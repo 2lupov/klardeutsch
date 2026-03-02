@@ -39,7 +39,14 @@ export const useProgress = () => {
           p_amount: coins,
           p_reason: `${category}:${level}:${exerciseId}`,
         });
-        toast({ title: `+${coins} 🪙` });
+        toast({
+          title: `+${coins} 🪙`,
+          description: category === "vocabulary" ? "Словарный запас" : category === "grammar" ? "Грамматика" : "Чтение",
+        });
+        // Haptic feedback
+        try {
+          (window as any).Telegram?.WebApp?.HapticFeedback?.notificationOccurred("success");
+        } catch {}
       }
     },
     [user]

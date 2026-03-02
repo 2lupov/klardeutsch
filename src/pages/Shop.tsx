@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCoins } from "@/hooks/useCoins";
 import { usePlatform } from "@/hooks/usePlatform";
 import { supabase } from "@/integrations/supabase/client";
-import { Coins, ShoppingBag, Check, Lock } from "lucide-react";
+import { Coins, ShoppingBag, Check, Lock, Sparkles } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 interface ShopItem {
@@ -28,6 +28,9 @@ const Shop = () => {
   const [loading, setLoading] = useState(true);
   const [buying, setBuying] = useState<string | null>(null);
   const [revealedContent, setRevealedContent] = useState<string | null>(null);
+  const [justPurchased, setJustPurchased] = useState<string | null>(null);
+  const [balanceBounce, setBalanceBounce] = useState(false);
+  const balanceRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -46,11 +49,34 @@ const Shop = () => {
   const handleBuy = async (item: ShopItem) => {
     if (purchased.has(item.id) || balance < item.price) return;
     setBuying(item.id);
+
     const ok = await purchaseItem(item.id);
     if (ok) {
+      // Trigger animations
+      setJustPurchased(item.id);
+      setBalanceBounce(true);
+
+      // Haptic feedback
+      try {
+        (window as any).Telegram?.WebApp?.HapticFeedback?.notificationOccurred("success");
+      } catch {}
+
+      toast({
+        title: `🎉 ${t("purchaseSuccess")}`,
+        description: `−${item.price} 🪙`,
+      });
+
       setPurchased((prev) => new Set([...prev, item.id]));
-      toast({ title: t("purchaseSuccess") });
+
+      // Reset animations
+      setTimeout(() => {
+        setJustPurchased(null);
+        setBalanceBounce(false);
+      }, 1500);
     } else {
+      try {
+        (window as any).Telegram?.WebApp?.HapticFeedback?.notificationOccurred("error");
+      } catch {}
       toast({ title: t("purchaseFailed"), variant: "destructive" });
     }
     setBuying(null);
@@ -72,7 +98,12 @@ const Shop = () => {
           <h1 className="font-display text-xl font-bold text-foreground">{t("shopTitle")}</h1>
           <p className="text-xs text-muted-foreground mt-0.5">{t("shopSubtitle")}</p>
         </div>
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
+        <div
+          ref={balanceRef}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 transition-all ${
+            balanceBounce ? "animate-balance-bounce" : ""
+          }`}
+        >
           <Coins className="w-4 h-4 text-primary" />
           <span className="font-display font-bold text-primary">{balance}</span>
         </div>
@@ -85,12 +116,19 @@ const Shop = () => {
         </div>
       ) : (
         <div className="grid gap-3">
-          {items.map((item) => {
+          {items.map((item, idx) => {
             const owned = purchased.has(item.id);
             const canAfford = balance >= item.price;
+            const wasJustPurchased = justPurchased === item.id;
 
             return (
-              <div key={item.id} className="glass-card p-4 animate-slide-up">
+              <div
+                key={item.id}
+                className={`glass-card p-4 animate-slide-up transition-all duration-500 ${
+                  wasJustPurchased ? "animate-shimmer border-primary/40 glow-yellow" : ""
+                }`}
+                style={{ animationDelay: `${idx * 0.05}s` }}
+              >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <h3 className="font-display font-semibold text-foreground text-sm">{item.title}</h3>
@@ -114,8 +152,9 @@ const Shop = () => {
                     ) : (
                       <button
                         onClick={() => setRevealedContent(item.id)}
-                        className="text-xs text-primary hover:underline"
+                        className="text-xs text-primary hover:underline flex items-center gap-1"
                       >
+                        <Sparkles className="w-3 h-3" />
                         {t("showContent")}
                       </button>
                     )}
@@ -124,7 +163,7 @@ const Shop = () => {
 
                 <div className="mt-3">
                   {owned ? (
-                    <div className="flex items-center gap-1.5 text-xs text-primary font-medium">
+                    <div className={`flex items-center gap-1.5 text-xs text-primary font-medium ${wasJustPurchased ? "animate-coin-pop" : ""}`}>
                       <Check className="w-3.5 h-3.5" />
                       {t("alreadyPurchased")}
                     </div>
@@ -132,14 +171,20 @@ const Shop = () => {
                     <button
                       onClick={() => handleBuy(item)}
                       disabled={!canAfford || buying === item.id}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+                      className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all active:scale-95 ${
                         canAfford
-                          ? "bg-primary text-primary-foreground hover:opacity-90"
+                          ? "bg-primary text-primary-foreground hover:opacity-90 hover:scale-[1.02]"
                           : "bg-muted text-muted-foreground cursor-not-allowed"
                       }`}
                     >
-                      {!canAfford && <Lock className="w-3.5 h-3.5" />}
-                      {buying === item.id ? t("loading") : canAfford ? t("buyButton") : t("notEnoughCoins")}
+                      {buying === item.id ? (
+                        <span className="animate-pulse">{t("loading")}</span>
+                      ) : (
+                        <>
+                          {!canAfford && <Lock className="w-3.5 h-3.5" />}
+                          {canAfford ? t("buyButton") : t("notEnoughCoins")}
+                        </>
+                      )}
                     </button>
                   )}
                 </div>
