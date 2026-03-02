@@ -9,6 +9,7 @@ import { BookOpen, Brain, Flame, RotateCcw, TrendingUp, Calendar, LogOut, Camera
 import { toast } from "@/hooks/use-toast";
 import { useCoins } from "@/hooks/useCoins";
 import Achievements, { type AchievementStats } from "@/components/Achievements";
+import LofiRadio from "@/components/LofiRadio";
 
 interface ProgressRow {
   level: string;
@@ -270,6 +271,11 @@ const Profile = () => {
         <StatCard icon={<BookOpen className="w-5 h-5" />} value={wordsLearned} label={t("wordsLearned")} />
         <StatCard icon={<Brain className="w-5 h-5" />} value={completedLessons} label={t("lessonsCompleted")} />
         <StatCard icon={<Flame className="w-5 h-5" />} value={streak} label={t("streakDays")} />
+      </div>
+
+      {/* Lofi Radio */}
+      <div className="mb-6">
+        <LofiRadio />
       </div>
 
       {/* Achievements */}

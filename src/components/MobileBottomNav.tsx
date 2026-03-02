@@ -1,7 +1,6 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { Home, User, BookOpen, BarChart3, ShoppingBag } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import LofiRadio from "@/components/LofiRadio";
 
 const MobileBottomNav = () => {
   const { t } = useLanguage();
@@ -35,9 +34,6 @@ const MobileBottomNav = () => {
             );
           })}
         </div>
-      </div>
-      <div className="flex justify-center pb-1">
-        <LofiRadio />
       </div>
     </nav>
   );
