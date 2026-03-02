@@ -1,17 +1,16 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { Level, CategoryData } from "@/data/lessons";
 import { fetchLevelData } from "@/hooks/useLessons";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useProgress } from "@/hooks/useProgress";
+import { usePlatform } from "@/hooks/usePlatform";
 import LevelSelector from "@/components/LevelSelector";
 import CategorySelector from "@/components/CategorySelector";
 import Flashcard from "@/components/Flashcard";
 import Quiz from "@/components/Quiz";
 import ReadingExercise from "@/components/ReadingExercise";
-import { ArrowLeft, LogOut, User } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 
 type Category = "vocabulary" | "grammar" | "reading";
 type Screen = "levels" | "categories" | "exercise";
@@ -23,16 +22,10 @@ const Index = () => {
   const [data, setData] = useState<CategoryData | null>(null);
   const [dataLoading, setDataLoading] = useState(false);
   const [clarity, setClarity] = useState(0);
-  const { user, loading, signOut } = useAuth();
+  const { user } = useAuth();
   const { saveProgress } = useProgress();
   const { t } = useLanguage();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!loading && !user) {
-      navigate("/auth");
-    }
-  }, [user, loading, navigate]);
+  const { isMobile } = usePlatform();
 
   useEffect(() => {
     if (screen !== "levels") {
@@ -44,20 +37,9 @@ const Index = () => {
     }
   }, [level, screen]);
 
-  // Reset fog when entering exercise
   useEffect(() => {
-    if (screen === "exercise") {
-      setClarity(0);
-    }
+    if (screen === "exercise") setClarity(0);
   }, [screen, category]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <span className="text-muted-foreground">{t("loading")}</span>
-      </div>
-    );
-  }
 
   if (!user) return null;
 
@@ -76,7 +58,6 @@ const Index = () => {
     else if (screen === "categories") setScreen("levels");
   };
 
-  // Gradually clear fog on correct answers
   const bumpClarity = (amount: number) => {
     setClarity((prev) => Math.min(1, prev + amount));
   };
@@ -129,13 +110,13 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="flex flex-col min-h-full">
       {/* Fog overlay — only visible during exercises */}
       {screen === "exercise" && (
         <div className="fog-overlay" style={{ "--clarity": clarity } as React.CSSProperties} />
       )}
 
-      <div className="flex-1 w-full max-w-md mx-auto px-4 py-6 relative z-10">
+      <div className={`flex-1 w-full mx-auto px-4 py-6 relative z-10 ${isMobile ? "max-w-md" : "max-w-2xl"}`}>
         {screen === "exercise" && (
           <button
             onClick={handleBack}
@@ -151,30 +132,6 @@ const Index = () => {
           <CategorySelector level={level} onSelect={handleCategorySelect} onBack={() => setScreen("levels")} />
         )}
         {screen === "exercise" && renderExercise()}
-      </div>
-
-      <div className="w-full border-t border-border bg-card/50 backdrop-blur-lg relative z-10">
-        <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
-          <span className="text-xs text-muted-foreground font-display tracking-wider">
-            KLAR · Deutsch lernen
-          </span>
-          <div className="flex items-center gap-3">
-            <Link
-              to="/profile"
-              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <User className="w-3.5 h-3.5" />
-              {t("myProfile")}
-            </Link>
-            <button
-              onClick={signOut}
-              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              {t("signOut")}
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   );
