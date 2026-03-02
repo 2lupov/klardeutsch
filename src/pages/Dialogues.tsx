@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { Send, ArrowLeft, Sparkles } from "lucide-react";
+import { Send, ArrowLeft, Sparkles, Music, Volume2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 /* ── Ambient Background ── */
@@ -122,25 +122,106 @@ const TopicSelection = ({
 );
 
 /* ── Chat Bubble ── */
-const ChatBubble = ({ msg }: { msg: Msg }) => {
+const ChatBubble = ({ msg, index }: { msg: Msg; index: number }) => {
   const isUser = msg.role === "user";
   return (
-    <div className={`flex ${isUser ? "justify-end" : "justify-start"} animate-fade-in`}>
+    <div
+      className={`flex ${isUser ? "justify-end" : "justify-start"} animate-fade-in`}
+      style={{ animationDelay: `${index * 30}ms` }}
+    >
+      {!isUser && (
+        <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center mr-2 mt-1 shrink-0">
+          <Sparkles className="w-3.5 h-3.5 text-primary" />
+        </div>
+      )}
       <div
-        className={`max-w-[82%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+        className={`max-w-[78%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
           isUser
-            ? "bg-primary text-primary-foreground rounded-br-lg"
-            : "bg-card/80 backdrop-blur-sm border border-border/30 text-foreground rounded-bl-lg"
+            ? "bg-primary/90 text-primary-foreground rounded-br-md shadow-sm shadow-primary/10"
+            : "bg-card/70 backdrop-blur-md border border-border/20 text-foreground rounded-bl-md shadow-sm"
         }`}
       >
         {isUser ? (
           <p>{msg.content}</p>
         ) : (
-          <div className="prose prose-sm dark:prose-invert max-w-none [&_hr]:my-2 [&_p]:my-1.5 [&_ul]:my-1 [&_strong]:text-foreground [&_em]:text-muted-foreground">
+          <div className="prose prose-sm dark:prose-invert max-w-none [&_hr]:my-2 [&_p]:my-1.5 [&_ul]:my-1 [&_strong]:text-foreground [&_em]:text-primary/70">
             <ReactMarkdown>{msg.content}</ReactMarkdown>
           </div>
         )}
       </div>
+    </div>
+  );
+};
+
+/* ── Mini Lofi Toggle ── */
+const LOFI_STREAM_URL = "http://ec3.yesstreaming.net:3755/stream";
+
+const MiniLofi = () => {
+  const [playing, setPlaying] = useState(false);
+  const [volume, setVolume] = useState(0.25);
+  const [expanded, setExpanded] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    const audio = new Audio();
+    audio.volume = volume;
+    audio.src = LOFI_STREAM_URL;
+    audio.preload = "none";
+    audioRef.current = audio;
+    audio.onplay = () => setPlaying(true);
+    audio.onpause = () => setPlaying(false);
+    return () => { audio.pause(); audioRef.current = null; };
+  }, []);
+
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.volume = volume;
+  }, [volume]);
+
+  const toggle = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    playing ? audio.pause() : audio.play().catch(console.error);
+  };
+
+  return (
+    <div className="flex items-center gap-1.5">
+      {expanded && (
+        <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-card/60 border border-border/20 backdrop-blur-sm animate-fade-in">
+          <Volume2 className="w-3 h-3 text-muted-foreground" />
+          <input
+            type="range"
+            min={0}
+            max={1}
+            step={0.05}
+            value={volume}
+            onChange={(e) => setVolume(parseFloat(e.target.value))}
+            className="w-16 h-1 accent-primary cursor-pointer"
+          />
+        </div>
+      )}
+      <button
+        onClick={() => { toggle(); if (!playing) setExpanded(true); }}
+        onDoubleClick={() => setExpanded(!expanded)}
+        className={`relative p-2 rounded-xl transition-all duration-300 ${
+          playing
+            ? "bg-primary/15 text-primary shadow-[0_0_12px_hsl(var(--primary)/0.12)]"
+            : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+        }`}
+        title="Lofi Radio · double-click for volume"
+      >
+        <Music className="w-4 h-4" />
+        {playing && (
+          <span className="absolute -top-0.5 -right-0.5 flex gap-[1.5px]">
+            {[0, 1, 2].map((i) => (
+              <span
+                key={i}
+                className="w-[2px] bg-primary rounded-full animate-bounce"
+                style={{ height: "6px", animationDelay: `${i * 0.15}s`, animationDuration: "0.6s" }}
+              />
+            ))}
+          </span>
+        )}
+      </button>
     </div>
   );
 };
@@ -273,72 +354,76 @@ const Dialogues = () => {
     <>
       <AmbientBackground />
       <div className="flex flex-col h-[calc(100dvh-8rem)] lg:h-[calc(100dvh-2rem)] animate-slide-up">
-      {/* Header */}
-      <div className="flex items-center gap-3 pb-3 mb-1">
-        <button
-          onClick={resetChat}
-          className="p-2 -ml-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all duration-200"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <div className="flex-1 min-w-0">
-          <p className="font-display font-semibold text-sm truncate">
-            {selectedTopic.emoji} {selectedTopic.de}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {selectedLevel} · {lang === "uk" ? selectedTopic.uk : selectedTopic.ru}
-          </p>
+        {/* Header */}
+        <div className="flex items-center gap-3 pb-3 mb-1">
+          <button
+            onClick={resetChat}
+            className="p-2 -ml-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all duration-200"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div className="flex-1 min-w-0">
+            <p className="font-display font-semibold text-sm truncate">
+              {selectedTopic.emoji} {selectedTopic.de}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {selectedLevel} · {lang === "uk" ? selectedTopic.uk : selectedTopic.ru}
+            </p>
+          </div>
+          <MiniLofi />
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary">
+            <Sparkles className="w-3 h-3" />
+            <span className="text-[10px] font-semibold">AI</span>
+          </div>
         </div>
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary">
-          <Sparkles className="w-3 h-3" />
-          <span className="text-[10px] font-semibold">AI</span>
-        </div>
-      </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto py-3 space-y-3.5 overscroll-none scrollbar-thin">
-        {messages.map((msg, i) => (
-          <ChatBubble key={i} msg={msg} />
-        ))}
-        {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
-          <div className="flex justify-start animate-fade-in">
-            <div className="bg-card/80 backdrop-blur-sm border border-border/30 rounded-2xl rounded-bl-lg px-4 py-3">
-              <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-pulse" />
-                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-pulse [animation-delay:150ms]" />
-                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-pulse [animation-delay:300ms]" />
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto py-4 px-1 space-y-4 overscroll-none">
+          {messages.map((msg, i) => (
+            <ChatBubble key={i} msg={msg} index={i} />
+          ))}
+          {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
+            <div className="flex justify-start animate-fade-in">
+              <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center mr-2 mt-1 shrink-0">
+                <Sparkles className="w-3.5 h-3.5 text-primary" />
+              </div>
+              <div className="bg-card/70 backdrop-blur-md border border-border/20 rounded-2xl rounded-bl-md px-5 py-3.5 shadow-sm">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-primary/40 animate-pulse" />
+                  <span className="w-2 h-2 rounded-full bg-primary/40 animate-pulse [animation-delay:200ms]" />
+                  <span className="w-2 h-2 rounded-full bg-primary/40 animate-pulse [animation-delay:400ms]" />
+                </div>
               </div>
             </div>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
 
-      {/* Input */}
-      <div className="pt-3">
-        <form
-          onSubmit={(e) => { e.preventDefault(); handleSend(); }}
-          className="flex gap-2"
-        >
-          <input
-            ref={inputRef}
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder={lang === "uk" ? "Напишіть німецькою..." : "Напишите на немецком..."}
-            disabled={isLoading}
-            className="flex-1 px-4 py-3 rounded-2xl bg-card/60 backdrop-blur-sm text-foreground placeholder:text-muted-foreground/60 border border-border/30 focus:border-primary/40 focus:bg-card/90 focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all duration-300 text-sm"
-          />
-          <button
-            type="submit"
-            disabled={isLoading || !input.trim()}
-            className="px-4 py-3 rounded-2xl bg-primary text-primary-foreground disabled:opacity-30 transition-all duration-300 hover:shadow-md hover:shadow-primary/20 active:scale-95"
+        {/* Input */}
+        <div className="pt-3 pb-1">
+          <form
+            onSubmit={(e) => { e.preventDefault(); handleSend(); }}
+            className="flex gap-2 items-end"
           >
-            <Send className="w-4 h-4" />
-          </button>
-        </form>
+            <input
+              ref={inputRef}
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder={lang === "uk" ? "Напишіть німецькою..." : "Напишите на немецком..."}
+              disabled={isLoading}
+              className="flex-1 px-5 py-3.5 rounded-2xl bg-card/50 backdrop-blur-md text-foreground placeholder:text-muted-foreground/40 border border-border/20 focus:border-primary/30 focus:bg-card/80 focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all duration-300 text-sm"
+            />
+            <button
+              type="submit"
+              disabled={isLoading || !input.trim()}
+              className="p-3.5 rounded-2xl bg-primary text-primary-foreground disabled:opacity-20 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 active:scale-90"
+            >
+              <Send className="w-4 h-4" />
+            </button>
+          </form>
+        </div>
       </div>
-    </div>
     </>
   );
 };
