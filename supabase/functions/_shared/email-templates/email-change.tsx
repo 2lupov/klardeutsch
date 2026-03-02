@@ -43,9 +43,13 @@ export const EmailChangeEmail = ({
         <Text style={text}>
           Нажми кнопку ниже для подтверждения:
         </Text>
-        <Button style={button} href={confirmationUrl}>
+        <Button style={button} href={confirmationUrl} target="_blank">
           Подтвердить смену email
         </Button>
+        <Text style={fallbackText}>
+          Если кнопка не работает, скопируй ссылку:{' '}
+          <Link href={confirmationUrl} style={link}>{confirmationUrl}</Link>
+        </Text>
         <Text style={footer}>
           Если ты не запрашивал это — немедленно проверь безопасность своего аккаунта.
         </Text>
@@ -85,5 +89,8 @@ const button = {
   borderRadius: '12px',
   padding: '14px 24px',
   textDecoration: 'none',
+  display: 'inline-block' as const,
+  textAlign: 'center' as const,
 }
+const fallbackText = { fontSize: '12px', color: '#9ca3af', margin: '16px 0 0', wordBreak: 'break-all' as const }
 const footer = { fontSize: '12px', color: '#9ca3af', margin: '32px 0 0' }

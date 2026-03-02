@@ -39,9 +39,13 @@ export const InviteEmail = ({
           </Link>
           . Нажми кнопку ниже, чтобы принять приглашение и начать учить немецкий.
         </Text>
-        <Button style={button} href={confirmationUrl}>
+        <Button style={button} href={confirmationUrl} target="_blank">
           Принять приглашение
         </Button>
+        <Text style={fallbackText}>
+          Если кнопка не работает, скопируй ссылку:{' '}
+          <Link href={confirmationUrl} style={link}>{confirmationUrl}</Link>
+        </Text>
         <Text style={footer}>
           Если ты не ожидал это приглашение — просто проигнорируй письмо.
         </Text>
@@ -81,5 +85,8 @@ const button = {
   borderRadius: '12px',
   padding: '14px 24px',
   textDecoration: 'none',
+  display: 'inline-block' as const,
+  textAlign: 'center' as const,
 }
+const fallbackText = { fontSize: '12px', color: '#9ca3af', margin: '16px 0 0', wordBreak: 'break-all' as const }
 const footer = { fontSize: '12px', color: '#9ca3af', margin: '32px 0 0' }
