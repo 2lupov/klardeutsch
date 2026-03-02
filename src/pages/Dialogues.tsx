@@ -348,66 +348,66 @@ const Dialogues = () => {
   return (
     <>
       <AmbientBackground />
-      <div className="flex flex-col h-[calc(100dvh-8rem)] lg:h-[calc(100dvh-2rem)] animate-slide-up">
-        {/* Header — compact */}
-        <div className="flex items-center gap-2 pb-2">
-          <button
-            onClick={resetChat}
-            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </button>
-          <span className="text-base">{selectedTopic.emoji}</span>
-          <span className="font-display font-semibold text-sm truncate">{selectedTopic.de}</span>
-          <span className="text-[10px] text-muted-foreground">{selectedLevel}</span>
-          <div className="flex-1" />
-          <MiniLofi />
-        </div>
+      <div className="flex flex-col items-center animate-slide-up pt-2">
+        {/* Chat container — centered, not full-width */}
+        <div className="w-full max-w-lg flex flex-col" style={{ height: "min(600px, calc(100dvh - 10rem))" }}>
+          {/* Header */}
+          <div className="flex items-center gap-2 pb-3">
+            <button
+              onClick={resetChat}
+              className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </button>
+            <span className="text-base">{selectedTopic.emoji}</span>
+            <span className="font-display font-semibold text-sm">{selectedTopic.de}</span>
+            <span className="text-[10px] text-muted-foreground ml-1">{selectedLevel}</span>
+            <div className="flex-1" />
+            <MiniLofi />
+          </div>
 
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto py-3 space-y-3 overscroll-none">
-          {messages.map((msg, i) => (
-            <ChatBubble key={i} msg={msg} index={i} />
-          ))}
-          {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
-            <div className="flex items-start gap-2 animate-fade-in">
-              <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center mt-0.5 shrink-0">
-                <Sparkles className="w-3 h-3 text-primary" />
-              </div>
-              <div className="bg-card/70 backdrop-blur-md border border-border/20 rounded-2xl rounded-bl-md px-4 py-2.5">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-pulse" />
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-pulse [animation-delay:200ms]" />
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-pulse [animation-delay:400ms]" />
+          {/* Messages area */}
+          <div className="flex-1 overflow-y-auto rounded-2xl bg-card/30 backdrop-blur-sm border border-border/10 p-4 space-y-3 overscroll-none">
+            {messages.map((msg, i) => (
+              <ChatBubble key={i} msg={msg} index={i} />
+            ))}
+            {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
+              <div className="flex justify-start animate-fade-in">
+                <div className="bg-card/60 border border-border/15 rounded-2xl rounded-bl-md px-4 py-2.5">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-pulse" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-pulse [animation-delay:200ms]" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-pulse [animation-delay:400ms]" />
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
 
-        {/* Input — inline, minimal */}
-        <form
-          onSubmit={(e) => { e.preventDefault(); handleSend(); }}
-          className="flex items-center gap-2 py-2"
-        >
-          <input
-            ref={inputRef}
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder={lang === "uk" ? "Напишіть німецькою..." : "Напишите на немецком..."}
-            disabled={isLoading}
-            className="flex-1 px-4 py-2.5 rounded-xl bg-card/50 backdrop-blur-sm text-foreground text-sm placeholder:text-muted-foreground/40 border border-border/20 focus:border-primary/30 focus:outline-none transition-colors"
-          />
-          <button
-            type="submit"
-            disabled={isLoading || !input.trim()}
-            className="p-2.5 rounded-xl bg-primary text-primary-foreground disabled:opacity-20 transition-all active:scale-90"
+          {/* Input */}
+          <form
+            onSubmit={(e) => { e.preventDefault(); handleSend(); }}
+            className="flex items-center gap-2 pt-3"
           >
-            <Send className="w-4 h-4" />
-          </button>
-        </form>
+            <input
+              ref={inputRef}
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder={lang === "uk" ? "Напишіть німецькою..." : "Напишите на немецком..."}
+              disabled={isLoading}
+              className="flex-1 px-4 py-2.5 rounded-xl bg-card/40 text-foreground text-sm placeholder:text-muted-foreground/40 border border-border/15 focus:border-primary/30 focus:outline-none transition-colors"
+            />
+            <button
+              type="submit"
+              disabled={isLoading || !input.trim()}
+              className="p-2.5 rounded-xl bg-primary text-primary-foreground disabled:opacity-20 transition-all active:scale-90"
+            >
+              <Send className="w-4 h-4" />
+            </button>
+          </form>
+        </div>
       </div>
     </>
   );
