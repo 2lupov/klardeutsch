@@ -41,7 +41,7 @@ const LevelSelector = ({ onSelect }: LevelSelectorProps) => {
         <p className="text-muted-foreground text-sm mt-1">{t("appSubtitle")}</p>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-3">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mt-3">
         {levels.map((item, i) => (
           <button
             key={item.level}
