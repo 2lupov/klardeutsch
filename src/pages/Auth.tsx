@@ -2,7 +2,9 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useEffect } from "react";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -13,6 +15,7 @@ const Auth = () => {
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (user) navigate("/");
@@ -35,7 +38,7 @@ const Auth = () => {
         options: { emailRedirectTo: window.location.origin },
       });
       if (error) setError(error.message);
-      else setMessage("Проверьте почту для подтверждения регистрации!");
+      else setMessage(t("checkEmail"));
     }
     setLoading(false);
   };
@@ -44,18 +47,21 @@ const Auth = () => {
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="w-full max-w-sm animate-slide-up">
         <div className="text-center mb-8">
+          <div className="flex justify-end mb-2">
+            <LanguageSwitcher />
+          </div>
           <h1 className="text-4xl font-display font-bold tracking-tight">
             <span className="text-gradient">KLAR</span>
           </h1>
           <p className="text-muted-foreground mt-2">
-            {isLogin ? "Войдите в аккаунт" : "Создайте аккаунт"}
+            {isLogin ? t("loginTitle") : t("signupTitle")}
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="glass-card p-6 flex flex-col gap-4">
           <input
             type="email"
-            placeholder="Email"
+            placeholder={t("email")}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -63,7 +69,7 @@ const Auth = () => {
           />
           <input
             type="password"
-            placeholder="Пароль"
+            placeholder={t("password")}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -79,7 +85,7 @@ const Auth = () => {
             disabled={loading}
             className="w-full px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold glow-yellow transition-all hover:opacity-90 disabled:opacity-50"
           >
-            {loading ? "..." : isLogin ? "Войти" : "Зарегистрироваться"}
+            {loading ? "..." : isLogin ? t("login") : t("signup")}
           </button>
 
           <button
@@ -87,7 +93,7 @@ const Auth = () => {
             onClick={() => { setIsLogin(!isLogin); setError(""); setMessage(""); }}
             className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
-            {isLogin ? "Нет аккаунта? Зарегистрируйтесь" : "Уже есть аккаунт? Войдите"}
+            {isLogin ? t("noAccount") : t("hasAccount")}
           </button>
         </form>
       </div>

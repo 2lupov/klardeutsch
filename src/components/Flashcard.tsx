@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { VocabCard } from "@/data/lessons";
 import { ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface FlashcardProps {
   cards: VocabCard[];
@@ -11,6 +12,7 @@ const Flashcard = ({ cards, onComplete }: FlashcardProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [learned, setLearned] = useState<Set<string>>(new Set());
+  const { t } = useLanguage();
 
   const card = cards[currentIndex];
   const progress = ((currentIndex + 1) / cards.length) * 100;
@@ -42,7 +44,7 @@ const Flashcard = ({ cards, onComplete }: FlashcardProps) => {
       <div className="w-full">
         <div className="flex justify-between text-sm text-muted-foreground mb-2">
           <span>{currentIndex + 1} / {cards.length}</span>
-          <span>{learned.size} выучено</span>
+          <span>{learned.size} {t("learned")}</span>
         </div>
         <div className="progress-bar">
           <div className="progress-bar-fill" style={{ width: `${progress}%` }} />
@@ -69,7 +71,7 @@ const Flashcard = ({ cards, onComplete }: FlashcardProps) => {
               <span className="text-sm font-medium text-primary mb-2">{card.article}</span>
             )}
             <h2 className="text-3xl font-display font-bold text-foreground mb-4">{card.german}</h2>
-            <p className="text-sm text-muted-foreground">Нажмите, чтобы перевернуть</p>
+            <p className="text-sm text-muted-foreground">{t("tapToFlip")}</p>
           </div>
 
           {/* Back */}
@@ -99,7 +101,7 @@ const Flashcard = ({ cards, onComplete }: FlashcardProps) => {
           onClick={markLearned}
           className="px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold transition-all hover:opacity-90 glow-yellow"
         >
-          Выучил ✓
+          {t("iLearned")}
         </button>
 
         <button
@@ -119,7 +121,7 @@ const Flashcard = ({ cards, onComplete }: FlashcardProps) => {
         className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
         <RotateCcw className="w-4 h-4" />
-        Начать заново
+        {t("restart")}
       </button>
     </div>
   );
