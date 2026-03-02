@@ -21,11 +21,11 @@ const DesktopSidebar = () => {
 
   const links = [
     { to: "/", icon: Home, label: t("navHome") },
-    { to: "/challenges", icon: Swords, label: t("navChallenges") },
     { to: "/profile", icon: User, label: t("myProfile") },
     { to: "/stats", icon: BarChart3, label: t("navStats") },
     { to: "/dictionary", icon: BookOpen, label: t("navDictionary") },
     { to: "/shop", icon: ShoppingBag, label: t("navShop") },
+    { to: "/challenges", icon: Swords, label: t("navChallenges") },
   ];
 
   return (
