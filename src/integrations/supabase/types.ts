@@ -29,6 +29,30 @@ export type Database = {
         }
         Relationships: []
       }
+      coin_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          reason: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          reason?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       custom_words: {
         Row: {
           article: string | null
@@ -143,6 +167,35 @@ export type Database = {
         }
         Relationships: []
       }
+      purchases: {
+        Row: {
+          id: string
+          item_id: string
+          purchased_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          item_id: string
+          purchased_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          item_id?: string
+          purchased_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchases_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "shop_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reading_questions: {
         Row: {
           correct_index: number
@@ -243,6 +296,66 @@ export type Database = {
           },
         ]
       }
+      shop_items: {
+        Row: {
+          available: boolean
+          content: string | null
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          item_type: string
+          price: number
+          title: string
+        }
+        Insert: {
+          available?: boolean
+          content?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          item_type?: string
+          price?: number
+          title: string
+        }
+        Update: {
+          available?: boolean
+          content?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          item_type?: string
+          price?: number
+          title?: string
+        }
+        Relationships: []
+      }
+      user_coins: {
+        Row: {
+          balance: number
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_progress: {
         Row: {
           category: string
@@ -320,8 +433,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      award_coins: {
+        Args: { p_amount: number; p_reason: string; p_user_id: string }
+        Returns: undefined
+      }
       check_admin_password: {
         Args: { input_password: string }
+        Returns: boolean
+      }
+      purchase_item: {
+        Args: { p_item_id: string; p_user_id: string }
         Returns: boolean
       }
     }

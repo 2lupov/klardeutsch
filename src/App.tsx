@@ -12,6 +12,7 @@ import Admin from "./pages/Admin";
 import Profile from "./pages/Profile";
 import Dictionary from "./pages/Dictionary";
 import Statistics from "./pages/Statistics";
+import Shop from "./pages/Shop";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/dictionary" element={<Dictionary />} />
                 <Route path="/stats" element={<Statistics />} />
+                <Route path="/shop" element={<Shop />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
