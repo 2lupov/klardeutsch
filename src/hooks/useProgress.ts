@@ -11,6 +11,13 @@ const COIN_REWARDS: Record<string, number> = {
   listening: 20,
 };
 
+const XP_REWARDS: Record<string, number> = {
+  vocabulary: 10,
+  grammar: 20,
+  reading: 30,
+  listening: 25,
+};
+
 export const useProgress = () => {
   const { user } = useAuth();
 
@@ -32,14 +39,18 @@ export const useProgress = () => {
           { onConflict: "user_id,level,category,exercise_id" }
         );
 
-      // Award coins on completion
+      // Award coins and XP on completion
       if (completed) {
         const coins = COIN_REWARDS[category] ?? 5;
-        await supabase.rpc("award_coins", {
-          p_user_id: user.id,
-          p_amount: coins,
-          p_reason: `${category}:${level}:${exerciseId}`,
-        });
+        const xp = XP_REWARDS[category] ?? 10;
+        await Promise.all([
+          supabase.rpc("award_coins", {
+            p_user_id: user.id,
+            p_amount: coins,
+            p_reason: `${category}:${level}:${exerciseId}`,
+          }),
+          supabase.rpc("award_xp", { p_user_id: user.id, p_amount: xp }),
+        ]);
         toast({
           title: `+${coins} 🪙`,
           description: category === "vocabulary" ? "Словарный запас" : category === "grammar" ? "Грамматика" : "Чтение",

@@ -507,6 +507,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_xp: {
+        Row: {
+          id: string
+          total_xp: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          total_xp?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          total_xp?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       vocab_cards: {
         Row: {
           article: string | null
@@ -552,9 +573,23 @@ export type Database = {
         Args: { p_amount: number; p_reason: string; p_user_id: string }
         Returns: undefined
       }
+      award_xp: {
+        Args: { p_amount: number; p_user_id: string }
+        Returns: undefined
+      }
       check_admin_password: {
         Args: { input_password: string }
         Returns: boolean
+      }
+      get_leaderboard: {
+        Args: { p_limit?: number }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          rank: number
+          total_xp: number
+          user_id: string
+        }[]
       }
       purchase_item: {
         Args: { p_item_id: string; p_user_id: string }

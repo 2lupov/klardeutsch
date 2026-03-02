@@ -5,11 +5,13 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { usePlatform } from "@/hooks/usePlatform";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { BookOpen, Brain, Flame, RotateCcw, TrendingUp, Calendar, LogOut, Camera, Pencil, Check, X, Coins, Trophy, Music, ArrowLeft, ChevronRight } from "lucide-react";
+import { BookOpen, Brain, Flame, RotateCcw, TrendingUp, Calendar, LogOut, Camera, Pencil, Check, X, Coins, Trophy, Music, ArrowLeft, ChevronRight, Award } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useCoins } from "@/hooks/useCoins";
 import Achievements, { type AchievementStats } from "@/components/Achievements";
 import LofiRadio from "@/components/LofiRadio";
+import Leaderboard from "@/components/Leaderboard";
+import { useXP } from "@/hooks/useXP";
 
 interface ProgressRow {
   level: string;
@@ -26,13 +28,14 @@ interface ProfileData {
   avatar_url: string | null;
 }
 
-type ProfileScreen = "main" | "achievements" | "activity" | "mistakes";
+type ProfileScreen = "main" | "achievements" | "activity" | "mistakes" | "leaderboard";
 
 const Profile = () => {
   const { user, signOut } = useAuth();
   const { t } = useLanguage();
   const { isMobile } = usePlatform();
   const { balance } = useCoins();
+  const { totalXP } = useXP();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -194,6 +197,28 @@ const Profile = () => {
       default: return "";
     }
   };
+
+  // Sub-screen: Leaderboard
+  if (screen === "leaderboard") {
+    return (
+      <div className={`w-full mx-auto px-4 py-4 h-full flex flex-col ${isMobile ? "max-w-md" : "max-w-2xl"}`}>
+        <button
+          onClick={() => setScreen("main")}
+          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          {t("back")}
+        </button>
+        <h2 className="font-display text-lg font-bold text-foreground mb-3 flex items-center gap-2">
+          <Award className="w-5 h-5 text-primary" />
+          {t("leaderboardTitle")}
+        </h2>
+        <div className="flex-1 overflow-y-auto">
+          <Leaderboard />
+        </div>
+      </div>
+    );
+  }
 
   // Sub-screen: Achievements
   if (screen === "achievements") {
@@ -371,6 +396,12 @@ const Profile = () => {
       {/* Navigation buttons */}
       <div className="flex flex-col gap-2 mb-4">
         <NavButton
+          icon={<Award className="w-4 h-4 text-primary" />}
+          label={t("leaderboardTitle")}
+          subtitle={`${totalXP} XP`}
+          onClick={() => setScreen("leaderboard")}
+        />
+        <NavButton
           icon={<Trophy className="w-4 h-4 text-primary" />}
           label={t("achievementsTitle")}
           onClick={() => setScreen("achievements")}
@@ -404,13 +435,16 @@ const StatCard = ({ icon, value, label }: { icon: React.ReactNode; value: number
   </div>
 );
 
-const NavButton = ({ icon, label, badge, onClick }: { icon: React.ReactNode; label: string; badge?: number; onClick: () => void }) => (
+const NavButton = ({ icon, label, badge, subtitle, onClick }: { icon: React.ReactNode; label: string; badge?: number; subtitle?: string; onClick: () => void }) => (
   <button
     onClick={onClick}
     className="glass-card px-4 py-3 flex items-center gap-3 text-left hover:border-primary/20 transition-colors group"
   >
     {icon}
-    <span className="flex-1 text-sm font-display font-medium text-foreground">{label}</span>
+    <div className="flex-1 min-w-0">
+      <span className="text-sm font-display font-medium text-foreground block">{label}</span>
+      {subtitle && <span className="text-[10px] text-muted-foreground">{subtitle}</span>}
+    </div>
     {badge !== undefined && (
       <span className="px-2 py-0.5 rounded-full bg-destructive/15 text-destructive text-[10px] font-semibold">{badge}</span>
     )}

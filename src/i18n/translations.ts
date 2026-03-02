@@ -218,6 +218,9 @@ const translations = {
   topic: { ru: "Тема", uk: "Тема" },
   aiAnalysis: { ru: "AI-разбор ошибок", uk: "AI-розбір помилок" },
   analyzeMyMistakes: { ru: "Разобрать мои ошибки", uk: "Розібрати мої помилки" },
+  leaderboardTitle: { ru: "Рейтинг", uk: "Рейтинг" },
+  leaderboardEmpty: { ru: "Пока никто не набрал XP — будь первым!", uk: "Поки ніхто не набрав XP — будь першим!" },
+  xpLabel: { ru: "XP", uk: "XP" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;
