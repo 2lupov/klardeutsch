@@ -348,9 +348,9 @@ const Dialogues = () => {
   return (
     <>
       <AmbientBackground />
-      <div className="flex flex-col items-center animate-slide-up px-4 pt-2">
-        {/* Chat container */}
-        <div className="w-full max-w-2xl flex flex-col h-[calc(100dvh-9rem)] lg:h-[calc(100dvh-3rem)]">
+      <div className="flex flex-col animate-slide-up h-[calc(100dvh-8rem)] lg:h-[calc(100dvh-2rem)]">
+        {/* Chat container — full height, padded */}
+        <div className="w-full flex flex-col flex-1 min-h-0 px-2">
           {/* Header */}
           <div className="flex items-center gap-2 pb-3">
             <button
