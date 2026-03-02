@@ -8,10 +8,10 @@ const MobileBottomNav = () => {
 
   const items = [
     { to: "/", icon: Home, label: t("navHome") },
-    { to: "/challenges", icon: Swords, label: t("navChallenges") },
     { to: "/profile", icon: User, label: t("myProfile") },
     { to: "/dictionary", icon: BookOpen, label: t("navDictionary") },
     { to: "/shop", icon: ShoppingBag, label: t("navShop") },
+    { to: "/challenges", icon: Swords, label: t("navChallenges") },
   ];
 
   return (
