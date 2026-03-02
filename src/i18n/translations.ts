@@ -119,6 +119,7 @@ const translations = {
   noDifficultWords: { ru: "Нет сложных слов", uk: "Немає складних слів" },
   reviewComplete: { ru: "Повторение завершено! 🎉", uk: "Повторення завершено! 🎉" },
   navDictionary: { ru: "Словарь", uk: "Словник" },
+  wordAdded: { ru: "Слово добавлено!", uk: "Слово додано!" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;

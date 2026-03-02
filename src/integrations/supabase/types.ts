@@ -29,6 +29,39 @@ export type Database = {
         }
         Relationships: []
       }
+      custom_words: {
+        Row: {
+          article: string | null
+          created_at: string
+          example: string | null
+          german: string
+          id: string
+          is_difficult: boolean
+          russian: string
+          user_id: string
+        }
+        Insert: {
+          article?: string | null
+          created_at?: string
+          example?: string | null
+          german: string
+          id?: string
+          is_difficult?: boolean
+          russian: string
+          user_id: string
+        }
+        Update: {
+          article?: string | null
+          created_at?: string
+          example?: string | null
+          german?: string
+          id?: string
+          is_difficult?: boolean
+          russian?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       grammar_lessons: {
         Row: {
           created_at: string
