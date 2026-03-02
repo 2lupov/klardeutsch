@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
 import Profile from "./pages/Profile";
+import Dictionary from "./pages/Dictionary";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
               <Route element={<AppLayout />}>
                 <Route path="/" element={<Index />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/dictionary" element={<Dictionary />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>

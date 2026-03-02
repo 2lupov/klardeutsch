@@ -178,6 +178,38 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_words: {
+        Row: {
+          id: string
+          is_difficult: boolean
+          learned_at: string
+          user_id: string
+          vocab_card_id: string
+        }
+        Insert: {
+          id?: string
+          is_difficult?: boolean
+          learned_at?: string
+          user_id: string
+          vocab_card_id: string
+        }
+        Update: {
+          id?: string
+          is_difficult?: boolean
+          learned_at?: string
+          user_id?: string
+          vocab_card_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_words_vocab_card_id_fkey"
+            columns: ["vocab_card_id"]
+            isOneToOne: false
+            referencedRelation: "vocab_cards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_progress: {
         Row: {
           category: string
