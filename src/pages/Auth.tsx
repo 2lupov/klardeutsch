@@ -68,7 +68,7 @@ const Auth = () => {
 
   if (demoMode === "loading") {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="h-[100dvh] bg-background flex items-center justify-center overflow-hidden">
         <span className="text-muted-foreground">{t("loading")}</span>
       </div>
     );
@@ -76,8 +76,8 @@ const Auth = () => {
 
   if (demoMode === "playing") {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
-        <div className="flex-1 w-full max-w-md mx-auto px-4 py-6 flex flex-col">
+      <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
+        <div className="flex-1 w-full max-w-md mx-auto px-4 py-6 flex flex-col overflow-y-auto overscroll-none">
           <button
             onClick={() => setDemoMode("off")}
             className="text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
@@ -92,7 +92,7 @@ const Auth = () => {
 
   if (demoMode === "finished") {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+      <div className="h-[100dvh] bg-background flex items-center justify-center px-4 overflow-hidden">
         <div className="w-full max-w-sm animate-slide-up text-center flex flex-col items-center gap-6">
           <div className="w-20 h-20 rounded-full flex items-center justify-center bg-primary/10 glow-yellow">
             <Sparkles className="w-10 h-10 text-primary" />
@@ -116,8 +116,8 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <div className="w-full max-w-sm animate-slide-up">
+    <div className="h-[100dvh] bg-background flex items-center justify-center px-4 overflow-hidden">
+      <div className="w-full max-w-sm animate-slide-up overflow-y-auto overscroll-none max-h-full py-6">
         <div className="text-center mb-8">
           <div className="flex justify-end mb-2">
             <LanguageSwitcher />
