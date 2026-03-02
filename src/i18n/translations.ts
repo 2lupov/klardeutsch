@@ -205,6 +205,8 @@ const translations = {
   listening: { ru: "Аудирование", uk: "Аудіювання" },
   saveChanges: { ru: "Сохранить изменения", uk: "Зберегти зміни" },
   saved: { ru: "Сохранено!", uk: "Збережено!" },
+  chooseTopic: { ru: "Выберите тему", uk: "Оберіть тему" },
+  topic: { ru: "Тема", uk: "Тема" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;

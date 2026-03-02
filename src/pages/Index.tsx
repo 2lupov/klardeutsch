@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { Level, CategoryData } from "@/data/lessons";
-import { fetchLevelData } from "@/hooks/useLessons";
+import { fetchLevelData, fetchTopics } from "@/hooks/useLessons";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useProgress } from "@/hooks/useProgress";
 import { usePlatform } from "@/hooks/usePlatform";
 import LevelSelector from "@/components/LevelSelector";
 import CategorySelector from "@/components/CategorySelector";
+import TopicSelector from "@/components/TopicSelector";
 import Flashcard from "@/components/Flashcard";
 import Quiz from "@/components/Quiz";
 import ReadingExercise from "@/components/ReadingExercise";
@@ -15,12 +16,14 @@ import DailyChallenge from "@/components/DailyChallenge";
 import { ArrowLeft } from "lucide-react";
 
 type Category = "vocabulary" | "grammar" | "reading" | "listening";
-type Screen = "levels" | "categories" | "exercise";
+type Screen = "levels" | "categories" | "topics" | "exercise";
 
 const Index = () => {
   const [screen, setScreen] = useState<Screen>("levels");
   const [level, setLevel] = useState<Level>("A1");
   const [category, setCategory] = useState<Category>("vocabulary");
+  const [topic, setTopic] = useState<string>("Allgemein");
+  const [topics, setTopics] = useState<string[]>([]);
   const [data, setData] = useState<CategoryData | null>(null);
   const [dataLoading, setDataLoading] = useState(false);
   const [clarity, setClarity] = useState(0);
@@ -29,15 +32,33 @@ const Index = () => {
   const { t } = useLanguage();
   const { isMobile } = usePlatform();
 
+  // Load data when entering exercise
   useEffect(() => {
-    if (screen !== "levels") {
+    if (screen === "exercise") {
       setDataLoading(true);
-      fetchLevelData(level).then((d) => {
+      fetchLevelData(level, topic).then((d) => {
         setData(d);
         setDataLoading(false);
       });
     }
-  }, [level, screen]);
+  }, [level, screen, topic]);
+
+  // Load topics when entering topics screen
+  useEffect(() => {
+    if (screen === "topics") {
+      setDataLoading(true);
+      fetchTopics(level, category).then((t) => {
+        if (t.length === 1) {
+          // Only one topic — skip selection
+          setTopic(t[0]);
+          setScreen("exercise");
+        } else {
+          setTopics(t);
+          setDataLoading(false);
+        }
+      });
+    }
+  }, [screen, level, category]);
 
   useEffect(() => {
     if (screen === "exercise") setClarity(0);
@@ -52,11 +73,17 @@ const Index = () => {
 
   const handleCategorySelect = (c: Category) => {
     setCategory(c);
+    setScreen("topics");
+  };
+
+  const handleTopicSelect = (t: string) => {
+    setTopic(t);
     setScreen("exercise");
   };
 
   const handleBack = () => {
-    if (screen === "exercise") setScreen("categories");
+    if (screen === "exercise") setScreen("topics");
+    else if (screen === "topics") setScreen("categories");
     else if (screen === "categories") setScreen("levels");
   };
 
@@ -121,7 +148,6 @@ const Index = () => {
 
   return (
     <div className="flex flex-col min-h-full">
-      {/* Fog overlay — only visible during exercises */}
       {screen === "exercise" && (
         <div className="fog-overlay" style={{ "--clarity": clarity } as React.CSSProperties} />
       )}
@@ -147,6 +173,19 @@ const Index = () => {
         )}
         {screen === "categories" && (
           <CategorySelector level={level} onSelect={handleCategorySelect} onBack={() => setScreen("levels")} />
+        )}
+        {screen === "topics" && (
+          dataLoading ? (
+            <p className="text-muted-foreground text-center">{t("loading")}</p>
+          ) : (
+            <TopicSelector
+              level={level}
+              category={category}
+              topics={topics}
+              onSelect={handleTopicSelect}
+              onBack={() => setScreen("categories")}
+            />
+          )
         )}
         {screen === "exercise" && renderExercise()}
       </div>
