@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, User, LogOut, BookOpen, BarChart3, ShoppingBag } from "lucide-react";
+import { Home, User, LogOut, BookOpen, BarChart3, ShoppingBag, Swords } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import KlarLogo from "@/components/KlarLogo";
@@ -21,6 +21,7 @@ const DesktopSidebar = () => {
 
   const links = [
     { to: "/", icon: Home, label: t("navHome") },
+    { to: "/challenges", icon: Swords, label: t("navChallenges") },
     { to: "/profile", icon: User, label: t("myProfile") },
     { to: "/stats", icon: BarChart3, label: t("navStats") },
     { to: "/dictionary", icon: BookOpen, label: t("navDictionary") },
