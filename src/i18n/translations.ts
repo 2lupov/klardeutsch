@@ -246,6 +246,16 @@ const translations = {
   navDialogues: { ru: "Диалоги", uk: "Діалоги" },
   decline: { ru: "Отклонить", uk: "Відхилити" },
   challengeDeclined: { ru: "Дуэль отклонена", uk: "Дуель відхилено" },
+
+  // Notifications
+  notificationsTitle: { ru: "Уведомления", uk: "Сповіщення" },
+  telegramLinked: { ru: "Telegram привязан ✅", uk: "Telegram прив'язаний ✅" },
+  telegramNotLinked: { ru: "Telegram не привязан", uk: "Telegram не прив'язаний" },
+  linkTelegram: { ru: "Привязать Telegram", uk: "Прив'язати Telegram" },
+  unlinkTelegram: { ru: "Отвязать", uk: "Відв'язати" },
+  telegramLinkDesc: { ru: "Получай напоминания об учёбе прямо в Telegram", uk: "Отримуй нагадування про навчання прямо в Telegram" },
+  openBot: { ru: "Открыть бота", uk: "Відкрити бота" },
+  telegramUnlinked: { ru: "Telegram отвязан", uk: "Telegram відв'язано" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;
