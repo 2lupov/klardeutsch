@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Level, lessonsData } from "@/data/lessons";
+import { Level, CategoryData } from "@/data/lessons";
+import { fetchLevelData } from "@/hooks/useLessons";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProgress } from "@/hooks/useProgress";
 import LevelSelector from "@/components/LevelSelector";
@@ -17,6 +18,8 @@ const Index = () => {
   const [screen, setScreen] = useState<Screen>("levels");
   const [level, setLevel] = useState<Level>("A1");
   const [category, setCategory] = useState<Category>("vocabulary");
+  const [data, setData] = useState<CategoryData | null>(null);
+  const [dataLoading, setDataLoading] = useState(false);
   const { user, loading, signOut } = useAuth();
   const { saveProgress } = useProgress();
   const navigate = useNavigate();
@@ -27,6 +30,17 @@ const Index = () => {
     }
   }, [user, loading, navigate]);
 
+  // Load level data from DB when level changes
+  useEffect(() => {
+    if (screen !== "levels") {
+      setDataLoading(true);
+      fetchLevelData(level).then((d) => {
+        setData(d);
+        setDataLoading(false);
+      });
+    }
+  }, [level, screen]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -36,8 +50,6 @@ const Index = () => {
   }
 
   if (!user) return null;
-
-  const data = lessonsData[level];
 
   const handleLevelSelect = (l: Level) => {
     setLevel(l);
@@ -70,6 +82,9 @@ const Index = () => {
   };
 
   const renderExercise = () => {
+    if (dataLoading || !data) {
+      return <p className="text-muted-foreground text-center">Загрузка...</p>;
+    }
     switch (category) {
       case "vocabulary":
         return <Flashcard cards={data.vocabulary} onComplete={handleVocabComplete} />;

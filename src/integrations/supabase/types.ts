@@ -14,6 +14,75 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_settings: {
+        Row: {
+          admin_password: string
+          id: string
+        }
+        Insert: {
+          admin_password?: string
+          id?: string
+        }
+        Update: {
+          admin_password?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      grammar_lessons: {
+        Row: {
+          created_at: string
+          id: string
+          level: string
+          theory: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          level: string
+          theory: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          level?: string
+          theory?: string
+        }
+        Relationships: []
+      }
+      grammar_questions: {
+        Row: {
+          correct_index: number
+          created_at: string
+          explanation: string | null
+          id: string
+          level: string
+          options: string[]
+          question: string
+          sort_order: number | null
+        }
+        Insert: {
+          correct_index: number
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          level: string
+          options: string[]
+          question: string
+          sort_order?: number | null
+        }
+        Update: {
+          correct_index?: number
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          level?: string
+          options?: string[]
+          question?: string
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -35,6 +104,74 @@ export type Database = {
           id?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      reading_questions: {
+        Row: {
+          correct_index: number
+          created_at: string
+          explanation: string | null
+          id: string
+          options: string[]
+          question: string
+          reading_id: string
+          sort_order: number | null
+        }
+        Insert: {
+          correct_index: number
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          options: string[]
+          question: string
+          reading_id: string
+          sort_order?: number | null
+        }
+        Update: {
+          correct_index?: number
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          options?: string[]
+          question?: string
+          reading_id?: string
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reading_questions_reading_id_fkey"
+            columns: ["reading_id"]
+            isOneToOne: false
+            referencedRelation: "reading_texts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reading_texts: {
+        Row: {
+          created_at: string
+          id: string
+          level: string
+          sort_order: number | null
+          text: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          level: string
+          sort_order?: number | null
+          text: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          level?: string
+          sort_order?: number | null
+          text?: string
+          title?: string
         }
         Relationships: []
       }
@@ -77,12 +214,48 @@ export type Database = {
         }
         Relationships: []
       }
+      vocab_cards: {
+        Row: {
+          article: string | null
+          created_at: string
+          example: string | null
+          german: string
+          id: string
+          level: string
+          russian: string
+          sort_order: number | null
+        }
+        Insert: {
+          article?: string | null
+          created_at?: string
+          example?: string | null
+          german: string
+          id?: string
+          level: string
+          russian: string
+          sort_order?: number | null
+        }
+        Update: {
+          article?: string | null
+          created_at?: string
+          example?: string | null
+          german?: string
+          id?: string
+          level?: string
+          russian?: string
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      check_admin_password: {
+        Args: { input_password: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
