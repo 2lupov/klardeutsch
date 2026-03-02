@@ -121,13 +121,19 @@ const ListeningEditor = ({ level }: { level: string }) => {
   return (
     <div className="flex flex-col gap-4">
       {texts.map((txt) => (
-        <div key={txt.id} className="glass-card p-4 flex flex-col gap-3">
+      <div key={txt.id} className="glass-card p-4 flex flex-col gap-3">
           <div className="flex gap-2 items-start">
             <input
               defaultValue={txt.title}
               onChange={(e) => trackTextChange(txt.id, { title: e.target.value })}
               placeholder={t("title")}
               className="flex-1 px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm font-semibold focus:border-primary focus:outline-none"
+            />
+            <input
+              defaultValue={txt.topic ?? "Allgemein"}
+              onChange={(e) => trackTextChange(txt.id, { topic: e.target.value })}
+              placeholder={t("topic")}
+              className="w-28 px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none"
             />
             <button onClick={() => deleteText(txt.id)} className="p-2 text-destructive hover:bg-destructive/10 rounded-lg">
               <Trash2 className="w-4 h-4" />

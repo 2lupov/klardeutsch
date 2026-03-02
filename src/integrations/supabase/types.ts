@@ -92,18 +92,21 @@ export type Database = {
           id: string
           level: string
           theory: string
+          topic: string
         }
         Insert: {
           created_at?: string
           id?: string
           level: string
           theory: string
+          topic?: string
         }
         Update: {
           created_at?: string
           id?: string
           level?: string
           theory?: string
+          topic?: string
         }
         Relationships: []
       }
@@ -117,6 +120,7 @@ export type Database = {
           options: string[]
           question: string
           sort_order: number | null
+          topic: string
         }
         Insert: {
           correct_index: number
@@ -127,6 +131,7 @@ export type Database = {
           options: string[]
           question: string
           sort_order?: number | null
+          topic?: string
         }
         Update: {
           correct_index?: number
@@ -137,6 +142,7 @@ export type Database = {
           options?: string[]
           question?: string
           sort_order?: number | null
+          topic?: string
         }
         Relationships: []
       }
@@ -221,6 +227,7 @@ export type Database = {
           sort_order: number | null
           text: string
           title: string
+          topic: string
         }
         Insert: {
           created_at?: string
@@ -229,6 +236,7 @@ export type Database = {
           sort_order?: number | null
           text: string
           title: string
+          topic?: string
         }
         Update: {
           created_at?: string
@@ -237,6 +245,7 @@ export type Database = {
           sort_order?: number | null
           text?: string
           title?: string
+          topic?: string
         }
         Relationships: []
       }
@@ -345,6 +354,7 @@ export type Database = {
           sort_order: number | null
           text: string
           title: string
+          topic: string
         }
         Insert: {
           created_at?: string
@@ -353,6 +363,7 @@ export type Database = {
           sort_order?: number | null
           text: string
           title: string
+          topic?: string
         }
         Update: {
           created_at?: string
@@ -361,6 +372,7 @@ export type Database = {
           sort_order?: number | null
           text?: string
           title?: string
+          topic?: string
         }
         Relationships: []
       }
@@ -505,6 +517,7 @@ export type Database = {
           level: string
           russian: string
           sort_order: number | null
+          topic: string
         }
         Insert: {
           article?: string | null
@@ -515,6 +528,7 @@ export type Database = {
           level: string
           russian: string
           sort_order?: number | null
+          topic?: string
         }
         Update: {
           article?: string | null
@@ -525,6 +539,7 @@ export type Database = {
           level?: string
           russian?: string
           sort_order?: number | null
+          topic?: string
         }
         Relationships: []
       }
