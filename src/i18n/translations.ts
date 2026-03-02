@@ -147,6 +147,12 @@ const translations = {
   achBookwormDesc: { ru: "Прочитайте все тексты", uk: "Прочитайте всі тексти" },
   achCustomCollector: { ru: "Коллекционер", uk: "Колекціонер" },
   achCustomCollectorDesc: { ru: "Добавьте 10 своих слов", uk: "Додайте 10 своїх слів" },
+
+  // Daily challenge
+  dailyChallenge: { ru: "Задание дня", uk: "Завдання дня" },
+  wordOfDay: { ru: "Слово дня", uk: "Слово дня" },
+  miniQuiz: { ru: "Мини-квиз", uk: "Міні-квіз" },
+  dailyComplete: { ru: "Задание дня выполнено! ✨", uk: "Завдання дня виконано! ✨" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;
