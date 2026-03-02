@@ -5,7 +5,6 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import KlarLogo from "@/components/KlarLogo";
 import { useLevelProgress } from "@/hooks/useLevelProgress";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
-import LofiRadio from "@/components/LofiRadio";
 
 const DesktopSidebar = () => {
   const { signOut } = useAuth();
@@ -56,11 +55,6 @@ const DesktopSidebar = () => {
           );
         })}
       </nav>
-
-      {/* Lofi Radio */}
-      <div className="px-4 py-3 border-t border-border">
-        <LofiRadio />
-      </div>
 
       {/* Footer */}
       <div className="p-4 border-t border-border">
