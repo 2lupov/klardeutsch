@@ -5,3 +5,5 @@ project_id = "jqqsszwbbxvevebmebfm"
     verify_jwt = false
   [functions.ai-dialogue]
     verify_jwt = false
+  [functions.telegram-reminders]
+    verify_jwt = false

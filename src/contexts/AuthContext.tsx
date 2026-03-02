@@ -28,12 +28,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+
+      // Update last_active on login/session refresh
+      if (session?.user) {
+        supabase
+          .from("profiles")
+          .update({ last_active: new Date().toISOString() } as any)
+          .eq("user_id", session.user.id)
+          .then();
+      }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+
+      if (session?.user) {
+        supabase
+          .from("profiles")
+          .update({ last_active: new Date().toISOString() } as any)
+          .eq("user_id", session.user.id)
+          .then();
+      }
     });
 
     return () => subscription.unsubscribe();
