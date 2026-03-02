@@ -44,11 +44,23 @@ const Auth = () => {
     setDemoMode(cards.length > 0 ? "playing" : "off");
   };
 
+  const [forgotMode, setForgotMode] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setMessage("");
     setLoading(true);
+
+    if (forgotMode) {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) setError(error.message);
+      else setMessage(t("resetPasswordSent"));
+      setLoading(false);
+      return;
+    }
 
     if (isLogin) {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -126,7 +138,7 @@ const Auth = () => {
             <span className="text-gradient">KLAR</span>
           </h1>
           <p className="text-muted-foreground text-sm mt-1">
-            {isLogin ? t("loginTitle") : t("signupTitle")}
+            {forgotMode ? t("resetPasswordTitle") : isLogin ? t("loginTitle") : t("signupTitle")}
           </p>
         </div>
 
@@ -139,33 +151,53 @@ const Auth = () => {
             required
             className="w-full px-4 py-3 rounded-xl bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:border-primary focus:outline-none transition-colors"
           />
-          <input
-            type="password"
-            placeholder={t("password")}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={6}
-            className="w-full px-4 py-3 rounded-xl bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:border-primary focus:outline-none transition-colors"
-          />
+          {!forgotMode && (
+            <input
+              type="password"
+              placeholder={t("password")}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={6}
+              className="w-full px-4 py-3 rounded-xl bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:border-primary focus:outline-none transition-colors"
+            />
+          )}
 
           {error && <p className="text-sm text-destructive">{error}</p>}
-          {message && <p className="text-sm text-success">{message}</p>}
+          {message && <p className="text-sm text-green-500">{message}</p>}
 
           <button
             type="submit"
             disabled={loading}
             className="w-full px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold glow-yellow transition-all hover:opacity-90 disabled:opacity-50"
           >
-            {loading ? "..." : isLogin ? t("login") : t("signup")}
+            {loading ? "..." : forgotMode ? t("sendResetLink") : isLogin ? t("login") : t("signup")}
           </button>
+
+          {isLogin && !forgotMode && (
+            <button
+              type="button"
+              onClick={() => { setForgotMode(true); setError(""); setMessage(""); }}
+              className="text-xs text-muted-foreground hover:text-primary transition-colors"
+            >
+              {t("forgotPassword")}
+            </button>
+          )}
 
           <button
             type="button"
-            onClick={() => { setIsLogin(!isLogin); setError(""); setMessage(""); }}
+            onClick={() => { 
+              if (forgotMode) {
+                setForgotMode(false);
+              } else {
+                setIsLogin(!isLogin);
+              }
+              setError(""); 
+              setMessage(""); 
+            }}
             className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
-            {isLogin ? t("noAccount") : t("hasAccount")}
+            {forgotMode ? t("hasAccount") : isLogin ? t("noAccount") : t("hasAccount")}
           </button>
         </form>
 
