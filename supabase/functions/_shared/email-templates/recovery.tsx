@@ -33,9 +33,13 @@ export const RecoveryEmail = ({
           Мы получили запрос на сброс пароля для твоего аккаунта KLAR.
           Нажми кнопку ниже, чтобы выбрать новый пароль.
         </Text>
-        <Button style={button} href={confirmationUrl}>
+        <Button style={button} href={confirmationUrl} target="_blank">
           Сбросить пароль
         </Button>
+        <Text style={fallbackText}>
+          Если кнопка не работает, скопируй ссылку:{' '}
+          <Link href={confirmationUrl} style={link}>{confirmationUrl}</Link>
+        </Text>
         <Text style={footer}>
           Если ты не запрашивал сброс — просто проигнорируй это письмо. Твой пароль останется прежним.
         </Text>
@@ -66,6 +70,7 @@ const text = {
   lineHeight: '1.6',
   margin: '0 0 24px',
 }
+const link = { color: '#e6a817', textDecoration: 'underline' }
 const button = {
   backgroundColor: '#e6a817',
   color: '#111827',
@@ -74,5 +79,8 @@ const button = {
   borderRadius: '12px',
   padding: '14px 24px',
   textDecoration: 'none',
+  display: 'inline-block' as const,
+  textAlign: 'center' as const,
 }
+const fallbackText = { fontSize: '12px', color: '#9ca3af', margin: '16px 0 0', wordBreak: 'break-all' as const }
 const footer = { fontSize: '12px', color: '#9ca3af', margin: '32px 0 0' }
