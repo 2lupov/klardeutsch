@@ -21,16 +21,26 @@ export interface ReadingText {
   questions: GrammarQuestion[];
 }
 
+export interface ListeningText {
+  id: string;
+  title: string;
+  text: string;
+  questions: GrammarQuestion[];
+  dictations: { id: string; sentence: string }[];
+}
+
 export interface CategoryData {
   vocabulary: VocabCard[];
   grammar: { theory: string; questions: GrammarQuestion[] };
   reading: ReadingText[];
+  listening: ListeningText[];
 }
 
-export type Level = "A1" | "A2" | "B1" | "B2";
+export type Level = "A1" | "A2" | "B1" | "B2" | "C1";
 
 export const lessonsData: Record<Level, CategoryData> = {
   A1: {
+    listening: [],
     vocabulary: [
       { id: "v1", german: "Hallo", russian: "Привет", example: "Hallo, wie geht's?" },
       { id: "v2", german: "Danke", russian: "Спасибо", example: "Danke schön!" },
@@ -92,6 +102,7 @@ export const lessonsData: Record<Level, CategoryData> = {
     ],
   },
   A2: {
+    listening: [],
     vocabulary: [
       { id: "v1", german: "die Wohnung", russian: "Квартира", article: "die", example: "Die Wohnung ist groß." },
       { id: "v2", german: "der Urlaub", russian: "Отпуск", article: "der", example: "Ich brauche Urlaub." },
@@ -136,6 +147,7 @@ export const lessonsData: Record<Level, CategoryData> = {
     ],
   },
   B1: {
+    listening: [],
     vocabulary: [
       { id: "v1", german: "die Ausbildung", russian: "Образование / обучение", article: "die" },
       { id: "v2", german: "bewerben (sich)", russian: "Подавать заявку", example: "Ich bewerbe mich um die Stelle." },
@@ -172,6 +184,7 @@ export const lessonsData: Record<Level, CategoryData> = {
     ],
   },
   B2: {
+    listening: [],
     vocabulary: [
       { id: "v1", german: "die Nachhaltigkeit", russian: "Устойчивое развитие", article: "die" },
       { id: "v2", german: "die Globalisierung", russian: "Глобализация", article: "die" },
@@ -200,6 +213,43 @@ export const lessonsData: Record<Level, CategoryData> = {
             id: "rq1",
             question: "Was verändert die Gesellschaft?",
             options: ["Sport", "Digitalisierung", "Musik", "Kochen"],
+            correctIndex: 1,
+          },
+        ],
+      },
+    ],
+  },
+  C1: {
+    listening: [],
+    vocabulary: [
+      { id: "v1", german: "die Voraussetzung", russian: "Предпосылка / условие", article: "die", example: "Das ist eine Voraussetzung für den Erfolg." },
+      { id: "v2", german: "berücksichtigen", russian: "Учитывать / принимать во внимание", example: "Man muss alle Faktoren berücksichtigen." },
+      { id: "v3", german: "die Auswirkung", russian: "Воздействие / последствие", article: "die", example: "Die Auswirkungen des Klimawandels sind spürbar." },
+      { id: "v4", german: "anspruchsvoll", russian: "Требовательный / сложный", example: "Die Aufgabe ist sehr anspruchsvoll." },
+      { id: "v5", german: "die Wahrnehmung", russian: "Восприятие", article: "die", example: "Die Wahrnehmung variiert von Person zu Person." },
+    ],
+    grammar: {
+      theory: "## Partizipialattribute — причастные обороты\n\nВ немецком языке причастия могут использоваться как **определения перед существительным**.\n\n**Partizip I (Präsens):** der **lesende** Student (читающий студент)\n\n**Partizip II (Perfekt):** das **gelesene** Buch (прочитанная книга)\n\n**Расширенное:** die **von vielen Menschen gelesene** Zeitung",
+      questions: [
+        {
+          id: "g1",
+          question: "Die ___ Aufgabe war sehr schwer.",
+          options: ["gestellte", "stellende", "gestellt", "stellen"],
+          correctIndex: 0,
+          explanation: "Partizip II 'gestellt' → 'gestellte' как определение",
+        },
+      ],
+    },
+    reading: [
+      {
+        id: "r1",
+        title: "Künstliche Intelligenz",
+        text: "Die rasante Entwicklung der künstlichen Intelligenz wirft zahlreiche ethische Fragen auf. Während Befürworter die Effizienzsteigerung betonen, warnen Kritiker vor möglichen Gefahren für den Arbeitsmarkt und die Privatsphäre.",
+        questions: [
+          {
+            id: "rq1",
+            question: "Was werfen Kritiker der KI vor?",
+            options: ["Zu langsame Entwicklung", "Gefahren für Arbeitsmarkt und Privatsphäre", "Zu hohe Kosten", "Mangelnde Effizienz"],
             correctIndex: 1,
           },
         ],

@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import type { Level } from "@/data/lessons";
 
-const CATEGORIES = ["vocabulary", "grammar", "reading"] as const;
+const CATEGORIES = ["vocabulary", "grammar", "reading", "listening"] as const;
 
 /**
  * Returns a 0–100 percentage representing how many categories

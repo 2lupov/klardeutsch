@@ -140,6 +140,106 @@ export type Database = {
         }
         Relationships: []
       }
+      listening_dictations: {
+        Row: {
+          created_at: string
+          id: string
+          listening_id: string
+          sentence: string
+          sort_order: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          listening_id: string
+          sentence: string
+          sort_order?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          listening_id?: string
+          sentence?: string
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listening_dictations_listening_id_fkey"
+            columns: ["listening_id"]
+            isOneToOne: false
+            referencedRelation: "listening_texts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      listening_questions: {
+        Row: {
+          correct_index: number
+          created_at: string
+          explanation: string | null
+          id: string
+          listening_id: string
+          options: string[]
+          question: string
+          sort_order: number | null
+        }
+        Insert: {
+          correct_index: number
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          listening_id: string
+          options: string[]
+          question: string
+          sort_order?: number | null
+        }
+        Update: {
+          correct_index?: number
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          listening_id?: string
+          options?: string[]
+          question?: string
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listening_questions_listening_id_fkey"
+            columns: ["listening_id"]
+            isOneToOne: false
+            referencedRelation: "listening_texts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      listening_texts: {
+        Row: {
+          created_at: string
+          id: string
+          level: string
+          sort_order: number | null
+          text: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          level: string
+          sort_order?: number | null
+          text: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          level?: string
+          sort_order?: number | null
+          text?: string
+          title?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

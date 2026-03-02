@@ -15,8 +15,9 @@ const DesktopSidebar = () => {
   const a2 = useLevelProgress("A2");
   const b1 = useLevelProgress("B1");
   const b2 = useLevelProgress("B2");
-  const totalProgress = Math.round((a1.progress + a2.progress + b1.progress + b2.progress) / 4);
-  const allCompleted = a1.completed && a2.completed && b1.completed && b2.completed;
+  const c1 = useLevelProgress("C1");
+  const totalProgress = Math.round((a1.progress + a2.progress + b1.progress + b2.progress + c1.progress) / 5);
+  const allCompleted = a1.completed && a2.completed && b1.completed && b2.completed && c1.completed;
 
   const links = [
     { to: "/", icon: Home, label: t("navHome") },

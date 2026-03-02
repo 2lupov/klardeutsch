@@ -10,10 +10,11 @@ import CategorySelector from "@/components/CategorySelector";
 import Flashcard from "@/components/Flashcard";
 import Quiz from "@/components/Quiz";
 import ReadingExercise from "@/components/ReadingExercise";
+import ListeningExercise from "@/components/ListeningExercise";
 import DailyChallenge from "@/components/DailyChallenge";
 import { ArrowLeft } from "lucide-react";
 
-type Category = "vocabulary" | "grammar" | "reading";
+type Category = "vocabulary" | "grammar" | "reading" | "listening";
 type Screen = "levels" | "categories" | "exercise";
 
 const Index = () => {
@@ -81,6 +82,12 @@ const Index = () => {
     handleBack();
   };
 
+  const handleListeningComplete = () => {
+    bumpClarity(1);
+    saveProgress(level, "listening", "listening", 0, true);
+    handleBack();
+  };
+
   const renderExercise = () => {
     if (dataLoading || !data) {
       return <p className="text-muted-foreground text-center">{t("loading")}</p>;
@@ -107,6 +114,8 @@ const Index = () => {
         );
       case "reading":
         return <ReadingExercise readings={data.reading} onComplete={handleReadingComplete} />;
+      case "listening":
+        return <ListeningExercise listenings={data.listening} onComplete={handleListeningComplete} />;
     }
   };
 

@@ -2,14 +2,15 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { ArrowLeft, Plus, Trash2, Save, Lock, ShoppingBag } from "lucide-react";
+import { Plus, Trash2, Save, Lock } from "lucide-react";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import ShopEditor from "@/components/admin/ShopEditor";
+import ListeningEditor from "@/components/admin/ListeningEditor";
 
-type Level = "A1" | "A2" | "B1" | "B2";
-type Tab = "vocabulary" | "grammar" | "reading" | "shop";
+type Level = "A1" | "A2" | "B1" | "B2" | "C1";
+type Tab = "vocabulary" | "grammar" | "reading" | "listening" | "shop";
 
-const LEVELS: Level[] = ["A1", "A2", "B1", "B2"];
+const LEVELS: Level[] = ["A1", "A2", "B1", "B2", "C1"];
 
 const Admin = () => {
   const { user } = useAuth();
@@ -94,7 +95,7 @@ const Admin = () => {
 
         {/* Tab selector */}
         <div className="flex gap-2 mb-6 flex-wrap">
-          {(["vocabulary", "grammar", "reading", "shop"] as Tab[]).map((tb) => (
+          {(["vocabulary", "grammar", "reading", "listening", "shop"] as Tab[]).map((tb) => (
             <button
               key={tb}
               onClick={() => setTab(tb)}
@@ -102,7 +103,7 @@ const Admin = () => {
                 tab === tb ? "bg-card border border-primary/50 text-foreground" : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              {tb === "vocabulary" ? t("vocabulary") : tb === "grammar" ? t("grammar") : tb === "reading" ? t("reading") : t("shopTab")}
+              {tb === "vocabulary" ? t("vocabulary") : tb === "grammar" ? t("grammar") : tb === "reading" ? t("reading") : tb === "listening" ? t("listening") : t("shopTab")}
             </button>
           ))}
         </div>
@@ -110,6 +111,7 @@ const Admin = () => {
         {tab === "vocabulary" && <VocabEditor level={level} />}
         {tab === "grammar" && <GrammarEditor level={level} />}
         {tab === "reading" && <ReadingEditor level={level} />}
+        {tab === "listening" && <ListeningEditor level={level} />}
         {tab === "shop" && <ShopEditor />}
       </div>
     </div>
