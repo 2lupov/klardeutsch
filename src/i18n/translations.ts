@@ -207,6 +207,8 @@ const translations = {
   saved: { ru: "Сохранено!", uk: "Збережено!" },
   chooseTopic: { ru: "Выберите тему", uk: "Оберіть тему" },
   topic: { ru: "Тема", uk: "Тема" },
+  aiAnalysis: { ru: "AI-разбор ошибок", uk: "AI-розбір помилок" },
+  analyzeMyMistakes: { ru: "Разобрать мои ошибки", uk: "Розібрати мої помилки" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;

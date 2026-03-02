@@ -2,17 +2,22 @@ import { useState } from "react";
 import { GrammarQuestion } from "@/data/lessons";
 import { CheckCircle2, XCircle, ArrowRight } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import AIFeedback, { MistakeData } from "@/components/AIFeedback";
 
 interface QuizProps {
   questions: GrammarQuestion[];
   onComplete: (score: number) => void;
+  level?: string;
+  category?: string;
 }
 
-const Quiz = ({ questions, onComplete }: QuizProps) => {
+const Quiz = ({ questions, onComplete, level = "A1", category = "grammar" }: QuizProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [score, setScore] = useState(0);
   const [showResult, setShowResult] = useState(false);
+  const [mistakes, setMistakes] = useState<MistakeData[]>([]);
+  const [showAI, setShowAI] = useState(true);
   const { t } = useLanguage();
 
   const q = questions[currentIndex];
@@ -25,6 +30,16 @@ const Quiz = ({ questions, onComplete }: QuizProps) => {
     setSelectedIndex(index);
     if (index === q.correctIndex) {
       setScore((s) => s + 1);
+    } else {
+      setMistakes((prev) => [
+        ...prev,
+        {
+          question: q.question,
+          userAnswer: q.options[index],
+          correctAnswer: q.options[q.correctIndex],
+          explanation: q.explanation,
+        },
+      ]);
     }
   };
 
@@ -50,6 +65,18 @@ const Quiz = ({ questions, onComplete }: QuizProps) => {
         <p className="text-muted-foreground">
           {score} {t("of")} {questions.length} {t("correctAnswers")}
         </p>
+
+        {mistakes.length > 0 && showAI && (
+          <div className="w-full max-w-xl">
+            <AIFeedback
+              mistakes={mistakes}
+              level={level}
+              category={category}
+              onClose={() => setShowAI(false)}
+            />
+          </div>
+        )}
+
         <button
           onClick={() => onComplete(score)}
           className="px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold glow-yellow"

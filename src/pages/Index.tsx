@@ -136,11 +136,11 @@ const Index = () => {
                 }}
               />
             </div>
-            <Quiz questions={data.grammar.questions} onComplete={handleQuizComplete} />
+            <Quiz questions={data.grammar.questions} onComplete={handleQuizComplete} level={level} category="grammar" />
           </div>
         );
       case "reading":
-        return <ReadingExercise readings={data.reading} onComplete={handleReadingComplete} />;
+        return <ReadingExercise readings={data.reading} onComplete={handleReadingComplete} level={level} />;
       case "listening":
         return <ListeningExercise listenings={data.listening} onComplete={handleListeningComplete} />;
     }
