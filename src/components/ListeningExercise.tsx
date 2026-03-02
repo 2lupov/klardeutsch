@@ -160,7 +160,12 @@ const ListeningExercise = ({ listenings, onComplete }: ListeningExerciseProps) =
   if (mode === "choose") {
     return (
       <div className="flex flex-col gap-4 animate-slide-up w-full max-w-xl mx-auto">
-        <h2 className="font-display text-lg font-bold text-foreground">{current.title}</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="font-display text-lg font-bold text-foreground">{current.title}</h2>
+          {listenings.length > 1 && (
+            <span className="text-xs text-muted-foreground">{currentIdx + 1}/{listenings.length}</span>
+          )}
+        </div>
         <p className="text-sm text-muted-foreground">{t("listenChooseMode")}</p>
 
         {/* Play full text */}

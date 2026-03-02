@@ -43,6 +43,8 @@ const Index = () => {
     }
   }, [level, screen, topic]);
 
+  const [singleTopic, setSingleTopic] = useState(false);
+
   // Load topics when entering topics screen
   useEffect(() => {
     if (screen === "topics") {
@@ -50,9 +52,11 @@ const Index = () => {
       fetchTopics(level, category).then((t) => {
         if (t.length === 1) {
           // Only one topic — skip selection
+          setSingleTopic(true);
           setTopic(t[0]);
           setScreen("exercise");
         } else {
+          setSingleTopic(false);
           setTopics(t);
           setDataLoading(false);
         }
@@ -82,8 +86,15 @@ const Index = () => {
   };
 
   const handleBack = () => {
-    if (screen === "exercise") setScreen("topics");
-    else if (screen === "topics") setScreen("categories");
+    if (screen === "exercise") {
+      // If there was only one topic, skip topics screen and go to categories
+      if (singleTopic) {
+        setSingleTopic(false);
+        setScreen("categories");
+      } else {
+        setScreen("topics");
+      }
+    } else if (screen === "topics") setScreen("categories");
     else if (screen === "categories") setScreen("levels");
   };
 
