@@ -1,11 +1,14 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Level, lessonsData } from "@/data/lessons";
+import { useAuth } from "@/contexts/AuthContext";
+import { useProgress } from "@/hooks/useProgress";
 import LevelSelector from "@/components/LevelSelector";
 import CategorySelector from "@/components/CategorySelector";
 import Flashcard from "@/components/Flashcard";
 import Quiz from "@/components/Quiz";
 import ReadingExercise from "@/components/ReadingExercise";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, LogOut } from "lucide-react";
 
 type Category = "vocabulary" | "grammar" | "reading";
 type Screen = "levels" | "categories" | "exercise";
@@ -14,6 +17,22 @@ const Index = () => {
   const [screen, setScreen] = useState<Screen>("levels");
   const [level, setLevel] = useState<Level>("A1");
   const [category, setCategory] = useState<Category>("vocabulary");
+  const { user, loading, signOut } = useAuth();
+  const { saveProgress } = useProgress();
+  const navigate = useNavigate();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <span className="text-muted-foreground">Загрузка...</span>
+      </div>
+    );
+  }
+
+  if (!user) {
+    navigate("/auth");
+    return null;
+  }
 
   const data = lessonsData[level];
 
@@ -32,10 +51,25 @@ const Index = () => {
     else if (screen === "categories") setScreen("levels");
   };
 
+  const handleVocabComplete = () => {
+    saveProgress(level, "vocabulary", "flashcards", 0, true);
+    handleBack();
+  };
+
+  const handleQuizComplete = (score: number) => {
+    saveProgress(level, "grammar", "quiz", score, true);
+    handleBack();
+  };
+
+  const handleReadingComplete = () => {
+    saveProgress(level, "reading", "reading", 0, true);
+    handleBack();
+  };
+
   const renderExercise = () => {
     switch (category) {
       case "vocabulary":
-        return <Flashcard cards={data.vocabulary} onComplete={handleBack} />;
+        return <Flashcard cards={data.vocabulary} onComplete={handleVocabComplete} />;
       case "grammar":
         return (
           <div className="flex flex-col gap-6 animate-slide-up">
@@ -50,11 +84,11 @@ const Index = () => {
                 }}
               />
             </div>
-            <Quiz questions={data.grammar.questions} onComplete={handleBack} />
+            <Quiz questions={data.grammar.questions} onComplete={handleQuizComplete} />
           </div>
         );
       case "reading":
-        return <ReadingExercise readings={data.reading} onComplete={handleBack} />;
+        return <ReadingExercise readings={data.reading} onComplete={handleReadingComplete} />;
     }
   };
 
@@ -78,12 +112,18 @@ const Index = () => {
         {screen === "exercise" && renderExercise()}
       </div>
 
-      {/* Bottom bar */}
       <div className="w-full border-t border-border bg-card/50 backdrop-blur-lg">
-        <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-center">
+        <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
           <span className="text-xs text-muted-foreground font-display tracking-wider">
             KLAR · Deutsch lernen
           </span>
+          <button
+            onClick={signOut}
+            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            Выйти
+          </button>
         </div>
       </div>
     </div>
