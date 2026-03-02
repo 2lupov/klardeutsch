@@ -79,6 +79,10 @@ const translations = {
   newQuestion: { ru: "Новый вопрос", uk: "Нове питання" },
   newText: { ru: "Новый текст", uk: "Новий текст" },
   textHere: { ru: "Текст здесь...", uk: "Текст тут..." },
+  tryDemo: { ru: "Попробовать 1 минуту", uk: "Спробувати 1 хвилину" },
+  demoFinished: { ru: "Понравилось? Зарегистрируйтесь, чтобы продолжить!", uk: "Сподобалось? Зареєструйтесь, щоб продовжити!" },
+  startLearning: { ru: "Начать учиться", uk: "Почати вчитися" },
+  backToLogin: { ru: "← Назад к входу", uk: "← Назад до входу" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;
