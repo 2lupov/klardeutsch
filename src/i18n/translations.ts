@@ -99,6 +99,14 @@ const translations = {
   activityHistory: { ru: "История активности", uk: "Історія активності" },
   myProfile: { ru: "Профиль", uk: "Профіль" },
   navHome: { ru: "Главная", uk: "Головна" },
+  editProfile: { ru: "Редактировать", uk: "Редагувати" },
+  saveProfile: { ru: "Сохранить", uk: "Зберегти" },
+  cancelEdit: { ru: "Отмена", uk: "Скасувати" },
+  nickname: { ru: "Никнейм", uk: "Нікнейм" },
+  changeAvatar: { ru: "Сменить фото", uk: "Змінити фото" },
+  profileSaved: { ru: "Профиль сохранён!", uk: "Профіль збережено!" },
+  resetProgress: { ru: "Сбросить прогресс", uk: "Скинути прогрес" },
+  resetConfirm: { ru: "Вы уверены? Весь прогресс будет удалён.", uk: "Ви впевнені? Весь прогрес буде видалено." },
 } as const;
 
 export type TranslationKey = keyof typeof translations;
