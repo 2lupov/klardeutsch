@@ -20,8 +20,8 @@ serve(async (req) => {
     });
   }
 
-  // Use a German female voice by default (Laura)
-  const selectedVoice = voiceId || "FGY2WhTYpPnrIDTdsKH5";
+  // Default voice for German pronunciation
+  const selectedVoice = voiceId || "PhufIH7nYh2Up1uej6aY";
 
   const response = await fetch(
     `https://api.elevenlabs.io/v1/text-to-speech/${selectedVoice}?output_format=mp3_44100_128`,
