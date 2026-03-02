@@ -1,10 +1,12 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePlatform } from "@/hooks/usePlatform";
 import { supabase } from "@/integrations/supabase/client";
-import { BookOpen, Brain, Flame, RotateCcw, TrendingUp, Calendar, LogOut } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { BookOpen, Brain, Flame, RotateCcw, TrendingUp, Calendar, LogOut, Camera, Pencil, Check, X } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 interface ProgressRow {
   level: string;
@@ -16,24 +18,37 @@ interface ProgressRow {
   updated_at: string;
 }
 
+interface ProfileData {
+  display_name: string | null;
+  avatar_url: string | null;
+}
+
 const Profile = () => {
   const { user, signOut } = useAuth();
   const { t } = useLanguage();
   const { isMobile } = usePlatform();
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [progress, setProgress] = useState<ProgressRow[]>([]);
   const [totalCards, setTotalCards] = useState(0);
   const [fetching, setFetching] = useState(true);
+  const [profile, setProfile] = useState<ProfileData>({ display_name: null, avatar_url: null });
+  const [editing, setEditing] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (!user) return;
     const load = async () => {
-      const [{ data: prog }, { count }] = await Promise.all([
+      const [{ data: prog }, { count }, { data: prof }] = await Promise.all([
         supabase.from("user_progress").select("*").eq("user_id", user.id),
         supabase.from("vocab_cards").select("*", { count: "exact", head: true }),
+        supabase.from("profiles").select("display_name, avatar_url").eq("user_id", user.id).single(),
       ]);
       setProgress(prog ?? []);
       setTotalCards(count ?? 0);
+      if (prof) setProfile({ display_name: prof.display_name, avatar_url: prof.avatar_url });
       setFetching(false);
     };
     load();
@@ -77,6 +92,45 @@ const Profile = () => {
     [progress]
   );
 
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    setUploading(true);
+    const ext = file.name.split(".").pop();
+    const path = `${user.id}/avatar.${ext}`;
+
+    // Remove old avatar if exists
+    await supabase.storage.from("avatars").remove([path]);
+
+    const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      setUploading(false);
+      return;
+    }
+
+    const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
+    const avatar_url = `${urlData.publicUrl}?t=${Date.now()}`;
+
+    await supabase.from("profiles").update({ avatar_url }).eq("user_id", user.id);
+    setProfile((p) => ({ ...p, avatar_url }));
+    setUploading(false);
+  };
+
+  const handleSaveName = async () => {
+    if (!user) return;
+    const trimmed = editName.trim();
+    await supabase.from("profiles").update({ display_name: trimmed || null }).eq("user_id", user.id);
+    setProfile((p) => ({ ...p, display_name: trimmed || null }));
+    setEditing(false);
+    toast({ title: t("profileSaved") });
+  };
+
+  const startEdit = () => {
+    setEditName(profile.display_name ?? "");
+    setEditing(true);
+  };
+
   if (!user || fetching) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -84,6 +138,9 @@ const Profile = () => {
       </div>
     );
   }
+
+  const displayName = profile.display_name || user.email?.split("@")[0] || "User";
+  const initials = displayName.slice(0, 2).toUpperCase();
 
   const categoryLabel = (cat: string) => {
     switch (cat) {
@@ -106,7 +163,6 @@ const Profile = () => {
 
   return (
     <div className={`w-full mx-auto px-4 py-6 ${isMobile ? "max-w-md" : "max-w-2xl"}`}>
-      {/* Mobile: sign out button */}
       {isMobile && (
         <button
           onClick={signOut}
@@ -117,18 +173,71 @@ const Profile = () => {
         </button>
       )}
 
-      <h1 className="font-display text-2xl font-bold text-foreground mb-6">{t("profileTitle")}</h1>
+      {/* Profile header with avatar */}
+      <div className="flex items-center gap-4 mb-6">
+        <div className="relative group">
+          <Avatar className="w-16 h-16 border-2 border-primary/20">
+            {profile.avatar_url ? (
+              <AvatarImage src={profile.avatar_url} alt={displayName} />
+            ) : null}
+            <AvatarFallback className="text-lg font-display font-bold bg-primary/10 text-primary">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            <Camera className="w-5 h-5 text-white" />
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleAvatarUpload}
+          />
+        </div>
+
+        <div className="flex-1 min-w-0">
+          {editing ? (
+            <div className="flex items-center gap-2">
+              <input
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                className="flex-1 min-w-0 bg-muted/50 border border-border rounded-lg px-3 py-1.5 text-sm font-display font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                placeholder={t("nickname")}
+                autoFocus
+                onKeyDown={(e) => e.key === "Enter" && handleSaveName()}
+              />
+              <button onClick={handleSaveName} className="p-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
+                <Check className="w-4 h-4" />
+              </button>
+              <button onClick={() => setEditing(false)} className="p-1.5 rounded-lg bg-muted text-muted-foreground hover:bg-muted/80 transition-colors">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <h1 className="font-display text-xl font-bold text-foreground truncate">{displayName}</h1>
+              <button onClick={startEdit} className="p-1 rounded-md text-muted-foreground hover:text-foreground transition-colors">
+                <Pencil className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+          <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+        </div>
+      </div>
 
       {/* Stat cards */}
-      <div className={`grid gap-3 mb-8 ${isMobile ? "grid-cols-3" : "grid-cols-3"}`}>
+      <div className="grid grid-cols-3 gap-3 mb-8">
         <StatCard icon={<BookOpen className="w-5 h-5" />} value={wordsLearned} label={t("wordsLearned")} />
         <StatCard icon={<Brain className="w-5 h-5" />} value={completedLessons} label={t("lessonsCompleted")} />
         <StatCard icon={<Flame className="w-5 h-5" />} value={streak} label={t("streakDays")} />
       </div>
 
-      {/* Desktop: two-column layout for sections */}
       <div className={isMobile ? "space-y-5" : "grid grid-cols-2 gap-5"}>
-        {/* Weak areas */}
         {weakAreas.length > 0 && (
           <section className="glass-card p-5 animate-slide-up">
             <h2 className="font-display text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
@@ -149,7 +258,6 @@ const Profile = () => {
           </section>
         )}
 
-        {/* Recommendation */}
         {recommendation && (
           <section className="glass-card p-5 animate-slide-up" style={{ animationDelay: "0.1s" }}>
             <h2 className="font-display text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
@@ -160,7 +268,6 @@ const Profile = () => {
           </section>
         )}
 
-        {/* Activity history */}
         {recentActivity.length > 0 && (
           <section className={`glass-card p-5 animate-slide-up ${!isMobile ? "col-span-2" : ""}`} style={{ animationDelay: "0.2s" }}>
             <h2 className="font-display text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
