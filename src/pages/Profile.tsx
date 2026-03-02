@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { BookOpen, Brain, Flame, RotateCcw, TrendingUp, Calendar, LogOut, Camera, Pencil, Check, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import Achievements, { type AchievementStats } from "@/components/Achievements";
 
 interface ProgressRow {
   level: string;
@@ -32,6 +33,8 @@ const Profile = () => {
 
   const [progress, setProgress] = useState<ProgressRow[]>([]);
   const [totalCards, setTotalCards] = useState(0);
+  const [customWordsCount, setCustomWordsCount] = useState(0);
+  const [savedWordsCount, setSavedWordsCount] = useState(0);
   const [fetching, setFetching] = useState(true);
   const [profile, setProfile] = useState<ProfileData>({ display_name: null, avatar_url: null });
   const [editing, setEditing] = useState(false);
@@ -41,13 +44,17 @@ const Profile = () => {
   useEffect(() => {
     if (!user) return;
     const load = async () => {
-      const [{ data: prog }, { count }, { data: prof }] = await Promise.all([
+      const [{ data: prog }, { count }, { data: prof }, { count: customCount }, { count: savedCount }] = await Promise.all([
         supabase.from("user_progress").select("*").eq("user_id", user.id),
         supabase.from("vocab_cards").select("*", { count: "exact", head: true }),
         supabase.from("profiles").select("display_name, avatar_url").eq("user_id", user.id).single(),
+        supabase.from("custom_words").select("*", { count: "exact", head: true }).eq("user_id", user.id),
+        supabase.from("saved_words").select("*", { count: "exact", head: true }).eq("user_id", user.id),
       ]);
       setProgress(prog ?? []);
       setTotalCards(count ?? 0);
+      setCustomWordsCount(customCount ?? 0);
+      setSavedWordsCount(savedCount ?? 0);
       if (prof) setProfile({ display_name: prof.display_name, avatar_url: prof.avatar_url });
       setFetching(false);
     };
@@ -92,6 +99,31 @@ const Profile = () => {
     [progress]
   );
 
+  const achievementStats: AchievementStats = useMemo(() => {
+    const levels = ["A1", "A2", "B1", "B2"];
+    const levelsCompleted = levels.filter((lvl) => {
+      const cats = ["vocabulary", "grammar", "reading"];
+      return cats.every((cat) => progress.some((p) => p.level === lvl && p.category === cat && p.completed));
+    }).length;
+
+    const grammarEntries = progress.filter((p) => p.category === "grammar" && p.score !== null);
+    const grammarAvgScore = grammarEntries.length > 0
+      ? grammarEntries.reduce((s, p) => s + (p.score ?? 0), 0) / grammarEntries.length
+      : 0;
+
+    const readingCompleted = progress.filter((p) => p.category === "reading" && p.completed).length;
+
+    return {
+      wordsLearned: savedWordsCount,
+      lessonsCompleted: completedLessons,
+      streak,
+      levelsCompleted,
+      grammarAvgScore,
+      readingCompleted,
+      customWordsAdded: customWordsCount,
+      difficultWordsReviewed: 0,
+    };
+  }, [progress, savedWordsCount, customWordsCount, completedLessons, streak]);
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
@@ -235,6 +267,11 @@ const Profile = () => {
         <StatCard icon={<BookOpen className="w-5 h-5" />} value={wordsLearned} label={t("wordsLearned")} />
         <StatCard icon={<Brain className="w-5 h-5" />} value={completedLessons} label={t("lessonsCompleted")} />
         <StatCard icon={<Flame className="w-5 h-5" />} value={streak} label={t("streakDays")} />
+      </div>
+
+      {/* Achievements */}
+      <div className="mb-6">
+        <Achievements stats={achievementStats} />
       </div>
 
       <div className={isMobile ? "space-y-5" : "grid grid-cols-2 gap-5"}>

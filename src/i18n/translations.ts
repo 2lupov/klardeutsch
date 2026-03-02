@@ -120,6 +120,33 @@ const translations = {
   reviewComplete: { ru: "Повторение завершено! 🎉", uk: "Повторення завершено! 🎉" },
   navDictionary: { ru: "Словарь", uk: "Словник" },
   wordAdded: { ru: "Слово добавлено!", uk: "Слово додано!" },
+
+  // Achievements
+  achievementsTitle: { ru: "Достижения", uk: "Досягнення" },
+  achFirstStep: { ru: "Первый шаг", uk: "Перший крок" },
+  achFirstStepDesc: { ru: "Завершите первое упражнение", uk: "Завершіть першу вправу" },
+  achWord10: { ru: "Словарик", uk: "Словничок" },
+  achWord10Desc: { ru: "Выучите 10 слов", uk: "Вивчіть 10 слів" },
+  achWord50: { ru: "Полиглот", uk: "Поліглот" },
+  achWord50Desc: { ru: "Выучите 50 слов", uk: "Вивчіть 50 слів" },
+  achWord100: { ru: "Мастер слов", uk: "Майстер слів" },
+  achWord100Desc: { ru: "Выучите 100 слов", uk: "Вивчіть 100 слів" },
+  achStreak3: { ru: "3 дня подряд", uk: "3 дні поспіль" },
+  achStreak3Desc: { ru: "Занимайтесь 3 дня подряд", uk: "Займайтесь 3 дні поспіль" },
+  achStreak7: { ru: "Неделя 🔥", uk: "Тиждень 🔥" },
+  achStreak7Desc: { ru: "Занимайтесь 7 дней подряд", uk: "Займайтесь 7 днів поспіль" },
+  achStreak30: { ru: "Месяц силы", uk: "Місяць сили" },
+  achStreak30Desc: { ru: "Занимайтесь 30 дней подряд", uk: "Займайтесь 30 днів поспіль" },
+  achLevelMaster: { ru: "Уровень пройден", uk: "Рівень пройдено" },
+  achLevelMasterDesc: { ru: "Пройдите все категории одного уровня", uk: "Пройдіть всі категорії одного рівня" },
+  achAllLevels: { ru: "Покоритель", uk: "Підкорювач" },
+  achAllLevelsDesc: { ru: "Пройдите все 4 уровня", uk: "Пройдіть усі 4 рівні" },
+  achGrammarPro: { ru: "Грамматик", uk: "Граматик" },
+  achGrammarProDesc: { ru: "Средний балл грамматики ≥ 90%", uk: "Середній бал граматики ≥ 90%" },
+  achBookworm: { ru: "Книжный червь", uk: "Книжковий черв'як" },
+  achBookwormDesc: { ru: "Прочитайте все тексты", uk: "Прочитайте всі тексти" },
+  achCustomCollector: { ru: "Коллекционер", uk: "Колекціонер" },
+  achCustomCollectorDesc: { ru: "Добавьте 10 своих слов", uk: "Додайте 10 своїх слів" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;
