@@ -348,7 +348,7 @@ const Dialogues = () => {
   return (
     <>
       <AmbientBackground />
-      <div className="flex flex-col animate-slide-up h-[calc(100dvh-8rem)] lg:h-[calc(100dvh-2rem)]">
+      <div className="flex flex-col animate-slide-up h-[calc(100dvh-5rem)] lg:h-[calc(100dvh-2rem)]">
         {/* Chat container — full height, padded */}
         <div className="w-full flex flex-col flex-1 min-h-0 px-2">
           {/* Header */}
@@ -388,7 +388,7 @@ const Dialogues = () => {
           {/* Input */}
           <form
             onSubmit={(e) => { e.preventDefault(); handleSend(); }}
-            className="flex items-center gap-2 pt-3"
+            className="flex items-center gap-2 pt-2 pb-1"
           >
             <input
               ref={inputRef}
@@ -397,7 +397,8 @@ const Dialogues = () => {
               onChange={(e) => setInput(e.target.value)}
               placeholder={lang === "uk" ? "Напишіть німецькою..." : "Напишите на немецком..."}
               disabled={isLoading}
-              className="flex-1 px-4 py-2.5 rounded-xl bg-card/40 text-foreground text-sm placeholder:text-muted-foreground/40 border border-border/15 focus:border-primary/30 focus:outline-none transition-colors"
+              style={{ fontSize: "16px" }}
+              className="flex-1 px-4 py-2.5 rounded-xl bg-card/40 text-foreground placeholder:text-muted-foreground/40 border border-border/15 focus:border-primary/30 focus:outline-none transition-colors"
             />
             <button
               type="submit"
