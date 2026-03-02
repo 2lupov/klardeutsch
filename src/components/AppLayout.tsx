@@ -26,8 +26,8 @@ const AppLayout = () => {
 
   if (isMobile) {
     return (
-      <div className="min-h-[100dvh] bg-background flex flex-col pb-14">
-        <div className="flex-1">
+      <div className="h-[100dvh] bg-background flex flex-col pb-14 overflow-hidden">
+        <div className="flex-1 overflow-y-auto overscroll-none">
           <Outlet />
         </div>
         <MobileBottomNav />
