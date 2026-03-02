@@ -4,7 +4,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { usePlatform } from "@/hooks/usePlatform";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Swords, Plus, ArrowLeft, BookOpen, Brain, Clock, CheckCircle2, Loader2 } from "lucide-react";
+import { Swords, Plus, ArrowLeft, BookOpen, Brain, Clock, CheckCircle2, Loader2, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import CreateChallenge from "@/components/challenges/CreateChallenge";
 import PlayChallenge from "@/components/challenges/PlayChallenge";
@@ -112,6 +112,16 @@ const Challenges = () => {
     setScreen("play");
   };
 
+  const handleDecline = async (challenge: Challenge) => {
+    const { error } = await supabase.from("challenges").delete().eq("id", challenge.id);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: t("challengeDeclined") });
+      loadChallenges();
+    }
+  };
+
   const handleChallengeCreated = (challenge?: any) => {
     if (challenge) {
       // Auto-start playing the challenge immediately
@@ -188,7 +198,7 @@ const Challenges = () => {
             {pending.length > 0 && (
               <Section title={t("incomingChallenges")} icon={<Swords className="w-4 h-4 text-primary" />}>
                 {pending.map((c) => (
-                  <ChallengeCard key={c.id} challenge={c} userId={user.id} onPlay={handlePlay} t={t} />
+                  <ChallengeCard key={c.id} challenge={c} userId={user.id} onPlay={handlePlay} onDecline={handleDecline} t={t} />
                 ))}
               </Section>
             )}
@@ -206,7 +216,7 @@ const Challenges = () => {
             {waiting.length > 0 && (
               <Section title={t("waitingForOpponent")} icon={<Clock className="w-4 h-4 text-muted-foreground" />}>
                 {waiting.map((c) => (
-                  <ChallengeCard key={c.id} challenge={c} userId={user.id} t={t} />
+                  <ChallengeCard key={c.id} challenge={c} userId={user.id} onDecline={handleDecline} t={t} />
                 ))}
               </Section>
             )}
@@ -252,11 +262,13 @@ const ChallengeCard = ({
   challenge: c,
   userId,
   onPlay,
+  onDecline,
   t,
 }: {
   challenge: Challenge;
   userId: string;
   onPlay?: (c: Challenge) => void;
+  onDecline?: (c: Challenge) => void;
   t: (key: any) => string;
 }) => {
   const isChallenger = c.challenger_id === userId;
@@ -265,6 +277,7 @@ const ChallengeCard = ({
   const initials = (opponentName ?? "?").slice(0, 2).toUpperCase();
   const canPlay = (c.status === "challenger_done" && c.opponent_id === userId) ||
                   (c.status === "pending" && c.challenger_id === userId);
+  const canDecline = !isChallenger && (c.status === "pending" || c.status === "challenger_done");
   const isCompleted = c.status === "completed";
   const myScore = isChallenger ? c.challenger_score : c.opponent_score;
   const theirScore = isChallenger ? c.opponent_score : c.challenger_score;
@@ -294,12 +307,34 @@ const ChallengeCard = ({
           </p>
         </div>
       ) : canPlay && onPlay ? (
-        <button
-          onClick={() => onPlay(c)}
-          className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-display font-medium hover:bg-primary/90 transition-colors"
-        >
-          {t("play")}
-        </button>
+        <div className="flex items-center gap-1.5 shrink-0">
+          {canDecline && onDecline && (
+            <button
+              onClick={() => onDecline(c)}
+              className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+              title={t("decline")}
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+          <button
+            onClick={() => onPlay(c)}
+            className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-display font-medium hover:bg-primary/90 transition-colors"
+          >
+            {t("play")}
+          </button>
+        </div>
+      ) : canDecline && onDecline ? (
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button
+            onClick={() => onDecline(c)}
+            className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+            title={t("decline")}
+          >
+            <X className="w-4 h-4" />
+          </button>
+          <span className="text-[10px] text-muted-foreground">{t("waiting")}</span>
+        </div>
       ) : (
         <span className="text-[10px] text-muted-foreground">{t("waiting")}</span>
       )}
