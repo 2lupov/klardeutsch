@@ -10,7 +10,8 @@ import CategorySelector from "@/components/CategorySelector";
 import Flashcard from "@/components/Flashcard";
 import Quiz from "@/components/Quiz";
 import ReadingExercise from "@/components/ReadingExercise";
-import { ArrowLeft, LogOut } from "lucide-react";
+import { ArrowLeft, LogOut, User } from "lucide-react";
+import { Link } from "react-router-dom";
 
 type Category = "vocabulary" | "grammar" | "reading";
 type Screen = "levels" | "categories" | "exercise";
@@ -157,13 +158,22 @@ const Index = () => {
           <span className="text-xs text-muted-foreground font-display tracking-wider">
             KLAR · Deutsch lernen
           </span>
-          <button
-            onClick={signOut}
-            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            {t("signOut")}
-          </button>
+          <div className="flex items-center gap-3">
+            <Link
+              to="/profile"
+              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <User className="w-3.5 h-3.5" />
+              {t("myProfile")}
+            </Link>
+            <button
+              onClick={signOut}
+              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              {t("signOut")}
+            </button>
+          </div>
         </div>
       </div>
     </div>
