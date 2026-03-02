@@ -207,7 +207,7 @@ const Challenges = () => {
             {myTurn.length > 0 && (
               <Section title="Ваш ход" icon={<Swords className="w-4 h-4 text-primary" />}>
                 {myTurn.map((c) => (
-                  <ChallengeCard key={c.id} challenge={c} userId={user.id} onPlay={handlePlay} t={t} />
+                  <ChallengeCard key={c.id} challenge={c} userId={user.id} onPlay={handlePlay} onDecline={handleDecline} t={t} />
                 ))}
               </Section>
             )}
@@ -277,7 +277,7 @@ const ChallengeCard = ({
   const initials = (opponentName ?? "?").slice(0, 2).toUpperCase();
   const canPlay = (c.status === "challenger_done" && c.opponent_id === userId) ||
                   (c.status === "pending" && c.challenger_id === userId);
-  const canDecline = !isChallenger && (c.status === "pending" || c.status === "challenger_done");
+  const canDelete = c.status !== "completed";
   const isCompleted = c.status === "completed";
   const myScore = isChallenger ? c.challenger_score : c.opponent_score;
   const theirScore = isChallenger ? c.opponent_score : c.challenger_score;
@@ -308,7 +308,7 @@ const ChallengeCard = ({
         </div>
       ) : canPlay && onPlay ? (
         <div className="flex items-center gap-1.5 shrink-0">
-          {canDecline && onDecline && (
+          {canDelete && onDecline && (
             <button
               onClick={() => onDecline(c)}
               className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
@@ -324,7 +324,7 @@ const ChallengeCard = ({
             {t("play")}
           </button>
         </div>
-      ) : canDecline && onDecline ? (
+      ) : canDelete && onDecline ? (
         <div className="flex items-center gap-1.5 shrink-0">
           <button
             onClick={() => onDecline(c)}
