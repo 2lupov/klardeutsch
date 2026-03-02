@@ -16,7 +16,7 @@ const AppLayout = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-[100dvh] bg-background flex items-center justify-center">
         <span className="text-muted-foreground animate-pulse font-display">KLAR</span>
       </div>
     );
@@ -26,7 +26,7 @@ const AppLayout = () => {
 
   if (isMobile) {
     return (
-      <div className="min-h-screen bg-background flex flex-col pb-14">
+      <div className="min-h-[100dvh] bg-background flex flex-col pb-14">
         <div className="flex-1">
           <Outlet />
         </div>
@@ -37,7 +37,7 @@ const AppLayout = () => {
 
   // Desktop layout
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-[100dvh] bg-background flex">
       <DesktopSidebar />
       <main className="flex-1 overflow-y-auto">
         <Outlet />
