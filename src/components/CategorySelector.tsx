@@ -1,5 +1,6 @@
 import { Level } from "@/data/lessons";
 import { BookOpen, Languages, FileText, ArrowLeft } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type Category = "vocabulary" | "grammar" | "reading";
 
@@ -9,13 +10,15 @@ interface CategorySelectorProps {
   onBack: () => void;
 }
 
-const categories: { key: Category; label: string; sublabel: string; icon: React.ReactNode }[] = [
-  { key: "vocabulary", label: "Wortschatz", sublabel: "Словарный запас", icon: <Languages className="w-6 h-6" /> },
-  { key: "grammar", label: "Grammatik", sublabel: "Грамматика", icon: <BookOpen className="w-6 h-6" /> },
-  { key: "reading", label: "Lesen", sublabel: "Чтение", icon: <FileText className="w-6 h-6" /> },
-];
-
 const CategorySelector = ({ level, onSelect, onBack }: CategorySelectorProps) => {
+  const { t } = useLanguage();
+
+  const categories: { key: Category; label: string; sublabel: string; icon: React.ReactNode }[] = [
+    { key: "vocabulary", label: "Wortschatz", sublabel: t("vocabSublabel"), icon: <Languages className="w-6 h-6" /> },
+    { key: "grammar", label: "Grammatik", sublabel: t("grammarSublabel"), icon: <BookOpen className="w-6 h-6" /> },
+    { key: "reading", label: "Lesen", sublabel: t("readingSublabel"), icon: <FileText className="w-6 h-6" /> },
+  ];
+
   return (
     <div className="flex flex-col gap-6 animate-slide-up">
       <button
@@ -23,12 +26,12 @@ const CategorySelector = ({ level, onSelect, onBack }: CategorySelectorProps) =>
         className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors self-start"
       >
         <ArrowLeft className="w-4 h-4" />
-        Назад
+        {t("back")}
       </button>
 
       <div>
-        <h2 className="text-2xl font-display font-bold">Уровень {level}</h2>
-        <p className="text-muted-foreground mt-1">Выберите категорию</p>
+        <h2 className="text-2xl font-display font-bold">{t("levelLabel")} {level}</h2>
+        <p className="text-muted-foreground mt-1">{t("chooseCategory")}</p>
       </div>
 
       <div className="flex flex-col gap-3">

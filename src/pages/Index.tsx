@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Level, CategoryData } from "@/data/lessons";
 import { fetchLevelData } from "@/hooks/useLessons";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useProgress } from "@/hooks/useProgress";
 import LevelSelector from "@/components/LevelSelector";
 import CategorySelector from "@/components/CategorySelector";
@@ -22,6 +23,7 @@ const Index = () => {
   const [dataLoading, setDataLoading] = useState(false);
   const { user, loading, signOut } = useAuth();
   const { saveProgress } = useProgress();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,7 +32,6 @@ const Index = () => {
     }
   }, [user, loading, navigate]);
 
-  // Load level data from DB when level changes
   useEffect(() => {
     if (screen !== "levels") {
       setDataLoading(true);
@@ -44,7 +45,7 @@ const Index = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <span className="text-muted-foreground">Загрузка...</span>
+        <span className="text-muted-foreground">{t("loading")}</span>
       </div>
     );
   }
@@ -83,7 +84,7 @@ const Index = () => {
 
   const renderExercise = () => {
     if (dataLoading || !data) {
-      return <p className="text-muted-foreground text-center">Загрузка...</p>;
+      return <p className="text-muted-foreground text-center">{t("loading")}</p>;
     }
     switch (category) {
       case "vocabulary":
@@ -119,7 +120,7 @@ const Index = () => {
             className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
-            Назад
+            {t("back")}
           </button>
         )}
 
@@ -140,7 +141,7 @@ const Index = () => {
             className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
             <LogOut className="w-3.5 h-3.5" />
-            Выйти
+            {t("signOut")}
           </button>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { GrammarQuestion } from "@/data/lessons";
 import { CheckCircle2, XCircle, ArrowRight } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface QuizProps {
   questions: GrammarQuestion[];
@@ -12,6 +13,7 @@ const Quiz = ({ questions, onComplete }: QuizProps) => {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [score, setScore] = useState(0);
   const [showResult, setShowResult] = useState(false);
+  const { t } = useLanguage();
 
   const q = questions[currentIndex];
   const progress = ((currentIndex + 1) / questions.length) * 100;
@@ -43,16 +45,16 @@ const Quiz = ({ questions, onComplete }: QuizProps) => {
           <span className="text-3xl font-display font-bold text-primary">{percentage}%</span>
         </div>
         <h2 className="text-xl font-display font-bold">
-          {percentage >= 70 ? "Отлично! 🎉" : percentage >= 40 ? "Неплохо! 💪" : "Попробуйте ещё раз 📖"}
+          {percentage >= 70 ? t("excellent") : percentage >= 40 ? t("notBad") : t("tryAgain")}
         </h2>
         <p className="text-muted-foreground">
-          {score} из {questions.length} правильных ответов
+          {score} {t("of")} {questions.length} {t("correctAnswers")}
         </p>
         <button
           onClick={() => onComplete(score)}
           className="px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold glow-yellow"
         >
-          Продолжить
+          {t("continue")}
         </button>
       </div>
     );
@@ -62,7 +64,7 @@ const Quiz = ({ questions, onComplete }: QuizProps) => {
     <div className="flex flex-col gap-6 animate-slide-up">
       <div className="w-full">
         <div className="flex justify-between text-sm text-muted-foreground mb-2">
-          <span>Вопрос {currentIndex + 1} / {questions.length}</span>
+          <span>{t("question")} {currentIndex + 1} / {questions.length}</span>
           <span>{score} ✓</span>
         </div>
         <div className="progress-bar">
@@ -116,7 +118,7 @@ const Quiz = ({ questions, onComplete }: QuizProps) => {
           onClick={handleNext}
           className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold glow-yellow transition-all"
         >
-          {currentIndex < questions.length - 1 ? "Далее" : "Результаты"}
+          {currentIndex < questions.length - 1 ? t("next") : t("results")}
           <ArrowRight className="w-4 h-4" />
         </button>
       )}

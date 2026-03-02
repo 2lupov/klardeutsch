@@ -1,24 +1,31 @@
 import { Level } from "@/data/lessons";
+import { useLanguage } from "@/contexts/LanguageContext";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 interface LevelSelectorProps {
   onSelect: (level: Level) => void;
 }
 
-const levels: { level: Level; description: string; emoji: string }[] = [
-  { level: "A1", description: "Начальный", emoji: "🌱" },
-  { level: "A2", description: "Элементарный", emoji: "🌿" },
-  { level: "B1", description: "Средний", emoji: "🌳" },
-  { level: "B2", description: "Выше среднего", emoji: "🏔️" },
-];
-
 const LevelSelector = ({ onSelect }: LevelSelectorProps) => {
+  const { t } = useLanguage();
+
+  const levels: { level: Level; description: string; emoji: string }[] = [
+    { level: "A1", description: t("levelA1"), emoji: "🌱" },
+    { level: "A2", description: t("levelA2"), emoji: "🌿" },
+    { level: "B1", description: t("levelB1"), emoji: "🌳" },
+    { level: "B2", description: t("levelB2"), emoji: "🏔️" },
+  ];
+
   return (
     <div className="flex flex-col gap-6 animate-slide-up">
       <div className="text-center">
+        <div className="flex justify-end mb-2">
+          <LanguageSwitcher />
+        </div>
         <h1 className="text-4xl font-display font-bold tracking-tight">
           <span className="text-gradient">KLAR</span>
         </h1>
-        <p className="text-muted-foreground mt-2">Немецкий язык — ясно и просто</p>
+        <p className="text-muted-foreground mt-2">{t("appSubtitle")}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-3 mt-4">

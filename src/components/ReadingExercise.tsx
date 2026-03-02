@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ReadingText } from "@/data/lessons";
 import Quiz from "./Quiz";
 import { BookOpen } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ReadingExerciseProps {
   readings: ReadingText[];
@@ -11,6 +12,7 @@ interface ReadingExerciseProps {
 const ReadingExercise = ({ readings, onComplete }: ReadingExerciseProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showQuestions, setShowQuestions] = useState(false);
+  const { t } = useLanguage();
 
   const reading = readings[currentIndex];
 
@@ -44,7 +46,7 @@ const ReadingExercise = ({ readings, onComplete }: ReadingExerciseProps) => {
         onClick={() => setShowQuestions(true)}
         className="px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold glow-yellow"
       >
-        Перейти к вопросам →
+        {t("goToQuestions")}
       </button>
     </div>
   );
