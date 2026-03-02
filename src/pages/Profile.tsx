@@ -5,7 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { usePlatform } from "@/hooks/usePlatform";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { BookOpen, Brain, Flame, RotateCcw, TrendingUp, Calendar, LogOut, Camera, Pencil, Check, X, Coins, Trophy, Music, ArrowLeft, ChevronRight, Award } from "lucide-react";
+import { BookOpen, Brain, Flame, RotateCcw, TrendingUp, Calendar, LogOut, Camera, Pencil, Check, X, Coins, Trophy, ArrowLeft, ChevronRight, Award, Bell, Send, Unlink2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useCoins } from "@/hooks/useCoins";
 import Achievements, { type AchievementStats } from "@/components/Achievements";
@@ -26,9 +26,10 @@ interface ProgressRow {
 interface ProfileData {
   display_name: string | null;
   avatar_url: string | null;
+  telegram_chat_id: number | null;
 }
 
-type ProfileScreen = "main" | "achievements" | "activity" | "mistakes" | "leaderboard";
+type ProfileScreen = "main" | "achievements" | "activity" | "mistakes" | "leaderboard" | "notifications";
 
 const Profile = () => {
   const { user, signOut } = useAuth();
@@ -45,7 +46,7 @@ const Profile = () => {
   const [customWordsCount, setCustomWordsCount] = useState(0);
   const [savedWordsCount, setSavedWordsCount] = useState(0);
   const [fetching, setFetching] = useState(true);
-  const [profile, setProfile] = useState<ProfileData>({ display_name: null, avatar_url: null });
+  const [profile, setProfile] = useState<ProfileData>({ display_name: null, avatar_url: null, telegram_chat_id: null });
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -56,7 +57,7 @@ const Profile = () => {
       const [{ data: prog }, { count }, { data: prof }, { count: customCount }, { count: savedCount }] = await Promise.all([
         supabase.from("user_progress").select("*").eq("user_id", user.id),
         supabase.from("vocab_cards").select("*", { count: "exact", head: true }),
-        supabase.from("profiles").select("display_name, avatar_url").eq("user_id", user.id).single(),
+        supabase.from("profiles").select("display_name, avatar_url, telegram_chat_id").eq("user_id", user.id).single(),
         supabase.from("custom_words").select("*", { count: "exact", head: true }).eq("user_id", user.id),
         supabase.from("saved_words").select("*", { count: "exact", head: true }).eq("user_id", user.id),
       ]);
@@ -64,7 +65,7 @@ const Profile = () => {
       setTotalCards(count ?? 0);
       setCustomWordsCount(customCount ?? 0);
       setSavedWordsCount(savedCount ?? 0);
-      if (prof) setProfile({ display_name: prof.display_name, avatar_url: prof.avatar_url });
+      if (prof) setProfile({ display_name: prof.display_name, avatar_url: prof.avatar_url, telegram_chat_id: (prof as any).telegram_chat_id ?? null });
       setFetching(false);
     };
     load();
@@ -197,6 +198,78 @@ const Profile = () => {
       default: return "";
     }
   };
+
+  // Sub-screen: Notifications
+  if (screen === "notifications") {
+    const botUsername = "KlarDeutschBot"; // Replace with your actual bot username
+    const deepLink = `https://t.me/${botUsername}?start=${user.id}`;
+
+    const handleUnlink = async () => {
+      await supabase
+        .from("profiles")
+        .update({ telegram_chat_id: null } as any)
+        .eq("user_id", user.id);
+      setProfile((p) => ({ ...p, telegram_chat_id: null }));
+      toast({ title: t("telegramUnlinked") });
+    };
+
+    return (
+      <div className={`w-full mx-auto px-4 py-4 h-full flex flex-col ${isMobile ? "max-w-md" : "max-w-2xl"}`}>
+        <button
+          onClick={() => setScreen("main")}
+          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          {t("back")}
+        </button>
+        <h2 className="font-display text-lg font-bold text-foreground mb-3 flex items-center gap-2">
+          <Bell className="w-5 h-5 text-primary" />
+          {t("notificationsTitle")}
+        </h2>
+
+        <section className="glass-card p-5">
+          <div className="flex items-center gap-3 mb-3">
+            <Send className="w-5 h-5 text-[#2AABEE]" />
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-foreground">Telegram</p>
+              <p className="text-xs text-muted-foreground">{t("telegramLinkDesc")}</p>
+            </div>
+          </div>
+
+          {profile.telegram_chat_id ? (
+            <div className="flex items-center justify-between p-3 rounded-lg bg-primary/5 border border-primary/10">
+              <span className="text-sm text-foreground">{t("telegramLinked")}</span>
+              <button
+                onClick={handleUnlink}
+                className="flex items-center gap-1 text-xs text-destructive hover:text-destructive/80 transition-colors"
+              >
+                <Unlink2 className="w-3.5 h-3.5" />
+                {t("unlinkTelegram")}
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-xs text-muted-foreground">
+                {t("telegramNotLinked")}
+              </p>
+              <a
+                href={deepLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-[#2AABEE] text-white text-sm font-semibold hover:bg-[#229ED9] transition-colors"
+              >
+                <Send className="w-4 h-4" />
+                {t("openBot")}
+              </a>
+              <p className="text-[11px] text-muted-foreground/60 text-center">
+                Нажми /start в боте — и уведомления подключатся автоматически
+              </p>
+            </div>
+          )}
+        </section>
+      </div>
+    );
+  }
 
   // Sub-screen: Leaderboard
   if (screen === "leaderboard") {
@@ -416,6 +489,12 @@ const Profile = () => {
           label={t("mistakesSection")}
           badge={weakAreas.length > 0 ? weakAreas.length : undefined}
           onClick={() => setScreen("mistakes")}
+        />
+        <NavButton
+          icon={<Bell className="w-4 h-4 text-[#2AABEE]" />}
+          label={t("notificationsTitle")}
+          subtitle={profile.telegram_chat_id ? "Telegram ✅" : undefined}
+          onClick={() => setScreen("notifications")}
         />
       </div>
 
