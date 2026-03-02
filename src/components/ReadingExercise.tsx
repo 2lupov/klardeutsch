@@ -7,9 +7,10 @@ import { useLanguage } from "@/contexts/LanguageContext";
 interface ReadingExerciseProps {
   readings: ReadingText[];
   onComplete: () => void;
+  level?: string;
 }
 
-const ReadingExercise = ({ readings, onComplete }: ReadingExerciseProps) => {
+const ReadingExercise = ({ readings, onComplete, level = "A1" }: ReadingExerciseProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showQuestions, setShowQuestions] = useState(false);
   const { t } = useLanguage();
@@ -20,6 +21,8 @@ const ReadingExercise = ({ readings, onComplete }: ReadingExerciseProps) => {
     return (
       <Quiz
         questions={reading.questions}
+        level={level}
+        category="reading"
         onComplete={() => {
           if (currentIndex < readings.length - 1) {
             setCurrentIndex((i) => i + 1);
