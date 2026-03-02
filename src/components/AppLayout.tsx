@@ -26,8 +26,8 @@ const AppLayout = () => {
 
   if (isMobile) {
     return (
-      <div className="h-[100dvh] bg-background flex flex-col pb-24 overflow-hidden">
-        <div className="flex-1 overflow-y-auto overscroll-none">
+      <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
+        <div className="flex-1 overflow-y-auto overscroll-none pb-14">
           <Outlet />
         </div>
         <MobileBottomNav />
@@ -37,7 +37,7 @@ const AppLayout = () => {
 
   // Desktop layout
   return (
-    <div className="min-h-[100dvh] bg-background flex">
+    <div className="h-[100dvh] bg-background flex overflow-hidden">
       <DesktopSidebar />
       <main className="flex-1 overflow-y-auto">
         <Outlet />

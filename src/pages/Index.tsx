@@ -158,16 +158,16 @@ const Index = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-full">
+    <div className={`flex flex-col ${isMobile ? "min-h-full" : "h-full"}`}>
       {screen === "exercise" && (
         <div className="fog-overlay" style={{ "--clarity": clarity } as React.CSSProperties} />
       )}
 
-      <div className={`flex-1 w-full mx-auto px-4 relative z-10 flex flex-col items-center justify-center ${isMobile ? "max-w-md py-4" : "max-w-3xl py-8"}`}>
+      <div className={`flex-1 w-full mx-auto px-4 relative z-10 flex flex-col items-center justify-center ${isMobile ? "max-w-md py-4" : "max-w-4xl py-4"}`}>
         {screen === "exercise" && (
           <button
             onClick={handleBack}
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6"
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
             {t("back")}
@@ -177,7 +177,7 @@ const Index = () => {
         {screen === "levels" && (
           <>
             <LevelSelector onSelect={handleLevelSelect} />
-            <div className={`w-full mt-4 ${isMobile ? "max-w-md" : "max-w-2xl"} mx-auto`}>
+            <div className={`w-full mt-3 ${isMobile ? "max-w-md" : "max-w-2xl"} mx-auto`}>
               <DailyChallenge />
             </div>
           </>
