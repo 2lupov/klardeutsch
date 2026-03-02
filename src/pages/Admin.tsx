@@ -69,7 +69,7 @@ const Admin = () => {
   }
 
   return (
-    <div className="h-[100dvh] bg-background overflow-y-auto">
+    <div className="h-[100dvh] bg-background overflow-y-auto" onFocus={(e) => { const t = e.target as HTMLElement; if (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA') (t as HTMLInputElement).select(); }}>
       <div className="w-full max-w-2xl mx-auto px-4 py-6 pb-12">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-display font-bold text-gradient">{t("adminPanel")}</h1>
