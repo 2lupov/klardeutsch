@@ -14,6 +14,7 @@ import Profile from "./pages/Profile";
 import Dictionary from "./pages/Dictionary";
 import Statistics from "./pages/Statistics";
 import Shop from "./pages/Shop";
+import Challenges from "./pages/Challenges";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,6 +38,7 @@ const App = () => (
                 <Route path="/dictionary" element={<Dictionary />} />
                 <Route path="/stats" element={<Statistics />} />
                 <Route path="/shop" element={<Shop />} />
+                <Route path="/challenges" element={<Challenges />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>

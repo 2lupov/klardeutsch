@@ -29,6 +29,60 @@ export type Database = {
         }
         Relationships: []
       }
+      challenges: {
+        Row: {
+          challenge_type: string
+          challenger_answers: Json | null
+          challenger_id: string
+          challenger_score: number
+          created_at: string
+          id: string
+          level: string
+          opponent_answers: Json | null
+          opponent_id: string
+          opponent_score: number
+          questions: Json
+          status: string
+          updated_at: string
+          winner_id: string | null
+          xp_reward: number
+        }
+        Insert: {
+          challenge_type?: string
+          challenger_answers?: Json | null
+          challenger_id: string
+          challenger_score?: number
+          created_at?: string
+          id?: string
+          level?: string
+          opponent_answers?: Json | null
+          opponent_id: string
+          opponent_score?: number
+          questions?: Json
+          status?: string
+          updated_at?: string
+          winner_id?: string | null
+          xp_reward?: number
+        }
+        Update: {
+          challenge_type?: string
+          challenger_answers?: Json | null
+          challenger_id?: string
+          challenger_score?: number
+          created_at?: string
+          id?: string
+          level?: string
+          opponent_answers?: Json | null
+          opponent_id?: string
+          opponent_score?: number
+          questions?: Json
+          status?: string
+          updated_at?: string
+          winner_id?: string | null
+          xp_reward?: number
+        }
+        Relationships: []
+      }
       coin_transactions: {
         Row: {
           amount: number
