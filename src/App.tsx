@@ -11,6 +11,7 @@ import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
 import Profile from "./pages/Profile";
 import Dictionary from "./pages/Dictionary";
+import Statistics from "./pages/Statistics";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/dictionary" element={<Dictionary />} />
+                <Route path="/stats" element={<Statistics />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>

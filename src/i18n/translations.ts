@@ -153,6 +153,15 @@ const translations = {
   wordOfDay: { ru: "Слово дня", uk: "Слово дня" },
   miniQuiz: { ru: "Мини-квиз", uk: "Міні-квіз" },
   dailyComplete: { ru: "Задание дня выполнено! ✨", uk: "Завдання дня виконано! ✨" },
+
+  // Statistics
+  statsTitle: { ru: "Статистика", uk: "Статистика" },
+  statsActivity: { ru: "Активность за 14 дней", uk: "Активність за 14 днів" },
+  statsByCategory: { ru: "По категориям", uk: "За категоріями" },
+  statsByLevel: { ru: "Прогресс по уровням", uk: "Прогрес за рівнями" },
+  statsAvgScore: { ru: "Ср. балл", uk: "Сер. бал" },
+  statsNoData: { ru: "Пока нет данных — начните заниматься!", uk: "Поки немає даних — почніть займатися!" },
+  navStats: { ru: "Статистика", uk: "Статистика" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;
