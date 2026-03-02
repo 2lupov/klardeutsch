@@ -7,3 +7,5 @@ project_id = "jqqsszwbbxvevebmebfm"
     verify_jwt = false
   [functions.telegram-reminders]
     verify_jwt = false
+  [functions.telegram-webhook]
+    verify_jwt = false
