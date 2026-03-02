@@ -102,9 +102,9 @@ const Profile = () => {
   );
 
   const achievementStats: AchievementStats = useMemo(() => {
-    const levels = ["A1", "A2", "B1", "B2"];
+    const levels = ["A1", "A2", "B1", "B2", "C1"];
     const levelsCompleted = levels.filter((lvl) => {
-      const cats = ["vocabulary", "grammar", "reading"];
+      const cats = ["vocabulary", "grammar", "reading", "listening"];
       return cats.every((cat) => progress.some((p) => p.level === lvl && p.category === cat && p.completed));
     }).length;
 

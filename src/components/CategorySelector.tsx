@@ -1,8 +1,8 @@
 import { Level } from "@/data/lessons";
-import { BookOpen, Languages, FileText, ArrowLeft } from "lucide-react";
+import { BookOpen, Languages, FileText, Headphones, ArrowLeft } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-type Category = "vocabulary" | "grammar" | "reading";
+type Category = "vocabulary" | "grammar" | "reading" | "listening";
 
 interface CategorySelectorProps {
   level: Level;
@@ -17,6 +17,7 @@ const CategorySelector = ({ level, onSelect, onBack }: CategorySelectorProps) =>
     { key: "vocabulary", label: "Wortschatz", sublabel: t("vocabSublabel"), icon: <Languages className="w-6 h-6" /> },
     { key: "grammar", label: "Grammatik", sublabel: t("grammarSublabel"), icon: <BookOpen className="w-6 h-6" /> },
     { key: "reading", label: "Lesen", sublabel: t("readingSublabel"), icon: <FileText className="w-6 h-6" /> },
+    { key: "listening", label: "Hören", sublabel: t("listeningSublabel"), icon: <Headphones className="w-6 h-6" /> },
   ];
 
   return (

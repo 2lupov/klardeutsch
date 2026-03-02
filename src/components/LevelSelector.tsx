@@ -16,15 +16,17 @@ const LevelSelector = ({ onSelect }: LevelSelectorProps) => {
   const a2 = useLevelProgress("A2");
   const b1 = useLevelProgress("B1");
   const b2 = useLevelProgress("B2");
+  const c1 = useLevelProgress("C1");
 
-  const totalProgress = Math.round((a1.progress + a2.progress + b1.progress + b2.progress) / 4);
-  const allCompleted = a1.completed && a2.completed && b1.completed && b2.completed;
+  const totalProgress = Math.round((a1.progress + a2.progress + b1.progress + b2.progress + c1.progress) / 5);
+  const allCompleted = a1.completed && a2.completed && b1.completed && b2.completed && c1.completed;
 
   const levels: { level: Level; description: string; emoji: string; pct: number }[] = [
     { level: "A1", description: t("levelA1"), emoji: "🌱", pct: a1.progress },
     { level: "A2", description: t("levelA2"), emoji: "🌿", pct: a2.progress },
     { level: "B1", description: t("levelB1"), emoji: "🌳", pct: b1.progress },
     { level: "B2", description: t("levelB2"), emoji: "🏔️", pct: b2.progress },
+    { level: "C1", description: t("levelC1"), emoji: "🎓", pct: c1.progress },
   ];
 
   return (

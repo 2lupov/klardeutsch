@@ -182,6 +182,27 @@ const translations = {
   coinsLabel: { ru: "Монеты", uk: "Монети" },
   coinsEarned: { ru: "Получено монет", uk: "Отримано монет" },
   shopTab: { ru: "Магазин", uk: "Магазин" },
+
+  // Listening
+  listeningSublabel: { ru: "Аудирование", uk: "Аудіювання" },
+  listenChooseMode: { ru: "Прослушайте текст и выберите упражнение", uk: "Прослухайте текст і оберіть вправу" },
+  listenToText: { ru: "Прослушать текст", uk: "Прослухати текст" },
+  listenQuiz: { ru: "Вопросы", uk: "Питання" },
+  listenDictation: { ru: "Диктант", uk: "Диктант" },
+  listenSentences: { ru: "предложений", uk: "речень" },
+  listenPlaying: { ru: "Воспроизводится...", uk: "Відтворюється..." },
+  listenAgain: { ru: "Прослушать ещё раз", uk: "Прослухати ще раз" },
+  listenPlaySentence: { ru: "Прослушать предложение", uk: "Прослухати речення" },
+  listenTypeHeard: { ru: "Напишите то, что услышали:", uk: "Напишіть те, що почули:" },
+  listenTypePlaceholder: { ru: "Введите услышанное...", uk: "Введіть почуте..." },
+  listenCheck: { ru: "Проверить", uk: "Перевірити" },
+  listenCorrect: { ru: "Правильно! 🎉", uk: "Правильно! 🎉" },
+  listenWrong: { ru: "Неправильно", uk: "Неправильно" },
+  listenAnswer: { ru: "Правильный ответ", uk: "Правильна відповідь" },
+
+  // Levels
+  levelC1: { ru: "Продвинутый", uk: "Просунутий" },
+  listening: { ru: "Аудирование", uk: "Аудіювання" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;

@@ -8,6 +8,7 @@ const COIN_REWARDS: Record<string, number> = {
   vocabulary: 5,
   grammar: 10,
   reading: 15,
+  listening: 20,
 };
 
 export const useProgress = () => {
