@@ -13,7 +13,7 @@ interface UserEntry {
 }
 
 interface Props {
-  onCreated: () => void;
+  onCreated: (challenge?: any) => void;
 }
 
 const LEVELS = ["A1", "A2", "B1", "B2", "C1"];
@@ -60,11 +60,10 @@ const CreateChallenge = ({ onCreated }: Props) => {
       // Shuffle and pick ROUNDS
       const shuffled = data.sort(() => Math.random() - 0.5).slice(0, ROUNDS);
       return shuffled.map((card) => {
-        // Generate 3 wrong answers from remaining cards
         const others = data.filter((c) => c.id !== card.id).sort(() => Math.random() - 0.5).slice(0, 3);
         const options = [card.russian, ...others.map((o) => o.russian)].sort(() => Math.random() - 0.5);
         return {
-          question: `${card.article ? card.article + " " : ""}${card.german}`,
+          question: card.german,
           options,
           correct_index: options.indexOf(card.russian),
         };
@@ -95,7 +94,7 @@ const CreateChallenge = ({ onCreated }: Props) => {
       return;
     }
 
-    const { error } = await supabase.from("challenges").insert({
+    const { data: inserted, error } = await supabase.from("challenges").insert({
       challenger_id: user.id,
       opponent_id: selectedUser.user_id,
       challenge_type: type,
@@ -103,15 +102,15 @@ const CreateChallenge = ({ onCreated }: Props) => {
       status: "pending",
       questions,
       xp_reward: 50,
-    });
+    }).select().single();
 
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+    if (error || !inserted) {
+      toast({ title: "Error", description: error?.message ?? "Unknown error", variant: "destructive" });
       setCreating(false);
       return;
     }
 
-    onCreated();
+    onCreated(inserted);
   };
 
   return (
