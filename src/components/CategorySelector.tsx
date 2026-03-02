@@ -20,7 +20,7 @@ const CategorySelector = ({ level, onSelect, onBack }: CategorySelectorProps) =>
   ];
 
   return (
-    <div className="flex flex-col gap-4 animate-slide-up h-full justify-center">
+    <div className="flex flex-col gap-4 animate-slide-up w-full max-w-xl mx-auto h-full justify-center">
       <button
         onClick={onBack}
         className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors self-start"

@@ -28,23 +28,23 @@ const LevelSelector = ({ onSelect }: LevelSelectorProps) => {
   ];
 
   return (
-    <div className="flex flex-col gap-3 animate-slide-up h-full justify-center">
+    <div className="flex flex-col gap-4 animate-slide-up w-full max-w-2xl mx-auto h-full justify-center">
       <div className="text-center">
         <div className="flex justify-end mb-1">
           <LanguageSwitcher />
         </div>
-        <div className="flex justify-center mb-0.5">
+        <div className="flex justify-center mb-1">
           <KlarLogo progress={totalProgress} completed={allCompleted} />
         </div>
         <p className="text-muted-foreground text-sm mt-1">{t("appSubtitle")}</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-2.5 mt-2">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-3">
         {levels.map((item, i) => (
           <button
             key={item.level}
             onClick={() => onSelect(item.level)}
-            className="glass-card p-4 flex flex-col items-center gap-2 transition-all hover:border-primary/50 hover:bg-primary/5 group relative overflow-hidden"
+            className="glass-card p-5 flex flex-col items-center gap-2.5 transition-all hover:border-primary/50 hover:bg-primary/5 group relative overflow-hidden"
             style={{ animationDelay: `${i * 80}ms` }}
           >
             <div
@@ -54,7 +54,7 @@ const LevelSelector = ({ onSelect }: LevelSelectorProps) => {
                 background: "linear-gradient(90deg, hsl(var(--yellow-glow)), hsl(var(--yellow-soft)))",
               }}
             />
-            <span className="text-2xl animate-float" style={{ animationDelay: `${i * 200}ms` }}>
+            <span className="text-3xl animate-float" style={{ animationDelay: `${i * 200}ms` }}>
               {item.emoji}
             </span>
             <div className="text-center">
