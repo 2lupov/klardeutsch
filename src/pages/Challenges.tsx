@@ -100,7 +100,7 @@ const Challenges = () => {
   }, [user]);
 
   const pending = useMemo(() => challenges.filter((c) => c.opponent_id === user?.id && c.status === "challenger_done"), [challenges, user]);
-  const _myTurn = useMemo(() => challenges.filter((c) => c.challenger_id === user?.id && c.status === "pending"), [challenges, user]);
+  const myTurn = useMemo(() => challenges.filter((c) => c.challenger_id === user?.id && c.status === "pending"), [challenges, user]);
   const completed = useMemo(() => challenges.filter((c) => c.status === "completed"), [challenges]);
   const waiting = useMemo(() => challenges.filter((c) =>
     (c.challenger_id === user?.id && c.status === "challenger_done") ||
@@ -188,6 +188,15 @@ const Challenges = () => {
             {pending.length > 0 && (
               <Section title={t("incomingChallenges")} icon={<Swords className="w-4 h-4 text-primary" />}>
                 {pending.map((c) => (
+                  <ChallengeCard key={c.id} challenge={c} userId={user.id} onPlay={handlePlay} t={t} />
+                ))}
+              </Section>
+            )}
+
+            {/* My turn to play */}
+            {myTurn.length > 0 && (
+              <Section title="Ваш ход" icon={<Swords className="w-4 h-4 text-primary" />}>
+                {myTurn.map((c) => (
                   <ChallengeCard key={c.id} challenge={c} userId={user.id} onPlay={handlePlay} t={t} />
                 ))}
               </Section>
