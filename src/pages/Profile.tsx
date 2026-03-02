@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePlatform } from "@/hooks/usePlatform";
 import { supabase } from "@/integrations/supabase/client";
-import { BookOpen, Brain, Flame, RotateCcw, TrendingUp, Calendar } from "lucide-react";
+import { BookOpen, Brain, Flame, RotateCcw, TrendingUp, Calendar, LogOut } from "lucide-react";
 
 interface ProgressRow {
   level: string;
@@ -17,7 +17,7 @@ interface ProgressRow {
 }
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { t } = useLanguage();
   const { isMobile } = usePlatform();
   const navigate = useNavigate();
@@ -106,6 +106,17 @@ const Profile = () => {
 
   return (
     <div className={`w-full mx-auto px-4 py-6 ${isMobile ? "max-w-md" : "max-w-2xl"}`}>
+      {/* Mobile: sign out button */}
+      {isMobile && (
+        <button
+          onClick={signOut}
+          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors mb-4"
+        >
+          <LogOut className="w-3.5 h-3.5" />
+          {t("signOut")}
+        </button>
+      )}
+
       <h1 className="font-display text-2xl font-bold text-foreground mb-6">{t("profileTitle")}</h1>
 
       {/* Stat cards */}
