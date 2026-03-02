@@ -112,10 +112,23 @@ const Challenges = () => {
     setScreen("play");
   };
 
-  const handleChallengeCreated = () => {
-    setScreen("list");
-    loadChallenges();
-    toast({ title: t("challengeSent") });
+  const handleChallengeCreated = (challenge?: any) => {
+    if (challenge) {
+      // Auto-start playing the challenge immediately
+      const enriched: Challenge = {
+        ...challenge,
+        questions: challenge.questions ?? [],
+        challenger_answers: challenge.challenger_answers ?? [],
+        opponent_answers: challenge.opponent_answers ?? [],
+      };
+      setActiveChallenge(enriched);
+      setScreen("play");
+      toast({ title: t("challengeSent") });
+    } else {
+      setScreen("list");
+      loadChallenges();
+      toast({ title: t("challengeSent") });
+    }
   };
 
   const handlePlayFinished = () => {
