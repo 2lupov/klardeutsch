@@ -10,6 +10,7 @@ import CategorySelector from "@/components/CategorySelector";
 import Flashcard from "@/components/Flashcard";
 import Quiz from "@/components/Quiz";
 import ReadingExercise from "@/components/ReadingExercise";
+import DailyChallenge from "@/components/DailyChallenge";
 import { ArrowLeft } from "lucide-react";
 
 type Category = "vocabulary" | "grammar" | "reading";
@@ -127,7 +128,14 @@ const Index = () => {
           </button>
         )}
 
-        {screen === "levels" && <LevelSelector onSelect={handleLevelSelect} />}
+        {screen === "levels" && (
+          <>
+            <LevelSelector onSelect={handleLevelSelect} />
+            <div className={`w-full mt-4 ${isMobile ? "max-w-md" : "max-w-2xl"} mx-auto`}>
+              <DailyChallenge />
+            </div>
+          </>
+        )}
         {screen === "categories" && (
           <CategorySelector level={level} onSelect={handleCategorySelect} onBack={() => setScreen("levels")} />
         )}
