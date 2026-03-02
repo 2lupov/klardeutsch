@@ -1,8 +1,41 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { Send, ArrowLeft, Loader2, Sparkles } from "lucide-react";
+import { Send, ArrowLeft, Sparkles } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+
+/* ── Ambient Background ── */
+const AmbientBackground = () => (
+  <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+    <div
+      className="absolute w-[600px] h-[600px] rounded-full opacity-[0.07] blur-[120px]"
+      style={{
+        background: "hsl(var(--primary))",
+        top: "-10%",
+        right: "-10%",
+        animation: "ambient-drift-1 20s ease-in-out infinite",
+      }}
+    />
+    <div
+      className="absolute w-[500px] h-[500px] rounded-full opacity-[0.05] blur-[100px]"
+      style={{
+        background: "hsl(var(--primary))",
+        bottom: "5%",
+        left: "-8%",
+        animation: "ambient-drift-2 25s ease-in-out infinite",
+      }}
+    />
+    <div
+      className="absolute w-[300px] h-[300px] rounded-full opacity-[0.04] blur-[80px]"
+      style={{
+        background: "hsl(var(--primary))",
+        top: "40%",
+        left: "50%",
+        animation: "ambient-drift-3 18s ease-in-out infinite",
+      }}
+    />
+  </div>
+);
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -224,17 +257,22 @@ const Dialogues = () => {
 
   if (!selectedTopic) {
     return (
-      <TopicSelection
-        lang={lang}
-        selectedLevel={selectedLevel}
-        setSelectedLevel={setSelectedLevel}
-        onStart={startConversation}
-      />
+      <>
+        <AmbientBackground />
+        <TopicSelection
+          lang={lang}
+          selectedLevel={selectedLevel}
+          setSelectedLevel={setSelectedLevel}
+          onStart={startConversation}
+        />
+      </>
     );
   }
 
   return (
-    <div className="flex flex-col h-[calc(100dvh-8rem)] lg:h-[calc(100dvh-2rem)] animate-slide-up">
+    <>
+      <AmbientBackground />
+      <div className="flex flex-col h-[calc(100dvh-8rem)] lg:h-[calc(100dvh-2rem)] animate-slide-up">
       {/* Header */}
       <div className="flex items-center gap-3 pb-3 mb-1">
         <button
@@ -301,6 +339,7 @@ const Dialogues = () => {
         </form>
       </div>
     </div>
+    </>
   );
 };
 
