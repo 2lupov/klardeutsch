@@ -119,7 +119,7 @@ const ListeningEditor = ({ level }: { level: string }) => {
   if (loading) return <p className="text-muted-foreground">{t("loading")}</p>;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4" onFocus={(e) => { const t = e.target as HTMLElement; if (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA') (t as HTMLInputElement).select(); }}>
       {texts.map((txt) => (
       <div key={txt.id} className="glass-card p-4 flex flex-col gap-3">
           <div className="flex gap-2 items-start">

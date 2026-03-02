@@ -39,7 +39,7 @@ const ShopEditor = () => {
   if (loading) return <p className="text-muted-foreground">{t("loading")}</p>;
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3" onFocus={(e) => { const t = e.target as HTMLElement; if (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA') (t as HTMLInputElement).select(); }}>
       {items.map((item) => (
         <div key={item.id} className="glass-card p-4 flex flex-col gap-2">
           <div className="flex gap-2">
