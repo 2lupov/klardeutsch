@@ -20,7 +20,7 @@ const CategorySelector = ({ level, onSelect, onBack }: CategorySelectorProps) =>
   ];
 
   return (
-    <div className="flex flex-col gap-6 animate-slide-up">
+    <div className="flex flex-col gap-4 animate-slide-up h-full justify-center">
       <button
         onClick={onBack}
         className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors self-start"
@@ -30,23 +30,23 @@ const CategorySelector = ({ level, onSelect, onBack }: CategorySelectorProps) =>
       </button>
 
       <div>
-        <h2 className="text-2xl font-display font-bold">{t("levelLabel")} {level}</h2>
-        <p className="text-muted-foreground mt-1">{t("chooseCategory")}</p>
+        <h2 className="text-xl font-display font-bold">{t("levelLabel")} {level}</h2>
+        <p className="text-muted-foreground text-sm mt-0.5">{t("chooseCategory")}</p>
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2.5">
         {categories.map((cat) => (
           <button
             key={cat.key}
             onClick={() => onSelect(cat.key)}
-            className="glass-card p-5 flex items-center gap-4 text-left transition-all hover:border-primary/50 hover:bg-primary/5 group"
+            className="glass-card p-4 flex items-center gap-3 text-left transition-all hover:border-primary/50 hover:bg-primary/5 group"
           >
-            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary/20 transition-colors">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary/20 transition-colors shrink-0">
               {cat.icon}
             </div>
             <div>
-              <h3 className="font-display font-semibold text-lg">{cat.label}</h3>
-              <p className="text-sm text-muted-foreground">{cat.sublabel}</p>
+              <h3 className="font-display font-semibold text-base">{cat.label}</h3>
+              <p className="text-xs text-muted-foreground">{cat.sublabel}</p>
             </div>
           </button>
         ))}

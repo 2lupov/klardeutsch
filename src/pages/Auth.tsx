@@ -117,20 +117,20 @@ const Auth = () => {
 
   return (
     <div className="h-[100dvh] bg-background flex items-center justify-center px-4 overflow-hidden">
-      <div className="w-full max-w-sm animate-slide-up overflow-y-auto overscroll-none max-h-full py-6">
-        <div className="text-center mb-8">
-          <div className="flex justify-end mb-2">
+      <div className="w-full max-w-sm">
+        <div className="text-center mb-5">
+          <div className="flex justify-end mb-1">
             <LanguageSwitcher />
           </div>
-          <h1 className="text-4xl font-display font-bold tracking-tight">
+          <h1 className="text-3xl font-display font-bold tracking-tight">
             <span className="text-gradient">KLAR</span>
           </h1>
-          <p className="text-muted-foreground mt-2">
+          <p className="text-muted-foreground text-sm mt-1">
             {isLogin ? t("loginTitle") : t("signupTitle")}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="glass-card p-6 flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="glass-card p-5 flex flex-col gap-3">
           <input
             type="email"
             placeholder={t("email")}
@@ -171,7 +171,7 @@ const Auth = () => {
 
         <button
           onClick={startDemo}
-          className="w-full mt-4 px-6 py-3 rounded-xl border border-primary/30 bg-primary/5 text-primary font-semibold transition-all hover:bg-primary/10 hover:border-primary/50 flex items-center justify-center gap-2"
+          className="w-full mt-3 px-5 py-2.5 rounded-xl border border-primary/30 bg-primary/5 text-primary font-semibold text-sm transition-all hover:bg-primary/10 hover:border-primary/50 flex items-center justify-center gap-2"
         >
           <Sparkles className="w-4 h-4" />
           {t("tryDemo")}

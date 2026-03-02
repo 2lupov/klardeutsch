@@ -28,26 +28,25 @@ const LevelSelector = ({ onSelect }: LevelSelectorProps) => {
   ];
 
   return (
-    <div className="flex flex-col gap-6 animate-slide-up">
+    <div className="flex flex-col gap-3 animate-slide-up h-full justify-center">
       <div className="text-center">
-        <div className="flex justify-end mb-2">
+        <div className="flex justify-end mb-1">
           <LanguageSwitcher />
         </div>
-        <div className="flex justify-center mb-1">
+        <div className="flex justify-center mb-0.5">
           <KlarLogo progress={totalProgress} completed={allCompleted} />
         </div>
-        <p className="text-muted-foreground mt-2">{t("appSubtitle")}</p>
+        <p className="text-muted-foreground text-sm mt-1">{t("appSubtitle")}</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 mt-4">
+      <div className="grid grid-cols-2 gap-2.5 mt-2">
         {levels.map((item, i) => (
           <button
             key={item.level}
             onClick={() => onSelect(item.level)}
-            className="glass-card p-6 flex flex-col items-center gap-3 transition-all hover:border-primary/50 hover:bg-primary/5 group relative overflow-hidden"
+            className="glass-card p-4 flex flex-col items-center gap-2 transition-all hover:border-primary/50 hover:bg-primary/5 group relative overflow-hidden"
             style={{ animationDelay: `${i * 80}ms` }}
           >
-            {/* Mini progress bar inside each card */}
             <div
               className="absolute bottom-0 left-0 h-0.5 transition-all duration-700"
               style={{
@@ -55,16 +54,16 @@ const LevelSelector = ({ onSelect }: LevelSelectorProps) => {
                 background: "linear-gradient(90deg, hsl(var(--yellow-glow)), hsl(var(--yellow-soft)))",
               }}
             />
-            <span className="text-3xl animate-float" style={{ animationDelay: `${i * 200}ms` }}>
+            <span className="text-2xl animate-float" style={{ animationDelay: `${i * 200}ms` }}>
               {item.emoji}
             </span>
             <div className="text-center">
-              <h3 className="text-xl font-display font-bold text-primary group-hover:text-yellow-glow transition-colors">
+              <h3 className="text-lg font-display font-bold text-primary group-hover:text-yellow-glow transition-colors">
                 {item.level}
               </h3>
-              <p className="text-xs text-muted-foreground mt-1">{item.description}</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">{item.description}</p>
               {item.pct > 0 && (
-                <p className="text-[10px] text-primary/70 mt-1 font-medium">{item.pct}%</p>
+                <p className="text-[10px] text-primary/70 mt-0.5 font-medium">{item.pct}%</p>
               )}
             </div>
           </button>
