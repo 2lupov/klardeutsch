@@ -2,6 +2,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
 import { useCallback } from "react";
+import { toast } from "@/hooks/use-toast";
+
+const COIN_REWARDS: Record<string, number> = {
+  vocabulary: 5,
+  grammar: 10,
+  reading: 15,
+};
 
 export const useProgress = () => {
   const { user } = useAuth();
@@ -23,6 +30,17 @@ export const useProgress = () => {
           }],
           { onConflict: "user_id,level,category,exercise_id" }
         );
+
+      // Award coins on completion
+      if (completed) {
+        const coins = COIN_REWARDS[category] ?? 5;
+        await supabase.rpc("award_coins", {
+          p_user_id: user.id,
+          p_amount: coins,
+          p_reason: `${category}:${level}:${exerciseId}`,
+        });
+        toast({ title: `+${coins} 🪙` });
+      }
     },
     [user]
   );

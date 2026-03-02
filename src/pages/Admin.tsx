@@ -2,11 +2,12 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { ArrowLeft, Plus, Trash2, Save, Lock } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Save, Lock, ShoppingBag } from "lucide-react";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import ShopEditor from "@/components/admin/ShopEditor";
 
 type Level = "A1" | "A2" | "B1" | "B2";
-type Tab = "vocabulary" | "grammar" | "reading";
+type Tab = "vocabulary" | "grammar" | "reading" | "shop";
 
 const LEVELS: Level[] = ["A1", "A2", "B1", "B2"];
 
@@ -92,8 +93,8 @@ const Admin = () => {
         </div>
 
         {/* Tab selector */}
-        <div className="flex gap-2 mb-6">
-          {(["vocabulary", "grammar", "reading"] as Tab[]).map((tb) => (
+        <div className="flex gap-2 mb-6 flex-wrap">
+          {(["vocabulary", "grammar", "reading", "shop"] as Tab[]).map((tb) => (
             <button
               key={tb}
               onClick={() => setTab(tb)}
@@ -101,7 +102,7 @@ const Admin = () => {
                 tab === tb ? "bg-card border border-primary/50 text-foreground" : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              {tb === "vocabulary" ? t("vocabulary") : tb === "grammar" ? t("grammar") : t("reading")}
+              {tb === "vocabulary" ? t("vocabulary") : tb === "grammar" ? t("grammar") : tb === "reading" ? t("reading") : t("shopTab")}
             </button>
           ))}
         </div>
@@ -109,6 +110,7 @@ const Admin = () => {
         {tab === "vocabulary" && <VocabEditor level={level} />}
         {tab === "grammar" && <GrammarEditor level={level} />}
         {tab === "reading" && <ReadingEditor level={level} />}
+        {tab === "shop" && <ShopEditor />}
       </div>
     </div>
   );

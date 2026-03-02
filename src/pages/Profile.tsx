@@ -5,8 +5,9 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { usePlatform } from "@/hooks/usePlatform";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { BookOpen, Brain, Flame, RotateCcw, TrendingUp, Calendar, LogOut, Camera, Pencil, Check, X } from "lucide-react";
+import { BookOpen, Brain, Flame, RotateCcw, TrendingUp, Calendar, LogOut, Camera, Pencil, Check, X, Coins } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { useCoins } from "@/hooks/useCoins";
 import Achievements, { type AchievementStats } from "@/components/Achievements";
 
 interface ProgressRow {
@@ -28,6 +29,7 @@ const Profile = () => {
   const { user, signOut } = useAuth();
   const { t } = useLanguage();
   const { isMobile } = usePlatform();
+  const { balance } = useCoins();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -263,7 +265,8 @@ const Profile = () => {
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-3 gap-3 mb-8">
+      <div className="grid grid-cols-4 gap-3 mb-8">
+        <StatCard icon={<Coins className="w-5 h-5" />} value={balance} label={t("coinsLabel")} />
         <StatCard icon={<BookOpen className="w-5 h-5" />} value={wordsLearned} label={t("wordsLearned")} />
         <StatCard icon={<Brain className="w-5 h-5" />} value={completedLessons} label={t("lessonsCompleted")} />
         <StatCard icon={<Flame className="w-5 h-5" />} value={streak} label={t("streakDays")} />

@@ -162,6 +162,26 @@ const translations = {
   statsAvgScore: { ru: "Ср. балл", uk: "Сер. бал" },
   statsNoData: { ru: "Пока нет данных — начните заниматься!", uk: "Поки немає даних — почніть займатися!" },
   navStats: { ru: "Статистика", uk: "Статистика" },
+
+  // Shop & Coins
+  shopTitle: { ru: "Магазин", uk: "Магазин" },
+  shopSubtitle: { ru: "Обменяйте монеты на задания от автора", uk: "Обміняйте монети на завдання від автора" },
+  shopEmpty: { ru: "Пока товаров нет — загляните позже!", uk: "Поки товарів немає — загляньте пізніше!" },
+  shopPrice: { ru: "Цена", uk: "Ціна" },
+  shopDescription: { ru: "Описание товара", uk: "Опис товару" },
+  shopContent: { ru: "Контент (задание, текст — виден после покупки)", uk: "Контент (завдання, текст — видно після покупки)" },
+  shopAvailable: { ru: "Доступен", uk: "Доступний" },
+  shopAddItem: { ru: "Добавить товар", uk: "Додати товар" },
+  buyButton: { ru: "Купить", uk: "Купити" },
+  notEnoughCoins: { ru: "Не хватает монет", uk: "Не вистачає монет" },
+  alreadyPurchased: { ru: "Куплено", uk: "Куплено" },
+  purchaseSuccess: { ru: "Покупка совершена! 🎉", uk: "Покупку здійснено! 🎉" },
+  purchaseFailed: { ru: "Не удалось купить", uk: "Не вдалося купити" },
+  showContent: { ru: "Показать задание →", uk: "Показати завдання →" },
+  navShop: { ru: "Магазин", uk: "Магазин" },
+  coinsLabel: { ru: "Монеты", uk: "Монети" },
+  coinsEarned: { ru: "Получено монет", uk: "Отримано монет" },
+  shopTab: { ru: "Магазин", uk: "Магазин" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;
