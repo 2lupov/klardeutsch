@@ -244,6 +244,8 @@ const translations = {
   waiting: { ru: "Ожидание…", uk: "Очікування…" },
   navChallenges: { ru: "Дуэли", uk: "Дуелі" },
   navDialogues: { ru: "Диалоги", uk: "Діалоги" },
+  decline: { ru: "Отклонить", uk: "Відхилити" },
+  challengeDeclined: { ru: "Дуэль отклонена", uk: "Дуель відхилено" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;
