@@ -63,6 +63,9 @@
 
   html, body {
     overscroll-behavior: none;
+    overflow: hidden;
+    height: 100dvh;
+    height: -webkit-fill-available;
   }
 
   body {
