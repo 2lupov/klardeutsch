@@ -203,6 +203,8 @@ const translations = {
   // Levels
   levelC1: { ru: "Продвинутый", uk: "Просунутий" },
   listening: { ru: "Аудирование", uk: "Аудіювання" },
+  saveChanges: { ru: "Сохранить изменения", uk: "Зберегти зміни" },
+  saved: { ru: "Сохранено!", uk: "Збережено!" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;
