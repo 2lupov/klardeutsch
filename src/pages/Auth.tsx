@@ -12,6 +12,7 @@ const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [nickname, setNickname] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -67,13 +68,19 @@ const Auth = () => {
       if (error) setError(error.message);
       else navigate("/");
     } else {
-      const { error } = await supabase.auth.signUp({
+      const { data: signUpData, error } = await supabase.auth.signUp({
         email,
         password,
         options: { emailRedirectTo: window.location.origin },
       });
-      if (error) setError(error.message);
-      else setMessage(t("checkEmail"));
+      if (error) {
+        setError(error.message);
+      } else {
+        if (signUpData.user) {
+          await supabase.from("profiles").update({ display_name: nickname }).eq("user_id", signUpData.user.id);
+        }
+        setMessage(t("checkEmail"));
+      }
     }
     setLoading(false);
   };
@@ -151,6 +158,17 @@ const Auth = () => {
             required
             className="w-full px-4 py-3 rounded-xl bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:border-primary focus:outline-none transition-colors"
           />
+          {!isLogin && !forgotMode && (
+            <input
+              type="text"
+              placeholder={t("nickname") || "Никнейм"}
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
+              required
+              maxLength={20}
+              className="w-full px-4 py-3 rounded-xl bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:border-primary focus:outline-none transition-colors"
+            />
+          )}
           {!forgotMode && (
             <input
               type="password"
