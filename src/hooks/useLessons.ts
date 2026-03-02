@@ -66,7 +66,7 @@ export async function fetchLevelData(level: Level, topic?: string): Promise<Cate
 
   const [vocabRes, grammarRes, questionsRes, readingRes, listeningRes] = await Promise.all([
     vocabQuery.order("sort_order"),
-    grammarQuery.single(),
+    grammarQuery.limit(1),
     questionsQuery.order("sort_order"),
     readingQuery.order("sort_order"),
     listeningQuery.order("sort_order"),
@@ -80,7 +80,7 @@ export async function fetchLevelData(level: Level, topic?: string): Promise<Cate
     article: v.article ?? undefined,
   }));
 
-  const theory = grammarRes.data?.theory ?? "";
+  const theory = grammarRes.data?.[0]?.theory ?? "";
   const grammarQuestions: GrammarQuestion[] = (questionsRes.data ?? []).map((q) => ({
     id: q.id,
     question: q.question,
