@@ -5,7 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { usePlatform } from "@/hooks/usePlatform";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { BookOpen, Brain, Flame, RotateCcw, TrendingUp, Calendar, LogOut, Camera, Pencil, Check, X, Coins } from "lucide-react";
+import { BookOpen, Brain, Flame, RotateCcw, TrendingUp, Calendar, LogOut, Camera, Pencil, Check, X, Coins, Trophy, Music, ArrowLeft, ChevronRight } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useCoins } from "@/hooks/useCoins";
 import Achievements, { type AchievementStats } from "@/components/Achievements";
@@ -26,6 +26,8 @@ interface ProfileData {
   avatar_url: string | null;
 }
 
+type ProfileScreen = "main" | "achievements" | "activity" | "mistakes";
+
 const Profile = () => {
   const { user, signOut } = useAuth();
   const { t } = useLanguage();
@@ -34,6 +36,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [screen, setScreen] = useState<ProfileScreen>("main");
   const [progress, setProgress] = useState<ProgressRow[]>([]);
   const [totalCards, setTotalCards] = useState(0);
   const [customWordsCount, setCustomWordsCount] = useState(0);
@@ -127,26 +130,22 @@ const Profile = () => {
       difficultWordsReviewed: 0,
     };
   }, [progress, savedWordsCount, customWordsCount, completedLessons, streak]);
+
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
     setUploading(true);
     const ext = file.name.split(".").pop();
     const path = `${user.id}/avatar.${ext}`;
-
-    // Remove old avatar if exists
     await supabase.storage.from("avatars").remove([path]);
-
     const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
       setUploading(false);
       return;
     }
-
     const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
     const avatar_url = `${urlData.publicUrl}?t=${Date.now()}`;
-
     await supabase.from("profiles").update({ avatar_url }).eq("user_id", user.id);
     setProfile((p) => ({ ...p, avatar_url }));
     setUploading(false);
@@ -168,7 +167,7 @@ const Profile = () => {
 
   if (!user || fetching) {
     return (
-      <div className="flex items-center justify-center py-20">
+      <div className="flex items-center justify-center h-full">
         <span className="text-muted-foreground">{t("loading")}</span>
       </div>
     );
@@ -196,22 +195,124 @@ const Profile = () => {
     }
   };
 
+  // Sub-screen: Achievements
+  if (screen === "achievements") {
+    return (
+      <div className={`w-full mx-auto px-4 py-4 h-full flex flex-col ${isMobile ? "max-w-md" : "max-w-2xl"}`}>
+        <button
+          onClick={() => setScreen("main")}
+          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          {t("back")}
+        </button>
+        <div className="flex-1 overflow-y-auto">
+          <Achievements stats={achievementStats} />
+        </div>
+      </div>
+    );
+  }
+
+  // Sub-screen: Activity
+  if (screen === "activity") {
+    return (
+      <div className={`w-full mx-auto px-4 py-4 h-full flex flex-col ${isMobile ? "max-w-md" : "max-w-2xl"}`}>
+        <button
+          onClick={() => setScreen("main")}
+          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          {t("back")}
+        </button>
+        <div className="flex-1 overflow-y-auto">
+          <section className="glass-card p-5">
+            <h2 className="font-display text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-muted-foreground" />
+              {t("activityHistory")}
+            </h2>
+            {recentActivity.length > 0 ? (
+              <ul className="space-y-2">
+                {recentActivity.map((a, i) => (
+                  <li key={i} className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">{categoryLabel(a.category)} · {a.level}</span>
+                    <span className="text-xs text-muted-foreground/60">{new Date(a.updated_at).toLocaleDateString()}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground">{t("statsNoData")}</p>
+            )}
+          </section>
+
+          {recommendation && (
+            <section className="glass-card p-5 mt-4">
+              <h2 className="font-display text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-primary" />
+                {t("recommendationSection")}
+              </h2>
+              <p className="text-sm text-muted-foreground">{recommendationText(recommendation)}</p>
+            </section>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Sub-screen: Mistakes
+  if (screen === "mistakes") {
+    return (
+      <div className={`w-full mx-auto px-4 py-4 h-full flex flex-col ${isMobile ? "max-w-md" : "max-w-2xl"}`}>
+        <button
+          onClick={() => setScreen("main")}
+          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          {t("back")}
+        </button>
+        <div className="flex-1 overflow-y-auto">
+          <section className="glass-card p-5">
+            <h2 className="font-display text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+              <RotateCcw className="w-4 h-4 text-destructive" />
+              {t("mistakesSection")}
+            </h2>
+            {weakAreas.length > 0 ? (
+              <ul className="space-y-2">
+                {weakAreas.map((w, i) => (
+                  <li key={i} className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">{t("grammarSublabel")} · {w.level}</span>
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs text-gradient font-display font-semibold">{w.score}%</span>
+                      <button onClick={() => navigate("/")} className="text-xs text-primary hover:underline">{t("retry")}</button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground">Ошибок нет — отличная работа! 🎉</p>
+            )}
+          </section>
+        </div>
+      </div>
+    );
+  }
+
+  // Main profile screen
   return (
-    <div className={`w-full mx-auto px-4 py-6 ${isMobile ? "max-w-md" : "max-w-2xl"}`}>
+    <div className={`w-full mx-auto px-4 py-4 h-full flex flex-col ${isMobile ? "max-w-md" : "max-w-2xl"}`}>
       {isMobile && (
         <button
           onClick={signOut}
-          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors mb-4"
+          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors mb-3"
         >
           <LogOut className="w-3.5 h-3.5" />
           {t("signOut")}
         </button>
       )}
 
-      {/* Profile header with avatar */}
-      <div className="flex items-center gap-4 mb-6">
+      {/* Profile header */}
+      <div className="flex items-center gap-4 mb-4">
         <div className="relative group">
-          <Avatar className="w-16 h-16 border-2 border-primary/20">
+          <Avatar className="w-14 h-14 border-2 border-primary/20">
             {profile.avatar_url ? (
               <AvatarImage src={profile.avatar_url} alt={displayName} />
             ) : null}
@@ -226,13 +327,7 @@ const Profile = () => {
           >
             <Camera className="w-5 h-5 text-white" />
           </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleAvatarUpload}
-          />
+          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
         </div>
 
         <div className="flex-1 min-w-0">
@@ -266,81 +361,61 @@ const Profile = () => {
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-4 gap-3 mb-8">
-        <StatCard icon={<Coins className="w-5 h-5" />} value={balance} label={t("coinsLabel")} />
-        <StatCard icon={<BookOpen className="w-5 h-5" />} value={wordsLearned} label={t("wordsLearned")} />
-        <StatCard icon={<Brain className="w-5 h-5" />} value={completedLessons} label={t("lessonsCompleted")} />
-        <StatCard icon={<Flame className="w-5 h-5" />} value={streak} label={t("streakDays")} />
+      <div className="grid grid-cols-4 gap-2 mb-4">
+        <StatCard icon={<Coins className="w-4 h-4" />} value={balance} label={t("coinsLabel")} />
+        <StatCard icon={<BookOpen className="w-4 h-4" />} value={wordsLearned} label={t("wordsLearned")} />
+        <StatCard icon={<Brain className="w-4 h-4" />} value={completedLessons} label={t("lessonsCompleted")} />
+        <StatCard icon={<Flame className="w-4 h-4" />} value={streak} label={t("streakDays")} />
+      </div>
+
+      {/* Navigation buttons */}
+      <div className="flex flex-col gap-2 mb-4">
+        <NavButton
+          icon={<Trophy className="w-4 h-4 text-primary" />}
+          label={t("achievementsTitle")}
+          onClick={() => setScreen("achievements")}
+        />
+        <NavButton
+          icon={<Calendar className="w-4 h-4 text-muted-foreground" />}
+          label={t("activityHistory")}
+          onClick={() => setScreen("activity")}
+        />
+        <NavButton
+          icon={<RotateCcw className="w-4 h-4 text-destructive" />}
+          label={t("mistakesSection")}
+          badge={weakAreas.length > 0 ? weakAreas.length : undefined}
+          onClick={() => setScreen("mistakes")}
+        />
       </div>
 
       {/* Lofi Radio */}
-      <div className="mb-6">
+      <div className="mt-auto">
         <LofiRadio />
-      </div>
-
-      {/* Achievements */}
-      <div className="mb-6">
-        <Achievements stats={achievementStats} />
-      </div>
-
-      <div className={isMobile ? "space-y-5" : "grid grid-cols-2 gap-5"}>
-        {weakAreas.length > 0 && (
-          <section className="glass-card p-5 animate-slide-up">
-            <h2 className="font-display text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-              <RotateCcw className="w-4 h-4 text-destructive" />
-              {t("mistakesSection")}
-            </h2>
-            <ul className="space-y-2">
-              {weakAreas.map((w, i) => (
-                <li key={i} className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">{t("grammarSublabel")} · {w.level}</span>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs text-gradient font-display font-semibold">{w.score}%</span>
-                    <button onClick={() => navigate("/")} className="text-xs text-primary hover:underline">{t("retry")}</button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
-
-        {recommendation && (
-          <section className="glass-card p-5 animate-slide-up" style={{ animationDelay: "0.1s" }}>
-            <h2 className="font-display text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-primary" />
-              {t("recommendationSection")}
-            </h2>
-            <p className="text-sm text-muted-foreground">{recommendationText(recommendation)}</p>
-          </section>
-        )}
-
-        {recentActivity.length > 0 && (
-          <section className={`glass-card p-5 animate-slide-up ${!isMobile ? "col-span-2" : ""}`} style={{ animationDelay: "0.2s" }}>
-            <h2 className="font-display text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-muted-foreground" />
-              {t("activityHistory")}
-            </h2>
-            <ul className="space-y-2">
-              {recentActivity.map((a, i) => (
-                <li key={i} className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">{categoryLabel(a.category)} · {a.level}</span>
-                  <span className="text-xs text-muted-foreground/60">{new Date(a.updated_at).toLocaleDateString()}</span>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
       </div>
     </div>
   );
 };
 
 const StatCard = ({ icon, value, label }: { icon: React.ReactNode; value: number; label: string }) => (
-  <div className="glass-card p-4 flex flex-col items-center gap-1.5 text-center">
+  <div className="glass-card p-3 flex flex-col items-center gap-1 text-center">
     <div className="text-muted-foreground">{icon}</div>
-    <span className="text-2xl font-display font-bold text-gradient">{value}</span>
-    <span className="text-[11px] text-muted-foreground leading-tight">{label}</span>
+    <span className="text-xl font-display font-bold text-gradient">{value}</span>
+    <span className="text-[10px] text-muted-foreground leading-tight">{label}</span>
   </div>
+);
+
+const NavButton = ({ icon, label, badge, onClick }: { icon: React.ReactNode; label: string; badge?: number; onClick: () => void }) => (
+  <button
+    onClick={onClick}
+    className="glass-card px-4 py-3 flex items-center gap-3 text-left hover:border-primary/20 transition-colors group"
+  >
+    {icon}
+    <span className="flex-1 text-sm font-display font-medium text-foreground">{label}</span>
+    {badge !== undefined && (
+      <span className="px-2 py-0.5 rounded-full bg-destructive/15 text-destructive text-[10px] font-semibold">{badge}</span>
+    )}
+    <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+  </button>
 );
 
 export default Profile;
