@@ -2,6 +2,7 @@ import { useState } from "react";
 import { VocabCard } from "@/data/lessons";
 import { ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { usePlatform } from "@/hooks/usePlatform";
 
 interface FlashcardProps {
   cards: VocabCard[];
@@ -13,6 +14,7 @@ const Flashcard = ({ cards, onComplete }: FlashcardProps) => {
   const [flipped, setFlipped] = useState(false);
   const [learned, setLearned] = useState<Set<string>>(new Set());
   const { t } = useLanguage();
+  const { isMobile } = usePlatform();
 
   const card = cards[currentIndex];
   const progress = ((currentIndex + 1) / cards.length) * 100;
@@ -39,7 +41,7 @@ const Flashcard = ({ cards, onComplete }: FlashcardProps) => {
   };
 
   return (
-    <div className="flex flex-col items-center gap-6">
+    <div className={`flex flex-col items-center gap-5 w-full ${isMobile ? "max-w-sm" : "max-w-lg"} mx-auto`}>
       {/* Progress */}
       <div className="w-full">
         <div className="flex justify-between text-sm text-muted-foreground mb-2">
@@ -53,7 +55,7 @@ const Flashcard = ({ cards, onComplete }: FlashcardProps) => {
 
       {/* Card */}
       <div
-        className="w-full max-w-sm aspect-[3/4] cursor-pointer perspective-1000"
+        className={`w-full cursor-pointer perspective-1000 ${isMobile ? "aspect-[3/4] max-w-sm" : "aspect-[4/3] max-w-lg"}`}
         onClick={() => setFlipped(!flipped)}
       >
         <div
