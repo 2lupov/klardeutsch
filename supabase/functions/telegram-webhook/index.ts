@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 const WEBAPP_URL = "https://klardeutsch.lovable.app";
-const SUPPORT_USERNAME = "your_support_username"; // Replace with your Telegram username
+const SUPPORT_USERNAME = "tulupov_de";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
