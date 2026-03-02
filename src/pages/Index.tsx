@@ -116,7 +116,7 @@ const Index = () => {
         <div className="fog-overlay" style={{ "--clarity": clarity } as React.CSSProperties} />
       )}
 
-      <div className={`flex-1 w-full mx-auto px-4 py-4 relative z-10 flex flex-col ${isMobile ? "max-w-md" : "max-w-2xl"}`}>
+      <div className={`flex-1 w-full mx-auto px-4 relative z-10 flex flex-col items-center justify-center ${isMobile ? "max-w-md py-4" : "max-w-3xl py-8"}`}>
         {screen === "exercise" && (
           <button
             onClick={handleBack}
