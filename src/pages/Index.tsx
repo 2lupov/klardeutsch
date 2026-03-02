@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Level, lessonsData } from "@/data/lessons";
 import { useAuth } from "@/contexts/AuthContext";
@@ -21,6 +21,12 @@ const Index = () => {
   const { saveProgress } = useProgress();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate("/auth");
+    }
+  }, [user, loading, navigate]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -29,10 +35,7 @@ const Index = () => {
     );
   }
 
-  if (!user) {
-    navigate("/auth");
-    return null;
-  }
+  if (!user) return null;
 
   const data = lessonsData[level];
 
