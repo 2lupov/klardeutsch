@@ -98,6 +98,7 @@ const translations = {
   recKeepGoing: { ru: "Отличный прогресс! Продолжайте в том же духе 💪", uk: "Чудовий прогрес! Продовжуйте в тому ж дусі 💪" },
   activityHistory: { ru: "История активности", uk: "Історія активності" },
   myProfile: { ru: "Профиль", uk: "Профіль" },
+  navHome: { ru: "Главная", uk: "Головна" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;
