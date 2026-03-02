@@ -107,6 +107,18 @@ const translations = {
   profileSaved: { ru: "Профиль сохранён!", uk: "Профіль збережено!" },
   resetProgress: { ru: "Сбросить прогресс", uk: "Скинути прогрес" },
   resetConfirm: { ru: "Вы уверены? Весь прогресс будет удалён.", uk: "Ви впевнені? Весь прогрес буде видалено." },
+
+  // Dictionary
+  dictionaryTitle: { ru: "Мой словарь", uk: "Мій словник" },
+  wordsTotal: { ru: "слов", uk: "слів" },
+  wordsDifficult: { ru: "сложных", uk: "складних" },
+  reviewDifficult: { ru: "Повторить", uk: "Повторити" },
+  searchWords: { ru: "Поиск слов...", uk: "Пошук слів..." },
+  dictionaryEmpty: { ru: "Словарь пуст — учите слова на главной!", uk: "Словник порожній — вчіть слова на головній!" },
+  wordRemoved: { ru: "Слово удалено", uk: "Слово видалено" },
+  noDifficultWords: { ru: "Нет сложных слов", uk: "Немає складних слів" },
+  reviewComplete: { ru: "Повторение завершено! 🎉", uk: "Повторення завершено! 🎉" },
+  navDictionary: { ru: "Словарь", uk: "Словник" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;

@@ -3,6 +3,8 @@ import { VocabCard } from "@/data/lessons";
 import { ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePlatform } from "@/hooks/usePlatform";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 interface FlashcardProps {
   cards: VocabCard[];
@@ -15,6 +17,7 @@ const Flashcard = ({ cards, onComplete }: FlashcardProps) => {
   const [learned, setLearned] = useState<Set<string>>(new Set());
   const { t } = useLanguage();
   const { isMobile } = usePlatform();
+  const { user } = useAuth();
 
   const card = cards[currentIndex];
   const progress = ((currentIndex + 1) / cards.length) * 100;
@@ -35,7 +38,15 @@ const Flashcard = ({ cards, onComplete }: FlashcardProps) => {
     }
   };
 
-  const markLearned = () => {
+  const markLearned = async () => {
+    if (user) {
+      await supabase
+        .from("saved_words")
+        .upsert(
+          [{ user_id: user.id, vocab_card_id: card.id, is_difficult: false }],
+          { onConflict: "user_id,vocab_card_id" }
+        );
+    }
     setLearned((prev) => new Set(prev).add(card.id));
     handleNext();
   };

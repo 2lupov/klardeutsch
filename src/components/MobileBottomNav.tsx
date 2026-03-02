@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, User, Settings } from "lucide-react";
+import { Home, User, BookOpen } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const MobileBottomNav = () => {
@@ -8,6 +8,7 @@ const MobileBottomNav = () => {
 
   const items = [
     { to: "/", icon: Home, label: t("navHome") },
+    { to: "/dictionary", icon: BookOpen, label: t("navDictionary") },
     { to: "/profile", icon: User, label: t("myProfile") },
   ];
 
