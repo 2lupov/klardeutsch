@@ -143,6 +143,13 @@ async function telegramApi(botToken: string, method: string, body: Record<string
 async function setupBot(botToken: string) {
   const results: Record<string, unknown> = {};
 
+  const webhookUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/telegram-webhook`;
+
+  // 0. Register webhook
+  results.webhook = await telegramApi(botToken, "setWebhook", {
+    url: webhookUrl,
+  });
+
   // 1. Set Menu Button → opens Mini App
   results.menuButton = await telegramApi(botToken, "setChatMenuButton", {
     menu_button: {
@@ -169,6 +176,9 @@ async function setupBot(botToken: string) {
   results.shortDescription = await telegramApi(botToken, "setMyShortDescription", {
     short_description: "Немецкий язык — ясно и просто 🇩🇪",
   });
+
+  // 5. Check webhook info
+  results.webhookInfo = await telegramApi(botToken, "getWebhookInfo", {});
 
   return results;
 }
