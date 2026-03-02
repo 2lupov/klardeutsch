@@ -3,3 +3,5 @@ project_id = "jqqsszwbbxvevebmebfm"
 [functions]
   [functions.auth-email-hook]
     verify_jwt = false
+  [functions.ai-dialogue]
+    verify_jwt = false

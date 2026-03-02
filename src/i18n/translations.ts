@@ -243,6 +243,7 @@ const translations = {
   play: { ru: "Играть", uk: "Грати" },
   waiting: { ru: "Ожидание…", uk: "Очікування…" },
   navChallenges: { ru: "Дуэли", uk: "Дуелі" },
+  navDialogues: { ru: "Диалоги", uk: "Діалоги" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;
