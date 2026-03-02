@@ -21,6 +21,7 @@ const Index = () => {
   const [category, setCategory] = useState<Category>("vocabulary");
   const [data, setData] = useState<CategoryData | null>(null);
   const [dataLoading, setDataLoading] = useState(false);
+  const [clarity, setClarity] = useState(0);
   const { user, loading, signOut } = useAuth();
   const { saveProgress } = useProgress();
   const { t } = useLanguage();
@@ -41,6 +42,13 @@ const Index = () => {
       });
     }
   }, [level, screen]);
+
+  // Reset fog when entering exercise
+  useEffect(() => {
+    if (screen === "exercise") {
+      setClarity(0);
+    }
+  }, [screen, category]);
 
   if (loading) {
     return (
@@ -67,17 +75,25 @@ const Index = () => {
     else if (screen === "categories") setScreen("levels");
   };
 
+  // Gradually clear fog on correct answers
+  const bumpClarity = (amount: number) => {
+    setClarity((prev) => Math.min(1, prev + amount));
+  };
+
   const handleVocabComplete = () => {
+    bumpClarity(1);
     saveProgress(level, "vocabulary", "flashcards", 0, true);
     handleBack();
   };
 
   const handleQuizComplete = (score: number) => {
+    bumpClarity(1);
     saveProgress(level, "grammar", "quiz", score, true);
     handleBack();
   };
 
   const handleReadingComplete = () => {
+    bumpClarity(1);
     saveProgress(level, "reading", "reading", 0, true);
     handleBack();
   };
@@ -113,7 +129,12 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <div className="flex-1 w-full max-w-md mx-auto px-4 py-6">
+      {/* Fog overlay — only visible during exercises */}
+      {screen === "exercise" && (
+        <div className="fog-overlay" style={{ "--clarity": clarity } as React.CSSProperties} />
+      )}
+
+      <div className="flex-1 w-full max-w-md mx-auto px-4 py-6 relative z-10">
         {screen === "exercise" && (
           <button
             onClick={handleBack}
@@ -131,7 +152,7 @@ const Index = () => {
         {screen === "exercise" && renderExercise()}
       </div>
 
-      <div className="w-full border-t border-border bg-card/50 backdrop-blur-lg">
+      <div className="w-full border-t border-border bg-card/50 backdrop-blur-lg relative z-10">
         <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
           <span className="text-xs text-muted-foreground font-display tracking-wider">
             KLAR · Deutsch lernen

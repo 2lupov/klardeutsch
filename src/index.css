@@ -111,4 +111,37 @@
     @apply h-full rounded-full transition-all duration-500;
     background: linear-gradient(90deg, hsl(var(--yellow-glow)), hsl(var(--yellow-soft)));
   }
+
+  /* Fog overlay — controlled via --clarity (0 = full fog, 1 = clear) */
+  .fog-overlay {
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    background: radial-gradient(ellipse at center, transparent 40%, hsl(var(--navy-deep) / 0.6) 100%);
+    opacity: calc(1 - var(--clarity, 0));
+    transition: opacity 1s ease;
+  }
+
+  @keyframes klar-celebrate {
+    0% { transform: scale(1); }
+    15% { transform: scale(1.12) translateY(-4px); }
+    30% { transform: scale(1); }
+    45% { transform: scale(1.06) translateY(-2px); }
+    60% { transform: scale(1); }
+    100% { transform: scale(1); }
+  }
+
+  .animate-klar-celebrate {
+    animation: klar-celebrate 1.2s ease-out;
+  }
+
+  @keyframes klar-glow-pulse {
+    0%, 100% { filter: drop-shadow(0 0 8px hsl(var(--yellow-glow) / 0.3)); }
+    50% { filter: drop-shadow(0 0 24px hsl(var(--yellow-glow) / 0.6)); }
+  }
+
+  .animate-klar-glow {
+    animation: klar-glow-pulse 2s ease-in-out infinite;
+  }
 }
