@@ -281,6 +281,39 @@ const Profile = () => {
               Перед поездкой или перелётом просто открой нужные уровни — и материалы будут доступны без интернета!
             </p>
           </section>
+
+          <section className="glass-card p-5">
+            <h3 className="font-display text-sm font-semibold text-foreground mb-2">📲 Установи как приложение</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed mb-3">
+              KLAR работает как полноценное приложение — добавь его на домашний экран для быстрого доступа.
+            </p>
+            <div className="space-y-3">
+              <div className="p-3 rounded-lg bg-muted/30 border border-border">
+                <p className="text-xs font-display font-semibold text-foreground mb-1">Через Telegram (рекомендуем)</p>
+                <ol className="text-xs text-muted-foreground space-y-1 list-decimal list-inside">
+                  <li>Открой бота <span className="font-medium text-foreground">@klar_deutsch_bot</span></li>
+                  <li>Нажми кнопку «Открыть KLAR»</li>
+                  <li>В меню (⋯) выбери «Добавить на домашний экран»</li>
+                </ol>
+              </div>
+              <div className="p-3 rounded-lg bg-muted/30 border border-border">
+                <p className="text-xs font-display font-semibold text-foreground mb-1">Safari (iPhone / iPad)</p>
+                <ol className="text-xs text-muted-foreground space-y-1 list-decimal list-inside">
+                  <li>Открой сайт в Safari</li>
+                  <li>Нажми кнопку «Поделиться» (□↑)</li>
+                  <li>Выбери «На экран Домой»</li>
+                </ol>
+              </div>
+              <div className="p-3 rounded-lg bg-muted/30 border border-border">
+                <p className="text-xs font-display font-semibold text-foreground mb-1">Chrome (Android)</p>
+                <ol className="text-xs text-muted-foreground space-y-1 list-decimal list-inside">
+                  <li>Открой сайт в Chrome</li>
+                  <li>Нажми меню (⋮) → «Добавить на главный экран»</li>
+                </ol>
+              </div>
+            </div>
+          </section>
+
           <button
             onClick={handleClearCache}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-destructive/30 text-destructive text-sm font-display font-medium hover:bg-destructive/10 transition-colors"

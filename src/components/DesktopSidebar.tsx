@@ -59,7 +59,7 @@ const DesktopSidebar = () => {
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-border space-y-1">
+      <div className="p-4 border-t border-border space-y-1 flex-shrink-0">
         <NavLink
           to="/method"
           className={`flex items-center gap-2 px-4 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors ${
