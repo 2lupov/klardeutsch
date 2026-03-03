@@ -224,7 +224,7 @@ const Profile = () => {
 
   // Sub-screen: Notifications
   if (screen === "notifications") {
-    const botUsername = "KlarDeutschBot"; // Replace with your actual bot username
+    const botUsername = "klar_deutsch_bot";
     const deepLink = `https://t.me/${botUsername}?start=${user.id}`;
 
     const handleUnlink = async () => {
