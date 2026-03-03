@@ -11,21 +11,29 @@ const MESSAGES = {
     "Hallo! Твой прогресс в KLAR замер. Давай проясним пару новых слов прямо сейчас? 🔥",
     "Hey! Немецкий скучает без тебя. Зайди на 2 минуты — и день не пропал! 💪",
     "Не забывай про KLAR! Каждый день — это +1 к твоему уровню 🚀",
+    "Wie geht's? Мы заметили, что тебя давно не было. Время вернуться! 🎓",
+    "Пока ты отдыхаешь, артикли не выучат себя сами 😅 Заходи в KLAR!",
   ],
   morning: [
     "Guten Morgen! ☀️ Начни день с 5 новых слов. Это займет всего 1 минуту!",
     "Доброе утро! Пока кофе остывает — выучи пару слов в KLAR ☕📚",
     "Morgens lernt es sich am besten! Заходи в KLAR на пару минут 🌅",
+    "Frühstück + KLAR = идеальное утро. Попробуй сегодня! 🥐✨",
+    "Утро — лучшее время для мозга. Открой KLAR и удиви себя! 🧠💥",
   ],
   evening: [
     "День почти прошёл, а ты ещё не заходил в KLAR. Зайдёшь? 🌙",
     "Вечерний KLAR — лучший KLAR. 5 минут перед сном, и ты на шаг ближе к цели 🎯",
     "Gute Nacht wird besser после пары упражнений в KLAR 😉",
+    "Вечер — время повторить слова дня. Зайди на минутку! 📖🌆",
+    "Перед сном — лучшее время закрепить знания. KLAR ждёт тебя! 😴📚",
   ],
   streak: [
     "⚠️ Осторожно! Твой стрик сгорит через пару часов. Спаси его! 🔥",
     "Не дай стрику умереть! Зайди на минутку и сохрани серию 💥",
     "Твоя серия дней под угрозой! Быстрый визит в KLAR спасёт её 🛡️",
+    "🔥 Стрик горит! Одно упражнение — и серия спасена!",
+    "Achtung! Серия вот-вот оборвётся. Не дай этому случиться! ⏰",
   ],
 };
 
@@ -73,16 +81,16 @@ Deno.serve(async (req) => {
     // Get current hour (UTC) to decide message type
     const currentHour = new Date().getUTCHours();
 
-    // Fetch users with telegram_chat_id who haven't been active in 24h
-    const twentyFourHoursAgo = new Date(
-      Date.now() - 24 * 60 * 60 * 1000
+    // Fetch users with telegram_chat_id who haven't been active in 6h
+    const sixHoursAgo = new Date(
+      Date.now() - 6 * 60 * 60 * 1000
     ).toISOString();
 
     const { data: inactiveUsers, error } = await supabase
       .from("profiles")
       .select("user_id, telegram_chat_id, last_active, display_name")
       .not("telegram_chat_id", "is", null)
-      .lt("last_active", twentyFourHoursAgo);
+      .lt("last_active", sixHoursAgo);
 
     if (error) {
       console.error("Error fetching profiles:", error);
