@@ -6,7 +6,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const WEBAPP_URL = "https://klardeutsch.lovable.app";
+const WEBAPP_URL = "https://klardeutsch.org";
 const SUPPORT_USERNAME = "tulupov_de";
 
 Deno.serve(async (req) => {
@@ -108,7 +108,7 @@ Deno.serve(async (req) => {
     if (text === "📲 На экран" && chatId) {
       await telegramApi(botToken, "sendMessage", {
         chat_id: chatId,
-        text: "📲 <b>Добавь KLAR на домашний экран</b>\n\n<b>В Telegram:</b>\n1. Нажми кнопку «🚀 Начать» внизу\n2. В меню (⋯) выбери «Добавить на домашний экран»\n\n<b>Safari (iPhone/iPad):</b>\n1. Открой <a href=\"https://klardeutsch.lovable.app\">klardeutsch.lovable.app</a>\n2. Нажми □↑ → «На экран Домой»\n\n<b>Chrome (Android):</b>\n1. Открой сайт в Chrome\n2. Меню (⋮) → «Добавить на главный экран»\n\nПриложение работает офлайн! 🔥",
+        text: "📲 <b>Добавь KLAR на домашний экран</b>\n\n<b>В Telegram:</b>\n1. Нажми кнопку «🚀 Начать» внизу\n2. В меню (⋯) выбери «Добавить на домашний экран»\n\n<b>Safari (iPhone/iPad):</b>\n1. Открой <a href=\"https://klardeutsch.org\">klardeutsch.org</a>\n2. Нажми □↑ → «На экран Домой»\n\n<b>Chrome (Android):</b>\n1. Открой сайт в Chrome\n2. Меню (⋮) → «Добавить на главный экран»\n\nПриложение работает офлайн! 🔥",
         parse_mode: "HTML",
         disable_web_page_preview: true,
       });
