@@ -1,13 +1,11 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, User, LogOut, BookOpen, BarChart3, ShoppingBag, Swords, MessageCircle } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { Home, User, BookOpen, BarChart3, ShoppingBag, Swords, MessageCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import KlarLogo from "@/components/KlarLogo";
 import { useLevelProgress } from "@/hooks/useLevelProgress";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 const DesktopSidebar = () => {
-  const { signOut } = useAuth();
   const { t } = useLanguage();
   const location = useLocation();
 
@@ -84,13 +82,6 @@ const DesktopSidebar = () => {
         >
           Оферта
         </NavLink>
-        <button
-          onClick={signOut}
-          className="flex items-center gap-2 px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors mt-2"
-        >
-          <LogOut className="w-4 h-4" />
-          {t("signOut")}
-        </button>
       </div>
     </aside>
   );
