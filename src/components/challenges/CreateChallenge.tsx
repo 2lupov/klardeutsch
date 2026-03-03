@@ -59,7 +59,7 @@ const CreateChallenge = ({ onCreated, initialOpponent }: Props) => {
     if (type === "vocab") {
       const { data } = await supabase
         .from("vocab_cards")
-        .select("id, german, russian, article")
+        .select("id, german, russian, ukrainian, article")
         .eq("level", level)
         .limit(50);
       if (!data || data.length < ROUNDS) return [];

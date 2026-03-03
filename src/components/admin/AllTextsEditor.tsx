@@ -62,7 +62,7 @@ const AllTextsEditor = () => {
     }
 
     // 2. Vocab cards
-    const { data: vocab } = await supabase.from("vocab_cards").select("id, german, russian, article, level, topic").order("level").limit(1000);
+    const { data: vocab } = await supabase.from("vocab_cards").select("id, german, russian, ukrainian, article, level, topic").order("level").limit(1000);
     for (const card of vocab ?? []) {
       allEntries.push({
         source: "vocab",
@@ -72,14 +72,25 @@ const AllTextsEditor = () => {
         value: card.german,
         context: `${card.level} · ${card.topic}`,
       });
-      allEntries.push({
-        source: "vocab",
-        id: card.id,
-        field: "russian",
-        label: `🇷🇺 ${card.german} →`,
-        value: card.russian,
-        context: `${card.level} · ${card.topic}`,
-      });
+      if (activeLang === "ru") {
+        allEntries.push({
+          source: "vocab",
+          id: card.id,
+          field: "russian",
+          label: `🇷🇺 ${card.german} →`,
+          value: card.russian,
+          context: `${card.level} · ${card.topic}`,
+        });
+      } else {
+        allEntries.push({
+          source: "vocab",
+          id: card.id,
+          field: "ukrainian",
+          label: `🇺🇦 ${card.german} →`,
+          value: (card as any).ukrainian ?? "",
+          context: `${card.level} · ${card.topic}`,
+        });
+      }
     }
 
     // 3. Grammar questions

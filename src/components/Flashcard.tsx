@@ -16,7 +16,7 @@ const Flashcard = ({ cards, onComplete }: FlashcardProps) => {
   const [flipped, setFlipped] = useState(false);
   const [learned, setLearned] = useState<Set<string>>(new Set());
   const [cardAnim, setCardAnim] = useState<"enter" | "exit" | "">("");
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const { isMobile } = usePlatform();
   const { user } = useAuth();
 
@@ -104,7 +104,7 @@ const Flashcard = ({ cards, onComplete }: FlashcardProps) => {
             className="absolute inset-0 glass-card flex flex-col items-center justify-center p-8 [transform:rotateY(180deg)]"
             style={{ backfaceVisibility: "hidden" }}
           >
-            <h2 className="text-2xl font-display font-bold text-primary mb-4">{card.russian}</h2>
+            <h2 className="text-2xl font-display font-bold text-primary mb-4">{lang === "uk" && card.ukrainian ? card.ukrainian : card.russian}</h2>
             {card.example && (
               <p className="text-sm text-muted-foreground italic text-center">"{card.example}"</p>
             )}

@@ -2,6 +2,7 @@ export interface VocabCard {
   id: string;
   german: string;
   russian: string;
+  ukrainian?: string;
   example?: string;
   article?: string;
 }

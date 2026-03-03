@@ -232,7 +232,10 @@ const VocabEditor = ({ level }: { level: Level }) => {
         <div key={card.id} className="glass-card p-4 flex flex-col gap-2">
           <div className="flex gap-2">
             <input defaultValue={card.german} onChange={(e) => trackChange(card.id, "german", e.target.value)} placeholder={t("german")} className="flex-1 px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none" />
-            <input defaultValue={card.russian} onChange={(e) => trackChange(card.id, "russian", e.target.value)} placeholder={t("russian")} className="flex-1 px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none" />
+            <input defaultValue={card.russian} onChange={(e) => trackChange(card.id, "russian", e.target.value)} placeholder="🇷🇺 Перевод" className="flex-1 px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none" />
+          </div>
+          <div className="flex gap-2">
+            <input defaultValue={card.ukrainian ?? ""} onChange={(e) => trackChange(card.id, "ukrainian", e.target.value)} placeholder="🇺🇦 Переклад" className="flex-1 px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none" />
           </div>
           <div className="flex gap-2">
             <input defaultValue={card.article ?? ""} onChange={(e) => trackChange(card.id, "article", e.target.value)} placeholder={t("article")} className="w-20 px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none" />
