@@ -6,55 +6,58 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-const MESSAGES = {
-  inactive: [
-    "Hallo! Твой прогресс в KLAR замер. Давай проясним пару новых слов прямо сейчас? 🔥",
-    "Hey! Немецкий скучает без тебя. Зайди на 2 минуты — и день не пропал! 💪",
-    "Не забывай про KLAR! Каждый день — это +1 к твоему уровню 🚀",
-    "Wie geht's? Мы заметили, что тебя давно не было. Время вернуться! 🎓",
-    "Пока ты отдыхаешь, артикли не выучат себя сами 😅 Заходи в KLAR!",
-  ],
+/* ─── Мотивационные сообщения (нейтральные, позитивные) ─── */
+const MOTIVATION = {
   morning: [
-    "Guten Morgen! ☀️ Начни день с 5 новых слов. Это займет всего 1 минуту!",
-    "Доброе утро! Пока кофе остывает — выучи пару слов в KLAR ☕📚",
-    "Morgens lernt es sich am besten! Заходи в KLAR на пару минут 🌅",
-    "Frühstück + KLAR = идеальное утро. Попробуй сегодня! 🥐✨",
-    "Утро — лучшее время для мозга. Открой KLAR и удиви себя! 🧠💥",
+    "Guten Morgen! ☀️ Новый день — новые слова. Открой KLAR и начни с 5 минут!",
+    "Доброе утро! Утро — лучшее время для мозга. Пара слов за кофе? ☕📚",
+    "Morgens lernt es sich am besten! Сегодня отличный день для немецкого 🌅",
+    "Frühstück + немецкий = идеальное утро. Versuch's mal! 🥐✨",
+    "Доброе утро! Маленький шаг каждый день — и результат не заставит себя ждать 🧠💪",
+    "Guten Morgen! Один урок утром заряжает на весь день. Probier es! 🚀",
+    "Утренний немецкий — самый продуктивный. Открой KLAR и удиви себя! 🌞",
+  ],
+  afternoon: [
+    "Добрый день! Перерыв — отличный момент выучить пару фраз 🎯",
+    "Mittagspause? Идеальное время для быстрого урока в KLAR! ☕",
+    "День в разгаре — а немецкий ждёт! 5 минут сделают разницу 📖",
+    "Nachmittags lernen ist auch super! Заглянёшь в KLAR? 🌤️",
+    "Добрый день! Даже 3 минуты немецкого — это прогресс. Du schaffst das! 💪",
+    "Маленькая практика днём — и слова запоминаются надолго 🧩",
+    "Halbzeit! Половина дня позади — самое время для немецкого перерыва 🎓",
   ],
   evening: [
-    "День почти прошёл, а ты ещё не заходил в KLAR. Зайдёшь? 🌙",
-    "Вечерний KLAR — лучший KLAR. 5 минут перед сном, и ты на шаг ближе к цели 🎯",
-    "Gute Nacht wird besser после пары упражнений в KLAR 😉",
-    "Вечер — время повторить слова дня. Зайди на минутку! 📖🌆",
-    "Перед сном — лучшее время закрепить знания. KLAR ждёт тебя! 😴📚",
-  ],
-  streak: [
-    "⚠️ Осторожно! Твой стрик сгорит через пару часов. Спаси его! 🔥",
-    "Не дай стрику умереть! Зайди на минутку и сохрани серию 💥",
-    "Твоя серия дней под угрозой! Быстрый визит в KLAR спасёт её 🛡️",
-    "🔥 Стрик горит! Одно упражнение — и серия спасена!",
-    "Achtung! Серия вот-вот оборвётся. Не дай этому случиться! ⏰",
+    "Добрый вечер! Вечер — время закрепить знания. Пара минут в KLAR? 🌙",
+    "Вечерний немецкий — самый уютный. Открой KLAR перед отдыхом 📖🌆",
+    "Guten Abend! Повтори пару слов — и день прошёл не зря ✨",
+    "Вечер — лучшее время для повторения. KLAR поможет! 📚",
+    "Schönen Abend! Немного практики вечером — и прогресс гарантирован 🎯",
+    "Вечерняя минутка немецкого — отличная привычка. Попробуй! 🌟",
+    "Abendzeit ist Lernzeit! Заглянёшь на минутку? 😊",
   ],
 };
+
+/* ─── Сообщения для неактивных (мягкие, без упрёков) ─── */
+const INACTIVE_MESSAGES = [
+  "Привет! В KLAR появились новые материалы — загляни, когда будет минутка 📚",
+  "Hallo! Немецкий ждёт тебя. Даже 2 минуты — это уже шаг вперёд 🚶",
+  "Мы соскучились! В KLAR есть кое-что новое для тебя. Заглянёшь? ✨",
+  "Hey! Каждый маленький шаг приближает к цели. KLAR всегда рядом 💪",
+  "Привет! Давно не виделись. Открой KLAR — там тебя ждут новые слова 🌱",
+  "Schritt für Schritt — шаг за шагом. KLAR поможет не терять темп 🎯",
+  "Привет! Знаешь, даже 1 минута практики в день — это прогресс. Попробуй! 😊",
+];
 
 function pickRandom(arr: string[]): string {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-async function sendTelegramMessage(
-  botToken: string,
-  chatId: number,
-  text: string
-) {
+async function sendTelegramMessage(botToken: string, chatId: number, text: string) {
   const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      chat_id: chatId,
-      text,
-      parse_mode: "HTML",
-    }),
+    body: JSON.stringify({ chat_id: chatId, text, parse_mode: "HTML" }),
   });
   return res.json();
 }
@@ -63,16 +66,6 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
-
-  let userIds: string[] | null = null;
-  try {
-    if (req.method === "POST") {
-      const body = await req.json().catch(() => ({}));
-      if (body.user_ids && Array.isArray(body.user_ids)) {
-        userIds = body.user_ids;
-      }
-    }
-  } catch {}
 
   try {
     const botToken = Deno.env.get("TELEGRAM_BOT_TOKEN");
@@ -88,20 +81,33 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Get current hour (UTC) to decide message type
+    // Determine local hour (UTC+2 for CET/Berlin)
     const currentHour = new Date().getUTCHours();
+    const localHour = (currentHour + 2) % 24;
 
-    // Fetch users with telegram_chat_id, optionally filtered
-    let query = supabase
+    // 🚫 НОЧЬ (23:00 — 07:59) — никаких сообщений
+    if (localHour >= 23 || localHour < 8) {
+      return new Response(
+        JSON.stringify({ message: "Night time — no messages sent", sent: 0 }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Determine time slot for motivation
+    let timeSlot: "morning" | "afternoon" | "evening";
+    if (localHour >= 8 && localHour < 12) {
+      timeSlot = "morning";
+    } else if (localHour >= 12 && localHour < 18) {
+      timeSlot = "afternoon";
+    } else {
+      timeSlot = "evening"; // 18:00–22:59
+    }
+
+    // Fetch all users with telegram_chat_id
+    const { data: allUsers, error } = await supabase
       .from("profiles")
       .select("user_id, telegram_chat_id, last_active, display_name")
       .not("telegram_chat_id", "is", null);
-
-    if (userIds && userIds.length > 0) {
-      query = query.in("user_id", userIds);
-    }
-
-    const { data: inactiveUsers, error } = await query;
 
     if (error) {
       console.error("Error fetching profiles:", error);
@@ -111,47 +117,48 @@ Deno.serve(async (req) => {
       });
     }
 
-    if (!inactiveUsers || inactiveUsers.length === 0) {
+    if (!allUsers || allUsers.length === 0) {
       return new Response(
-        JSON.stringify({ message: "No inactive users to notify", sent: 0 }),
+        JSON.stringify({ message: "No users with Telegram", sent: 0 }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
+    // Determine inactive threshold: no activity for 48+ hours
+    const inactiveThreshold = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
+
     let sent = 0;
+    let motivationSent = 0;
+    let inactiveSent = 0;
     const errors: string[] = [];
 
-    for (const user of inactiveUsers) {
-      // Pick message based on time of day (UTC+2 roughly for CET)
-      const localHour = (currentHour + 2) % 24;
+    for (const user of allUsers) {
+      const name = user.display_name || "";
       let message: string;
 
-      if (localHour >= 6 && localHour < 11) {
-        message = pickRandom(MESSAGES.morning);
-      } else if (localHour >= 19 && localHour < 23) {
-        message = pickRandom(MESSAGES.evening);
+      const isInactive = !user.last_active || user.last_active < inactiveThreshold;
+
+      if (isInactive) {
+        // Inactive users get a gentle nudge (only once per cycle, not motivation)
+        message = pickRandom(INACTIVE_MESSAGES);
+        inactiveSent++;
       } else {
-        message = pickRandom(MESSAGES.inactive);
+        // Active users get time-based motivation
+        message = pickRandom(MOTIVATION[timeSlot]);
+        motivationSent++;
       }
 
-      // Add personal touch
-      const name = user.display_name || "";
+      // Personalize
       if (name) {
         message = `${name}, ${message.charAt(0).toLowerCase()}${message.slice(1)}`;
       }
 
       try {
-        const result = await sendTelegramMessage(
-          botToken,
-          user.telegram_chat_id!,
-          message
-        );
+        const result = await sendTelegramMessage(botToken, user.telegram_chat_id!, message);
         if (result.ok) {
           sent++;
         } else {
-          errors.push(
-            `User ${user.user_id}: ${result.description || "unknown error"}`
-          );
+          errors.push(`User ${user.user_id}: ${result.description || "unknown error"}`);
         }
       } catch (e) {
         errors.push(`User ${user.user_id}: ${e.message}`);
@@ -160,9 +167,13 @@ Deno.serve(async (req) => {
 
     return new Response(
       JSON.stringify({
-        message: `Sent ${sent} reminders`,
+        message: `Sent ${sent} messages (${motivationSent} motivation, ${inactiveSent} inactive)`,
         sent,
-        total: inactiveUsers.length,
+        motivation_sent: motivationSent,
+        inactive_sent: inactiveSent,
+        total: allUsers.length,
+        time_slot: timeSlot,
+        local_hour: localHour,
         errors: errors.length > 0 ? errors : undefined,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
