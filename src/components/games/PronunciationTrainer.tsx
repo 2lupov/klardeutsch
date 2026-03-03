@@ -345,34 +345,46 @@ const PronunciationTrainer = ({ onBack }: PronunciationTrainerProps) => {
             Послушать
           </button>
 
-          <button
-            onClick={isListening ? stopListening : startListening}
-            disabled={isTranscribing}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-display font-bold text-sm transition-all ${
-              isListening
-                ? "bg-destructive text-destructive-foreground animate-pulse"
-                : isTranscribing
-                ? "bg-muted text-muted-foreground"
-                : "bg-primary text-primary-foreground hover:bg-primary/90"
-            }`}
-          >
-            {isTranscribing ? (
+          <div className="relative">
+            {/* Pulsing ring when recording */}
+            {isListening && (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Анализ...
-              </>
-            ) : isListening ? (
-              <>
-                <MicOff className="w-4 h-4" />
-                Стоп
-              </>
-            ) : (
-              <>
-                <Mic className="w-4 h-4" />
-                Говорить
+                <span className="absolute inset-0 rounded-xl bg-destructive/30 animate-ping" />
+                <span className="absolute -inset-1 rounded-2xl border-2 border-destructive/40 animate-pulse" />
               </>
             )}
-          </button>
+            <button
+              onClick={isListening ? stopListening : startListening}
+              disabled={isTranscribing}
+              className={`relative z-10 flex items-center gap-2 px-5 py-3 rounded-xl font-display font-bold text-sm transition-all ${
+                isListening
+                  ? "bg-destructive text-destructive-foreground shadow-[0_0_20px_hsl(0_72%_51%/0.4)]"
+                  : isTranscribing
+                  ? "bg-muted text-muted-foreground"
+                  : "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_16px_hsl(45_92%_52%/0.3)]"
+              }`}
+            >
+              {isTranscribing ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Анализ...
+                </>
+              ) : isListening ? (
+                <>
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive-foreground/60" />
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-destructive-foreground" />
+                  </span>
+                  Остановить запись
+                </>
+              ) : (
+                <>
+                  <Mic className="w-4 h-4" />
+                  🎙 Говорить
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
