@@ -165,7 +165,7 @@ const LessonCard = ({ lesson, index, lang, isExpanded, onToggle, onSectionOpen, 
     if (activeSection) {
       const currentSection = sections.find(s => s.key === activeSection);
       return (
-        <div className="px-4 pb-4 animate-slide-up">
+        <div className="animate-slide-up">
           <button
             onClick={() => setActiveSection(null)}
             className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground mb-4 transition-colors group"
@@ -184,11 +184,8 @@ const LessonCard = ({ lesson, index, lang, isExpanded, onToggle, onSectionOpen, 
 
     // Section grid (like LevelSelector)
     return (
-      <div className="px-4 pb-4 animate-slide-up">
-        {topicDesc && (
-          <p className="text-xs text-muted-foreground italic mb-3">{topicDesc}</p>
-        )}
-        <div className="grid grid-cols-2 gap-2.5">
+      <div className="animate-slide-up">
+        <div className="grid grid-cols-2 gap-2.5 mt-1">
           {sections.map((section, i) => (
             <button
               key={section.key}
@@ -227,10 +224,10 @@ const LessonCard = ({ lesson, index, lang, isExpanded, onToggle, onSectionOpen, 
 
   return (
     <div className={cn(
-      "rounded-2xl border transition-all duration-300",
-      isExpanded
+      hideHeader ? "" : "rounded-2xl border transition-all duration-300",
+      !hideHeader && (isExpanded
         ? "border-primary/20 bg-card shadow-lg shadow-primary/5"
-        : "border-border/30 bg-card/60 hover:bg-card/80 hover:border-border/50"
+        : "border-border/30 bg-card/60 hover:bg-card/80 hover:border-border/50")
     )}>
       {/* Lesson header */}
       {!hideHeader && (
