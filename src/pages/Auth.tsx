@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -26,6 +26,7 @@ const Auth = () => {
   const [showFireworks, setShowFireworks] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
   const navigate = useNavigate();
+  const logoRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const { t } = useLanguage();
 
@@ -116,7 +117,7 @@ const Auth = () => {
 
   return (
     <>
-      {showFireworks && <Fireworks onComplete={handleFireworksComplete} />}
+      {showFireworks && <Fireworks onComplete={handleFireworksComplete} originRef={logoRef} />}
       <div
         className="h-[100dvh] bg-background flex items-center justify-center px-4 overflow-hidden transition-opacity duration-500"
         style={{ opacity: fadeOut ? 0 : 1 }}
@@ -126,7 +127,9 @@ const Auth = () => {
           <div className="flex justify-end mb-1">
             <LanguageSwitcher />
           </div>
-          <AuthKlarLogo progress={getProgress()} />
+          <div ref={logoRef}>
+            <AuthKlarLogo progress={getProgress()} />
+          </div>
           <p className="text-muted-foreground text-sm mt-1 animate-auth-fade-up" style={{ animationDelay: "0.7s" }}>
             {forgotMode ? t("resetPasswordTitle") : isLogin ? t("loginTitle") : t("signupTitle")}
           </p>

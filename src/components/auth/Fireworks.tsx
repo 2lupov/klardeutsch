@@ -14,8 +14,6 @@ interface Confetti {
 
 interface Sparkle {
   id: number;
-  x: number;
-  y: number;
   angle: number;
   speed: number;
   size: number;
@@ -37,7 +35,6 @@ const COLORS = [
 ];
 
 const triggerHaptic = () => {
-  // Telegram WebApp haptic
   try {
     const tg = (window as any).Telegram?.WebApp;
     if (tg?.HapticFeedback) {
@@ -46,54 +43,64 @@ const triggerHaptic = () => {
       setTimeout(() => tg.HapticFeedback.impactOccurred("light"), 400);
     }
   } catch {}
-  // Standard Vibration API
   if (navigator.vibrate) {
     navigator.vibrate([100, 50, 80, 50, 60]);
   }
 };
 
-const Fireworks = ({ onComplete }: { onComplete: () => void }) => {
-  // Confetti pieces shooting upward from bottom
+interface FireworksProps {
+  onComplete: () => void;
+  /** Ref to the element the fireworks should originate from */
+  originRef?: React.RefObject<HTMLElement>;
+}
+
+const Fireworks = ({ onComplete, originRef }: FireworksProps) => {
+  const [origin, setOrigin] = useState<{ x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    if (originRef?.current) {
+      const rect = originRef.current.getBoundingClientRect();
+      setOrigin({
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2,
+      });
+    }
+  }, [originRef]);
+
+  // Confetti pieces shooting upward from the KLAR logo position
   const confetti = useMemo<Confetti[]>(() => {
     const arr: Confetti[] = [];
     for (let i = 0; i < 80; i++) {
       arr.push({
         id: i,
-        x: 10 + Math.random() * 80,
+        x: -40 + Math.random() * 80, // spread around origin
         delay: Math.random() * 600,
         duration: 1800 + Math.random() * 1200,
         size: 6 + Math.random() * 8,
         color: COLORS[Math.floor(Math.random() * COLORS.length)],
         rotation: Math.random() * 360,
-        drift: (Math.random() - 0.5) * 120,
+        drift: (Math.random() - 0.5) * 200,
         shape: (["rect", "circle", "strip"] as const)[Math.floor(Math.random() * 3)],
       });
     }
     return arr;
   }, []);
 
-  // Burst sparkles from center
+  // Burst sparkles radiating out from origin
   const sparkles = useMemo<Sparkle[]>(() => {
     const arr: Sparkle[] = [];
-    const origins = [
-      { x: 50, y: 45 },
-      { x: 30, y: 40 },
-      { x: 70, y: 40 },
-    ];
-    origins.forEach((origin, oi) => {
-      for (let i = 0; i < 16; i++) {
+    for (let wave = 0; wave < 3; wave++) {
+      for (let i = 0; i < 18; i++) {
         arr.push({
-          id: oi * 100 + i,
-          x: origin.x,
-          y: origin.y,
-          angle: (Math.PI * 2 * i) / 16 + (Math.random() - 0.5) * 0.4,
-          speed: 40 + Math.random() * 80,
+          id: wave * 100 + i,
+          angle: (Math.PI * 2 * i) / 18 + (Math.random() - 0.5) * 0.3,
+          speed: 50 + Math.random() * 100 + wave * 20,
           size: 3 + Math.random() * 4,
           color: COLORS[Math.floor(Math.random() * COLORS.length)],
-          delay: oi * 150 + Math.random() * 100,
+          delay: wave * 180 + Math.random() * 100,
         });
       }
-    });
+    }
     return arr;
   }, []);
 
@@ -103,25 +110,29 @@ const Fireworks = ({ onComplete }: { onComplete: () => void }) => {
     return () => clearTimeout(t);
   }, [onComplete]);
 
+  // Fallback to center of screen
+  const ox = origin?.x ?? window.innerWidth / 2;
+  const oy = origin?.y ?? window.innerHeight * 0.35;
+
   return (
     <div className="fixed inset-0 z-50 pointer-events-none overflow-hidden">
-      {/* Flash */}
+      {/* Flash centered on origin */}
       <div
         className="absolute inset-0"
         style={{
-          background: "radial-gradient(circle at 50% 50%, hsl(45 92% 52% / 0.35), transparent 60%)",
+          background: `radial-gradient(circle at ${ox}px ${oy}px, hsl(45 92% 52% / 0.4), transparent 50%)`,
           animation: "fw-flash 0.8s ease-out forwards",
         }}
       />
 
-      {/* Burst sparkles */}
+      {/* Burst sparkles from KLAR */}
       {sparkles.map((s) => (
         <div
           key={`s-${s.id}`}
           className="absolute rounded-full"
           style={{
-            left: `${s.x}%`,
-            top: `${s.y}%`,
+            left: ox,
+            top: oy,
             width: s.size,
             height: s.size,
             backgroundColor: s.color,
@@ -133,14 +144,14 @@ const Fireworks = ({ onComplete }: { onComplete: () => void }) => {
         />
       ))}
 
-      {/* Confetti shooting up */}
+      {/* Confetti shooting up from KLAR */}
       {confetti.map((c) => (
         <div
           key={`c-${c.id}`}
           className="absolute"
           style={{
-            left: `${c.x}%`,
-            bottom: "-20px",
+            left: ox + c.x,
+            top: oy,
             animation: `fw-confetti-up ${c.duration}ms cubic-bezier(0.2, 0.8, 0.3, 1) ${c.delay}ms forwards`,
             "--fw-drift": `${c.drift}px`,
             "--fw-rot": `${c.rotation + 720}deg`,
