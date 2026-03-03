@@ -36,7 +36,7 @@ type ProfileScreen = "main" | "achievements" | "activity" | "mistakes" | "leader
 const Profile = () => {
   const { user, signOut } = useAuth();
   const { t } = useLanguage();
-  const { isMobile } = usePlatform();
+  const { isMobile, isTelegram } = usePlatform();
   const { balance } = useCoins();
   const { totalXP } = useXP();
   const navigate = useNavigate();
@@ -702,7 +702,7 @@ const Profile = () => {
       </div>
 
       {/* Info links (mobile) */}
-      {isMobile && (
+      {isMobile && !isTelegram && (
         <div className="flex items-center justify-center gap-3 text-[10px] text-muted-foreground mt-2 mb-2">
           <Link to="/method" className="hover:text-foreground transition-colors">О методе</Link>
           <span>·</span>

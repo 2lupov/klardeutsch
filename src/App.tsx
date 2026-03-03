@@ -2,10 +2,11 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { LofiProvider } from "@/contexts/LofiContext";
+import { usePlatform } from "@/hooks/usePlatform";
 import AppLayout from "@/components/AppLayout";
 import OfflineBanner from "@/components/OfflineBanner";
 import Index from "./pages/Index";
@@ -27,6 +28,35 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+const AppRoutes = () => {
+  const { isTelegram } = usePlatform();
+
+  return (
+    <Routes>
+      <Route path="/auth" element={<Auth />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      {/* Web-only routes — redirect to home in Telegram */}
+      <Route path="/admin" element={isTelegram ? <Navigate to="/" replace /> : <Admin />} />
+      <Route path="/method" element={isTelegram ? <Navigate to="/" replace /> : <Method />} />
+      <Route path="/privacy" element={isTelegram ? <Navigate to="/" replace /> : <Privacy />} />
+      <Route path="/terms" element={isTelegram ? <Navigate to="/" replace /> : <Terms />} />
+      <Route path="/qr" element={isTelegram ? <Navigate to="/" replace /> : <QR />} />
+      {/* Authenticated routes with responsive layout */}
+      <Route element={<AppLayout />}>
+        <Route path="/" element={<Index />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/dictionary" element={<Dictionary />} />
+        <Route path="/stats" element={<Statistics />} />
+        <Route path="/shop" element={<Shop />} />
+        <Route path="/challenges" element={<Challenges />} />
+        <Route path="/dialogues" element={<Dialogues />} />
+        <Route path="/games" element={<Games />} />
+      </Route>
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <LanguageProvider>
@@ -37,27 +67,7 @@ const App = () => (
           <Sonner />
           <OfflineBanner />
           <BrowserRouter>
-            <Routes>
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/admin" element={<Admin />} />
-              <Route path="/method" element={<Method />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/qr" element={<QR />} />
-              {/* Authenticated routes with responsive layout */}
-              <Route element={<AppLayout />}>
-                <Route path="/" element={<Index />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/dictionary" element={<Dictionary />} />
-                <Route path="/stats" element={<Statistics />} />
-                <Route path="/shop" element={<Shop />} />
-                <Route path="/challenges" element={<Challenges />} />
-                <Route path="/dialogues" element={<Dialogues />} />
-                <Route path="/games" element={<Games />} />
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <AppRoutes />
           </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>
