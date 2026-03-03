@@ -5,46 +5,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import DemoExperience from "@/components/DemoExperience";
+import AuthKlarLogo from "@/components/auth/AuthKlarLogo";
+import Fireworks from "@/components/auth/Fireworks";
 import { Sparkles } from "lucide-react";
-
-const TypewriterLogo = () => {
-  const [visibleCount, setVisibleCount] = useState(0);
-  const letters = ["K", "L", "A", "R"];
-
-  useEffect(() => {
-    const timers = letters.map((_, i) =>
-      setTimeout(() => setVisibleCount(i + 1), 150 + i * 180)
-    );
-    return () => timers.forEach(clearTimeout);
-  }, []);
-
-  return (
-    <h1 className="text-3xl font-display font-bold tracking-tight flex items-center justify-center gap-[2px]">
-      {letters.map((letter, i) => (
-        <span
-          key={i}
-          className="text-gradient inline-block transition-all duration-300"
-          style={{
-            opacity: i < visibleCount ? 1 : 0,
-            transform: i < visibleCount ? "translateY(0) scale(1)" : "translateY(-12px) scale(0.7)",
-            transitionDelay: `${i * 60}ms`,
-          }}
-        >
-          {letter}
-        </span>
-      ))}
-      <span
-        className="inline-block w-[2px] h-7 ml-0.5 border-r-2"
-        style={{
-          animation: visibleCount >= letters.length
-            ? "typewriter-cursor 0.8s step-end infinite"
-            : "none",
-          borderColor: visibleCount < letters.length ? "transparent" : undefined,
-        }}
-      />
-    </h1>
-  );
-};
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(false);
@@ -60,9 +23,29 @@ const Auth = () => {
   const [message, setMessage] = useState("");
   const [demoMode, setDemoMode] = useState(false);
   const [forgotMode, setForgotMode] = useState(false);
+  const [showFireworks, setShowFireworks] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
   const { t } = useLanguage();
+
+  // Calculate logo fill progress based on form completion
+  const getProgress = () => {
+    if (forgotMode) {
+      return email.length >= 5 ? 1 : email.length / 5;
+    }
+    if (isLogin) {
+      // 2 fields: email + password
+      const emailPart = Math.min(email.length / 5, 1) * 0.5;
+      const passPart = Math.min(password.length / 6, 1) * 0.5;
+      return emailPart + passPart;
+    }
+    // Signup: 3 required fields (email, nickname, password) + optional referral
+    const emailPart = Math.min(email.length / 5, 1) * 0.3;
+    const nickPart = Math.min(nickname.length / 2, 1) * 0.25;
+    const passPart = Math.min(password.length / 6, 1) * 0.35;
+    const refPart = referralCode.length > 0 ? 0.1 : 0;
+    return Math.min(emailPart + nickPart + passPart + refPart, 1);
+  };
 
   useEffect(() => {
     if (user) navigate("/");
@@ -87,7 +70,10 @@ const Auth = () => {
     if (isLogin) {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) setError(error.message);
-      else navigate("/");
+      else {
+        setShowFireworks(true);
+        setTimeout(() => navigate("/"), 1800);
+      }
     } else {
       const { data: signUpData, error } = await supabase.auth.signUp({
         email,
@@ -123,13 +109,15 @@ const Auth = () => {
   }
 
   return (
-    <div className="h-[100dvh] bg-background flex items-center justify-center px-4 overflow-hidden">
+    <>
+      {showFireworks && <Fireworks onComplete={() => setShowFireworks(false)} />}
+      <div className="h-[100dvh] bg-background flex items-center justify-center px-4 overflow-hidden">
       <div className="w-full max-w-sm">
         <div className="text-center mb-5 animate-auth-fade-up" style={{ animationDelay: "0.1s" }}>
           <div className="flex justify-end mb-1">
             <LanguageSwitcher />
           </div>
-          <TypewriterLogo />
+          <AuthKlarLogo progress={getProgress()} />
           <p className="text-muted-foreground text-sm mt-1 animate-auth-fade-up" style={{ animationDelay: "0.7s" }}>
             {forgotMode ? t("resetPasswordTitle") : isLogin ? t("loginTitle") : t("signupTitle")}
           </p>
@@ -225,6 +213,7 @@ const Auth = () => {
         </button>
       </div>
     </div>
+    </>
   );
 };
 
