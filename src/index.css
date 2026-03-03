@@ -244,4 +244,58 @@
     animation: auth-fade-up 0.4s ease-out forwards;
     opacity: 0;
   }
+
+  /* Quiz answer animations */
+  @keyframes answer-shake {
+    0%, 100% { transform: translateX(0); }
+    15% { transform: translateX(-6px); }
+    30% { transform: translateX(6px); }
+    45% { transform: translateX(-4px); }
+    60% { transform: translateX(4px); }
+    75% { transform: translateX(-2px); }
+    90% { transform: translateX(2px); }
+  }
+
+  .animate-answer-shake {
+    animation: answer-shake 0.5s ease-out;
+  }
+
+  @keyframes answer-correct {
+    0% { box-shadow: 0 0 0 0 hsl(var(--success) / 0.4); }
+    50% { box-shadow: 0 0 0 8px hsl(var(--success) / 0); }
+    100% { box-shadow: 0 0 0 0 hsl(var(--success) / 0); }
+  }
+
+  .animate-answer-correct {
+    animation: answer-correct 0.6s ease-out;
+  }
+
+  /* Flashcard swipe transition */
+  @keyframes card-exit-left {
+    0% { opacity: 1; transform: translateX(0) rotate(0deg); }
+    100% { opacity: 0; transform: translateX(-60px) rotate(-4deg); }
+  }
+
+  @keyframes card-enter-right {
+    0% { opacity: 0; transform: translateX(60px) rotate(4deg); }
+    100% { opacity: 1; transform: translateX(0) rotate(0deg); }
+  }
+
+  .animate-card-exit {
+    animation: card-exit-left 0.25s ease-in forwards;
+  }
+
+  .animate-card-enter {
+    animation: card-enter-right 0.3s ease-out forwards;
+  }
+
+  /* Quiz question transition */
+  @keyframes question-slide-in {
+    0% { opacity: 0; transform: translateX(30px); }
+    100% { opacity: 1; transform: translateX(0); }
+  }
+
+  .animate-question-in {
+    animation: question-slide-in 0.35s ease-out;
+  }
 }

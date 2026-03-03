@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { VocabCard } from "@/data/lessons";
 import { ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -15,6 +15,7 @@ const Flashcard = ({ cards, onComplete }: FlashcardProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [learned, setLearned] = useState<Set<string>>(new Set());
+  const [cardAnim, setCardAnim] = useState<"enter" | "exit" | "">("");
   const { t } = useLanguage();
   const { isMobile } = usePlatform();
   const { user } = useAuth();
@@ -22,20 +23,24 @@ const Flashcard = ({ cards, onComplete }: FlashcardProps) => {
   const card = cards[currentIndex];
   const progress = ((currentIndex + 1) / cards.length) * 100;
 
-  const handleNext = () => {
+  const transitionCard = (nextIndex: number) => {
     setFlipped(false);
-    if (currentIndex < cards.length - 1) {
-      setTimeout(() => setCurrentIndex(currentIndex + 1), 150);
-    } else {
-      onComplete();
-    }
+    setCardAnim("exit");
+    setTimeout(() => {
+      if (nextIndex >= cards.length) {
+        onComplete();
+        return;
+      }
+      setCurrentIndex(nextIndex);
+      setCardAnim("enter");
+      setTimeout(() => setCardAnim(""), 300);
+    }, 250);
   };
 
+  const handleNext = () => transitionCard(currentIndex + 1);
+
   const handlePrev = () => {
-    if (currentIndex > 0) {
-      setFlipped(false);
-      setTimeout(() => setCurrentIndex(currentIndex - 1), 150);
-    }
+    if (currentIndex > 0) transitionCard(currentIndex - 1);
   };
 
   const markLearned = async () => {
@@ -50,6 +55,12 @@ const Flashcard = ({ cards, onComplete }: FlashcardProps) => {
     setLearned((prev) => new Set(prev).add(card.id));
     handleNext();
   };
+
+  const cardAnimClass = cardAnim === "exit"
+    ? "animate-card-exit"
+    : cardAnim === "enter"
+    ? "animate-card-enter"
+    : "";
 
   return (
     <div className={`flex flex-col items-center gap-5 w-full ${isMobile ? "max-w-sm" : "max-w-lg"} mx-auto`}>
@@ -66,18 +77,19 @@ const Flashcard = ({ cards, onComplete }: FlashcardProps) => {
 
       {/* Card */}
       <div
-        className={`w-full cursor-pointer perspective-1000 ${isMobile ? "aspect-[3/4] max-w-sm" : "aspect-[4/3] max-w-lg"}`}
+        className={`w-full cursor-pointer ${isMobile ? "aspect-[3/4] max-w-sm" : "aspect-[4/3] max-w-lg"} ${cardAnimClass}`}
         onClick={() => setFlipped(!flipped)}
+        style={{ perspective: "1000px" }}
       >
         <div
-          className={`relative w-full h-full transition-transform duration-500 preserve-3d ${
+          className={`relative w-full h-full transition-transform duration-500 ${
             flipped ? "[transform:rotateY(180deg)]" : ""
           }`}
           style={{ transformStyle: "preserve-3d" }}
         >
           {/* Front */}
           <div
-            className="absolute inset-0 glass-card glow-yellow flex flex-col items-center justify-center p-8 backface-hidden"
+            className="absolute inset-0 glass-card glow-yellow flex flex-col items-center justify-center p-8"
             style={{ backfaceVisibility: "hidden" }}
           >
             {card.article && (
@@ -89,7 +101,7 @@ const Flashcard = ({ cards, onComplete }: FlashcardProps) => {
 
           {/* Back */}
           <div
-            className="absolute inset-0 glass-card flex flex-col items-center justify-center p-8 backface-hidden [transform:rotateY(180deg)]"
+            className="absolute inset-0 glass-card flex flex-col items-center justify-center p-8 [transform:rotateY(180deg)]"
             style={{ backfaceVisibility: "hidden" }}
           >
             <h2 className="text-2xl font-display font-bold text-primary mb-4">{card.russian}</h2>
@@ -130,6 +142,7 @@ const Flashcard = ({ cards, onComplete }: FlashcardProps) => {
           setCurrentIndex(0);
           setFlipped(false);
           setLearned(new Set());
+          setCardAnim("");
         }}
         className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
