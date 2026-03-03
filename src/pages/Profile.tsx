@@ -421,13 +421,25 @@ const Profile = () => {
   return (
     <div className={`w-full mx-auto px-4 py-4 h-full flex flex-col ${isMobile ? "max-w-md" : "max-w-2xl"}`}>
       {isMobile && (
-        <button
-          onClick={signOut}
-          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors mb-3"
-        >
-          <LogOut className="w-3.5 h-3.5" />
-          {t("signOut")}
-        </button>
+        <div className="flex items-center justify-between mb-3">
+          <button
+            onClick={signOut}
+            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            {t("signOut")}
+          </button>
+          <div className="relative">
+            <LofiRadio />
+          </div>
+        </div>
+      )}
+      {!isMobile && (
+        <div className="flex justify-end mb-3">
+          <div className="relative">
+            <LofiRadio />
+          </div>
+        </div>
       )}
 
       {/* Profile header */}
@@ -537,10 +549,6 @@ const Profile = () => {
         </div>
       )}
 
-      {/* Lofi Radio */}
-      <div className="mt-auto">
-        <LofiRadio />
-      </div>
     </div>
   );
 };
