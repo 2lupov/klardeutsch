@@ -419,7 +419,7 @@ const Profile = () => {
 
   // Main profile screen
   return (
-    <div className={`w-full mx-auto px-4 py-4 h-full flex flex-col ${isMobile ? "max-w-md" : "max-w-2xl"}`}>
+    <div className={`w-full mx-auto px-4 py-4 pb-8 ${isMobile ? "max-w-md" : "max-w-2xl"}`}>
       {isMobile && (
         <div className="flex items-center justify-between mb-3">
           <button
