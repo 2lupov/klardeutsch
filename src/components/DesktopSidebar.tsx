@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, User, BookOpen, BarChart3, ShoppingBag, Swords, MessageCircle } from "lucide-react";
+import { Home, User, BookOpen, BarChart3, ShoppingBag, Gamepad2, MessageCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import KlarLogo from "@/components/KlarLogo";
 import { useLevelProgress } from "@/hooks/useLevelProgress";
@@ -23,7 +23,7 @@ const DesktopSidebar = () => {
     { to: "/stats", icon: BarChart3, label: t("navStats") },
     { to: "/dictionary", icon: BookOpen, label: t("navDictionary") },
     { to: "/shop", icon: ShoppingBag, label: t("navShop") },
-    { to: "/challenges", icon: Swords, label: t("navChallenges") },
+    { to: "/games", icon: Gamepad2, label: "Игры" },
     { to: "/dialogues", icon: MessageCircle, label: t("navDialogues") },
   ];
 

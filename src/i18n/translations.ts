@@ -243,6 +243,7 @@ const translations = {
   play: { ru: "Играть", uk: "Грати" },
   waiting: { ru: "Ожидание…", uk: "Очікування…" },
   navChallenges: { ru: "Дуэли", uk: "Дуелі" },
+  navGames: { ru: "Игры", uk: "Ігри" },
   navDialogues: { ru: "Диалоги", uk: "Діалоги" },
   decline: { ru: "Отклонить", uk: "Відхилити" },
   challengeDeclined: { ru: "Дуэль отклонена", uk: "Дуель відхилено" },

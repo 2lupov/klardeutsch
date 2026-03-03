@@ -33,7 +33,7 @@ export interface Challenge {
 
 type Screen = "list" | "create" | "play";
 
-const Challenges = () => {
+const Challenges = ({ onBack }: { onBack?: () => void }) => {
   const { user } = useAuth();
   const { t } = useLanguage();
   const { isMobile } = usePlatform();
@@ -174,10 +174,17 @@ const Challenges = () => {
   return (
     <div className={`w-full mx-auto px-4 py-4 h-full flex flex-col ${isMobile ? "max-w-md" : "max-w-2xl"}`}>
       <div className="flex items-center justify-between mb-4">
-        <h1 className="font-display text-xl font-bold text-foreground flex items-center gap-2">
-          <Swords className="w-5 h-5 text-primary" />
-          {t("challengesTitle")}
-        </h1>
+        <div className="flex items-center gap-2">
+          {onBack && (
+            <button onClick={onBack} className="text-muted-foreground hover:text-foreground transition-colors">
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+          )}
+          <h1 className="font-display text-xl font-bold text-foreground flex items-center gap-2">
+            <Swords className="w-5 h-5 text-primary" />
+            {t("challengesTitle")}
+          </h1>
+        </div>
         <button
           onClick={() => setScreen("create")}
           className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-display font-medium hover:bg-primary/90 transition-colors"
