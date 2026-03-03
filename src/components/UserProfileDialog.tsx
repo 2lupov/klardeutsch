@@ -4,7 +4,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Trophy, Swords, Flame, BookOpen, Brain, Star, Loader2 } from "lucide-react";
+import { Trophy, Swords, BookOpen, Star, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface UserProfileDialogProps {
@@ -45,23 +45,39 @@ const UserProfileDialog = ({
     if (!open || !userId) return;
     setLoading(true);
     const load = async () => {
-      const [duelsRes, challengesRes] = await Promise.all([
-        supabase
-          .from("challenges")
-          .select("id", { count: "exact", head: true })
-          .eq("winner_id", userId),
-        supabase
-          .from("challenges")
-          .select("id", { count: "exact", head: true })
-          .or(`challenger_id.eq.${userId},opponent_id.eq.${userId}`)
-          .eq("status", "done"),
-      ]);
-      setStats({
-        wordsLearned: 0,
-        lessonsCompleted: 0,
-        duelsWon: duelsRes.count ?? 0,
-        challengesPlayed: challengesRes.count ?? 0,
-      });
+      // Check if this is a demo user
+      const { data: demoUser } = await supabase
+        .from("demo_leaderboard")
+        .select("words_learned, lessons_completed, duels_won, duels_played")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (demoUser) {
+        setStats({
+          wordsLearned: (demoUser as any).words_learned ?? 0,
+          lessonsCompleted: (demoUser as any).lessons_completed ?? 0,
+          duelsWon: (demoUser as any).duels_won ?? 0,
+          challengesPlayed: (demoUser as any).duels_played ?? 0,
+        });
+      } else {
+        const [duelsRes, challengesRes] = await Promise.all([
+          supabase
+            .from("challenges")
+            .select("id", { count: "exact", head: true })
+            .eq("winner_id", userId),
+          supabase
+            .from("challenges")
+            .select("id", { count: "exact", head: true })
+            .or(`challenger_id.eq.${userId},opponent_id.eq.${userId}`)
+            .eq("status", "done"),
+        ]);
+        setStats({
+          wordsLearned: 0,
+          lessonsCompleted: 0,
+          duelsWon: duelsRes.count ?? 0,
+          challengesPlayed: challengesRes.count ?? 0,
+        });
+      }
       setLoading(false);
     };
     load();
@@ -127,7 +143,12 @@ const UserProfileDialog = ({
                 <span className="text-lg font-display font-bold text-foreground">{stats.duelsWon}</span>
                 <span className="text-[10px] text-muted-foreground">Дуэлей выиграно</span>
               </div>
-              <div className="glass-card p-3 flex flex-col items-center gap-1 col-span-2">
+              <div className="glass-card p-3 flex flex-col items-center gap-1">
+                <BookOpen className="w-4 h-4 text-primary" />
+                <span className="text-lg font-display font-bold text-foreground">{stats.wordsLearned}</span>
+                <span className="text-[10px] text-muted-foreground">Слов изучено</span>
+              </div>
+              <div className="glass-card p-3 flex flex-col items-center gap-1">
                 <Star className="w-4 h-4 text-primary" />
                 <span className="text-lg font-display font-bold text-foreground">{stats.challengesPlayed}</span>
                 <span className="text-[10px] text-muted-foreground">Дуэлей сыграно</span>

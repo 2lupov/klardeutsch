@@ -205,25 +205,37 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           display_name: string
+          duels_played: number
+          duels_won: number
           id: string
+          lessons_completed: number
           telegram_chat_id: number | null
           total_xp: number
+          words_learned: number
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
           display_name: string
+          duels_played?: number
+          duels_won?: number
           id?: string
+          lessons_completed?: number
           telegram_chat_id?: number | null
           total_xp?: number
+          words_learned?: number
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
           display_name?: string
+          duels_played?: number
+          duels_won?: number
           id?: string
+          lessons_completed?: number
           telegram_chat_id?: number | null
           total_xp?: number
+          words_learned?: number
         }
         Relationships: []
       }
