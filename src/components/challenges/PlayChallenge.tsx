@@ -74,8 +74,26 @@ const PlayChallenge = ({ challenge, onFinished }: Props) => {
 
     await supabase.from("challenges").update(updateData).eq("id", challenge.id);
 
-    // Award XP to winner or both on draw
+    // Notify challenger via Telegram when opponent finishes
     if (updateData.status === "completed") {
+      const { data: myProfile } = await supabase
+        .from("profiles")
+        .select("display_name")
+        .eq("user_id", user.id)
+        .single();
+
+      supabase.functions.invoke("notify-duel-result", {
+        body: {
+          challenger_id: challenge.challenger_id,
+          opponent_name: myProfile?.display_name || "Соперник",
+          challenger_score: challenge.challenger_score,
+          opponent_score: score,
+          challenge_type: challenge.challenge_type,
+          level: challenge.level,
+        },
+      }).then(({ error }) => {
+        if (error) console.error("notify-duel-result error:", error);
+      });
       if (updateData.winner_id) {
         await supabase.rpc("award_xp", { p_user_id: updateData.winner_id, p_amount: challenge.xp_reward });
       } else {
