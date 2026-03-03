@@ -4,7 +4,6 @@ import * as React from 'npm:react@18.3.1'
 
 import {
   Body,
-  Button,
   Container,
   Head,
   Heading,
@@ -19,6 +18,7 @@ interface SignupEmailProps {
   siteUrl: string
   recipient: string
   confirmationUrl: string
+  token?: string
 }
 
 export const SignupEmail = ({
@@ -26,10 +26,11 @@ export const SignupEmail = ({
   siteUrl,
   recipient,
   confirmationUrl,
+  token,
 }: SignupEmailProps) => (
   <Html lang="ru" dir="ltr">
     <Head />
-    <Preview>Подтверди email для KLAR</Preview>
+    <Preview>Код подтверждения для KLAR</Preview>
     <Body style={main}>
       <Container style={container}>
         <Text style={brand}>KLAR</Text>
@@ -39,18 +40,19 @@ export const SignupEmail = ({
           <Link href={siteUrl} style={link}>
             <strong>KLAR</strong>
           </Link>
-          ! Осталось подтвердить твой email (
+          ! Введи этот код для подтверждения email (
           <Link href={`mailto:${recipient}`} style={link}>
             {recipient}
           </Link>
-          ).
+          ):
         </Text>
-        <Button style={button} href={confirmationUrl} target="_blank">
-          Подтвердить email
-        </Button>
-        <Text style={fallbackText}>
-          Если кнопка не работает, скопируй эту ссылку в браузер:{' '}
-          <Link href={confirmationUrl} style={link}>{confirmationUrl}</Link>
+        {token ? (
+          <Text style={codeBox}>{token}</Text>
+        ) : (
+          <Text style={codeBox}>------</Text>
+        )}
+        <Text style={hintText}>
+          Скопируй код и вставь его на странице подтверждения.
         </Text>
         <Text style={footer}>
           Если ты не регистрировался — просто проигнорируй это письмо.
@@ -83,16 +85,17 @@ const text = {
   margin: '0 0 24px',
 }
 const link = { color: '#e6a817', textDecoration: 'underline' }
-const button = {
-  backgroundColor: '#e6a817',
-  color: '#111827',
-  fontSize: '15px',
+const codeBox = {
+  fontSize: '32px',
   fontWeight: 'bold' as const,
+  color: '#111827',
+  backgroundColor: '#fef9e7',
+  border: '2px solid #e6a817',
   borderRadius: '12px',
-  padding: '14px 24px',
-  textDecoration: 'none',
-  display: 'inline-block' as const,
+  padding: '16px 24px',
   textAlign: 'center' as const,
+  letterSpacing: '8px',
+  margin: '0 0 16px',
 }
-const fallbackText = { fontSize: '12px', color: '#9ca3af', margin: '16px 0 0', wordBreak: 'break-all' as const }
+const hintText = { fontSize: '13px', color: '#9ca3af', margin: '0 0 24px', textAlign: 'center' as const }
 const footer = { fontSize: '12px', color: '#9ca3af', margin: '32px 0 0' }
