@@ -8,6 +8,7 @@ import DesktopSidebar from "@/components/DesktopSidebar";
 import PageTransition from "@/components/PageTransition";
 import LofiFloatingPlayer from "@/components/LofiFloatingPlayer";
 import NicknameGate from "@/components/NicknameGate";
+import EditModeToolbar from "@/components/EditModeToolbar";
 
 const AppLayout = () => {
   const { user, loading } = useAuth();
@@ -51,6 +52,7 @@ const AppLayout = () => {
   if (isMobile) {
     return (
       <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
+        <EditModeToolbar />
         <LofiFloatingPlayer />
         <div className="flex-1 overflow-y-auto overscroll-none pb-14">
           <PageTransition><Outlet /></PageTransition>
@@ -64,6 +66,7 @@ const AppLayout = () => {
     <div className="h-[100dvh] bg-background flex overflow-hidden">
       <DesktopSidebar />
       <main className="flex-1 overflow-y-auto relative">
+        <EditModeToolbar />
         <LofiFloatingPlayer />
         <PageTransition><Outlet /></PageTransition>
       </main>

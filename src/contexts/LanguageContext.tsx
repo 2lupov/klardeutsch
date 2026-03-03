@@ -6,12 +6,22 @@ interface LanguageContextType {
   lang: Lang;
   setLang: (lang: Lang) => void;
   t: (key: TranslationKey) => string;
+  editMode: boolean;
+  setEditMode: (v: boolean) => void;
+  overrides: Record<string, Record<string, string>>;
+  saveOverride: (key: string, lang: string, value: string) => Promise<void>;
+  reloadOverrides: () => Promise<void>;
 }
 
 const LanguageContext = createContext<LanguageContextType>({
   lang: "ru",
   setLang: () => {},
   t: (key) => key,
+  editMode: false,
+  setEditMode: () => {},
+  overrides: {},
+  saveOverride: async () => {},
+  reloadOverrides: async () => {},
 });
 
 export const useLanguage = () => useContext(LanguageContext);
@@ -23,21 +33,21 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   });
 
   const [overrides, setOverrides] = useState<Record<string, Record<string, string>>>({});
+  const [editMode, setEditMode] = useState(false);
 
-  useEffect(() => {
-    const load = async () => {
-      const { data } = await supabase.from("translation_overrides").select("key, lang, value");
-      if (data) {
-        const map: Record<string, Record<string, string>> = {};
-        data.forEach((row: any) => {
-          if (!map[row.key]) map[row.key] = {};
-          map[row.key][row.lang] = row.value;
-        });
-        setOverrides(map);
-      }
-    };
-    load();
+  const loadOverrides = useCallback(async () => {
+    const { data } = await supabase.from("translation_overrides").select("key, lang, value");
+    if (data) {
+      const map: Record<string, Record<string, string>> = {};
+      data.forEach((row: any) => {
+        if (!map[row.key]) map[row.key] = {};
+        map[row.key][row.lang] = row.value;
+      });
+      setOverrides(map);
+    }
   }, []);
+
+  useEffect(() => { loadOverrides(); }, [loadOverrides]);
 
   const setLang = useCallback((l: Lang) => {
     setLangState(l);
@@ -45,14 +55,27 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const t = useCallback((key: TranslationKey): string => {
-    // Check overrides first
     const override = overrides[key]?.[lang];
     if (override) return override;
     return translations[key]?.[lang] ?? key;
   }, [lang, overrides]);
 
+  const saveOverride = useCallback(async (key: string, lng: string, value: string) => {
+    const defaultVal = (translations as any)[key]?.[lng] ?? "";
+    if (value === defaultVal || value === "") {
+      // Remove override, revert to default
+      await supabase.from("translation_overrides").delete().eq("key", key).eq("lang", lng);
+    } else {
+      await supabase.from("translation_overrides").upsert(
+        { key, lang: lng, value, updated_at: new Date().toISOString() },
+        { onConflict: "key,lang" }
+      );
+    }
+    await loadOverrides();
+  }, [loadOverrides]);
+
   return (
-    <LanguageContext.Provider value={{ lang, setLang, t }}>
+    <LanguageContext.Provider value={{ lang, setLang, t, editMode, setEditMode, overrides, saveOverride, reloadOverrides: loadOverrides }}>
       {children}
     </LanguageContext.Provider>
   );

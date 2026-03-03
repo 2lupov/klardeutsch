@@ -1,14 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Plus, Trash2, Lock, Check, BookOpen, Languages, Headphones, BookText, ShoppingBag, Gamepad2, Users, Globe } from "lucide-react";
+import { Plus, Trash2, Lock, Check, BookOpen, Languages, Headphones, BookText, ShoppingBag, Gamepad2, Users, Globe, Pencil } from "lucide-react";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import ShopEditor from "@/components/admin/ShopEditor";
 import ListeningEditor from "@/components/admin/ListeningEditor";
 import UsersEditor from "@/components/admin/UsersEditor";
 import CafeEditor from "@/components/admin/CafeEditor";
-import TranslationsEditor from "@/components/admin/TranslationsEditor";
 import { toast } from "sonner";
 
 type Level = "A1" | "A2" | "B1" | "B2" | "C1";
@@ -134,7 +134,7 @@ const Admin = () => {
         {tab === "shop" && <ShopEditor />}
         {tab === "games" && <GamesEditor level={level} />}
         {tab === "users" && <UsersEditor />}
-        {tab === "translations" && <TranslationsEditor />}
+        {tab === "translations" && <TranslationsLauncher />}
       </div>
     </div>
   );
@@ -530,6 +530,34 @@ const GamesEditor = ({ level }: { level: Level }) => {
 
       {/* Café Bestellung Editor */}
       <CafeEditor level={level} />
+    </div>
+  );
+};
+
+// ——— Translations Launcher ———
+const TranslationsLauncher = () => {
+  const navigate = useNavigate();
+  const { setEditMode } = useLanguage();
+
+  const handleLaunch = () => {
+    setEditMode(true);
+    navigate("/");
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-4 py-12">
+      <Globe className="w-12 h-12 text-primary/40" />
+      <h2 className="font-display text-lg font-bold text-foreground">Редактирование переводов</h2>
+      <p className="text-sm text-muted-foreground text-center max-w-sm">
+        Нажмите кнопку, чтобы перейти на обычные страницы приложения. Все тексты станут кликабельными — нажмите на любой, чтобы отредактировать.
+      </p>
+      <button
+        onClick={handleLaunch}
+        className="flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-display font-semibold text-sm hover:opacity-90 transition-opacity"
+      >
+        <Pencil className="w-4 h-4" />
+        Начать редактирование
+      </button>
     </div>
   );
 };
