@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Shield, ShieldOff, Search, Users, Star, Coins, Send, Bell, Loader2, MessageSquare, CheckSquare, Square, X, Plus, Minus, Trash2, UserPlus, Pencil, Bot, Camera, MailCheck, Save } from "lucide-react";
+import { Shield, ShieldOff, Search, Users, Star, Coins, Send, Bell, Loader2, MessageSquare, CheckSquare, Square, X, Plus, Minus, Trash2, UserPlus, Pencil, Bot, Camera, MailCheck } from "lucide-react";
 import { toast } from "sonner";
 
 interface AdminUser {
@@ -39,9 +39,6 @@ const UsersEditor = () => {
   const [resending, setResending] = useState<string | null>(null);
   const [confirming, setConfirming] = useState<string | null>(null);
   const [coinAmounts, setCoinAmounts] = useState<Record<string, string>>({});
-  const [pendingXp, setPendingXp] = useState<Record<string, number>>({});
-  const [pendingCoins, setPendingCoins] = useState<Record<string, number>>({});
-  const [saving, setSaving] = useState<string | null>(null);
 
   // Demo users state
   const [demoUsers, setDemoUsers] = useState<DemoUser[]>([]);
@@ -84,53 +81,26 @@ const UsersEditor = () => {
     } : u));
   };
 
-  const adjustXpLocal = (userId: string, delta: number) => {
-    setPendingXp(prev => ({ ...prev, [userId]: (prev[userId] || 0) + delta }));
+  const adjustXp = async (userId: string, currentXp: number, delta: number) => {
+    const newXp = Math.max(0, currentXp + delta);
+    const { error } = await supabase.rpc("admin_set_xp", { p_user_id: userId, p_xp: newXp });
+    if (error) {
+      toast.error("Ошибка: " + error.message);
+    } else {
+      toast.success(`XP: ${currentXp} → ${newXp}`);
+      setUsers(prev => prev.map(u => u.user_id === userId ? { ...u, total_xp: newXp } : u));
+    }
   };
 
-  const adjustCoinsLocal = (userId: string, delta: number) => {
-    setPendingCoins(prev => ({ ...prev, [userId]: (prev[userId] || 0) + delta }));
-  };
-
-  const hasPendingChanges = (userId: string) => {
-    return (pendingXp[userId] && pendingXp[userId] !== 0) || (pendingCoins[userId] && pendingCoins[userId] !== 0);
-  };
-
-  const saveChanges = async (userId: string) => {
-    setSaving(userId);
-    const xpDelta = pendingXp[userId] || 0;
-    const coinDelta = pendingCoins[userId] || 0;
-    let hasError = false;
-
-    if (xpDelta !== 0) {
-      const user = users.find(u => u.user_id === userId);
-      const newXp = Math.max(0, (user?.total_xp || 0) + xpDelta);
-      const { error } = await supabase.rpc("admin_set_xp", { p_user_id: userId, p_xp: newXp });
-      if (error) {
-        toast.error("Ошибка XP: " + error.message);
-        hasError = true;
-      } else {
-        setUsers(prev => prev.map(u => u.user_id === userId ? { ...u, total_xp: newXp } : u));
-      }
+  const adjustCoins = async (userId: string, delta: number) => {
+    const reason = delta > 0 ? "admin_award" : "admin_deduct";
+    const { error } = await supabase.rpc("award_coins", { p_user_id: userId, p_amount: delta, p_reason: reason });
+    if (error) {
+      toast.error("Ошибка: " + error.message);
+    } else {
+      toast.success(`Монеты: ${delta > 0 ? "+" : ""}${delta}`);
+      setUsers(prev => prev.map(u => u.user_id === userId ? { ...u, coin_balance: u.coin_balance + delta } : u));
     }
-
-    if (coinDelta !== 0) {
-      const reason = coinDelta > 0 ? "admin_award" : "admin_deduct";
-      const { error } = await supabase.rpc("award_coins", { p_user_id: userId, p_amount: coinDelta, p_reason: reason });
-      if (error) {
-        toast.error("Ошибка монет: " + error.message);
-        hasError = true;
-      } else {
-        setUsers(prev => prev.map(u => u.user_id === userId ? { ...u, coin_balance: u.coin_balance + coinDelta } : u));
-      }
-    }
-
-    if (!hasError) {
-      toast.success("Изменения сохранены!");
-      setPendingXp(prev => { const n = { ...prev }; delete n[userId]; return n; });
-      setPendingCoins(prev => { const n = { ...prev }; delete n[userId]; return n; });
-    }
-    setSaving(null);
   };
 
   const uploadAvatar = async (userId: string, file: File) => {
@@ -564,21 +534,18 @@ const UsersEditor = () => {
               )}
             </div>
 
-            <div className="flex items-center gap-4 text-xs text-muted-foreground pl-7 flex-wrap">
+            <div className="flex items-center gap-4 text-xs text-muted-foreground pl-7">
               <span className="flex items-center gap-1">
                 <Star className="w-3 h-3 text-primary" />
                 <button
-                  onClick={() => adjustXpLocal(user.user_id, -(parseInt(xpAmounts[user.user_id]) || 50))}
+                  onClick={() => adjustXp(user.user_id, user.total_xp, -(parseInt(xpAmounts[user.user_id]) || 50))}
                   className="w-5 h-5 rounded bg-destructive/10 text-destructive hover:bg-destructive/20 flex items-center justify-center transition-colors"
                 >
                   <Minus className="w-3 h-3" />
                 </button>
-                <span className="font-semibold text-foreground min-w-[35px] text-center text-[11px]">
-                  {user.total_xp + (pendingXp[user.user_id] || 0)}
-                  {pendingXp[user.user_id] ? <span className="text-primary ml-0.5">({pendingXp[user.user_id] > 0 ? "+" : ""}{pendingXp[user.user_id]})</span> : null}
-                </span>
+                <span className="font-semibold text-foreground min-w-[35px] text-center text-[11px]">{user.total_xp}</span>
                 <button
-                  onClick={() => adjustXpLocal(user.user_id, parseInt(xpAmounts[user.user_id]) || 50)}
+                  onClick={() => adjustXp(user.user_id, user.total_xp, parseInt(xpAmounts[user.user_id]) || 50)}
                   className="w-5 h-5 rounded bg-primary/10 text-primary hover:bg-primary/20 flex items-center justify-center transition-colors"
                 >
                   <Plus className="w-3 h-3" />
@@ -595,17 +562,14 @@ const UsersEditor = () => {
               <span className="flex items-center gap-1">
                 <Coins className="w-3 h-3 text-primary" />
                 <button
-                  onClick={() => adjustCoinsLocal(user.user_id, -(parseInt(coinAmounts[user.user_id]) || 50))}
+                  onClick={() => adjustCoins(user.user_id, -(parseInt(coinAmounts[user.user_id]) || 50))}
                   className="w-5 h-5 rounded bg-destructive/10 text-destructive hover:bg-destructive/20 flex items-center justify-center transition-colors"
                 >
                   <Minus className="w-3 h-3" />
                 </button>
-                <span className="font-semibold text-foreground min-w-[35px] text-center text-[11px]">
-                  {user.coin_balance + (pendingCoins[user.user_id] || 0)}
-                  {pendingCoins[user.user_id] ? <span className="text-primary ml-0.5">({pendingCoins[user.user_id] > 0 ? "+" : ""}{pendingCoins[user.user_id]})</span> : null}
-                </span>
+                <span className="font-semibold text-foreground min-w-[35px] text-center text-[11px]">{user.coin_balance}</span>
                 <button
-                  onClick={() => adjustCoinsLocal(user.user_id, parseInt(coinAmounts[user.user_id]) || 50)}
+                  onClick={() => adjustCoins(user.user_id, parseInt(coinAmounts[user.user_id]) || 50)}
                   className="w-5 h-5 rounded bg-primary/10 text-primary hover:bg-primary/20 flex items-center justify-center transition-colors"
                 >
                   <Plus className="w-3 h-3" />
@@ -621,16 +585,6 @@ const UsersEditor = () => {
               <span className="text-[10px]">
                 {user.user_created_at ? new Date(user.user_created_at).toLocaleDateString("ru") : "—"}
               </span>
-              {hasPendingChanges(user.user_id) && (
-                <button
-                  onClick={() => saveChanges(user.user_id)}
-                  disabled={saving === user.user_id}
-                  className="flex items-center gap-1 px-3 py-1 rounded-lg text-[11px] font-semibold bg-primary text-primary-foreground hover:opacity-90 transition-all disabled:opacity-40 animate-pulse"
-                >
-                  {saving === user.user_id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
-                  Сохранить
-                </button>
-              )}
             </div>
 
             <div className="flex justify-end gap-1.5 flex-wrap">
