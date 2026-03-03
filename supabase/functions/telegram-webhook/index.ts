@@ -86,12 +86,20 @@ Deno.serve(async (req) => {
         reply_markup: {
           keyboard: [
             [
-              { text: "👤 Профиль", web_app: { url: `${WEBAPP_URL}/profile` } },
               { text: "📚 Курсы", web_app: { url: WEBAPP_URL } },
+              { text: "👤 Профиль", web_app: { url: `${WEBAPP_URL}/profile` } },
+            ],
+            [
+              { text: "📖 Словарь", web_app: { url: `${WEBAPP_URL}/dictionary` } },
+              { text: "🛍 Магазин", web_app: { url: `${WEBAPP_URL}/shop` } },
+            ],
+            [
+              { text: "🎮 Игры", web_app: { url: `${WEBAPP_URL}/games` } },
+              { text: "💬 Диалоги", web_app: { url: `${WEBAPP_URL}/dialogues` } },
             ],
             [
               { text: "📲 На экран" },
-              { text: "💬 Поддержка" },
+              { text: "🆘 Поддержка" },
             ],
           ],
           resize_keyboard: true,
@@ -119,7 +127,7 @@ Deno.serve(async (req) => {
     }
 
     // Handle "Поддержка" button
-    if (text === "💬 Поддержка" && chatId) {
+    if ((text === "💬 Поддержка" || text === "🆘 Поддержка") && chatId) {
       await telegramApi(botToken, "sendMessage", {
         chat_id: chatId,
         text: `Напиши нам: @${SUPPORT_USERNAME}\n\nМы всегда рады помочь! 💬`,
