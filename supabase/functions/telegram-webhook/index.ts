@@ -90,12 +90,27 @@ Deno.serve(async (req) => {
               { text: "📚 Курсы", web_app: { url: WEBAPP_URL } },
             ],
             [
+              { text: "📲 На экран" },
               { text: "💬 Поддержка" },
             ],
           ],
           resize_keyboard: true,
           is_persistent: true,
         },
+      });
+
+      return new Response(JSON.stringify({ ok: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Handle "На экран" button
+    if (text === "📲 На экран" && chatId) {
+      await telegramApi(botToken, "sendMessage", {
+        chat_id: chatId,
+        text: "📲 <b>Добавь KLAR на домашний экран</b>\n\n<b>В Telegram:</b>\n1. Нажми кнопку «🚀 Начать» внизу\n2. В меню (⋯) выбери «Добавить на домашний экран»\n\n<b>Safari (iPhone/iPad):</b>\n1. Открой <a href=\"https://klardeutsch.lovable.app\">klardeutsch.lovable.app</a>\n2. Нажми □↑ → «На экран Домой»\n\n<b>Chrome (Android):</b>\n1. Открой сайт в Chrome\n2. Меню (⋮) → «Добавить на главный экран»\n\nПриложение работает офлайн! 🔥",
+        parse_mode: "HTML",
+        disable_web_page_preview: true,
       });
 
       return new Response(JSON.stringify({ ok: true }), {
