@@ -23,3 +23,5 @@ project_id = "jqqsszwbbxvevebmebfm"
     verify_jwt = false
   [functions.check-translations]
     verify_jwt = false
+  [functions.auto-duel-response]
+    verify_jwt = false

@@ -72,7 +72,19 @@ const PlayChallenge = ({ challenge, onFinished }: Props) => {
       updateData.status = "completed";
     }
 
+    // Update challenge first
     await supabase.from("challenges").update(updateData).eq("id", challenge.id);
+
+    // If challenger just finished, trigger auto-response for demo opponents
+    if (isChallenger) {
+      supabase.functions.invoke("auto-duel-response", {
+        body: { challenge_id: challenge.id },
+      }).then(({ data, error }) => {
+        if (data?.auto) console.log("Demo auto-response:", data);
+        if (error) console.error("auto-duel-response error:", error);
+      });
+    }
+
 
     // Notify challenger via Telegram when opponent finishes
     if (updateData.status === "completed") {
