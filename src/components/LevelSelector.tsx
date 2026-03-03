@@ -72,12 +72,27 @@ const LevelSelector = ({ onSelect }: LevelSelectorProps) => {
             </div>
           </button>
         ))}
+
+        {/* Mini-games — grid cell on mobile, hidden on desktop */}
+        <button
+          onClick={() => navigate("/games")}
+          className="lg:hidden glass-card p-5 flex flex-col items-center gap-2.5 transition-all hover:border-primary/50 hover:bg-primary/5 group"
+          style={{ animationDelay: "400ms" }}
+        >
+          <span className="text-3xl animate-float" style={{ animationDelay: "1000ms" }}>🕹️</span>
+          <div className="text-center">
+            <h3 className="text-lg font-display font-bold text-primary group-hover:text-yellow-glow transition-colors">
+              Игры
+            </h3>
+            <p className="text-[11px] text-muted-foreground mt-0.5">Мини-игры</p>
+          </div>
+        </button>
       </div>
 
-      {/* Mini-games button */}
+      {/* Mini-games — full-width button on desktop only */}
       <button
         onClick={() => navigate("/games")}
-        className="w-full glass-card p-4 flex items-center justify-center gap-3 mt-1 hover:border-primary/40 hover:bg-primary/5 transition-all group"
+        className="hidden lg:flex w-full glass-card p-4 items-center justify-center gap-3 mt-1 hover:border-primary/40 hover:bg-primary/5 transition-all group"
       >
         <span className="text-xl">🕹️</span>
         <span className="font-display text-sm font-semibold text-muted-foreground group-hover:text-primary transition-colors">
