@@ -21,8 +21,11 @@ const Referrals = () => {
   const { code, referrals, challenges, loading, activeCount, milestones } = useReferrals();
   const { lang } = useLanguage();
   const [copied, setCopied] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
 
   const t = (ru: string, uk: string) => (lang === "uk" ? uk : ru);
+
+  const referralLink = code ? `${window.location.origin}/auth?ref=${code}` : "";
 
   const copyCode = async () => {
     if (!code) return;
@@ -30,6 +33,14 @@ const Referrals = () => {
     setCopied(true);
     toast({ title: t("Код скопирован!", "Код скопійовано!") });
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const copyLink = async () => {
+    if (!referralLink) return;
+    await navigator.clipboard.writeText(referralLink);
+    setCopiedLink(true);
+    toast({ title: t("Ссылка скопирована!", "Посилання скопійовано!") });
+    setTimeout(() => setCopiedLink(false), 2000);
   };
 
   if (loading) {
@@ -62,6 +73,22 @@ const Referrals = () => {
         <p className="text-[11px] text-muted-foreground mt-2 text-center">
           {t("Друг вводит этот код при регистрации — вы оба получаете награды", "Друг вводить цей код при реєстрації — ви обидва отримуєте нагороди")}
         </p>
+
+        {/* Unique link */}
+        <div className="mt-3 pt-3 border-t border-border/20">
+          <p className="text-[11px] text-muted-foreground mb-2">{t("Или поделись ссылкой:", "Або поділись посиланням:")}</p>
+          <div className="flex items-center gap-2">
+            <div className="flex-1 px-3 py-2 rounded-lg bg-muted/40 border border-border/20 text-[11px] text-muted-foreground truncate font-mono">
+              {referralLink}
+            </div>
+            <button
+              onClick={copyLink}
+              className="p-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors shrink-0"
+            >
+              {copiedLink ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+            </button>
+          </div>
+        </div>
       </section>
 
       {/* Milestones */}
