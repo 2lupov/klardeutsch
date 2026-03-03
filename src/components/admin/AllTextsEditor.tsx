@@ -241,68 +241,67 @@ const AllTextsEditor = () => {
     if (edits.size === 0) return;
     setSaving(true);
 
-    const promises: PromiseLike<any>[] = [];
+    let errorCount = 0;
+    let successCount = 0;
 
     for (const [compositeKey, newValue] of edits.entries()) {
       const [source, id, field] = compositeKey.split("::");
+      let error: any = null;
 
       if (source === "ui") {
-        // Save as translation override
         const defaultVal = (translations as any)[id]?.[field] ?? "";
         if (newValue === defaultVal || newValue === "") {
-          promises.push(
-            supabase.from("translation_overrides").delete().eq("key", id).eq("lang", field).then()
-          );
+          const res = await supabase.from("translation_overrides").delete().eq("key", id).eq("lang", field);
+          error = res.error;
         } else {
-          promises.push(
-            supabase.from("translation_overrides").upsert(
-              { key: id, lang: field, value: newValue, updated_at: new Date().toISOString() },
-              { onConflict: "key,lang" }
-            ).then()
+          const res = await supabase.from("translation_overrides").upsert(
+            { key: id, lang: field, value: newValue, updated_at: new Date().toISOString() },
+            { onConflict: "key,lang" }
           );
+          error = res.error;
         }
       } else if (source === "vocab") {
-        promises.push(
-          supabase.from("vocab_cards").update({ [field]: newValue }).eq("id", id).then()
-        );
+        const res = await supabase.from("vocab_cards").update({ [field]: newValue }).eq("id", id);
+        error = res.error;
       } else if (source === "grammar") {
         if (field.startsWith("option_")) {
-          // Need to update the options array
           const idx = parseInt(field.split("_")[1]);
-          
-          // Fetch current options
-          promises.push(
-            supabase.from("grammar_questions").select("options").eq("id", id).single().then(async ({ data }) => {
-              if (data) {
-                const opts = [...(data.options as string[])];
-                opts[idx] = newValue;
-                await supabase.from("grammar_questions").update({ options: opts }).eq("id", id);
-              }
-            })
-          );
+          const { data } = await supabase.from("grammar_questions").select("options").eq("id", id).single();
+          if (data) {
+            const opts = [...(data.options as string[])];
+            opts[idx] = newValue;
+            const res = await supabase.from("grammar_questions").update({ options: opts }).eq("id", id);
+            error = res.error;
+          }
         } else {
-          promises.push(
-            supabase.from("grammar_questions").update({ [field]: newValue }).eq("id", id).then()
-          );
+          const res = await supabase.from("grammar_questions").update({ [field]: newValue }).eq("id", id);
+          error = res.error;
         }
       } else if (source === "cafe") {
-        promises.push(
-          supabase.from("cafe_scenarios").update({ [field]: newValue }).eq("id", id).then()
-        );
+        const res = await supabase.from("cafe_scenarios").update({ [field]: newValue }).eq("id", id);
+        error = res.error;
       } else if (source === "reading") {
-        promises.push(
-          supabase.from("reading_texts").update({ [field]: newValue }).eq("id", id).then()
-        );
+        const res = await supabase.from("reading_texts").update({ [field]: newValue }).eq("id", id);
+        error = res.error;
       } else if (source === "listening") {
-        promises.push(
-          supabase.from("listening_texts").update({ [field]: newValue }).eq("id", id).then()
-        );
+        const res = await supabase.from("listening_texts").update({ [field]: newValue }).eq("id", id);
+        error = res.error;
+      }
+
+      if (error) {
+        console.error(`Ошибка сохранения ${compositeKey}:`, error);
+        errorCount++;
+      } else {
+        successCount++;
       }
     }
 
-    await Promise.all(promises);
-    toast.success(`Сохранено ${edits.size} изменений!`);
-    setEdits(new Map());
+    if (errorCount > 0) {
+      toast.error(`Ошибка: ${errorCount} из ${edits.size} не сохранились. Проверьте, что вы вошли как админ.`);
+    } else {
+      toast.success(`Сохранено ${successCount} изменений!`);
+      setEdits(new Map());
+    }
     setSaving(false);
     loadAll();
   };
