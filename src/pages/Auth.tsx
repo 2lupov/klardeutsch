@@ -7,6 +7,45 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 import DemoExperience from "@/components/DemoExperience";
 import { Sparkles } from "lucide-react";
 
+const TypewriterLogo = () => {
+  const [visibleCount, setVisibleCount] = useState(0);
+  const letters = ["K", "L", "A", "R"];
+
+  useEffect(() => {
+    const timers = letters.map((_, i) =>
+      setTimeout(() => setVisibleCount(i + 1), 150 + i * 180)
+    );
+    return () => timers.forEach(clearTimeout);
+  }, []);
+
+  return (
+    <h1 className="text-3xl font-display font-bold tracking-tight flex items-center justify-center gap-[2px]">
+      {letters.map((letter, i) => (
+        <span
+          key={i}
+          className="text-gradient inline-block transition-all duration-300"
+          style={{
+            opacity: i < visibleCount ? 1 : 0,
+            transform: i < visibleCount ? "translateY(0) scale(1)" : "translateY(-12px) scale(0.7)",
+            transitionDelay: `${i * 60}ms`,
+          }}
+        >
+          {letter}
+        </span>
+      ))}
+      <span
+        className="inline-block w-[2px] h-7 ml-0.5 border-r-2"
+        style={{
+          animation: visibleCount >= letters.length
+            ? "typewriter-cursor 0.8s step-end infinite"
+            : "none",
+          borderColor: visibleCount < letters.length ? "transparent" : undefined,
+        }}
+      />
+    </h1>
+  );
+};
+
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(false);
   const [email, setEmail] = useState("");
@@ -86,19 +125,17 @@ const Auth = () => {
   return (
     <div className="h-[100dvh] bg-background flex items-center justify-center px-4 overflow-hidden">
       <div className="w-full max-w-sm">
-        <div className="text-center mb-5">
+        <div className="text-center mb-5 animate-auth-fade-up" style={{ animationDelay: "0.1s" }}>
           <div className="flex justify-end mb-1">
             <LanguageSwitcher />
           </div>
-          <h1 className="text-3xl font-display font-bold tracking-tight">
-            <span className="text-gradient">KLAR</span>
-          </h1>
-          <p className="text-muted-foreground text-sm mt-1">
+          <TypewriterLogo />
+          <p className="text-muted-foreground text-sm mt-1 animate-auth-fade-up" style={{ animationDelay: "0.7s" }}>
             {forgotMode ? t("resetPasswordTitle") : isLogin ? t("loginTitle") : t("signupTitle")}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="glass-card p-5 flex flex-col gap-3">
+        <form onSubmit={handleSubmit} className="glass-card p-5 flex flex-col gap-3 animate-auth-scale-in" style={{ animationDelay: "0.5s" }}>
           <input
             type="email"
             placeholder={t("email")}
@@ -141,7 +178,7 @@ const Auth = () => {
           )}
 
           {error && <p className="text-sm text-destructive">{error}</p>}
-          {message && <p className="text-sm text-green-500">{message}</p>}
+          {message && <p className="text-sm text-success">{message}</p>}
 
           <button
             type="submit"
@@ -180,7 +217,8 @@ const Auth = () => {
 
         <button
           onClick={() => setDemoMode(true)}
-          className="w-full mt-3 px-5 py-2.5 rounded-xl border border-primary/30 bg-primary/5 text-primary font-semibold text-sm transition-all hover:bg-primary/10 hover:border-primary/50 flex items-center justify-center gap-2"
+          className="w-full mt-3 px-5 py-2.5 rounded-xl border border-primary/30 bg-primary/5 text-primary font-semibold text-sm transition-all hover:bg-primary/10 hover:border-primary/50 flex items-center justify-center gap-2 animate-auth-fade-up"
+          style={{ animationDelay: "0.8s" }}
         >
           <Sparkles className="w-4 h-4" />
           {t("tryDemo")}
