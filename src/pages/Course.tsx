@@ -174,6 +174,7 @@ const Course = () => {
             lesson={activeLesson}
             index={lessonIndex}
             lang={lang}
+            level={course.level}
             isExpanded={true}
             onToggle={() => {}}
             onSectionOpen={handleSectionOpen}

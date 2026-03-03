@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 import ClozeExercise from "./ClozeExercise";
 import MCExercise from "./MCExercise";
 
@@ -14,13 +15,14 @@ interface LessonCardProps {
   };
   index: number;
   lang: string;
+  level?: string;
   isExpanded: boolean;
   onToggle: () => void;
   onSectionOpen?: () => void;
   hideHeader?: boolean;
 }
 
-type SectionKey = "theory" | "vocab" | "cloze" | "mc" | "dialog" | "culture" | "grammar" | "reading";
+type SectionKey = "theory" | "exercises" | "vocab" | "dialog" | "culture" | "grammar" | "reading" | "next";
 
 interface SectionDef {
   key: SectionKey;
@@ -31,32 +33,41 @@ interface SectionDef {
   count?: number;
 }
 
-const LessonCard = ({ lesson, index, lang, isExpanded, onToggle, onSectionOpen, hideHeader }: LessonCardProps) => {
+const nextLevelMap: Record<string, string> = { A1: "A2", A2: "B1", B1: "B2", B2: "C1", C1: "C1" };
+
+const LessonCard = ({ lesson, index, lang, level = "A1", isExpanded, onToggle, onSectionOpen, hideHeader }: LessonCardProps) => {
   const [activeSection, setActiveSection] = useState<SectionKey | null>(null);
   const [openedSections, setOpenedSections] = useState<Set<string>>(new Set());
+  const navigate = useNavigate();
 
   const ex = lesson.exercises || {};
   const vocab = ex.vocabulary || ex.vocab_cards || [];
   const exercises = ex.exercises || [];
   const dialog = ex.practice_dialog;
   const culturalNotes = ex.cultural_notes || [];
-  const topicDesc = lang === "uk" ? ex.topic_description?.ua : ex.topic_description?.ru;
 
   const clozeExercises = exercises.filter((e: any) => e.type === "cloze");
   const mcExercises = exercises.filter((e: any) => e.type === "multiple_choice");
+  const hasExercises = clozeExercises.length > 0 || mcExercises.length > 0 || (ex.grammar_questions?.length > 0 && !exercises.length);
+  const exerciseCount = clozeExercises.length + mcExercises.length + (ex.grammar_questions?.length > 0 && !exercises.length ? ex.grammar_questions.length : 0);
+
+  const nextLevel = nextLevelMap[level] || "A2";
 
   const sections = ([
     { key: "theory" as SectionKey, emoji: "📖", label: lang === "uk" ? "Теорія" : "Теория", sublabel: lang === "uk" ? "Правила та пояснення" : "Правила и объяснения", available: !!lesson.theory },
-    { key: "vocab" as SectionKey, emoji: "📚", label: lang === "uk" ? "Словник" : "Словарь", sublabel: lang === "uk" ? "Нові слова" : "Новые слова", available: vocab.length > 0, count: vocab.length },
-    { key: "cloze" as SectionKey, emoji: "✍️", label: lang === "uk" ? "Пропуски" : "Пропуски", sublabel: lang === "uk" ? "Заповніть пропуски" : "Заполните пропуски", available: clozeExercises.length > 0, count: clozeExercises.length },
-    { key: "mc" as SectionKey, emoji: "🧠", label: lang === "uk" ? "Тест" : "Тест", sublabel: lang === "uk" ? "Виберіть відповідь" : "Выберите ответ", available: mcExercises.length > 0, count: mcExercises.length },
+    { key: "exercises" as SectionKey, emoji: "✍️", label: lang === "uk" ? "Вправи" : "Упражнения", sublabel: lang === "uk" ? "Перевірте знання" : "Проверьте знания", available: hasExercises, count: exerciseCount },
+    { key: "vocab" as SectionKey, emoji: "📚", label: lang === "uk" ? `Словник ${level}` : `Словарь ${level}`, sublabel: lang === "uk" ? "Нові слова" : "Новые слова", available: vocab.length > 0, count: vocab.length },
     { key: "dialog" as SectionKey, emoji: "💬", label: lang === "uk" ? "Діалог" : "Диалог", sublabel: lang === "uk" ? "Практика розмови" : "Практика разговора", available: !!dialog },
     { key: "culture" as SectionKey, emoji: "🌍", label: lang === "uk" ? "Культура" : "Культура", sublabel: lang === "uk" ? "Цікаві факти" : "Интересные факты", available: culturalNotes.length > 0, count: culturalNotes.length },
-    { key: "grammar" as SectionKey, emoji: "📝", label: lang === "uk" ? "Граматика" : "Грамматика", sublabel: lang === "uk" ? "Питання" : "Вопросы", available: ex.grammar_questions?.length > 0 && !exercises.length, count: ex.grammar_questions?.length },
     { key: "reading" as SectionKey, emoji: "📕", label: lang === "uk" ? "Читання" : "Чтение", sublabel: lang === "uk" ? "Текст для читання" : "Текст для чтения", available: !!ex.reading },
+    { key: "next" as SectionKey, emoji: "🚀", label: lang === "uk" ? `Готовий до ${nextLevel}?` : `Готов к ${nextLevel}?`, sublabel: lang === "uk" ? "Наступний рівень" : "Следующий уровень", available: true },
   ] as SectionDef[]).filter(s => s.available);
 
   const handleSectionSelect = (key: SectionKey) => {
+    if (key === "next") {
+      navigate("/shop");
+      return;
+    }
     setActiveSection(key);
     if (!openedSections.has(key)) {
       setOpenedSections(prev => new Set(prev).add(key));
@@ -70,6 +81,16 @@ const LessonCard = ({ lesson, index, lang, isExpanded, onToggle, onSectionOpen, 
         return (
           <div className="p-4 rounded-xl bg-secondary/50 border border-border/30 animate-slide-up">
             <div className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{lesson.theory}</div>
+          </div>
+        );
+      case "exercises":
+        return (
+          <div className="space-y-2.5 animate-slide-up">
+            {clozeExercises.map((e: any, i: number) => <ClozeExercise key={`c-${i}`} ex={e} lang={lang} />)}
+            {mcExercises.map((e: any, i: number) => <MCExercise key={`mc-${i}`} ex={e} lang={lang} />)}
+            {ex.grammar_questions?.length > 0 && !exercises.length && (
+              ex.grammar_questions.map((q: any, qi: number) => <MCExercise key={`g-${qi}`} ex={q} lang={lang} />)
+            )}
           </div>
         );
       case "vocab":
@@ -91,18 +112,6 @@ const LessonCard = ({ lesson, index, lang, isExpanded, onToggle, onSectionOpen, 
                 </div>
               );
             })}
-          </div>
-        );
-      case "cloze":
-        return (
-          <div className="space-y-2.5 animate-slide-up">
-            {clozeExercises.map((e: any, i: number) => <ClozeExercise key={i} ex={e} lang={lang} />)}
-          </div>
-        );
-      case "mc":
-        return (
-          <div className="space-y-2.5 animate-slide-up">
-            {mcExercises.map((e: any, i: number) => <MCExercise key={i} ex={e} lang={lang} />)}
           </div>
         );
       case "dialog":
@@ -139,12 +148,6 @@ const LessonCard = ({ lesson, index, lang, isExpanded, onToggle, onSectionOpen, 
             ))}
           </div>
         );
-      case "grammar":
-        return (
-          <div className="space-y-2.5 animate-slide-up">
-            {ex.grammar_questions?.map((q: any, qi: number) => <MCExercise key={qi} ex={q} lang={lang} />)}
-          </div>
-        );
       case "reading":
         return ex.reading ? (
           <div className="p-3 rounded-xl bg-secondary/30 text-xs animate-slide-up">
@@ -157,11 +160,9 @@ const LessonCard = ({ lesson, index, lang, isExpanded, onToggle, onSectionOpen, 
     }
   };
 
-  // Content area
   const renderContent = () => {
     if (!isExpanded) return null;
 
-    // Active section → show content with back button
     if (activeSection) {
       const currentSection = sections.find(s => s.key === activeSection);
       return (
@@ -182,7 +183,6 @@ const LessonCard = ({ lesson, index, lang, isExpanded, onToggle, onSectionOpen, 
       );
     }
 
-    // Section grid (like LevelSelector)
     return (
       <div className="animate-slide-up">
         <div className="grid grid-cols-2 gap-2.5 mt-1">
@@ -192,29 +192,35 @@ const LessonCard = ({ lesson, index, lang, isExpanded, onToggle, onSectionOpen, 
               onClick={() => handleSectionSelect(section.key)}
               className={cn(
                 "glass-card p-4 flex flex-col items-center gap-2 transition-all hover:border-primary/50 hover:bg-primary/5 group relative overflow-hidden",
-                openedSections.has(section.key) && "border-primary/20"
+                openedSections.has(section.key) && "border-primary/20",
+                section.key === "next" && "col-span-2 bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20"
               )}
               style={{ animationDelay: `${i * 60}ms` }}
             >
-              {/* Progress indicator for opened sections */}
               {openedSections.has(section.key) && (
                 <div
                   className="absolute bottom-0 left-0 h-0.5 w-full"
                   style={{ background: "linear-gradient(90deg, hsl(var(--yellow-glow)), hsl(var(--yellow-soft)))" }}
                 />
               )}
-              <span className="text-2xl animate-float" style={{ animationDelay: `${i * 150}ms` }}>
+              <span className={cn("animate-float", section.key === "next" ? "text-3xl" : "text-2xl")} style={{ animationDelay: `${i * 150}ms` }}>
                 {section.emoji}
               </span>
               <div className="text-center">
-                <h3 className="text-sm font-display font-bold text-primary group-hover:text-foreground transition-colors">
+                <h3 className={cn(
+                  "font-display font-bold transition-colors",
+                  section.key === "next" ? "text-base text-primary" : "text-sm text-primary group-hover:text-foreground"
+                )}>
                   {section.label}
                 </h3>
                 <p className="text-[10px] text-muted-foreground mt-0.5">{section.sublabel}</p>
-                {section.count !== undefined && (
+                {section.count !== undefined && section.key !== "next" && (
                   <p className="text-[10px] text-primary/70 mt-0.5 font-medium">{section.count} шт.</p>
                 )}
               </div>
+              {section.key === "next" && (
+                <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-primary/50" />
+              )}
             </button>
           ))}
         </div>
@@ -229,7 +235,6 @@ const LessonCard = ({ lesson, index, lang, isExpanded, onToggle, onSectionOpen, 
         ? "border-primary/20 bg-card shadow-lg shadow-primary/5"
         : "border-border/30 bg-card/60 hover:bg-card/80 hover:border-border/50")
     )}>
-      {/* Lesson header */}
       {!hideHeader && (
         <button onClick={onToggle} className="w-full flex items-center gap-3.5 p-4 text-left group">
           <div className={cn(
@@ -243,7 +248,6 @@ const LessonCard = ({ lesson, index, lang, isExpanded, onToggle, onSectionOpen, 
           <span className="text-sm font-semibold text-foreground flex-1">{lesson.title}</span>
         </button>
       )}
-
       {renderContent()}
     </div>
   );
