@@ -1,6 +1,7 @@
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Brain, Sparkles, Target, Zap, Star, ChevronDown, ArrowLeft } from "lucide-react";
+import { Brain, Sparkles, Target, Zap, Star, ChevronDown, ArrowLeft, Volume2, Loader2, Pause } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useState, useRef, useCallback } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 const testimonials = [
@@ -25,6 +26,16 @@ const testimonials = [
     text: "Аудирование с ElevenLabs — как живой преподаватель. Рекомендую всем, кто учит немецкий!",
   },
 ];
+
+const motivationText: Record<string, string> = {
+  ru: "Привет! Я — KLAR, твой помощник в изучении немецкого языка. Забудь скучные учебники и бесконечную зубрёжку. Здесь всё по-другому: короткие уроки, умные карточки, квизы и аудирование — всего 5–10 минут в день. Искусственный интеллект анализирует именно твои ошибки и подсказывает, над чем работать. А система XP, достижений и дуэлей с друзьями превращает учёбу в увлекательную игру. От A1 до C1 — ясно, просто и бесплатно. Начни прямо сейчас!",
+  uk: "Привіт! Я — KLAR, твій помічник у вивченні німецької мови. Забудь нудні підручники та нескінченне зубріння. Тут все інакше: короткі уроки, розумні картки, квізи та аудіювання — лише 5–10 хвилин на день. Штучний інтелект аналізує саме твої помилки і підказує, над чим працювати. А система XP, досягнень та дуелей з друзями перетворює навчання на захопливу гру. Від A1 до C1 — ясно, просто і безкоштовно. Починай прямо зараз!",
+};
+
+const voiceIdMap: Record<string, string> = {
+  ru: "ycbyWsnf4hqZgdpKHqiU",
+  uk: "2OXYbN1uGomXXJtv9Dq6",
+};
 
 const faqItems = [
   {
@@ -57,8 +68,50 @@ const features = [
 ];
 
 const Method = () => {
-  const { t } = useLanguage();
+  const { lang, t } = useLanguage();
   const navigate = useNavigate();
+  const [audioState, setAudioState] = useState<"idle" | "loading" | "playing">("idle");
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const playMotivation = useCallback(async () => {
+    if (audioState === "playing" && audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      setAudioState("idle");
+      return;
+    }
+
+    setAudioState("loading");
+    try {
+      const text = motivationText[lang] || motivationText.ru;
+      const voiceId = voiceIdMap[lang] || voiceIdMap.ru;
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ text, voiceId }),
+        }
+      );
+
+      if (!response.ok) throw new Error("TTS failed");
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      audio.onended = () => setAudioState("idle");
+      await audio.play();
+      setAudioState("playing");
+    } catch {
+      setAudioState("idle");
+    }
+  }, [lang, audioState]);
 
   return (
     <div className="min-h-[100dvh] overflow-y-auto bg-background text-foreground">
@@ -77,15 +130,33 @@ const Method = () => {
             От A1 до C1 с AI-поддержкой.
           </p>
 
-          {/* Video placeholder */}
-          <div className="glass-card aspect-video max-w-md mx-auto flex items-center justify-center mb-4">
-            <div className="text-center text-muted-foreground">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                <div className="w-0 h-0 border-l-[14px] border-l-primary border-y-[9px] border-y-transparent ml-1" />
-              </div>
-              <p className="text-sm">Видео-приветствие<br /><span className="text-xs opacity-60">скоро здесь</span></p>
+          {/* Audio motivation */}
+          <button
+            onClick={playMotivation}
+            className="glass-card max-w-md mx-auto flex items-center gap-4 px-6 py-5 mb-4 cursor-pointer hover:border-primary/30 transition-all group"
+          >
+            <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
+              {audioState === "loading" ? (
+                <Loader2 className="w-6 h-6 text-primary animate-spin" />
+              ) : audioState === "playing" ? (
+                <Pause className="w-6 h-6 text-primary" />
+              ) : (
+                <Volume2 className="w-6 h-6 text-primary" />
+              )}
             </div>
-          </div>
+            <div className="text-left">
+              <p className="font-display font-semibold text-sm">
+                {lang === "uk" ? "🎧 Послухай мотивацію KLAR" : "🎧 Послушай мотивацию KLAR"}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {audioState === "loading"
+                  ? lang === "uk" ? "Завантаження..." : "Загрузка..."
+                  : audioState === "playing"
+                    ? lang === "uk" ? "Зараз грає — натисни щоб зупинити" : "Сейчас играет — нажми чтобы остановить"
+                    : lang === "uk" ? "Натисни, щоб почути" : "Нажми, чтобы услышать"}
+              </p>
+            </div>
+          </button>
         </div>
 
         {/* ambient glow */}
