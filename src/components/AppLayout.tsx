@@ -1,22 +1,40 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, Outlet } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePlatform } from "@/hooks/usePlatform";
+import { supabase } from "@/integrations/supabase/client";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import DesktopSidebar from "@/components/DesktopSidebar";
 import PageTransition from "@/components/PageTransition";
 import LofiFloatingPlayer from "@/components/LofiFloatingPlayer";
+import NicknameGate from "@/components/NicknameGate";
 
 const AppLayout = () => {
   const { user, loading } = useAuth();
   const { isMobile } = usePlatform();
   const navigate = useNavigate();
+  const [nicknameChecked, setNicknameChecked] = useState(false);
+  const [hasNickname, setHasNickname] = useState(true);
 
   useEffect(() => {
     if (!loading && !user) navigate("/auth");
   }, [user, loading, navigate]);
 
-  if (loading) {
+  useEffect(() => {
+    if (!user) return;
+    const check = async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("display_name")
+        .eq("user_id", user.id)
+        .single();
+      setHasNickname(!!data?.display_name?.trim());
+      setNicknameChecked(true);
+    };
+    check();
+  }, [user]);
+
+  if (loading || !nicknameChecked) {
     return (
       <div className="min-h-[100dvh] bg-background flex items-center justify-center">
         <span className="text-muted-foreground animate-pulse font-display">KLAR</span>
@@ -25,6 +43,10 @@ const AppLayout = () => {
   }
 
   if (!user) return null;
+
+  if (!hasNickname) {
+    return <NicknameGate onComplete={() => setHasNickname(true)} />;
+  }
 
   if (isMobile) {
     return (
@@ -38,7 +60,6 @@ const AppLayout = () => {
     );
   }
 
-  // Desktop layout
   return (
     <div className="h-[100dvh] bg-background flex overflow-hidden">
       <DesktopSidebar />
