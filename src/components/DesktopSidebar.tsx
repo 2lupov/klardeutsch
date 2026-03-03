@@ -1,6 +1,7 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { Home, User, BookOpen, BarChart3, ShoppingBag, Gamepad2, MessageCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { usePlatform } from "@/hooks/usePlatform";
 import KlarLogo from "@/components/KlarLogo";
 import { useLevelProgress } from "@/hooks/useLevelProgress";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
@@ -8,6 +9,7 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 const DesktopSidebar = () => {
   const { t } = useLanguage();
   const location = useLocation();
+  const { isTelegram } = usePlatform();
 
   const a1 = useLevelProgress("A1");
   const a2 = useLevelProgress("A2");
@@ -56,33 +58,35 @@ const DesktopSidebar = () => {
         })}
       </nav>
 
-      {/* Footer */}
-      <div className="p-4 border-t border-border space-y-1 flex-shrink-0">
-        <NavLink
-          to="/method"
-          className={`flex items-center gap-2 px-4 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors ${
-            location.pathname === "/method" ? "text-foreground" : ""
-          }`}
-        >
-          О методе KLAR
-        </NavLink>
-        <NavLink
-          to="/privacy"
-          className={`flex items-center gap-2 px-4 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors ${
-            location.pathname === "/privacy" ? "text-foreground" : ""
-          }`}
-        >
-          Конфиденциальность
-        </NavLink>
-        <NavLink
-          to="/terms"
-          className={`flex items-center gap-2 px-4 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors ${
-            location.pathname === "/terms" ? "text-foreground" : ""
-          }`}
-        >
-          Оферта
-        </NavLink>
-      </div>
+      {/* Footer — web only */}
+      {!isTelegram && (
+        <div className="p-4 border-t border-border space-y-1 flex-shrink-0">
+          <NavLink
+            to="/method"
+            className={`flex items-center gap-2 px-4 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors ${
+              location.pathname === "/method" ? "text-foreground" : ""
+            }`}
+          >
+            О методе KLAR
+          </NavLink>
+          <NavLink
+            to="/privacy"
+            className={`flex items-center gap-2 px-4 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors ${
+              location.pathname === "/privacy" ? "text-foreground" : ""
+            }`}
+          >
+            Конфиденциальность
+          </NavLink>
+          <NavLink
+            to="/terms"
+            className={`flex items-center gap-2 px-4 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors ${
+              location.pathname === "/terms" ? "text-foreground" : ""
+            }`}
+          >
+            Оферта
+          </NavLink>
+        </div>
+      )}
     </aside>
   );
 };
