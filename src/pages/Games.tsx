@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
-import { Recycle, Coffee, Swords, Mic } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Recycle, Coffee, Swords, Mic, ArrowLeft } from "lucide-react";
 import { usePlatform } from "@/hooks/usePlatform";
 import ArticleSorter from "@/components/games/ArticleSorter";
 import CafeBestellung from "@/components/games/CafeBestellung";
@@ -13,6 +13,7 @@ const Games = () => {
   const [screen, setScreen] = useState<GameScreen>("list");
   const { isMobile } = usePlatform();
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Handle navigation from UserProfileDialog
   useEffect(() => {
@@ -40,6 +41,13 @@ const Games = () => {
 
   return (
     <div className={`w-full mx-auto px-4 py-6 ${isMobile ? "max-w-md" : "max-w-2xl"}`}>
+      <button
+        onClick={() => navigate(-1)}
+        className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Назад
+      </button>
       <h1 className="font-display text-xl font-bold text-foreground mb-1 flex items-center gap-2">
         🎮 Мини-игры
       </h1>
