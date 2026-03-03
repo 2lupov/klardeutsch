@@ -50,8 +50,11 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Wait 2-8 seconds for realism (random delay)
-    const delay = 2000 + Math.random() * 6000;
+    // Random delay: 30 seconds to 2 hours for realism
+    const minDelay = 30 * 1000;
+    const maxDelay = 2 * 60 * 60 * 1000;
+    const delay = minDelay + Math.random() * (maxDelay - minDelay);
+    console.log(`Auto-duel for ${demo.display_name}: responding in ${Math.round(delay / 1000)}s`);
     await new Promise((r) => setTimeout(r, delay));
 
     // Generate realistic random answers
