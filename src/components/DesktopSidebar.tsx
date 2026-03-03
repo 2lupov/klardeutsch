@@ -7,7 +7,7 @@ import { useLevelProgress } from "@/hooks/useLevelProgress";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 const DesktopSidebar = () => {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const location = useLocation();
   const { isTelegram } = usePlatform();
 
@@ -67,23 +67,23 @@ const DesktopSidebar = () => {
               location.pathname === "/method" ? "text-foreground" : ""
             }`}
           >
-            О методе KLAR
-          </NavLink>
-          <NavLink
+          {lang === "uk" ? "Про метод KLAR" : "О методе KLAR"}
+        </NavLink>
+        <NavLink
             to="/privacy"
             className={`flex items-center gap-2 px-4 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors ${
               location.pathname === "/privacy" ? "text-foreground" : ""
             }`}
           >
-            Конфиденциальность
-          </NavLink>
-          <NavLink
+          {lang === "uk" ? "Конфіденційність" : "Конфиденциальность"}
+        </NavLink>
+        <NavLink
             to="/terms"
             className={`flex items-center gap-2 px-4 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors ${
               location.pathname === "/terms" ? "text-foreground" : ""
             }`}
           >
-            Оферта
+          {lang === "uk" ? "Оферта" : "Оферта"}
           </NavLink>
         </div>
       )}
