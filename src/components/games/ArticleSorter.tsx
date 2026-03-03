@@ -25,9 +25,9 @@ const BIN_ACTIVE: Record<Bin, string> = {
 };
 
 const BIN_ICONS: Record<Bin, string> = {
-  Der: "🔵",
-  Die: "🔴",
-  Das: "🟢",
+  Der: "🗑️",
+  Die: "🗑️",
+  Das: "🗑️",
 };
 
 const NEIGHBOR_PHRASES = [
@@ -263,7 +263,7 @@ const ArticleSorter = ({ onBack }: { onBack: () => void }) => {
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
           >
-            <h2 className="text-3xl font-display font-bold text-foreground mb-2">{currentWord.german}</h2>
+            <h2 className="text-3xl font-display font-bold text-foreground mb-2">{currentWord.german.replace(/^(der|die|das)\s+/i, '')}</h2>
             <p className="text-sm text-muted-foreground">{currentWord.russian}</p>
 
             {isMobile && !feedback && (
