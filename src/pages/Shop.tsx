@@ -20,8 +20,8 @@ interface ShopItem {
 
 const Shop = () => {
   const { user } = useAuth();
-  const { t } = useLanguage();
-  const { isMobile } = usePlatform();
+  const { lang, t } = useLanguage();
+  const { isMobile, isTelegram } = usePlatform();
   const { balance, purchaseItem } = useCoins();
   const [items, setItems] = useState<ShopItem[]>([]);
   const [purchased, setPurchased] = useState<Set<string>>(new Set());
@@ -86,6 +86,44 @@ const Shop = () => {
     return (
       <div className="flex items-center justify-center py-20">
         <span className="text-muted-foreground">{t("loading")}</span>
+      </div>
+    );
+  }
+
+  if (isTelegram) {
+    return (
+      <div className="w-full mx-auto px-4 py-6 max-w-md">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="font-display text-xl font-bold text-foreground">{t("shopTitle")}</h1>
+            <p className="text-xs text-muted-foreground mt-0.5">{t("shopSubtitle")}</p>
+          </div>
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
+            <Coins className="w-4 h-4 text-primary" />
+            <span className="font-display font-bold text-primary">{balance}</span>
+          </div>
+        </div>
+        <div className="glass-card p-6 text-center space-y-4">
+          <ShoppingBag className="w-12 h-12 text-primary mx-auto" />
+          <div>
+            <h2 className="font-display font-bold text-foreground mb-2">
+              {lang === "uk" ? "Магазин працює через сайт" : "Магазин работает через сайт"}
+            </h2>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {lang === "uk"
+                ? "Щоб переглядати курси та купувати матеріали, відкрийте KLAR у браузері."
+                : "Чтобы просматривать курсы и покупать материалы, откройте KLAR в браузере."}
+            </p>
+          </div>
+          <a
+            href="https://klardeutsch.lovable.app/shop"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold transition-all hover:opacity-90 active:scale-95"
+          >
+            {lang === "uk" ? "Відкрити у браузері" : "Открыть в браузере"}
+          </a>
+        </div>
       </div>
     );
   }
