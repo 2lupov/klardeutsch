@@ -256,6 +256,11 @@ const translations = {
   telegramLinkDesc: { ru: "Получай напоминания об учёбе прямо в Telegram", uk: "Отримуй нагадування про навчання прямо в Telegram" },
   openBot: { ru: "Открыть бота", uk: "Відкрити бота" },
   telegramUnlinked: { ru: "Telegram отвязан", uk: "Telegram відв'язано" },
+
+  // Referrals
+  referralsTitle: { ru: "Рефералы", uk: "Реферали" },
+  referralCode: { ru: "Реферальный код", uk: "Реферальний код" },
+  referralCodePlaceholder: { ru: "Код друга (необязательно)", uk: "Код друга (необов'язково)" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;

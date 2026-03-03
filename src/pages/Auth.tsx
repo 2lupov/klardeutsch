@@ -13,6 +13,7 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [nickname, setNickname] = useState("");
+  const [referralCode, setReferralCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -78,6 +79,13 @@ const Auth = () => {
       } else {
         if (signUpData.user) {
           await supabase.from("profiles").update({ display_name: nickname }).eq("user_id", signUpData.user.id);
+          // Apply referral code if provided
+          if (referralCode.trim()) {
+            await supabase.rpc("apply_referral_code", {
+              p_referred_id: signUpData.user.id,
+              p_code: referralCode.trim(),
+            });
+          }
         }
         setMessage(t("checkEmail"));
       }
@@ -167,6 +175,16 @@ const Auth = () => {
               required
               maxLength={20}
               className="w-full px-4 py-3 rounded-xl bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:border-primary focus:outline-none transition-colors"
+            />
+          )}
+          {!isLogin && !forgotMode && (
+            <input
+              type="text"
+              placeholder={t("referralCodePlaceholder") || "Код друга (необязательно)"}
+              value={referralCode}
+              onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+              maxLength={9}
+              className="w-full px-4 py-3 rounded-xl bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:border-primary focus:outline-none transition-colors font-mono tracking-wider"
             />
           )}
           {!forgotMode && (
