@@ -2,16 +2,17 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Plus, Trash2, Lock, Check, BookOpen, Languages, Headphones, BookText, ShoppingBag, Gamepad2, Users } from "lucide-react";
+import { Plus, Trash2, Lock, Check, BookOpen, Languages, Headphones, BookText, ShoppingBag, Gamepad2, Users, Globe } from "lucide-react";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import ShopEditor from "@/components/admin/ShopEditor";
 import ListeningEditor from "@/components/admin/ListeningEditor";
 import UsersEditor from "@/components/admin/UsersEditor";
 import CafeEditor from "@/components/admin/CafeEditor";
+import TranslationsEditor from "@/components/admin/TranslationsEditor";
 import { toast } from "sonner";
 
 type Level = "A1" | "A2" | "B1" | "B2" | "C1";
-type Tab = "vocabulary" | "grammar" | "reading" | "listening" | "shop" | "games" | "users";
+type Tab = "vocabulary" | "grammar" | "reading" | "listening" | "shop" | "games" | "users" | "translations";
 
 const LEVELS: Level[] = ["A1", "A2", "B1", "B2", "C1"];
 
@@ -23,6 +24,7 @@ const TAB_CONFIG: { key: Tab; icon: React.ElementType; label: string }[] = [
   { key: "shop", icon: ShoppingBag, label: "shopTab" },
   { key: "games", icon: Gamepad2, label: "games" },
   { key: "users", icon: Users, label: "users" },
+  { key: "translations", icon: Globe, label: "translations" },
 ];
 
 const Admin = () => {
@@ -119,7 +121,7 @@ const Admin = () => {
               }`}
             >
               <Icon className="w-3.5 h-3.5" />
-              {key === "games" ? "Игры" : key === "users" ? "Юзеры" : t(label as any)}
+              {key === "games" ? "Игры" : key === "users" ? "Юзеры" : key === "translations" ? "Языки" : t(label as any)}
             </button>
           ))}
         </div>
@@ -132,6 +134,7 @@ const Admin = () => {
         {tab === "shop" && <ShopEditor />}
         {tab === "games" && <GamesEditor level={level} />}
         {tab === "users" && <UsersEditor />}
+        {tab === "translations" && <TranslationsEditor />}
       </div>
     </div>
   );

@@ -630,6 +630,30 @@ export type Database = {
         }
         Relationships: []
       }
+      translation_overrides: {
+        Row: {
+          id: string
+          key: string
+          lang: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          id?: string
+          key: string
+          lang: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          id?: string
+          key?: string
+          lang?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
       user_coins: {
         Row: {
           balance: number
