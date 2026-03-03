@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Gift, Flame, Sparkles } from "lucide-react";
 import { useDailyBonus, BonusReward } from "@/hooks/useDailyBonus";
 import {
@@ -13,13 +13,14 @@ const DailyBonusDialog = () => {
   const [open, setOpen] = useState(false);
   const [claimed, setClaimed] = useState<BonusReward | null>(null);
   const [claiming, setClaiming] = useState(false);
-  const [shown, setShown] = useState(false);
 
-  // Auto-open when bonus is available
-  if (canClaim && !loading && !shown && !open) {
-    setTimeout(() => setOpen(true), 800);
-    setShown(true);
-  }
+  // Auto-open when bonus is available (using useEffect to avoid render-time side effects)
+  useEffect(() => {
+    if (canClaim && !loading) {
+      const timer = setTimeout(() => setOpen(true), 800);
+      return () => clearTimeout(timer);
+    }
+  }, [canClaim, loading]);
 
   const handleClaim = async () => {
     setClaiming(true);
@@ -28,7 +29,7 @@ const DailyBonusDialog = () => {
     setClaiming(false);
   };
 
-  if (loading || (!canClaim && !claimed)) return null;
+  if (loading || (!canClaim && !open && !claimed)) return null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -53,7 +54,7 @@ const DailyBonusDialog = () => {
             <>
               {/* Gift box animation */}
               <div className="relative">
-                <div className="text-6xl animate-bounce">🎁</div>
+                <span className="text-6xl block animate-bounce" role="img" aria-label="gift">🎁</span>
                 <Sparkles className="absolute -top-1 -right-1 w-5 h-5 text-primary animate-pulse" />
               </div>
 
@@ -72,9 +73,9 @@ const DailyBonusDialog = () => {
           ) : (
             <>
               {/* Reward reveal */}
-              <div className="text-6xl animate-scale-in">
+              <span className="text-6xl block animate-scale-in" role="img" aria-label="reward">
                 {claimed.emoji}
-              </div>
+              </span>
 
               <div className="text-center">
                 <p className="font-display font-bold text-lg text-foreground">
