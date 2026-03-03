@@ -380,7 +380,7 @@ const PronunciationTrainer = ({ onBack }: PronunciationTrainerProps) => {
               ) : (
                 <>
                   <Mic className="w-4 h-4" />
-                  🎙 Говорить
+                  Говорить
                 </>
               )}
             </button>
