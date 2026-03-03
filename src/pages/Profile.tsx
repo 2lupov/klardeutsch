@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePlatform } from "@/hooks/usePlatform";
@@ -525,6 +525,17 @@ const Profile = () => {
           onClick={() => setScreen("referrals")}
         />
       </div>
+
+      {/* Info links (mobile) */}
+      {isMobile && (
+        <div className="flex items-center justify-center gap-3 text-[10px] text-muted-foreground mt-2 mb-2">
+          <Link to="/method" className="hover:text-foreground transition-colors">О методе</Link>
+          <span>·</span>
+          <Link to="/privacy" className="hover:text-foreground transition-colors">Конфиденциальность</Link>
+          <span>·</span>
+          <Link to="/terms" className="hover:text-foreground transition-colors">Оферта</Link>
+        </div>
+      )}
 
       {/* Lofi Radio */}
       <div className="mt-auto">
