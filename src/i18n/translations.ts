@@ -2,7 +2,7 @@ export type Lang = "ru" | "uk";
 
 const translations = {
   // Common
-  back: { ru: "Назад", uk: "Назад" },
+  back: { ru: "Назад", uk: "Повернутися" },
   loading: { ru: "Загрузка...", uk: "Завантаження..." },
   signOut: { ru: "Выйти", uk: "Вийти" },
 
