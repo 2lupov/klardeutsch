@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Shield, ShieldOff, Search, Users, Star, Coins, Send, Bell, Loader2, MessageSquare, CheckSquare, Square, X } from "lucide-react";
+import { Shield, ShieldOff, Search, Users, Star, Coins, Send, Bell, Loader2, MessageSquare, CheckSquare, Square, X, Plus, Minus } from "lucide-react";
 import { toast } from "sonner";
 
 interface AdminUser {
@@ -50,6 +50,17 @@ const UsersEditor = () => {
     }
     toast.success(isAdmin ? "Роль admin снята" : "Роль admin назначена");
     load();
+  };
+
+  const adjustXp = async (userId: string, currentXp: number, delta: number) => {
+    const newXp = Math.max(0, currentXp + delta);
+    const { error } = await supabase.rpc("admin_set_xp", { p_user_id: userId, p_xp: newXp });
+    if (error) {
+      toast.error("Ошибка: " + error.message);
+    } else {
+      toast.success(`XP: ${currentXp} → ${newXp}`);
+      load();
+    }
   };
 
   const toggleSelect = (userId: string) => {
@@ -279,11 +290,27 @@ const UsersEditor = () => {
             </div>
 
             <div className="flex items-center gap-4 text-xs text-muted-foreground pl-7">
-              <span className="flex items-center gap-1">
-                <Star className="w-3 h-3 text-yellow-500" /> {user.total_xp} XP
+              <span className="flex items-center gap-1.5">
+                <Star className="w-3 h-3 text-primary" />
+                <button
+                  onClick={() => adjustXp(user.user_id, user.total_xp, -50)}
+                  className="w-5 h-5 rounded bg-destructive/10 text-destructive hover:bg-destructive/20 flex items-center justify-center transition-colors"
+                  title="-50 XP"
+                >
+                  <Minus className="w-3 h-3" />
+                </button>
+                <span className="font-semibold text-foreground min-w-[40px] text-center">{user.total_xp}</span>
+                <button
+                  onClick={() => adjustXp(user.user_id, user.total_xp, 50)}
+                  className="w-5 h-5 rounded bg-primary/10 text-primary hover:bg-primary/20 flex items-center justify-center transition-colors"
+                  title="+50 XP"
+                >
+                  <Plus className="w-3 h-3" />
+                </button>
+                <span className="text-muted-foreground">XP</span>
               </span>
               <span className="flex items-center gap-1">
-                <Coins className="w-3 h-3 text-yellow-500" /> {user.coin_balance}
+                <Coins className="w-3 h-3 text-primary" /> {user.coin_balance}
               </span>
               <span>
                 {user.user_created_at ? new Date(user.user_created_at).toLocaleDateString("ru") : "—"}
