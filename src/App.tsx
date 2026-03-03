@@ -18,6 +18,7 @@ import Shop from "./pages/Shop";
 import Challenges from "./pages/Challenges";
 import Dialogues from "./pages/Dialogues";
 import Method from "./pages/Method";
+import Games from "./pages/Games";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import NotFound from "./pages/NotFound";
@@ -49,6 +50,7 @@ const App = () => (
                 <Route path="/shop" element={<Shop />} />
                 <Route path="/challenges" element={<Challenges />} />
                 <Route path="/dialogues" element={<Dialogues />} />
+                <Route path="/games" element={<Games />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
