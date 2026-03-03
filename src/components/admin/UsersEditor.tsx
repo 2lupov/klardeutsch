@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Shield, ShieldOff, Search, Users, Star, Coins, Send, Bell, Loader2, MessageSquare, CheckSquare, Square, X, Plus, Minus } from "lucide-react";
+import { Shield, ShieldOff, Search, Users, Star, Coins, Send, Bell, Loader2, MessageSquare, CheckSquare, Square, X, Plus, Minus, Trash2, UserPlus, Pencil, Bot } from "lucide-react";
 import { toast } from "sonner";
 
 interface AdminUser {
@@ -14,6 +14,12 @@ interface AdminUser {
   roles: string[];
   user_created_at: string;
   last_active: string | null;
+}
+
+interface DemoUser {
+  id: string;
+  display_name: string;
+  total_xp: number;
 }
 
 const UsersEditor = () => {
@@ -29,6 +35,13 @@ const UsersEditor = () => {
   const [dmMsg, setDmMsg] = useState("");
   const [dmSending, setDmSending] = useState(false);
 
+  // Demo users state
+  const [demoUsers, setDemoUsers] = useState<DemoUser[]>([]);
+  const [newDemoName, setNewDemoName] = useState("");
+  const [newDemoXp, setNewDemoXp] = useState("100");
+  const [editingDemoId, setEditingDemoId] = useState<string | null>(null);
+  const [editingDemoName, setEditingDemoName] = useState("");
+
   const load = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase.rpc("get_admin_users");
@@ -40,7 +53,15 @@ const UsersEditor = () => {
     setLoading(false);
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  const loadDemo = useCallback(async () => {
+    const { data } = await supabase
+      .from("demo_leaderboard")
+      .select("id, display_name, total_xp")
+      .order("total_xp", { ascending: false });
+    setDemoUsers((data as DemoUser[]) ?? []);
+  }, []);
+
+  useEffect(() => { load(); loadDemo(); }, [load, loadDemo]);
 
   const toggleAdmin = async (userId: string, isAdmin: boolean) => {
     if (isAdmin) {
@@ -60,6 +81,55 @@ const UsersEditor = () => {
     } else {
       toast.success(`XP: ${currentXp} → ${newXp}`);
       load();
+    }
+  };
+
+  // Demo user actions
+  const addDemoUser = async () => {
+    if (!newDemoName.trim()) return;
+    const { error } = await supabase.from("demo_leaderboard").insert({
+      display_name: newDemoName.trim(),
+      total_xp: parseInt(newDemoXp) || 100,
+    });
+    if (error) {
+      toast.error("Ошибка: " + error.message);
+    } else {
+      toast.success("Фейк-юзер добавлен");
+      setNewDemoName("");
+      setNewDemoXp("100");
+      loadDemo();
+    }
+  };
+
+  const removeDemoUser = async (id: string) => {
+    const { error } = await supabase.from("demo_leaderboard").delete().eq("id", id);
+    if (error) {
+      toast.error("Ошибка: " + error.message);
+    } else {
+      toast.success("Удалён");
+      loadDemo();
+    }
+  };
+
+  const saveDemoName = async (id: string) => {
+    if (!editingDemoName.trim()) return;
+    const { error } = await supabase.from("demo_leaderboard").update({ display_name: editingDemoName.trim() }).eq("id", id);
+    if (error) {
+      toast.error("Ошибка: " + error.message);
+    } else {
+      toast.success("Имя обновлено");
+      setEditingDemoId(null);
+      loadDemo();
+    }
+  };
+
+  const adjustDemoXp = async (id: string, currentXp: number, delta: number) => {
+    const newXp = Math.max(0, currentXp + delta);
+    const { error } = await supabase.from("demo_leaderboard").update({ total_xp: newXp }).eq("id", id);
+    if (error) {
+      toast.error("Ошибка: " + error.message);
+    } else {
+      loadDemo();
     }
   };
 
@@ -141,6 +211,90 @@ const UsersEditor = () => {
 
   return (
     <div className="flex flex-col gap-3">
+      {/* Demo Users Section */}
+      <section className="glass-card p-4 flex flex-col gap-3">
+        <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-2">
+          <Bot className="w-4 h-4 text-primary" /> Фейк-юзеры (рейтинг)
+          <span className="ml-auto text-xs text-muted-foreground font-normal">{demoUsers.length}</span>
+        </h3>
+
+        {/* Add new */}
+        <div className="flex gap-2">
+          <input
+            value={newDemoName}
+            onChange={(e) => setNewDemoName(e.target.value)}
+            placeholder="Имя..."
+            className="flex-1 px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none"
+          />
+          <input
+            value={newDemoXp}
+            onChange={(e) => setNewDemoXp(e.target.value)}
+            placeholder="XP"
+            type="number"
+            className="w-20 px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none"
+          />
+          <button
+            onClick={addDemoUser}
+            disabled={!newDemoName.trim()}
+            className="px-3 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium disabled:opacity-40 transition-all"
+          >
+            <UserPlus className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* List */}
+        <div className="space-y-1.5">
+          {demoUsers.map((du) => (
+            <div key={du.id} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/30 border border-border/20">
+              <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-[10px]">
+                {du.display_name[0]?.toUpperCase()}
+              </div>
+
+              {editingDemoId === du.id ? (
+                <input
+                  value={editingDemoName}
+                  onChange={(e) => setEditingDemoName(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && saveDemoName(du.id)}
+                  onBlur={() => saveDemoName(du.id)}
+                  autoFocus
+                  className="flex-1 px-2 py-1 rounded bg-secondary text-foreground border border-primary text-xs focus:outline-none"
+                />
+              ) : (
+                <span
+                  className="flex-1 text-xs font-medium text-foreground cursor-pointer hover:text-primary transition-colors"
+                  onClick={() => { setEditingDemoId(du.id); setEditingDemoName(du.display_name); }}
+                  title="Нажми чтобы переименовать"
+                >
+                  {du.display_name} <Pencil className="w-2.5 h-2.5 inline text-muted-foreground" />
+                </span>
+              )}
+
+              {/* XP controls */}
+              <button
+                onClick={() => adjustDemoXp(du.id, du.total_xp, -50)}
+                className="w-5 h-5 rounded bg-destructive/10 text-destructive hover:bg-destructive/20 flex items-center justify-center transition-colors"
+              >
+                <Minus className="w-3 h-3" />
+              </button>
+              <span className="text-xs font-semibold text-foreground min-w-[35px] text-center">{du.total_xp}</span>
+              <button
+                onClick={() => adjustDemoXp(du.id, du.total_xp, 50)}
+                className="w-5 h-5 rounded bg-primary/10 text-primary hover:bg-primary/20 flex items-center justify-center transition-colors"
+              >
+                <Plus className="w-3 h-3" />
+              </button>
+
+              <button
+                onClick={() => removeDemoUser(du.id)}
+                className="w-5 h-5 rounded bg-destructive/10 text-destructive hover:bg-destructive/20 flex items-center justify-center transition-colors ml-1"
+              >
+                <Trash2 className="w-3 h-3" />
+              </button>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Search */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -262,7 +416,6 @@ const UsersEditor = () => {
         return (
           <div key={user.user_id} className={`glass-card p-4 flex flex-col gap-2 transition-colors ${isSelected ? "border-primary/30 bg-primary/5" : ""}`}>
             <div className="flex items-center gap-3">
-              {/* Checkbox */}
               <button onClick={() => toggleSelect(user.user_id)} className="shrink-0">
                 {isSelected ? (
                   <CheckSquare className="w-4 h-4 text-primary" />
