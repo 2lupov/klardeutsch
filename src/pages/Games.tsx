@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Recycle, Coffee, Swords } from "lucide-react";
+import { Recycle, Coffee, Swords, Mic } from "lucide-react";
 import { usePlatform } from "@/hooks/usePlatform";
 import ArticleSorter from "@/components/games/ArticleSorter";
 import CafeBestellung from "@/components/games/CafeBestellung";
+import PronunciationTrainer from "@/components/games/PronunciationTrainer";
 import Challenges from "@/pages/Challenges";
 
-type GameScreen = "list" | "article-sorter" | "cafe" | "challenges";
+type GameScreen = "list" | "article-sorter" | "cafe" | "challenges" | "pronunciation";
 
 const Games = () => {
   const [screen, setScreen] = useState<GameScreen>("list");
@@ -21,6 +22,10 @@ const Games = () => {
 
   if (screen === "challenges") {
     return <Challenges onBack={() => setScreen("list")} />;
+  }
+
+  if (screen === "pronunciation") {
+    return <PronunciationTrainer onBack={() => setScreen("list")} />;
   }
 
   return (
@@ -53,7 +58,7 @@ const Games = () => {
           onClick={() => setScreen("cafe")}
           className="w-full glass-card p-5 flex items-center gap-4 text-left hover:border-primary/30 transition-all group"
         >
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-800/20 to-primary/20 flex items-center justify-center text-2xl flex-shrink-0">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-muted/30 to-primary/20 flex items-center justify-center text-2xl flex-shrink-0">
             ☕
           </div>
           <div className="flex-1 min-w-0">
@@ -85,16 +90,23 @@ const Games = () => {
           <Swords className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
         </button>
 
-        {/* Placeholder for future games */}
-        <div className="glass-card p-5 flex items-center gap-4 opacity-40">
-          <div className="w-12 h-12 rounded-2xl bg-muted/30 flex items-center justify-center text-2xl flex-shrink-0">
-            🔜
+        <button
+          onClick={() => setScreen("pronunciation")}
+          className="w-full glass-card p-5 flex items-center gap-4 text-left hover:border-primary/30 transition-all group"
+        >
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center text-2xl flex-shrink-0">
+            🗣
           </div>
-          <div className="flex-1">
-            <h3 className="font-display text-sm font-bold text-muted-foreground">Скоро...</h3>
-            <p className="text-[11px] text-muted-foreground mt-0.5">Новые игры в разработке</p>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-display text-sm font-bold text-foreground group-hover:text-primary transition-colors">
+              Произношение: Sprich nach!
+            </h3>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              Слушай, повторяй и сравнивай своё произношение с эталоном
+            </p>
           </div>
-        </div>
+          <Mic className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
+        </button>
       </div>
     </div>
   );
