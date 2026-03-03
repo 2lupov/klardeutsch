@@ -1,0 +1,1 @@
+ALTER TABLE public.demo_leaderboard ADD COLUMN telegram_chat_id bigint DEFAULT NULL;

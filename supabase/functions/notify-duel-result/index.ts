@@ -31,13 +31,30 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
+    // Check real user first, then demo user
+    let chatId: number | null = null;
+
     const { data: profile } = await supabase
       .from("profiles")
       .select("telegram_chat_id")
       .eq("user_id", challenger_id)
       .single();
 
-    if (!profile?.telegram_chat_id) {
+    if (profile?.telegram_chat_id) {
+      chatId = profile.telegram_chat_id;
+    } else {
+      const { data: demo } = await supabase
+        .from("demo_leaderboard")
+        .select("telegram_chat_id")
+        .eq("id", challenger_id)
+        .single();
+
+      if (demo?.telegram_chat_id) {
+        chatId = demo.telegram_chat_id;
+      }
+    }
+
+    if (!chatId) {
       return new Response(JSON.stringify({ sent: false, reason: "no_telegram" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -56,7 +73,7 @@ Deno.serve(async (req) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        chat_id: profile.telegram_chat_id,
+        chat_id: chatId,
         text: message,
         parse_mode: "HTML",
       }),
