@@ -59,10 +59,34 @@ const DesktopSidebar = () => {
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-border">
+      <div className="p-4 border-t border-border space-y-1">
+        <NavLink
+          to="/method"
+          className={`flex items-center gap-2 px-4 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors ${
+            location.pathname === "/method" ? "text-foreground" : ""
+          }`}
+        >
+          О методе KLAR
+        </NavLink>
+        <NavLink
+          to="/privacy"
+          className={`flex items-center gap-2 px-4 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors ${
+            location.pathname === "/privacy" ? "text-foreground" : ""
+          }`}
+        >
+          Конфиденциальность
+        </NavLink>
+        <NavLink
+          to="/terms"
+          className={`flex items-center gap-2 px-4 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors ${
+            location.pathname === "/terms" ? "text-foreground" : ""
+          }`}
+        >
+          Оферта
+        </NavLink>
         <button
           onClick={signOut}
-          className="flex items-center gap-2 px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          className="flex items-center gap-2 px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors mt-2"
         >
           <LogOut className="w-4 h-4" />
           {t("signOut")}
