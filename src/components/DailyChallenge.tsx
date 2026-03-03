@@ -92,7 +92,11 @@ const DailyChallenge = () => {
                   {word.article && (
                     <span className="text-xs text-primary font-medium">{word.article}</span>
                   )}
-                  <span className="font-display font-bold text-lg text-foreground">{word.german}</span>
+                  <span className="font-display font-bold text-lg text-foreground">
+                    {word.article && word.german.toLowerCase().startsWith(word.article.toLowerCase())
+                      ? word.german.slice(word.article.length).trim()
+                      : word.german}
+                  </span>
                 </div>
                 {wordFlipped ? (
                   <p className="text-sm text-primary mt-1 animate-slide-up">{word.russian}</p>
