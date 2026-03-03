@@ -34,6 +34,8 @@ const UsersEditor = () => {
   const [dmUserId, setDmUserId] = useState<string | null>(null);
   const [dmMsg, setDmMsg] = useState("");
   const [dmSending, setDmSending] = useState(false);
+  const [xpAmounts, setXpAmounts] = useState<Record<string, string>>({});
+  const [coinAmounts, setCoinAmounts] = useState<Record<string, string>>({});
 
   // Demo users state
   const [demoUsers, setDemoUsers] = useState<DemoUser[]>([]);
@@ -70,7 +72,10 @@ const UsersEditor = () => {
       await supabase.from("user_roles").insert({ user_id: userId, role: "admin" });
     }
     toast.success(isAdmin ? "Роль admin снята" : "Роль admin назначена");
-    load();
+    setUsers(prev => prev.map(u => u.user_id === userId ? {
+      ...u,
+      roles: isAdmin ? u.roles.filter(r => r !== "admin") : [...u.roles, "admin"]
+    } : u));
   };
 
   const adjustXp = async (userId: string, currentXp: number, delta: number) => {
@@ -80,7 +85,7 @@ const UsersEditor = () => {
       toast.error("Ошибка: " + error.message);
     } else {
       toast.success(`XP: ${currentXp} → ${newXp}`);
-      load();
+      setUsers(prev => prev.map(u => u.user_id === userId ? { ...u, total_xp: newXp } : u));
     }
   };
 
@@ -91,7 +96,7 @@ const UsersEditor = () => {
       toast.error("Ошибка: " + error.message);
     } else {
       toast.success(`Монеты: ${delta > 0 ? "+" : ""}${delta}`);
-      load();
+      setUsers(prev => prev.map(u => u.user_id === userId ? { ...u, coin_balance: u.coin_balance + delta } : u));
     }
   };
 
@@ -111,7 +116,7 @@ const UsersEditor = () => {
       return;
     }
     toast.success("Аватарка обновлена!");
-    load();
+    setUsers(prev => prev.map(u => u.user_id === userId ? { ...u, avatar_url: avatarUrl } : u));
   };
 
   // Demo user actions
@@ -488,44 +493,54 @@ const UsersEditor = () => {
             </div>
 
             <div className="flex items-center gap-4 text-xs text-muted-foreground pl-7">
-              <span className="flex items-center gap-1.5">
+              <span className="flex items-center gap-1">
                 <Star className="w-3 h-3 text-primary" />
                 <button
-                  onClick={() => adjustXp(user.user_id, user.total_xp, -50)}
+                  onClick={() => adjustXp(user.user_id, user.total_xp, -(parseInt(xpAmounts[user.user_id]) || 50))}
                   className="w-5 h-5 rounded bg-destructive/10 text-destructive hover:bg-destructive/20 flex items-center justify-center transition-colors"
-                  title="-50 XP"
                 >
                   <Minus className="w-3 h-3" />
                 </button>
-                <span className="font-semibold text-foreground min-w-[40px] text-center">{user.total_xp}</span>
+                <span className="font-semibold text-foreground min-w-[35px] text-center text-[11px]">{user.total_xp}</span>
                 <button
-                  onClick={() => adjustXp(user.user_id, user.total_xp, 50)}
+                  onClick={() => adjustXp(user.user_id, user.total_xp, parseInt(xpAmounts[user.user_id]) || 50)}
                   className="w-5 h-5 rounded bg-primary/10 text-primary hover:bg-primary/20 flex items-center justify-center transition-colors"
-                  title="+50 XP"
                 >
                   <Plus className="w-3 h-3" />
                 </button>
-                <span className="text-muted-foreground">XP</span>
+                <input
+                  type="number"
+                  value={xpAmounts[user.user_id] ?? "50"}
+                  onChange={(e) => setXpAmounts(prev => ({ ...prev, [user.user_id]: e.target.value }))}
+                  className="w-14 px-1.5 py-0.5 rounded bg-secondary text-foreground border border-border text-[10px] text-center focus:border-primary focus:outline-none"
+                  min={1}
+                />
+                <span className="text-muted-foreground text-[10px]">XP</span>
               </span>
-              <span className="flex items-center gap-1.5">
+              <span className="flex items-center gap-1">
                 <Coins className="w-3 h-3 text-primary" />
                 <button
-                  onClick={() => adjustCoins(user.user_id, -50)}
+                  onClick={() => adjustCoins(user.user_id, -(parseInt(coinAmounts[user.user_id]) || 50))}
                   className="w-5 h-5 rounded bg-destructive/10 text-destructive hover:bg-destructive/20 flex items-center justify-center transition-colors"
-                  title="-50 монет"
                 >
                   <Minus className="w-3 h-3" />
                 </button>
-                <span className="font-semibold text-foreground min-w-[40px] text-center">{user.coin_balance}</span>
+                <span className="font-semibold text-foreground min-w-[35px] text-center text-[11px]">{user.coin_balance}</span>
                 <button
-                  onClick={() => adjustCoins(user.user_id, 50)}
+                  onClick={() => adjustCoins(user.user_id, parseInt(coinAmounts[user.user_id]) || 50)}
                   className="w-5 h-5 rounded bg-primary/10 text-primary hover:bg-primary/20 flex items-center justify-center transition-colors"
-                  title="+50 монет"
                 >
                   <Plus className="w-3 h-3" />
                 </button>
+                <input
+                  type="number"
+                  value={coinAmounts[user.user_id] ?? "50"}
+                  onChange={(e) => setCoinAmounts(prev => ({ ...prev, [user.user_id]: e.target.value }))}
+                  className="w-14 px-1.5 py-0.5 rounded bg-secondary text-foreground border border-border text-[10px] text-center focus:border-primary focus:outline-none"
+                  min={1}
+                />
               </span>
-              <span>
+              <span className="text-[10px]">
                 {user.user_created_at ? new Date(user.user_created_at).toLocaleDateString("ru") : "—"}
               </span>
             </div>
