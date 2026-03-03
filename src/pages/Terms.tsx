@@ -5,7 +5,7 @@ const Terms = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="h-full overflow-y-auto bg-background text-foreground px-4 py-8 max-w-2xl mx-auto">
+    <div className="min-h-[100dvh] overflow-y-auto bg-background text-foreground px-4 py-8 max-w-2xl mx-auto">
       <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6">
         <ArrowLeft className="w-4 h-4" /> Назад
       </button>
