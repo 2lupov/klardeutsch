@@ -16,6 +16,9 @@ import Statistics from "./pages/Statistics";
 import Shop from "./pages/Shop";
 import Challenges from "./pages/Challenges";
 import Dialogues from "./pages/Dialogues";
+import Method from "./pages/Method";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +35,9 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/admin" element={<Admin />} />
+              <Route path="/method" element={<Method />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
               {/* Authenticated routes with responsive layout */}
               <Route element={<AppLayout />}>
                 <Route path="/" element={<Index />} />
