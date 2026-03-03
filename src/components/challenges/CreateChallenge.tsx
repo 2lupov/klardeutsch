@@ -130,7 +130,9 @@ const CreateChallenge = ({ onCreated }: Props) => {
         challenge_type: type,
         level,
       },
-    }).catch(() => {});
+    }).then(({ error }) => {
+      if (error) console.error("notify-duel error:", error);
+    });
 
     onCreated(inserted);
   };
