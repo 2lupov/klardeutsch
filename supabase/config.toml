@@ -17,3 +17,5 @@ project_id = "jqqsszwbbxvevebmebfm"
     verify_jwt = false
   [functions.notify-duel-result]
     verify_jwt = false
+  [functions.check-writing]
+    verify_jwt = false

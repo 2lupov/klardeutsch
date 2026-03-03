@@ -12,10 +12,11 @@ import Flashcard from "@/components/Flashcard";
 import Quiz from "@/components/Quiz";
 import ReadingExercise from "@/components/ReadingExercise";
 import ListeningExercise from "@/components/ListeningExercise";
+import WritingExercise from "@/components/WritingExercise";
 import DailyChallenge from "@/components/DailyChallenge";
 import { ArrowLeft } from "lucide-react";
 
-type Category = "vocabulary" | "grammar" | "reading" | "listening";
+type Category = "vocabulary" | "grammar" | "reading" | "listening" | "writing";
 type Screen = "levels" | "categories" | "topics" | "exercise";
 
 const Index = () => {
@@ -47,9 +48,9 @@ const Index = () => {
 
   // Load topics when entering topics screen
   useEffect(() => {
-    if (screen === "topics") {
+    if (screen === "topics" && category !== "writing") {
       setDataLoading(true);
-      fetchTopics(level, category).then((t) => {
+      fetchTopics(level, category as "vocabulary" | "grammar" | "reading" | "listening").then((t) => {
         if (t.length === 1) {
           // Only one topic — skip selection
           setSingleTopic(true);
@@ -77,7 +78,11 @@ const Index = () => {
 
   const handleCategorySelect = (c: Category) => {
     setCategory(c);
-    setScreen("topics");
+    if (c === "writing") {
+      setScreen("exercise");
+    } else {
+      setScreen("topics");
+    }
   };
 
   const handleTopicSelect = (t: string) => {
@@ -126,7 +131,22 @@ const Index = () => {
     handleBack();
   };
 
+  const handleWritingComplete = () => {
+    bumpClarity(1);
+    saveProgress(level, "writing", "writing", 0, true);
+    handleBack();
+  };
+
   const renderExercise = () => {
+    if (category === "writing") {
+      return (
+        <WritingExercise
+          level={level}
+          onComplete={handleWritingComplete}
+          onBack={handleBack}
+        />
+      );
+    }
     if (dataLoading || !data) {
       return <p className="text-muted-foreground text-center">{t("loading")}</p>;
     }
@@ -191,7 +211,7 @@ const Index = () => {
           ) : (
             <TopicSelector
               level={level}
-              category={category}
+              category={category as "vocabulary" | "grammar" | "reading" | "listening"}
               topics={topics}
               onSelect={handleTopicSelect}
               onBack={() => setScreen("categories")}
