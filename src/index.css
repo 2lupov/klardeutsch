@@ -231,6 +231,13 @@
     100% { transform: translate(var(--fw-tx), var(--fw-ty)) scale(0); opacity: 0; }
   }
 
+  @keyframes fw-confetti-up {
+    0% { transform: translateY(0) translateX(0) rotate(0deg) scale(0); opacity: 0; }
+    10% { opacity: 1; transform: translateY(-30vh) translateX(calc(var(--fw-drift) * 0.3)) rotate(calc(var(--fw-rot) * 0.3)) scale(1); }
+    50% { opacity: 1; transform: translateY(-70vh) translateX(var(--fw-drift)) rotate(var(--fw-rot)) scale(1); }
+    100% { opacity: 0; transform: translateY(-40vh) translateX(calc(var(--fw-drift) * 1.2)) rotate(calc(var(--fw-rot) * 1.5)) scale(0.5); }
+  }
+
   @keyframes auth-scale-in {
     0% { opacity: 0; transform: scale(0.92) translateY(12px); }
     100% { opacity: 1; transform: scale(1) translateY(0); }
