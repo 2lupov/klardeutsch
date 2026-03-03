@@ -9,7 +9,7 @@ import ListeningEditor from "@/components/admin/ListeningEditor";
 import { toast } from "sonner";
 
 type Level = "A1" | "A2" | "B1" | "B2" | "C1";
-type Tab = "vocabulary" | "grammar" | "reading" | "listening" | "shop";
+type Tab = "vocabulary" | "grammar" | "reading" | "listening" | "shop" | "games";
 
 const LEVELS: Level[] = ["A1", "A2", "B1", "B2", "C1"];
 
@@ -96,7 +96,7 @@ const Admin = () => {
 
         {/* Tab selector */}
         <div className="flex gap-2 mb-6 flex-wrap">
-          {(["vocabulary", "grammar", "reading", "listening", "shop"] as Tab[]).map((tb) => (
+          {(["vocabulary", "grammar", "reading", "listening", "shop", "games"] as Tab[]).map((tb) => (
             <button
               key={tb}
               onClick={() => setTab(tb)}
@@ -104,7 +104,7 @@ const Admin = () => {
                 tab === tb ? "bg-card border border-primary/50 text-foreground" : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              {tb === "vocabulary" ? t("vocabulary") : tb === "grammar" ? t("grammar") : tb === "reading" ? t("reading") : tb === "listening" ? t("listening") : t("shopTab")}
+              {tb === "vocabulary" ? t("vocabulary") : tb === "grammar" ? t("grammar") : tb === "reading" ? t("reading") : tb === "listening" ? t("listening") : tb === "shop" ? t("shopTab") : "🕹️ Игры"}
             </button>
           ))}
         </div>
@@ -114,6 +114,7 @@ const Admin = () => {
         {tab === "reading" && <ReadingEditor level={level} />}
         {tab === "listening" && <ListeningEditor level={level} />}
         {tab === "shop" && <ShopEditor />}
+        {tab === "games" && <GamesEditor level={level} />}
       </div>
     </div>
   );
@@ -462,6 +463,59 @@ const ReadingEditor = ({ level }: { level: Level }) => {
         <Plus className="w-4 h-4" /> {t("addText")}
       </button>
       <SaveButton dirty={dirty} saving={saving} onSave={saveAll} />
+    </div>
+  );
+};
+
+// ——— Games Editor ———
+const GamesEditor = ({ level }: { level: Level }) => {
+  const [wordsCount, setWordsCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true);
+      const { count } = await supabase
+        .from("vocab_cards")
+        .select("*", { count: "exact", head: true })
+        .eq("level", level)
+        .not("article", "is", null);
+      setWordsCount(count ?? 0);
+      setLoading(false);
+    };
+    load();
+  }, [level]);
+
+  if (loading) return <p className="text-muted-foreground">Загрузка...</p>;
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="glass-card p-5">
+        <h3 className="font-display text-sm font-bold text-foreground mb-1 flex items-center gap-2">
+          ♻️ Der/Die/Das: Сортировка мусора
+        </h3>
+        <p className="text-xs text-muted-foreground mb-3">
+          Игра берёт слова из карточек словаря (vocab_cards) с заполненным артиклем.
+        </p>
+        <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 border border-border">
+          <div className="text-center">
+            <span className="text-2xl font-display font-bold text-primary">{wordsCount}</span>
+            <p className="text-[10px] text-muted-foreground">слов с артиклем</p>
+          </div>
+          <div className="flex-1 text-xs text-muted-foreground">
+            Уровень <span className="font-semibold text-foreground">{level}</span> · Чтобы добавить слова в игру, перейди во вкладку «Словарь» и убедись, что у карточек заполнено поле «Артикль» (der/die/das).
+          </div>
+        </div>
+      </div>
+
+      <div className="glass-card p-5 opacity-40">
+        <h3 className="font-display text-sm font-bold text-muted-foreground mb-1 flex items-center gap-2">
+          🔜 Новые игры
+        </h3>
+        <p className="text-xs text-muted-foreground">
+          Здесь появятся настройки для новых мини-игр по мере их добавления.
+        </p>
+      </div>
     </div>
   );
 };
