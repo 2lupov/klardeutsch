@@ -24,6 +24,7 @@ const Dictionary = () => {
   const [words, setWords] = useState<DictWord[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "difficult">("all");
+  const [articleFilter, setArticleFilter] = useState<"all" | "der" | "die" | "das">("all");
   const [search, setSearch] = useState("");
   const [reviewMode, setReviewMode] = useState(false);
   const [reviewIndex, setReviewIndex] = useState(0);
@@ -139,6 +140,7 @@ const Dictionary = () => {
 
   const filtered = words.filter((w) => {
     if (filter === "difficult" && !w.is_difficult) return false;
+    if (articleFilter !== "all" && w.article?.toLowerCase() !== articleFilter) return false;
     if (search) {
       const s = search.toLowerCase();
       return w.german.toLowerCase().includes(s) || w.russian.toLowerCase().includes(s);
@@ -306,6 +308,24 @@ const Dictionary = () => {
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-9 pr-3 py-2 rounded-xl bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
           />
+        </div>
+        <div className="flex gap-1.5">
+          {(["all", "der", "die", "das"] as const).map((a) => (
+            <button
+              key={a}
+              onClick={() => setArticleFilter(a)}
+              className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                articleFilter === a
+                  ? a === "der" ? "bg-blue-500/20 border border-blue-500/50 text-blue-400"
+                  : a === "die" ? "bg-pink-500/20 border border-pink-500/50 text-pink-400"
+                  : a === "das" ? "bg-emerald-500/20 border border-emerald-500/50 text-emerald-400"
+                  : "bg-primary/10 border border-primary/50 text-primary"
+                  : "bg-secondary border border-border text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {a === "all" ? "Alle" : a}
+            </button>
+          ))}
         </div>
         <button
           onClick={() => setFilter(filter === "all" ? "difficult" : "all")}
