@@ -153,13 +153,11 @@ const LOFI_STREAM_URL = "http://ec3.yesstreaming.net:3755/stream";
 
 const MiniLofi = () => {
   const [playing, setPlaying] = useState(false);
-  const [volume, setVolume] = useState(0.25);
-  const [expanded, setExpanded] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     const audio = new Audio();
-    audio.volume = volume;
+    audio.volume = 0.25;
     audio.src = LOFI_STREAM_URL;
     audio.preload = "none";
     audioRef.current = audio;
@@ -168,10 +166,6 @@ const MiniLofi = () => {
     return () => { audio.pause(); audioRef.current = null; };
   }, []);
 
-  useEffect(() => {
-    if (audioRef.current) audioRef.current.volume = volume;
-  }, [volume]);
-
   const toggle = () => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -179,45 +173,28 @@ const MiniLofi = () => {
   };
 
   return (
-    <div className="flex items-center gap-1.5">
-      {expanded && (
-        <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-card/60 border border-border/20 backdrop-blur-sm animate-fade-in">
-          <Volume2 className="w-3 h-3 text-muted-foreground" />
-          <input
-            type="range"
-            min={0}
-            max={1}
-            step={0.05}
-            value={volume}
-            onChange={(e) => setVolume(parseFloat(e.target.value))}
-            className="w-16 h-1 accent-primary cursor-pointer"
-          />
-        </div>
+    <button
+      onClick={toggle}
+      className={`relative p-2 rounded-xl transition-all duration-300 ${
+        playing
+          ? "bg-primary/15 text-primary shadow-[0_0_12px_hsl(var(--primary)/0.12)]"
+          : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+      }`}
+      title="Lofi Radio"
+    >
+      <Music className="w-4 h-4" />
+      {playing && (
+        <span className="absolute -top-0.5 -right-0.5 flex gap-[1.5px]">
+          {[0, 1, 2].map((i) => (
+            <span
+              key={i}
+              className="w-[2px] bg-primary rounded-full animate-bounce"
+              style={{ height: "6px", animationDelay: `${i * 0.15}s`, animationDuration: "0.6s" }}
+            />
+          ))}
+        </span>
       )}
-      <button
-        onClick={() => { toggle(); if (!playing) setExpanded(true); }}
-        onDoubleClick={() => setExpanded(!expanded)}
-        className={`relative p-2 rounded-xl transition-all duration-300 ${
-          playing
-            ? "bg-primary/15 text-primary shadow-[0_0_12px_hsl(var(--primary)/0.12)]"
-            : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-        }`}
-        title="Lofi Radio · double-click for volume"
-      >
-        <Music className="w-4 h-4" />
-        {playing && (
-          <span className="absolute -top-0.5 -right-0.5 flex gap-[1.5px]">
-            {[0, 1, 2].map((i) => (
-              <span
-                key={i}
-                className="w-[2px] bg-primary rounded-full animate-bounce"
-                style={{ height: "6px", animationDelay: `${i * 0.15}s`, animationDuration: "0.6s" }}
-              />
-            ))}
-          </span>
-        )}
-      </button>
-    </div>
+    </button>
   );
 };
 
