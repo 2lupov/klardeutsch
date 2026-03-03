@@ -110,9 +110,14 @@ const PronunciationTrainer = ({ onBack }: PronunciationTrainerProps) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
+  const currentPhraseRef = useRef("");
 
   const phrases = PHRASES[level];
   const current = phrases[phraseIndex % phrases.length];
+  
+  // Keep ref in sync so callbacks don't go stale
+  currentPhraseRef.current = current.de;
 
   const nextPhrase = () => {
     let next: number;
@@ -152,7 +157,7 @@ const PronunciationTrainer = ({ onBack }: PronunciationTrainerProps) => {
     }
   }, [current.de, isPlaying]);
 
-  const transcribeAudio = useCallback(async (audioBlob: Blob) => {
+  const transcribeAudio = async (audioBlob: Blob) => {
     setIsTranscribing(true);
     try {
       const formData = new FormData();
@@ -180,7 +185,8 @@ const PronunciationTrainer = ({ onBack }: PronunciationTrainerProps) => {
         return;
       }
 
-      const s = similarity(current.de, text);
+      const phraseToCompare = currentPhraseRef.current;
+      const s = similarity(phraseToCompare, text);
       setRecognized(text);
       setScore(s);
       setAttempts((a) => a + 1);
@@ -192,46 +198,78 @@ const PronunciationTrainer = ({ onBack }: PronunciationTrainerProps) => {
     } finally {
       setIsTranscribing(false);
     }
-  }, [current.de]);
+  };
 
-  const startListening = useCallback(async () => {
+  const startListening = async () => {
+    // Stop any existing recording first
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      mediaRecorderRef.current.stop();
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => t.stop());
+    }
+    
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: { 
+          echoCancellation: true, 
+          noiseSuppression: true,
+          autoGainControl: true 
+        } 
+      });
+      streamRef.current = stream;
       chunksRef.current = [];
 
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
-          ? "audio/webm;codecs=opus"
-          : "audio/webm",
-      });
+      // Pick a supported mimeType
+      let mimeType = "audio/webm";
+      if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) {
+        mimeType = "audio/webm;codecs=opus";
+      }
+
+      const mediaRecorder = new MediaRecorder(stream, { mimeType });
 
       mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) chunksRef.current.push(e.data);
-      };
-
-      mediaRecorder.onstop = () => {
-        stream.getTracks().forEach((t) => t.stop());
-        const audioBlob = new Blob(chunksRef.current, { type: "audio/webm" });
-        if (audioBlob.size > 0) {
-          transcribeAudio(audioBlob);
+        if (e.data && e.data.size > 0) {
+          chunksRef.current.push(e.data);
         }
       };
 
+      mediaRecorder.onstop = () => {
+        // Stop all tracks
+        stream.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
+        
+        const audioBlob = new Blob(chunksRef.current, { type: mimeType });
+        console.log("Recording stopped, blob size:", audioBlob.size, "chunks:", chunksRef.current.length);
+        
+        if (audioBlob.size > 0 && chunksRef.current.length > 0) {
+          transcribeAudio(audioBlob);
+        } else {
+          setRecognized("🔇 Запись слишком короткая. Говорите дольше.");
+        }
+        setIsListening(false);
+      };
+
       mediaRecorderRef.current = mediaRecorder;
-      mediaRecorder.start();
+      // Use timeslice of 500ms to collect chunks periodically
+      mediaRecorder.start(500);
       setIsListening(true);
+      console.log("Recording started, state:", mediaRecorder.state);
     } catch (e) {
       console.error("Mic error:", e);
-      setRecognized("⚠️ Разрешите доступ к микрофону");
+      setRecognized("⚠️ Разрешите доступ к микрофону в настройках браузера");
+      setIsListening(false);
     }
-  }, [transcribeAudio]);
+  };
 
-  const stopListening = useCallback(() => {
-    if (mediaRecorderRef.current?.state === "recording") {
+  const stopListening = () => {
+    console.log("Stopping recording, state:", mediaRecorderRef.current?.state);
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
       mediaRecorderRef.current.stop();
+    } else {
+      setIsListening(false);
     }
-    setIsListening(false);
-  }, []);
+  };
 
   const getScoreColor = (s: number) => {
     if (s >= 80) return "text-green-400";
