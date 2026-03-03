@@ -143,6 +143,106 @@ export type Database = {
         }
         Relationships: []
       }
+      course_lessons: {
+        Row: {
+          course_id: string
+          created_at: string
+          exercises: Json
+          id: string
+          sort_order: number | null
+          theory: string
+          title: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          exercises?: Json
+          id?: string
+          sort_order?: number | null
+          theory?: string
+          title: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          exercises?: Json
+          id?: string
+          sort_order?: number | null
+          theory?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_lessons_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_purchases: {
+        Row: {
+          course_id: string
+          id: string
+          purchased_at: string
+          user_id: string
+        }
+        Insert: {
+          course_id: string
+          id?: string
+          purchased_at?: string
+          user_id: string
+        }
+        Update: {
+          course_id?: string
+          id?: string
+          purchased_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_purchases_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      courses: {
+        Row: {
+          available: boolean
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          level: string
+          price: number
+          title: string
+        }
+        Insert: {
+          available?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          level?: string
+          price?: number
+          title: string
+        }
+        Update: {
+          available?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          level?: string
+          price?: number
+          title?: string
+        }
+        Relationships: []
+      }
       custom_words: {
         Row: {
           article: string | null
@@ -921,6 +1021,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      purchase_course: {
+        Args: { p_course_id: string; p_user_id: string }
         Returns: boolean
       }
       purchase_item: {
