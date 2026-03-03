@@ -3,9 +3,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Lock } from "lucide-react";
-import CourseHeader from "@/components/course/CourseHeader";
+import { ArrowLeft, Lock, ChevronRight } from "lucide-react";
+import { usePlatform } from "@/hooks/usePlatform";
+import CourseLevelLogo from "@/components/course/CourseLevelLogo";
 import LessonCard from "@/components/course/LessonCard";
+import CourseHeader from "@/components/course/CourseHeader";
 
 interface CourseLesson {
   id: string;
@@ -27,11 +29,14 @@ const Course = () => {
   const { user } = useAuth();
   const { lang } = useLanguage();
   const navigate = useNavigate();
+  const { isMobile } = usePlatform();
   const [course, setCourse] = useState<CourseInfo | null>(null);
   const [lessons, setLessons] = useState<CourseLesson[]>([]);
   const [hasAccess, setHasAccess] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [expandedLesson, setExpandedLesson] = useState<string | null>(null);
+  const [activeLesson, setActiveLesson] = useState<CourseLesson | null>(null);
+  const [clarity, setClarity] = useState(0);
+  const [sectionsOpened, setSectionsOpened] = useState(0);
 
   useEffect(() => {
     if (!user || !id) return;
@@ -48,6 +53,42 @@ const Course = () => {
     };
     load();
   }, [user, id]);
+
+  // Reset clarity when entering a lesson
+  useEffect(() => {
+    if (activeLesson) {
+      setClarity(0);
+      setSectionsOpened(0);
+    }
+  }, [activeLesson?.id]);
+
+  const handleSectionOpen = () => {
+    setSectionsOpened(prev => {
+      const next = prev + 1;
+      // Each section opened bumps clarity
+      const totalSections = countSections(activeLesson!);
+      setClarity(Math.min(1, next / Math.max(totalSections, 1)));
+      return next;
+    });
+  };
+
+  const countSections = (lesson: CourseLesson) => {
+    const ex = lesson.exercises || {};
+    let count = 0;
+    if (lesson.theory) count++;
+    const vocab = ex.vocabulary || ex.vocab_cards || [];
+    if (vocab.length > 0) count++;
+    const exercises = ex.exercises || [];
+    const cloze = exercises.filter((e: any) => e.type === "cloze");
+    const mc = exercises.filter((e: any) => e.type === "multiple_choice");
+    if (cloze.length > 0) count++;
+    if (mc.length > 0) count++;
+    if (ex.practice_dialog) count++;
+    if ((ex.cultural_notes || []).length > 0) count++;
+    if (ex.grammar_questions?.length > 0 && !exercises.length) count++;
+    if (ex.reading) count++;
+    return count;
+  };
 
   if (loading) {
     return (
@@ -92,6 +133,58 @@ const Course = () => {
     );
   }
 
+  // ─── Lesson detail view (with fog + filling effect) ───
+  if (activeLesson) {
+    const lessonIndex = lessons.findIndex(l => l.id === activeLesson.id);
+    const totalSections = countSections(activeLesson);
+    const progressPercent = totalSections > 0 ? Math.min(100, Math.round((sectionsOpened / totalSections) * 100)) : 0;
+
+    return (
+      <div className={`flex flex-col ${isMobile ? "min-h-full" : "h-full"}`}>
+        {/* Fog overlay */}
+        <div className="fog-overlay" style={{ "--clarity": clarity } as React.CSSProperties} />
+
+        <div className={`flex-1 w-full mx-auto px-4 relative z-10 ${isMobile ? "max-w-md py-4" : "max-w-2xl py-6"}`}>
+          {/* Back button */}
+          <button
+            onClick={() => setActiveLesson(null)}
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors group"
+          >
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+            {lang === "uk" ? "До уроків" : "К урокам"}
+          </button>
+
+          {/* Level logo with fill effect */}
+          <div className="flex flex-col items-center mb-6">
+            <CourseLevelLogo
+              level={course.level}
+              progress={progressPercent}
+              completed={progressPercent >= 100}
+            />
+            <p className="text-sm text-muted-foreground mt-3 font-medium">
+              {lang === "uk" ? "Урок" : "Урок"} {lessonIndex + 1}
+            </p>
+            <h2 className="font-display text-lg font-bold text-foreground mt-1 text-center">
+              {activeLesson.title}
+            </h2>
+          </div>
+
+          {/* Lesson sections */}
+          <LessonCard
+            lesson={activeLesson}
+            index={lessonIndex}
+            lang={lang}
+            isExpanded={true}
+            onToggle={() => {}}
+            onSectionOpen={handleSectionOpen}
+            hideHeader
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // ─── Lessons list view ───
   return (
     <div className="w-full mx-auto px-4 py-6 max-w-2xl animate-slide-up">
       <CourseHeader
@@ -104,16 +197,19 @@ const Course = () => {
         lang={lang}
       />
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         {lessons.map((lesson, i) => (
-          <LessonCard
+          <button
             key={lesson.id}
-            lesson={lesson}
-            index={i}
-            lang={lang}
-            isExpanded={expandedLesson === lesson.id}
-            onToggle={() => setExpandedLesson(expandedLesson === lesson.id ? null : lesson.id)}
-          />
+            onClick={() => setActiveLesson(lesson)}
+            className="w-full flex items-center gap-3.5 p-4 rounded-2xl border border-border/30 bg-card/60 hover:bg-card/80 hover:border-border/50 transition-all text-left group"
+          >
+            <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 font-display font-bold text-sm group-hover:bg-primary/20 transition-colors">
+              {i + 1}
+            </div>
+            <span className="text-sm font-semibold text-foreground flex-1">{lesson.title}</span>
+            <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
+          </button>
         ))}
       </div>
     </div>

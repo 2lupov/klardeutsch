@@ -16,6 +16,8 @@ interface LessonCardProps {
   lang: string;
   isExpanded: boolean;
   onToggle: () => void;
+  onSectionOpen?: () => void;
+  hideHeader?: boolean;
 }
 
 const SectionButton = ({ icon: Icon, label, count, isOpen, onClick, color }: {
@@ -41,9 +43,16 @@ const SectionButton = ({ icon: Icon, label, count, isOpen, onClick, color }: {
   </button>
 );
 
-const LessonCard = ({ lesson, index, lang, isExpanded, onToggle }: LessonCardProps) => {
+const LessonCard = ({ lesson, index, lang, isExpanded, onToggle, onSectionOpen, hideHeader }: LessonCardProps) => {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
-  const toggleSection = (key: string) => setExpandedSections(prev => ({ ...prev, [key]: !prev[key] }));
+  const [openedSections, setOpenedSections] = useState<Set<string>>(new Set());
+  const toggleSection = (key: string) => {
+    setExpandedSections(prev => ({ ...prev, [key]: !prev[key] }));
+    if (!openedSections.has(key)) {
+      setOpenedSections(prev => new Set(prev).add(key));
+      onSectionOpen?.();
+    }
+  };
 
   const ex = lesson.exercises || {};
   const vocab = ex.vocabulary || ex.vocab_cards || [];
@@ -65,21 +74,23 @@ const LessonCard = ({ lesson, index, lang, isExpanded, onToggle }: LessonCardPro
         : "border-border/30 bg-card/60 hover:bg-card/80 hover:border-border/50"
     )}>
       {/* Lesson header */}
-      <button onClick={onToggle} className="w-full flex items-center gap-3.5 p-4 text-left group">
-        <div className={cn(
-          "w-9 h-9 rounded-xl flex items-center justify-center shrink-0 font-display font-bold text-sm transition-all",
-          isExpanded
-            ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
-            : "bg-primary/10 text-primary group-hover:bg-primary/20"
-        )}>
-          {index + 1}
-        </div>
-        <span className="text-sm font-semibold text-foreground flex-1">{lesson.title}</span>
-        <ChevronDown className={cn(
-          "w-4 h-4 text-muted-foreground transition-transform duration-300",
-          isExpanded && "rotate-180"
-        )} />
-      </button>
+      {!hideHeader && (
+        <button onClick={onToggle} className="w-full flex items-center gap-3.5 p-4 text-left group">
+          <div className={cn(
+            "w-9 h-9 rounded-xl flex items-center justify-center shrink-0 font-display font-bold text-sm transition-all",
+            isExpanded
+              ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
+              : "bg-primary/10 text-primary group-hover:bg-primary/20"
+          )}>
+            {index + 1}
+          </div>
+          <span className="text-sm font-semibold text-foreground flex-1">{lesson.title}</span>
+          <ChevronDown className={cn(
+            "w-4 h-4 text-muted-foreground transition-transform duration-300",
+            isExpanded && "rotate-180"
+          )} />
+        </button>
+      )}
 
       {/* Expanded content */}
       {isExpanded && (
