@@ -9,6 +9,7 @@ import PageTransition from "@/components/PageTransition";
 import LofiFloatingPlayer from "@/components/LofiFloatingPlayer";
 import NicknameGate from "@/components/NicknameGate";
 import EditModeToolbar from "@/components/EditModeToolbar";
+import DailyBonusDialog from "@/components/DailyBonusDialog";
 
 const AppLayout = () => {
   const { user, loading } = useAuth();
@@ -54,6 +55,7 @@ const AppLayout = () => {
       <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
         <EditModeToolbar />
         <LofiFloatingPlayer />
+        <DailyBonusDialog />
         <div className="flex-1 overflow-y-auto overscroll-none pb-14">
           <PageTransition><Outlet /></PageTransition>
         </div>
@@ -68,6 +70,7 @@ const AppLayout = () => {
       <main className="flex-1 overflow-y-auto relative">
         <EditModeToolbar />
         <LofiFloatingPlayer />
+        <DailyBonusDialog />
         <PageTransition><Outlet /></PageTransition>
       </main>
     </div>
