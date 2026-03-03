@@ -1,0 +1,1 @@
+ALTER TABLE public.saved_words ADD CONSTRAINT saved_words_user_vocab_unique UNIQUE (user_id, vocab_card_id);

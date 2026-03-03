@@ -2,8 +2,11 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { ArrowLeft, RotateCcw, Recycle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { usePlatform } from "@/hooks/usePlatform";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/hooks/use-toast";
 
 interface WordItem {
+  id: string;
   german: string;
   russian: string;
   article: string | null;
@@ -48,6 +51,7 @@ const SUCCESS_PHRASES = [
 
 const ArticleSorter = ({ onBack }: { onBack: () => void }) => {
   const { isMobile } = usePlatform();
+  const { user } = useAuth();
   const [allWords, setAllWords] = useState<WordItem[]>([]);
   const [gameWords, setGameWords] = useState<WordItem[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -65,7 +69,7 @@ const ArticleSorter = ({ onBack }: { onBack: () => void }) => {
     const load = async () => {
       const { data } = await supabase
         .from("vocab_cards")
-        .select("german, russian, article")
+        .select("id, german, russian, article")
         .not("article", "is", null)
         .neq("article", "");
       if (data) {
@@ -120,13 +124,25 @@ const ArticleSorter = ({ onBack }: { onBack: () => void }) => {
           if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred("light");
         } catch {}
         if (navigator.vibrate) navigator.vibrate(30);
-      } else {
+    } else {
         setMistakes((m) => m + 1);
         setFeedback({
           type: "error",
           text: NEIGHBOR_PHRASES[Math.floor(Math.random() * NEIGHBOR_PHRASES.length)],
           correct: `${correct} ${currentWord.german.replace(/^(der|die|das)\s+/i, '')}`,
         });
+        // Auto-save wrong word to dictionary
+        if (user && currentWord.id) {
+          supabase
+            .from("saved_words")
+            .upsert(
+              [{ user_id: user.id, vocab_card_id: currentWord.id, is_difficult: true }],
+              { onConflict: "user_id,vocab_card_id" }
+            )
+            .then(() => {
+              toast({ title: "📖 Добавлено в словарь", description: currentWord.german });
+            });
+        }
         // Haptic error
         try {
           const tg = (window as any).Telegram?.WebApp;
