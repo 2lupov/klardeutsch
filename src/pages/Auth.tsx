@@ -8,7 +8,7 @@ import DemoExperience from "@/components/DemoExperience";
 import { Sparkles } from "lucide-react";
 
 const Auth = () => {
-  const [isLogin, setIsLogin] = useState(() => !new URLSearchParams(window.location.search).has("ref"));
+  const [isLogin, setIsLogin] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [nickname, setNickname] = useState("");
