@@ -763,6 +763,7 @@ export type Database = {
           content: string | null
           created_at: string
           description: string | null
+          file_url: string | null
           id: string
           image_url: string | null
           item_type: string
@@ -774,6 +775,7 @@ export type Database = {
           content?: string | null
           created_at?: string
           description?: string | null
+          file_url?: string | null
           id?: string
           image_url?: string | null
           item_type?: string
@@ -785,6 +787,7 @@ export type Database = {
           content?: string | null
           created_at?: string
           description?: string | null
+          file_url?: string | null
           id?: string
           image_url?: string | null
           item_type?: string
