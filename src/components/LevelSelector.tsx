@@ -79,11 +79,11 @@ const LevelSelector = ({ onSelect }: LevelSelectorProps) => {
         onClick={() => navigate("/games")}
         className="w-full glass-card p-4 flex items-center justify-center gap-3 mt-1 hover:border-primary/40 hover:bg-primary/5 transition-all group"
       >
-        <span className="text-xl">🎮</span>
+        <span className="text-xl">🕹️</span>
         <span className="font-display text-sm font-semibold text-muted-foreground group-hover:text-primary transition-colors">
           Мини-игры
         </span>
-        <span className="text-lg">♻️</span>
+        <span className="text-xl">🕹️</span>
       </button>
     </div>
   );
