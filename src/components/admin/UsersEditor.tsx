@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Shield, ShieldOff, Search, Users, Star, Coins, Send, Bell, Loader2, MessageSquare, CheckSquare, Square, X, Plus, Minus, Trash2, UserPlus, Pencil, Bot, Camera } from "lucide-react";
+import { Shield, ShieldOff, Search, Users, Star, Coins, Send, Bell, Loader2, MessageSquare, CheckSquare, Square, X, Plus, Minus, Trash2, UserPlus, Pencil, Bot, Camera, MailCheck } from "lucide-react";
 import { toast } from "sonner";
 
 interface AdminUser {
@@ -35,6 +35,7 @@ const UsersEditor = () => {
   const [dmMsg, setDmMsg] = useState("");
   const [dmSending, setDmSending] = useState(false);
   const [xpAmounts, setXpAmounts] = useState<Record<string, string>>({});
+  const [resending, setResending] = useState<string | null>(null);
   const [coinAmounts, setCoinAmounts] = useState<Record<string, string>>({});
 
   // Demo users state
@@ -234,6 +235,22 @@ const UsersEditor = () => {
     }
     setDmSending(false);
   };
+
+  const handleResendConfirmation = async (userId: string, email: string) => {
+    setResending(userId);
+    const { data, error } = await supabase.functions.invoke("resend-confirmation", {
+      body: { email },
+    });
+    if (error) {
+      toast.error("Ошибка: " + error.message);
+    } else if (data?.error) {
+      toast.error("Ошибка: " + data.error);
+    } else {
+      toast.success(`Письмо отправлено на ${email}`);
+    }
+    setResending(null);
+  };
+
 
   const filtered = users.filter((u) => {
     const q = search.toLowerCase();
@@ -545,7 +562,15 @@ const UsersEditor = () => {
               </span>
             </div>
 
-            <div className="flex justify-end gap-1.5">
+            <div className="flex justify-end gap-1.5 flex-wrap">
+              <button
+                onClick={() => handleResendConfirmation(user.user_id, user.email)}
+                disabled={resending === user.user_id}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-secondary hover:bg-muted text-foreground transition-colors disabled:opacity-40"
+              >
+                {resending === user.user_id ? <Loader2 className="w-3 h-3 animate-spin" /> : <MailCheck className="w-3 h-3" />}
+                Переотправить код
+              </button>
               <button
                 onClick={() => { setDmUserId(user.user_id); setDmMsg(""); }}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-secondary hover:bg-muted text-foreground transition-colors"
