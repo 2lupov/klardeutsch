@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Shield, ShieldOff, Search, Users, Star, Coins, Send, Bell, Loader2, MessageSquare, CheckSquare, Square, X, Plus, Minus, Trash2, UserPlus, Pencil, Bot } from "lucide-react";
+import { Shield, ShieldOff, Search, Users, Star, Coins, Send, Bell, Loader2, MessageSquare, CheckSquare, Square, X, Plus, Minus, Trash2, UserPlus, Pencil, Bot, Camera } from "lucide-react";
 import { toast } from "sonner";
 
 interface AdminUser {
@@ -82,6 +82,25 @@ const UsersEditor = () => {
       toast.success(`XP: ${currentXp} → ${newXp}`);
       load();
     }
+  };
+
+  const uploadAvatar = async (userId: string, file: File) => {
+    const ext = file.name.split(".").pop() || "jpg";
+    const path = `${userId}/avatar.${ext}`;
+    const { error: uploadError } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+    if (uploadError) {
+      toast.error("Ошибка загрузки: " + uploadError.message);
+      return;
+    }
+    const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
+    const avatarUrl = urlData.publicUrl + "?t=" + Date.now();
+    const { error: updateError } = await supabase.from("profiles").update({ avatar_url: avatarUrl }).eq("user_id", userId);
+    if (updateError) {
+      toast.error("Ошибка обновления профиля: " + updateError.message);
+      return;
+    }
+    toast.success("Аватарка обновлена!");
+    load();
   };
 
   // Demo user actions
@@ -424,13 +443,28 @@ const UsersEditor = () => {
                 )}
               </button>
 
-              {user.avatar_url ? (
-                <img src={user.avatar_url} alt="" className="w-9 h-9 rounded-full object-cover border border-border" />
-              ) : (
-                <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
-                  {(user.display_name || user.email || "?")[0].toUpperCase()}
-                </div>
-              )}
+              <div className="relative group shrink-0">
+                {user.avatar_url ? (
+                  <img src={user.avatar_url} alt="" className="w-9 h-9 rounded-full object-cover border border-border" />
+                ) : (
+                  <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
+                    {(user.display_name || user.email || "?")[0].toUpperCase()}
+                  </div>
+                )}
+                <label className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
+                  <Camera className="w-3.5 h-3.5 text-white" />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) uploadAvatar(user.user_id, file);
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+              </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-foreground truncate">
                   {user.display_name || "Без имени"}
