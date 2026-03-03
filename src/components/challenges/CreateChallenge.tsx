@@ -92,6 +92,13 @@ const CreateChallenge = ({ onCreated }: Props) => {
     if (!selectedUser || !user) return;
     setCreating(true);
 
+    // Get challenger display name
+    const { data: myProfile } = await supabase
+      .from("profiles")
+      .select("display_name")
+      .eq("user_id", user.id)
+      .single();
+
     const questions = await generateQuestions();
     if (questions.length < ROUNDS) {
       toast({ title: t("notEnoughQuestions"), variant: "destructive" });
@@ -114,6 +121,16 @@ const CreateChallenge = ({ onCreated }: Props) => {
       setCreating(false);
       return;
     }
+
+    // Notify opponent via Telegram (fire-and-forget)
+    supabase.functions.invoke("notify-duel", {
+      body: {
+        opponent_id: selectedUser.user_id,
+        challenger_name: myProfile?.display_name || user.email?.split("@")[0] || "Игрок",
+        challenge_type: type,
+        level,
+      },
+    }).catch(() => {});
 
     onCreated(inserted);
   };
