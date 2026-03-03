@@ -72,10 +72,11 @@ export async function fetchLevelData(level: Level, topic?: string): Promise<Cate
     listeningQuery.order("sort_order"),
   ]);
 
-  const vocabulary: VocabCard[] = (vocabRes.data ?? []).map((v) => ({
+  const vocabulary: VocabCard[] = (vocabRes.data ?? []).map((v: any) => ({
     id: v.id,
     german: v.german,
     russian: v.russian,
+    ukrainian: v.ukrainian ?? undefined,
     example: v.example ?? undefined,
     article: v.article ?? undefined,
   }));

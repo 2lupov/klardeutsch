@@ -24,7 +24,7 @@ const dateSeed = () => {
 };
 
 const DailyChallenge = () => {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [word, setWord] = useState<WordOfDay | null>(null);
   const [question, setQuestion] = useState<MiniQuestion | null>(null);
   const [loading, setLoading] = useState(true);
@@ -46,7 +46,7 @@ const DailyChallenge = () => {
     const seed = dateSeed();
 
     const [{ data: words }, { data: questions }] = await Promise.all([
-      supabase.from("vocab_cards").select("german, russian, article, example").order("id"),
+      supabase.from("vocab_cards").select("german, russian, ukrainian, article, example").order("id"),
       supabase.from("grammar_questions").select("question, options, correct_index, explanation").order("id"),
     ]);
 
@@ -99,7 +99,7 @@ const DailyChallenge = () => {
                   </span>
                 </div>
                 {wordFlipped ? (
-                  <p className="text-sm text-primary mt-1 animate-slide-up">{word.russian}</p>
+                  <p className="text-sm text-primary mt-1 animate-slide-up">{(word as any).ukrainian && lang === "uk" ? (word as any).ukrainian : word.russian}</p>
                 ) : (
                   <p className="text-xs text-muted-foreground mt-1">{t("tapToFlip")}</p>
                 )}

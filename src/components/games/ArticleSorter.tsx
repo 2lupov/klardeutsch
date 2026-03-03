@@ -1,14 +1,16 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { ArrowLeft, RotateCcw, Recycle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { usePlatform } from "@/hooks/usePlatform";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "@/hooks/use-toast";
 
 interface WordItem {
   id: string;
   german: string;
   russian: string;
+  ukrainian: string;
   article: string | null;
 }
 
@@ -51,6 +53,7 @@ const SUCCESS_PHRASES = [
 
 const ArticleSorter = ({ onBack }: { onBack: () => void }) => {
   const { isMobile } = usePlatform();
+  const { lang } = useLanguage();
   const { user } = useAuth();
   const [allWords, setAllWords] = useState<WordItem[]>([]);
   const [gameWords, setGameWords] = useState<WordItem[]>([]);
@@ -69,7 +72,7 @@ const ArticleSorter = ({ onBack }: { onBack: () => void }) => {
     const load = async () => {
       const { data } = await supabase
         .from("vocab_cards")
-        .select("id, german, russian, article")
+        .select("id, german, russian, ukrainian, article")
         .not("article", "is", null)
         .neq("article", "");
       if (data) {
@@ -280,7 +283,7 @@ const ArticleSorter = ({ onBack }: { onBack: () => void }) => {
             onTouchEnd={handleTouchEnd}
           >
             <h2 className="text-3xl font-display font-bold text-foreground mb-2">{currentWord.german.replace(/^(der|die|das)\s+/i, '')}</h2>
-            <p className="text-sm text-muted-foreground">{currentWord.russian}</p>
+            <p className="text-sm text-muted-foreground">{lang === "uk" && currentWord.ukrainian ? currentWord.ukrainian : currentWord.russian}</p>
 
             {isMobile && !feedback && (
               <p className="text-[10px] text-muted-foreground/50 mt-3 font-display">

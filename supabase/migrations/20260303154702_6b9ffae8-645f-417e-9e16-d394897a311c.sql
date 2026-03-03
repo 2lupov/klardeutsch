@@ -1,0 +1,1 @@
+ALTER TABLE public.vocab_cards ADD COLUMN ukrainian text NOT NULL DEFAULT '';

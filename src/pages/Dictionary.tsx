@@ -11,6 +11,7 @@ interface DictWord {
   source: "saved" | "custom";
   german: string;
   russian: string;
+  ukrainian?: string;
   article: string | null;
   example: string | null;
   level: string | null;
@@ -19,7 +20,7 @@ interface DictWord {
 
 const Dictionary = () => {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const { isMobile } = usePlatform();
   const [words, setWords] = useState<DictWord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,7 +49,7 @@ const Dictionary = () => {
     const [savedRes, customRes] = await Promise.all([
       supabase
         .from("saved_words")
-        .select("id, vocab_card_id, is_difficult, learned_at, vocab_cards(german, russian, article, example, level)")
+        .select("id, vocab_card_id, is_difficult, learned_at, vocab_cards(german, russian, ukrainian, article, example, level)")
         .eq("user_id", user.id)
         .order("learned_at", { ascending: false }),
       supabase
@@ -63,6 +64,7 @@ const Dictionary = () => {
       source: "saved" as const,
       german: w.vocab_cards.german,
       russian: w.vocab_cards.russian,
+      ukrainian: w.vocab_cards.ukrainian ?? "",
       article: w.vocab_cards.article,
       example: w.vocab_cards.example,
       level: w.vocab_cards.level,
@@ -188,7 +190,7 @@ const Dictionary = () => {
               <p className="text-sm text-muted-foreground mt-4">{t("tapToFlip")}</p>
             </div>
             <div className="absolute inset-0 glass-card flex flex-col items-center justify-center p-8 [transform:rotateY(180deg)]" style={{ backfaceVisibility: "hidden" }}>
-              <h2 className="text-2xl font-display font-bold text-primary">{card?.russian}</h2>
+              <h2 className="text-2xl font-display font-bold text-primary">{lang === "uk" && card?.ukrainian ? card.ukrainian : card?.russian}</h2>
               {card?.example && <p className="text-sm text-muted-foreground italic text-center mt-4">"{card.example}"</p>}
             </div>
           </div>
@@ -363,7 +365,7 @@ const Dictionary = () => {
                   {word.article && <span className="text-sm text-yellow-400 font-display font-semibold">{word.article}</span>}
                   <span className="font-display font-semibold text-foreground truncate">{word.german.replace(/^(der|die|das)\s+/i, '')}</span>
                 </div>
-                <p className="text-sm text-muted-foreground truncate">{word.russian}</p>
+                <p className="text-sm text-muted-foreground truncate">{lang === "uk" && word.ukrainian ? word.ukrainian : word.russian}</p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 {word.level && <span className="text-[10px] text-muted-foreground/60">{word.level}</span>}

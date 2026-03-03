@@ -815,6 +815,7 @@ export type Database = {
           russian: string
           sort_order: number | null
           topic: string
+          ukrainian: string
         }
         Insert: {
           article?: string | null
@@ -826,6 +827,7 @@ export type Database = {
           russian: string
           sort_order?: number | null
           topic?: string
+          ukrainian?: string
         }
         Update: {
           article?: string | null
@@ -837,6 +839,7 @@ export type Database = {
           russian?: string
           sort_order?: number | null
           topic?: string
+          ukrainian?: string
         }
         Relationships: []
       }
