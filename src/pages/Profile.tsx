@@ -527,27 +527,18 @@ const Profile = () => {
   // Main profile screen
   return (
     <div className={`w-full mx-auto px-4 py-4 pb-8 ${isMobile ? "max-w-md" : "max-w-2xl"}`}>
-      {isMobile && (
-        <div className="flex items-center justify-between mb-3">
-          <button
-            onClick={signOut}
-            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            {t("signOut")}
-          </button>
-          <div className="relative">
-            <LofiRadio />
-          </div>
+      <div className="flex items-center justify-between mb-3">
+        <button
+          onClick={signOut}
+          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <LogOut className="w-3.5 h-3.5" />
+          {t("signOut")}
+        </button>
+        <div className="relative">
+          <LofiRadio />
         </div>
-      )}
-      {!isMobile && (
-        <div className="flex justify-end mb-3">
-          <div className="relative">
-            <LofiRadio />
-          </div>
-        </div>
-      )}
+      </div>
 
       {/* Profile header */}
       <div className="flex items-center gap-4 mb-4">
