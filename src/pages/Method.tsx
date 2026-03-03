@@ -1,31 +1,23 @@
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Brain, Sparkles, Target, Zap, Star, ChevronDown, ArrowLeft, Volume2, Loader2, Pause } from "lucide-react";
+import { Brain, Sparkles, Target, Zap, Star, ArrowLeft, Volume2, Loader2, Pause } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useRef, useCallback } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
-const testimonials = [
-  {
-    name: "Анна К.",
-    photo: "https://api.dicebear.com/9.x/avataaars/svg?seed=Anna",
-    text: "За 3 месяца с KLAR я сдала Goethe A2! Карточки и квизы — просто огонь 🔥",
-  },
-  {
-    name: "Дмитрий П.",
-    photo: "https://api.dicebear.com/9.x/avataaars/svg?seed=Dmitry",
-    text: "Наконец-то немецкий не кажется скучным. Система прогресса мотивирует заниматься каждый день.",
-  },
-  {
-    name: "Олена В.",
-    photo: "https://api.dicebear.com/9.x/avataaars/svg?seed=Olena",
-    text: "Мені подобається, що все ясно і без зайвого. AI-розбір помилок — це геніально!",
-  },
-  {
-    name: "Максим Т.",
-    photo: "https://api.dicebear.com/9.x/avataaars/svg?seed=Max",
-    text: "Аудирование с ElevenLabs — как живой преподаватель. Рекомендую всем, кто учит немецкий!",
-  },
-];
+const testimonials = {
+  ru: [
+    { name: "Анна К.", photo: "https://api.dicebear.com/9.x/avataaars/svg?seed=Anna", text: "За 3 месяца с KLAR я сдала Goethe A2! Карточки и квизы — просто огонь 🔥" },
+    { name: "Дмитрий П.", photo: "https://api.dicebear.com/9.x/avataaars/svg?seed=Dmitry", text: "Наконец-то немецкий не кажется скучным. Система прогресса мотивирует заниматься каждый день." },
+    { name: "Олена В.", photo: "https://api.dicebear.com/9.x/avataaars/svg?seed=Olena", text: "Мне нравится, что всё ясно и без лишнего. AI-разбор ошибок — это гениально!" },
+    { name: "Максим Т.", photo: "https://api.dicebear.com/9.x/avataaars/svg?seed=Max", text: "Аудирование с ElevenLabs — как живой преподаватель. Рекомендую всем, кто учит немецкий!" },
+  ],
+  uk: [
+    { name: "Анна К.", photo: "https://api.dicebear.com/9.x/avataaars/svg?seed=Anna", text: "За 3 місяці з KLAR я склала Goethe A2! Картки та квізи — просто вогонь 🔥" },
+    { name: "Дмитро П.", photo: "https://api.dicebear.com/9.x/avataaars/svg?seed=Dmitry", text: "Нарешті німецька не здається нудною. Система прогресу мотивує займатися щодня." },
+    { name: "Олена В.", photo: "https://api.dicebear.com/9.x/avataaars/svg?seed=Olena", text: "Мені подобається, що все ясно і без зайвого. AI-розбір помилок — це геніально!" },
+    { name: "Максим Т.", photo: "https://api.dicebear.com/9.x/avataaars/svg?seed=Max", text: "Аудіювання з ElevenLabs — як живий викладач. Рекомендую всім, хто вчить німецьку!" },
+  ],
+};
 
 const motivationText: Record<string, string> = {
   ru: "Привет! Я — KLAR, твой помощник в изучении немецкого языка. Забудь скучные учебники и бесконечную зубрёжку. Здесь всё по-другому: короткие уроки, умные карточки, квизы и аудирование — всего 5–10 минут в день. Искусственный интеллект анализирует именно твои ошибки и подсказывает, над чем работать. А система XP, достижений и дуэлей с друзьями превращает учёбу в увлекательную игру. От A1 до C1 — ясно, просто и бесплатно. Начни прямо сейчас!",
@@ -37,42 +29,84 @@ const voiceIdMap: Record<string, string> = {
   uk: "2OXYbN1uGomXXJtv9Dq6",
 };
 
-const faqItems = [
-  {
-    q: "Как работает подписка?",
-    a: "KLAR полностью бесплатен. Все уровни (A1–C1), карточки, квизы, аудирование и AI-разбор ошибок доступны без ограничений. Мы развиваем проект за счёт магазина авторских заданий.",
-  },
-  {
-    q: "Как установить KLAR на iPhone?",
-    a: "Откройте klardeutsch.org в Safari → нажмите кнопку «Поделиться» (внизу) → «На экран Домой». Приложение появится как обычная иконка.",
-  },
-  {
-    q: "Как установить KLAR на Android?",
-    a: "Откройте klardeutsch.org в Chrome → нажмите три точки (⋮) → «Добавить на главный экран» или дождитесь всплывающего баннера «Установить».",
-  },
-  {
-    q: "Работает ли KLAR без интернета?",
-    a: "Да! После первой загрузки основные карточки и интерфейс кэшируются. Вы можете повторять слова офлайн. Для AI-функций и аудирования нужен интернет.",
-  },
-  {
-    q: "Чем KLAR отличается от Duolingo?",
-    a: "KLAR создан специально для русско/украиноговорящих. Объяснения на вашем языке, AI разбирает именно ваши ошибки, а система уровней соответствует Goethe-Institut (A1–C1).",
-  },
-];
+const faqItems = {
+  ru: [
+    { q: "Как работает подписка?", a: "KLAR полностью бесплатен. Все уровни (A1–C1), карточки, квизы, аудирование и AI-разбор ошибок доступны без ограничений. Мы развиваем проект за счёт магазина авторских заданий." },
+    { q: "Как установить KLAR на iPhone?", a: "Откройте klardeutsch.org в Safari → нажмите кнопку «Поделиться» (внизу) → «На экран Домой». Приложение появится как обычная иконка." },
+    { q: "Как установить KLAR на Android?", a: "Откройте klardeutsch.org в Chrome → нажмите три точки (⋮) → «Добавить на главный экран» или дождитесь всплывающего баннера «Установить»." },
+    { q: "Работает ли KLAR без интернета?", a: "Да! После первой загрузки основные карточки и интерфейс кэшируются. Вы можете повторять слова офлайн. Для AI-функций и аудирования нужен интернет." },
+    { q: "Чем KLAR отличается от Duolingo?", a: "KLAR создан специально для русско/украиноговорящих. Объяснения на вашем языке, AI разбирает именно ваши ошибки, а система уровней соответствует Goethe-Institut (A1–C1)." },
+  ],
+  uk: [
+    { q: "Як працює підписка?", a: "KLAR повністю безкоштовний. Усі рівні (A1–C1), картки, квізи, аудіювання та AI-розбір помилок доступні без обмежень. Ми розвиваємо проєкт за рахунок магазину авторських завдань." },
+    { q: "Як встановити KLAR на iPhone?", a: "Відкрийте klardeutsch.org у Safari → натисніть кнопку «Поділитися» (внизу) → «На екран Домому». Застосунок з'явиться як звичайна іконка." },
+    { q: "Як встановити KLAR на Android?", a: "Відкрийте klardeutsch.org у Chrome → натисніть три крапки (⋮) → «Додати на головний екран» або дочекайтеся спливаючого банера «Встановити»." },
+    { q: "Чи працює KLAR без інтернету?", a: "Так! Після першого завантаження основні картки та інтерфейс кешуються. Ви можете повторювати слова офлайн. Для AI-функцій та аудіювання потрібен інтернет." },
+    { q: "Чим KLAR відрізняється від Duolingo?", a: "KLAR створений спеціально для російсько/україномовних. Пояснення вашою мовою, AI розбирає саме ваші помилки, а система рівнів відповідає Goethe-Institut (A1–C1)." },
+  ],
+};
 
-const features = [
-  { icon: Target, title: "Ясность", desc: "Простые объяснения без лишней воды. Каждый урок — конкретный результат." },
-  { icon: Brain, title: "AI-технологии", desc: "Искусственный интеллект анализирует ваши ошибки и подсказывает, над чем работать." },
-  { icon: Zap, title: "Скорость", desc: "5–10 минут в день. Карточки, квизы и аудирование в удобном темпе." },
-  { icon: Sparkles, title: "Мотивация", desc: "XP, достижения, дуэли с друзьями и магазин заданий — учиться интересно." },
-];
+const featuresData = {
+  ru: [
+    { icon: Target, title: "Ясность", desc: "Простые объяснения без лишней воды. Каждый урок — конкретный результат." },
+    { icon: Brain, title: "AI-технологии", desc: "Искусственный интеллект анализирует ваши ошибки и подсказывает, над чем работать." },
+    { icon: Zap, title: "Скорость", desc: "5–10 минут в день. Карточки, квизы и аудирование в удобном темпе." },
+    { icon: Sparkles, title: "Мотивация", desc: "XP, достижения, дуэли с друзьями и магазин заданий — учиться интересно." },
+  ],
+  uk: [
+    { icon: Target, title: "Ясність", desc: "Прості пояснення без зайвого. Кожен урок — конкретний результат." },
+    { icon: Brain, title: "AI-технології", desc: "Штучний інтелект аналізує ваші помилки та підказує, над чим працювати." },
+    { icon: Zap, title: "Швидкість", desc: "5–10 хвилин на день. Картки, квізи та аудіювання у зручному темпі." },
+    { icon: Sparkles, title: "Мотивація", desc: "XP, досягнення, дуелі з друзями та магазин завдань — вчитися цікаво." },
+  ],
+};
+
+const ui = {
+  ru: {
+    heroTitle: "Метод",
+    heroSub1: "Немецкий язык — ясно и просто.",
+    heroSub2: "От A1 до C1 с AI-поддержкой.",
+    audioLabel: "🎧 Послушай мотивацию KLAR",
+    audioLoading: "Загрузка...",
+    audioPlaying: "Сейчас играет — нажми чтобы остановить",
+    audioIdle: "Нажми, чтобы услышать",
+    whyTitle: "Почему KLAR?",
+    reviewsTitle: "Отзывы учеников",
+    faqTitle: "Частые вопросы",
+    cta: "Начать бесплатно",
+    footerPrivacy: "Политика конфиденциальности",
+    footerTerms: "Оферта",
+    footerCopy: "KLAR — Немецкий язык ясно и просто",
+  },
+  uk: {
+    heroTitle: "Метод",
+    heroSub1: "Німецька мова — ясно і просто.",
+    heroSub2: "Від A1 до C1 з AI-підтримкою.",
+    audioLabel: "🎧 Послухай мотивацію KLAR",
+    audioLoading: "Завантаження...",
+    audioPlaying: "Зараз грає — натисни щоб зупинити",
+    audioIdle: "Натисни, щоб почути",
+    whyTitle: "Чому KLAR?",
+    reviewsTitle: "Відгуки учнів",
+    faqTitle: "Часті запитання",
+    cta: "Почати безкоштовно",
+    footerPrivacy: "Політика конфіденційності",
+    footerTerms: "Оферта",
+    footerCopy: "KLAR — Німецька мова ясно і просто",
+  },
+};
 
 const Method = () => {
-  const { lang, t } = useLanguage();
+  const { lang } = useLanguage();
   const navigate = useNavigate();
   const [audioState, setAudioState] = useState<"idle" | "loading" | "playing">("idle");
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioCacheRef = useRef<Map<string, string>>(new Map());
+
+  const t = ui[lang] || ui.ru;
+  const features = featuresData[lang] || featuresData.ru;
+  const reviews = testimonials[lang] || testimonials.ru;
+  const faqs = faqItems[lang] || faqItems.ru;
 
   const playMotivation = useCallback(async () => {
     if (audioState === "playing" && audioRef.current) {
@@ -135,14 +169,13 @@ const Method = () => {
 
         <div className="relative z-10 max-w-xl mx-auto">
           <h1 className="text-4xl md:text-5xl font-display font-bold mb-3">
-            Метод <span className="text-gradient">KLAR</span>
+            {t.heroTitle} <span className="text-gradient">KLAR</span>
           </h1>
           <p className="text-muted-foreground text-lg mb-8">
-            Немецкий язык — ясно и просто.<br />
-            От A1 до C1 с AI-поддержкой.
+            {t.heroSub1}<br />
+            {t.heroSub2}
           </p>
 
-          {/* Audio motivation */}
           <button
             onClick={playMotivation}
             className="glass-card max-w-md mx-auto flex items-center gap-4 px-6 py-5 mb-4 cursor-pointer hover:border-primary/30 transition-all group"
@@ -157,27 +190,20 @@ const Method = () => {
               )}
             </div>
             <div className="text-left">
-              <p className="font-display font-semibold text-sm">
-                {lang === "uk" ? "🎧 Послухай мотивацію KLAR" : "🎧 Послушай мотивацию KLAR"}
-              </p>
+              <p className="font-display font-semibold text-sm">{t.audioLabel}</p>
               <p className="text-xs text-muted-foreground">
-                {audioState === "loading"
-                  ? lang === "uk" ? "Завантаження..." : "Загрузка..."
-                  : audioState === "playing"
-                    ? lang === "uk" ? "Зараз грає — натисни щоб зупинити" : "Сейчас играет — нажми чтобы остановить"
-                    : lang === "uk" ? "Натисни, щоб почути" : "Нажми, чтобы услышать"}
+                {audioState === "loading" ? t.audioLoading : audioState === "playing" ? t.audioPlaying : t.audioIdle}
               </p>
             </div>
           </button>
         </div>
 
-        {/* ambient glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
       </section>
 
       {/* Features */}
       <section className="px-4 py-12 max-w-2xl mx-auto">
-        <h2 className="text-2xl font-display font-bold text-center mb-8">Почему KLAR?</h2>
+        <h2 className="text-2xl font-display font-bold text-center mb-8">{t.whyTitle}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {features.map((f, i) => (
             <div key={i} className="glass-card p-5 flex gap-4 items-start animate-slide-up" style={{ animationDelay: `${i * 0.1}s` }}>
@@ -195,14 +221,14 @@ const Method = () => {
 
       {/* Testimonials */}
       <section className="px-4 py-12 max-w-2xl mx-auto">
-        <h2 className="text-2xl font-display font-bold text-center mb-8">Отзывы учеников</h2>
+        <h2 className="text-2xl font-display font-bold text-center mb-8">{t.reviewsTitle}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {testimonials.map((t, i) => (
+          {reviews.map((r, i) => (
             <div key={i} className="glass-card p-5 animate-slide-up" style={{ animationDelay: `${i * 0.08}s` }}>
               <div className="flex items-center gap-3 mb-3">
-                <img src={t.photo} alt={t.name} className="w-10 h-10 rounded-full bg-secondary" />
+                <img src={r.photo} alt={r.name} className="w-10 h-10 rounded-full bg-secondary" />
                 <div>
-                  <p className="font-semibold text-sm">{t.name}</p>
+                  <p className="font-semibold text-sm">{r.name}</p>
                   <div className="flex gap-0.5">
                     {[...Array(5)].map((_, j) => (
                       <Star key={j} className="w-3 h-3 text-primary fill-primary" />
@@ -210,7 +236,7 @@ const Method = () => {
                   </div>
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground leading-relaxed">{t.text}</p>
+              <p className="text-sm text-muted-foreground leading-relaxed">{r.text}</p>
             </div>
           ))}
         </div>
@@ -218,9 +244,9 @@ const Method = () => {
 
       {/* FAQ */}
       <section className="px-4 py-12 max-w-xl mx-auto">
-        <h2 className="text-2xl font-display font-bold text-center mb-8">Частые вопросы</h2>
+        <h2 className="text-2xl font-display font-bold text-center mb-8">{t.faqTitle}</h2>
         <Accordion type="single" collapsible className="space-y-2">
-          {faqItems.map((item, i) => (
+          {faqs.map((item, i) => (
             <AccordionItem key={i} value={`faq-${i}`} className="glass-card border-none px-4">
               <AccordionTrigger className="text-sm font-semibold text-left hover:no-underline">
                 {item.q}
@@ -239,18 +265,18 @@ const Method = () => {
           onClick={() => navigate("/auth")}
           className="w-full px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold glow-yellow transition-all hover:opacity-90"
         >
-          Начать бесплатно
+          {t.cta}
         </button>
       </section>
 
       {/* Footer */}
       <footer className="px-4 py-8 border-t border-border text-center text-xs text-muted-foreground space-y-2">
         <div className="flex items-center justify-center gap-4">
-          <button onClick={() => navigate("/privacy")} className="hover:text-foreground transition-colors">Политика конфиденциальности</button>
+          <button onClick={() => navigate("/privacy")} className="hover:text-foreground transition-colors">{t.footerPrivacy}</button>
           <span>·</span>
-          <button onClick={() => navigate("/terms")} className="hover:text-foreground transition-colors">Оферта</button>
+          <button onClick={() => navigate("/terms")} className="hover:text-foreground transition-colors">{t.footerTerms}</button>
         </div>
-        <p>© {new Date().getFullYear()} KLAR — Немецкий язык ясно и просто</p>
+        <p>© {new Date().getFullYear()} {t.footerCopy}</p>
       </footer>
     </div>
   );
