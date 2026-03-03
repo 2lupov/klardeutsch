@@ -14,6 +14,7 @@ interface AdminUser {
   roles: string[];
   user_created_at: string;
   last_active: string | null;
+  email_confirmed: boolean;
 }
 
 interface DemoUser {
@@ -502,7 +503,14 @@ const UsersEditor = () => {
                 <p className="text-sm font-semibold text-foreground truncate">
                   {user.display_name || "Без имени"}
                 </p>
-                <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                <div className="flex items-center gap-1.5">
+                  <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                  {user.email_confirmed ? (
+                    <span className="shrink-0 px-1.5 py-0.5 rounded-full bg-green-500/15 text-green-600 text-[9px] font-bold">✓</span>
+                  ) : (
+                    <span className="shrink-0 px-1.5 py-0.5 rounded-full bg-destructive/15 text-destructive text-[9px] font-bold">не подтв.</span>
+                  )}
+                </div>
               </div>
               {isAdmin && (
                 <span className="px-2 py-0.5 rounded-full bg-primary/20 text-primary text-[10px] font-bold">ADMIN</span>

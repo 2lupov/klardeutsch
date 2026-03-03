@@ -998,6 +998,7 @@ export type Database = {
           coin_balance: number
           display_name: string
           email: string
+          email_confirmed: boolean
           last_active: string
           roles: string[]
           total_xp: number
