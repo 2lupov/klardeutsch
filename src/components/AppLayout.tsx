@@ -5,6 +5,7 @@ import { usePlatform } from "@/hooks/usePlatform";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import DesktopSidebar from "@/components/DesktopSidebar";
 import PageTransition from "@/components/PageTransition";
+import LofiFloatingPlayer from "@/components/LofiFloatingPlayer";
 
 const AppLayout = () => {
   const { user, loading } = useAuth();
@@ -28,6 +29,7 @@ const AppLayout = () => {
   if (isMobile) {
     return (
       <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
+        <LofiFloatingPlayer />
         <div className="flex-1 overflow-y-auto overscroll-none pb-14">
           <PageTransition><Outlet /></PageTransition>
         </div>
@@ -40,7 +42,8 @@ const AppLayout = () => {
   return (
     <div className="h-[100dvh] bg-background flex overflow-hidden">
       <DesktopSidebar />
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto relative">
+        <LofiFloatingPlayer />
         <PageTransition><Outlet /></PageTransition>
       </main>
     </div>
