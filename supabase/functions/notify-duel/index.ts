@@ -31,14 +31,34 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Get opponent's telegram_chat_id
+    // Check real user profile first
+    let chatId: number | null = null;
+    let opponentName: string | null = null;
+
     const { data: profile } = await supabase
       .from("profiles")
       .select("telegram_chat_id, display_name")
       .eq("user_id", opponent_id)
       .single();
 
-    if (!profile?.telegram_chat_id) {
+    if (profile?.telegram_chat_id) {
+      chatId = profile.telegram_chat_id;
+      opponentName = profile.display_name;
+    } else {
+      // Check if opponent is a demo/fake user
+      const { data: demo } = await supabase
+        .from("demo_leaderboard")
+        .select("telegram_chat_id, display_name")
+        .eq("id", opponent_id)
+        .single();
+
+      if (demo?.telegram_chat_id) {
+        chatId = demo.telegram_chat_id;
+        opponentName = demo.display_name;
+      }
+    }
+
+    if (!chatId) {
       return new Response(JSON.stringify({ sent: false, reason: "no_telegram" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -46,13 +66,14 @@ Deno.serve(async (req) => {
 
     const typeLabel = challenge_type === "vocab" ? "Словарный запас" : "Грамматика";
     const name = challenger_name || "Кто-то";
-    const message = `⚔️ <b>Вызов на дуэль!</b>\n\n${name} вызывает тебя на дуэль!\n📚 ${typeLabel} · ${level || "A1"}\n\nЗайди в KLAR, чтобы принять вызов! 💪`;
+    const demoLabel = opponentName ? ` (→ ${opponentName})` : "";
+    const message = `⚔️ <b>Вызов на дуэль!</b>${demoLabel}\n\n${name} вызывает на дуэль!\n📚 ${typeLabel} · ${level || "A1"}\n\nЗайди в KLAR, чтобы принять вызов! 💪`;
 
     const res = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        chat_id: profile.telegram_chat_id,
+        chat_id: chatId,
         text: message,
         parse_mode: "HTML",
       }),

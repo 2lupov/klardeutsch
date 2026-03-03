@@ -206,6 +206,7 @@ export type Database = {
           created_at: string
           display_name: string
           id: string
+          telegram_chat_id: number | null
           total_xp: number
         }
         Insert: {
@@ -213,6 +214,7 @@ export type Database = {
           created_at?: string
           display_name: string
           id?: string
+          telegram_chat_id?: number | null
           total_xp?: number
         }
         Update: {
@@ -220,6 +222,7 @@ export type Database = {
           created_at?: string
           display_name?: string
           id?: string
+          telegram_chat_id?: number | null
           total_xp?: number
         }
         Relationships: []

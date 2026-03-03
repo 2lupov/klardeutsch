@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Minus, Trash2, Pencil, UserPlus, Camera, Lock } from "lucide-react";
+import { Plus, Minus, Trash2, Pencil, UserPlus, Camera, Lock, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 import AvatarPicker from "@/components/AvatarPicker";
 
@@ -9,6 +9,7 @@ interface DemoUser {
   display_name: string;
   total_xp: number;
   avatar_url: string | null;
+  telegram_chat_id: number | null;
 }
 
 const StuffOnlyTab = () => {
@@ -67,7 +68,7 @@ const DemoUsersManager = () => {
     setLoading(true);
     const { data } = await supabase
       .from("demo_leaderboard")
-      .select("id, display_name, total_xp, avatar_url")
+      .select("id, display_name, total_xp, avatar_url, telegram_chat_id")
       .order("total_xp", { ascending: false });
     setDemoUsers((data as DemoUser[]) ?? []);
     setLoading(false);
@@ -215,13 +216,33 @@ const DemoUsersManager = () => {
             </button>
           </div>
 
-          {/* Avatar picker toggle */}
-          <button
-            onClick={() => setAvatarPickerFor(avatarPickerFor === du.id ? null : du.id)}
-            className="text-xs text-primary hover:underline self-start"
-          >
-            {avatarPickerFor === du.id ? "Скрыть аватарки" : "Выбрать аватарку"}
-          </button>
+          {/* Telegram + Avatar picker */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <button
+              onClick={() => setAvatarPickerFor(avatarPickerFor === du.id ? null : du.id)}
+              className="text-xs text-primary hover:underline"
+            >
+              {avatarPickerFor === du.id ? "Скрыть аватарки" : "Выбрать аватарку"}
+            </button>
+            <div className="flex items-center gap-1.5">
+              <MessageSquare className="w-3 h-3 text-muted-foreground" />
+              <input
+                type="number"
+                placeholder="Telegram chat ID"
+                defaultValue={du.telegram_chat_id ?? ""}
+                onBlur={async (e) => {
+                  const val = e.target.value.trim();
+                  const chatId = val ? parseInt(val) : null;
+                  if (chatId === du.telegram_chat_id) return;
+                  await supabase.from("demo_leaderboard").update({ telegram_chat_id: chatId } as any).eq("id", du.id);
+                  toast.success(chatId ? "Telegram подключён!" : "Telegram отключён");
+                  load();
+                }}
+                className="w-36 px-2 py-1 rounded-lg bg-secondary text-foreground border border-border text-xs focus:border-primary focus:outline-none"
+              />
+              {du.telegram_chat_id && <span className="text-[10px] text-green-500 font-medium">✓</span>}
+            </div>
+          </div>
 
           {avatarPickerFor === du.id && (
             <AvatarPicker
