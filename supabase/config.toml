@@ -19,3 +19,5 @@ project_id = "jqqsszwbbxvevebmebfm"
     verify_jwt = false
   [functions.check-writing]
     verify_jwt = false
+  [functions.telegram-weekly-report]
+    verify_jwt = false
