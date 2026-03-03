@@ -13,6 +13,7 @@ import LofiRadio from "@/components/LofiRadio";
 import Leaderboard from "@/components/Leaderboard";
 import Referrals from "@/components/Referrals";
 import { useXP } from "@/hooks/useXP";
+import AvatarPicker from "@/components/AvatarPicker";
 
 interface ProgressRow {
   level: string;
@@ -55,7 +56,8 @@ const Profile = () => {
   const [dialoguesCount, setDialoguesCount] = useState(0);
   const [dailyBonusStreakVal, setDailyBonusStreakVal] = useState(0);
   const [challengesSentCount, setChallengesSentCount] = useState(0);
-
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+  const [settingAvatar, setSettingAvatar] = useState(false);
   useEffect(() => {
     if (!user) return;
     const load = async () => {
@@ -178,6 +180,17 @@ const Profile = () => {
     await supabase.from("profiles").update({ avatar_url }).eq("user_id", user.id);
     setProfile((p) => ({ ...p, avatar_url }));
     setUploading(false);
+    setShowAvatarPicker(false);
+  };
+
+  const handlePresetAvatar = async (url: string) => {
+    if (!user) return;
+    setSettingAvatar(true);
+    await supabase.from("profiles").update({ avatar_url: url }).eq("user_id", user.id);
+    setProfile((p) => ({ ...p, avatar_url: url }));
+    setSettingAvatar(false);
+    setShowAvatarPicker(false);
+    toast({ title: t("profileSaved") });
   };
 
   const handleSaveName = async () => {
@@ -576,7 +589,7 @@ const Profile = () => {
             </AvatarFallback>
           </Avatar>
           <button
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => setShowAvatarPicker(!showAvatarPicker)}
             disabled={uploading}
             className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
           >
@@ -614,6 +627,29 @@ const Profile = () => {
           <p className="text-xs text-muted-foreground truncate">{user.email}</p>
         </div>
       </div>
+
+      {/* Avatar picker */}
+      {showAvatarPicker && (
+        <div className="glass-card p-4 mb-4 flex flex-col gap-3">
+          <p className="text-xs font-medium text-foreground">Выбери аватарку:</p>
+          <AvatarPicker
+            currentUrl={profile.avatar_url}
+            onSelect={handlePresetAvatar}
+            loading={settingAvatar}
+          />
+          <div className="flex items-center gap-2">
+            <div className="flex-1 h-px bg-border" />
+            <span className="text-[10px] text-muted-foreground">або</span>
+            <div className="flex-1 h-px bg-border" />
+          </div>
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="text-xs text-primary hover:underline"
+          >
+            Завантажити своє фото
+          </button>
+        </div>
+      )}
 
       {/* Stat cards */}
       <div className="grid grid-cols-4 gap-2 mb-4">
