@@ -219,10 +219,16 @@
     50% { transform: translate(-50%, -40px) scale(1.15); }
   }
 
-  /* Auth page typewriter */
-  @keyframes typewriter-cursor {
-    0%, 100% { border-color: hsl(var(--yellow-glow)); }
-    50% { border-color: transparent; }
+  /* Fireworks */
+  @keyframes fw-flash {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  @keyframes fw-particle {
+    0% { transform: translate(0, 0) scale(1); opacity: 1; }
+    70% { opacity: 1; }
+    100% { transform: translate(var(--fw-tx), var(--fw-ty)) scale(0); opacity: 0; }
   }
 
   @keyframes auth-scale-in {
