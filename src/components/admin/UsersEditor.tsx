@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Shield, ShieldOff, Search, Users, Star, Coins } from "lucide-react";
+import { Shield, ShieldOff, Search, Users, Star, Coins, Send, Bell, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface AdminUser {
@@ -21,6 +21,9 @@ const UsersEditor = () => {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [broadcastMsg, setBroadcastMsg] = useState("");
+  const [broadcasting, setBroadcasting] = useState(false);
+  const [triggering, setTriggering] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -43,6 +46,32 @@ const UsersEditor = () => {
     }
     toast.success(isAdmin ? "Роль admin снята" : "Роль admin назначена");
     load();
+  };
+
+  const handleBroadcast = async () => {
+    if (!broadcastMsg.trim()) return;
+    setBroadcasting(true);
+    const { data, error } = await supabase.functions.invoke("telegram-broadcast", {
+      body: { message: broadcastMsg.trim() },
+    });
+    if (error) {
+      toast.error("Ошибка: " + error.message);
+    } else {
+      toast.success(`Отправлено ${data?.sent ?? 0} из ${data?.total ?? 0} пользователям`);
+      setBroadcastMsg("");
+    }
+    setBroadcasting(false);
+  };
+
+  const handleTriggerReminders = async () => {
+    setTriggering(true);
+    const { data, error } = await supabase.functions.invoke("telegram-reminders");
+    if (error) {
+      toast.error("Ошибка: " + error.message);
+    } else {
+      toast.success(`Напоминания: ${data?.sent ?? 0} отправлено из ${data?.total ?? 0}`);
+    }
+    setTriggering(false);
   };
 
   const filtered = users.filter((u) => {
@@ -79,6 +108,42 @@ const UsersEditor = () => {
           <span className="text-sm font-display font-bold text-foreground">{users.filter(u => u.roles.includes("admin")).length}</span>
           <span className="text-xs text-muted-foreground">админов</span>
         </div>
+      </div>
+
+      {/* Telegram actions */}
+      <div className="glass-card p-4 flex flex-col gap-3">
+        <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-2">
+          <Send className="w-4 h-4 text-primary" /> Telegram-рассылка
+        </h3>
+        <textarea
+          value={broadcastMsg}
+          onChange={(e) => setBroadcastMsg(e.target.value)}
+          placeholder="Напишите сообщение для всех пользователей..."
+          rows={3}
+          maxLength={1000}
+          className="w-full px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none resize-y"
+        />
+        <div className="flex gap-2">
+          <button
+            onClick={handleBroadcast}
+            disabled={broadcasting || !broadcastMsg.trim()}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium disabled:opacity-40 transition-all"
+          >
+            {broadcasting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+            {broadcasting ? "Отправка..." : "Отправить всем"}
+          </button>
+          <button
+            onClick={handleTriggerReminders}
+            disabled={triggering}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-secondary border border-border text-foreground text-sm font-medium disabled:opacity-40 hover:bg-muted transition-all"
+          >
+            {triggering ? <Loader2 className="w-4 h-4 animate-spin" /> : <Bell className="w-4 h-4" />}
+            {triggering ? "..." : "Напоминание"}
+          </button>
+        </div>
+        <p className="text-[10px] text-muted-foreground">
+          «Отправить всем» — ваш текст всем с Telegram. «Напоминание» — авто-напоминание неактивным.
+        </p>
       </div>
 
       {/* Users list */}
