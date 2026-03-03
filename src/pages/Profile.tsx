@@ -5,12 +5,13 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { usePlatform } from "@/hooks/usePlatform";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { BookOpen, Brain, Flame, RotateCcw, TrendingUp, Calendar, LogOut, Camera, Pencil, Check, X, Coins, Trophy, ArrowLeft, ChevronRight, Award, Bell, Send, Unlink2 } from "lucide-react";
+import { BookOpen, Brain, Flame, RotateCcw, TrendingUp, Calendar, LogOut, Camera, Pencil, Check, X, Coins, Trophy, ArrowLeft, ChevronRight, Award, Bell, Send, Unlink2, Users } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useCoins } from "@/hooks/useCoins";
 import Achievements, { type AchievementStats } from "@/components/Achievements";
 import LofiRadio from "@/components/LofiRadio";
 import Leaderboard from "@/components/Leaderboard";
+import Referrals from "@/components/Referrals";
 import { useXP } from "@/hooks/useXP";
 
 interface ProgressRow {
@@ -29,7 +30,7 @@ interface ProfileData {
   telegram_chat_id: number | null;
 }
 
-type ProfileScreen = "main" | "achievements" | "activity" | "mistakes" | "leaderboard" | "notifications";
+type ProfileScreen = "main" | "achievements" | "activity" | "mistakes" | "leaderboard" | "notifications" | "referrals";
 
 const Profile = () => {
   const { user, signOut } = useAuth();
@@ -198,6 +199,28 @@ const Profile = () => {
       default: return "";
     }
   };
+
+  // Sub-screen: Referrals
+  if (screen === "referrals") {
+    return (
+      <div className={`w-full mx-auto px-4 py-4 h-full flex flex-col ${isMobile ? "max-w-md" : "max-w-2xl"}`}>
+        <button
+          onClick={() => setScreen("main")}
+          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          {t("back")}
+        </button>
+        <h2 className="font-display text-lg font-bold text-foreground mb-3 flex items-center gap-2">
+          <Users className="w-5 h-5 text-primary" />
+          {t("referralsTitle")}
+        </h2>
+        <div className="flex-1 overflow-y-auto">
+          <Referrals />
+        </div>
+      </div>
+    );
+  }
 
   // Sub-screen: Notifications
   if (screen === "notifications") {
@@ -495,6 +518,11 @@ const Profile = () => {
           label={t("notificationsTitle")}
           subtitle={profile.telegram_chat_id ? "Telegram ✅" : undefined}
           onClick={() => setScreen("notifications")}
+        />
+        <NavButton
+          icon={<Users className="w-4 h-4 text-primary" />}
+          label={t("referralsTitle")}
+          onClick={() => setScreen("referrals")}
         />
       </div>
 

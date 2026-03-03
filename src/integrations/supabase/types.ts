@@ -436,6 +436,96 @@ export type Database = {
         }
         Relationships: []
       }
+      referral_challenges: {
+        Row: {
+          challenge_type: string
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          current_value: number
+          id: string
+          referred_id: string
+          referrer_id: string
+          reward_type: string
+          reward_value: string
+          target_value: number
+        }
+        Insert: {
+          challenge_type: string
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          current_value?: number
+          id?: string
+          referred_id: string
+          referrer_id: string
+          reward_type: string
+          reward_value: string
+          target_value?: number
+        }
+        Update: {
+          challenge_type?: string
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          current_value?: number
+          id?: string
+          referred_id?: string
+          referrer_id?: string
+          reward_type?: string
+          reward_value?: string
+          target_value?: number
+        }
+        Relationships: []
+      }
+      referral_codes: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      referrals: {
+        Row: {
+          activated_at: string | null
+          created_at: string
+          id: string
+          referred_id: string
+          referrer_id: string
+          status: string
+        }
+        Insert: {
+          activated_at?: string | null
+          created_at?: string
+          id?: string
+          referred_id: string
+          referrer_id: string
+          status?: string
+        }
+        Update: {
+          activated_at?: string | null
+          created_at?: string
+          id?: string
+          referred_id?: string
+          referrer_id?: string
+          status?: string
+        }
+        Relationships: []
+      }
       saved_words: {
         Row: {
           id: string
@@ -647,6 +737,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      activate_referral: { Args: { p_referred_id: string }; Returns: undefined }
+      apply_referral_code: {
+        Args: { p_code: string; p_referred_id: string }
+        Returns: boolean
+      }
       award_coins: {
         Args: { p_amount: number; p_reason: string; p_user_id: string }
         Returns: undefined
@@ -659,6 +754,7 @@ export type Database = {
         Args: { input_password: string }
         Returns: boolean
       }
+      generate_referral_code: { Args: { p_user_id: string }; Returns: string }
       get_leaderboard: {
         Args: { p_limit?: number }
         Returns: {
@@ -667,6 +763,13 @@ export type Database = {
           rank: number
           total_xp: number
           user_id: string
+        }[]
+      }
+      get_referral_stats: {
+        Args: { p_user_id: string }
+        Returns: {
+          active_referrals: number
+          total_referrals: number
         }[]
       }
       has_role: {
