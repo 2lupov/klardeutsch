@@ -52,6 +52,12 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const setLang = useCallback((l: Lang) => {
     setLangState(l);
     localStorage.setItem("klar-lang", l);
+    // Sync to profile for Telegram notifications
+    supabase.auth.getUser().then(({ data }) => {
+      if (data?.user?.id) {
+        supabase.from("profiles").update({ preferred_lang: l } as any).eq("user_id", data.user.id).then(() => {});
+      }
+    });
   }, []);
 
   const t = useCallback((key: TranslationKey): string => {

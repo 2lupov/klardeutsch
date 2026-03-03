@@ -509,6 +509,7 @@ export type Database = {
           display_name: string | null
           id: string
           last_active: string | null
+          preferred_lang: string
           telegram_chat_id: number | null
           updated_at: string
           user_id: string
@@ -519,6 +520,7 @@ export type Database = {
           display_name?: string | null
           id?: string
           last_active?: string | null
+          preferred_lang?: string
           telegram_chat_id?: number | null
           updated_at?: string
           user_id: string
@@ -529,6 +531,7 @@ export type Database = {
           display_name?: string | null
           id?: string
           last_active?: string | null
+          preferred_lang?: string
           telegram_chat_id?: number | null
           updated_at?: string
           user_id?: string
