@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from "react";
 import { ArrowLeft, Volume2, Mic, MicOff, RefreshCw, Loader2, CheckCircle2 } from "lucide-react";
 import { usePlatform } from "@/hooks/usePlatform";
+import { toast } from "sonner";
 
 interface PronunciationTrainerProps {
   onBack: () => void;
@@ -50,7 +51,6 @@ const PHRASES: Record<string, { de: string; ru: string }[]> = {
 
 const LEVELS = Object.keys(PHRASES);
 
-// Normalize text for comparison
 function normalize(text: string): string {
   return text
     .toLowerCase()
@@ -59,7 +59,6 @@ function normalize(text: string): string {
     .trim();
 }
 
-// Calculate similarity between two strings (Levenshtein-based)
 function similarity(a: string, b: string): number {
   const an = normalize(a);
   const bn = normalize(b);
@@ -69,7 +68,6 @@ function similarity(a: string, b: string): number {
   const wordsA = an.split(" ");
   const wordsB = bn.split(" ");
 
-  // Word-level matching
   let matched = 0;
   for (const wa of wordsA) {
     if (wordsB.some((wb) => wb === wa || levenshteinRatio(wa, wb) > 0.7)) {
@@ -98,24 +96,20 @@ function levenshteinRatio(a: string, b: string): number {
   return 1 - dist / Math.max(a.length, b.length);
 }
 
-// Check if Web Speech Recognition is available
-function getSpeechRecognition(): any {
-  const w = window as any;
-  return w.SpeechRecognition || w.webkitSpeechRecognition || null;
-}
-
 const PronunciationTrainer = ({ onBack }: PronunciationTrainerProps) => {
   const { isMobile } = usePlatform();
   const [level, setLevel] = useState("A1");
   const [phraseIndex, setPhraseIndex] = useState(() => Math.floor(Math.random() * PHRASES.A1.length));
   const [isPlaying, setIsPlaying] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
   const [recognized, setRecognized] = useState("");
   const [score, setScore] = useState<number | null>(null);
   const [attempts, setAttempts] = useState(0);
   const [totalScore, setTotalScore] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const recognitionRef = useRef<any>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
 
   const phrases = PHRASES[level];
   const current = phrases[phraseIndex % phrases.length];
@@ -158,57 +152,84 @@ const PronunciationTrainer = ({ onBack }: PronunciationTrainerProps) => {
     }
   }, [current.de, isPlaying]);
 
-  const startListening = useCallback(() => {
-    const SpeechRec = getSpeechRecognition();
-    if (!SpeechRec) {
-      setRecognized("⚠️ Ваш браузер не поддерживает распознавание речи. Используйте Chrome.");
-      return;
-    }
+  const transcribeAudio = useCallback(async (audioBlob: Blob) => {
+    setIsTranscribing(true);
+    try {
+      const formData = new FormData();
+      formData.append("audio", audioBlob, "recording.webm");
 
-    const recognition = new SpeechRec() as any;
-    recognition.lang = "de-DE";
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 3;
-
-    recognition.onstart = () => setIsListening(true);
-
-    recognition.onresult = (event: SpeechRecognitionEvent) => {
-      // Take best match from alternatives
-      let bestText = "";
-      let bestScore = 0;
-      for (let i = 0; i < event.results[0].length; i++) {
-        const alt = event.results[0][i].transcript;
-        const s = similarity(current.de, alt);
-        if (s > bestScore) {
-          bestScore = s;
-          bestText = alt;
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-transcribe`,
+        {
+          method: "POST",
+          headers: {
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: formData,
         }
-      }
-      setRecognized(bestText);
-      setScore(bestScore);
-      setAttempts((a) => a + 1);
-      setTotalScore((t) => t + bestScore);
-    };
+      );
 
-    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-      console.error("Speech recognition error:", event.error);
-      if (event.error === "not-allowed") {
-        setRecognized("⚠️ Разрешите доступ к микрофону");
-      } else if (event.error === "no-speech") {
+      if (!response.ok) throw new Error("Transcription failed");
+
+      const data = await response.json();
+      const text = data.text?.trim() || "";
+
+      if (!text) {
         setRecognized("🔇 Речь не распознана. Попробуйте ещё раз.");
+        return;
       }
-      setIsListening(false);
-    };
 
-    recognition.onend = () => setIsListening(false);
-
-    recognitionRef.current = recognition;
-    recognition.start();
+      const s = similarity(current.de, text);
+      setRecognized(text);
+      setScore(s);
+      setAttempts((a) => a + 1);
+      setTotalScore((t) => t + s);
+    } catch (e) {
+      console.error("Transcription error:", e);
+      toast.error("Ошибка распознавания речи");
+      setRecognized("⚠️ Ошибка распознавания. Попробуйте ещё раз.");
+    } finally {
+      setIsTranscribing(false);
+    }
   }, [current.de]);
 
+  const startListening = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      chunksRef.current = [];
+
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+          ? "audio/webm;codecs=opus"
+          : "audio/webm",
+      });
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        stream.getTracks().forEach((t) => t.stop());
+        const audioBlob = new Blob(chunksRef.current, { type: "audio/webm" });
+        if (audioBlob.size > 0) {
+          transcribeAudio(audioBlob);
+        }
+      };
+
+      mediaRecorderRef.current = mediaRecorder;
+      mediaRecorder.start();
+      setIsListening(true);
+    } catch (e) {
+      console.error("Mic error:", e);
+      setRecognized("⚠️ Разрешите доступ к микрофону");
+    }
+  }, [transcribeAudio]);
+
   const stopListening = useCallback(() => {
-    recognitionRef.current?.stop();
+    if (mediaRecorderRef.current?.state === "recording") {
+      mediaRecorderRef.current.stop();
+    }
     setIsListening(false);
   }, []);
 
@@ -227,6 +248,7 @@ const PronunciationTrainer = ({ onBack }: PronunciationTrainerProps) => {
   };
 
   const avgScore = attempts > 0 ? Math.round(totalScore / attempts) : 0;
+  const isBusy = isListening || isTranscribing;
 
   return (
     <div className={`w-full mx-auto px-4 py-6 flex flex-col gap-4 animate-slide-up ${isMobile ? "max-w-md" : "max-w-2xl"}`}>
@@ -287,13 +309,21 @@ const PronunciationTrainer = ({ onBack }: PronunciationTrainerProps) => {
 
           <button
             onClick={isListening ? stopListening : startListening}
+            disabled={isTranscribing}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-display font-bold text-sm transition-all ${
               isListening
                 ? "bg-destructive text-destructive-foreground animate-pulse"
+                : isTranscribing
+                ? "bg-muted text-muted-foreground"
                 : "bg-primary text-primary-foreground hover:bg-primary/90"
             }`}
           >
-            {isListening ? (
+            {isTranscribing ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Анализ...
+              </>
+            ) : isListening ? (
               <>
                 <MicOff className="w-4 h-4" />
                 Стоп
@@ -312,7 +342,6 @@ const PronunciationTrainer = ({ onBack }: PronunciationTrainerProps) => {
       {recognized && !recognized.startsWith("⚠️") && !recognized.startsWith("🔇") && (
         <div className="glass-card p-5 animate-slide-up">
           <div className="text-center">
-            {/* Score circle */}
             {score !== null && (
               <div className="mb-3">
                 <div className={`text-4xl font-display font-bold ${getScoreColor(score)}`}>
@@ -322,7 +351,6 @@ const PronunciationTrainer = ({ onBack }: PronunciationTrainerProps) => {
               </div>
             )}
 
-            {/* Comparison */}
             <div className="space-y-2 mt-4">
               <div className="flex items-center gap-2 justify-center text-sm">
                 <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
@@ -338,7 +366,6 @@ const PronunciationTrainer = ({ onBack }: PronunciationTrainerProps) => {
               </div>
             </div>
 
-            {/* Word-by-word highlight */}
             {score !== null && score < 100 && (
               <div className="mt-3 flex flex-wrap gap-1 justify-center">
                 {normalize(current.de).split(" ").map((word, i) => {
@@ -363,7 +390,6 @@ const PronunciationTrainer = ({ onBack }: PronunciationTrainerProps) => {
         </div>
       )}
 
-      {/* Error messages */}
       {recognized && (recognized.startsWith("⚠️") || recognized.startsWith("🔇")) && (
         <div className="glass-card p-4 animate-slide-up">
           <p className="text-sm text-muted-foreground text-center">{recognized}</p>
@@ -374,7 +400,7 @@ const PronunciationTrainer = ({ onBack }: PronunciationTrainerProps) => {
       <div className="flex gap-3">
         <button
           onClick={() => { setRecognized(""); setScore(null); }}
-          disabled={!recognized}
+          disabled={!recognized || isBusy}
           className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border border-border text-foreground font-display font-bold text-sm hover:bg-muted/50 transition-colors disabled:opacity-30"
         >
           <Mic className="w-4 h-4" />
@@ -382,16 +408,16 @@ const PronunciationTrainer = ({ onBack }: PronunciationTrainerProps) => {
         </button>
         <button
           onClick={nextPhrase}
-          className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-primary text-primary-foreground font-display font-bold text-sm hover:bg-primary/90 transition-colors"
+          disabled={isBusy}
+          className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-primary text-primary-foreground font-display font-bold text-sm hover:bg-primary/90 transition-colors disabled:opacity-50"
         >
           <RefreshCw className="w-4 h-4" />
           Следующая
         </button>
       </div>
 
-      {/* Tip */}
       <p className="text-[11px] text-muted-foreground/60 text-center">
-        💡 Сначала послушай, потом нажми «Говорить» и произнеси фразу чётко
+        💡 Нажми «Говорить», произнеси фразу чётко и нажми «Стоп»
       </p>
     </div>
   );
