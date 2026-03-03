@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Trophy, Medal, Award } from "lucide-react";
+import UserProfileDialog from "@/components/UserProfileDialog";
 
 interface LeaderboardEntry {
   user_id: string;
@@ -18,6 +19,7 @@ const Leaderboard = () => {
   const { t } = useLanguage();
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedUser, setSelectedUser] = useState<LeaderboardEntry | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -60,10 +62,11 @@ const Leaderboard = () => {
         const initials = name.slice(0, 2).toUpperCase();
 
         return (
-          <div
+          <button
             key={entry.user_id}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors ${
-              isMe ? "bg-primary/10 border border-primary/20" : "glass-card"
+            onClick={() => setSelectedUser(entry)}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-left ${
+              isMe ? "bg-primary/10 border border-primary/20" : "glass-card hover:border-primary/20"
             }`}
           >
             <div className="w-6 flex items-center justify-center shrink-0">
@@ -81,9 +84,18 @@ const Leaderboard = () => {
             <span className="text-sm font-display font-bold text-gradient shrink-0">
               {entry.total_xp} XP
             </span>
-          </div>
+          </button>
         );
       })}
+
+      <UserProfileDialog
+        userId={selectedUser?.user_id ?? null}
+        displayName={selectedUser?.display_name ?? null}
+        avatarUrl={selectedUser?.avatar_url ?? null}
+        totalXp={selectedUser?.total_xp ?? 0}
+        open={!!selectedUser}
+        onOpenChange={(open) => !open && setSelectedUser(null)}
+      />
     </div>
   );
 };

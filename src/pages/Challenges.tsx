@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
+import { useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePlatform } from "@/hooks/usePlatform";
@@ -37,7 +38,9 @@ const Challenges = ({ onBack }: { onBack?: () => void }) => {
   const { user } = useAuth();
   const { t } = useLanguage();
   const { isMobile } = usePlatform();
-  const [screen, setScreen] = useState<Screen>("list");
+  const location = useLocation();
+  const challengeUser = (location.state as any)?.challengeUser ?? null;
+  const [screen, setScreen] = useState<Screen>(challengeUser ? "create" : "list");
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeChallenge, setActiveChallenge] = useState<Challenge | null>(null);
@@ -155,7 +158,7 @@ const Challenges = ({ onBack }: { onBack?: () => void }) => {
         <button onClick={() => setScreen("list")} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4">
           <ArrowLeft className="w-4 h-4" /> {t("back")}
         </button>
-        <CreateChallenge onCreated={handleChallengeCreated} />
+        <CreateChallenge onCreated={handleChallengeCreated} initialOpponent={challengeUser} />
       </div>
     );
   }
