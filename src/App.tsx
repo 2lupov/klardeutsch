@@ -24,6 +24,7 @@ import Games from "./pages/Games";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import QR from "./pages/QR";
+import Course from "./pages/Course";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -51,6 +52,7 @@ const AppRoutes = () => {
         <Route path="/challenges" element={<Challenges />} />
         <Route path="/dialogues" element={<Dialogues />} />
         <Route path="/games" element={<Games />} />
+        <Route path="/course/:id" element={<Course />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
