@@ -137,26 +137,48 @@ const CourseEditor = ({ level }: { level: Level }) => {
       return;
     }
 
-    // First try local parsing
+    // Clean up markdown code blocks and whitespace
     let clean = jsonInput.trim();
-    if (clean.startsWith("```json")) clean = clean.slice(7);
-    if (clean.startsWith("```")) clean = clean.slice(3);
-    if (clean.endsWith("```")) clean = clean.slice(0, -3);
+    // Remove various markdown wrappers
+    clean = clean.replace(/^```(?:json)?\s*\n?/i, "");
+    clean = clean.replace(/\n?```\s*$/i, "");
     clean = clean.trim();
+
+    // Try to extract JSON object if there's extra text around it
+    const jsonMatch = clean.match(/(\{[\s\S]*\})/);
+    if (jsonMatch) {
+      clean = jsonMatch[1];
+    }
 
     try {
       const parsed = JSON.parse(clean) as CourseData;
       if (!parsed.course || !parsed.lessons?.length) {
-        throw new Error("Нет course или lessons");
+        toast.error("JSON распознан, но нет полей 'course' или 'lessons'. Проверьте структуру.");
+        return;
+      }
+      // Auto-fill level if missing
+      if (!parsed.course.level) {
+        parsed.course.level = level;
       }
       setCourseData(parsed);
       setStep("preview");
       toast.success(`Курс "${parsed.course.title}" — ${parsed.lessons.length} уроков`);
       return;
-    } catch {
-      // Fall through to AI validation
+    } catch (parseErr: any) {
+      // Show specific parse error to help debug
+      const errMsg = parseErr.message || "Неизвестная ошибка";
+      const posMatch = errMsg.match(/position (\d+)/);
+      let hint = errMsg;
+      if (posMatch) {
+        const pos = parseInt(posMatch[1]);
+        const snippet = clean.substring(Math.max(0, pos - 30), pos + 30);
+        hint = `Ошибка на позиции ${pos}: ...${snippet}...`;
+      }
+      console.error("JSON parse error:", errMsg, "\nFirst 200 chars:", clean.substring(0, 200));
+      toast.error(`Ошибка парсинга JSON: ${hint}`);
     }
 
+    // Fallback: try AI validation
     setValidating(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-course-prompt", {
