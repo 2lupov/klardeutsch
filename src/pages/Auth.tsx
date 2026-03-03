@@ -24,6 +24,7 @@ const Auth = () => {
   const [demoMode, setDemoMode] = useState(false);
   const [forgotMode, setForgotMode] = useState(false);
   const [showFireworks, setShowFireworks] = useState(false);
+  const [fadeOut, setFadeOut] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
   const { t } = useLanguage();
@@ -48,8 +49,8 @@ const Auth = () => {
   };
 
   useEffect(() => {
-    if (user) navigate("/");
-  }, [user, navigate]);
+    if (user && !showFireworks) navigate("/");
+  }, [user, navigate, showFireworks]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,7 +73,6 @@ const Auth = () => {
       if (error) setError(error.message);
       else {
         setShowFireworks(true);
-        setTimeout(() => navigate("/"), 1800);
       }
     } else {
       const { data: signUpData, error } = await supabase.auth.signUp({
@@ -108,10 +108,19 @@ const Auth = () => {
     );
   }
 
+
+  const handleFireworksComplete = () => {
+    setFadeOut(true);
+    setTimeout(() => navigate("/"), 600);
+  };
+
   return (
     <>
-      {showFireworks && <Fireworks onComplete={() => setShowFireworks(false)} />}
-      <div className="h-[100dvh] bg-background flex items-center justify-center px-4 overflow-hidden">
+      {showFireworks && <Fireworks onComplete={handleFireworksComplete} />}
+      <div
+        className="h-[100dvh] bg-background flex items-center justify-center px-4 overflow-hidden transition-opacity duration-500"
+        style={{ opacity: fadeOut ? 0 : 1 }}
+      >
       <div className="w-full max-w-sm">
         <div className="text-center mb-5 animate-auth-fade-up" style={{ animationDelay: "0.1s" }}>
           <div className="flex justify-end mb-1">
