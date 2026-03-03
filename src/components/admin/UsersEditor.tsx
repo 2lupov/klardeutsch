@@ -84,6 +84,17 @@ const UsersEditor = () => {
     }
   };
 
+  const adjustCoins = async (userId: string, delta: number) => {
+    const reason = delta > 0 ? "admin_award" : "admin_deduct";
+    const { error } = await supabase.rpc("award_coins", { p_user_id: userId, p_amount: delta, p_reason: reason });
+    if (error) {
+      toast.error("Ошибка: " + error.message);
+    } else {
+      toast.success(`Монеты: ${delta > 0 ? "+" : ""}${delta}`);
+      load();
+    }
+  };
+
   const uploadAvatar = async (userId: string, file: File) => {
     const ext = file.name.split(".").pop() || "jpg";
     const path = `${userId}/avatar.${ext}`;
@@ -496,8 +507,23 @@ const UsersEditor = () => {
                 </button>
                 <span className="text-muted-foreground">XP</span>
               </span>
-              <span className="flex items-center gap-1">
-                <Coins className="w-3 h-3 text-primary" /> {user.coin_balance}
+              <span className="flex items-center gap-1.5">
+                <Coins className="w-3 h-3 text-primary" />
+                <button
+                  onClick={() => adjustCoins(user.user_id, -50)}
+                  className="w-5 h-5 rounded bg-destructive/10 text-destructive hover:bg-destructive/20 flex items-center justify-center transition-colors"
+                  title="-50 монет"
+                >
+                  <Minus className="w-3 h-3" />
+                </button>
+                <span className="font-semibold text-foreground min-w-[40px] text-center">{user.coin_balance}</span>
+                <button
+                  onClick={() => adjustCoins(user.user_id, 50)}
+                  className="w-5 h-5 rounded bg-primary/10 text-primary hover:bg-primary/20 flex items-center justify-center transition-colors"
+                  title="+50 монет"
+                >
+                  <Plus className="w-3 h-3" />
+                </button>
               </span>
               <span>
                 {user.user_created_at ? new Date(user.user_created_at).toLocaleDateString("ru") : "—"}
