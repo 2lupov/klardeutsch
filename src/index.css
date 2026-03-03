@@ -68,6 +68,12 @@
     height: -webkit-fill-available;
   }
 
+  /* Allow scrolling on standalone pages (method, privacy, terms) */
+  html:has(.standalone-scroll),
+  html:has(.standalone-scroll) body {
+    overflow: auto;
+  }
+
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Inter', sans-serif;

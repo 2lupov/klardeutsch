@@ -38,7 +38,7 @@ serve(async (req) => {
           stability: 0.6,
           similarity_boost: 0.75,
           style: 0.3,
-          speed: 0.85,
+          speed: 1.1,
         },
       }),
     }
