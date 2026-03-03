@@ -125,7 +125,7 @@ const ArticleSorter = ({ onBack }: { onBack: () => void }) => {
         setFeedback({
           type: "error",
           text: NEIGHBOR_PHRASES[Math.floor(Math.random() * NEIGHBOR_PHRASES.length)],
-          correct: `${correct} ${currentWord.german}`,
+          correct: `${correct} ${currentWord.german.replace(/^(der|die|das)\s+/i, '')}`,
         });
         // Haptic error
         try {
@@ -306,8 +306,8 @@ const ArticleSorter = ({ onBack }: { onBack: () => void }) => {
               activeBin === bin ? BIN_ACTIVE[bin] : BIN_COLORS[bin]
             } ${feedback || gameOver ? "opacity-50" : "hover:scale-[1.03] active:scale-95"}`}
           >
-            <span className="text-2xl">{BIN_ICONS[bin]}</span>
-            <span className="font-display text-lg font-bold text-foreground">{bin}</span>
+            <span className="text-3xl">{BIN_ICONS[bin]}</span>
+            <span className="font-display text-xl font-bold text-foreground">{bin}</span>
           </button>
         ))}
       </div>

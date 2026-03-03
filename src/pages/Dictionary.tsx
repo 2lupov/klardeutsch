@@ -360,8 +360,8 @@ const Dictionary = () => {
               </button>
               <div className="flex-1 min-w-0">
                 <div className="flex items-baseline gap-2">
-                  {word.article && <span className="text-xs text-primary font-medium">{word.article}</span>}
-                  <span className="font-display font-semibold text-foreground truncate">{word.german}</span>
+                  {word.article && <span className="text-sm text-yellow-400 font-display font-semibold">{word.article}</span>}
+                  <span className="font-display font-semibold text-foreground truncate">{word.german.replace(/^(der|die|das)\s+/i, '')}</span>
                 </div>
                 <p className="text-sm text-muted-foreground truncate">{word.russian}</p>
               </div>
