@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { usePlatform } from "@/hooks/usePlatform";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import DesktopSidebar from "@/components/DesktopSidebar";
+import PageTransition from "@/components/PageTransition";
 
 const AppLayout = () => {
   const { user, loading } = useAuth();
@@ -28,7 +29,7 @@ const AppLayout = () => {
     return (
       <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
         <div className="flex-1 overflow-y-auto overscroll-none pb-14">
-          <Outlet />
+          <PageTransition><Outlet /></PageTransition>
         </div>
         <MobileBottomNav />
       </div>
@@ -40,7 +41,7 @@ const AppLayout = () => {
     <div className="h-[100dvh] bg-background flex overflow-hidden">
       <DesktopSidebar />
       <main className="flex-1 overflow-y-auto">
-        <Outlet />
+        <PageTransition><Outlet /></PageTransition>
       </main>
     </div>
   );

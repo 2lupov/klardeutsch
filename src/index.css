@@ -298,4 +298,23 @@
   .animate-question-in {
     animation: question-slide-in 0.35s ease-out;
   }
+
+  /* Page transitions */
+  @keyframes page-enter {
+    0% { opacity: 0; transform: translateY(8px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes page-exit {
+    0% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-8px); }
+  }
+
+  .animate-page-enter {
+    animation: page-enter 0.25s ease-out forwards;
+  }
+
+  .animate-page-exit {
+    animation: page-exit 0.15s ease-in forwards;
+  }
 }
