@@ -3,16 +3,17 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Plus, Trash2, Lock, Check, BookOpen, Languages, Headphones, BookText, ShoppingBag, Gamepad2, Users, Globe, Pencil } from "lucide-react";
+import { Plus, Trash2, Lock, Check, BookOpen, Languages, Headphones, BookText, ShoppingBag, Gamepad2, Users, Globe, Pencil, Sparkles } from "lucide-react";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import ShopEditor from "@/components/admin/ShopEditor";
 import ListeningEditor from "@/components/admin/ListeningEditor";
 import UsersEditor from "@/components/admin/UsersEditor";
 import CafeEditor from "@/components/admin/CafeEditor";
+import ContentGenerator from "@/components/admin/ContentGenerator";
 import { toast } from "sonner";
 
 type Level = "A1" | "A2" | "B1" | "B2" | "C1";
-type Tab = "vocabulary" | "grammar" | "reading" | "listening" | "shop" | "games" | "users" | "translations";
+type Tab = "vocabulary" | "grammar" | "reading" | "listening" | "shop" | "games" | "users" | "translations" | "generator";
 
 const LEVELS: Level[] = ["A1", "A2", "B1", "B2", "C1"];
 
@@ -25,6 +26,7 @@ const TAB_CONFIG: { key: Tab; icon: React.ElementType; label: string }[] = [
   { key: "games", icon: Gamepad2, label: "games" },
   { key: "users", icon: Users, label: "users" },
   { key: "translations", icon: Globe, label: "translations" },
+  { key: "generator", icon: Sparkles, label: "generator" },
 ];
 
 const Admin = () => {
@@ -121,7 +123,7 @@ const Admin = () => {
               }`}
             >
               <Icon className="w-3.5 h-3.5" />
-              {key === "games" ? "Игры" : key === "users" ? "Юзеры" : key === "translations" ? "Языки" : t(label as any)}
+              {key === "games" ? "Игры" : key === "users" ? "Юзеры" : key === "translations" ? "Языки" : key === "generator" ? "ИИ-генератор" : t(label as any)}
             </button>
           ))}
         </div>
@@ -135,6 +137,7 @@ const Admin = () => {
         {tab === "games" && <GamesEditor level={level} />}
         {tab === "users" && <UsersEditor />}
         {tab === "translations" && <TranslationsLauncher />}
+        {tab === "generator" && <ContentGenerator level={level} />}
       </div>
     </div>
   );
