@@ -61,7 +61,7 @@ const Method = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-[100dvh] bg-background text-foreground">
+    <div className="h-full overflow-y-auto bg-background text-foreground">
       {/* Hero */}
       <section className="relative px-4 pt-12 pb-16 text-center overflow-hidden">
         <button onClick={() => navigate(-1)} className="absolute top-4 left-4 text-muted-foreground hover:text-foreground transition-colors">
