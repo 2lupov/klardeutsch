@@ -28,7 +28,7 @@ const DesktopSidebar = () => {
   ];
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 min-h-screen border-r border-border bg-card/50 backdrop-blur-xl">
+    <aside className="hidden lg:flex flex-col w-64 h-screen sticky top-0 border-r border-border bg-card/50 backdrop-blur-xl overflow-hidden">
       {/* Logo */}
       <div className="p-6 flex flex-col items-center gap-2 border-b border-border">
         <KlarLogo progress={totalProgress} completed={allCompleted} />
