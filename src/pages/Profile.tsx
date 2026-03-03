@@ -51,6 +51,10 @@ const Profile = () => {
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [duelsWonCount, setDuelsWonCount] = useState(0);
+  const [dialoguesCount, setDialoguesCount] = useState(0);
+  const [dailyBonusStreakVal, setDailyBonusStreakVal] = useState(0);
+  const [challengesSentCount, setChallengesSentCount] = useState(0);
 
   useEffect(() => {
     if (!user) return;
@@ -67,6 +71,20 @@ const Profile = () => {
       setCustomWordsCount(customCount ?? 0);
       setSavedWordsCount(savedCount ?? 0);
       if (prof) setProfile({ display_name: prof.display_name, avatar_url: prof.avatar_url, telegram_chat_id: (prof as any).telegram_chat_id ?? null });
+
+      // Fetch extra achievement stats
+      const [duelsRes, challengesSentRes, dailyBonusRes] = await Promise.all([
+        supabase.from("challenges").select("id", { count: "exact", head: true }).eq("winner_id", user.id),
+        supabase.from("challenges").select("id", { count: "exact", head: true }).eq("challenger_id", user.id),
+        (supabase as any).from("daily_bonuses").select("streak").eq("user_id", user.id).maybeSingle(),
+      ]);
+      setDuelsWonCount(duelsRes.count ?? 0);
+      setChallengesSentCount(challengesSentRes.count ?? 0);
+      setDailyBonusStreakVal(dailyBonusRes.data?.streak ?? 0);
+      // Dialogues completed = progress entries with category containing "dialogue"
+      const dialogueEntries = (prog ?? []).filter((p: any) => p.category === "dialogue" || p.exercise_id?.includes("dialogue"));
+      setDialoguesCount(dialogueEntries.length);
+
       setFetching(false);
     };
     load();
@@ -123,6 +141,7 @@ const Profile = () => {
       : 0;
 
     const readingCompleted = progress.filter((p) => p.category === "reading" && p.completed).length;
+    const writingCompleted = progress.filter((p) => p.category === "writing" && p.completed).length;
 
     return {
       wordsLearned: savedWordsCount,
@@ -133,8 +152,13 @@ const Profile = () => {
       readingCompleted,
       customWordsAdded: customWordsCount,
       difficultWordsReviewed: 0,
+      writingCompleted,
+      duelsWon: duelsWonCount,
+      dialoguesCompleted: dialoguesCount,
+      dailyBonusStreak: dailyBonusStreakVal,
+      challengesSent: challengesSentCount,
     };
-  }, [progress, savedWordsCount, customWordsCount, completedLessons, streak]);
+  }, [progress, savedWordsCount, customWordsCount, completedLessons, streak, duelsWonCount, dialoguesCount, dailyBonusStreakVal, challengesSentCount]);
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

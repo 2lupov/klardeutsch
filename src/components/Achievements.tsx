@@ -1,9 +1,11 @@
-import { useMemo } from "react";
+import { useMemo, useEffect, useRef, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
   Flame, BookOpen, GraduationCap, Trophy, Star, Target,
-  Zap, Crown, Medal, Sparkles, Heart, Rocket
+  Zap, Crown, Medal, Sparkles, Heart, Rocket, PenTool,
+  Gift, Swords, MessageCircle, Users
 } from "lucide-react";
+import confetti from "canvas-confetti";
 
 interface AchievementDef {
   id: string;
@@ -18,11 +20,16 @@ export interface AchievementStats {
   wordsLearned: number;
   lessonsCompleted: number;
   streak: number;
-  levelsCompleted: number; // number of levels with all 3 categories done
+  levelsCompleted: number;
   grammarAvgScore: number;
   readingCompleted: number;
   customWordsAdded: number;
   difficultWordsReviewed: number;
+  writingCompleted?: number;
+  duelsWon?: number;
+  dialoguesCompleted?: number;
+  dailyBonusStreak?: number;
+  challengesSent?: number;
 }
 
 const achievements: AchievementDef[] = [
@@ -56,6 +63,14 @@ const achievements: AchievementDef[] = [
     descKey: "achWord100Desc",
     check: (s) => s.wordsLearned >= 100,
     progressFn: (s) => ({ current: Math.min(s.wordsLearned, 100), target: 100 }),
+  },
+  {
+    id: "word_250",
+    icon: <Trophy className="w-6 h-6" />,
+    titleKey: "achWord250",
+    descKey: "achWord250Desc",
+    check: (s) => s.wordsLearned >= 250,
+    progressFn: (s) => ({ current: Math.min(s.wordsLearned, 250), target: 250 }),
   },
   {
     id: "streak_3",
@@ -120,6 +135,61 @@ const achievements: AchievementDef[] = [
     check: (s) => s.customWordsAdded >= 10,
     progressFn: (s) => ({ current: Math.min(s.customWordsAdded, 10), target: 10 }),
   },
+  // New achievements
+  {
+    id: "first_writing",
+    icon: <PenTool className="w-6 h-6" />,
+    titleKey: "achFirstWriting",
+    descKey: "achFirstWritingDesc",
+    check: (s) => (s.writingCompleted ?? 0) >= 1,
+  },
+  {
+    id: "writer_5",
+    icon: <PenTool className="w-6 h-6" />,
+    titleKey: "achWriter5",
+    descKey: "achWriter5Desc",
+    check: (s) => (s.writingCompleted ?? 0) >= 5,
+    progressFn: (s) => ({ current: Math.min(s.writingCompleted ?? 0, 5), target: 5 }),
+  },
+  {
+    id: "daily_bonus_7",
+    icon: <Gift className="w-6 h-6" />,
+    titleKey: "achDailyBonus7",
+    descKey: "achDailyBonus7Desc",
+    check: (s) => (s.dailyBonusStreak ?? 0) >= 7,
+    progressFn: (s) => ({ current: Math.min(s.dailyBonusStreak ?? 0, 7), target: 7 }),
+  },
+  {
+    id: "duelist_3",
+    icon: <Swords className="w-6 h-6" />,
+    titleKey: "achDuelist3",
+    descKey: "achDuelist3Desc",
+    check: (s) => (s.duelsWon ?? 0) >= 3,
+    progressFn: (s) => ({ current: Math.min(s.duelsWon ?? 0, 3), target: 3 }),
+  },
+  {
+    id: "duelist_10",
+    icon: <Swords className="w-6 h-6" />,
+    titleKey: "achDuelist10",
+    descKey: "achDuelist10Desc",
+    check: (s) => (s.duelsWon ?? 0) >= 10,
+    progressFn: (s) => ({ current: Math.min(s.duelsWon ?? 0, 10), target: 10 }),
+  },
+  {
+    id: "first_dialogue",
+    icon: <MessageCircle className="w-6 h-6" />,
+    titleKey: "achFirstDialogue",
+    descKey: "achFirstDialogueDesc",
+    check: (s) => (s.dialoguesCompleted ?? 0) >= 1,
+  },
+  {
+    id: "challenger",
+    icon: <Users className="w-6 h-6" />,
+    titleKey: "achChallenger",
+    descKey: "achChallengerDesc",
+    check: (s) => (s.challengesSent ?? 0) >= 5,
+    progressFn: (s) => ({ current: Math.min(s.challengesSent ?? 0, 5), target: 5 }),
+  },
 ];
 
 interface AchievementsProps {
@@ -128,6 +198,8 @@ interface AchievementsProps {
 
 const Achievements = ({ stats }: AchievementsProps) => {
   const { t } = useLanguage();
+  const prevUnlockedRef = useRef<Set<string>>(new Set());
+  const [newlyUnlocked, setNewlyUnlocked] = useState<string | null>(null);
 
   const sorted = useMemo(() => {
     return achievements.map((a) => ({
@@ -142,6 +214,30 @@ const Achievements = ({ stats }: AchievementsProps) => {
   }, [stats]);
 
   const unlockedCount = sorted.filter((a) => a.unlocked).length;
+  const unlockedIds = useMemo(() => new Set(sorted.filter((a) => a.unlocked).map((a) => a.id)), [sorted]);
+
+  // Detect newly unlocked achievements and fire confetti
+  useEffect(() => {
+    if (prevUnlockedRef.current.size === 0) {
+      prevUnlockedRef.current = unlockedIds;
+      return;
+    }
+
+    for (const id of unlockedIds) {
+      if (!prevUnlockedRef.current.has(id)) {
+        setNewlyUnlocked(id);
+        confetti({
+          particleCount: 80,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ["#FFD700", "#FF6B35", "#00D4AA", "#7C3AED"],
+        });
+        setTimeout(() => setNewlyUnlocked(null), 2000);
+        break;
+      }
+    }
+    prevUnlockedRef.current = unlockedIds;
+  }, [unlockedIds]);
 
   return (
     <section className="animate-slide-up">
@@ -163,7 +259,7 @@ const Achievements = ({ stats }: AchievementsProps) => {
               ach.unlocked
                 ? "border-primary/30 bg-primary/5"
                 : "opacity-50 grayscale"
-            }`}
+            } ${newlyUnlocked === ach.id ? "animate-scale-in ring-2 ring-primary" : ""}`}
           >
             {/* Progress bar at bottom */}
             {!ach.unlocked && ach.progress && (
@@ -172,7 +268,7 @@ const Achievements = ({ stats }: AchievementsProps) => {
                   className="h-full rounded-full transition-all duration-500"
                   style={{
                     width: `${(ach.progress.current / ach.progress.target) * 100}%`,
-                    background: "linear-gradient(90deg, hsl(var(--yellow-glow)), hsl(var(--yellow-soft)))",
+                    background: "linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary) / 0.6))",
                   }}
                 />
               </div>
