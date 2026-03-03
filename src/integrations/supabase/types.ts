@@ -200,6 +200,30 @@ export type Database = {
         }
         Relationships: []
       }
+      demo_leaderboard: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string
+          id: string
+          total_xp: number
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name: string
+          id?: string
+          total_xp?: number
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string
+          id?: string
+          total_xp?: number
+        }
+        Relationships: []
+      }
       grammar_lessons: {
         Row: {
           created_at: string
@@ -822,6 +846,10 @@ export type Database = {
     }
     Functions: {
       activate_referral: { Args: { p_referred_id: string }; Returns: undefined }
+      admin_set_xp: {
+        Args: { p_user_id: string; p_xp: number }
+        Returns: undefined
+      }
       apply_referral_code: {
         Args: { p_code: string; p_referred_id: string }
         Returns: boolean
