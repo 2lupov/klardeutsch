@@ -40,22 +40,18 @@ const TAB_CONFIG: { key: Tab; icon: React.ElementType; label: string }[] = [
 const Admin = () => {
   const { user } = useAuth();
   const { t } = useLanguage();
-  const [authenticated, setAuthenticated] = useState(false);
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [level, setLevel] = useState<Level>("A1");
   const [tab, setTab] = useState<Tab>("vocabulary");
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    const { data } = await supabase.rpc("check_admin_password", { input_password: password });
-    if (data) {
-      setAuthenticated(true);
-    } else {
-      setError(t("wrongPassword"));
-    }
-  };
+  useEffect(() => {
+    if (!user) { setIsAdmin(false); return; }
+    const checkRole = async () => {
+      const { data } = await supabase.rpc("has_role", { _user_id: user.id, _role: "admin" });
+      setIsAdmin(!!data);
+    };
+    checkRole();
+  }, [user]);
 
   if (!user) {
     return (
@@ -65,29 +61,22 @@ const Admin = () => {
     );
   }
 
-  if (!authenticated) {
+  if (isAdmin === null) {
     return (
       <div className="h-[100dvh] bg-background flex items-center justify-center px-4 overflow-y-auto">
-        <form onSubmit={handleLogin} className="w-full max-w-sm animate-slide-up">
-          <div className="text-center mb-6">
-            <Lock className="w-10 h-10 text-primary mx-auto mb-3" />
-            <h1 className="text-2xl font-display font-bold">{t("adminPanel")}</h1>
-            <p className="text-sm text-muted-foreground mt-1">{t("enterAdminPassword")}</p>
-          </div>
-          <div className="glass-card p-6 flex flex-col gap-4">
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder={t("password")}
-              className="w-full px-4 py-3 rounded-xl bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:border-primary focus:outline-none transition-colors"
-            />
-            {error && <p className="text-sm text-destructive">{error}</p>}
-            <button type="submit" className="w-full px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold glow-yellow">
-              {t("login")}
-            </button>
-          </div>
-        </form>
+        <p className="text-muted-foreground animate-pulse">Загрузка...</p>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="h-[100dvh] bg-background flex items-center justify-center px-4 overflow-y-auto">
+        <div className="text-center">
+          <Lock className="w-10 h-10 text-destructive mx-auto mb-3" />
+          <h1 className="text-2xl font-display font-bold">{t("adminPanel")}</h1>
+          <p className="text-sm text-muted-foreground mt-2">Доступ запрещён. Требуется роль администратора.</p>
+        </div>
       </div>
     );
   }

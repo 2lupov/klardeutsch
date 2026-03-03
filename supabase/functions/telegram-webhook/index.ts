@@ -50,15 +50,26 @@ Deno.serve(async (req) => {
       const parts = text.split(" ");
       const userId = parts[1];
 
-      // Link account if user_id provided
-      if (userId) {
-        const { error } = await supabase
+      // Link account if user_id provided and is a valid UUID
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (userId && uuidRegex.test(userId)) {
+        // Verify the user actually exists before linking
+        const { data: profile } = await supabase
           .from("profiles")
-          .update({ telegram_chat_id: chatId } as any)
-          .eq("user_id", userId);
+          .select("user_id")
+          .eq("user_id", userId)
+          .maybeSingle();
 
-        if (error) {
-          console.error("Error updating profile:", error);
+        if (profile) {
+          const { error } = await supabase
+            .from("profiles")
+            .update({ telegram_chat_id: chatId } as any)
+            .eq("user_id", userId)
+            .is("telegram_chat_id", null); // Only link if not already linked
+
+          if (error) {
+            console.error("Error updating profile:", error);
+          }
         }
       }
 
