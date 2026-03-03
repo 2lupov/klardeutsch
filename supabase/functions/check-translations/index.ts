@@ -31,54 +31,78 @@ serve(async (req) => {
     // ACTION: scan — fetch all vocab cards + translation overrides and check with AI
     if (action === "scan") {
       // Fetch data to check
-      const [vocabRes, overridesRes, grammarRes] = await Promise.all([
+      const [vocabRes, overridesRes, grammarRes, cafeRes] = await Promise.all([
         supabase.from("vocab_cards").select("id, german, russian, article, level, topic").order("level").limit(500),
-        supabase.from("translation_overrides").select("id, key, lang, value").limit(200),
+        supabase.from("translation_overrides").select("id, key, lang, value").limit(500),
         supabase.from("grammar_questions").select("id, question, options, level").limit(200),
+        supabase.from("cafe_scenarios").select("id, barista_line, hint_ru, hint_uk, level").limit(100),
       ]);
 
       const vocabCards = vocabRes.data ?? [];
       const overrides = overridesRes.data ?? [];
       const grammarQs = grammarRes.data ?? [];
+      const cafeScenarios = cafeRes.data ?? [];
 
       // Build prompt for AI
       const vocabSample = vocabCards.map((c: any) =>
-        `[VOCAB|${c.id}] ${c.german} (${c.article || "no article"}) → ${c.russian} [${c.level}]`
+        `[VOCAB|${c.id}] DE: "${c.german}" (${c.article || "no article"}) → RU: "${c.russian}" [${c.level}]`
       ).join("\n");
 
-      const overrideSample = overrides.map((o: any) =>
-        `[OVERRIDE|${o.id}] key="${o.key}" lang="${o.lang}" value="${o.value}"`
+      // Split overrides by language for clearer checking
+      const ruOverrides = overrides.filter((o: any) => o.lang === "ru");
+      const ukOverrides = overrides.filter((o: any) => o.lang === "uk");
+
+      const ruOverrideSample = ruOverrides.map((o: any) =>
+        `[OVERRIDE|${o.id}] key="${o.key}" lang="ru" value="${o.value}"`
+      ).join("\n");
+
+      const ukOverrideSample = ukOverrides.map((o: any) =>
+        `[OVERRIDE|${o.id}] key="${o.key}" lang="uk" value="${o.value}"`
       ).join("\n");
 
       const grammarSample = grammarQs.map((q: any) =>
         `[GRAMMAR|${q.id}] Q: ${q.question} | Options: ${(q.options || []).join(" / ")} [${q.level}]`
       ).join("\n");
 
-      const prompt = `You are a professional German-Russian translator and language expert. 
-Analyze the following educational content for a German language learning app. Find ALL errors:
+      const cafeSample = cafeScenarios.map((c: any) =>
+        `[CAFE|${c.id}] DE: "${c.barista_line}" → RU: "${c.hint_ru}" | UK: "${c.hint_uk}" [${c.level}]`
+      ).join("\n");
 
-1. VOCAB CARDS - Check German→Russian translations for accuracy. Check articles (der/die/das) are correct. Check spelling.
-2. TRANSLATION OVERRIDES - Check UI translations for accuracy and naturalness.
-3. GRAMMAR QUESTIONS - Check that questions and options are grammatically correct in German.
+      const prompt = `You are a professional trilingual translator (German, Russian, Ukrainian) and language expert.
+Analyze the following educational content for a German language learning app that supports BOTH Russian and Ukrainian users. Find ALL errors:
 
-For each error found, return a JSON array of objects with these fields:
-- "type": "vocab" | "override" | "grammar"
+1. VOCAB CARDS — Check German→Russian translations. Check articles (der/die/das). Check spelling in both German and Russian.
+2. UI TRANSLATIONS (RUSSIAN) — Check Russian UI translations for accuracy, grammar, and naturalness.
+3. UI TRANSLATIONS (UKRAINIAN) — Check Ukrainian UI translations for accuracy, grammar, and naturalness. Make sure it's proper Ukrainian, NOT surzhyk or Russian words in Ukrainian text.
+4. GRAMMAR QUESTIONS — Check German questions and options for correctness.
+5. CAFÉ SCENARIOS — Check both Russian (hint_ru) and Ukrainian (hint_uk) hints for accuracy relative to the German barista line.
+
+IMPORTANT: Pay special attention to Ukrainian translations — they must be natural, correct Ukrainian, not a word-by-word copy from Russian.
+
+For each error found, return a JSON array of objects:
+- "type": "vocab" | "override" | "grammar" | "cafe"
 - "id": the ID from brackets
-- "field": which field has the error (e.g. "russian", "german", "article", "value", "question", "options")
+- "field": which field has the error (e.g. "russian", "german", "article", "value", "question", "options", "hint_ru", "hint_uk")
 - "current": current wrong value
-- "suggested": corrected value
+- "suggested": corrected value  
 - "reason": brief explanation in Russian
 
 ONLY report actual errors. If everything is correct, return an empty array.
 
-=== VOCAB CARDS ===
+=== VOCAB CARDS (German → Russian) ===
 ${vocabSample || "(none)"}
 
-=== UI TRANSLATION OVERRIDES ===
-${overrideSample || "(none)"}
+=== UI TRANSLATIONS — RUSSIAN ===
+${ruOverrideSample || "(none)"}
+
+=== UI TRANSLATIONS — UKRAINIAN ===
+${ukOverrideSample || "(none)"}
 
 === GRAMMAR QUESTIONS ===
 ${grammarSample || "(none)"}
+
+=== CAFÉ SCENARIOS (German → Russian + Ukrainian) ===
+${cafeSample || "(none)"}
 
 Return ONLY a valid JSON array. No markdown, no extra text.`;
 
@@ -131,7 +155,7 @@ Return ONLY a valid JSON array. No markdown, no extra text.`;
 
       return new Response(JSON.stringify({
         errors,
-        scanned: { vocab: vocabCards.length, overrides: overrides.length, grammar: grammarQs.length },
+        scanned: { vocab: vocabCards.length, overrides: overrides.length, grammar: grammarQs.length, cafe: cafeScenarios.length },
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -159,6 +183,11 @@ Return ONLY a valid JSON array. No markdown, no extra text.`;
               update[fix.field] = fix.suggested;
             }
             await supabase.from("grammar_questions").update(update).eq("id", fix.id);
+            results.push({ id: fix.id, success: true });
+          } else if (fix.type === "cafe") {
+            const update: any = {};
+            update[fix.field] = fix.suggested;
+            await supabase.from("cafe_scenarios").update(update).eq("id", fix.id);
             results.push({ id: fix.id, success: true });
           }
         } catch (e) {

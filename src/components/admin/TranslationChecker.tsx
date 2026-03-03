@@ -18,7 +18,7 @@ type TrafficLight = "idle" | "scanning" | "red" | "yellow" | "green";
 const TranslationChecker = () => {
   const [status, setStatus] = useState<TrafficLight>("idle");
   const [errors, setErrors] = useState<TranslationError[]>([]);
-  const [scanned, setScanned] = useState<{ vocab: number; overrides: number; grammar: number } | null>(null);
+  const [scanned, setScanned] = useState<{ vocab: number; overrides: number; grammar: number; cafe?: number } | null>(null);
   const [fixing, setFixing] = useState(false);
 
   const handleScan = async () => {
@@ -120,6 +120,7 @@ const TranslationChecker = () => {
       case "vocab": return "Словарь";
       case "override": return "Перевод UI";
       case "grammar": return "Грамматика";
+      case "cafe": return "Кафе";
       default: return type;
     }
   };
@@ -176,10 +177,11 @@ const TranslationChecker = () => {
 
       {/* Scanned stats */}
       {scanned && (
-        <div className="flex gap-2 text-xs text-muted-foreground">
+        <div className="flex gap-2 text-xs text-muted-foreground flex-wrap">
           <span className="px-2 py-1 rounded-lg bg-muted/30">📚 Карточки: {scanned.vocab}</span>
           <span className="px-2 py-1 rounded-lg bg-muted/30">🌐 UI: {scanned.overrides}</span>
           <span className="px-2 py-1 rounded-lg bg-muted/30">📝 Грамматика: {scanned.grammar}</span>
+          {scanned.cafe > 0 && <span className="px-2 py-1 rounded-lg bg-muted/30">☕ Кафе: {scanned.cafe}</span>}
         </div>
       )}
 
