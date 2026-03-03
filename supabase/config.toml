@@ -9,3 +9,9 @@ project_id = "jqqsszwbbxvevebmebfm"
     verify_jwt = false
   [functions.telegram-webhook]
     verify_jwt = false
+  [functions.telegram-broadcast]
+    verify_jwt = false
+  [functions.notify-duel]
+    verify_jwt = false
+  [functions.generate-exercises]
+    verify_jwt = false
