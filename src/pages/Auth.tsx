@@ -8,6 +8,7 @@ import DemoExperience from "@/components/DemoExperience";
 import AuthKlarLogo from "@/components/auth/AuthKlarLogo";
 import Fireworks from "@/components/auth/Fireworks";
 import { Sparkles } from "lucide-react";
+import SimpleCaptcha from "@/components/auth/SimpleCaptcha";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -25,6 +26,8 @@ const Auth = () => {
   const [forgotMode, setForgotMode] = useState(false);
   const [showFireworks, setShowFireworks] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [captchaVerified, setCaptchaVerified] = useState(false);
   const navigate = useNavigate();
   const logoRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
@@ -57,6 +60,12 @@ const Auth = () => {
     e.preventDefault();
     setError("");
     setMessage("");
+
+    if (failedAttempts >= 3 && !captchaVerified) {
+      setError("Решите капчу для продолжения");
+      return;
+    }
+
     setLoading(true);
 
     if (forgotMode) {
@@ -71,7 +80,11 @@ const Auth = () => {
 
     if (isLogin) {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) setError(error.message);
+      if (error) {
+        setError(error.message);
+        setFailedAttempts(prev => prev + 1);
+        setCaptchaVerified(false);
+      }
       else {
         setShowFireworks(true);
       }
@@ -83,6 +96,8 @@ const Auth = () => {
       });
       if (error) {
         setError(error.message);
+        setFailedAttempts(prev => prev + 1);
+        setCaptchaVerified(false);
       } else {
         if (signUpData.user) {
           await supabase.from("profiles").update({ display_name: nickname }).eq("user_id", signUpData.user.id);
@@ -177,12 +192,19 @@ const Auth = () => {
             />
           )}
 
+          {failedAttempts >= 3 && (
+            <div className="flex flex-col gap-1">
+              <span className="text-xs text-muted-foreground">🔒 Подтвердите, что вы не робот</span>
+              <SimpleCaptcha onVerified={setCaptchaVerified} />
+            </div>
+          )}
+
           {error && <p className="text-sm text-destructive">{error}</p>}
           {message && <p className="text-sm text-success">{message}</p>}
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || (failedAttempts >= 3 && !captchaVerified)}
             className="w-full px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold glow-yellow transition-all hover:opacity-90 disabled:opacity-50"
           >
             {loading ? "..." : forgotMode ? t("sendResetLink") : isLogin ? t("login") : t("signup")}
