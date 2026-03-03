@@ -37,6 +37,7 @@ const UsersEditor = () => {
   const [dmSending, setDmSending] = useState(false);
   const [xpAmounts, setXpAmounts] = useState<Record<string, string>>({});
   const [resending, setResending] = useState<string | null>(null);
+  const [confirming, setConfirming] = useState<string | null>(null);
   const [coinAmounts, setCoinAmounts] = useState<Record<string, string>>({});
 
   // Demo users state
@@ -252,6 +253,22 @@ const UsersEditor = () => {
     setResending(null);
   };
 
+
+  const handleConfirmEmail = async (userId: string) => {
+    setConfirming(userId);
+    const { data, error } = await supabase.functions.invoke("admin-confirm-email", {
+      body: { user_id: userId },
+    });
+    if (error) {
+      toast.error("Ошибка: " + error.message);
+    } else if (data?.error) {
+      toast.error("Ошибка: " + data.error);
+    } else {
+      toast.success("Email подтверждён!");
+      setUsers(prev => prev.map(u => u.user_id === userId ? { ...u, email_confirmed: true } : u));
+    }
+    setConfirming(null);
+  };
 
   const filtered = users.filter((u) => {
     const q = search.toLowerCase();
@@ -571,6 +588,16 @@ const UsersEditor = () => {
             </div>
 
             <div className="flex justify-end gap-1.5 flex-wrap">
+              {!user.email_confirmed && (
+                <button
+                  onClick={() => handleConfirmEmail(user.user_id)}
+                  disabled={confirming === user.user_id}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-green-500/10 text-green-600 hover:bg-green-500/20 transition-colors disabled:opacity-40"
+                >
+                  {confirming === user.user_id ? <Loader2 className="w-3 h-3 animate-spin" /> : <MailCheck className="w-3 h-3" />}
+                  Подтвердить email
+                </button>
+              )}
               <button
                 onClick={() => handleResendConfirmation(user.user_id, user.email)}
                 disabled={resending === user.user_id}
