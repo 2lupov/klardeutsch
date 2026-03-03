@@ -10,7 +10,7 @@ import Fireworks from "@/components/auth/Fireworks";
 import { Sparkles } from "lucide-react";
 
 const Auth = () => {
-  const [isLogin, setIsLogin] = useState(false);
+  const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [nickname, setNickname] = useState("");
