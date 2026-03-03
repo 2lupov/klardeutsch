@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useReferrals } from "@/hooks/useReferrals";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Copy, Check, Users, Gift, Target, Link2, Sparkles } from "lucide-react";
+import { Copy, Check, Users, Gift, Target, Link2, Sparkles, QrCode } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 const CHALLENGE_INFO: Record<string, { emoji: string; ru: string; uk: string }> = {
@@ -22,10 +22,12 @@ const Referrals = () => {
   const { lang } = useLanguage();
   const [copied, setCopied] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [copiedQR, setCopiedQR] = useState(false);
 
   const t = (ru: string, uk: string) => (lang === "uk" ? uk : ru);
 
   const referralLink = code ? `${window.location.origin}/auth?ref=${code}` : "";
+  const qrLink = code ? `${window.location.origin}/qr?ref=${code}` : "";
 
   const copyCode = async () => {
     if (!code) return;
@@ -88,6 +90,34 @@ const Referrals = () => {
               {copiedLink ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
             </button>
           </div>
+        </div>
+
+        {/* QR Landing link */}
+        <div className="mt-3 pt-3 border-t border-border/20">
+          <p className="text-[11px] text-muted-foreground mb-2 flex items-center gap-1">
+            <QrCode className="w-3 h-3" />
+            {t("Ссылка для QR-кода:", "Посилання для QR-коду:")}
+          </p>
+          <div className="flex items-center gap-2">
+            <div className="flex-1 px-3 py-2 rounded-lg bg-muted/40 border border-border/20 text-[11px] text-muted-foreground truncate font-mono">
+              {qrLink}
+            </div>
+            <button
+              onClick={async () => {
+                if (!qrLink) return;
+                await navigator.clipboard.writeText(qrLink);
+                setCopiedQR(true);
+                toast({ title: t("QR-ссылка скопирована!", "QR-посилання скопійовано!") });
+                setTimeout(() => setCopiedQR(false), 2000);
+              }}
+              className="p-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors shrink-0"
+            >
+              {copiedQR ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+            </button>
+          </div>
+          <p className="text-[10px] text-muted-foreground/60 mt-1.5">
+            {t("Используй эту ссылку для генерации QR-кода в любом сервисе", "Використовуй це посилання для генерації QR-коду в будь-якому сервісі")}
+          </p>
         </div>
       </section>
 

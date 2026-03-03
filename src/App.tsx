@@ -22,6 +22,7 @@ import Method from "./pages/Method";
 import Games from "./pages/Games";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import QR from "./pages/QR";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +44,7 @@ const App = () => (
               <Route path="/method" element={<Method />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
+              <Route path="/qr" element={<QR />} />
               {/* Authenticated routes with responsive layout */}
               <Route element={<AppLayout />}>
                 <Route path="/" element={<Index />} />
