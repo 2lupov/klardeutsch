@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { Recycle, Coffee, Swords, Mic } from "lucide-react";
 import { usePlatform } from "@/hooks/usePlatform";
 import ArticleSorter from "@/components/games/ArticleSorter";
@@ -11,6 +12,15 @@ type GameScreen = "list" | "article-sorter" | "cafe" | "challenges" | "pronuncia
 const Games = () => {
   const [screen, setScreen] = useState<GameScreen>("list");
   const { isMobile } = usePlatform();
+  const location = useLocation();
+
+  // Handle navigation from UserProfileDialog
+  useEffect(() => {
+    const state = location.state as any;
+    if (state?.screen === "challenges") {
+      setScreen("challenges");
+    }
+  }, [location.state]);
 
   if (screen === "article-sorter") {
     return <ArticleSorter onBack={() => setScreen("list")} />;

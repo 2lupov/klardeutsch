@@ -14,17 +14,18 @@ interface UserEntry {
 
 interface Props {
   onCreated: (challenge?: any) => void;
+  initialOpponent?: UserEntry | null;
 }
 
 const LEVELS = ["A1", "A2", "B1", "B2", "C1"];
 const ROUNDS = 5;
 
-const CreateChallenge = ({ onCreated }: Props) => {
+const CreateChallenge = ({ onCreated, initialOpponent }: Props) => {
   const { user } = useAuth();
   const { t } = useLanguage();
   const [results, setResults] = useState<UserEntry[]>([]);
   const [search, setSearch] = useState("");
-  const [selectedUser, setSelectedUser] = useState<UserEntry | null>(null);
+  const [selectedUser, setSelectedUser] = useState<UserEntry | null>(initialOpponent ?? null);
   const [type, setType] = useState<"vocab" | "grammar">("vocab");
   const [level, setLevel] = useState("A1");
   const [creating, setCreating] = useState(false);
