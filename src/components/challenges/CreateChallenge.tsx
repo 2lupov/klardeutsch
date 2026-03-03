@@ -22,31 +22,37 @@ const ROUNDS = 5;
 const CreateChallenge = ({ onCreated }: Props) => {
   const { user } = useAuth();
   const { t } = useLanguage();
-  const [users, setUsers] = useState<UserEntry[]>([]);
+  const [results, setResults] = useState<UserEntry[]>([]);
   const [search, setSearch] = useState("");
   const [selectedUser, setSelectedUser] = useState<UserEntry | null>(null);
   const [type, setType] = useState<"vocab" | "grammar">("vocab");
   const [level, setLevel] = useState("A1");
   const [creating, setCreating] = useState(false);
-  const [loadingUsers, setLoadingUsers] = useState(true);
+  const [searching, setSearching] = useState(false);
 
+  // Live search by nickname
   useEffect(() => {
-    const load = async () => {
+    const query = search.trim();
+    if (query.length < 2) {
+      setResults([]);
+      return;
+    }
+
+    const timeout = setTimeout(async () => {
+      setSearching(true);
       const { data } = await supabase
         .from("profiles")
         .select("user_id, display_name, avatar_url")
         .neq("user_id", user?.id ?? "")
-        .limit(100);
-      setUsers(data ?? []);
-      setLoadingUsers(false);
-    };
-    load();
-  }, [user]);
+        .not("display_name", "is", null)
+        .ilike("display_name", `%${query}%`)
+        .limit(20);
+      setResults(data ?? []);
+      setSearching(false);
+    }, 300);
 
-  const filtered = users.filter((u) => {
-    const name = u.display_name?.toLowerCase() ?? "";
-    return name.includes(search.toLowerCase());
-  });
+    return () => clearTimeout(timeout);
+  }, [search, user]);
 
   const generateQuestions = async (): Promise<any[]> => {
     if (type === "vocab") {
@@ -57,7 +63,6 @@ const CreateChallenge = ({ onCreated }: Props) => {
         .limit(50);
       if (!data || data.length < ROUNDS) return [];
 
-      // Shuffle and pick ROUNDS
       const shuffled = data.sort(() => Math.random() - 0.5).slice(0, ROUNDS);
       return shuffled.map((card) => {
         const others = data.filter((c) => c.id !== card.id).sort(() => Math.random() - 0.5).slice(0, 3);
@@ -167,11 +172,29 @@ const CreateChallenge = ({ onCreated }: Props) => {
         </div>
       </div>
 
-      {/* Opponent selector */}
+      {/* Opponent selector — live search */}
       <div className="flex-1 flex flex-col min-h-0">
         <label className="text-xs font-display font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
           {t("selectOpponent")}
         </label>
+
+        {/* Selected user chip */}
+        {selectedUser && (
+          <div className="flex items-center gap-2 mb-2 px-3 py-2 rounded-xl bg-primary/10 border border-primary/20">
+            <Avatar className="w-6 h-6">
+              {selectedUser.avatar_url ? <AvatarImage src={selectedUser.avatar_url} /> : null}
+              <AvatarFallback className="text-[10px] font-bold bg-primary/10 text-primary">
+                {(selectedUser.display_name || "?").slice(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <span className="text-sm font-display font-medium text-foreground flex-1">{selectedUser.display_name}</span>
+            <button
+              onClick={() => setSelectedUser(null)}
+              className="text-muted-foreground hover:text-foreground text-xs"
+            >✕</button>
+          </div>
+        )}
+
         <div className="relative mb-2">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
@@ -180,16 +203,24 @@ const CreateChallenge = ({ onCreated }: Props) => {
             placeholder={t("searchUsers")}
             className="w-full pl-9 pr-3 py-2 rounded-xl bg-muted/50 border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
           />
+          {searching && (
+            <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-muted-foreground" />
+          )}
         </div>
+
         <div className="flex-1 overflow-y-auto space-y-1">
-          {loadingUsers ? (
+          {search.trim().length < 2 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">
+              Введи минимум 2 символа для поиска
+            </p>
+          ) : searching ? (
             <div className="flex items-center justify-center py-4">
               <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
             </div>
-          ) : filtered.length === 0 ? (
+          ) : results.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-4">{t("noUsersFound")}</p>
           ) : (
-            filtered.map((u) => {
+            results.map((u) => {
               const name = u.display_name || "User";
               const initials = name.slice(0, 2).toUpperCase();
               const selected = selectedUser?.user_id === u.user_id;
