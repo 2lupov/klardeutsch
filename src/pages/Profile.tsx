@@ -5,7 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { usePlatform } from "@/hooks/usePlatform";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { BookOpen, Brain, Flame, RotateCcw, TrendingUp, Calendar, LogOut, Camera, Pencil, Check, X, Coins, Trophy, ArrowLeft, ChevronRight, Award, Bell, Send, Unlink2, Users } from "lucide-react";
+import { BookOpen, Brain, Flame, RotateCcw, TrendingUp, Calendar, LogOut, Camera, Pencil, Check, X, Coins, Trophy, ArrowLeft, ChevronRight, Award, Bell, Send, Unlink2, Users, WifiOff, Trash2, HardDrive } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useCoins } from "@/hooks/useCoins";
 import Achievements, { type AchievementStats } from "@/components/Achievements";
@@ -30,7 +30,7 @@ interface ProfileData {
   telegram_chat_id: number | null;
 }
 
-type ProfileScreen = "main" | "achievements" | "activity" | "mistakes" | "leaderboard" | "notifications" | "referrals";
+type ProfileScreen = "main" | "achievements" | "activity" | "mistakes" | "leaderboard" | "notifications" | "referrals" | "offline";
 
 const Profile = () => {
   const { user, signOut } = useAuth();
@@ -217,6 +217,80 @@ const Profile = () => {
         </h2>
         <div className="flex-1 overflow-y-auto">
           <Referrals />
+        </div>
+      </div>
+    );
+  }
+
+  // Sub-screen: Offline
+  if (screen === "offline") {
+    const handleClearCache = async () => {
+      const keys = await caches.keys();
+      await Promise.all(keys.map((k) => caches.delete(k)));
+      toast({ title: "Кэш очищен", description: "Данные будут загружены заново при следующем подключении." });
+    };
+
+    return (
+      <div className={`w-full mx-auto px-4 py-4 h-full flex flex-col ${isMobile ? "max-w-md" : "max-w-2xl"}`}>
+        <button
+          onClick={() => setScreen("main")}
+          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          {t("back")}
+        </button>
+        <h2 className="font-display text-lg font-bold text-foreground mb-3 flex items-center gap-2">
+          <WifiOff className="w-5 h-5 text-primary" />
+          Офлайн-режим
+        </h2>
+        <div className="flex-1 overflow-y-auto space-y-4">
+          <section className="glass-card p-5">
+            <h3 className="font-display text-sm font-semibold text-foreground mb-2">Как это работает?</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Когда ты открываешь карточки слов, грамматику или тексты для чтения — они автоматически сохраняются на устройстве. 
+              Если пропадёт интернет, ты сможешь продолжить учёбу с уже загруженными материалами.
+            </p>
+          </section>
+          <section className="glass-card p-5">
+            <h3 className="font-display text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+              <HardDrive className="w-4 h-4 text-muted-foreground" />
+              Что кэшируется
+            </h3>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
+                Карточки слов (все уровни)
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
+                Грамматические правила и вопросы
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
+                Тексты для чтения
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
+                Тексты для аудирования
+              </li>
+            </ul>
+          </section>
+          <section className="glass-card p-5">
+            <h3 className="font-display text-sm font-semibold text-foreground mb-2">💡 Совет</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Перед поездкой или перелётом просто открой нужные уровни — и материалы будут доступны без интернета!
+            </p>
+          </section>
+          <button
+            onClick={handleClearCache}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-destructive/30 text-destructive text-sm font-display font-medium hover:bg-destructive/10 transition-colors"
+          >
+            <Trash2 className="w-4 h-4" />
+            Очистить кэш
+          </button>
+          <p className="text-[11px] text-muted-foreground/60 text-center pb-4">
+            После очистки данные загрузятся заново при подключении к интернету
+          </p>
         </div>
       </div>
     );
@@ -535,6 +609,11 @@ const Profile = () => {
           icon={<Users className="w-4 h-4 text-primary" />}
           label={t("referralsTitle")}
           onClick={() => setScreen("referrals")}
+        />
+        <NavButton
+          icon={<WifiOff className="w-4 h-4 text-muted-foreground" />}
+          label="Офлайн-режим"
+          onClick={() => setScreen("offline")}
         />
       </div>
 
