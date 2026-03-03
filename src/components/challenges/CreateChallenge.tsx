@@ -122,7 +122,13 @@ const CreateChallenge = ({ onCreated }: Props) => {
       return;
     }
 
-    // Notify opponent via Telegram (fire-and-forget)
+    // Notify opponent via Telegram
+    console.log("notify-duel: calling with", {
+      opponent_id: selectedUser.user_id,
+      challenger_name: myProfile?.display_name,
+      challenge_type: type,
+      level,
+    });
     supabase.functions.invoke("notify-duel", {
       body: {
         opponent_id: selectedUser.user_id,
@@ -130,7 +136,8 @@ const CreateChallenge = ({ onCreated }: Props) => {
         challenge_type: type,
         level,
       },
-    }).then(({ error }) => {
+    }).then(({ data, error }) => {
+      console.log("notify-duel response:", { data, error });
       if (error) console.error("notify-duel error:", error);
     });
 
