@@ -10,6 +10,10 @@ interface DemoUser {
   total_xp: number;
   avatar_url: string | null;
   telegram_chat_id: number | null;
+  words_learned: number;
+  lessons_completed: number;
+  duels_won: number;
+  duels_played: number;
 }
 
 const StuffOnlyTab = () => {
@@ -68,7 +72,7 @@ const DemoUsersManager = () => {
     setLoading(true);
     const { data } = await supabase
       .from("demo_leaderboard")
-      .select("id, display_name, total_xp, avatar_url, telegram_chat_id")
+      .select("id, display_name, total_xp, avatar_url, telegram_chat_id, words_learned, lessons_completed, duels_won, duels_played")
       .order("total_xp", { ascending: false });
     setDemoUsers((data as DemoUser[]) ?? []);
     setLoading(false);
@@ -214,6 +218,31 @@ const DemoUsersManager = () => {
             <button onClick={() => removeDemoUser(du.id)} className="w-7 h-7 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 flex items-center justify-center">
               <Trash2 className="w-3.5 h-3.5" />
             </button>
+          </div>
+
+          {/* Stats controls */}
+          <div className="grid grid-cols-2 gap-2">
+            {([
+              { key: "words_learned", label: "📚 Слова", value: du.words_learned },
+              { key: "lessons_completed", label: "📖 Уроки", value: du.lessons_completed },
+              { key: "duels_won", label: "🏆 Победы", value: du.duels_won },
+              { key: "duels_played", label: "⚔️ Дуэли", value: du.duels_played },
+            ] as const).map((stat) => (
+              <div key={stat.key} className="flex items-center gap-1.5 bg-secondary/50 rounded-lg px-2 py-1.5">
+                <span className="text-[10px] text-muted-foreground whitespace-nowrap">{stat.label}</span>
+                <input
+                  type="number"
+                  defaultValue={stat.value}
+                  onBlur={async (e) => {
+                    const val = Math.max(0, parseInt(e.target.value) || 0);
+                    if (val === stat.value) return;
+                    await supabase.from("demo_leaderboard").update({ [stat.key]: val } as any).eq("id", du.id);
+                    toast.success("Обновлено!"); load();
+                  }}
+                  className="w-14 px-1.5 py-0.5 rounded bg-secondary text-foreground border border-border text-xs text-center focus:border-primary focus:outline-none"
+                />
+              </div>
+            ))}
           </div>
 
           {/* Telegram + Avatar picker */}
