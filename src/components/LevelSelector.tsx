@@ -1,6 +1,7 @@
 import { Level } from "@/data/lessons";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useLevelProgress } from "@/hooks/useLevelProgress";
+import { useNavigate } from "react-router-dom";
 import LanguageSwitcher from "./LanguageSwitcher";
 import KlarLogo from "./KlarLogo";
 
@@ -10,6 +11,7 @@ interface LevelSelectorProps {
 
 const LevelSelector = ({ onSelect }: LevelSelectorProps) => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
 
   // Aggregate progress across all levels for the logo
   const a1 = useLevelProgress("A1");
@@ -71,6 +73,18 @@ const LevelSelector = ({ onSelect }: LevelSelectorProps) => {
           </button>
         ))}
       </div>
+
+      {/* Mini-games button */}
+      <button
+        onClick={() => navigate("/games")}
+        className="w-full glass-card p-4 flex items-center justify-center gap-3 mt-1 hover:border-primary/40 hover:bg-primary/5 transition-all group"
+      >
+        <span className="text-xl">🎮</span>
+        <span className="font-display text-sm font-semibold text-muted-foreground group-hover:text-primary transition-colors">
+          Мини-игры
+        </span>
+        <span className="text-lg">♻️</span>
+      </button>
     </div>
   );
 };
