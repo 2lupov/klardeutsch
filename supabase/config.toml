@@ -21,3 +21,5 @@ project_id = "jqqsszwbbxvevebmebfm"
     verify_jwt = false
   [functions.telegram-weekly-report]
     verify_jwt = false
+  [functions.check-translations]
+    verify_jwt = false
