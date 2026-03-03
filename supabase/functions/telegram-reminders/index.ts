@@ -64,6 +64,16 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  let userIds: string[] | null = null;
+  try {
+    if (req.method === "POST") {
+      const body = await req.json().catch(() => ({}));
+      if (body.user_ids && Array.isArray(body.user_ids)) {
+        userIds = body.user_ids;
+      }
+    }
+  } catch {}
+
   try {
     const botToken = Deno.env.get("TELEGRAM_BOT_TOKEN");
     if (!botToken) {
@@ -81,11 +91,17 @@ Deno.serve(async (req) => {
     // Get current hour (UTC) to decide message type
     const currentHour = new Date().getUTCHours();
 
-    // Fetch all users with telegram_chat_id
-    const { data: inactiveUsers, error } = await supabase
+    // Fetch users with telegram_chat_id, optionally filtered
+    let query = supabase
       .from("profiles")
       .select("user_id, telegram_chat_id, last_active, display_name")
       .not("telegram_chat_id", "is", null);
+
+    if (userIds && userIds.length > 0) {
+      query = query.in("user_id", userIds);
+    }
+
+    const { data: inactiveUsers, error } = await query;
 
     if (error) {
       console.error("Error fetching profiles:", error);

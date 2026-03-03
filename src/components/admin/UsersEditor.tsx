@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Shield, ShieldOff, Search, Users, Star, Coins, Send, Bell, Loader2 } from "lucide-react";
+import { Shield, ShieldOff, Search, Users, Star, Coins, Send, Bell, Loader2, MessageSquare, CheckSquare, Square, X } from "lucide-react";
 import { toast } from "sonner";
 
 interface AdminUser {
@@ -24,6 +24,10 @@ const UsersEditor = () => {
   const [broadcastMsg, setBroadcastMsg] = useState("");
   const [broadcasting, setBroadcasting] = useState(false);
   const [triggering, setTriggering] = useState(false);
+  const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
+  const [dmUserId, setDmUserId] = useState<string | null>(null);
+  const [dmMsg, setDmMsg] = useState("");
+  const [dmSending, setDmSending] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -48,16 +52,35 @@ const UsersEditor = () => {
     load();
   };
 
+  const toggleSelect = (userId: string) => {
+    setSelectedUsers(prev => {
+      const next = new Set(prev);
+      if (next.has(userId)) next.delete(userId);
+      else next.add(userId);
+      return next;
+    });
+  };
+
+  const selectAll = () => {
+    if (selectedUsers.size === filtered.length) {
+      setSelectedUsers(new Set());
+    } else {
+      setSelectedUsers(new Set(filtered.map(u => u.user_id)));
+    }
+  };
+
   const handleBroadcast = async () => {
     if (!broadcastMsg.trim()) return;
     setBroadcasting(true);
-    const { data, error } = await supabase.functions.invoke("telegram-broadcast", {
-      body: { message: broadcastMsg.trim() },
-    });
+    const body: any = { message: broadcastMsg.trim() };
+    if (selectedUsers.size > 0) {
+      body.user_ids = Array.from(selectedUsers);
+    }
+    const { data, error } = await supabase.functions.invoke("telegram-broadcast", { body });
     if (error) {
       toast.error("Ошибка: " + error.message);
     } else {
-      toast.success(`Отправлено ${data?.sent ?? 0} из ${data?.total ?? 0} пользователям`);
+      toast.success(`Отправлено ${data?.sent ?? 0} из ${data?.total ?? 0}`);
       setBroadcastMsg("");
     }
     setBroadcasting(false);
@@ -65,7 +88,11 @@ const UsersEditor = () => {
 
   const handleTriggerReminders = async () => {
     setTriggering(true);
-    const { data, error } = await supabase.functions.invoke("telegram-reminders");
+    const body: any = {};
+    if (selectedUsers.size > 0) {
+      body.user_ids = Array.from(selectedUsers);
+    }
+    const { data, error } = await supabase.functions.invoke("telegram-reminders", { body });
     if (error) {
       toast.error("Ошибка: " + error.message);
     } else {
@@ -74,10 +101,28 @@ const UsersEditor = () => {
     setTriggering(false);
   };
 
+  const handleDmSend = async () => {
+    if (!dmUserId || !dmMsg.trim()) return;
+    setDmSending(true);
+    const { data, error } = await supabase.functions.invoke("telegram-broadcast", {
+      body: { message: dmMsg.trim(), user_ids: [dmUserId] },
+    });
+    if (error) {
+      toast.error("Ошибка: " + error.message);
+    } else if (data?.sent) {
+      toast.success("Сообщение отправлено!");
+      setDmMsg("");
+      setDmUserId(null);
+    } else {
+      toast.error("Не удалось отправить (нет Telegram?)");
+    }
+    setDmSending(false);
+  };
+
   const filtered = users.filter((u) => {
     const q = search.toLowerCase();
-    return !q || 
-      u.email?.toLowerCase().includes(q) || 
+    return !q ||
+      u.email?.toLowerCase().includes(q) ||
       u.display_name?.toLowerCase().includes(q);
   });
 
@@ -113,12 +158,20 @@ const UsersEditor = () => {
       {/* Telegram actions */}
       <div className="glass-card p-4 flex flex-col gap-3">
         <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-2">
-          <Send className="w-4 h-4 text-primary" /> Telegram-рассылка
+          <Send className="w-4 h-4 text-primary" /> Telegram
+          {selectedUsers.size > 0 && (
+            <span className="ml-auto text-xs text-primary font-normal">
+              Выбрано: {selectedUsers.size}
+              <button onClick={() => setSelectedUsers(new Set())} className="ml-1.5 text-muted-foreground hover:text-foreground">
+                <X className="w-3 h-3 inline" />
+              </button>
+            </span>
+          )}
         </h3>
         <textarea
           value={broadcastMsg}
           onChange={(e) => setBroadcastMsg(e.target.value)}
-          placeholder="Напишите сообщение для всех пользователей..."
+          placeholder={selectedUsers.size > 0 ? `Сообщение для ${selectedUsers.size} выбранных...` : "Сообщение для всех пользователей..."}
           rows={3}
           maxLength={1000}
           className="w-full px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none resize-y"
@@ -130,7 +183,7 @@ const UsersEditor = () => {
             className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium disabled:opacity-40 transition-all"
           >
             {broadcasting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-            {broadcasting ? "Отправка..." : "Отправить всем"}
+            {broadcasting ? "Отправка..." : selectedUsers.size > 0 ? `Отправить (${selectedUsers.size})` : "Отправить всем"}
           </button>
           <button
             onClick={handleTriggerReminders}
@@ -138,20 +191,75 @@ const UsersEditor = () => {
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-secondary border border-border text-foreground text-sm font-medium disabled:opacity-40 hover:bg-muted transition-all"
           >
             {triggering ? <Loader2 className="w-4 h-4 animate-spin" /> : <Bell className="w-4 h-4" />}
-            {triggering ? "..." : "Напоминание"}
+            {triggering ? "..." : selectedUsers.size > 0 ? `Напомнить (${selectedUsers.size})` : "Напомнить всем"}
           </button>
         </div>
         <p className="text-[10px] text-muted-foreground">
-          «Отправить всем» — ваш текст всем с Telegram. «Напоминание» — авто-напоминание неактивным.
+          Выберите пользователей ниже для точечной отправки, или отправьте всем.
         </p>
       </div>
+
+      {/* DM modal */}
+      {dmUserId && (
+        <div className="glass-card p-4 flex flex-col gap-2 border-primary/30">
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs font-display font-semibold text-foreground flex items-center gap-1.5">
+              <MessageSquare className="w-3.5 h-3.5 text-primary" />
+              Личное сообщение: {users.find(u => u.user_id === dmUserId)?.display_name || "Пользователь"}
+            </h4>
+            <button onClick={() => { setDmUserId(null); setDmMsg(""); }} className="text-muted-foreground hover:text-foreground">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <textarea
+            value={dmMsg}
+            onChange={(e) => setDmMsg(e.target.value)}
+            placeholder="Напишите личное сообщение..."
+            rows={2}
+            maxLength={1000}
+            className="w-full px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none resize-y"
+            autoFocus
+          />
+          <button
+            onClick={handleDmSend}
+            disabled={dmSending || !dmMsg.trim()}
+            className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium disabled:opacity-40 transition-all"
+          >
+            {dmSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+            {dmSending ? "Отправка..." : "Отправить"}
+          </button>
+        </div>
+      )}
+
+      {/* Select all */}
+      <button
+        onClick={selectAll}
+        className="flex items-center gap-2 px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+      >
+        {selectedUsers.size === filtered.length && filtered.length > 0 ? (
+          <CheckSquare className="w-3.5 h-3.5 text-primary" />
+        ) : (
+          <Square className="w-3.5 h-3.5" />
+        )}
+        {selectedUsers.size === filtered.length && filtered.length > 0 ? "Снять выделение" : "Выбрать всех"}
+      </button>
 
       {/* Users list */}
       {filtered.map((user) => {
         const isAdmin = user.roles.includes("admin");
+        const isSelected = selectedUsers.has(user.user_id);
         return (
-          <div key={user.user_id} className="glass-card p-4 flex flex-col gap-2">
+          <div key={user.user_id} className={`glass-card p-4 flex flex-col gap-2 transition-colors ${isSelected ? "border-primary/30 bg-primary/5" : ""}`}>
             <div className="flex items-center gap-3">
+              {/* Checkbox */}
+              <button onClick={() => toggleSelect(user.user_id)} className="shrink-0">
+                {isSelected ? (
+                  <CheckSquare className="w-4 h-4 text-primary" />
+                ) : (
+                  <Square className="w-4 h-4 text-muted-foreground" />
+                )}
+              </button>
+
               {user.avatar_url ? (
                 <img src={user.avatar_url} alt="" className="w-9 h-9 rounded-full object-cover border border-border" />
               ) : (
@@ -170,7 +278,7 @@ const UsersEditor = () => {
               )}
             </div>
 
-            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+            <div className="flex items-center gap-4 text-xs text-muted-foreground pl-7">
               <span className="flex items-center gap-1">
                 <Star className="w-3 h-3 text-yellow-500" /> {user.total_xp} XP
               </span>
@@ -182,12 +290,18 @@ const UsersEditor = () => {
               </span>
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-1.5">
+              <button
+                onClick={() => { setDmUserId(user.user_id); setDmMsg(""); }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-secondary hover:bg-muted text-foreground transition-colors"
+              >
+                <MessageSquare className="w-3 h-3" /> Написать
+              </button>
               <button
                 onClick={() => toggleAdmin(user.user_id, isAdmin)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                  isAdmin 
-                    ? "bg-destructive/10 text-destructive hover:bg-destructive/20" 
+                  isAdmin
+                    ? "bg-destructive/10 text-destructive hover:bg-destructive/20"
                     : "bg-primary/10 text-primary hover:bg-primary/20"
                 }`}
               >

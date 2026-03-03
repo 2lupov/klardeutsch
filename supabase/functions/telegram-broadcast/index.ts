@@ -67,7 +67,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { message } = await req.json();
+    const { message, user_ids } = await req.json();
     if (!message || typeof message !== "string" || message.trim().length === 0) {
       return new Response(JSON.stringify({ error: "Message is required" }), {
         status: 400,
@@ -75,11 +75,17 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Get all users with telegram_chat_id
-    const { data: users } = await adminSupabase
+    // Get users with telegram_chat_id — optionally filtered by user_ids
+    let query = adminSupabase
       .from("profiles")
       .select("user_id, telegram_chat_id, display_name")
       .not("telegram_chat_id", "is", null);
+
+    if (user_ids && Array.isArray(user_ids) && user_ids.length > 0) {
+      query = query.in("user_id", user_ids);
+    }
+
+    const { data: users } = await query;
 
     if (!users || users.length === 0) {
       return new Response(JSON.stringify({ message: "No users with Telegram", sent: 0 }), {
