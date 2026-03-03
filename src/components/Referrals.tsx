@@ -101,14 +101,6 @@ const Referrals = () => {
               level="M"
               bgColor="#ffffff"
               fgColor="#18181b"
-              imageSettings={{
-                src: "/icon-192.png",
-                x: undefined,
-                y: undefined,
-                height: 32,
-                width: 32,
-                excavate: true,
-              }}
             />
           </div>
           <p className="text-[10px] text-muted-foreground/60 text-center max-w-[200px]">
