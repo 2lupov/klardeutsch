@@ -129,16 +129,25 @@ const Shop = () => {
                 }`}
                 style={{ animationDelay: `${idx * 0.05}s` }}
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-display font-semibold text-foreground text-sm">{item.title}</h3>
-                    {item.description && (
-                      <p className="text-xs text-muted-foreground mt-1">{item.description}</p>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-1 text-primary font-display font-bold text-sm shrink-0">
-                    <Coins className="w-3.5 h-3.5" />
-                    {item.price}
+                <div className="flex items-start gap-3">
+                  {/* Product image */}
+                  {item.image_url && (
+                    <div className="w-16 h-16 rounded-lg overflow-hidden bg-secondary flex-shrink-0">
+                      <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                  
+                  <div className="flex-1 min-w-0 flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-display font-semibold text-foreground text-sm">{item.title}</h3>
+                      {item.description && (
+                        <p className="text-xs text-muted-foreground mt-1">{item.description}</p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1 text-primary font-display font-bold text-sm shrink-0">
+                      <Coins className="w-3.5 h-3.5" />
+                      {item.price}
+                    </div>
                   </div>
                 </div>
 
