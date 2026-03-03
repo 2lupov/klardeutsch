@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Plus, Trash2, ImagePlus, X, Loader2 } from "lucide-react";
+import { Plus, Trash2, ImagePlus, X, Loader2, FileUp, FileText, Download } from "lucide-react";
 import { toast } from "sonner";
 
 const ShopEditor = () => {
@@ -89,7 +89,50 @@ const ShopEditor = () => {
     toast.success("Фото удалено");
   };
 
-  if (loading) return <p className="text-muted-foreground">{t("loading")}</p>;
+  const uploadFile = async (id: string, file: File) => {
+    setUploading(id + "-file");
+    try {
+      const ext = file.name.split(".").pop() || "bin";
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const filePath = `${id}/${safeName}`;
+
+      await supabase.storage.from("shop-files").remove([filePath]);
+
+      const { error: uploadError } = await supabase.storage
+        .from("shop-files")
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from("shop-files")
+        .getPublicUrl(filePath);
+
+      const fileUrl = urlData.publicUrl;
+      await supabase.from("shop_items").update({ file_url: fileUrl }).eq("id", id);
+
+      setItems(prev => prev.map(item =>
+        item.id === id ? { ...item, file_url: fileUrl } : item
+      ));
+
+      toast.success(`Файл "${file.name}" загружен!`);
+    } catch (err: any) {
+      toast.error("Ошибка загрузки файла: " + err.message);
+    }
+    setUploading(null);
+  };
+
+  const removeFile = async (id: string, fileUrl: string) => {
+    const path = fileUrl.split("/shop-files/")[1]?.split("?")[0];
+    if (path) {
+      await supabase.storage.from("shop-files").remove([decodeURIComponent(path)]);
+    }
+    await supabase.from("shop_items").update({ file_url: null }).eq("id", id);
+    setItems(prev => prev.map(item =>
+      item.id === id ? { ...item, file_url: null } : item
+    ));
+    toast.success("Файл удалён");
+  };
 
   return (
     <div className="flex flex-col gap-3" onFocus={(e) => { const t = e.target as HTMLElement; if (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA') (t as HTMLInputElement).select(); }}>
@@ -185,6 +228,43 @@ const ShopEditor = () => {
             rows={3}
             className="w-full px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none resize-y"
           />
+
+
+          {/* File attachment section */}
+          <div className="flex items-center gap-2">
+            {item.file_url ? (
+              <div className="flex items-center gap-2 flex-1 px-3 py-2 rounded-lg bg-secondary border border-border">
+                <FileText className="w-4 h-4 text-primary flex-shrink-0" />
+                <a href={item.file_url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline truncate flex-1">
+                  {decodeURIComponent(item.file_url.split("/").pop()?.split("?")[0] || "Файл")}
+                </a>
+                <a href={item.file_url} download className="p-1 text-muted-foreground hover:text-primary transition-colors">
+                  <Download className="w-3.5 h-3.5" />
+                </a>
+                <button onClick={() => removeFile(item.id, item.file_url)} className="p-1 text-destructive hover:text-destructive/80 transition-colors">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ) : (
+              <label className="flex items-center gap-2 px-3 py-2 rounded-lg border border-dashed border-border text-muted-foreground hover:text-primary hover:border-primary/50 cursor-pointer transition-all text-sm">
+                {uploading === item.id + "-file" ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <FileUp className="w-4 h-4" />
+                )}
+                Прикрепить файл
+                <input
+                  type="file"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) uploadFile(item.id, file);
+                  }}
+                />
+              </label>
+            )}
+          </div>
+
           <div className="flex items-center justify-between">
             <label className="flex items-center gap-2 text-sm text-muted-foreground">
               <input
