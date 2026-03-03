@@ -18,6 +18,7 @@ const Quiz = ({ questions, onComplete, level = "A1", category = "grammar" }: Qui
   const [showResult, setShowResult] = useState(false);
   const [mistakes, setMistakes] = useState<MistakeData[]>([]);
   const [showAI, setShowAI] = useState(true);
+  const [animKey, setAnimKey] = useState(0);
   const { t } = useLanguage();
 
   const q = questions[currentIndex];
@@ -47,6 +48,7 @@ const Quiz = ({ questions, onComplete, level = "A1", category = "grammar" }: Qui
     if (currentIndex < questions.length - 1) {
       setCurrentIndex((i) => i + 1);
       setSelectedIndex(null);
+      setAnimKey((k) => k + 1);
     } else {
       setShowResult(true);
     }
@@ -99,7 +101,7 @@ const Quiz = ({ questions, onComplete, level = "A1", category = "grammar" }: Qui
         </div>
       </div>
 
-      <div className="glass-card p-6">
+      <div key={animKey} className="glass-card p-6 animate-question-in">
         <h3 className="text-lg font-display font-semibold mb-6">{q.question}</h3>
 
         <div className="flex flex-col gap-3">
@@ -107,9 +109,9 @@ const Quiz = ({ questions, onComplete, level = "A1", category = "grammar" }: Qui
             let style = "glass-card p-4 cursor-pointer transition-all text-left";
             if (answered) {
               if (i === q.correctIndex) {
-                style += " border-success/50 bg-success/10";
+                style += " border-success/50 bg-success/10 animate-answer-correct";
               } else if (i === selectedIndex) {
-                style += " border-destructive/50 bg-destructive/10";
+                style += " border-destructive/50 bg-destructive/10 animate-answer-shake";
               }
             } else {
               style += " hover:border-primary/50 hover:bg-primary/5";
@@ -134,7 +136,7 @@ const Quiz = ({ questions, onComplete, level = "A1", category = "grammar" }: Qui
         </div>
 
         {answered && q.explanation && (
-          <div className="mt-4 p-3 rounded-lg bg-primary/5 border border-primary/20 text-sm text-muted-foreground">
+          <div className="mt-4 p-3 rounded-lg bg-primary/5 border border-primary/20 text-sm text-muted-foreground animate-auth-fade-up" style={{ animationDelay: "0.1s" }}>
             💡 {q.explanation}
           </div>
         )}
@@ -143,7 +145,8 @@ const Quiz = ({ questions, onComplete, level = "A1", category = "grammar" }: Qui
       {answered && (
         <button
           onClick={handleNext}
-          className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold glow-yellow transition-all"
+          className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold glow-yellow transition-all animate-auth-fade-up"
+          style={{ animationDelay: "0.05s" }}
         >
           {currentIndex < questions.length - 1 ? t("next") : t("results")}
           <ArrowRight className="w-4 h-4" />
