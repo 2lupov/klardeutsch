@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Minus, Trash2, Pencil, UserPlus, Camera, Lock, MessageSquare } from "lucide-react";
+import { Plus, Minus, Trash2, Pencil, UserPlus, Camera, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 import AvatarPicker from "@/components/AvatarPicker";
 
@@ -17,44 +17,6 @@ interface DemoUser {
 }
 
 const StuffOnlyTab = () => {
-  const [unlocked, setUnlocked] = useState(false);
-  const [pwd, setPwd] = useState("");
-  const [error, setError] = useState("");
-
-  const handleUnlock = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    const { data } = await supabase.rpc("check_admin_password", { input_password: pwd });
-    if (data) {
-      setUnlocked(true);
-    } else {
-      setError("Неверный пароль");
-    }
-  };
-
-  if (!unlocked) {
-    return (
-      <form onSubmit={handleUnlock} className="glass-card p-6 flex flex-col gap-4 max-w-sm mx-auto">
-        <div className="text-center">
-          <Lock className="w-8 h-8 text-primary mx-auto mb-2" />
-          <h3 className="text-sm font-display font-semibold text-foreground">Stuff Only</h3>
-          <p className="text-xs text-muted-foreground mt-1">Введите пароль для доступа</p>
-        </div>
-        <input
-          type="password"
-          value={pwd}
-          onChange={(e) => setPwd(e.target.value)}
-          placeholder="Пароль..."
-          className="w-full px-4 py-3 rounded-xl bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:border-primary focus:outline-none"
-        />
-        {error && <p className="text-xs text-destructive">{error}</p>}
-        <button type="submit" className="w-full px-4 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm">
-          Открыть
-        </button>
-      </form>
-    );
-  }
-
   return <DemoUsersManager />;
 };
 
