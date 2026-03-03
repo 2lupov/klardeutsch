@@ -72,12 +72,23 @@ const Method = () => {
   const navigate = useNavigate();
   const [audioState, setAudioState] = useState<"idle" | "loading" | "playing">("idle");
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioCacheRef = useRef<Map<string, string>>(new Map());
 
   const playMotivation = useCallback(async () => {
     if (audioState === "playing" && audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
       setAudioState("idle");
+      return;
+    }
+
+    const cachedUrl = audioCacheRef.current.get(lang);
+    if (cachedUrl) {
+      const audio = new Audio(cachedUrl);
+      audioRef.current = audio;
+      audio.onended = () => setAudioState("idle");
+      await audio.play();
+      setAudioState("playing");
       return;
     }
 
@@ -103,6 +114,7 @@ const Method = () => {
 
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
+      audioCacheRef.current.set(lang, url);
       const audio = new Audio(url);
       audioRef.current = audio;
       audio.onended = () => setAudioState("idle");
