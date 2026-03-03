@@ -12,7 +12,6 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import Admin from "./pages/Admin";
-import StuffOnly from "./pages/StuffOnly";
 import Profile from "./pages/Profile";
 import Dictionary from "./pages/Dictionary";
 import Statistics from "./pages/Statistics";
@@ -42,7 +41,6 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/admin" element={<Admin />} />
-              <Route path="/stuff-only" element={<StuffOnly />} />
               <Route path="/method" element={<Method />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
