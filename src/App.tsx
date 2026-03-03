@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import AppLayout from "@/components/AppLayout";
+import OfflineBanner from "@/components/OfflineBanner";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
@@ -30,6 +31,7 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
+          <OfflineBanner />
           <BrowserRouter>
             <Routes>
               <Route path="/auth" element={<Auth />} />
