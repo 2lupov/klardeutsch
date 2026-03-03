@@ -200,6 +200,7 @@ const Achievements = ({ stats }: AchievementsProps) => {
   const { t } = useLanguage();
   const prevUnlockedRef = useRef<Set<string>>(new Set());
   const [newlyUnlocked, setNewlyUnlocked] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const sorted = useMemo(() => {
     return achievements.map((a) => ({
@@ -252,44 +253,69 @@ const Achievements = ({ stats }: AchievementsProps) => {
       </div>
 
       <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-        {sorted.map((ach) => (
-          <div
-            key={ach.id}
-            className={`glass-card p-3 flex flex-col items-center gap-1.5 text-center transition-all relative overflow-hidden ${
-              ach.unlocked
-                ? "border-primary/30 bg-primary/5"
-                : "opacity-50 grayscale"
-            } ${newlyUnlocked === ach.id ? "animate-scale-in ring-2 ring-primary" : ""}`}
-          >
-            {/* Progress bar at bottom */}
-            {!ach.unlocked && ach.progress && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-muted">
-                <div
-                  className="h-full rounded-full transition-all duration-500"
-                  style={{
-                    width: `${(ach.progress.current / ach.progress.target) * 100}%`,
-                    background: "linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary) / 0.6))",
-                  }}
-                />
-              </div>
-            )}
+        {sorted.map((ach) => {
+          const isExpanded = expandedId === ach.id;
+          return (
+            <div
+              key={ach.id}
+              onClick={() => setExpandedId(isExpanded ? null : ach.id)}
+              className={`glass-card p-3 flex flex-col items-center gap-1.5 text-center transition-all relative overflow-hidden cursor-pointer ${
+                ach.unlocked
+                  ? "border-primary/30 bg-primary/5"
+                  : "opacity-50 grayscale"
+              } ${newlyUnlocked === ach.id ? "animate-scale-in ring-2 ring-primary" : ""} ${
+                isExpanded ? "col-span-3 sm:col-span-4 !opacity-100 !grayscale-0" : ""
+              }`}
+            >
+              {/* Progress bar at bottom */}
+              {!ach.unlocked && ach.progress && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-muted">
+                  <div
+                    className="h-full rounded-full transition-all duration-500"
+                    style={{
+                      width: `${(ach.progress.current / ach.progress.target) * 100}%`,
+                      background: "linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary) / 0.6))",
+                    }}
+                  />
+                </div>
+              )}
 
-            <div className={ach.unlocked ? "text-primary" : "text-muted-foreground"}>
-              {ach.icon}
-            </div>
-            <span className="text-[10px] font-display font-semibold leading-tight text-foreground">
-              {t(ach.titleKey as any)}
-            </span>
-            {!ach.unlocked && ach.progress && (
-              <span className="text-[9px] text-muted-foreground">
-                {ach.progress.current}/{ach.progress.target}
+              <div className={ach.unlocked ? "text-primary" : "text-muted-foreground"}>
+                {ach.icon}
+              </div>
+              <span className="text-[10px] font-display font-semibold leading-tight text-foreground">
+                {t(ach.titleKey as any)}
               </span>
-            )}
-            {ach.unlocked && (
-              <span className="text-[9px] text-primary font-medium">✓</span>
-            )}
-          </div>
-        ))}
+
+              {/* Expanded description */}
+              {isExpanded && (
+                <p className="text-[11px] text-muted-foreground leading-snug mt-1 px-1">
+                  {t(ach.descKey as any)}
+                </p>
+              )}
+
+              {!isExpanded && !ach.unlocked && ach.progress && (
+                <span className="text-[9px] text-muted-foreground">
+                  {ach.progress.current}/{ach.progress.target}
+                </span>
+              )}
+              {!isExpanded && ach.unlocked && (
+                <span className="text-[9px] text-primary font-medium">✓</span>
+              )}
+
+              {/* Expanded progress details */}
+              {isExpanded && ach.progress && (
+                <span className="text-[10px] text-muted-foreground font-medium">
+                  {ach.progress.current}/{ach.progress.target}
+                  {ach.unlocked && " ✓"}
+                </span>
+              )}
+              {isExpanded && !ach.progress && ach.unlocked && (
+                <span className="text-[10px] text-primary font-medium">Выполнено ✓</span>
+              )}
+            </div>
+          );
+        })}
       </div>
     </section>
   );
