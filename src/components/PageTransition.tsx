@@ -4,18 +4,20 @@ import { useLocation } from "react-router-dom";
 const PageTransition = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
   const [displayChildren, setDisplayChildren] = useState(children);
-  const [transitionClass, setTransitionClass] = useState("animate-page-enter");
+  const [phase, setPhase] = useState<"visible" | "fading-out" | "fading-in">("visible");
   const prevPath = useRef(location.pathname);
 
   useEffect(() => {
     if (location.pathname !== prevPath.current) {
       prevPath.current = location.pathname;
-      setTransitionClass("animate-page-exit");
+      setPhase("fading-out");
 
       const timeout = setTimeout(() => {
         setDisplayChildren(children);
-        setTransitionClass("animate-page-enter");
-      }, 150);
+        setPhase("fading-in");
+        // Remove fading-in class after animation completes
+        setTimeout(() => setPhase("visible"), 300);
+      }, 180);
 
       return () => clearTimeout(timeout);
     } else {
@@ -23,8 +25,14 @@ const PageTransition = ({ children }: { children: ReactNode }) => {
     }
   }, [location.pathname, children]);
 
+  const style: React.CSSProperties = {
+    transition: "opacity 0.18s ease, transform 0.25s ease",
+    opacity: phase === "fading-out" ? 0 : 1,
+    transform: phase === "fading-out" ? "scale(0.985)" : phase === "fading-in" ? "scale(1)" : "none",
+  };
+
   return (
-    <div className={transitionClass} style={{ willChange: "opacity, transform" }}>
+    <div style={style}>
       {displayChildren}
     </div>
   );
