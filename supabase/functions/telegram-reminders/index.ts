@@ -81,16 +81,11 @@ Deno.serve(async (req) => {
     // Get current hour (UTC) to decide message type
     const currentHour = new Date().getUTCHours();
 
-    // Fetch users with telegram_chat_id who haven't been active in 6h
-    const sixHoursAgo = new Date(
-      Date.now() - 6 * 60 * 60 * 1000
-    ).toISOString();
-
+    // Fetch all users with telegram_chat_id
     const { data: inactiveUsers, error } = await supabase
       .from("profiles")
       .select("user_id, telegram_chat_id, last_active, display_name")
-      .not("telegram_chat_id", "is", null)
-      .lt("last_active", sixHoursAgo);
+      .not("telegram_chat_id", "is", null);
 
     if (error) {
       console.error("Error fetching profiles:", error);
