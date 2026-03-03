@@ -38,7 +38,7 @@ const DesktopSidebar = () => {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 p-4 flex flex-col gap-1">
+      <nav className="flex-1 p-4 flex flex-col gap-1 overflow-y-auto">
         {links.map((item) => {
           const active = location.pathname === item.to;
           return (
