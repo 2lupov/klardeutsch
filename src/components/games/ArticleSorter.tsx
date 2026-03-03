@@ -25,9 +25,9 @@ const BIN_ACTIVE: Record<Bin, string> = {
 };
 
 const BIN_ICONS: Record<Bin, string> = {
-  Der: "🗑️",
-  Die: "🗑️",
-  Das: "🗑️",
+  Der: "🔵🗑️",
+  Die: "🩷🗑️",
+  Das: "♻️🗑️",
 };
 
 const NEIGHBOR_PHRASES = [
