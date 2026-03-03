@@ -29,6 +29,42 @@ export type Database = {
         }
         Relationships: []
       }
+      cafe_scenarios: {
+        Row: {
+          barista_line: string
+          created_at: string
+          hint_ru: string
+          hint_uk: string
+          id: string
+          level: string
+          options: Json
+          sort_order: number | null
+          timer_sec: number
+        }
+        Insert: {
+          barista_line: string
+          created_at?: string
+          hint_ru?: string
+          hint_uk?: string
+          id?: string
+          level?: string
+          options?: Json
+          sort_order?: number | null
+          timer_sec?: number
+        }
+        Update: {
+          barista_line?: string
+          created_at?: string
+          hint_ru?: string
+          hint_uk?: string
+          id?: string
+          level?: string
+          options?: Json
+          sort_order?: number | null
+          timer_sec?: number
+        }
+        Relationships: []
+      }
       challenges: {
         Row: {
           challenge_type: string
@@ -755,6 +791,20 @@ export type Database = {
         Returns: boolean
       }
       generate_referral_code: { Args: { p_user_id: string }; Returns: string }
+      get_admin_users: {
+        Args: never
+        Returns: {
+          avatar_url: string
+          coin_balance: number
+          display_name: string
+          email: string
+          last_active: string
+          roles: string[]
+          total_xp: number
+          user_created_at: string
+          user_id: string
+        }[]
+      }
       get_leaderboard: {
         Args: { p_limit?: number }
         Returns: {

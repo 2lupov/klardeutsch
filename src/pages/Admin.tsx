@@ -2,16 +2,28 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Plus, Trash2, Lock, Check } from "lucide-react";
+import { Plus, Trash2, Lock, Check, BookOpen, Languages, Headphones, BookText, ShoppingBag, Gamepad2, Users } from "lucide-react";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import ShopEditor from "@/components/admin/ShopEditor";
 import ListeningEditor from "@/components/admin/ListeningEditor";
+import UsersEditor from "@/components/admin/UsersEditor";
+import CafeEditor from "@/components/admin/CafeEditor";
 import { toast } from "sonner";
 
 type Level = "A1" | "A2" | "B1" | "B2" | "C1";
-type Tab = "vocabulary" | "grammar" | "reading" | "listening" | "shop" | "games";
+type Tab = "vocabulary" | "grammar" | "reading" | "listening" | "shop" | "games" | "users";
 
 const LEVELS: Level[] = ["A1", "A2", "B1", "B2", "C1"];
+
+const TAB_CONFIG: { key: Tab; icon: React.ElementType; label: string }[] = [
+  { key: "vocabulary", icon: BookOpen, label: "vocabulary" },
+  { key: "grammar", icon: Languages, label: "grammar" },
+  { key: "reading", icon: BookText, label: "reading" },
+  { key: "listening", icon: Headphones, label: "listening" },
+  { key: "shop", icon: ShoppingBag, label: "shopTab" },
+  { key: "games", icon: Gamepad2, label: "games" },
+  { key: "users", icon: Users, label: "users" },
+];
 
 const Admin = () => {
   const { user } = useAuth();
@@ -95,26 +107,31 @@ const Admin = () => {
         </div>
 
         {/* Tab selector */}
-        <div className="flex gap-2 mb-6 flex-wrap">
-          {(["vocabulary", "grammar", "reading", "listening", "shop", "games"] as Tab[]).map((tb) => (
+        <div className="flex gap-1.5 mb-6 flex-wrap">
+          {TAB_CONFIG.map(({ key, icon: Icon, label }) => (
             <button
-              key={tb}
-              onClick={() => setTab(tb)}
-              className={`px-4 py-2 rounded-xl text-sm transition-all ${
-                tab === tb ? "bg-card border border-primary/50 text-foreground" : "text-muted-foreground hover:text-foreground"
+              key={key}
+              onClick={() => setTab(key)}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm transition-all ${
+                tab === key 
+                  ? "bg-card border border-primary/50 text-foreground shadow-sm" 
+                  : "text-muted-foreground hover:text-foreground hover:bg-card/50"
               }`}
             >
-              {tb === "vocabulary" ? t("vocabulary") : tb === "grammar" ? t("grammar") : tb === "reading" ? t("reading") : tb === "listening" ? t("listening") : tb === "shop" ? t("shopTab") : "🕹️ Игры"}
+              <Icon className="w-3.5 h-3.5" />
+              {key === "games" ? "Игры" : key === "users" ? "Юзеры" : t(label as any)}
             </button>
           ))}
         </div>
 
+        {/* Hide level selector for non-level tabs */}
         {tab === "vocabulary" && <VocabEditor level={level} />}
         {tab === "grammar" && <GrammarEditor level={level} />}
         {tab === "reading" && <ReadingEditor level={level} />}
         {tab === "listening" && <ListeningEditor level={level} />}
         {tab === "shop" && <ShopEditor />}
         {tab === "games" && <GamesEditor level={level} />}
+        {tab === "users" && <UsersEditor />}
       </div>
     </div>
   );
@@ -508,14 +525,8 @@ const GamesEditor = ({ level }: { level: Level }) => {
         </div>
       </div>
 
-      <div className="glass-card p-5 opacity-40">
-        <h3 className="font-display text-sm font-bold text-muted-foreground mb-1 flex items-center gap-2">
-          🔜 Новые игры
-        </h3>
-        <p className="text-xs text-muted-foreground">
-          Здесь появятся настройки для новых мини-игр по мере их добавления.
-        </p>
-      </div>
+      {/* Café Bestellung Editor */}
+      <CafeEditor level={level} />
     </div>
   );
 };

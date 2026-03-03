@@ -4,21 +4,25 @@ import { usePlatform } from "@/hooks/usePlatform";
 import { useCoins } from "@/hooks/useCoins";
 import { useXP } from "@/hooks/useXP";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { supabase } from "@/integrations/supabase/client";
 
-/* ── dialogue scenarios ── */
+/* ── types ── */
 
-interface Scenario {
-  barista: string;          // what the barista says (German TTS)
+interface GameOption {
+  text: string;
+  type: "perfect" | "formal" | "rude";
+  feedback: { ru: string; uk: string };
+}
+
+interface GameScenario {
+  barista: string;
   hint: { ru: string; uk: string };
-  options: {
-    text: string;
-    type: "perfect" | "formal" | "rude";
-    feedback: { ru: string; uk: string };
-  }[];
+  options: GameOption[];
   timerSec: number;
 }
 
-const SCENARIOS: Scenario[] = [
+/* ── hardcoded fallback ── */
+const FALLBACK_SCENARIOS: GameScenario[] = [
   {
     barista: "Was darf's sein?",
     hint: { ru: "Бармен спросил, что вы хотите", uk: "Бармен запитав, що бажаєте" },
@@ -26,46 +30,6 @@ const SCENARIOS: Scenario[] = [
       { text: "Einen Kaffee, bitte!", type: "perfect", feedback: { ru: "Идеально! Естественно и вежливо 👌", uk: "Ідеально! Природно і ввічливо 👌" } },
       { text: "Ich möchte gerne einen Kaffee bestellen.", type: "formal", feedback: { ru: "Слишком формально для кафе 🤓", uk: "Занадто формально для кафе 🤓" } },
       { text: "Kaffee. Schnell.", type: "rude", feedback: { ru: "Ого, это грубо! Так не говорят 😬", uk: "Ого, це грубо! Так не кажуть 😬" } },
-    ],
-    timerSec: 10,
-  },
-  {
-    barista: "Möchten Sie Milch dazu?",
-    hint: { ru: "Хотите молоко?", uk: "Бажаєте молоко?" },
-    options: [
-      { text: "Ja, mit Hafermilch bitte.", type: "perfect", feedback: { ru: "Супер! Как настоящий берлинец ☕", uk: "Супер! Як справжній берлінець ☕" } },
-      { text: "Ich würde sehr gerne Milch zu meinem Kaffee hinzufügen lassen.", type: "formal", feedback: { ru: "Это сочинение, а не кафе 📝", uk: "Це твір, а не кафе 📝" } },
-      { text: "Milch, ja.", type: "rude", feedback: { ru: "Коротко и сухо — не лучший тон 😕", uk: "Коротко і сухо — не найкращий тон 😕" } },
-    ],
-    timerSec: 10,
-  },
-  {
-    barista: "Zum Mitnehmen oder hier trinken?",
-    hint: { ru: "С собой или здесь?", uk: "Із собою чи тут?" },
-    options: [
-      { text: "Zum Hier trinken, bitte.", type: "perfect", feedback: { ru: "Точно в цель! Звучит натурально 🎯", uk: "Точно в ціль! Звучить природно 🎯" } },
-      { text: "Ich beabsichtige, den Kaffee in Ihrem Etablissement zu konsumieren.", type: "formal", feedback: { ru: "Ты случайно не профессор? 🎓", uk: "Ти випадково не професор? 🎓" } },
-      { text: "Hier.", type: "rude", feedback: { ru: "Одно слово — маловато 😤", uk: "Одне слово — замало 😤" } },
-    ],
-    timerSec: 10,
-  },
-  {
-    barista: "Das macht drei fünfzig.",
-    hint: { ru: "С вас 3,50€", uk: "З вас 3,50€" },
-    options: [
-      { text: "Bitte, stimmt so!", type: "perfect", feedback: { ru: "Класс! И чаевые оставил 💰", uk: "Клас! І чайові залишив 💰" } },
-      { text: "Ich möchte den exakten Betrag von drei Euro und fünfzig Cent entrichten.", type: "formal", feedback: { ru: "Это не банк, расслабься 🏦", uk: "Це не банк, розслабся 🏦" } },
-      { text: "Hier, Geld.", type: "rude", feedback: { ru: "Ну хоть «bitte» добавь 😅", uk: "Ну хоч «bitte» додай 😅" } },
-    ],
-    timerSec: 10,
-  },
-  {
-    barista: "Sonst noch etwas?",
-    hint: { ru: "Ещё что-нибудь?", uk: "Ще щось?" },
-    options: [
-      { text: "Nee, das war's. Danke!", type: "perfect", feedback: { ru: "Как местный! Perfekt! 🇩🇪", uk: "Як місцевий! Perfekt! 🇩🇪" } },
-      { text: "Nein, ich benötige nichts weiteres, vielen herzlichen Dank.", type: "formal", feedback: { ru: "Витиевато для пятницы в кафе 🙃", uk: "Замудровано для п'ятниці в кафе 🙃" } },
-      { text: "Nein.", type: "rude", feedback: { ru: "Сухо! Добавь Danke 😊", uk: "Сухо! Додай Danke 😊" } },
     ],
     timerSec: 10,
   },
@@ -80,6 +44,8 @@ const CafeBestellung = ({ onBack }: { onBack: () => void }) => {
   const { awardXP } = useXP();
   const l = lang === "uk" ? "uk" : "ru";
 
+  const [scenarios, setScenarios] = useState<GameScenario[]>([]);
+  const [_scenariosLoaded, setScenariosLoaded] = useState(false);
   const [step, setStep] = useState(0);
   const [perfectCount, setPerfectCount] = useState(0);
   const [_totalAnswered, setTotalAnswered] = useState(0);
@@ -90,7 +56,35 @@ const CafeBestellung = ({ onBack }: { onBack: () => void }) => {
   const [baristaState, setBaristaState] = useState<"idle" | "speaking" | "wink" | "annoyed">("idle");
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const scenario = SCENARIOS[step];
+  /* ── load scenarios from DB ── */
+  useEffect(() => {
+    const load = async () => {
+      const { data } = await supabase
+        .from("cafe_scenarios")
+        .select("*")
+        .order("sort_order");
+      if (data && data.length > 0) {
+        const mapped: GameScenario[] = data.map((s: any) => ({
+          barista: s.barista_line,
+          hint: { ru: s.hint_ru, uk: s.hint_uk },
+          options: (s.options as any[]).map((o: any) => ({
+            text: o.text,
+            type: o.type as "perfect" | "formal" | "rude",
+            feedback: { ru: o.feedback_ru, uk: o.feedback_uk },
+          })),
+          timerSec: s.timer_sec,
+        }));
+        setScenarios(mapped);
+      } else {
+        setScenarios(FALLBACK_SCENARIOS);
+      }
+      setScenariosLoaded(true);
+    };
+    load();
+  }, []);
+
+  const scenario = scenarios[step] ?? null;
+
 
   /* ── TTS ── */
   const playBarista = useCallback(async (text: string) => {
@@ -178,7 +172,7 @@ const CafeBestellung = ({ onBack }: { onBack: () => void }) => {
 
   /* ── next / end ── */
   const nextStep = () => {
-    if (step + 1 >= SCENARIOS.length) {
+    if (step + 1 >= scenarios.length) {
       setGameOver(true);
       // Awards
       if (perfectCount >= 3) {
@@ -221,6 +215,16 @@ const CafeBestellung = ({ onBack }: { onBack: () => void }) => {
   const timerColor = timerPct > 50 ? "bg-primary" : timerPct > 25 ? "bg-yellow-500" : "bg-destructive";
 
   /* ── GAME OVER screen ── */
+  /* ── loading screen ── */
+  if (scenarios.length === 0) {
+    return (
+      <div className="w-full mx-auto px-4 py-6 max-w-md flex flex-col items-center justify-center gap-4 min-h-[60vh]">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <p className="text-muted-foreground text-sm">Загрузка сценариев...</p>
+      </div>
+    );
+  }
+
   if (gameOver) {
     const isGreat = perfectCount >= 3;
     return (
@@ -238,8 +242,8 @@ const CafeBestellung = ({ onBack }: { onBack: () => void }) => {
           </h2>
           <p className="text-muted-foreground">
             {l === "uk"
-              ? `Ідеальних відповідей: ${perfectCount} / ${SCENARIOS.length}`
-              : `Идеальных ответов: ${perfectCount} / ${SCENARIOS.length}`}
+              ? `Ідеальних відповідей: ${perfectCount} / ${scenarios.length}`
+              : `Идеальных ответов: ${perfectCount} / ${scenarios.length}`}
           </p>
 
           <div className="flex items-center justify-center gap-6">
@@ -282,10 +286,10 @@ const CafeBestellung = ({ onBack }: { onBack: () => void }) => {
         </button>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Coffee className="w-3.5 h-3.5 text-primary" />
-          {step + 1}/{SCENARIOS.length}
+          {step + 1}/{scenarios.length}
         </div>
         <div className="flex items-center gap-1">
-          {Array.from({ length: SCENARIOS.length }).map((_, i) => (
+          {Array.from({ length: scenarios.length }).map((_, i) => (
             <div
               key={i}
               className={`w-2 h-2 rounded-full transition-colors ${
@@ -383,7 +387,7 @@ const CafeBestellung = ({ onBack }: { onBack: () => void }) => {
             onClick={nextStep}
             className="mt-3 px-6 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold glow-yellow hover:opacity-90 transition-all"
           >
-            {step + 1 >= SCENARIOS.length
+            {step + 1 >= scenarios.length
               ? l === "uk" ? "Результат" : "Результат"
               : l === "uk" ? "Далі" : "Далее"}
           </button>
