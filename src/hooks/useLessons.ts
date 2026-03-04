@@ -110,6 +110,7 @@ export async function fetchLevelData(level: Level, topic?: string): Promise<Cate
     title: l.title,
     text: l.text,
     voice_config: l.voice_config ?? null,
+    audio_url: l.audio_url ?? null,
     questions: (l.listening_questions ?? [])
       .sort((a: any, b: any) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
       .map((q: any) => ({

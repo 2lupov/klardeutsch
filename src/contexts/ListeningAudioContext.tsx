@@ -7,7 +7,7 @@ interface ListeningAudioContextType {
   playing: boolean;
   loading: boolean;
   /** Play a listening text. If same text is already loaded, toggle play/pause. */
-  play: (text: string, title: string, voiceConfig?: Record<string, string> | null) => Promise<void>;
+  play: (text: string, title: string, voiceConfig?: Record<string, string> | null, audioUrl?: string | null) => Promise<void>;
   toggle: () => void;
   stop: () => void;
 }
@@ -54,7 +54,7 @@ export const ListeningAudioProvider = ({ children }: { children: ReactNode }) =>
     }
   }, [playing]);
 
-  const play = useCallback(async (text: string, title: string, voiceConfig?: Record<string, string> | null) => {
+  const play = useCallback(async (text: string, title: string, voiceConfig?: Record<string, string> | null, audioUrl?: string | null) => {
     // If same text already loaded, just toggle
     if (currentTextRef.current === text && audioRef.current) {
       toggle();
@@ -75,37 +75,45 @@ export const ListeningAudioProvider = ({ children }: { children: ReactNode }) =>
     currentTextRef.current = text;
 
     try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData.session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      let url: string;
 
-      // Detect dialogue
-      const isDialogue = /^[A-Z]:\s/m.test(text);
-      const functionName = isDialogue ? "dialogue-tts" : "elevenlabs-tts";
+      // If we have a cached audio URL, use it directly (instant playback!)
+      if (audioUrl) {
+        url = audioUrl;
+      } else {
+        // Fallback: generate on-the-fly via TTS
+        const { data: sessionData } = await supabase.auth.getSession();
+        const token = sessionData.session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
-      const bodyPayload: Record<string, any> = { text, speed: 0.85 };
-      if (isDialogue && voiceConfig && Object.keys(voiceConfig).length > 0) {
-        bodyPayload.voice_config = voiceConfig;
-      } else if (!isDialogue && voiceConfig?.narrator) {
-        bodyPayload.voiceId = voiceConfig.narrator;
+        const isDialogue = /^[A-Z]:\s/m.test(text);
+        const functionName = isDialogue ? "dialogue-tts" : "elevenlabs-tts";
+
+        const bodyPayload: Record<string, any> = { text, speed: 0.85 };
+        if (isDialogue && voiceConfig && Object.keys(voiceConfig).length > 0) {
+          bodyPayload.voice_config = voiceConfig;
+        } else if (!isDialogue && voiceConfig?.narrator) {
+          bodyPayload.voiceId = voiceConfig.narrator;
+        }
+
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${functionName}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(bodyPayload),
+          }
+        );
+
+        if (!response.ok) throw new Error("TTS failed");
+
+        const blob = await response.blob();
+        url = URL.createObjectURL(blob);
       }
 
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${functionName}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(bodyPayload),
-        }
-      );
-
-      if (!response.ok) throw new Error("TTS failed");
-
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
       const audio = new Audio(url);
       audioRef.current = audio;
 
@@ -113,7 +121,6 @@ export const ListeningAudioProvider = ({ children }: { children: ReactNode }) =>
       audio.onpause = () => setPlaying(false);
       audio.onended = () => {
         setPlaying(false);
-        // Don't clear title — allow replay
       };
 
       await audio.play();

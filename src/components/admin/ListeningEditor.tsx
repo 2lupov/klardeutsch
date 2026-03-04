@@ -8,8 +8,50 @@ const withScroll = async (fn: () => Promise<void>) => {
 };
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Plus, Trash2, Check, ArrowUp, ArrowDown, Play, Square, Loader2 } from "lucide-react";
+import { Plus, Trash2, Check, ArrowUp, ArrowDown, Play, Square, Loader2, Volume2 } from "lucide-react";
 import { toast } from "sonner";
+import { fetchEdgeFunction } from "@/lib/auth-fetch";
+
+/** Button to generate & cache audio for a listening text */
+const GenerateAudioButton = ({ listeningId, audioUrl, onGenerated }: { listeningId: string; audioUrl?: string | null; onGenerated: (url: string) => void }) => {
+  const [generating, setGenerating] = useState(false);
+
+  const generate = async () => {
+    setGenerating(true);
+    try {
+      const res = await fetchEdgeFunction("generate-listening-audio", { json: { listening_id: listeningId } });
+      if (!res.ok) { const err = await res.json(); throw new Error(err.error || "Failed"); }
+      const data = await res.json();
+      onGenerated(data.audio_url);
+      toast.success("Аудио сгенерировано и сохранено ✓");
+    } catch (e: any) {
+      toast.error(`Ошибка: ${e.message}`);
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  return (
+    <button
+      onClick={generate}
+      disabled={generating}
+      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+        audioUrl
+          ? "bg-success/10 text-success border border-success/30 hover:bg-success/20"
+          : "bg-primary/10 text-primary border border-primary/30 hover:bg-primary/20"
+      } disabled:opacity-50`}
+      title={audioUrl ? "Перегенерировать аудио" : "Сгенерировать аудио"}
+    >
+      {generating ? (
+        <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Генерация...</>
+      ) : audioUrl ? (
+        <><Volume2 className="w-3.5 h-3.5" /> 🔄 Обновить аудио</>
+      ) : (
+        <><Volume2 className="w-3.5 h-3.5" /> 🎵 Сгенерировать аудио</>
+      )}
+    </button>
+  );
+};
 
 /** Auto-resize textarea to fit content */
 const AutoTextarea = ({ value, onChange, placeholder, className }: {
@@ -463,6 +505,19 @@ const ListeningEditor = ({ level }: { level: string }) => {
               <button onClick={() => deleteText(txt.id)} className="p-2 text-destructive hover:bg-destructive/10 rounded-lg">
                 <Trash2 className="w-4 h-4" />
               </button>
+            </div>
+            {/* Generate audio button */}
+            <div className="flex items-center gap-2">
+              <GenerateAudioButton
+                listeningId={txt.id}
+                audioUrl={txt.audio_url}
+                onGenerated={(url) => {
+                  setTexts(prev => prev.map(t => t.id === txt.id ? { ...t, audio_url: url } : t));
+                }}
+              />
+              {txt.audio_url && (
+                <span className="text-[10px] text-success">✓ Аудио закэшировано</span>
+              )}
             </div>
 
             {/* Content area */}
