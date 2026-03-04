@@ -516,6 +516,7 @@ export type Database = {
           text: string
           title: string
           topic: string
+          voice_config: Json | null
         }
         Insert: {
           created_at?: string
@@ -525,6 +526,7 @@ export type Database = {
           text: string
           title: string
           topic?: string
+          voice_config?: Json | null
         }
         Update: {
           created_at?: string
@@ -534,6 +536,7 @@ export type Database = {
           text?: string
           title?: string
           topic?: string
+          voice_config?: Json | null
         }
         Relationships: []
       }

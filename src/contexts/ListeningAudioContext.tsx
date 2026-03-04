@@ -7,7 +7,7 @@ interface ListeningAudioContextType {
   playing: boolean;
   loading: boolean;
   /** Play a listening text. If same text is already loaded, toggle play/pause. */
-  play: (text: string, title: string) => Promise<void>;
+  play: (text: string, title: string, voiceConfig?: Record<string, string> | null) => Promise<void>;
   toggle: () => void;
   stop: () => void;
 }
@@ -54,7 +54,7 @@ export const ListeningAudioProvider = ({ children }: { children: ReactNode }) =>
     }
   }, [playing]);
 
-  const play = useCallback(async (text: string, title: string) => {
+  const play = useCallback(async (text: string, title: string, voiceConfig?: Record<string, string> | null) => {
     // If same text already loaded, just toggle
     if (currentTextRef.current === text && audioRef.current) {
       toggle();
@@ -82,6 +82,11 @@ export const ListeningAudioProvider = ({ children }: { children: ReactNode }) =>
       const isDialogue = /^[A-Z]:\s/m.test(text);
       const functionName = isDialogue ? "dialogue-tts" : "elevenlabs-tts";
 
+      const bodyPayload: Record<string, any> = { text, speed: 0.85 };
+      if (isDialogue && voiceConfig && Object.keys(voiceConfig).length > 0) {
+        bodyPayload.voice_config = voiceConfig;
+      }
+
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${functionName}`,
         {
@@ -91,7 +96,7 @@ export const ListeningAudioProvider = ({ children }: { children: ReactNode }) =>
             apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ text, speed: 0.85 }),
+          body: JSON.stringify(bodyPayload),
         }
       );
 

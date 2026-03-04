@@ -20,6 +20,7 @@ interface ListeningText {
   id: string;
   title: string;
   text: string;
+  voice_config?: Record<string, string> | null;
   questions: ListeningQuestion[];
   dictations: Dictation[];
 }
@@ -51,7 +52,7 @@ const ListeningExercise = ({ listenings, onComplete }: ListeningExerciseProps) =
   const current = listenings[currentIdx];
 
   const toggleAudio = (text: string) => {
-    playAudio(text, current.title);
+    playAudio(text, current.title, current.voice_config);
   };
 
   // Quiz handlers
