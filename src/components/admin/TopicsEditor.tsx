@@ -1,4 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
+
+const withScroll = async (fn: () => Promise<void>) => {
+  const el = document.getElementById("admin-scroll");
+  const scrollTop = el?.scrollTop ?? 0;
+  await fn();
+  requestAnimationFrame(() => { if (el) el.scrollTop = scrollTop; });
+};
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Trash2, ChevronDown, ChevronUp, Save, Loader2, X, Pencil, Hash } from "lucide-react";
 import { toast } from "sonner";
@@ -93,7 +100,7 @@ const TopicsEditor = () => {
     toast.success(`Тема "${newName.trim()}" создана!`);
     setNewName("");
     setNewEmoji("📂");
-    load();
+    withScroll(load);
   };
 
   const deleteTopic = async (topic: Topic) => {
@@ -113,7 +120,7 @@ const TopicsEditor = () => {
     }
     await supabase.from("topics").delete().eq("id", topic.id);
     toast.success("Тема удалена");
-    load();
+    withScroll(load);
   };
 
   const saveEdit = async () => {
@@ -137,7 +144,7 @@ const TopicsEditor = () => {
 
     toast.success("Тема обновлена ✅");
     setEditingId(null);
-    load();
+    withScroll(load);
   };
 
   const moveTopic = async (index: number, dir: -1 | 1) => {
@@ -164,7 +171,7 @@ const TopicsEditor = () => {
     toast.success(`Тема "${newName.trim()}" добавлена в ${added} уровней`);
     setNewName("");
     setNewEmoji("📂");
-    load();
+    withScroll(load);
   };
 
   return (

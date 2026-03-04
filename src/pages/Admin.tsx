@@ -20,6 +20,16 @@ import { toast } from "sonner";
 type Level = "A1" | "A2" | "B1" | "B2" | "C1";
 type Tab = "topics" | "vocabulary" | "grammar" | "reading" | "listening" | "shop" | "games" | "users" | "translations" | "generator" | "checker" | "alltexts" | "stuffonly" | "courses";
 
+/** Preserves scroll position of admin container across async reload */
+const withScroll = async (fn: () => Promise<void>) => {
+  const el = document.getElementById("admin-scroll");
+  const scrollTop = el?.scrollTop ?? 0;
+  await fn();
+  requestAnimationFrame(() => {
+    if (el) el.scrollTop = scrollTop;
+  });
+};
+
 const LEVELS: Level[] = ["A1", "A2", "B1", "B2", "C1"];
 
 const TAB_CONFIG: { key: Tab; icon: React.ElementType; label: string }[] = [
@@ -84,7 +94,7 @@ const Admin = () => {
   }
 
   return (
-    <div className="h-[100dvh] bg-background overflow-y-auto" onFocus={(e) => { const t = e.target as HTMLElement; if (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA') (t as HTMLInputElement).select(); }}>
+    <div id="admin-scroll" className="h-[100dvh] bg-background overflow-y-auto" onFocus={(e) => { const t = e.target as HTMLElement; if (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA') (t as HTMLInputElement).select(); }}>
       <div className="w-full max-w-2xl mx-auto px-4 py-6 pb-12">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-display font-bold text-gradient">{t("adminPanel")}</h1>
@@ -213,7 +223,6 @@ const VocabEditor = ({ level }: { level: Level }) => {
     setDirty(false);
     setSaving(false);
     toast.success(t("saved") || "Сохранено!");
-    load();
   };
 
   const addCard = async () => {
@@ -221,12 +230,12 @@ const VocabEditor = ({ level }: { level: Level }) => {
     await supabase.from("vocab_cards").insert([{
       level, german: t("newWordGerman"), russian: t("newWord"), sort_order: cards.length + 1, topic,
     }]);
-    load();
+    withScroll(load);
   };
 
   const deleteCard = async (id: string) => {
     await supabase.from("vocab_cards").delete().eq("id", id);
-    load();
+    withScroll(load);
   };
 
   if (loading) return <p className="text-muted-foreground">{t("loading")}</p>;
@@ -345,19 +354,18 @@ const GrammarEditor = ({ level }: { level: Level }) => {
     setPendingQUpdates(new Map());
     setSaving(false);
     toast.success(t("saved") || "Сохранено!");
-    load();
   };
 
   const addLesson = async () => {
     const topic = filterTopic !== "__all__" ? filterTopic : "Allgemein";
     await supabase.from("grammar_lessons").insert([{ level, theory: "", topic }]);
-    load();
+    withScroll(load);
   };
 
   const deleteLesson = async (id: string) => {
     if (!confirm("Удалить теорию грамматики?")) return;
     await supabase.from("grammar_lessons").delete().eq("id", id);
-    load();
+    withScroll(load);
   };
 
   const addQuestion = async () => {
@@ -365,12 +373,12 @@ const GrammarEditor = ({ level }: { level: Level }) => {
     await supabase.from("grammar_questions").insert([{
       level, question: t("newQuestion"), options: ["A", "B", "C", "D"], correct_index: 0, sort_order: questions.length + 1, topic,
     }]);
-    load();
+    withScroll(load);
   };
 
   const deleteQuestion = async (id: string) => {
     await supabase.from("grammar_questions").delete().eq("id", id);
-    load();
+    withScroll(load);
   };
 
   if (loading) return <p className="text-muted-foreground">{t("loading")}</p>;
@@ -508,29 +516,28 @@ const ReadingEditor = ({ level }: { level: Level }) => {
     setPendingQUpdates(new Map());
     setSaving(false);
     toast.success(t("saved") || "Сохранено!");
-    load();
   };
 
   const addText = async () => {
     await supabase.from("reading_texts").insert([{ level, title: t("newText"), text: t("textHere"), sort_order: texts.length + 1 }]);
-    load();
+    withScroll(load);
   };
 
   const deleteText = async (id: string) => {
     await supabase.from("reading_texts").delete().eq("id", id);
-    load();
+    withScroll(load);
   };
 
   const addQuestion = async (readingId: string, count: number) => {
     await supabase.from("reading_questions").insert([{
       reading_id: readingId, question: t("newQuestion"), options: ["A", "B", "C", "D"], correct_index: 0, sort_order: count + 1,
     }]);
-    load();
+    withScroll(load);
   };
 
   const deleteQuestion = async (id: string) => {
     await supabase.from("reading_questions").delete().eq("id", id);
-    load();
+    withScroll(load);
   };
 
   if (loading) return <p className="text-muted-foreground">{t("loading")}</p>;

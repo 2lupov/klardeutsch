@@ -1,4 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
+
+const withScroll = async (fn: () => Promise<void>) => {
+  const el = document.getElementById("admin-scroll");
+  const scrollTop = el?.scrollTop ?? 0;
+  await fn();
+  requestAnimationFrame(() => { if (el) el.scrollTop = scrollTop; });
+};
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Plus, Trash2, Check } from "lucide-react";
@@ -77,43 +84,42 @@ const ListeningEditor = ({ level }: { level: string }) => {
     setPendingDictUpdates(new Map());
     setSaving(false);
     toast.success(t("saved"));
-    load();
   };
 
   const addText = async () => {
     await supabase.from("listening_texts").insert([{
       level, title: "Neuer Hörtext", text: "Text hier...", sort_order: texts.length + 1,
     }]);
-    load();
+    withScroll(load);
   };
 
   const deleteText = async (id: string) => {
     await supabase.from("listening_texts").delete().eq("id", id);
-    load();
+    withScroll(load);
   };
 
   const addQuestion = async (listeningId: string, count: number) => {
     await supabase.from("listening_questions").insert([{
       listening_id: listeningId, question: t("newQuestion"), options: ["A", "B", "C", "D"], correct_index: 0, sort_order: count + 1,
     }]);
-    load();
+    withScroll(load);
   };
 
   const deleteQuestion = async (id: string) => {
     await supabase.from("listening_questions").delete().eq("id", id);
-    load();
+    withScroll(load);
   };
 
   const addDictation = async (listeningId: string, count: number) => {
     await supabase.from("listening_dictations").insert([{
       listening_id: listeningId, sentence: "Neuer Satz zum Diktieren", sort_order: count + 1,
     }]);
-    load();
+    withScroll(load);
   };
 
   const deleteDictation = async (id: string) => {
     await supabase.from("listening_dictations").delete().eq("id", id);
-    load();
+    withScroll(load);
   };
 
   if (loading) return <p className="text-muted-foreground">{t("loading")}</p>;
