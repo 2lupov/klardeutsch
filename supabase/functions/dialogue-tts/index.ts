@@ -9,10 +9,10 @@ const corsHeaders = {
 
 // Voice pairs
 const VOICES = {
-  male1: "JBFqnCBsd6RMkjVDRZzb",   // George
-  male2: "onwK4e9ZLuTAKqWW03F9",   // Daniel
-  female1: "XrExE9yKIg1WjnnlVkGX", // Matilda
-  female2: "EXAVITQu4vr4xnSDxMaL", // Sarah
+  male1: "aTTiK3YzK3dXETpuDE2h",
+  male2: "fmj9wTxZg3ta4xR75kgB",
+  female1: "6CS8keYmkwxkspesdyA7",
+  female2: "NE7AIW5DoJ7lUosXV2KR",
 };
 
 interface Line {
