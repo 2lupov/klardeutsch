@@ -9,6 +9,7 @@ const COIN_REWARDS: Record<string, number> = {
   grammar: 10,
   reading: 15,
   listening: 20,
+  writing: 15,
 };
 
 const XP_REWARDS: Record<string, number> = {
@@ -16,6 +17,7 @@ const XP_REWARDS: Record<string, number> = {
   grammar: 20,
   reading: 30,
   listening: 25,
+  writing: 25,
 };
 
 export const useProgress = () => {
@@ -53,7 +55,7 @@ export const useProgress = () => {
         ]);
         toast({
           title: `+${coins} 🪙`,
-          description: category === "vocabulary" ? "Словарный запас" : category === "grammar" ? "Грамматика" : "Чтение",
+          description: category === "vocabulary" ? "Словарный запас" : category === "grammar" ? "Грамматика" : category === "reading" ? "Чтение" : category === "listening" ? "Аудирование" : category === "writing" ? "Письмо" : category,
         });
         // Haptic feedback
         try {

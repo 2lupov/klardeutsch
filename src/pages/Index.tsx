@@ -134,7 +134,8 @@ const Index = () => {
   const handleWritingComplete = () => {
     bumpClarity(1);
     saveProgress(level, "writing", "writing", 0, true);
-    handleBack();
+    // Writing skips topics, go straight to categories
+    setScreen("categories");
   };
 
   const renderExercise = () => {
