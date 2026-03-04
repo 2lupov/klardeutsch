@@ -355,4 +355,15 @@
   .animate-page-exit {
     animation: page-exit 0.15s ease-in forwards;
   }
+
+  @keyframes klar-fill-clip {
+    0% { clip-path: inset(100% 0 0 0); }
+    50% { clip-path: inset(0% 0 0 0); }
+    100% { clip-path: inset(100% 0 0 0); }
+  }
+
+  @keyframes klar-fill-loop {
+    0%, 100% { opacity: 0.06; }
+    50% { opacity: 0.03; }
+  }
 }

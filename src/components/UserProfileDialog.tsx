@@ -23,6 +23,36 @@ interface UserStats {
   challengesPlayed: number;
 }
 
+/* ── Animated KLAR background ── */
+const KlarBackground = () => (
+  <div className="absolute inset-0 flex items-center justify-center overflow-hidden pointer-events-none select-none">
+    <span
+      className="font-display font-bold text-[120px] tracking-tighter leading-none opacity-[0.06]"
+      style={{
+        backgroundImage: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.3))",
+        WebkitBackgroundClip: "text",
+        WebkitTextFillColor: "transparent",
+        animation: "klar-fill-loop 4s ease-in-out infinite",
+      }}
+    >
+      KLAR
+    </span>
+    {/* Animated fill overlay */}
+    <span
+      className="absolute font-display font-bold text-[120px] tracking-tighter leading-none"
+      style={{
+        backgroundImage: "linear-gradient(135deg, hsl(var(--yellow-glow)), hsl(var(--yellow-soft)))",
+        WebkitBackgroundClip: "text",
+        WebkitTextFillColor: "transparent",
+        animation: "klar-fill-clip 4s ease-in-out infinite",
+        clipPath: "inset(100% 0 0 0)",
+      }}
+    >
+      KLAR
+    </span>
+  </div>
+);
+
 const UserProfileDialog = ({
   userId,
   displayName,
@@ -60,22 +90,16 @@ const UserProfileDialog = ({
           challengesPlayed: (demoUser as any).duels_played ?? 0,
         });
       } else {
-        const [duelsRes, challengesRes] = await Promise.all([
-          supabase
-            .from("challenges")
-            .select("id", { count: "exact", head: true })
-            .eq("winner_id", userId),
-          supabase
-            .from("challenges")
-            .select("id", { count: "exact", head: true })
-            .or(`challenger_id.eq.${userId},opponent_id.eq.${userId}`)
-            .eq("status", "done"),
-        ]);
+        // Use security definer function to get duel stats (bypasses RLS)
+        const { data: duelStats } = await supabase
+          .rpc("get_user_duel_stats", { p_user_id: userId });
+
+        const ds = Array.isArray(duelStats) ? duelStats[0] : duelStats;
         setStats({
           wordsLearned: 0,
           lessonsCompleted: 0,
-          duelsWon: duelsRes.count ?? 0,
-          challengesPlayed: challengesRes.count ?? 0,
+          duelsWon: ds?.duels_won ?? 0,
+          challengesPlayed: ds?.duels_played ?? 0,
         });
       }
       setLoading(false);
@@ -85,7 +109,6 @@ const UserProfileDialog = ({
 
   const handleChallenge = () => {
     onOpenChange(false);
-    // Navigate to games page with challenges screen and pre-selected opponent
     navigate("/games", {
       state: {
         screen: "challenges",
@@ -98,16 +121,17 @@ const UserProfileDialog = ({
     });
   };
 
-  // XP level calculation
   const level = Math.floor(totalXp / 100) + 1;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm p-0 overflow-hidden border-border/50 bg-background">
         <DialogTitle className="sr-only">Профиль {name}</DialogTitle>
-        {/* Header with gradient */}
-        <div className="relative h-24 bg-gradient-to-br from-primary/30 via-primary/10 to-accent/20">
-          <div className="absolute -bottom-10 left-1/2 -translate-x-1/2">
+
+        {/* Header with gradient + KLAR background */}
+        <div className="relative h-28 bg-gradient-to-br from-primary/30 via-primary/10 to-accent/20 overflow-hidden">
+          <KlarBackground />
+          <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 z-10">
             <Avatar className="w-20 h-20 border-4 border-background shadow-lg">
               {avatarUrl ? <AvatarImage src={avatarUrl} alt={name} /> : null}
               <AvatarFallback className="text-lg font-display font-bold bg-primary/10 text-primary">
@@ -118,7 +142,6 @@ const UserProfileDialog = ({
         </div>
 
         <div className="pt-12 pb-5 px-5 flex flex-col items-center gap-4">
-          {/* Name & level */}
           <div className="text-center">
             <h3 className="font-display text-lg font-bold text-foreground">
               {name} {isMe && "⭐"}
@@ -128,7 +151,6 @@ const UserProfileDialog = ({
             </p>
           </div>
 
-          {/* Stats grid */}
           {loading ? (
             <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
           ) : stats ? (
@@ -156,7 +178,6 @@ const UserProfileDialog = ({
             </div>
           ) : null}
 
-          {/* Challenge button — only show for other users */}
           {!isMe && userId && (
             <button
               onClick={handleChallenge}

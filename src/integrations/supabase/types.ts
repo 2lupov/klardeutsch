@@ -1058,6 +1058,13 @@ export type Database = {
           total_referrals: number
         }[]
       }
+      get_user_duel_stats: {
+        Args: { p_user_id: string }
+        Returns: {
+          duels_played: number
+          duels_won: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
