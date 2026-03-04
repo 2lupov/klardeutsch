@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 const withScroll = async (fn: () => Promise<void>) => {
   const el = document.getElementById("admin-scroll");
@@ -8,8 +8,88 @@ const withScroll = async (fn: () => Promise<void>) => {
 };
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Plus, Trash2, Check, ArrowUp, ArrowDown } from "lucide-react";
+import { Plus, Trash2, Check, ArrowUp, ArrowDown, Play, Square, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+
+/** Auto-resize textarea to fit content */
+const AutoTextarea = ({ value, onChange, placeholder, className }: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  className?: string;
+}) => {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.style.height = "0";
+      ref.current.style.height = ref.current.scrollHeight + "px";
+    }
+  }, [value]);
+  return (
+    <textarea
+      ref={ref}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      rows={1}
+      placeholder={placeholder}
+      className={className}
+      style={{ overflow: "hidden" }}
+    />
+  );
+};
+
+/** Preview button to listen to a text snippet with a voice */
+const PreviewButton = ({ text, voiceId }: { text: string; voiceId: string }) => {
+  const [state, setState] = useState<"idle" | "loading" | "playing">("idle");
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const stop = () => {
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+    setState("idle");
+  };
+
+  const play = async () => {
+    if (state === "playing") { stop(); return; }
+    if (!text.trim() || !voiceId) { toast.error("Укажите голос и текст"); return; }
+    stop();
+    setState("loading");
+    try {
+      const preview = text.slice(0, 200);
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+          },
+          body: JSON.stringify({ text: preview, voiceId }),
+        }
+      );
+      if (!res.ok) throw new Error("TTS error");
+      const blob = await res.blob();
+      const audio = new Audio(URL.createObjectURL(blob));
+      audioRef.current = audio;
+      audio.onended = () => setState("idle");
+      await audio.play();
+      setState("playing");
+    } catch {
+      toast.error("Ошибка воспроизведения");
+      setState("idle");
+    }
+  };
+
+  useEffect(() => () => stop(), []);
+
+  return (
+    <button onClick={play} className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors" title="Предпрослушивание">
+      {state === "loading" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> :
+       state === "playing" ? <Square className="w-3.5 h-3.5 fill-current" /> :
+       <Play className="w-3.5 h-3.5" />}
+    </button>
+  );
+};
 
 const VOICE_OPTIONS = [
   { id: "aTTiK3YzK3dXETpuDE2h", label: "Мужской 1" },
@@ -129,16 +209,16 @@ const DialogueColumn = ({ speaker, lines, onChange, voiceValue, onVoiceChange }:
       <div className="flex items-center gap-2 mb-1">
         <span className="text-sm font-bold text-primary">{speaker}</span>
         <VoiceSelect value={voiceValue} onChange={onVoiceChange} label={speaker} />
+        <PreviewButton text={lines.filter(l => l.trim()).join(". ")} voiceId={voiceValue} />
       </div>
       {lines.map((line, i) => (
         <div key={i} className="flex gap-1 items-start">
           <span className="text-[10px] text-muted-foreground mt-2.5 w-4 text-right shrink-0">{i + 1}</span>
-          <textarea
+          <AutoTextarea
             value={line}
-            onChange={(e) => updateLine(i, e.target.value)}
-            rows={1}
+            onChange={(v) => updateLine(i, v)}
             placeholder={`Реплика ${speaker}...`}
-            className="flex-1 px-2 py-1.5 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none resize-y min-h-[36px]"
+            className="flex-1 px-2 py-1.5 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none resize-none min-h-[36px]"
           />
           <div className="flex flex-col gap-0.5">
             <button onClick={() => moveLine(i, -1)} disabled={i === 0} className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-20">
@@ -420,6 +500,7 @@ const ListeningEditor = ({ level }: { level: string }) => {
                     onChange={(v) => updateVoiceConfig(txt.id, vc, "narrator", v)}
                     label="Голос"
                   />
+                  <PreviewButton text={txt.text} voiceId={vc["narrator"] ?? ""} />
                 </div>
               </>
             )}
