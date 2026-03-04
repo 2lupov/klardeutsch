@@ -61,8 +61,13 @@ const ListeningExercise = ({ listenings, onComplete }: ListeningExerciseProps) =
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData.session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      
+      // Detect if text is a dialogue (has A: / B: pattern)
+      const isDialogue = /^[A-Z]:\s/m.test(text);
+      const functionName = isDialogue ? "dialogue-tts" : "elevenlabs-tts";
+      
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${functionName}`,
         {
           method: "POST",
           headers: {
@@ -70,7 +75,7 @@ const ListeningExercise = ({ listenings, onComplete }: ListeningExerciseProps) =
             apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ text }),
+          body: JSON.stringify({ text, speed: 0.85 }),
         }
       );
       if (!response.ok) throw new Error("TTS failed");
