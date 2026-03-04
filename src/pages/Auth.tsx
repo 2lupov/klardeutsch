@@ -192,7 +192,7 @@ const Auth = () => {
           <div className="w-full max-w-sm">
             <div className="text-center mb-5 animate-auth-fade-up" style={{ animationDelay: "0.1s" }}>
               <div ref={logoRef}>
-                <AuthKlarLogo progress={otpCode.length / 8} />
+                <AuthKlarLogo progress={otpCode.length / 6} />
               </div>
               <p className="text-muted-foreground text-sm mt-2">
                 {t("enterOtpCode") || "Введите код из письма"}
@@ -202,7 +202,7 @@ const Auth = () => {
 
             <div className="glass-card p-5 flex flex-col items-center gap-4 animate-auth-scale-in" style={{ animationDelay: "0.3s" }}>
               <InputOTP
-                maxLength={8}
+                maxLength={6}
                 value={otpCode}
                 onChange={setOtpCode}
               >
@@ -213,8 +213,6 @@ const Auth = () => {
                   <InputOTPSlot index={3} />
                   <InputOTPSlot index={4} />
                   <InputOTPSlot index={5} />
-                  <InputOTPSlot index={6} />
-                  <InputOTPSlot index={7} />
                 </InputOTPGroup>
               </InputOTP>
 
@@ -224,7 +222,7 @@ const Auth = () => {
               <button
                 type="button"
                 onClick={handleVerifyOtp}
-                disabled={loading || otpCode.length < 8}
+                disabled={loading || otpCode.length < 6}
                 className="w-full px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold glow-yellow transition-all hover:opacity-90 disabled:opacity-50"
               >
                 {loading ? "..." : t("confirm")}
