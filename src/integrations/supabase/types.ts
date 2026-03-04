@@ -834,6 +834,33 @@ export type Database = {
         }
         Relationships: []
       }
+      topics: {
+        Row: {
+          created_at: string
+          emoji: string | null
+          id: string
+          level: string
+          name: string
+          sort_order: number | null
+        }
+        Insert: {
+          created_at?: string
+          emoji?: string | null
+          id?: string
+          level?: string
+          name: string
+          sort_order?: number | null
+        }
+        Update: {
+          created_at?: string
+          emoji?: string | null
+          id?: string
+          level?: string
+          name?: string
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
       translation_overrides: {
         Row: {
           id: string
