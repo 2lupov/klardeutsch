@@ -9,6 +9,7 @@ import {
   Head,
   Heading,
   Html,
+  Img,
   Link,
   Preview,
   Text,
@@ -28,6 +29,7 @@ export const RecoveryEmail = ({
     <Preview>Сброс пароля для KLAR</Preview>
     <Body style={main}>
       <Container style={container}>
+        <Img src="https://jqqsszwbbxvevebmebfm.supabase.co/storage/v1/object/public/email-assets/logo.png" alt="KLAR" width="64" height="64" style={logo} />
         <Text style={brand}>KLAR</Text>
         <Heading style={h1}>Сброс пароля</Heading>
         <Text style={text}>
@@ -53,6 +55,7 @@ export default RecoveryEmail
 
 const main = { backgroundColor: '#ffffff', fontFamily: "'Space Grotesk', Arial, sans-serif" }
 const container = { padding: '32px 28px' }
+const logo = { margin: '0 0 16px', borderRadius: '12px' }
 const brand = {
   fontSize: '28px',
   fontWeight: 'bold' as const,
