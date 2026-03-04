@@ -11,6 +11,8 @@ interface LanguageContextType {
   overrides: Record<string, Record<string, string>>;
   saveOverride: (key: string, lang: string, value: string) => Promise<void>;
   reloadOverrides: () => Promise<void>;
+  languageLocked: boolean;
+  lockLanguage: (lang: Lang) => Promise<void>;
 }
 
 const LanguageContext = createContext<LanguageContextType>({
@@ -22,6 +24,8 @@ const LanguageContext = createContext<LanguageContextType>({
   overrides: {},
   saveOverride: async () => {},
   reloadOverrides: async () => {},
+  languageLocked: false,
+  lockLanguage: async () => {},
 });
 
 export const useLanguage = () => useContext(LanguageContext);
@@ -34,6 +38,9 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
 
   const [overrides, setOverrides] = useState<Record<string, Record<string, string>>>({});
   const [editMode, setEditMode] = useState(false);
+  const [languageLocked, setLanguageLocked] = useState(() => {
+    return localStorage.getItem("klar-lang-locked") === "true";
+  });
 
   const loadOverrides = useCallback(async () => {
     const { data } = await supabase.from("translation_overrides").select("key, lang, value");
@@ -49,6 +56,26 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => { loadOverrides(); }, [loadOverrides]);
 
+  // Load locked state from profile on auth
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data?.user?.id) {
+        supabase.from("profiles").select("preferred_lang, language_locked").eq("user_id", data.user.id).single().then(({ data: prof }) => {
+          if (prof) {
+            const locked = !!(prof as any).language_locked;
+            setLanguageLocked(locked);
+            localStorage.setItem("klar-lang-locked", String(locked));
+            if (locked && (prof as any).preferred_lang) {
+              const savedLang = (prof as any).preferred_lang as Lang;
+              setLangState(savedLang);
+              localStorage.setItem("klar-lang", savedLang);
+            }
+          }
+        });
+      }
+    });
+  }, []);
+
   const setLang = useCallback((l: Lang) => {
     setLangState(l);
     localStorage.setItem("klar-lang", l);
@@ -60,6 +87,17 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     });
   }, []);
 
+  const lockLanguage = useCallback(async (l: Lang) => {
+    setLangState(l);
+    localStorage.setItem("klar-lang", l);
+    setLanguageLocked(true);
+    localStorage.setItem("klar-lang-locked", "true");
+    const { data } = await supabase.auth.getUser();
+    if (data?.user?.id) {
+      await supabase.from("profiles").update({ preferred_lang: l, language_locked: true } as any).eq("user_id", data.user.id);
+    }
+  }, []);
+
   const t = useCallback((key: TranslationKey): string => {
     const override = overrides[key]?.[lang];
     if (override) return override;
@@ -69,7 +107,6 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const saveOverride = useCallback(async (key: string, lng: string, value: string) => {
     const defaultVal = (translations as any)[key]?.[lng] ?? "";
     if (value === defaultVal || value === "") {
-      // Remove override, revert to default
       await supabase.from("translation_overrides").delete().eq("key", key).eq("lang", lng);
     } else {
       await supabase.from("translation_overrides").upsert(
@@ -81,7 +118,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   }, [loadOverrides]);
 
   return (
-    <LanguageContext.Provider value={{ lang, setLang, t, editMode, setEditMode, overrides, saveOverride, reloadOverrides: loadOverrides }}>
+    <LanguageContext.Provider value={{ lang, setLang, t, editMode, setEditMode, overrides, saveOverride, reloadOverrides: loadOverrides, languageLocked, lockLanguage }}>
       {children}
     </LanguageContext.Provider>
   );

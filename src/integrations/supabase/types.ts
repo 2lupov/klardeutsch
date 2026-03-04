@@ -543,6 +543,7 @@ export type Database = {
           created_at: string
           display_name: string | null
           id: string
+          language_locked: boolean
           last_active: string | null
           preferred_lang: string
           telegram_chat_id: number | null
@@ -554,6 +555,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          language_locked?: boolean
           last_active?: string | null
           preferred_lang?: string
           telegram_chat_id?: number | null
@@ -565,6 +567,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          language_locked?: boolean
           last_active?: string | null
           preferred_lang?: string
           telegram_chat_id?: number | null

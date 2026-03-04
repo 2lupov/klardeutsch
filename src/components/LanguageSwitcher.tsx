@@ -7,7 +7,10 @@ const options: { value: Lang; label: string }[] = [
 ];
 
 const LanguageSwitcher = () => {
-  const { lang, setLang } = useLanguage();
+  const { lang, setLang, languageLocked } = useLanguage();
+
+  // If language is locked, don't show switcher
+  if (languageLocked) return null;
 
   return (
     <div className="flex gap-1 bg-secondary rounded-lg p-0.5">
