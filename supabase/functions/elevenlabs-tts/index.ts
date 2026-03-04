@@ -21,15 +21,14 @@ serve(async (req) => {
     const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, {
       global: { headers: { Authorization: authHeader } },
     });
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const { text, voiceId } = await req.json();
+    const { text, voiceId, speed } = await req.json();
     const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
 
     if (!ELEVENLABS_API_KEY) {
@@ -39,8 +38,8 @@ serve(async (req) => {
       });
     }
 
-    // Default voice for German pronunciation
-    const selectedVoice = voiceId || "PhufIH7nYh2Up1uej6aY";
+    // Default voice for German
+    const selectedVoice = voiceId || "aTTiK3YzK3dXETpuDE2h";
 
     const response = await fetch(
       `https://api.elevenlabs.io/v1/text-to-speech/${selectedVoice}?output_format=mp3_44100_128`,
@@ -57,7 +56,7 @@ serve(async (req) => {
             stability: 0.6,
             similarity_boost: 0.75,
             style: 0.3,
-            speed: 1.1,
+            speed: speed ?? 0.85,
           },
         }),
       }

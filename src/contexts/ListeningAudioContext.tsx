@@ -85,6 +85,8 @@ export const ListeningAudioProvider = ({ children }: { children: ReactNode }) =>
       const bodyPayload: Record<string, any> = { text, speed: 0.85 };
       if (isDialogue && voiceConfig && Object.keys(voiceConfig).length > 0) {
         bodyPayload.voice_config = voiceConfig;
+      } else if (!isDialogue && voiceConfig?.narrator) {
+        bodyPayload.voiceId = voiceConfig.narrator;
       }
 
       const response = await fetch(
