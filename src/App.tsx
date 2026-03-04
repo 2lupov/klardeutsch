@@ -6,9 +6,11 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { LofiProvider } from "@/contexts/LofiContext";
+import { ListeningAudioProvider } from "@/contexts/ListeningAudioContext";
 import { usePlatform } from "@/hooks/usePlatform";
 import AppLayout from "@/components/AppLayout";
 import OfflineBanner from "@/components/OfflineBanner";
+import ListeningFloatingPlayer from "@/components/ListeningFloatingPlayer";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
@@ -63,6 +65,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <LanguageProvider>
       <LofiProvider>
+      <ListeningAudioProvider>
       <AuthProvider>
         <TooltipProvider>
           <Toaster />
@@ -70,9 +73,11 @@ const App = () => (
           <OfflineBanner />
           <BrowserRouter>
             <AppRoutes />
+            <ListeningFloatingPlayer />
           </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>
+      </ListeningAudioProvider>
       </LofiProvider>
     </LanguageProvider>
   </QueryClientProvider>

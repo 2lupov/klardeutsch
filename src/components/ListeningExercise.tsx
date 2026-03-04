@@ -1,6 +1,6 @@
-import { useState, useCallback, useRef } from "react";
+import { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { supabase } from "@/integrations/supabase/client";
+import { useListeningAudio } from "@/contexts/ListeningAudioContext";
 import { Volume2, Play, Pause, Check, X, Headphones, PenLine } from "lucide-react";
 
 interface ListeningQuestion {
@@ -33,11 +33,9 @@ type Mode = "choose" | "quiz" | "dictation";
 
 const ListeningExercise = ({ listenings, onComplete }: ListeningExerciseProps) => {
   const { t } = useLanguage();
+  const { playing, loading, play: playAudio, stop: stopAudio } = useListeningAudio();
   const [currentIdx, setCurrentIdx] = useState(0);
   const [mode, setMode] = useState<Mode>("choose");
-  const [playing, setPlaying] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Quiz state
   const [qIdx, setQIdx] = useState(0);
@@ -52,64 +50,8 @@ const ListeningExercise = ({ listenings, onComplete }: ListeningExerciseProps) =
 
   const current = listenings[currentIdx];
 
-  const playAudio = useCallback(async (text: string) => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
-    }
-    setLoading(true);
-    try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData.session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-      
-      // Detect if text is a dialogue (has A: / B: pattern)
-      const isDialogue = /^[A-Z]:\s/m.test(text);
-      const functionName = isDialogue ? "dialogue-tts" : "elevenlabs-tts";
-      
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${functionName}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ text, speed: 0.85 }),
-        }
-      );
-      if (!response.ok) throw new Error("TTS failed");
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const audio = new Audio(url);
-      audioRef.current = audio;
-      audio.onplay = () => setPlaying(true);
-      audio.onended = () => setPlaying(false);
-      audio.onpause = () => setPlaying(false);
-      await audio.play();
-    } catch (e) {
-      console.error("TTS error:", e);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const toggleAudio = useCallback((text: string) => {
-    if (audioRef.current && playing) {
-      audioRef.current.pause();
-      return;
-    }
-    if (audioRef.current && !playing) {
-      audioRef.current.play();
-      return;
-    }
-    playAudio(text);
-  }, [playing, playAudio]);
-
-  const stopAudio = () => {
-    audioRef.current?.pause();
-    audioRef.current = null;
-    setPlaying(false);
+  const toggleAudio = (text: string) => {
+    playAudio(text, current.title);
   };
 
   // Quiz handlers
