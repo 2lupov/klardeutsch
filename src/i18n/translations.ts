@@ -282,6 +282,18 @@ const translations = {
   referralsTitle: { ru: "Рефералы", uk: "Реферали" },
   referralCode: { ru: "Реферальный код", uk: "Реферальний код" },
   referralCodePlaceholder: { ru: "Код друга (необязательно)", uk: "Код друга (необов'язково)" },
+
+  // Mini-games
+  gamesTitle: { ru: "Мини-игры", uk: "Міні-ігри" },
+  gamesSubtitle: { ru: "Учи немецкий играючи", uk: "Вчи німецьку граючись" },
+  gameArticleSorterTitle: { ru: "Der/Die/Das: Сортировка мусора", uk: "Der/Die/Das: Сортування сміття" },
+  gameArticleSorterDesc: { ru: "Сортируй слова по артиклям — как мусор в Германии!", uk: "Сортуй слова за артиклями — як сміття в Німеччині!" },
+  gameCafeTitle: { ru: "Café Bestellung: Не будь туристом", uk: "Café Bestellung: Не будь туристом" },
+  gameCafeDesc: { ru: "Закажи кофе как настоящий берлинец — успей ответить бармену!", uk: "Замов каву як справжній берлінець — встигни відповісти бармену!" },
+  gameDuelsTitle: { ru: "Дуэли: Вызови друга", uk: "Дуелі: Виклич друга" },
+  gameDuelsDesc: { ru: "Соревнуйся с друзьями — кто лучше знает немецкий!", uk: "Змагайся з друзями — хто краще знає німецьку!" },
+  gamePronunciationTitle: { ru: "Произношение: Sprich nach!", uk: "Вимова: Sprich nach!" },
+  gamePronunciationDesc: { ru: "Слушай, повторяй и сравнивай своё произношение с эталоном", uk: "Слухай, повторюй і порівнюй свою вимову з еталоном" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;

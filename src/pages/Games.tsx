@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Recycle, Coffee, Swords, Mic, ArrowLeft } from "lucide-react";
 import { usePlatform } from "@/hooks/usePlatform";
+import { useLanguage } from "@/contexts/LanguageContext";
 import ArticleSorter from "@/components/games/ArticleSorter";
 import CafeBestellung from "@/components/games/CafeBestellung";
 import PronunciationTrainer from "@/components/games/PronunciationTrainer";
@@ -12,6 +13,7 @@ type GameScreen = "list" | "article-sorter" | "cafe" | "challenges" | "pronuncia
 const Games = () => {
   const [screen, setScreen] = useState<GameScreen>("list");
   const { isMobile } = usePlatform();
+  const { t } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -46,12 +48,12 @@ const Games = () => {
         className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
       >
         <ArrowLeft className="w-4 h-4" />
-        Назад
+        {t("back")}
       </button>
       <h1 className="font-display text-xl font-bold text-foreground mb-1 flex items-center gap-2">
-        🎮 Мини-игры
+        🎮 {t("gamesTitle")}
       </h1>
-      <p className="text-sm text-muted-foreground mb-6">Учи немецкий играючи</p>
+      <p className="text-sm text-muted-foreground mb-6">{t("gamesSubtitle")}</p>
 
       <div className="space-y-3">
         <button
@@ -63,10 +65,10 @@ const Games = () => {
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-display text-sm font-bold text-foreground group-hover:text-primary transition-colors">
-              Der/Die/Das: Сортировка мусора
+              {t("gameArticleSorterTitle")}
             </h3>
             <p className="text-[11px] text-muted-foreground mt-0.5">
-              Сортируй слова по артиклям — как мусор в Германии!
+              {t("gameArticleSorterDesc")}
             </p>
           </div>
           <Recycle className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
@@ -81,10 +83,10 @@ const Games = () => {
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-display text-sm font-bold text-foreground group-hover:text-primary transition-colors">
-              Café Bestellung: Не будь туристом
+              {t("gameCafeTitle")}
             </h3>
             <p className="text-[11px] text-muted-foreground mt-0.5">
-              Закажи кофе как настоящий берлинец — успей ответить бармену!
+              {t("gameCafeDesc")}
             </p>
           </div>
           <Coffee className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
@@ -99,10 +101,10 @@ const Games = () => {
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-display text-sm font-bold text-foreground group-hover:text-primary transition-colors">
-              Дуэли: Вызови друга
+              {t("gameDuelsTitle")}
             </h3>
             <p className="text-[11px] text-muted-foreground mt-0.5">
-              Соревнуйся с друзьями — кто лучше знает немецкий!
+              {t("gameDuelsDesc")}
             </p>
           </div>
           <Swords className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
@@ -117,10 +119,10 @@ const Games = () => {
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-display text-sm font-bold text-foreground group-hover:text-primary transition-colors">
-              Произношение: Sprich nach!
+              {t("gamePronunciationTitle")}
             </h3>
             <p className="text-[11px] text-muted-foreground mt-0.5">
-              Слушай, повторяй и сравнивай своё произношение с эталоном
+              {t("gamePronunciationDesc")}
             </p>
           </div>
           <Mic className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
