@@ -32,6 +32,7 @@ const Auth = () => {
   const [otpMode, setOtpMode] = useState(false);
   const [otpCode, setOtpCode] = useState("");
   const [signupUserId, setSignupUserId] = useState<string | null>(null);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const navigate = useNavigate();
   const logoRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
@@ -59,6 +60,25 @@ const Auth = () => {
   useEffect(() => {
     if (user && !showFireworks) navigate("/");
   }, [user, navigate, showFireworks]);
+
+  // Resend cooldown timer
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setTimeout(() => setResendCooldown(c => c - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [resendCooldown]);
+
+  const handleResendCode = async () => {
+    setError("");
+    setLoading(true);
+    const { error } = await supabase.auth.resend({ type: "signup", email });
+    if (error) setError(error.message);
+    else {
+      setMessage(t("codeSentAgain") || "Код отправлен повторно");
+      setResendCooldown(60);
+    }
+    setLoading(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -197,6 +217,7 @@ const Auth = () => {
               </InputOTP>
 
               {error && <p className="text-sm text-destructive">{error}</p>}
+              {message && <p className="text-sm text-success">{message}</p>}
 
               <button
                 type="button"
@@ -204,15 +225,26 @@ const Auth = () => {
                 disabled={loading || otpCode.length < 6}
                 className="w-full px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold glow-yellow transition-all hover:opacity-90 disabled:opacity-50"
               >
-                {loading ? "..." : t("confirm") || "Подтвердить"}
+                {loading ? "..." : t("confirm")}
               </button>
 
               <button
                 type="button"
-                onClick={() => { setOtpMode(false); setOtpCode(""); setError(""); }}
+                onClick={handleResendCode}
+                disabled={loading || resendCooldown > 0}
+                className="text-sm text-muted-foreground hover:text-primary transition-colors disabled:opacity-50"
+              >
+                {resendCooldown > 0
+                  ? `${t("resendCode")} (${resendCooldown}с)`
+                  : t("resendCode")}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => { setOtpMode(false); setOtpCode(""); setError(""); setMessage(""); }}
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
-                ← {t("back") || "Назад"}
+                ← {t("back")}
               </button>
             </div>
           </div>
