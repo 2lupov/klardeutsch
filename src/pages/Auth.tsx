@@ -75,7 +75,7 @@ const Auth = () => {
     if (error) setError(error.message);
     else {
       setMessage(t("codeSentAgain") || "Код отправлен повторно");
-      setResendCooldown(60);
+      setResendCooldown(5);
     }
     setLoading(false);
   };
