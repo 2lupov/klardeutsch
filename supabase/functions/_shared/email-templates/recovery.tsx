@@ -12,6 +12,7 @@ import {
   Img,
   Link,
   Preview,
+  Section,
   Text,
 } from 'npm:@react-email/components@0.0.22'
 
@@ -28,24 +29,23 @@ export const RecoveryEmail = ({
     <Head />
     <Preview>Сброс пароля для KLAR</Preview>
     <Body style={main}>
-      <Container style={container}>
-        <Img src="https://jqqsszwbbxvevebmebfm.supabase.co/storage/v1/object/public/email-assets/logo.png" alt="KLAR" width="64" height="64" style={logo} />
-        <Text style={brand}>KLAR</Text>
-        <Heading style={h1}>Сброс пароля</Heading>
-        <Text style={text}>
-          Мы получили запрос на сброс пароля для твоего аккаунта KLAR.
-          Нажми кнопку ниже, чтобы выбрать новый пароль.
-        </Text>
-        <Button style={button} href={confirmationUrl} target="_blank">
-          Сбросить пароль
-        </Button>
-        <Text style={fallbackText}>
-          Если кнопка не работает, скопируй ссылку:{' '}
-          <Link href={confirmationUrl} style={link}>{confirmationUrl}</Link>
-        </Text>
-        <Text style={footer}>
-          Если ты не запрашивал сброс — просто проигнорируй это письмо. Твой пароль останется прежним.
-        </Text>
+      <Container style={wrapper}>
+        <Section style={card}>
+          <Img src="https://jqqsszwbbxvevebmebfm.supabase.co/storage/v1/object/public/email-assets/logo.png" alt="KLAR" width="56" height="56" style={logo} />
+          <Text style={brand}>KLAR</Text>
+          <Heading style={h1}>Сброс пароля</Heading>
+          <Text style={text}>
+            Мы получили запрос на сброс пароля для твоего аккаунта KLAR.
+            Нажми кнопку ниже, чтобы выбрать новый пароль.
+          </Text>
+          <Button style={button} href={confirmationUrl} target="_blank">
+            Сбросить пароль
+          </Button>
+          <Text style={fallbackText}>
+            Если кнопка не работает, скопируй ссылку:{' '}
+            <Link href={confirmationUrl} style={link}>{confirmationUrl}</Link>
+          </Text>
+        </Section>
       </Container>
     </Body>
   </Html>
@@ -54,10 +54,15 @@ export const RecoveryEmail = ({
 export default RecoveryEmail
 
 const main = { backgroundColor: '#ffffff', fontFamily: "'Space Grotesk', Arial, sans-serif" }
-const container = { padding: '32px 28px' }
-const logo = { margin: '0 0 16px', borderRadius: '12px' }
+const wrapper = { padding: '24px 16px' }
+const card = {
+  backgroundColor: '#0f1729',
+  borderRadius: '16px',
+  padding: '36px 28px',
+}
+const logo = { margin: '0 0 12px', borderRadius: '12px' }
 const brand = {
-  fontSize: '28px',
+  fontSize: '24px',
   fontWeight: 'bold' as const,
   color: '#e6a817',
   margin: '0 0 24px',
@@ -65,19 +70,19 @@ const brand = {
 const h1 = {
   fontSize: '22px',
   fontWeight: 'bold' as const,
-  color: '#111827',
+  color: '#f1f5f9',
   margin: '0 0 16px',
 }
 const text = {
   fontSize: '15px',
-  color: '#6b7280',
+  color: '#94a3b8',
   lineHeight: '1.6',
   margin: '0 0 24px',
 }
 const link = { color: '#e6a817', textDecoration: 'underline' }
 const button = {
   backgroundColor: '#e6a817',
-  color: '#111827',
+  color: '#0f1729',
   fontSize: '15px',
   fontWeight: 'bold' as const,
   borderRadius: '12px',
@@ -86,5 +91,4 @@ const button = {
   display: 'inline-block' as const,
   textAlign: 'center' as const,
 }
-const fallbackText = { fontSize: '12px', color: '#9ca3af', margin: '16px 0 0', wordBreak: 'break-all' as const }
-const footer = { fontSize: '12px', color: '#9ca3af', margin: '32px 0 0' }
+const fallbackText = { fontSize: '12px', color: '#64748b', margin: '16px 0 0', wordBreak: 'break-all' as const }

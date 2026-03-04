@@ -11,6 +11,7 @@ import {
   Img,
   Link,
   Preview,
+  Section,
   Text,
 } from 'npm:@react-email/components@0.0.22'
 
@@ -33,32 +34,27 @@ export const SignupEmail = ({
     <Head />
     <Preview>Код подтверждения для KLAR</Preview>
     <Body style={main}>
-      <Container style={container}>
-        <Img src="https://jqqsszwbbxvevebmebfm.supabase.co/storage/v1/object/public/email-assets/logo.png" alt="KLAR" width="64" height="64" style={logo} />
-        <Text style={brand}>KLAR</Text>
-        <Heading style={h1}>Добро пожаловать! 🎉</Heading>
-        <Text style={text}>
-          Спасибо за регистрацию в{' '}
-          <Link href={siteUrl} style={link}>
-            <strong>KLAR</strong>
-          </Link>
-          ! Введи этот код для подтверждения email (
-          <Link href={`mailto:${recipient}`} style={link}>
-            {recipient}
-          </Link>
-          ):
-        </Text>
-        {token ? (
-          <Text style={codeBox}>{token}</Text>
-        ) : (
-          <Text style={codeBox}>------</Text>
-        )}
-        <Text style={hintText}>
-          Скопируй код и вставь его на странице подтверждения.
-        </Text>
-        <Text style={footer}>
-          Если ты не регистрировался — просто проигнорируй это письмо.
-        </Text>
+      <Container style={wrapper}>
+        <Section style={card}>
+          <Img src="https://jqqsszwbbxvevebmebfm.supabase.co/storage/v1/object/public/email-assets/logo.png" alt="KLAR" width="56" height="56" style={logo} />
+          <Text style={brand}>KLAR</Text>
+          <Heading style={h1}>Добро пожаловать! 🎉</Heading>
+          <Text style={text}>
+            Спасибо за регистрацию в{' '}
+            <Link href={siteUrl} style={link}>
+              <strong>KLAR</strong>
+            </Link>
+            ! Введи этот код для подтверждения email:
+          </Text>
+          {token ? (
+            <Text style={codeBox}>{token}</Text>
+          ) : (
+            <Text style={codeBox}>------</Text>
+          )}
+          <Text style={hintText}>
+            Скопируй код и вставь его на странице подтверждения.
+          </Text>
+        </Section>
       </Container>
     </Body>
   </Html>
@@ -67,10 +63,15 @@ export const SignupEmail = ({
 export default SignupEmail
 
 const main = { backgroundColor: '#ffffff', fontFamily: "'Space Grotesk', Arial, sans-serif" }
-const container = { padding: '32px 28px' }
-const logo = { margin: '0 0 16px', borderRadius: '12px' }
+const wrapper = { padding: '24px 16px' }
+const card = {
+  backgroundColor: '#0f1729',
+  borderRadius: '16px',
+  padding: '36px 28px',
+}
+const logo = { margin: '0 0 12px', borderRadius: '12px' }
 const brand = {
-  fontSize: '28px',
+  fontSize: '24px',
   fontWeight: 'bold' as const,
   color: '#e6a817',
   margin: '0 0 24px',
@@ -78,12 +79,12 @@ const brand = {
 const h1 = {
   fontSize: '22px',
   fontWeight: 'bold' as const,
-  color: '#111827',
+  color: '#f1f5f9',
   margin: '0 0 16px',
 }
 const text = {
   fontSize: '15px',
-  color: '#6b7280',
+  color: '#94a3b8',
   lineHeight: '1.6',
   margin: '0 0 24px',
 }
@@ -91,8 +92,8 @@ const link = { color: '#e6a817', textDecoration: 'underline' }
 const codeBox = {
   fontSize: '32px',
   fontWeight: 'bold' as const,
-  color: '#111827',
-  backgroundColor: '#fef9e7',
+  color: '#f1f5f9',
+  backgroundColor: '#1a2744',
   border: '2px solid #e6a817',
   borderRadius: '12px',
   padding: '16px 24px',
@@ -100,5 +101,4 @@ const codeBox = {
   letterSpacing: '8px',
   margin: '0 0 16px',
 }
-const hintText = { fontSize: '13px', color: '#9ca3af', margin: '0 0 24px', textAlign: 'center' as const }
-const footer = { fontSize: '12px', color: '#9ca3af', margin: '32px 0 0' }
+const hintText = { fontSize: '13px', color: '#64748b', margin: '0', textAlign: 'center' as const }
