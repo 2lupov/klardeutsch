@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { usePlatform } from "@/hooks/usePlatform";
+import { loginWithTelegramWidget } from "@/hooks/useTelegramAuth";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import DemoExperience from "@/components/DemoExperience";
 import AuthKlarLogo from "@/components/auth/AuthKlarLogo";
@@ -10,6 +12,26 @@ import Fireworks from "@/components/auth/Fireworks";
 import { Sparkles } from "lucide-react";
 import SimpleCaptcha from "@/components/auth/SimpleCaptcha";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+
+/** Injects the official Telegram Login Widget script */
+const TelegramLoginButton = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!containerRef.current || containerRef.current.hasChildNodes()) return;
+    const script = document.createElement("script");
+    script.src = "https://telegram.org/js/telegram-widget.js?22";
+    script.setAttribute("data-telegram-login", "klar_deutsch_bot");
+    script.setAttribute("data-size", "large");
+    script.setAttribute("data-radius", "12");
+    script.setAttribute("data-onauth", "onTelegramAuth(user)");
+    script.setAttribute("data-request-access", "write");
+    script.async = true;
+    containerRef.current.appendChild(script);
+  }, []);
+
+  return <div ref={containerRef} className="flex justify-center" />;
+};
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -33,10 +55,12 @@ const Auth = () => {
   const [otpCode, setOtpCode] = useState("");
   const [signupUserId, setSignupUserId] = useState<string | null>(null);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [tgWidgetLoading, setTgWidgetLoading] = useState(false);
   const navigate = useNavigate();
   const logoRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const { t } = useLanguage();
+  const { isTelegram } = usePlatform();
 
   // Calculate logo fill progress based on form completion
   const getProgress = () => {
@@ -57,9 +81,39 @@ const Auth = () => {
     return Math.min(emailPart + nickPart + passPart + refPart, 1);
   };
 
+  // If in TMA and loading is happening, show loading state (handled by AuthContext)
+  // If user is already logged in via TMA auto-login, redirect
   useEffect(() => {
     if (user && !showFireworks) navigate("/");
   }, [user, navigate, showFireworks]);
+
+  // Telegram Login Widget callback
+  useEffect(() => {
+    (window as any).onTelegramAuth = async (tgUser: any) => {
+      setTgWidgetLoading(true);
+      setError("");
+      try {
+        await loginWithTelegramWidget({
+          id: String(tgUser.id),
+          first_name: tgUser.first_name || "",
+          last_name: tgUser.last_name || "",
+          username: tgUser.username || "",
+          photo_url: tgUser.photo_url || "",
+          auth_date: String(tgUser.auth_date),
+          hash: tgUser.hash,
+        });
+        setShowFireworks(true);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setTgWidgetLoading(false);
+      }
+    };
+
+    return () => {
+      delete (window as any).onTelegramAuth;
+    };
+  }, []);
 
   // Resend cooldown timer
   useEffect(() => {
@@ -361,6 +415,25 @@ const Auth = () => {
             {forgotMode ? t("hasAccount") : isLogin ? t("noAccount") : t("hasAccount")}
           </button>
         </form>
+
+        {/* Telegram Login — only on web, not in TMA */}
+        {!isTelegram && (
+          <div className="mt-3 animate-auth-fade-up" style={{ animationDelay: "0.7s" }}>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="flex-1 h-px bg-border" />
+              <span className="text-xs text-muted-foreground">{t("orDivider")}</span>
+              <div className="flex-1 h-px bg-border" />
+            </div>
+            {tgWidgetLoading ? (
+              <p className="text-sm text-center text-muted-foreground animate-pulse">
+                {t("telegramAuthLoading")}
+              </p>
+            ) : (
+              <TelegramLoginButton />
+            )}
+            {error && tgWidgetLoading && <p className="text-sm text-destructive text-center mt-1">{error}</p>}
+          </div>
+        )}
 
         <button
           onClick={() => setDemoMode(true)}
