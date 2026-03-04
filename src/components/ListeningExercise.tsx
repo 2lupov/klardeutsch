@@ -50,7 +50,6 @@ const ListeningExercise = ({ listenings, onComplete }: ListeningExerciseProps) =
   const [_dictCorrectCount, setDictCorrectCount] = useState(0);
 
   const current = listenings[currentIdx];
-  if (!current) return null;
 
   const playAudio = useCallback(async (text: string) => {
     if (audioRef.current) {
@@ -86,6 +85,18 @@ const ListeningExercise = ({ listenings, onComplete }: ListeningExerciseProps) =
       setLoading(false);
     }
   }, []);
+
+  const toggleAudio = useCallback((text: string) => {
+    if (audioRef.current && playing) {
+      audioRef.current.pause();
+      return;
+    }
+    if (audioRef.current && !playing) {
+      audioRef.current.play();
+      return;
+    }
+    playAudio(text);
+  }, [playing, playAudio]);
 
   const stopAudio = () => {
     audioRef.current?.pause();
@@ -156,6 +167,8 @@ const ListeningExercise = ({ listenings, onComplete }: ListeningExerciseProps) =
     setDictCorrectCount(0);
   };
 
+  if (!current) return null;
+
   // Mode selector
   if (mode === "choose") {
     return (
@@ -170,7 +183,7 @@ const ListeningExercise = ({ listenings, onComplete }: ListeningExerciseProps) =
 
         {/* Play full text */}
         <button
-          onClick={() => playAudio(current.text)}
+          onClick={() => toggleAudio(current.text)}
           disabled={loading}
           className="glass-card p-4 flex items-center gap-3 transition-all hover:border-primary/50 hover:bg-primary/5"
         >
@@ -227,7 +240,7 @@ const ListeningExercise = ({ listenings, onComplete }: ListeningExerciseProps) =
 
         {/* Play button */}
         <button
-          onClick={() => playAudio(current.text)}
+          onClick={() => toggleAudio(current.text)}
           disabled={loading}
           className="glass-card p-3 flex items-center gap-3 transition-all hover:border-primary/50"
         >
@@ -289,7 +302,7 @@ const ListeningExercise = ({ listenings, onComplete }: ListeningExerciseProps) =
 
         {/* Play sentence */}
         <button
-          onClick={() => playAudio(d.sentence)}
+          onClick={() => toggleAudio(d.sentence)}
           disabled={loading}
           className="glass-card p-4 flex items-center justify-center gap-3 transition-all hover:border-primary/50"
         >
