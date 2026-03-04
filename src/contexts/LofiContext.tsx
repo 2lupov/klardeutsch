@@ -9,24 +9,36 @@ const LofiContext = createContext<LofiContextType>({ playing: false, toggle: () 
 
 export const useLofi = () => useContext(LofiContext);
 
-const LOFI_STREAM_URL = "http://ec3.yesstreaming.net:3755/stream";
+// High-quality HTTPS lofi streams (fallback chain)
+const LOFI_STREAMS = [
+  "https://streams.fluxfm.de/Chillhop/mp3-320/audio/",
+  "https://stream.laut.fm/lofi",
+  "https://stream.laut.fm/chillout-lounge",
+];
 
 export const LofiProvider = ({ children }: { children: ReactNode }) => {
   const [playing, setPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const streamIdxRef = useRef(0);
 
   useEffect(() => {
     const audio = new Audio();
     audio.volume = 0.3;
-    audio.src = LOFI_STREAM_URL;
     audio.preload = "none";
     audioRef.current = audio;
     audio.onplay = () => setPlaying(true);
     audio.onpause = () => setPlaying(false);
+    audio.onerror = () => {
+      // Try next stream on error
+      streamIdxRef.current = (streamIdxRef.current + 1) % LOFI_STREAMS.length;
+      audio.src = LOFI_STREAMS[streamIdxRef.current];
+      if (playing) audio.play().catch(console.error);
+    };
     return () => {
       audio.pause();
       audio.onplay = null;
       audio.onpause = null;
+      audio.onerror = null;
       audioRef.current = null;
     };
   }, []);
@@ -34,8 +46,12 @@ export const LofiProvider = ({ children }: { children: ReactNode }) => {
   const toggle = () => {
     const audio = audioRef.current;
     if (!audio) return;
-    if (playing) audio.pause();
-    else audio.play().catch(console.error);
+    if (playing) {
+      audio.pause();
+    } else {
+      audio.src = LOFI_STREAMS[streamIdxRef.current];
+      audio.play().catch(console.error);
+    }
   };
 
   return (
