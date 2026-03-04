@@ -282,35 +282,40 @@ const VocabEditor = ({ level }: { level: Level }) => {
 // ——— Grammar Editor ———
 const GrammarEditor = ({ level }: { level: Level }) => {
   const { t } = useLanguage();
-  const [theory, setTheory] = useState("");
-  const [originalTheory, setOriginalTheory] = useState("");
-  const [lessonId, setLessonId] = useState<string | null>(null);
+  const [lessons, setLessons] = useState<any[]>([]);
   const [questions, setQuestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [pendingLessonUpdates, setPendingLessonUpdates] = useState<Map<string, Record<string, any>>>(new Map());
   const [pendingQUpdates, setPendingQUpdates] = useState<Map<string, Record<string, any>>>(new Map());
+  const [topicsList, setTopicsList] = useState<string[]>([]);
+  const [filterTopic, setFilterTopic] = useState<string>("__all__");
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [lessonRes, qRes] = await Promise.all([
-      supabase.from("grammar_lessons").select("*").eq("level", level).single(),
+    const [lessonsRes, qRes, topicsRes] = await Promise.all([
+      supabase.from("grammar_lessons").select("*").eq("level", level).order("topic"),
       supabase.from("grammar_questions").select("*").eq("level", level).order("sort_order"),
+      supabase.from("topics").select("name").eq("level", level).order("sort_order"),
     ]);
-    const t = lessonRes.data?.theory ?? "";
-    setTheory(t);
-    setOriginalTheory(t);
-    setLessonId(lessonRes.data?.id ?? null);
+    setLessons(lessonsRes.data ?? []);
     setQuestions(qRes.data ?? []);
+    setTopicsList((topicsRes.data ?? []).map((t: any) => t.name));
     setLoading(false);
     setDirty(false);
+    setPendingLessonUpdates(new Map());
     setPendingQUpdates(new Map());
   }, [level]);
 
   useEffect(() => { load(); }, [load]);
 
-  const handleTheoryChange = (val: string) => {
-    setTheory(val);
+  const trackLessonChange = (id: string, updates: Record<string, any>) => {
+    setPendingLessonUpdates((prev) => {
+      const next = new Map(prev);
+      next.set(id, { ...(next.get(id) ?? {}), ...updates });
+      return next;
+    });
     setDirty(true);
   };
 
@@ -327,31 +332,38 @@ const GrammarEditor = ({ level }: { level: Level }) => {
     setSaving(true);
     const promises: PromiseLike<any>[] = [];
 
-    // Save theory
-    if (theory !== originalTheory) {
-      if (lessonId) {
-        promises.push(supabase.from("grammar_lessons").update({ theory }).eq("id", lessonId).then());
-      } else {
-        promises.push(supabase.from("grammar_lessons").insert([{ level, theory }]).then());
-      }
+    for (const [id, updates] of pendingLessonUpdates.entries()) {
+      promises.push(supabase.from("grammar_lessons").update(updates).eq("id", id).then());
     }
-
-    // Save question updates
     for (const [id, updates] of pendingQUpdates.entries()) {
       promises.push(supabase.from("grammar_questions").update(updates).eq("id", id).then());
     }
 
     await Promise.all(promises);
     setDirty(false);
+    setPendingLessonUpdates(new Map());
     setPendingQUpdates(new Map());
     setSaving(false);
     toast.success(t("saved") || "Сохранено!");
     load();
   };
 
+  const addLesson = async () => {
+    const topic = filterTopic !== "__all__" ? filterTopic : "Allgemein";
+    await supabase.from("grammar_lessons").insert([{ level, theory: "", topic }]);
+    load();
+  };
+
+  const deleteLesson = async (id: string) => {
+    if (!confirm("Удалить теорию грамматики?")) return;
+    await supabase.from("grammar_lessons").delete().eq("id", id);
+    load();
+  };
+
   const addQuestion = async () => {
+    const topic = filterTopic !== "__all__" ? filterTopic : "Allgemein";
     await supabase.from("grammar_questions").insert([{
-      level, question: t("newQuestion"), options: ["A", "B", "C", "D"], correct_index: 0, sort_order: questions.length + 1,
+      level, question: t("newQuestion"), options: ["A", "B", "C", "D"], correct_index: 0, sort_order: questions.length + 1, topic,
     }]);
     load();
   };
@@ -363,18 +375,57 @@ const GrammarEditor = ({ level }: { level: Level }) => {
 
   if (loading) return <p className="text-muted-foreground">{t("loading")}</p>;
 
+  const filteredLessons = filterTopic === "__all__" ? lessons : lessons.filter(l => (l.topic || "Allgemein") === filterTopic);
+  const filteredQuestions = filterTopic === "__all__" ? questions : questions.filter(q => (q.topic || "Allgemein") === filterTopic);
+
   return (
     <div className="flex flex-col gap-4">
-      <div className="glass-card p-4">
-        <label className="text-sm text-muted-foreground mb-2 block">{t("theoryMarkdown")}</label>
-        <textarea value={theory} onChange={(e) => handleTheoryChange(e.target.value)} rows={8} className="w-full px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none resize-y" />
+      {/* Topic filter */}
+      <div className="flex gap-1.5 flex-wrap">
+        <button onClick={() => setFilterTopic("__all__")} className={`px-2.5 py-1 rounded-lg text-[10px] font-medium transition-colors ${filterTopic === "__all__" ? "bg-primary/15 text-primary border border-primary/30" : "bg-secondary text-muted-foreground"}`}>
+          Все ({lessons.length}T / {questions.length}Q)
+        </button>
+        {topicsList.map(tp => {
+          const lCount = lessons.filter(l => (l.topic || "Allgemein") === tp).length;
+          const qCount = questions.filter(q => (q.topic || "Allgemein") === tp).length;
+          return (
+            <button key={tp} onClick={() => setFilterTopic(tp)} className={`px-2.5 py-1 rounded-lg text-[10px] font-medium transition-colors ${filterTopic === tp ? "bg-primary/15 text-primary border border-primary/30" : "bg-secondary text-muted-foreground"}`}>
+              {tp} ({lCount}T/{qCount}Q)
+            </button>
+          );
+        })}
       </div>
 
-      <h3 className="text-sm font-display font-semibold text-muted-foreground">{t("questions")}</h3>
-      {questions.map((q) => (
+      {/* Grammar lessons (theory per topic) */}
+      <h3 className="text-sm font-display font-semibold text-muted-foreground">📖 Теория</h3>
+      {filteredLessons.map((lesson) => (
+        <div key={lesson.id} className="glass-card p-4 space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <select defaultValue={lesson.topic ?? "Allgemein"} onChange={(e) => trackLessonChange(lesson.id, { topic: e.target.value })} className="px-2 py-1 rounded-lg bg-secondary text-foreground border border-border text-xs focus:border-primary focus:outline-none">
+                {topicsList.map(tp => <option key={tp} value={tp}>{tp}</option>)}
+              </select>
+              <span className="text-[10px] text-muted-foreground">Теория</span>
+            </div>
+            <button onClick={() => deleteLesson(lesson.id)} className="p-1.5 text-destructive hover:bg-destructive/10 rounded-lg">
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
+          <textarea defaultValue={lesson.theory} onChange={(e) => trackLessonChange(lesson.id, { theory: e.target.value })} rows={6} className="w-full px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none resize-y" />
+        </div>
+      ))}
+      <button onClick={addLesson} className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all text-sm">
+        <Plus className="w-4 h-4" /> Добавить теорию {filterTopic !== "__all__" ? `(${filterTopic})` : ""}
+      </button>
+
+      <h3 className="text-sm font-display font-semibold text-muted-foreground">❓ {t("questions")}</h3>
+      {filteredQuestions.map((q) => (
         <div key={q.id} className="glass-card p-4 flex flex-col gap-2">
           <div className="flex gap-2 items-start">
             <input defaultValue={q.question} onChange={(e) => trackQChange(q.id, { question: e.target.value })} placeholder={t("questionLabel")} className="flex-1 px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none" />
+            <select defaultValue={q.topic ?? "Allgemein"} onChange={(e) => trackQChange(q.id, { topic: e.target.value })} className="w-28 px-2 py-2 rounded-lg bg-secondary text-foreground border border-border text-xs focus:border-primary focus:outline-none">
+              {topicsList.map(tp => <option key={tp} value={tp}>{tp}</option>)}
+            </select>
             <button onClick={() => deleteQuestion(q.id)} className="p-2 text-destructive hover:bg-destructive/10 rounded-lg">
               <Trash2 className="w-4 h-4" />
             </button>
@@ -389,7 +440,7 @@ const GrammarEditor = ({ level }: { level: Level }) => {
         </div>
       ))}
       <button onClick={addQuestion} className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all">
-        <Plus className="w-4 h-4" /> {t("addQuestion")}
+        <Plus className="w-4 h-4" /> {t("addQuestion")} {filterTopic !== "__all__" ? `(${filterTopic})` : ""}
       </button>
       <SaveButton dirty={dirty} saving={saving} onSave={saveAll} />
     </div>
