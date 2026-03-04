@@ -2,12 +2,20 @@ import { useState } from "react";
 import { CheckCircle, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const ClozeExercise = ({ ex, lang }: { ex: any; lang: string }) => {
+const ClozeExercise = ({ ex, lang, onComplete }: { ex: any; lang: string; onComplete?: () => void }) => {
   const [answer, setAnswer] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const isCorrect = answer.trim().toLowerCase() === ex.answer.toLowerCase();
   const hint = lang === "uk" ? ex.hint?.ua : ex.hint?.ru;
   const explanation = lang === "uk" ? ex.explanation?.ua : ex.explanation?.ru;
+
+  const handleSubmit = () => {
+    if (!answer.trim() || submitted) return;
+    setSubmitted(true);
+    if (answer.trim().toLowerCase() === ex.answer.toLowerCase()) {
+      onComplete?.();
+    }
+  };
 
   return (
     <div className={cn(
@@ -25,13 +33,13 @@ const ClozeExercise = ({ ex, lang }: { ex: any; lang: string }) => {
       <div className="flex gap-2">
         <input
           value={answer}
-          onChange={(e) => { setAnswer(e.target.value); setSubmitted(false); }}
+          onChange={(e) => { setAnswer(e.target.value); if (submitted) setSubmitted(false); }}
           placeholder="..."
           className="flex-1 px-3 py-2 rounded-xl bg-card text-foreground border border-border text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all"
-          onKeyDown={(e) => e.key === "Enter" && answer.trim() && setSubmitted(true)}
+          onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
         />
         <button
-          onClick={() => answer.trim() && setSubmitted(true)}
+          onClick={handleSubmit}
           className={cn(
             "px-4 py-2 rounded-xl text-xs font-bold transition-all",
             submitted

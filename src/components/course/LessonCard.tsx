@@ -20,6 +20,7 @@ interface LessonCardProps {
   isExpanded: boolean;
   onToggle: () => void;
   onSectionOpen?: () => void;
+  onExerciseComplete?: () => void;
   hideHeader?: boolean;
 }
 
@@ -36,7 +37,7 @@ interface SectionDef {
 
 const nextLevelMap: Record<string, string> = { A1: "A2", A2: "B1", B1: "B2", B2: "C1", C1: "C1" };
 
-const LessonCard = ({ lesson, index, lang, level = "A1", isExpanded, onToggle, onSectionOpen, hideHeader }: LessonCardProps) => {
+const LessonCard = ({ lesson, index, lang, level = "A1", isExpanded, onToggle, onSectionOpen, onExerciseComplete, hideHeader }: LessonCardProps) => {
   const [activeSection, setActiveSection] = useState<SectionKey | null>(null);
   const [openedSections, setOpenedSections] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
@@ -88,10 +89,10 @@ const LessonCard = ({ lesson, index, lang, level = "A1", isExpanded, onToggle, o
       case "exercises":
         return (
           <div className="space-y-2.5 animate-slide-up">
-            {clozeExercises.map((e: any, i: number) => <ClozeExercise key={`c-${i}`} ex={e} lang={lang} />)}
-            {mcExercises.map((e: any, i: number) => <MCExercise key={`mc-${i}`} ex={e} lang={lang} />)}
+            {clozeExercises.map((e: any, i: number) => <ClozeExercise key={`c-${i}`} ex={e} lang={lang} onComplete={onExerciseComplete} />)}
+            {mcExercises.map((e: any, i: number) => <MCExercise key={`mc-${i}`} ex={e} lang={lang} onComplete={onExerciseComplete} />)}
             {ex.grammar_questions?.length > 0 && !exercises.length && (
-              ex.grammar_questions.map((q: any, qi: number) => <MCExercise key={`g-${qi}`} ex={q} lang={lang} />)
+              ex.grammar_questions.map((q: any, qi: number) => <MCExercise key={`g-${qi}`} ex={q} lang={lang} onComplete={onExerciseComplete} />)
             )}
           </div>
         );
