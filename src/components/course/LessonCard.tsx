@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import ClozeExercise from "./ClozeExercise";
 import MCExercise from "./MCExercise";
 import LessonNotebook from "./LessonNotebook";
+import TheoryRenderer from "./TheoryRenderer";
 
 interface LessonCardProps {
   lesson: {
@@ -83,7 +84,7 @@ const LessonCard = ({ lesson, index, lang, level = "A1", isExpanded, onToggle, o
       case "theory":
         return (
           <div className="p-4 rounded-xl bg-secondary/50 border border-border/30 animate-slide-up">
-            <div className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{lesson.theory}</div>
+            <TheoryRenderer theory={lesson.theory} lang={lang} />
           </div>
         );
       case "exercises":
