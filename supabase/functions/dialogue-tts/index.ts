@@ -7,12 +7,13 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Two distinct male German voices
-const VOICE_MALE_1 = "JBFqnCBsd6RMkjVDRZzb"; // George
-const VOICE_MALE_2 = "onwK4e9ZLuTAKqWW03F9"; // Daniel
-// Two distinct female German voices
-const VOICE_FEMALE_1 = "XrExE9yKIg1WjnnlVkGX"; // Matilda
-const VOICE_FEMALE_2 = "EXAVITQu4vr4xnSDxMaL"; // Sarah
+// Voice pairs
+const VOICES = {
+  male1: "JBFqnCBsd6RMkjVDRZzb",   // George
+  male2: "onwK4e9ZLuTAKqWW03F9",   // Daniel
+  female1: "XrExE9yKIg1WjnnlVkGX", // Matilda
+  female2: "EXAVITQu4vr4xnSDxMaL", // Sarah
+};
 
 interface Line {
   speaker: string;
@@ -20,7 +21,6 @@ interface Line {
 }
 
 function parseDialogue(text: string): Line[] | null {
-  // Check if text has A:/B: pattern
   const hasDialogue = /^[A-Z]:\s/m.test(text);
   if (!hasDialogue) return null;
 
@@ -35,6 +35,74 @@ function parseDialogue(text: string): Line[] | null {
     }
   }
   return lines.length > 0 ? lines : null;
+}
+
+async function detectGenders(text: string): Promise<Record<string, "m" | "f">> {
+  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+  if (!LOVABLE_API_KEY) {
+    console.log("No LOVABLE_API_KEY, defaulting to male voices");
+    return {};
+  }
+
+  try {
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash-lite",
+        messages: [
+          {
+            role: "system",
+            content: "You detect speaker genders in German dialogues. Respond ONLY with a JSON object mapping speaker letters to 'm' or 'f'. Example: {\"A\":\"m\",\"B\":\"f\"}. Use context clues: names, articles (der/die), adjectives (-e/-er endings), pronouns, social roles.",
+          },
+          {
+            role: "user",
+            content: text,
+          },
+        ],
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "set_genders",
+              description: "Set the detected genders for each speaker",
+              parameters: {
+                type: "object",
+                properties: {
+                  genders: {
+                    type: "object",
+                    additionalProperties: { type: "string", enum: ["m", "f"] },
+                  },
+                },
+                required: ["genders"],
+                additionalProperties: false,
+              },
+            },
+          },
+        ],
+        tool_choice: { type: "function", function: { name: "set_genders" } },
+      }),
+    });
+
+    if (!response.ok) {
+      console.error("AI gender detection failed:", response.status);
+      return {};
+    }
+
+    const data = await response.json();
+    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+    if (toolCall?.function?.arguments) {
+      const parsed = JSON.parse(toolCall.function.arguments);
+      console.log("Detected genders:", parsed.genders);
+      return parsed.genders || {};
+    }
+  } catch (e) {
+    console.error("Gender detection error:", e);
+  }
+  return {};
 }
 
 async function generateTTS(text: string, voiceId: string, apiKey: string, speed = 0.85): Promise<ArrayBuffer> {
@@ -67,10 +135,7 @@ async function generateTTS(text: string, voiceId: string, apiKey: string, speed 
   return response.arrayBuffer();
 }
 
-// Create a short silence MP3 frame (~300ms)
 function createSilence(): Uint8Array {
-  // Minimal valid MP3 frame (silent), repeated for ~300ms pause
-  // This is a single MPEG1 Layer3 128kbps 44100Hz stereo silent frame
   const silentFrame = new Uint8Array([
     0xFF, 0xFB, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -78,7 +143,6 @@ function createSilence(): Uint8Array {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x49, 0x6E, 0x66, 0x6F,
   ]);
-  // Repeat silent frame ~12 times for roughly 300ms
   const count = 12;
   const result = new Uint8Array(silentFrame.length * count);
   for (let i = 0; i < count; i++) {
@@ -93,7 +157,6 @@ serve(async (req) => {
   }
 
   try {
-    // Auth check
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -123,22 +186,36 @@ serve(async (req) => {
     const lines = parseDialogue(text);
 
     if (!lines) {
-      // Not a dialogue — use single voice (narrator)
-      const audioBuffer = await generateTTS(text, VOICE_MALE_1, ELEVENLABS_API_KEY, speed ?? 0.85);
+      const audioBuffer = await generateTTS(text, VOICES.male1, ELEVENLABS_API_KEY, speed ?? 0.85);
       return new Response(audioBuffer, {
         headers: { ...corsHeaders, "Content-Type": "audio/mpeg" },
       });
     }
 
-    // Dialogue mode: generate each line with appropriate voice
-    // Map unique speakers to voices — default to two male voices
+    // Detect genders via AI
+    const genders = await detectGenders(text);
+    
+    // Map speakers to voices based on detected gender
     const speakerSet = [...new Set(lines.map((l) => l.speaker))];
     const voiceMap: Record<string, string> = {};
-    speakerSet.forEach((s, i) => {
-      voiceMap[s] = i % 2 === 0 ? VOICE_MALE_1 : VOICE_MALE_2;
-    });
+    
+    let maleIdx = 0;
+    let femaleIdx = 0;
+    const maleVoices = [VOICES.male1, VOICES.male2];
+    const femaleVoices = [VOICES.female1, VOICES.female2];
 
-    console.log(`Dialogue detected: ${lines.length} lines, ${speakerSet.length} speakers, voices: ${JSON.stringify(voiceMap)}`);
+    for (const speaker of speakerSet) {
+      const gender = genders[speaker] || "m"; // default male
+      if (gender === "f") {
+        voiceMap[speaker] = femaleVoices[femaleIdx % femaleVoices.length];
+        femaleIdx++;
+      } else {
+        voiceMap[speaker] = maleVoices[maleIdx % maleVoices.length];
+        maleIdx++;
+      }
+    }
+
+    console.log(`Dialogue: ${lines.length} lines, speakers: ${JSON.stringify(voiceMap)}`);
 
     // Generate all lines in parallel
     const audioPromises = lines.map((line) =>
@@ -146,7 +223,7 @@ serve(async (req) => {
     );
     const audioBuffers = await Promise.all(audioPromises);
 
-    // Concatenate with short silence between lines
+    // Concatenate with silence between lines
     const silence = createSilence();
     let totalLength = 0;
     for (const buf of audioBuffers) {
@@ -159,7 +236,6 @@ serve(async (req) => {
       const chunk = new Uint8Array(audioBuffers[i]);
       combined.set(chunk, offset);
       offset += chunk.byteLength;
-      // Add silence between lines (not after last)
       if (i < audioBuffers.length - 1) {
         combined.set(silence, offset);
         offset += silence.length;
