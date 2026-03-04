@@ -5,7 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { usePlatform } from "@/hooks/usePlatform";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { BookOpen, Brain, Flame, RotateCcw, TrendingUp, Calendar, LogOut, Camera, Pencil, Check, X, Coins, Trophy, ArrowLeft, ChevronRight, Award, Bell, Send, Unlink2, Users, WifiOff, Trash2, HardDrive } from "lucide-react";
+import { BookOpen, Brain, Flame, RotateCcw, TrendingUp, Calendar, LogOut, Camera, Pencil, Check, X, Coins, Trophy, ArrowLeft, ChevronRight, Award, Bell, Send, Unlink2, Users, WifiOff, Trash2, HardDrive, Globe, Lock } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useCoins } from "@/hooks/useCoins";
 import Achievements, { type AchievementStats } from "@/components/Achievements";
@@ -35,7 +35,7 @@ type ProfileScreen = "main" | "achievements" | "activity" | "mistakes" | "leader
 
 const Profile = () => {
   const { user, signOut } = useAuth();
-  const { t } = useLanguage();
+  const { t, lang, languageLocked, lockLanguage } = useLanguage();
   const { isMobile, isTelegram } = usePlatform();
   const { balance } = useCoins();
   const { totalXP } = useXP();
@@ -648,6 +648,46 @@ const Profile = () => {
           >
             Завантажити своє фото
           </button>
+        </div>
+      )}
+
+      {/* Language choice */}
+      {!languageLocked ? (
+        <div className="glass-card p-4 mb-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <Globe className="w-4 h-4 text-primary" />
+            <p className="text-sm font-display font-semibold text-foreground">
+              {lang === "uk" ? "Обери мову інтерфейсу" : "Выбери язык интерфейса"}
+            </p>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {lang === "uk" ? "Після вибору мову буде зафіксовано і перемикач зникне." : "После выбора язык будет зафиксирован и переключатель исчезнет."}
+          </p>
+          <div className="flex gap-2">
+            <button
+              onClick={() => lockLanguage("ru")}
+              className={`flex-1 py-3 rounded-xl border-2 text-sm font-bold transition-all ${
+                lang === "ru" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/30"
+              }`}
+            >
+              🇷🇺 Русский
+            </button>
+            <button
+              onClick={() => lockLanguage("uk")}
+              className={`flex-1 py-3 rounded-xl border-2 text-sm font-bold transition-all ${
+                lang === "uk" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/30"
+              }`}
+            >
+              🇺🇦 Українська
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2 mb-4 px-1">
+          <Lock className="w-3 h-3 text-muted-foreground/50" />
+          <span className="text-[10px] text-muted-foreground/50">
+            {lang === "uk" ? "🇺🇦 Українська" : "🇷🇺 Русский"} — {lang === "uk" ? "мову зафіксовано" : "язык зафиксирован"}
+          </span>
         </div>
       )}
 

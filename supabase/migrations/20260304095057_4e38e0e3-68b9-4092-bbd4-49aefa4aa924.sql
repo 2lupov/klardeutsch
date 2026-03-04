@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS language_locked boolean NOT NULL DEFAULT false;
