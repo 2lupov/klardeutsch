@@ -670,7 +670,7 @@ const Profile = () => {
                 lang === "ru" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/30"
               }`}
             >
-              🇷🇺 Русский
+              💬 Русский
             </button>
             <button
               onClick={() => lockLanguage("uk")}
@@ -678,7 +678,7 @@ const Profile = () => {
                 lang === "uk" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/30"
               }`}
             >
-              🇺🇦 Українська
+              ✨ Українська
             </button>
           </div>
         </div>
@@ -686,7 +686,7 @@ const Profile = () => {
         <div className="flex items-center gap-2 mb-4 px-1">
           <Lock className="w-3 h-3 text-muted-foreground/50" />
           <span className="text-[10px] text-muted-foreground/50">
-            {lang === "uk" ? "🇺🇦 Українська" : "🇷🇺 Русский"} — {lang === "uk" ? "мову зафіксовано" : "язык зафиксирован"}
+            {lang === "uk" ? "✨ Українська" : "💬 Русский"} — {lang === "uk" ? "мову зафіксовано" : "язык зафиксирован"}
           </span>
         </div>
       )}
