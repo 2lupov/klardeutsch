@@ -73,19 +73,35 @@ function createEmptyBlock(type: TheoryBlock["type"]): TheoryBlock {
 const inputCls = "w-full px-2 py-1.5 rounded-lg bg-secondary text-foreground border border-border text-xs focus:border-primary focus:outline-none";
 const smallInputCls = "px-2 py-1 rounded-lg bg-secondary text-foreground border border-border text-[10px] focus:border-primary focus:outline-none";
 
-const BlockEditor = ({ block, onChange, onRemove }: { block: TheoryBlock; onChange: (b: TheoryBlock) => void; onRemove: () => void }) => {
+const BlockEditor = ({ block, onChange, onRemove, onDuplicate, onSplit, isCollapsed, onToggleCollapse }: { 
+  block: TheoryBlock; onChange: (b: TheoryBlock) => void; onRemove: () => void; 
+  onDuplicate: () => void; onSplit?: () => void; isCollapsed: boolean; onToggleCollapse: () => void;
+}) => {
   const update = (patch: Partial<TheoryBlock>) => onChange({ ...block, ...patch } as TheoryBlock);
+  const bt = BLOCK_TYPES.find(b => b.type === block.type);
+  const preview = block.content || block.title || block.de || (block.items_list?.[0]) || (block.headers?.join(" | ")) || "";
 
   return (
     <div className="p-3 rounded-xl bg-muted/30 border border-border/30 space-y-2 relative group">
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-display font-bold text-muted-foreground uppercase tracking-wider">
-          {BLOCK_TYPES.find(b => b.type === block.type)?.emoji} {BLOCK_TYPES.find(b => b.type === block.type)?.label}
-        </span>
-        <button onClick={onRemove} className="p-1 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100">
-          <X className="w-3.5 h-3.5" />
+        <button onClick={onToggleCollapse} className="flex items-center gap-1.5 text-left flex-1 min-w-0">
+          <span className="text-[10px] font-display font-bold text-muted-foreground uppercase tracking-wider shrink-0">
+            {bt?.emoji} {bt?.label}
+          </span>
+          {isCollapsed && preview && (
+            <span className="text-[10px] text-muted-foreground/60 truncate">{preview.slice(0, 50)}{preview.length > 50 ? "…" : ""}</span>
+          )}
+          {isCollapsed ? <ChevronDown className="w-3 h-3 text-muted-foreground shrink-0" /> : <ChevronUp className="w-3 h-3 text-muted-foreground shrink-0" />}
         </button>
+        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button onClick={onDuplicate} title="Дублировать" className="p-1 text-muted-foreground hover:text-primary transition-colors"><CopyPlus className="w-3.5 h-3.5" /></button>
+          {onSplit && <button onClick={onSplit} title="Разделить" className="p-1 text-muted-foreground hover:text-primary transition-colors"><FileText className="w-3.5 h-3.5" /></button>}
+          <button onClick={onRemove} className="p-1 text-muted-foreground hover:text-destructive transition-colors"><X className="w-3.5 h-3.5" /></button>
+        </div>
       </div>
+
+      {isCollapsed ? null : (<>
+
 
       {block.type === "heading" && (
         <div className="flex gap-2">
@@ -179,6 +195,7 @@ const BlockEditor = ({ block, onChange, onRemove }: { block: TheoryBlock; onChan
           <button onClick={() => update({ items_list: [...(block.items_list || []), ""] })} className="text-[10px] text-primary flex items-center gap-1"><Plus className="w-3 h-3" /> Пункт</button>
         </>
       )}
+      </>)}
     </div>
   );
 };
@@ -189,25 +206,55 @@ const TheoryEditor = ({ value, onChange }: { value: string; onChange: (v: string
     return value ? [{ type: "text" as const, content: value }] : [];
   });
   const [showPreview, setShowPreview] = useState(false);
+  const [collapsedBlocks, setCollapsedBlocks] = useState<Set<number>>(new Set());
 
   const sync = (newBlocks: TheoryBlock[]) => { setBlocks(newBlocks); onChange(JSON.stringify(newBlocks)); };
   const addBlock = (type: TheoryBlock["type"]) => sync([...blocks, createEmptyBlock(type)]);
+  const insertBlock = (afterIndex: number, type: TheoryBlock["type"]) => {
+    const n = [...blocks]; n.splice(afterIndex + 1, 0, createEmptyBlock(type)); sync(n);
+  };
   const updateBlock = (i: number, b: TheoryBlock) => { const n = [...blocks]; n[i] = b; sync(n); };
   const removeBlock = (i: number) => sync(blocks.filter((_, j) => j !== i));
+  const duplicateBlock = (i: number) => { const n = [...blocks]; n.splice(i + 1, 0, { ...JSON.parse(JSON.stringify(blocks[i])) }); sync(n); };
+  const splitBlock = (i: number) => {
+    const block = blocks[i];
+    if (block.type !== "text" || !block.content) return;
+    const lines = block.content.split("\n").filter(Boolean);
+    if (lines.length <= 1) return;
+    const mid = Math.ceil(lines.length / 2);
+    const n = [...blocks];
+    n.splice(i, 1, { type: "text", content: lines.slice(0, mid).join("\n") }, { type: "text", content: lines.slice(mid).join("\n") });
+    sync(n);
+  };
   const moveBlock = (i: number, dir: -1 | 1) => {
     const ni = i + dir;
     if (ni < 0 || ni >= blocks.length) return;
     const n = [...blocks]; [n[i], n[ni]] = [n[ni], n[i]]; sync(n);
   };
+  const toggleCollapse = (i: number) => {
+    setCollapsedBlocks(prev => { const s = new Set(prev); s.has(i) ? s.delete(i) : s.add(i); return s; });
+  };
+  const collapseAll = () => setCollapsedBlocks(new Set(blocks.map((_, i) => i)));
+  const expandAll = () => setCollapsedBlocks(new Set());
+
+  const [insertMenuAt, setInsertMenuAt] = useState<number | null>(null);
 
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <span className="text-[10px] text-muted-foreground font-bold uppercase">Теория ({blocks.length} блоков)</span>
-        <button onClick={() => setShowPreview(!showPreview)} className="text-[10px] text-primary flex items-center gap-1">
-          {showPreview ? <Edit3 className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-          {showPreview ? "Редактор" : "Превью"}
-        </button>
+        <div className="flex items-center gap-2">
+          {blocks.length > 1 && (
+            <button onClick={collapsedBlocks.size === blocks.length ? expandAll : collapseAll} className="text-[10px] text-muted-foreground hover:text-foreground flex items-center gap-1">
+              {collapsedBlocks.size === blocks.length ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+              {collapsedBlocks.size === blocks.length ? "Развернуть" : "Свернуть"}
+            </button>
+          )}
+          <button onClick={() => setShowPreview(!showPreview)} className="text-[10px] text-primary flex items-center gap-1">
+            {showPreview ? <Edit3 className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+            {showPreview ? "Редактор" : "Превью"}
+          </button>
+        </div>
       </div>
 
       {showPreview ? (
@@ -217,13 +264,40 @@ const TheoryEditor = ({ value, onChange }: { value: string; onChange: (v: string
       ) : (
         <>
           {blocks.map((block, i) => (
-            <div key={i} className="flex gap-1">
-              <div className="flex flex-col gap-0.5 pt-3">
-                <button onClick={() => moveBlock(i, -1)} disabled={i === 0} className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-20"><ChevronUp className="w-3 h-3" /></button>
-                <button onClick={() => moveBlock(i, 1)} disabled={i === blocks.length - 1} className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-20"><ChevronDown className="w-3 h-3" /></button>
+            <div key={i}>
+              <div className="flex gap-1">
+                <div className="flex flex-col gap-0.5 pt-3">
+                  <button onClick={() => moveBlock(i, -1)} disabled={i === 0} className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-20"><ChevronUp className="w-3 h-3" /></button>
+                  <button onClick={() => moveBlock(i, 1)} disabled={i === blocks.length - 1} className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-20"><ChevronDown className="w-3 h-3" /></button>
+                </div>
+                <div className="flex-1">
+                  <BlockEditor
+                    block={block}
+                    onChange={b => updateBlock(i, b)}
+                    onRemove={() => removeBlock(i)}
+                    onDuplicate={() => duplicateBlock(i)}
+                    onSplit={block.type === "text" ? () => splitBlock(i) : undefined}
+                    isCollapsed={collapsedBlocks.has(i)}
+                    onToggleCollapse={() => toggleCollapse(i)}
+                  />
+                </div>
               </div>
-              <div className="flex-1">
-                <BlockEditor block={block} onChange={b => updateBlock(i, b)} onRemove={() => removeBlock(i)} />
+              {/* Insert between blocks */}
+              <div className="flex justify-center py-0.5 group/insert">
+                {insertMenuAt === i ? (
+                  <div className="flex flex-wrap gap-1 p-1.5 rounded-lg bg-secondary border border-border animate-slide-up">
+                    {BLOCK_TYPES.map(bt => (
+                      <button key={bt.type} onClick={() => { insertBlock(i, bt.type); setInsertMenuAt(null); }} className="px-1.5 py-0.5 rounded bg-background border border-border/50 text-[9px] text-muted-foreground hover:text-foreground hover:border-primary/30 transition-colors">
+                        {bt.emoji}
+                      </button>
+                    ))}
+                    <button onClick={() => setInsertMenuAt(null)} className="px-1.5 py-0.5 text-[9px] text-muted-foreground hover:text-destructive"><X className="w-3 h-3" /></button>
+                  </div>
+                ) : (
+                  <button onClick={() => setInsertMenuAt(i)} className="opacity-0 group-hover/insert:opacity-100 transition-opacity p-0.5 text-muted-foreground hover:text-primary">
+                    <Plus className="w-3 h-3" />
+                  </button>
+                )}
               </div>
             </div>
           ))}
@@ -239,7 +313,6 @@ const TheoryEditor = ({ value, onChange }: { value: string; onChange: (v: string
     </div>
   );
 };
-
 /* ══════════════════════════════════════════
    Exercises Editor (fill-in-the-blank + MC)
    ══════════════════════════════════════════ */
