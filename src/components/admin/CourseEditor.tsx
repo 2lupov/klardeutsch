@@ -1,4 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
+
+const withScroll = async (fn: () => Promise<void>) => {
+  const el = document.getElementById("admin-scroll");
+  const scrollTop = el?.scrollTop ?? 0;
+  await fn();
+  requestAnimationFrame(() => { if (el) el.scrollTop = scrollTop; });
+};
 import { supabase } from "@/integrations/supabase/client";
 import {
   BookOpen, Wand2, Copy, Check, FileJson, Upload, Loader2, Trash2,
@@ -606,7 +613,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
       title: editCourse.title, description: editCourse.description, level: editCourse.level, price: editCourse.price,
     } as any).eq("id", editCourse.id);
     toast.success("Курс обновлён ✅");
-    loadCourses();
+    withScroll(loadCourses);
   };
 
   /* ─── Add new lesson ─── */
@@ -749,7 +756,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
       const { error: lessonsErr } = await supabase.from("course_lessons").insert(lessons as any);
       if (lessonsErr) throw lessonsErr;
       toast.success(`✅ Курс сохранён с ${lessons.length} уроками!`);
-      setCourseData(null); setJsonInput(""); setStep("list"); loadCourses();
+      setCourseData(null); setJsonInput(""); setStep("list"); withScroll(loadCourses);
     } catch (err: any) { toast.error("Ошибка: " + err.message); }
     setSaving(false);
   };
@@ -757,7 +764,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
   const toggleCourseAvailability = async (id: string, current: boolean) => {
     await supabase.from("courses").update({ available: !current } as any).eq("id", id);
     toast.success(current ? "Курс скрыт" : "Курс опубликован");
-    loadCourses();
+    withScroll(loadCourses);
   };
 
   const deleteCourse = async (id: string) => {
@@ -765,7 +772,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
     await supabase.from("course_lessons").delete().eq("course_id", id);
     await supabase.from("courses").delete().eq("id", id);
     toast.success("Курс удалён");
-    loadCourses();
+    withScroll(loadCourses);
   };
 
   // ─── EDIT MODE ───

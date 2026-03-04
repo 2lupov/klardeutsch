@@ -1,4 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
+
+const withScroll = async (fn: () => Promise<void>) => {
+  const el = document.getElementById("admin-scroll");
+  const scrollTop = el?.scrollTop ?? 0;
+  await fn();
+  requestAnimationFrame(() => { if (el) el.scrollTop = scrollTop; });
+};
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Plus, Trash2, ImagePlus, X, Loader2, FileUp, FileText, Download } from "lucide-react";
@@ -26,7 +33,7 @@ const ShopEditor = () => {
       price: 100,
       item_type: "task",
     }]);
-    load();
+    withScroll(load);
   };
 
   const updateItem = async (id: string, field: string, value: any) => {
@@ -41,7 +48,7 @@ const ShopEditor = () => {
       if (path) await supabase.storage.from("shop-images").remove([path]);
     }
     await supabase.from("shop_items").delete().eq("id", id);
-    load();
+    withScroll(load);
   };
 
   const uploadImage = async (id: string, file: File) => {
