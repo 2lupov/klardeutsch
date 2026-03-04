@@ -27,3 +27,5 @@ project_id = "jqqsszwbbxvevebmebfm"
     verify_jwt = false
   [functions.resend-confirmation]
     verify_jwt = false
+  [functions.dialogue-tts]
+    verify_jwt = false
