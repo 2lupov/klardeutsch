@@ -37,6 +37,7 @@ const Course = () => {
   const [activeLesson, setActiveLesson] = useState<CourseLesson | null>(null);
   const [clarity, setClarity] = useState(0);
   const [sectionsOpened, setSectionsOpened] = useState(0);
+  const [exercisesCompleted, setExercisesCompleted] = useState(0);
 
   useEffect(() => {
     if (!user || !id) return;
@@ -54,22 +55,35 @@ const Course = () => {
     load();
   }, [user, id]);
 
-  // Reset clarity when entering a lesson
+  // Reset when entering a lesson
   useEffect(() => {
     if (activeLesson) {
       setClarity(0);
       setSectionsOpened(0);
+      setExercisesCompleted(0);
     }
   }, [activeLesson?.id]);
 
   const handleSectionOpen = () => {
     setSectionsOpened(prev => {
       const next = prev + 1;
-      // Each section opened bumps clarity
       const totalSections = countSections(activeLesson!);
       setClarity(Math.min(1, next / Math.max(totalSections, 1)));
       return next;
     });
+  };
+
+  const handleExerciseComplete = () => {
+    setExercisesCompleted(prev => prev + 1);
+  };
+
+  const countExercises = (lesson: CourseLesson) => {
+    const ex = lesson.exercises || {};
+    const exercises = ex.exercises || [];
+    const cloze = exercises.filter((e: any) => e.type === "cloze").length;
+    const mc = exercises.filter((e: any) => e.type === "multiple_choice").length;
+    const grammar = (ex.grammar_questions?.length > 0 && !exercises.length) ? ex.grammar_questions.length : 0;
+    return cloze + mc + grammar;
   };
 
   const countSections = (lesson: CourseLesson) => {
@@ -136,8 +150,8 @@ const Course = () => {
   // ─── Lesson detail view (with fog + filling effect) ───
   if (activeLesson) {
     const lessonIndex = lessons.findIndex(l => l.id === activeLesson.id);
-    const totalSections = countSections(activeLesson);
-    const progressPercent = totalSections > 0 ? Math.min(100, Math.round((sectionsOpened / totalSections) * 100)) : 0;
+    const totalExercises = countExercises(activeLesson);
+    const progressPercent = totalExercises > 0 ? Math.min(100, Math.round((exercisesCompleted / totalExercises) * 100)) : 0;
 
     return (
       <div className={`flex flex-col ${isMobile ? "min-h-full" : "h-full"}`}>
@@ -178,6 +192,7 @@ const Course = () => {
             isExpanded={true}
             onToggle={() => {}}
             onSectionOpen={handleSectionOpen}
+            onExerciseComplete={handleExerciseComplete}
             hideHeader
           />
         </div>

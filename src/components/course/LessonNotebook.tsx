@@ -49,7 +49,6 @@ const LessonNotebook = ({ lessonId, lang, theory, exercises }: LessonNotebookPro
     }
   }, [user, lessonId, content, lang]);
 
-  // Auto-save on blur
   const handleBlur = () => {
     if (content.trim()) save();
   };
@@ -81,17 +80,12 @@ const LessonNotebook = ({ lessonId, lang, theory, exercises }: LessonNotebookPro
 
   return (
     <div className="animate-slide-up">
-      {/* Notebook paper effect */}
-      <div className="relative rounded-2xl overflow-hidden border border-primary/20 bg-gradient-to-b from-amber-50/80 to-orange-50/40 dark:from-amber-950/30 dark:to-orange-950/20 shadow-lg">
-        {/* Spiral binding dots */}
-        <div className="absolute left-3 top-0 bottom-0 flex flex-col justify-start pt-14 gap-[18px] z-10">
-          {Array.from({ length: 12 }).map((_, i) => (
-            <div key={i} className="w-2.5 h-2.5 rounded-full bg-primary/20 border border-primary/30" />
-          ))}
-        </div>
+      <div className="relative rounded-2xl overflow-hidden border border-border/40 bg-card shadow-lg">
+        {/* Spine accent */}
+        <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary/60 via-primary/30 to-primary/10" />
 
         {/* Header */}
-        <div className="px-5 pl-10 pt-4 pb-3 border-b border-primary/10 flex items-center gap-2">
+        <div className="px-5 pl-6 pt-4 pb-3 border-b border-border/30 flex items-center gap-2">
           <BookOpen className="w-4 h-4 text-primary" />
           <h3 className="font-display font-bold text-sm text-foreground">
             {lang === "uk" ? "Мій зошит" : "Моя тетрадь"}
@@ -104,11 +98,11 @@ const LessonNotebook = ({ lessonId, lang, theory, exercises }: LessonNotebookPro
         </div>
 
         {/* Quick insert buttons */}
-        <div className="px-5 pl-10 pt-3 flex flex-wrap gap-1.5">
+        <div className="px-5 pl-6 pt-3 flex flex-wrap gap-1.5">
           {theory && (
             <button
               onClick={addTheorySnippet}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-medium bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-medium bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"
             >
               <Sparkles className="w-3 h-3" />
               {lang === "uk" ? "Додати теорію" : "Добавить теорию"}
@@ -117,7 +111,7 @@ const LessonNotebook = ({ lessonId, lang, theory, exercises }: LessonNotebookPro
           {((exercises?.vocabulary || exercises?.vocab_cards || []).length > 0) && (
             <button
               onClick={addVocabSnippet}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-medium bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-medium bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"
             >
               <Sparkles className="w-3 h-3" />
               {lang === "uk" ? "Додати слова" : "Добавить слова"}
@@ -125,28 +119,26 @@ const LessonNotebook = ({ lessonId, lang, theory, exercises }: LessonNotebookPro
           )}
         </div>
 
-        {/* Textarea with ruled lines */}
-        <div className="px-5 pl-10 pt-2 pb-4 relative">
+        {/* Textarea */}
+        <div className="px-5 pl-6 pt-2 pb-4">
           <textarea
             value={content}
             onChange={e => setContent(e.target.value)}
             onBlur={handleBlur}
             placeholder={lang === "uk" ? "Пишіть нотатки тут... ✏️" : "Пишите заметки здесь... ✏️"}
             className={cn(
-              "w-full min-h-[200px] bg-transparent resize-y text-sm text-foreground placeholder:text-muted-foreground/50",
-              "focus:outline-none leading-[28px]",
-              "notebook-lines"
+              "w-full min-h-[200px] bg-transparent resize-y text-sm text-foreground placeholder:text-muted-foreground/40",
+              "focus:outline-none leading-[28px] rounded-lg p-2"
             )}
             style={{
-              backgroundImage: "repeating-linear-gradient(transparent, transparent 27px, hsl(var(--primary) / 0.08) 27px, hsl(var(--primary) / 0.08) 28px)",
+              backgroundImage: "repeating-linear-gradient(transparent, transparent 27px, hsl(var(--border) / 0.3) 27px, hsl(var(--border) / 0.3) 28px)",
               backgroundSize: "100% 28px",
-              backgroundPositionY: "0px",
             }}
           />
         </div>
 
         {/* Save button */}
-        <div className="px-5 pl-10 pb-4 flex justify-end">
+        <div className="px-5 pl-6 pb-4 flex justify-end">
           <button
             onClick={save}
             disabled={saving}

@@ -2,10 +2,18 @@ import { useState } from "react";
 import { Lightbulb } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const MCExercise = ({ ex, lang }: { ex: any; lang: string }) => {
+const MCExercise = ({ ex, lang, onComplete }: { ex: any; lang: string; onComplete?: () => void }) => {
   const [selected, setSelected] = useState<number | null>(null);
   const question = lang === "uk" ? ex.question?.ua : ex.question?.ru;
   const explanation = lang === "uk" ? ex.explanation?.ua : ex.explanation?.ru;
+
+  const handleSelect = (i: number) => {
+    if (selected !== null) return;
+    setSelected(i);
+    if (i === ex.correct_index) {
+      onComplete?.();
+    }
+  };
 
   return (
     <div className="p-4 rounded-xl bg-secondary/30 border border-border/20">
@@ -18,7 +26,7 @@ const MCExercise = ({ ex, lang }: { ex: any; lang: string }) => {
           return (
             <button
               key={i}
-              onClick={() => setSelected(i)}
+              onClick={() => handleSelect(i)}
               disabled={selected !== null}
               className={cn(
                 "text-left px-4 py-2.5 rounded-xl text-xs font-medium border transition-all duration-200",
