@@ -509,6 +509,7 @@ export type Database = {
       }
       listening_texts: {
         Row: {
+          audio_url: string | null
           created_at: string
           id: string
           level: string
@@ -519,6 +520,7 @@ export type Database = {
           voice_config: Json | null
         }
         Insert: {
+          audio_url?: string | null
           created_at?: string
           id?: string
           level: string
@@ -529,6 +531,7 @@ export type Database = {
           voice_config?: Json | null
         }
         Update: {
+          audio_url?: string | null
           created_at?: string
           id?: string
           level?: string
