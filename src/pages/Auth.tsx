@@ -9,6 +9,7 @@ import AuthKlarLogo from "@/components/auth/AuthKlarLogo";
 import Fireworks from "@/components/auth/Fireworks";
 import { Sparkles } from "lucide-react";
 import SimpleCaptcha from "@/components/auth/SimpleCaptcha";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -28,6 +29,9 @@ const Auth = () => {
   const [fadeOut, setFadeOut] = useState(false);
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [captchaVerified, setCaptchaVerified] = useState(false);
+  const [otpMode, setOtpMode] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [signupUserId, setSignupUserId] = useState<string | null>(null);
   const navigate = useNavigate();
   const logoRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
@@ -103,14 +107,11 @@ const Auth = () => {
         if (signUpData.user && (!signUpData.user.identities || signUpData.user.identities.length === 0)) {
           setError("Аккаунт с этим email уже существует. Попробуйте войти.");
         } else if (signUpData.user) {
-          await supabase.from("profiles").update({ display_name: nickname }).eq("user_id", signUpData.user.id);
-          if (referralCode.trim()) {
-            await supabase.rpc("apply_referral_code", {
-              p_referred_id: signUpData.user.id,
-              p_code: referralCode.trim(),
-            });
-          }
-          setMessage(t("checkEmail"));
+          // Save user info for OTP step
+          setSignupUserId(signUpData.user.id);
+          // Switch to OTP entry screen
+          setOtpMode(true);
+          setError("");
         }
       }
     }
@@ -128,10 +129,97 @@ const Auth = () => {
   }
 
 
+  const handleVerifyOtp = async () => {
+    setError("");
+    setLoading(true);
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token: otpCode,
+      type: "signup",
+    });
+    if (error) {
+      setError(error.message);
+    } else {
+      // Profile update + referral after confirmed
+      if (signupUserId) {
+        await supabase.from("profiles").update({ display_name: nickname }).eq("user_id", signupUserId);
+        if (referralCode.trim()) {
+          await supabase.rpc("apply_referral_code", {
+            p_referred_id: signupUserId,
+            p_code: referralCode.trim(),
+          });
+        }
+      }
+      setShowFireworks(true);
+    }
+    setLoading(false);
+  };
+
   const handleFireworksComplete = () => {
     setFadeOut(true);
     setTimeout(() => navigate("/"), 600);
   };
+
+  // OTP verification screen
+  if (otpMode) {
+    return (
+      <>
+        {showFireworks && <Fireworks onComplete={handleFireworksComplete} originRef={logoRef} />}
+        <div
+          className="h-[100dvh] bg-background flex items-center justify-center px-4 overflow-hidden transition-opacity duration-500"
+          style={{ opacity: fadeOut ? 0 : 1 }}
+        >
+          <div className="w-full max-w-sm">
+            <div className="text-center mb-5 animate-auth-fade-up" style={{ animationDelay: "0.1s" }}>
+              <div ref={logoRef}>
+                <AuthKlarLogo progress={otpCode.length / 6} />
+              </div>
+              <p className="text-muted-foreground text-sm mt-2">
+                {t("enterOtpCode") || "Введите код из письма"}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">{email}</p>
+            </div>
+
+            <div className="glass-card p-5 flex flex-col items-center gap-4 animate-auth-scale-in" style={{ animationDelay: "0.3s" }}>
+              <InputOTP
+                maxLength={6}
+                value={otpCode}
+                onChange={setOtpCode}
+              >
+                <InputOTPGroup>
+                  <InputOTPSlot index={0} />
+                  <InputOTPSlot index={1} />
+                  <InputOTPSlot index={2} />
+                  <InputOTPSlot index={3} />
+                  <InputOTPSlot index={4} />
+                  <InputOTPSlot index={5} />
+                </InputOTPGroup>
+              </InputOTP>
+
+              {error && <p className="text-sm text-destructive">{error}</p>}
+
+              <button
+                type="button"
+                onClick={handleVerifyOtp}
+                disabled={loading || otpCode.length < 6}
+                className="w-full px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold glow-yellow transition-all hover:opacity-90 disabled:opacity-50"
+              >
+                {loading ? "..." : t("confirm") || "Подтвердить"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => { setOtpMode(false); setOtpCode(""); setError(""); }}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                ← {t("back") || "Назад"}
+              </button>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
