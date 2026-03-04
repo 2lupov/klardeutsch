@@ -129,19 +129,19 @@ const UserProfileDialog = ({
         <DialogTitle className="sr-only">Профиль {name}</DialogTitle>
 
         {/* Header with gradient + KLAR background */}
-        <div className="relative h-28 bg-gradient-to-br from-primary/30 via-primary/10 to-accent/20 overflow-hidden">
+        <div className="relative h-32 bg-gradient-to-br from-primary/30 via-primary/10 to-accent/20 overflow-hidden">
           <KlarBackground />
-          <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 z-10">
-            <Avatar className="w-16 h-16 border-4 border-background shadow-lg">
-              {avatarUrl ? <AvatarImage src={avatarUrl} alt={name} /> : null}
-              <AvatarFallback className="text-base font-display font-bold bg-primary/10 text-primary">
+          <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 z-10">
+            <Avatar className="w-14 h-14 border-3 border-background shadow-lg">
+              {avatarUrl ? <AvatarImage src={avatarUrl} alt={name} className="object-cover" /> : null}
+              <AvatarFallback className="text-sm font-display font-bold bg-primary/10 text-primary">
                 {initials}
               </AvatarFallback>
             </Avatar>
           </div>
         </div>
 
-        <div className="pt-10 pb-5 px-5 flex flex-col items-center gap-4">
+        <div className="pt-8 pb-5 px-5 flex flex-col items-center gap-4">
           <div className="text-center">
             <h3 className="font-display text-lg font-bold text-foreground">
               {name} {isMe && "⭐"}
