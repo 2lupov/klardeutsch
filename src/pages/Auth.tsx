@@ -99,7 +99,10 @@ const Auth = () => {
         setFailedAttempts(prev => prev + 1);
         setCaptchaVerified(false);
       } else {
-        if (signUpData.user) {
+        // Detect already-registered user (Supabase returns empty identities)
+        if (signUpData.user && (!signUpData.user.identities || signUpData.user.identities.length === 0)) {
+          setError("Аккаунт с этим email уже существует. Попробуйте войти.");
+        } else if (signUpData.user) {
           await supabase.from("profiles").update({ display_name: nickname }).eq("user_id", signUpData.user.id);
           if (referralCode.trim()) {
             await supabase.rpc("apply_referral_code", {
@@ -107,8 +110,8 @@ const Auth = () => {
               p_code: referralCode.trim(),
             });
           }
+          setMessage(t("checkEmail"));
         }
-        setMessage(t("checkEmail"));
       }
     }
     setLoading(false);
