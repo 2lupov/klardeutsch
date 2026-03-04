@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import ClozeExercise from "./ClozeExercise";
 import MCExercise from "./MCExercise";
+import LessonNotebook from "./LessonNotebook";
 
 interface LessonCardProps {
   lesson: {
@@ -22,7 +23,7 @@ interface LessonCardProps {
   hideHeader?: boolean;
 }
 
-type SectionKey = "theory" | "exercises" | "vocab" | "dialog" | "culture" | "grammar" | "reading" | "next";
+type SectionKey = "theory" | "exercises" | "vocab" | "dialog" | "culture" | "grammar" | "reading" | "notebook" | "next";
 
 interface SectionDef {
   key: SectionKey;
@@ -59,6 +60,7 @@ const LessonCard = ({ lesson, index, lang, level = "A1", isExpanded, onToggle, o
     { key: "vocab" as SectionKey, emoji: "📚", label: lang === "uk" ? `Словник ${level}` : `Словарь ${level}`, sublabel: lang === "uk" ? "Нові слова" : "Новые слова", available: vocab.length > 0, count: vocab.length },
     { key: "dialog" as SectionKey, emoji: "💬", label: lang === "uk" ? "Діалог" : "Диалог", sublabel: lang === "uk" ? "Практика розмови" : "Практика разговора", available: !!dialog },
     { key: "culture" as SectionKey, emoji: "🌍", label: lang === "uk" ? "Культура" : "Культура", sublabel: lang === "uk" ? "Цікаві факти" : "Интересные факты", available: culturalNotes.length > 0, count: culturalNotes.length },
+    { key: "notebook" as SectionKey, emoji: "📝", label: lang === "uk" ? "Зошит" : "Тетрадь", sublabel: lang === "uk" ? "Мої нотатки" : "Мои заметки", available: true },
     { key: "reading" as SectionKey, emoji: "📕", label: lang === "uk" ? "Читання" : "Чтение", sublabel: lang === "uk" ? "Текст для читання" : "Текст для чтения", available: !!ex.reading },
     { key: "next" as SectionKey, emoji: "🚀", label: lang === "uk" ? `Готовий до ${nextLevel}?` : `Готов к ${nextLevel}?`, sublabel: lang === "uk" ? "Наступний рівень" : "Следующий уровень", available: true },
   ] as SectionDef[]).filter(s => s.available);
@@ -155,6 +157,15 @@ const LessonCard = ({ lesson, index, lang, level = "A1", isExpanded, onToggle, o
             <p className="text-muted-foreground whitespace-pre-wrap">{ex.reading.text}</p>
           </div>
         ) : null;
+      case "notebook":
+        return (
+          <LessonNotebook
+            lessonId={lesson.id}
+            lang={lang}
+            theory={lesson.theory}
+            exercises={ex}
+          />
+        );
       default:
         return null;
     }
