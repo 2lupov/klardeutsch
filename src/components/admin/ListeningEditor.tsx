@@ -18,25 +18,52 @@ const VOICE_OPTIONS = [
   { id: "NE7AIW5DoJ7lUosXV2KR", label: "Женский 2" },
 ];
 
-const VoiceSelect = ({ value, onChange, label }: { value: string; onChange: (v: string) => void; label: string }) => (
-  <select
-    value={value}
-    onChange={(e) => onChange(e.target.value)}
-    className="px-2 py-1 rounded-lg bg-secondary text-foreground border border-border text-xs focus:border-primary focus:outline-none"
-  >
-    <option value="">{label}: авто</option>
-    <optgroup label="Мужские">
-      {VOICE_OPTIONS.filter(v => v.label.startsWith("Муж")).map(v => (
-        <option key={v.id} value={v.id}>{label}: {v.label}</option>
-      ))}
-    </optgroup>
-    <optgroup label="Женские">
-      {VOICE_OPTIONS.filter(v => v.label.startsWith("Жен")).map(v => (
-        <option key={v.id} value={v.id}>{label}: {v.label}</option>
-      ))}
-    </optgroup>
-  </select>
-);
+const CUSTOM_ID = "__custom__";
+
+const VoiceSelect = ({ value, onChange, label }: { value: string; onChange: (v: string) => void; label: string }) => {
+  const isPreset = !value || VOICE_OPTIONS.some(v => v.id === value);
+  const [custom, setCustom] = useState(!isPreset);
+  const [customId, setCustomId] = useState(!isPreset ? value : "");
+
+  return (
+    <div className="flex items-center gap-1.5">
+      <select
+        value={custom ? CUSTOM_ID : value}
+        onChange={(e) => {
+          if (e.target.value === CUSTOM_ID) {
+            setCustom(true);
+            if (customId) onChange(customId);
+          } else {
+            setCustom(false);
+            onChange(e.target.value);
+          }
+        }}
+        className="px-2 py-1 rounded-lg bg-secondary text-foreground border border-border text-xs focus:border-primary focus:outline-none"
+      >
+        <option value="">{label}: авто</option>
+        <optgroup label="Мужские">
+          {VOICE_OPTIONS.filter(v => v.label.startsWith("Муж")).map(v => (
+            <option key={v.id} value={v.id}>{label}: {v.label}</option>
+          ))}
+        </optgroup>
+        <optgroup label="Женские">
+          {VOICE_OPTIONS.filter(v => v.label.startsWith("Жен")).map(v => (
+            <option key={v.id} value={v.id}>{label}: {v.label}</option>
+          ))}
+        </optgroup>
+        <option value={CUSTOM_ID}>Свой ID...</option>
+      </select>
+      {custom && (
+        <input
+          value={customId}
+          onChange={(e) => { setCustomId(e.target.value); onChange(e.target.value); }}
+          placeholder="voice ID"
+          className="w-36 px-2 py-1 rounded-lg bg-secondary text-foreground border border-border text-xs font-mono focus:border-primary focus:outline-none"
+        />
+      )}
+    </div>
+  );
+};
 
 /** Parse dialogue text into structured lines */
 function parseDialogueLines(text: string): { speaker: string; text: string }[] | null {
