@@ -40,6 +40,15 @@ const DemoUsersManager = () => {
     setLoading(false);
   }, []);
 
+  const withScroll = useCallback(async (fn: () => Promise<void>) => {
+    const el = document.getElementById("admin-scroll");
+    const scrollTop = el?.scrollTop ?? 0;
+    await fn();
+    requestAnimationFrame(() => {
+      if (el) el.scrollTop = scrollTop;
+    });
+  }, []);
+
   useEffect(() => { load(); }, [load]);
 
   const addDemoUser = async () => {
@@ -51,28 +60,28 @@ const DemoUsersManager = () => {
     if (newUserAvatarUrl) insertData.avatar_url = newUserAvatarUrl;
     const { error } = await supabase.from("demo_leaderboard").insert(insertData);
     if (error) toast.error("Ошибка: " + error.message);
-    else { toast.success("Добавлен!"); setNewDemoName(""); setNewDemoXp("100"); setNewUserAvatarUrl(null); load(); }
+    else { toast.success("Добавлен!"); setNewDemoName(""); setNewDemoXp("100"); setNewUserAvatarUrl(null); withScroll(load); }
   };
 
   const removeDemoUser = async (id: string) => {
     await supabase.from("demo_leaderboard").delete().eq("id", id);
-    toast.success("Удалён"); load();
+    toast.success("Удалён"); withScroll(load);
   };
 
   const saveDemoName = async (id: string) => {
     if (!editingDemoName.trim()) return;
     await supabase.from("demo_leaderboard").update({ display_name: editingDemoName.trim() }).eq("id", id);
-    toast.success("Обновлено"); setEditingDemoId(null); load();
+    toast.success("Обновлено"); setEditingDemoId(null); withScroll(load);
   };
 
   const adjustDemoXp = async (id: string, currentXp: number, delta: number) => {
     await supabase.from("demo_leaderboard").update({ total_xp: Math.max(0, currentXp + delta) }).eq("id", id);
-    load();
+    withScroll(load);
   };
 
   const setDemoAvatar = async (id: string, url: string) => {
     await supabase.from("demo_leaderboard").update({ avatar_url: url }).eq("id", id);
-    toast.success("Аватарка обновлена!"); setAvatarPickerFor(null); load();
+    toast.success("Аватарка обновлена!"); setAvatarPickerFor(null); withScroll(load);
   };
 
   const uploadAvatar = async (id: string, file: File) => {
@@ -82,7 +91,7 @@ const DemoUsersManager = () => {
     if (upErr) { toast.error("Ошибка: " + upErr.message); return; }
     const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
     await supabase.from("demo_leaderboard").update({ avatar_url: urlData.publicUrl + "?t=" + Date.now() }).eq("id", id);
-    toast.success("Аватарка обновлена!"); load();
+    toast.success("Аватарка обновлена!"); withScroll(load);
   };
 
   if (loading) return <p className="text-muted-foreground animate-pulse">Загрузка...</p>;
@@ -199,7 +208,7 @@ const DemoUsersManager = () => {
                     const val = Math.max(0, parseInt(e.target.value) || 0);
                     if (val === stat.value) return;
                     await supabase.from("demo_leaderboard").update({ [stat.key]: val } as any).eq("id", du.id);
-                    toast.success("Обновлено!"); load();
+                    toast.success("Обновлено!"); withScroll(load);
                   }}
                   className="w-14 px-1.5 py-0.5 rounded bg-secondary text-foreground border border-border text-xs text-center focus:border-primary focus:outline-none"
                 />
@@ -227,7 +236,7 @@ const DemoUsersManager = () => {
                   if (chatId === du.telegram_chat_id) return;
                   await supabase.from("demo_leaderboard").update({ telegram_chat_id: chatId } as any).eq("id", du.id);
                   toast.success(chatId ? "Telegram подключён!" : "Telegram отключён");
-                  load();
+                  withScroll(load);
                 }}
                 className="w-36 px-2 py-1 rounded-lg bg-secondary text-foreground border border-border text-xs focus:border-primary focus:outline-none"
               />
