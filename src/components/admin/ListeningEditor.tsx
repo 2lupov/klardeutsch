@@ -8,7 +8,7 @@ const withScroll = async (fn: () => Promise<void>) => {
 };
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Plus, Trash2, Check } from "lucide-react";
+import { Plus, Trash2, Check, ArrowUp, ArrowDown } from "lucide-react";
 import { toast } from "sonner";
 
 const VOICE_OPTIONS = [
@@ -65,7 +65,7 @@ const VoiceSelect = ({ value, onChange, label }: { value: string; onChange: (v: 
   );
 };
 
-/** Parse dialogue text into structured lines */
+/** Parse "A: text\nB: text" into structured lines */
 function parseDialogueLines(text: string): { speaker: string; text: string }[] | null {
   if (!/^[A-Z]:\s/m.test(text)) return null;
   const lines: { speaker: string; text: string }[] = [];
@@ -77,6 +77,89 @@ function parseDialogueLines(text: string): { speaker: string; text: string }[] |
   return lines.length > 0 ? lines : null;
 }
 
+/** Serialize dialogue lines back to "A: ...\nB: ..." format */
+function serializeDialogueLines(linesA: string[], linesB: string[]): string {
+  // Interleave A and B lines
+  const result: string[] = [];
+  const maxLen = Math.max(linesA.length, linesB.length);
+  for (let i = 0; i < maxLen; i++) {
+    if (i < linesA.length && linesA[i].trim()) result.push(`A: ${linesA[i].trim()}`);
+    if (i < linesB.length && linesB[i].trim()) result.push(`B: ${linesB[i].trim()}`);
+  }
+  return result.join("\n");
+}
+
+/** Split parsed lines into two arrays for A and B */
+function splitDialogueToColumns(text: string): { linesA: string[]; linesB: string[] } {
+  const parsed = parseDialogueLines(text);
+  if (!parsed) return { linesA: [""], linesB: [""] };
+  const linesA = parsed.filter(l => l.speaker === "A").map(l => l.text);
+  const linesB = parsed.filter(l => l.speaker === "B").map(l => l.text);
+  return { linesA: linesA.length ? linesA : [""], linesB: linesB.length ? linesB : [""] };
+}
+
+/** Dialogue column editor */
+const DialogueColumn = ({ speaker, lines, onChange, voiceValue, onVoiceChange }: {
+  speaker: string;
+  lines: string[];
+  onChange: (lines: string[]) => void;
+  voiceValue: string;
+  onVoiceChange: (v: string) => void;
+}) => {
+  const updateLine = (idx: number, value: string) => {
+    const next = [...lines];
+    next[idx] = value;
+    onChange(next);
+  };
+  const addLine = () => onChange([...lines, ""]);
+  const removeLine = (idx: number) => {
+    if (lines.length <= 1) return;
+    onChange(lines.filter((_, i) => i !== idx));
+  };
+  const moveLine = (idx: number, dir: -1 | 1) => {
+    const newIdx = idx + dir;
+    if (newIdx < 0 || newIdx >= lines.length) return;
+    const next = [...lines];
+    [next[idx], next[newIdx]] = [next[newIdx], next[idx]];
+    onChange(next);
+  };
+
+  return (
+    <div className="flex-1 flex flex-col gap-2 min-w-0">
+      <div className="flex items-center gap-2 mb-1">
+        <span className="text-sm font-bold text-primary">{speaker}</span>
+        <VoiceSelect value={voiceValue} onChange={onVoiceChange} label={speaker} />
+      </div>
+      {lines.map((line, i) => (
+        <div key={i} className="flex gap-1 items-start">
+          <span className="text-[10px] text-muted-foreground mt-2.5 w-4 text-right shrink-0">{i + 1}</span>
+          <textarea
+            value={line}
+            onChange={(e) => updateLine(i, e.target.value)}
+            rows={1}
+            placeholder={`Реплика ${speaker}...`}
+            className="flex-1 px-2 py-1.5 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none resize-y min-h-[36px]"
+          />
+          <div className="flex flex-col gap-0.5">
+            <button onClick={() => moveLine(i, -1)} disabled={i === 0} className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-20">
+              <ArrowUp className="w-3 h-3" />
+            </button>
+            <button onClick={() => moveLine(i, 1)} disabled={i === lines.length - 1} className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-20">
+              <ArrowDown className="w-3 h-3" />
+            </button>
+          </div>
+          <button onClick={() => removeLine(i)} disabled={lines.length <= 1} className="p-1 text-destructive hover:bg-destructive/10 rounded disabled:opacity-20">
+            <Trash2 className="w-3 h-3" />
+          </button>
+        </div>
+      ))}
+      <button onClick={addLine} className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 self-start">
+        <Plus className="w-3 h-3" /> Реплика
+      </button>
+    </div>
+  );
+};
+
 const ListeningEditor = ({ level }: { level: string }) => {
   const { t } = useLanguage();
   const [texts, setTexts] = useState<any[]>([]);
@@ -86,6 +169,10 @@ const ListeningEditor = ({ level }: { level: string }) => {
   const [pendingTextUpdates, setPendingTextUpdates] = useState<Map<string, Record<string, any>>>(new Map());
   const [pendingQUpdates, setPendingQUpdates] = useState<Map<string, Record<string, any>>>(new Map());
   const [pendingDictUpdates, setPendingDictUpdates] = useState<Map<string, string>>(new Map());
+  // Track dialogue column state per text id
+  const [dialogueStates, setDialogueStates] = useState<Map<string, { linesA: string[]; linesB: string[] }>>(new Map());
+  // Track mode per text (solo / dialogue)
+  const [modes, setModes] = useState<Map<string, "solo" | "dialogue">>(new Map());
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -94,7 +181,20 @@ const ListeningEditor = ({ level }: { level: string }) => {
       .select("*, listening_questions(*), listening_dictations(*)")
       .eq("level", level)
       .order("sort_order");
-    setTexts(data ?? []);
+    const items = data ?? [];
+    setTexts(items);
+    // Init modes & dialogue states from loaded data
+    const newModes = new Map<string, "solo" | "dialogue">();
+    const newDialogue = new Map<string, { linesA: string[]; linesB: string[] }>();
+    for (const txt of items) {
+      const isD = /^[A-Z]:\s/m.test(txt.text);
+      newModes.set(txt.id, isD ? "dialogue" : "solo");
+      if (isD) {
+        newDialogue.set(txt.id, splitDialogueToColumns(txt.text));
+      }
+    }
+    setModes(newModes);
+    setDialogueStates(newDialogue);
     setLoading(false);
     setDirty(false);
     setPendingTextUpdates(new Map());
@@ -110,7 +210,6 @@ const ListeningEditor = ({ level }: { level: string }) => {
       next.set(id, { ...next.get(id), ...updates });
       return next;
     });
-    // Also update local state for immediate UI feedback
     setTexts(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
     setDirty(true);
   };
@@ -139,6 +238,43 @@ const ListeningEditor = ({ level }: { level: string }) => {
     trackTextChange(txtId, { voice_config: Object.keys(newVc).length ? newVc : null });
   };
 
+  const updateDialogueColumn = (txtId: string, speaker: "A" | "B", lines: string[]) => {
+    setDialogueStates(prev => {
+      const next = new Map(prev);
+      const current = next.get(txtId) ?? { linesA: [""], linesB: [""] };
+      const updated = speaker === "A" ? { ...current, linesA: lines } : { ...current, linesB: lines };
+      next.set(txtId, updated);
+      // Serialize and track as text change
+      const serialized = serializeDialogueLines(updated.linesA, updated.linesB);
+      trackTextChange(txtId, { text: serialized });
+      return next;
+    });
+  };
+
+  const setMode = (txtId: string, mode: "solo" | "dialogue") => {
+    setModes(prev => {
+      const next = new Map(prev);
+      next.set(txtId, mode);
+      return next;
+    });
+    if (mode === "dialogue") {
+      const txt = texts.find(t => t.id === txtId);
+      const existing = splitDialogueToColumns(txt?.text ?? "");
+      // If switching from solo, put the text as first line of A
+      if (existing.linesA.length === 1 && !existing.linesA[0] && txt?.text && !/^[A-Z]:\s/m.test(txt.text)) {
+        existing.linesA = [txt.text];
+      }
+      setDialogueStates(prev => {
+        const next = new Map(prev);
+        next.set(txtId, existing);
+        return next;
+      });
+      // Serialize immediately
+      const serialized = serializeDialogueLines(existing.linesA, existing.linesB);
+      trackTextChange(txtId, { text: serialized });
+    }
+  };
+
   const saveAll = async () => {
     setSaving(true);
     const promises: PromiseLike<any>[] = [];
@@ -160,10 +296,17 @@ const ListeningEditor = ({ level }: { level: string }) => {
     toast.success(t("saved"));
   };
 
-  const addText = async () => {
-    await supabase.from("listening_texts").insert([{
-      level, title: "Neuer Hörtext", text: "Text hier...", sort_order: texts.length + 1,
-    }]);
+  const addText = async (mode: "solo" | "dialogue") => {
+    const text = mode === "dialogue" ? "A: Hallo!\nB: Hallo!" : "Text hier...";
+    const { data } = await supabase.from("listening_texts").insert([{
+      level, title: mode === "dialogue" ? "Neuer Dialog" : "Neuer Hörtext", text, sort_order: texts.length + 1,
+    }]).select().single();
+    if (data) {
+      setModes(prev => { const n = new Map(prev); n.set(data.id, mode); return n; });
+      if (mode === "dialogue") {
+        setDialogueStates(prev => { const n = new Map(prev); n.set(data.id, { linesA: ["Hallo!"], linesB: ["Hallo!"] }); return n; });
+      }
+    }
     withScroll(load);
   };
 
@@ -201,12 +344,14 @@ const ListeningEditor = ({ level }: { level: string }) => {
   return (
     <div className="flex flex-col gap-4" onFocus={(e) => { const t = e.target as HTMLElement; if (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA') (t as HTMLInputElement).select(); }}>
       {texts.map((txt) => {
-        const dialogueLines = parseDialogueLines(txt.text);
-        const isDialogue = !!dialogueLines;
+        const mode = modes.get(txt.id) ?? "solo";
+        const isDialogue = mode === "dialogue";
         const vc = txt.voice_config ?? {};
-        
+        const dState = dialogueStates.get(txt.id) ?? { linesA: [""], linesB: [""] };
+
         return (
           <div key={txt.id} className="glass-card p-4 flex flex-col gap-3">
+            {/* Header */}
             <div className="flex gap-2 items-start">
               <input
                 defaultValue={txt.title}
@@ -220,65 +365,63 @@ const ListeningEditor = ({ level }: { level: string }) => {
                 placeholder={t("topic")}
                 className="w-28 px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none"
               />
+              {/* Mode toggle */}
+              <div className="flex rounded-lg border border-border overflow-hidden text-xs shrink-0">
+                <button
+                  onClick={() => setMode(txt.id, "solo")}
+                  className={`px-3 py-2 transition-colors ${!isDialogue ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-foreground"}`}
+                >
+                  🎙️ Соло
+                </button>
+                <button
+                  onClick={() => setMode(txt.id, "dialogue")}
+                  className={`px-3 py-2 transition-colors ${isDialogue ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-foreground"}`}
+                >
+                  💬 Диалог
+                </button>
+              </div>
               <button onClick={() => deleteText(txt.id)} className="p-2 text-destructive hover:bg-destructive/10 rounded-lg">
                 <Trash2 className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Text area */}
-            <textarea
-              defaultValue={txt.text}
-              onChange={(e) => trackTextChange(txt.id, { text: e.target.value })}
-              rows={4}
-              placeholder="Hörtext..."
-              className="w-full px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none resize-y"
-            />
-
-            {/* Voice configuration */}
+            {/* Content area */}
             {isDialogue ? (
-              <>
-                {/* Dialogue: show parsed lines grouped by speaker */}
-                {(() => {
-                  const speakers = [...new Set(dialogueLines!.map(l => l.speaker))];
-                  return (
-                    <div className="flex flex-col gap-2">
-                      <span className="text-xs text-muted-foreground font-display">🎙️ Голоса диалога:</span>
-                      {speakers.map(speaker => {
-                        const speakerLines = dialogueLines!.filter(l => l.speaker === speaker);
-                        return (
-                          <div key={speaker} className="ml-2 border-l-2 border-primary/30 pl-3 flex flex-col gap-1">
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-bold text-primary w-5">{speaker}:</span>
-                              <VoiceSelect
-                                value={vc[speaker] ?? ""}
-                                onChange={(v) => updateVoiceConfig(txt.id, vc, speaker, v)}
-                                label={speaker}
-                              />
-                            </div>
-                            <div className="flex flex-col gap-0.5">
-                              {speakerLines.map((line, i) => (
-                                <p key={i} className="text-[11px] text-muted-foreground pl-7 truncate">
-                                  «{line.text}»
-                                </p>
-                              ))}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  );
-                })()}
-              </>
-            ) : (
-              /* Non-dialogue: single narrator voice */
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">🎙️ Голос:</span>
-                <VoiceSelect
-                  value={vc["narrator"] ?? ""}
-                  onChange={(v) => updateVoiceConfig(txt.id, vc, "narrator", v)}
-                  label="Голос"
+              <div className="flex gap-3">
+                <DialogueColumn
+                  speaker="A"
+                  lines={dState.linesA}
+                  onChange={(lines) => updateDialogueColumn(txt.id, "A", lines)}
+                  voiceValue={vc["A"] ?? ""}
+                  onVoiceChange={(v) => updateVoiceConfig(txt.id, vc, "A", v)}
+                />
+                <div className="w-px bg-border shrink-0" />
+                <DialogueColumn
+                  speaker="B"
+                  lines={dState.linesB}
+                  onChange={(lines) => updateDialogueColumn(txt.id, "B", lines)}
+                  voiceValue={vc["B"] ?? ""}
+                  onVoiceChange={(v) => updateVoiceConfig(txt.id, vc, "B", v)}
                 />
               </div>
+            ) : (
+              <>
+                <textarea
+                  defaultValue={txt.text}
+                  onChange={(e) => trackTextChange(txt.id, { text: e.target.value })}
+                  rows={4}
+                  placeholder="Hörtext..."
+                  className="w-full px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none resize-y"
+                />
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">🎙️ Голос:</span>
+                  <VoiceSelect
+                    value={vc["narrator"] ?? ""}
+                    onChange={(v) => updateVoiceConfig(txt.id, vc, "narrator", v)}
+                    label="Голос"
+                  />
+                </div>
+              </>
             )}
 
             {/* Questions */}
@@ -328,9 +471,17 @@ const ListeningEditor = ({ level }: { level: string }) => {
           </div>
         );
       })}
-      <button onClick={addText} className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all">
-        <Plus className="w-4 h-4" /> Добавить аудио-текст
-      </button>
+
+      {/* Add buttons */}
+      <div className="flex gap-3">
+        <button onClick={() => addText("solo")} className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all">
+          <Plus className="w-4 h-4" /> 🎙️ Соло-текст
+        </button>
+        <button onClick={() => addText("dialogue")} className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all">
+          <Plus className="w-4 h-4" /> 💬 Диалог
+        </button>
+      </div>
+
       {dirty && (
         <button
           onClick={saveAll}
