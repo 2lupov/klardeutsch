@@ -177,7 +177,7 @@ serve(async (req) => {
       });
     }
 
-    const { text, speed } = await req.json();
+    const { text, speed, voice_config } = await req.json();
     const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
     if (!ELEVENLABS_API_KEY) {
       throw new Error("ELEVENLABS_API_KEY not configured");
@@ -192,26 +192,33 @@ serve(async (req) => {
       });
     }
 
-    // Detect genders via AI
-    const genders = await detectGenders(text);
-    
-    // Map speakers to voices based on detected gender
+    // Map speakers to voices
     const speakerSet = [...new Set(lines.map((l) => l.speaker))];
     const voiceMap: Record<string, string> = {};
-    
-    let maleIdx = 0;
-    let femaleIdx = 0;
-    const maleVoices = [VOICES.male1, VOICES.male2];
-    const femaleVoices = [VOICES.female1, VOICES.female2];
 
-    for (const speaker of speakerSet) {
-      const gender = genders[speaker] || "m"; // default male
-      if (gender === "f") {
-        voiceMap[speaker] = femaleVoices[femaleIdx % femaleVoices.length];
-        femaleIdx++;
-      } else {
-        voiceMap[speaker] = maleVoices[maleIdx % maleVoices.length];
-        maleIdx++;
+    if (voice_config && typeof voice_config === "object") {
+      // Use explicit voice config from admin
+      for (const speaker of speakerSet) {
+        voiceMap[speaker] = voice_config[speaker] || VOICES.male1;
+      }
+      console.log(`Using admin voice_config: ${JSON.stringify(voiceMap)}`);
+    } else {
+      // Fallback: try AI detection
+      const genders = await detectGenders(text);
+      let maleIdx = 0;
+      let femaleIdx = 0;
+      const maleVoices = [VOICES.male1, VOICES.male2];
+      const femaleVoices = [VOICES.female1, VOICES.female2];
+
+      for (const speaker of speakerSet) {
+        const gender = genders[speaker] || "m";
+        if (gender === "f") {
+          voiceMap[speaker] = femaleVoices[femaleIdx % femaleVoices.length];
+          femaleIdx++;
+        } else {
+          voiceMap[speaker] = maleVoices[maleIdx % maleVoices.length];
+          maleIdx++;
+        }
       }
     }
 

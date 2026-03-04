@@ -26,6 +26,7 @@ export interface ListeningText {
   id: string;
   title: string;
   text: string;
+  voice_config?: Record<string, string> | null;
   questions: GrammarQuestion[];
   dictations: { id: string; sentence: string }[];
 }

@@ -1,0 +1,1 @@
+ALTER TABLE public.listening_texts ADD COLUMN voice_config jsonb DEFAULT NULL;

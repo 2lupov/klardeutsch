@@ -153,6 +153,40 @@ const ListeningEditor = ({ level }: { level: string }) => {
             className="w-full px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none resize-y"
           />
 
+          {/* Voice config for dialogue speakers */}
+          {/^[A-Z]:\s/m.test(txt.text) && (() => {
+            const speakers = [...new Set((txt.text as string).match(/^([A-Z]):/gm)?.map((m: string) => m[0]) ?? [])];
+            const vc = txt.voice_config ?? {};
+            return (
+              <div className="flex flex-wrap gap-2 items-center">
+                <span className="text-xs text-muted-foreground">🎙️ Голоса:</span>
+                {speakers.map((s: string) => (
+                  <select
+                    key={s}
+                    defaultValue={vc[s] ?? ""}
+                    onChange={(e) => {
+                      const newVc = { ...vc, [s]: e.target.value || undefined };
+                      // Clean empty values
+                      Object.keys(newVc).forEach(k => { if (!newVc[k]) delete newVc[k]; });
+                      trackTextChange(txt.id, { voice_config: Object.keys(newVc).length ? newVc : null });
+                    }}
+                    className="px-2 py-1 rounded-lg bg-secondary text-foreground border border-border text-xs focus:border-primary focus:outline-none"
+                  >
+                    <option value="">{s}: авто</option>
+                    <optgroup label="Мужские">
+                      <option value="aTTiK3YzK3dXETpuDE2h">{s}: Мужской 1</option>
+                      <option value="fmj9wTxZg3ta4xR75kgB">{s}: Мужской 2</option>
+                    </optgroup>
+                    <optgroup label="Женские">
+                      <option value="6CS8keYmkwxkspesdyA7">{s}: Женский 1</option>
+                      <option value="NE7AIW5DoJ7lUosXV2KR">{s}: Женский 2</option>
+                    </optgroup>
+                  </select>
+                ))}
+              </div>
+            );
+          })()}
+
           {/* Questions */}
           <p className="text-xs text-muted-foreground font-display">{t("questions")}:</p>
           {(txt.listening_questions ?? [])
