@@ -294,6 +294,9 @@ const translations = {
   gameDuelsDesc: { ru: "Соревнуйся с друзьями — кто лучше знает немецкий!", uk: "Змагайся з друзями — хто краще знає німецьку!" },
   gamePronunciationTitle: { ru: "Произношение: Sprich nach!", uk: "Вимова: Sprich nach!" },
   gamePronunciationDesc: { ru: "Слушай, повторяй и сравнивай своё произношение с эталоном", uk: "Слухай, повторюй і порівнюй свою вимову з еталоном" },
+  loginWithTelegram: { ru: "Войти через Telegram", uk: "Увійти через Telegram" },
+  telegramAuthLoading: { ru: "Вход через Telegram...", uk: "Вхід через Telegram..." },
+  orDivider: { ru: "или", uk: "або" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;
