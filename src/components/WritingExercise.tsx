@@ -70,21 +70,14 @@ const WritingExercise = ({ level, onComplete, onBack }: WritingExerciseProps) =>
     setFeedback("");
 
     try {
-      const resp = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/check-writing`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: JSON.stringify({
+      const { fetchEdgeFunction } = await import("@/lib/auth-fetch");
+      const resp = await fetchEdgeFunction("check-writing", {
+        json: {
             text: text.trim(),
             task: `${currentTask.task_de} — ${currentTask.task_ru}`,
             level,
-          }),
-        }
-      );
+        },
+      });
 
       if (!resp.ok || !resp.body) {
         const err = await resp.json().catch(() => ({ error: "Unknown error" }));

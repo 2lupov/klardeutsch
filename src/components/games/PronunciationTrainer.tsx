@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from "react";
 import { ArrowLeft, Volume2, Mic, MicOff, RefreshCw, Loader2, CheckCircle2 } from "lucide-react";
 import { usePlatform } from "@/hooks/usePlatform";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 interface PronunciationTrainerProps {
@@ -127,10 +128,16 @@ const PronunciationTrainer = ({ onBack }: PronunciationTrainerProps) => {
     setScore(null);
   };
 
+  const getAccessToken = useCallback(async () => {
+    const { data } = await supabase.auth.getSession();
+    return data.session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  }, []);
+
   const playTTS = useCallback(async () => {
     if (isPlaying) return;
     setIsPlaying(true);
     try {
+      const token = await getAccessToken();
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
         {
@@ -138,7 +145,7 @@ const PronunciationTrainer = ({ onBack }: PronunciationTrainerProps) => {
           headers: {
             "Content-Type": "application/json",
             apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ text: current.de }),
         }
@@ -155,11 +162,12 @@ const PronunciationTrainer = ({ onBack }: PronunciationTrainerProps) => {
       console.error("TTS error:", e);
       setIsPlaying(false);
     }
-  }, [current.de, isPlaying]);
+  }, [current.de, isPlaying, getAccessToken]);
 
   const transcribeAudio = async (audioBlob: Blob) => {
     setIsTranscribing(true);
     try {
+      const token = await getAccessToken();
       const formData = new FormData();
       formData.append("audio", audioBlob, "recording.webm");
 
@@ -169,7 +177,7 @@ const PronunciationTrainer = ({ onBack }: PronunciationTrainerProps) => {
           method: "POST",
           headers: {
             apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            Authorization: `Bearer ${token}`,
           },
           body: formData,
         }

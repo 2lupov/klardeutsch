@@ -80,18 +80,10 @@ const DemoExperience = ({ onBack, onSignup }: DemoProps) => {
     if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
     setAudioLoading(true);
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: JSON.stringify({ text }),
-        }
-      );
+      const { fetchEdgeFunction } = await import("@/lib/auth-fetch");
+      const response = await fetchEdgeFunction("elevenlabs-tts", {
+        json: { text },
+      });
       if (!response.ok) throw new Error();
       const blob = await response.blob();
       const audio = new Audio(URL.createObjectURL(blob));
