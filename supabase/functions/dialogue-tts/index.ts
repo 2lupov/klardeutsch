@@ -7,9 +7,12 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Two distinct German voices: male + female
-const VOICE_A = "JBFqnCBsd6RMkjVDRZzb"; // George – male
-const VOICE_B = "XrExE9yKIg1WjnnlVkGX"; // Matilda – female
+// Two distinct male German voices
+const VOICE_MALE_1 = "JBFqnCBsd6RMkjVDRZzb"; // George
+const VOICE_MALE_2 = "onwK4e9ZLuTAKqWW03F9"; // Daniel
+// Two distinct female German voices
+const VOICE_FEMALE_1 = "XrExE9yKIg1WjnnlVkGX"; // Matilda
+const VOICE_FEMALE_2 = "EXAVITQu4vr4xnSDxMaL"; // Sarah
 
 interface Line {
   speaker: string;
@@ -103,9 +106,8 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_ANON_KEY")!,
       { global: { headers: { Authorization: authHeader } } }
     );
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -122,21 +124,21 @@ serve(async (req) => {
 
     if (!lines) {
       // Not a dialogue — use single voice (narrator)
-      const audioBuffer = await generateTTS(text, VOICE_A, ELEVENLABS_API_KEY, speed ?? 0.85);
+      const audioBuffer = await generateTTS(text, VOICE_MALE_1, ELEVENLABS_API_KEY, speed ?? 0.85);
       return new Response(audioBuffer, {
         headers: { ...corsHeaders, "Content-Type": "audio/mpeg" },
       });
     }
 
     // Dialogue mode: generate each line with appropriate voice
-    // Map unique speakers to voices
+    // Map unique speakers to voices — default to two male voices
     const speakerSet = [...new Set(lines.map((l) => l.speaker))];
     const voiceMap: Record<string, string> = {};
     speakerSet.forEach((s, i) => {
-      voiceMap[s] = i % 2 === 0 ? VOICE_A : VOICE_B;
+      voiceMap[s] = i % 2 === 0 ? VOICE_MALE_1 : VOICE_MALE_2;
     });
 
-    console.log(`Dialogue detected: ${lines.length} lines, ${speakerSet.length} speakers`);
+    console.log(`Dialogue detected: ${lines.length} lines, ${speakerSet.length} speakers, voices: ${JSON.stringify(voiceMap)}`);
 
     // Generate all lines in parallel
     const audioPromises = lines.map((line) =>
