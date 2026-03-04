@@ -224,11 +224,12 @@ serve(async (req) => {
 
     console.log(`Dialogue: ${lines.length} lines, speakers: ${JSON.stringify(voiceMap)}`);
 
-    // Generate all lines in parallel
-    const audioPromises = lines.map((line) =>
-      generateTTS(line.text, voiceMap[line.speaker], ELEVENLABS_API_KEY, speed ?? 0.85)
-    );
-    const audioBuffers = await Promise.all(audioPromises);
+    // Generate lines sequentially to avoid ElevenLabs concurrent request limit
+    const audioBuffers: ArrayBuffer[] = [];
+    for (const line of lines) {
+      const buf = await generateTTS(line.text, voiceMap[line.speaker], ELEVENLABS_API_KEY, speed ?? 0.85);
+      audioBuffers.push(buf);
+    }
 
     // Concatenate with silence between lines
     const silence = createSilence();
