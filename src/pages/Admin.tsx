@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Plus, Trash2, Lock, Check, BookOpen, Languages, Headphones, BookText, ShoppingBag, Gamepad2, Users, Globe, Pencil, Sparkles, ScanSearch, FileText, Bot, GraduationCap } from "lucide-react";
+import { Plus, Trash2, Lock, Check, BookOpen, Languages, Headphones, BookText, ShoppingBag, Gamepad2, Users, Globe, Pencil, Sparkles, ScanSearch, FileText, Bot, GraduationCap, FolderOpen } from "lucide-react";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import ShopEditor from "@/components/admin/ShopEditor";
 import ListeningEditor from "@/components/admin/ListeningEditor";
@@ -14,14 +14,16 @@ import CourseEditor from "@/components/admin/CourseEditor";
 import TranslationChecker from "@/components/admin/TranslationChecker";
 import AllTextsEditor from "@/components/admin/AllTextsEditor";
 import StuffOnlyTab from "@/components/admin/StuffOnlyTab";
+import TopicsEditor from "@/components/admin/TopicsEditor";
 import { toast } from "sonner";
 
 type Level = "A1" | "A2" | "B1" | "B2" | "C1";
-type Tab = "vocabulary" | "grammar" | "reading" | "listening" | "shop" | "games" | "users" | "translations" | "generator" | "checker" | "alltexts" | "stuffonly" | "courses";
+type Tab = "topics" | "vocabulary" | "grammar" | "reading" | "listening" | "shop" | "games" | "users" | "translations" | "generator" | "checker" | "alltexts" | "stuffonly" | "courses";
 
 const LEVELS: Level[] = ["A1", "A2", "B1", "B2", "C1"];
 
 const TAB_CONFIG: { key: Tab; icon: React.ElementType; label: string }[] = [
+  { key: "topics", icon: FolderOpen, label: "topics" },
   { key: "vocabulary", icon: BookOpen, label: "vocabulary" },
   { key: "grammar", icon: Languages, label: "grammar" },
   { key: "reading", icon: BookText, label: "reading" },
@@ -120,12 +122,13 @@ const Admin = () => {
               }`}
             >
               <Icon className="w-3.5 h-3.5" />
-              {key === "games" ? "Игры" : key === "users" ? "Юзеры" : key === "translations" ? "Языки" : key === "generator" ? "ИИ-генератор" : key === "checker" ? "ИИ-проверка" : key === "alltexts" ? "Все тексты" : key === "stuffonly" ? "Stuff Only" : key === "courses" ? "Курсы" : t(label as any)}
+              {key === "topics" ? "Темы" : key === "games" ? "Игры" : key === "users" ? "Юзеры" : key === "translations" ? "Языки" : key === "generator" ? "ИИ-генератор" : key === "checker" ? "ИИ-проверка" : key === "alltexts" ? "Все тексты" : key === "stuffonly" ? "Stuff Only" : key === "courses" ? "Курсы" : t(label as any)}
             </button>
           ))}
         </div>
 
         {/* Hide level selector for non-level tabs */}
+        {tab === "topics" && <TopicsEditor />}
         {tab === "vocabulary" && <VocabEditor level={level} />}
         {tab === "grammar" && <GrammarEditor level={level} />}
         {tab === "reading" && <ReadingEditor level={level} />}
@@ -173,11 +176,17 @@ const VocabEditor = ({ level }: { level: Level }) => {
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
   const [pendingUpdates, setPendingUpdates] = useState<Map<string, Record<string, string>>>(new Map());
+  const [topicsList, setTopicsList] = useState<string[]>([]);
+  const [filterTopic, setFilterTopic] = useState<string>("__all__");
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data } = await supabase.from("vocab_cards").select("*").eq("level", level).order("sort_order");
-    setCards(data ?? []);
+    const [cardsRes, topicsRes] = await Promise.all([
+      supabase.from("vocab_cards").select("*").eq("level", level).order("sort_order"),
+      supabase.from("topics").select("name").eq("level", level).order("sort_order"),
+    ]);
+    setCards(cardsRes.data ?? []);
+    setTopicsList((topicsRes.data ?? []).map((t: any) => t.name));
     setLoading(false);
     setDirty(false);
     setPendingUpdates(new Map());
@@ -208,8 +217,9 @@ const VocabEditor = ({ level }: { level: Level }) => {
   };
 
   const addCard = async () => {
+    const topic = filterTopic !== "__all__" ? filterTopic : "Allgemein";
     await supabase.from("vocab_cards").insert([{
-      level, german: t("newWordGerman"), russian: t("newWord"), sort_order: cards.length + 1,
+      level, german: t("newWordGerman"), russian: t("newWord"), sort_order: cards.length + 1, topic,
     }]);
     load();
   };
@@ -221,9 +231,26 @@ const VocabEditor = ({ level }: { level: Level }) => {
 
   if (loading) return <p className="text-muted-foreground">{t("loading")}</p>;
 
+  const filtered = filterTopic === "__all__" ? cards : cards.filter(c => (c.topic || "Allgemein") === filterTopic);
+
   return (
     <div className="flex flex-col gap-3">
-      {cards.map((card) => (
+      {/* Topic filter */}
+      <div className="flex gap-1.5 flex-wrap">
+        <button onClick={() => setFilterTopic("__all__")} className={`px-2.5 py-1 rounded-lg text-[10px] font-medium transition-colors ${filterTopic === "__all__" ? "bg-primary/15 text-primary border border-primary/30" : "bg-secondary text-muted-foreground"}`}>
+          Все ({cards.length})
+        </button>
+        {topicsList.map(tp => {
+          const count = cards.filter(c => (c.topic || "Allgemein") === tp).length;
+          return (
+            <button key={tp} onClick={() => setFilterTopic(tp)} className={`px-2.5 py-1 rounded-lg text-[10px] font-medium transition-colors ${filterTopic === tp ? "bg-primary/15 text-primary border border-primary/30" : "bg-secondary text-muted-foreground"}`}>
+              {tp} ({count})
+            </button>
+          );
+        })}
+      </div>
+
+      {filtered.map((card) => (
         <div key={card.id} className="glass-card p-4 flex flex-col gap-2">
           <div className="flex gap-2">
             <input defaultValue={card.german} onChange={(e) => trackChange(card.id, "german", e.target.value)} placeholder={t("german")} className="flex-1 px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none" />
@@ -235,7 +262,9 @@ const VocabEditor = ({ level }: { level: Level }) => {
           <div className="flex gap-2">
             <input defaultValue={card.article ?? ""} onChange={(e) => trackChange(card.id, "article", e.target.value)} placeholder={t("article")} className="w-20 px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none" />
             <input defaultValue={card.example ?? ""} onChange={(e) => trackChange(card.id, "example", e.target.value)} placeholder={t("example")} className="flex-1 px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none" />
-            <input defaultValue={card.topic ?? "Allgemein"} onChange={(e) => trackChange(card.id, "topic", e.target.value)} placeholder={t("topic")} className="w-28 px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none" />
+            <select defaultValue={card.topic ?? "Allgemein"} onChange={(e) => trackChange(card.id, "topic", e.target.value)} className="w-28 px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none">
+              {topicsList.map(tp => <option key={tp} value={tp}>{tp}</option>)}
+            </select>
             <button onClick={() => deleteCard(card.id)} className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors">
               <Trash2 className="w-4 h-4" />
             </button>
@@ -376,11 +405,17 @@ const ReadingEditor = ({ level }: { level: Level }) => {
   const [saving, setSaving] = useState(false);
   const [pendingTextUpdates, setPendingTextUpdates] = useState<Map<string, Record<string, any>>>(new Map());
   const [pendingQUpdates, setPendingQUpdates] = useState<Map<string, Record<string, any>>>(new Map());
+  const [topicsList, setTopicsList] = useState<string[]>([]);
+  const [filterTopic, setFilterTopic] = useState<string>("__all__");
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data } = await supabase.from("reading_texts").select("*, reading_questions(*)").eq("level", level).order("sort_order");
-    setTexts(data ?? []);
+    const [textsRes, topicsRes] = await Promise.all([
+      supabase.from("reading_texts").select("*, reading_questions(*)").eq("level", level).order("sort_order"),
+      supabase.from("topics").select("name").eq("level", level).order("sort_order"),
+    ]);
+    setTexts(textsRes.data ?? []);
+    setTopicsList((topicsRes.data ?? []).map((t: any) => t.name));
     setLoading(false);
     setDirty(false);
     setPendingTextUpdates(new Map());
@@ -449,13 +484,32 @@ const ReadingEditor = ({ level }: { level: Level }) => {
 
   if (loading) return <p className="text-muted-foreground">{t("loading")}</p>;
 
+  const filtered = filterTopic === "__all__" ? texts : texts.filter(t => (t.topic || "Allgemein") === filterTopic);
+
   return (
     <div className="flex flex-col gap-4">
-      {texts.map((txt) => (
+      {/* Topic filter */}
+      <div className="flex gap-1.5 flex-wrap">
+        <button onClick={() => setFilterTopic("__all__")} className={`px-2.5 py-1 rounded-lg text-[10px] font-medium transition-colors ${filterTopic === "__all__" ? "bg-primary/15 text-primary border border-primary/30" : "bg-secondary text-muted-foreground"}`}>
+          Все ({texts.length})
+        </button>
+        {topicsList.map(tp => {
+          const count = texts.filter(t => (t.topic || "Allgemein") === tp).length;
+          return (
+            <button key={tp} onClick={() => setFilterTopic(tp)} className={`px-2.5 py-1 rounded-lg text-[10px] font-medium transition-colors ${filterTopic === tp ? "bg-primary/15 text-primary border border-primary/30" : "bg-secondary text-muted-foreground"}`}>
+              {tp} ({count})
+            </button>
+          );
+        })}
+      </div>
+
+      {filtered.map((txt) => (
         <div key={txt.id} className="glass-card p-4 flex flex-col gap-3">
           <div className="flex gap-2 items-start">
             <input defaultValue={txt.title} onChange={(e) => trackTextChange(txt.id, { title: e.target.value })} placeholder={t("title")} className="flex-1 px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm font-semibold focus:border-primary focus:outline-none" />
-            <input defaultValue={txt.topic ?? "Allgemein"} onChange={(e) => trackTextChange(txt.id, { topic: e.target.value })} placeholder={t("topic")} className="w-28 px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none" />
+            <select defaultValue={txt.topic ?? "Allgemein"} onChange={(e) => trackTextChange(txt.id, { topic: e.target.value })} className="w-28 px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none">
+              {topicsList.map(tp => <option key={tp} value={tp}>{tp}</option>)}
+            </select>
             <button onClick={() => deleteText(txt.id)} className="p-2 text-destructive hover:bg-destructive/10 rounded-lg">
               <Trash2 className="w-4 h-4" />
             </button>
