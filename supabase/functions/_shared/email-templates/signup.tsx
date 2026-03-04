@@ -8,10 +8,8 @@ import {
   Head,
   Heading,
   Html,
-  Img,
   Link,
   Preview,
-  Section,
   Text,
 } from 'npm:@react-email/components@0.0.22'
 
@@ -34,27 +32,24 @@ export const SignupEmail = ({
     <Head />
     <Preview>Код подтверждения для KLAR</Preview>
     <Body style={main}>
-      <Container style={wrapper}>
-        <Section style={card}>
-          <Img src="https://jqqsszwbbxvevebmebfm.supabase.co/storage/v1/object/public/email-assets/logo.png" alt="KLAR" width="56" height="56" style={logo} />
-          <Text style={brand}>KLAR</Text>
-          <Heading style={h1}>Добро пожаловать! 🎉</Heading>
-          <Text style={text}>
-            Спасибо за регистрацию в{' '}
-            <Link href={siteUrl} style={link}>
-              <strong>KLAR</strong>
-            </Link>
-            ! Введи этот код для подтверждения email:
-          </Text>
-          {token ? (
-            <Text style={codeBox}>{token}</Text>
-          ) : (
-            <Text style={codeBox}>------</Text>
-          )}
-          <Text style={hintText}>
-            Скопируй код и вставь его на странице подтверждения.
-          </Text>
-        </Section>
+      <Container style={container}>
+        <Text style={brand}>KLAR</Text>
+        <Heading style={h1}>Добро пожаловать! 🎉</Heading>
+        <Text style={text}>
+          Спасибо за регистрацию в{' '}
+          <Link href={siteUrl} style={link}>
+            <strong>KLAR</strong>
+          </Link>
+          ! Введи этот код для подтверждения email:
+        </Text>
+        {token ? (
+          <Text style={codeBox}>{token}</Text>
+        ) : (
+          <Text style={codeBox}>------</Text>
+        )}
+        <Text style={hintText}>
+          Скопируй код и вставь его на странице подтверждения.
+        </Text>
       </Container>
     </Body>
   </Html>
@@ -62,14 +57,13 @@ export const SignupEmail = ({
 
 export default SignupEmail
 
-const main = { backgroundColor: '#ffffff', fontFamily: "'Space Grotesk', Arial, sans-serif" }
-const wrapper = { padding: '24px 16px' }
-const card = {
+const main = {
   backgroundColor: '#0f1729',
-  borderRadius: '16px',
-  padding: '36px 28px',
+  fontFamily: "'Space Grotesk', Arial, sans-serif",
+  margin: '0',
+  padding: '0',
 }
-const logo = { margin: '0 0 12px', borderRadius: '12px' }
+const container = { padding: '36px 28px' }
 const brand = {
   fontSize: '24px',
   fontWeight: 'bold' as const,
