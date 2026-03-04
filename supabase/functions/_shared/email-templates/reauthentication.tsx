@@ -25,10 +25,7 @@ export const ReauthenticationEmail = ({ token }: ReauthenticationEmailProps) => 
         <Text style={brand}>KLAR</Text>
         <Heading style={h1}>Код подтверждения</Heading>
         <Text style={text}>Используй этот код для подтверждения:</Text>
-        <Text style={codeStyle}>{token}</Text>
-        <Text style={footer}>
-          Код действителен ограниченное время. Если ты не запрашивал его — просто проигнорируй.
-        </Text>
+        <Text style={codeBox}>{token}</Text>
       </Container>
     </Body>
   </Html>
@@ -36,10 +33,15 @@ export const ReauthenticationEmail = ({ token }: ReauthenticationEmailProps) => 
 
 export default ReauthenticationEmail
 
-const main = { backgroundColor: '#ffffff', fontFamily: "'Space Grotesk', Arial, sans-serif" }
-const container = { padding: '32px 28px' }
+const main = {
+  backgroundColor: '#0f1729',
+  fontFamily: "'Space Grotesk', Arial, sans-serif",
+  margin: '0',
+  padding: '0',
+}
+const container = { padding: '36px 28px' }
 const brand = {
-  fontSize: '28px',
+  fontSize: '24px',
   fontWeight: 'bold' as const,
   color: '#e6a817',
   margin: '0 0 24px',
@@ -47,21 +49,24 @@ const brand = {
 const h1 = {
   fontSize: '22px',
   fontWeight: 'bold' as const,
-  color: '#111827',
+  color: '#f1f5f9',
   margin: '0 0 16px',
 }
 const text = {
   fontSize: '15px',
-  color: '#6b7280',
+  color: '#94a3b8',
   lineHeight: '1.6',
   margin: '0 0 24px',
 }
-const codeStyle = {
-  fontFamily: "'Space Grotesk', Courier, monospace",
-  fontSize: '28px',
+const codeBox = {
+  fontSize: '32px',
   fontWeight: 'bold' as const,
-  color: '#e6a817',
-  letterSpacing: '4px',
-  margin: '0 0 32px',
+  color: '#f1f5f9',
+  backgroundColor: '#1a2744',
+  border: '2px solid #e6a817',
+  borderRadius: '12px',
+  padding: '16px 24px',
+  textAlign: 'center' as const,
+  letterSpacing: '8px',
+  margin: '0 0 16px',
 }
-const footer = { fontSize: '12px', color: '#9ca3af', margin: '32px 0 0' }
