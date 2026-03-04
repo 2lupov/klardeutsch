@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { fetchEdgeFunction } from "@/lib/auth-fetch";
 import { Brain, Sparkles, X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -31,18 +32,9 @@ const AIFeedback = ({ mistakes, level, category, onClose }: AIFeedbackProps) => 
     setContent("");
 
     try {
-      const resp = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-mistakes`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: JSON.stringify({ mistakes, level, category }),
-        }
-      );
+      const resp = await fetchEdgeFunction("analyze-mistakes", {
+        json: { mistakes, level, category },
+      });
 
       if (!resp.ok || !resp.body) {
         const errData = await resp.json().catch(() => ({}));

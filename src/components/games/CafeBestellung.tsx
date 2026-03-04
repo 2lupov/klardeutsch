@@ -91,18 +91,10 @@ const CafeBestellung = ({ onBack }: { onBack: () => void }) => {
     setTtsLoading(true);
     setBaristaState("speaking");
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: JSON.stringify({ text, voiceId: "JBFqnCBsd6RMkjVDRZzb" }),
-        }
-      );
+      const { fetchEdgeFunction } = await import("@/lib/auth-fetch");
+      const response = await fetchEdgeFunction("elevenlabs-tts", {
+        json: { text, voiceId: "JBFqnCBsd6RMkjVDRZzb" },
+      });
       if (!response.ok) throw new Error();
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);

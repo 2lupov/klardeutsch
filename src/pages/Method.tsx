@@ -131,18 +131,10 @@ const Method = () => {
       const text = motivationText[lang] || motivationText.ru;
       const voiceId = voiceIdMap[lang] || voiceIdMap.ru;
 
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: JSON.stringify({ text, voiceId }),
-        }
-      );
+      const { fetchEdgeFunction } = await import("@/lib/auth-fetch");
+      const response = await fetchEdgeFunction("elevenlabs-tts", {
+        json: { text, voiceId },
+      });
 
       if (!response.ok) throw new Error("TTS failed");
 

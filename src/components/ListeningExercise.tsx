@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Volume2, Play, Pause, Check, X, Headphones, PenLine } from "lucide-react";
 
 interface ListeningQuestion {
@@ -58,6 +59,8 @@ const ListeningExercise = ({ listenings, onComplete }: ListeningExerciseProps) =
     }
     setLoading(true);
     try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
         {
@@ -65,7 +68,7 @@ const ListeningExercise = ({ listenings, onComplete }: ListeningExerciseProps) =
           headers: {
             "Content-Type": "application/json",
             apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ text }),
         }
