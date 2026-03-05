@@ -17,8 +17,10 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 /** Injects the official Telegram Login Widget script */
 const TelegramLoginButton = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const isProduction = window.location.hostname === "klardeutsch.org" || window.location.hostname === "www.klardeutsch.org";
 
   useEffect(() => {
+    if (!isProduction) return;
     if (!containerRef.current || containerRef.current.hasChildNodes()) return;
     const script = document.createElement("script");
     script.src = "https://telegram.org/js/telegram-widget.js?22";
@@ -29,7 +31,9 @@ const TelegramLoginButton = () => {
     script.setAttribute("data-request-access", "write");
     script.async = true;
     containerRef.current.appendChild(script);
-  }, []);
+  }, [isProduction]);
+
+  if (!isProduction) return null;
 
   return <div ref={containerRef} className="flex justify-center" />;
 };
