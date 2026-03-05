@@ -4,29 +4,30 @@ interface Particle {
   id: number;
   x: number;
   y: number;
-  angle: number;
-  speed: number;
   size: number;
   color: string;
   delay: number;
   duration: number;
-  type: "spark" | "confetti" | "star" | "ring" | "trail";
+  type: "confetti" | "spark" | "letter-shard";
   rotation: number;
   drift: number;
+  angle: number;
+  speed: number;
+  letter?: string;
 }
 
-const COLORS = [
-  "hsl(45, 92%, 52%)",   // gold
-  "hsl(45, 80%, 65%)",   // light gold
-  "hsl(30, 90%, 55%)",   // orange
-  "hsl(60, 85%, 60%)",   // yellow
-  "hsl(0, 85%, 60%)",    // red
-  "hsl(200, 80%, 60%)",  // blue
-  "hsl(280, 70%, 65%)",  // purple
-  "hsl(140, 70%, 55%)",  // green
-  "hsl(320, 80%, 65%)",  // pink
-  "hsl(170, 70%, 55%)",  // teal
+const YELLOW_PALETTE = [
+  "hsl(45, 92%, 52%)",
+  "hsl(45, 80%, 65%)",
+  "hsl(50, 90%, 58%)",
+  "hsl(40, 85%, 50%)",
+  "hsl(55, 95%, 60%)",
+  "hsl(38, 90%, 55%)",
+  "hsl(48, 88%, 70%)",
+  "hsl(42, 95%, 45%)",
 ];
+
+const randColor = () => YELLOW_PALETTE[Math.floor(Math.random() * YELLOW_PALETTE.length)];
 
 const triggerHaptic = () => {
   try {
@@ -35,13 +36,9 @@ const triggerHaptic = () => {
       tg.HapticFeedback.impactOccurred("heavy");
       setTimeout(() => tg.HapticFeedback.impactOccurred("medium"), 200);
       setTimeout(() => tg.HapticFeedback.impactOccurred("light"), 400);
-      setTimeout(() => tg.HapticFeedback.impactOccurred("heavy"), 800);
-      setTimeout(() => tg.HapticFeedback.impactOccurred("medium"), 1200);
     }
   } catch {}
-  if (navigator.vibrate) {
-    navigator.vibrate([100, 50, 80, 50, 60, 100, 120]);
-  }
+  if (navigator.vibrate) navigator.vibrate([100, 50, 80, 50, 60]);
 };
 
 interface FireworksProps {
@@ -49,10 +46,9 @@ interface FireworksProps {
   originRef?: React.RefObject<HTMLElement>;
 }
 
-const randColor = () => COLORS[Math.floor(Math.random() * COLORS.length)];
-
 const Fireworks = ({ onComplete, originRef }: FireworksProps) => {
   const [origin, setOrigin] = useState<{ x: number; y: number } | null>(null);
+  const [phase, setPhase] = useState<"fill" | "explode">("fill");
 
   useEffect(() => {
     if (originRef?.current) {
@@ -61,162 +57,156 @@ const Fireworks = ({ onComplete, originRef }: FireworksProps) => {
     }
   }, [originRef]);
 
+  // Phase 1: fill logo → Phase 2: explode
+  useEffect(() => {
+    const fillTimer = setTimeout(() => {
+      setPhase("explode");
+      triggerHaptic();
+    }, 900);
+    const completeTimer = setTimeout(onComplete, 3800);
+    return () => {
+      clearTimeout(fillTimer);
+      clearTimeout(completeTimer);
+    };
+  }, [onComplete]);
+
+  const ox = origin?.x ?? window.innerWidth / 2;
+  const oy = origin?.y ?? window.innerHeight * 0.35;
+
   const particles = useMemo<Particle[]>(() => {
     const arr: Particle[] = [];
     let id = 0;
-    const W = window.innerWidth;
-    const H = window.innerHeight;
 
-    // === Wave 1: central burst sparks (from origin) ===
-    for (let wave = 0; wave < 3; wave++) {
-      const count = 24 + wave * 6;
-      for (let i = 0; i < count; i++) {
-        arr.push({
-          id: id++, x: 0, y: 0,
-          angle: (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.4,
-          speed: 60 + Math.random() * 120 + wave * 30,
-          size: 3 + Math.random() * 5,
-          color: randColor(),
-          delay: wave * 200 + Math.random() * 100,
-          duration: 1000 + Math.random() * 600,
-          type: "spark",
-          rotation: 0, drift: 0,
-        });
-      }
+    // Letter shards flying outward
+    const letters = ["K", "L", "A", "R"];
+    letters.forEach((letter, i) => {
+      const baseAngle = ((i - 1.5) / 4) * Math.PI * 0.8 - Math.PI / 2;
+      arr.push({
+        id: id++, x: 0, y: 0,
+        size: 36, color: "hsl(45, 92%, 52%)",
+        delay: 0, duration: 1400,
+        type: "letter-shard",
+        rotation: (Math.random() - 0.5) * 720,
+        drift: 0,
+        angle: baseAngle + (Math.random() - 0.5) * 0.5,
+        speed: 120 + Math.random() * 80,
+        letter,
+      });
+    });
+
+    // Central burst sparks
+    for (let i = 0; i < 40; i++) {
+      const angle = (Math.PI * 2 * i) / 40 + (Math.random() - 0.5) * 0.3;
+      arr.push({
+        id: id++, x: 0, y: 0,
+        size: 3 + Math.random() * 5,
+        color: randColor(),
+        delay: Math.random() * 100,
+        duration: 800 + Math.random() * 400,
+        type: "spark",
+        rotation: 0, drift: 0,
+        angle, speed: 50 + Math.random() * 120,
+      });
     }
 
-    // === Wave 2: confetti shooting up ===
-    for (let i = 0; i < 100; i++) {
+    // Confetti rain
+    for (let i = 0; i < 120; i++) {
       arr.push({
         id: id++,
-        x: -50 + Math.random() * 100,
+        x: (Math.random() - 0.5) * 80,
         y: 0,
-        angle: 0, speed: 0,
         size: 6 + Math.random() * 10,
         color: randColor(),
-        delay: Math.random() * 500,
-        duration: 2200 + Math.random() * 1000,
+        delay: Math.random() * 600,
+        duration: 2400 + Math.random() * 1200,
         type: "confetti",
         rotation: Math.random() * 360,
-        drift: (Math.random() - 0.5) * 250,
-      });
-    }
-
-    // === Wave 3: secondary explosions at random positions ===
-    const burstPoints = [
-      { bx: W * 0.2, by: H * 0.25, bDelay: 600 },
-      { bx: W * 0.8, by: H * 0.3, bDelay: 900 },
-      { bx: W * 0.5, by: H * 0.15, bDelay: 1200 },
-      { bx: W * 0.3, by: H * 0.6, bDelay: 1500 },
-      { bx: W * 0.7, by: H * 0.5, bDelay: 1800 },
-    ];
-    for (const bp of burstPoints) {
-      for (let i = 0; i < 16; i++) {
-        arr.push({
-          id: id++,
-          x: bp.bx, y: bp.by,
-          angle: (Math.PI * 2 * i) / 16 + (Math.random() - 0.5) * 0.3,
-          speed: 30 + Math.random() * 70,
-          size: 3 + Math.random() * 4,
-          color: randColor(),
-          delay: bp.bDelay + Math.random() * 150,
-          duration: 900 + Math.random() * 500,
-          type: "spark",
-          rotation: 0, drift: 0,
-        });
-      }
-      // Expanding ring for each burst
-      arr.push({
-        id: id++,
-        x: bp.bx, y: bp.by,
+        drift: (Math.random() - 0.5) * 300,
         angle: 0, speed: 0,
-        size: 80 + Math.random() * 40,
-        color: randColor(),
-        delay: bp.bDelay,
-        duration: 800,
-        type: "ring",
-        rotation: 0, drift: 0,
-      });
-    }
-
-    // === Stars floating down ===
-    for (let i = 0; i < 20; i++) {
-      arr.push({
-        id: id++,
-        x: Math.random() * W,
-        y: -20,
-        angle: 0, speed: 0,
-        size: 10 + Math.random() * 14,
-        color: randColor(),
-        delay: 400 + Math.random() * 2000,
-        duration: 2000 + Math.random() * 1500,
-        type: "star",
-        rotation: Math.random() * 360,
-        drift: (Math.random() - 0.5) * 100,
-      });
-    }
-
-    // === Trails shooting upward ===
-    for (let i = 0; i < 8; i++) {
-      arr.push({
-        id: id++,
-        x: W * 0.15 + Math.random() * W * 0.7,
-        y: H,
-        angle: 0, speed: 0,
-        size: 3,
-        color: COLORS[i % COLORS.length],
-        delay: i * 250 + Math.random() * 200,
-        duration: 1200,
-        type: "trail",
-        rotation: 0,
-        drift: (Math.random() - 0.5) * 60,
       });
     }
 
     return arr;
   }, []);
 
-  useEffect(() => {
-    triggerHaptic();
-    const t = setTimeout(onComplete, 3500);
-    return () => clearTimeout(t);
-  }, [onComplete]);
-
-  const ox = origin?.x ?? window.innerWidth / 2;
-  const oy = origin?.y ?? window.innerHeight * 0.35;
+  if (phase === "fill") {
+    return (
+      <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center">
+        <h1
+          className="text-6xl font-display font-bold tracking-tight select-none"
+          style={{
+            backgroundImage: "linear-gradient(135deg, hsl(45 92% 52%), hsl(50 90% 65%))",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            filter: "drop-shadow(0 0 20px hsl(45 92% 52% / 0.6))",
+            animation: "klar-fill-pulse 0.9s ease-in-out forwards",
+          }}
+        >
+          KLAR
+        </h1>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 pointer-events-none overflow-hidden">
-      {/* Multi-layer flash */}
+      {/* Flash */}
       <div
         className="absolute inset-0"
         style={{
-          background: `radial-gradient(circle at ${ox}px ${oy}px, hsl(45 92% 52% / 0.5), transparent 50%)`,
-          animation: "fw-flash 0.8s ease-out forwards",
+          background: `radial-gradient(circle at ${ox}px ${oy}px, hsl(45 92% 52% / 0.6), transparent 60%)`,
+          animation: "fw-flash 0.6s ease-out forwards",
         }}
       />
+
+      {/* Shockwave ring */}
       <div
-        className="absolute inset-0"
+        className="absolute rounded-full"
         style={{
-          background: `radial-gradient(circle at ${ox}px ${oy}px, hsl(45 92% 80% / 0.3), transparent 30%)`,
-          animation: "fw-flash 0.4s ease-out forwards",
+          left: ox, top: oy,
+          width: 0, height: 0,
+          border: "2px solid hsl(45 92% 52% / 0.6)",
+          boxShadow: "0 0 30px hsl(45 92% 52% / 0.4)",
+          transform: "translate(-50%, -50%)",
+          animation: "klar-shockwave 0.8s ease-out forwards",
         }}
       />
 
       {particles.map((p) => {
+        if (p.type === "letter-shard") {
+          return (
+            <div
+              key={p.id}
+              className="absolute font-display font-bold select-none"
+              style={{
+                left: ox, top: oy,
+                fontSize: p.size,
+                backgroundImage: "linear-gradient(135deg, hsl(45 92% 52%), hsl(50 90% 65%))",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                filter: "drop-shadow(0 0 12px hsl(45 92% 52% / 0.5))",
+                transform: "translate(-50%, -50%)",
+                animation: `klar-letter-fly ${p.duration}ms ease-out ${p.delay}ms forwards`,
+                "--klar-tx": `${Math.cos(p.angle) * p.speed}px`,
+                "--klar-ty": `${Math.sin(p.angle) * p.speed}px`,
+                "--klar-rot": `${p.rotation}deg`,
+              } as React.CSSProperties}
+            >
+              {p.letter}
+            </div>
+          );
+        }
+
         if (p.type === "spark") {
-          const isSecondary = p.x !== 0 || p.y !== 0;
-          const cx = isSecondary ? p.x : ox;
-          const cy = isSecondary ? p.y : oy;
           return (
             <div
               key={p.id}
               className="absolute rounded-full"
               style={{
-                left: cx, top: cy,
+                left: ox, top: oy,
                 width: p.size, height: p.size,
                 backgroundColor: p.color,
-                boxShadow: `0 0 ${p.size * 4}px ${p.color}, 0 0 ${p.size * 8}px ${p.color}40`,
+                boxShadow: `0 0 ${p.size * 3}px ${p.color}`,
                 animation: `fw-particle ${p.duration}ms ease-out ${p.delay}ms forwards`,
                 "--fw-tx": `${Math.cos(p.angle) * p.speed}px`,
                 "--fw-ty": `${Math.sin(p.angle) * p.speed}px`,
@@ -249,65 +239,6 @@ const Fireworks = ({ onComplete, originRef }: FireworksProps) => {
                 <div style={{ width: p.size, height: p.size, backgroundColor: p.color, borderRadius: "50%" }} />
               )}
             </div>
-          );
-        }
-
-        if (p.type === "ring") {
-          return (
-            <div
-              key={p.id}
-              className="absolute rounded-full"
-              style={{
-                left: p.x, top: p.y,
-                width: 0, height: 0,
-                border: `2px solid ${p.color}`,
-                boxShadow: `0 0 20px ${p.color}, inset 0 0 20px ${p.color}40`,
-                transform: "translate(-50%, -50%)",
-                animation: `fw-ring ${p.duration}ms ease-out ${p.delay}ms forwards`,
-                "--fw-ring-size": `${p.size}px`,
-                opacity: 0,
-              } as React.CSSProperties}
-            />
-          );
-        }
-
-        if (p.type === "star") {
-          return (
-            <div
-              key={p.id}
-              className="absolute"
-              style={{
-                left: p.x, top: p.y,
-                fontSize: p.size,
-                color: p.color,
-                textShadow: `0 0 ${p.size}px ${p.color}`,
-                animation: `fw-star-fall ${p.duration}ms ease-in ${p.delay}ms forwards`,
-                "--fw-star-drift": `${p.drift}px`,
-                "--fw-star-rot": `${p.rotation + 360}deg`,
-                opacity: 0,
-              } as React.CSSProperties}
-            >
-              ✦
-            </div>
-          );
-        }
-
-        if (p.type === "trail") {
-          return (
-            <div
-              key={p.id}
-              className="absolute"
-              style={{
-                left: p.x, bottom: 0,
-                width: p.size, height: p.size,
-                backgroundColor: p.color,
-                borderRadius: "50%",
-                boxShadow: `0 0 12px ${p.color}, 0 8px 24px ${p.color}80`,
-                animation: `fw-trail ${p.duration}ms ease-out ${p.delay}ms forwards`,
-                "--fw-trail-drift": `${p.drift}px`,
-                opacity: 0,
-              } as React.CSSProperties}
-            />
           );
         }
 
