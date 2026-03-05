@@ -248,13 +248,15 @@
 
   @keyframes klar-explode {
     0% { transform: scale(1); opacity: 1; filter: drop-shadow(0 0 0px hsl(45 92% 52% / 0)); }
-    30% { transform: scale(1.4); opacity: 1; filter: drop-shadow(0 0 40px hsl(45 92% 52% / 0.9)); }
-    60% { transform: scale(2); opacity: 0.6; filter: drop-shadow(0 0 60px hsl(45 92% 52% / 0.5)); }
-    100% { transform: scale(3); opacity: 0; filter: drop-shadow(0 0 0px hsl(45 92% 52% / 0)); }
+    15% { transform: scale(1.08); opacity: 1; filter: drop-shadow(0 0 15px hsl(45 92% 52% / 0.4)); }
+    40% { transform: scale(1.25); opacity: 1; filter: drop-shadow(0 0 35px hsl(45 92% 52% / 0.8)); }
+    65% { transform: scale(1.7); opacity: 0.7; filter: drop-shadow(0 0 50px hsl(45 92% 52% / 0.6)); }
+    85% { transform: scale(2.2); opacity: 0.3; filter: drop-shadow(0 0 30px hsl(45 92% 52% / 0.3)); }
+    100% { transform: scale(2.8); opacity: 0; filter: drop-shadow(0 0 0px hsl(45 92% 52% / 0)); }
   }
 
   .animate-klar-explode {
-    animation: klar-explode 0.5s ease-out forwards;
+    animation: klar-explode 0.7s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
   }
 
   @keyframes klar-letter-fly {
