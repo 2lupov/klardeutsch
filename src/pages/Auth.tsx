@@ -327,8 +327,8 @@ const Auth = () => {
           <div className="flex justify-end mb-1">
             <LanguageSwitcher />
           </div>
-          <div ref={logoRef} style={{ visibility: showFireworks ? 'hidden' : 'visible' }}>
-            <AuthKlarLogo progress={getProgress()} />
+          <div ref={logoRef} className={showFireworks ? "animate-klar-explode" : ""}>
+            <AuthKlarLogo progress={showFireworks ? 1 : getProgress()} />
           </div>
           <p className="text-muted-foreground text-sm mt-1 animate-auth-fade-up" style={{ animationDelay: "0.7s" }}>
             {forgotMode ? t("resetPasswordTitle") : isLogin ? t("loginTitle") : t("signupTitle")}
