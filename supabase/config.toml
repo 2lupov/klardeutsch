@@ -29,3 +29,7 @@ project_id = "jqqsszwbbxvevebmebfm"
     verify_jwt = false
   [functions.dialogue-tts]
     verify_jwt = false
+  [functions.generate-full-course]
+    verify_jwt = false
+  [functions.generate-course-prompt]
+    verify_jwt = false

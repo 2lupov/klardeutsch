@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Progress } from "@/components/ui/progress";
 
 const withScroll = async (fn: () => Promise<void>) => {
   const el = document.getElementById("admin-scroll");
@@ -553,7 +554,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
   const [lessonsCount, setLessonsCount] = useState("5");
   const [topics, setTopics] = useState("");
   const [generatedPrompt, setGeneratedPrompt] = useState("");
-  const [generating, setGenerating] = useState(false);
+  const [generatingPrompt, setGeneratingPrompt] = useState(false);
   const [copied, setCopied] = useState(false);
   const [jsonInput, setJsonInput] = useState("");
   const [validating, setValidating] = useState(false);
@@ -568,6 +569,62 @@ const CourseEditor = ({ level }: { level: Level }) => {
   const [loadingLessons, setLoadingLessons] = useState(false);
   const [savingEdit, setSavingEdit] = useState(false);
   const [savingNewLesson, setSavingNewLesson] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [genProgress, setGenProgress] = useState(0);
+  const [genTotal, setGenTotal] = useState(0);
+  const [genLog, setGenLog] = useState<string[]>([]);
+  const genAbortRef = useRef(false);
+
+  const generateAllLessons = async (course: ExistingCourse) => {
+    if (!confirm(`Сгенерировать 25 уроков для ${course.level}? Это может занять несколько минут.`)) return;
+    setGenerating(true);
+    genAbortRef.current = false;
+    const batchSize = 5;
+    const totalBatches = 5;
+    setGenTotal(25);
+    setGenProgress(0);
+    setGenLog([]);
+
+    for (let batch = 0; batch < totalBatches; batch++) {
+      if (genAbortRef.current) break;
+      const batchStart = batch * batchSize;
+      setGenLog(prev => [...prev, `⏳ Генерация уроков ${batchStart + 1}-${batchStart + batchSize}...`]);
+      
+      try {
+        const { data, error } = await supabase.functions.invoke("generate-full-course", {
+          body: { courseId: course.id, level: course.level, batchStart, batchSize },
+        });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        
+        setGenProgress((batch + 1) * batchSize);
+        setGenLog(prev => [...prev, `✅ Уроки ${batchStart + 1}-${batchStart + (data?.lessonsGenerated || batchSize)} готовы!`]);
+      } catch (err: any) {
+        setGenLog(prev => [...prev, `❌ Ошибка батча ${batch + 1}: ${err.message}`]);
+        if (err.message?.includes("Rate limit")) {
+          setGenLog(prev => [...prev, `⏳ Ждём 60 сек...`]);
+          await new Promise(r => setTimeout(r, 60000));
+          batch--; // retry
+          continue;
+        }
+        break;
+      }
+      
+      // Small delay between batches
+      if (batch < totalBatches - 1) {
+        await new Promise(r => setTimeout(r, 3000));
+      }
+    }
+    
+    setGenerating(false);
+    toast.success("Генерация завершена! 🎉");
+    // Reload lessons
+    if (editingCourseId === course.id) {
+      const { data } = await supabase.from("course_lessons").select("*").eq("course_id", course.id).order("sort_order", { ascending: true });
+      setEditLessons((data as any[]) || []);
+    }
+    withScroll(loadCourses);
+  };
 
   const loadCourses = useCallback(async () => {
     setLoadingCourses(true);
@@ -694,7 +751,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
 
   const handleGeneratePrompt = async () => {
     if (!courseName.trim()) { toast.error("Введите название курса"); return; }
-    setGenerating(true);
+    setGeneratingPrompt(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-course-prompt", {
         body: { action: "generate_prompt", courseName: courseName.trim(), level, lessonsCount: parseInt(lessonsCount) || 5, topics: topics.trim() ? topics.split(",").map(t => t.trim()) : [], description: description.trim() },
@@ -705,7 +762,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
       setStep("prompt");
       toast.success("Промпт сгенерирован!");
     } catch (err: any) { toast.error("Ошибка: " + err.message); }
-    setGenerating(false);
+    setGeneratingPrompt(false);
   };
 
   const copyPrompt = async () => { await navigator.clipboard.writeText(generatedPrompt); setCopied(true); toast.success("Скопировано!"); setTimeout(() => setCopied(false), 2000); };
@@ -824,6 +881,31 @@ const CourseEditor = ({ level }: { level: Level }) => {
           </div>
         </div>
 
+        {/* Auto-generate 25 lessons */}
+        {editCourse && editLessons.length === 0 && !generating && (
+          <button onClick={() => generateAllLessons(editCourse)} className="w-full py-3 rounded-xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground text-sm font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+            <Sparkles className="w-4 h-4" /> Авто-генерация 25 уроков ({editCourse.level})
+          </button>
+        )}
+
+        {generating && (
+          <div className="glass-card p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-bold text-foreground flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin text-primary" /> Генерация уроков...
+              </span>
+              <span className="text-xs text-muted-foreground">{genProgress}/{genTotal}</span>
+            </div>
+            <Progress value={(genProgress / Math.max(genTotal, 1)) * 100} className="h-2" />
+            <div className="max-h-32 overflow-y-auto space-y-0.5">
+              {genLog.map((line, i) => (
+                <p key={i} className="text-[10px] text-muted-foreground">{line}</p>
+              ))}
+            </div>
+            <button onClick={() => { genAbortRef.current = true; }} className="text-[10px] text-destructive hover:underline">Остановить</button>
+          </div>
+        )}
+
         {loadingLessons ? (
           <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>
         ) : editLessons.length === 0 ? (
@@ -936,9 +1018,9 @@ const CourseEditor = ({ level }: { level: Level }) => {
             <div className="flex-1"><label className="text-[10px] text-muted-foreground block mb-1">Уроков</label><input type="number" value={lessonsCount} onChange={e => setLessonsCount(e.target.value)} min={1} max={30} className="w-full px-3 py-2 rounded-xl bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none" /></div>
           </div>
           <div><label className="text-[10px] text-muted-foreground block mb-1">Темы (через запятую)</label><input value={topics} onChange={e => setTopics(e.target.value)} placeholder="Приветствие, В отеле..." className="w-full px-3 py-2 rounded-xl bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none" /></div>
-          <button onClick={handleGeneratePrompt} disabled={generating || !courseName.trim()} className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-primary text-primary-foreground font-semibold disabled:opacity-40">
-            {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
-            {generating ? "ИИ генерирует..." : "Создать промпт через ИИ"}
+          <button onClick={handleGeneratePrompt} disabled={generatingPrompt || !courseName.trim()} className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-primary text-primary-foreground font-semibold disabled:opacity-40">
+            {generatingPrompt ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
+            {generatingPrompt ? "ИИ генерирует..." : "Создать промпт через ИИ"}
           </button>
         </div>
       )}
