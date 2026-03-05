@@ -35,7 +35,6 @@ const triggerHaptic = () => {
     if (tg?.HapticFeedback) {
       tg.HapticFeedback.impactOccurred("heavy");
       setTimeout(() => tg.HapticFeedback.impactOccurred("medium"), 200);
-      setTimeout(() => tg.HapticFeedback.impactOccurred("light"), 400);
     }
   } catch {}
   if (navigator.vibrate) navigator.vibrate([100, 50, 80, 50, 60]);
@@ -48,7 +47,6 @@ interface FireworksProps {
 
 const Fireworks = ({ onComplete, originRef }: FireworksProps) => {
   const [origin, setOrigin] = useState<{ x: number; y: number } | null>(null);
-  const [phase, setPhase] = useState<"fill" | "explode">("fill");
 
   useEffect(() => {
     if (originRef?.current) {
@@ -57,71 +55,65 @@ const Fireworks = ({ onComplete, originRef }: FireworksProps) => {
     }
   }, [originRef]);
 
-  // Phase 1: fill logo → Phase 2: explode
   useEffect(() => {
-    const fillTimer = setTimeout(() => {
-      setPhase("explode");
-      triggerHaptic();
-    }, 900);
-    const completeTimer = setTimeout(onComplete, 3800);
-    return () => {
-      clearTimeout(fillTimer);
-      clearTimeout(completeTimer);
-    };
+    triggerHaptic();
+    const t = setTimeout(onComplete, 3200);
+    return () => clearTimeout(t);
   }, [onComplete]);
 
   const ox = origin?.x ?? window.innerWidth / 2;
-  const oy = origin?.y ?? window.innerHeight * 0.35;
+  const oy = origin?.y ?? window.innerHeight * 0.3;
 
   const particles = useMemo<Particle[]>(() => {
     const arr: Particle[] = [];
     let id = 0;
 
-    // Letter shards flying outward
+    // Letter shards — fly outward immediately from logo position
     const letters = ["K", "L", "A", "R"];
     letters.forEach((letter, i) => {
-      const baseAngle = ((i - 1.5) / 4) * Math.PI * 0.8 - Math.PI / 2;
+      // Spread letters in different directions
+      const baseAngle = -Math.PI + ((i + 0.5) / letters.length) * Math.PI * 2;
       arr.push({
         id: id++, x: 0, y: 0,
-        size: 36, color: "hsl(45, 92%, 52%)",
-        delay: 0, duration: 1400,
+        size: 40, color: "hsl(45, 92%, 52%)",
+        delay: 0, duration: 1200,
         type: "letter-shard",
-        rotation: (Math.random() - 0.5) * 720,
+        rotation: (Math.random() > 0.5 ? 1 : -1) * (300 + Math.random() * 400),
         drift: 0,
-        angle: baseAngle + (Math.random() - 0.5) * 0.5,
-        speed: 120 + Math.random() * 80,
+        angle: baseAngle + (Math.random() - 0.5) * 0.4,
+        speed: 180 + Math.random() * 100,
         letter,
       });
     });
 
     // Central burst sparks
-    for (let i = 0; i < 40; i++) {
-      const angle = (Math.PI * 2 * i) / 40 + (Math.random() - 0.5) * 0.3;
+    for (let i = 0; i < 50; i++) {
+      const angle = (Math.PI * 2 * i) / 50 + (Math.random() - 0.5) * 0.3;
       arr.push({
         id: id++, x: 0, y: 0,
         size: 3 + Math.random() * 5,
         color: randColor(),
-        delay: Math.random() * 100,
-        duration: 800 + Math.random() * 400,
+        delay: Math.random() * 80,
+        duration: 700 + Math.random() * 400,
         type: "spark",
         rotation: 0, drift: 0,
-        angle, speed: 50 + Math.random() * 120,
+        angle, speed: 60 + Math.random() * 140,
       });
     }
 
-    // Confetti rain
+    // Yellow confetti shooting outward and falling
     for (let i = 0; i < 120; i++) {
       arr.push({
         id: id++,
-        x: (Math.random() - 0.5) * 80,
+        x: (Math.random() - 0.5) * 60,
         y: 0,
         size: 6 + Math.random() * 10,
         color: randColor(),
-        delay: Math.random() * 600,
+        delay: 50 + Math.random() * 500,
         duration: 2400 + Math.random() * 1200,
         type: "confetti",
         rotation: Math.random() * 360,
-        drift: (Math.random() - 0.5) * 300,
+        drift: (Math.random() - 0.5) * 350,
         angle: 0, speed: 0,
       });
     }
@@ -129,32 +121,13 @@ const Fireworks = ({ onComplete, originRef }: FireworksProps) => {
     return arr;
   }, []);
 
-  if (phase === "fill") {
-    return (
-      <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center">
-        <h1
-          className="text-6xl font-display font-bold tracking-tight select-none"
-          style={{
-            backgroundImage: "linear-gradient(135deg, hsl(45 92% 52%), hsl(50 90% 65%))",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            filter: "drop-shadow(0 0 20px hsl(45 92% 52% / 0.6))",
-            animation: "klar-fill-pulse 0.9s ease-in-out forwards",
-          }}
-        >
-          KLAR
-        </h1>
-      </div>
-    );
-  }
-
   return (
     <div className="fixed inset-0 z-50 pointer-events-none overflow-hidden">
-      {/* Flash */}
+      {/* Flash from origin */}
       <div
         className="absolute inset-0"
         style={{
-          background: `radial-gradient(circle at ${ox}px ${oy}px, hsl(45 92% 52% / 0.6), transparent 60%)`,
+          background: `radial-gradient(circle at ${ox}px ${oy}px, hsl(45 92% 52% / 0.7), transparent 50%)`,
           animation: "fw-flash 0.6s ease-out forwards",
         }}
       />
