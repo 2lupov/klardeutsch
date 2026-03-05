@@ -57,7 +57,7 @@ const Fireworks = ({ onComplete, originRef }: FireworksProps) => {
 
   useEffect(() => {
     triggerHaptic();
-    const t = setTimeout(onComplete, 3200);
+    const t = setTimeout(onComplete, 2000);
     return () => clearTimeout(t);
   }, [onComplete]);
 
@@ -76,7 +76,7 @@ const Fireworks = ({ onComplete, originRef }: FireworksProps) => {
       arr.push({
         id: id++, x: 0, y: 0,
         size: 40, color: "hsl(45, 92%, 52%)",
-        delay: 0, duration: 1200,
+        delay: 0, duration: 800,
         type: "letter-shard",
         rotation: (Math.random() > 0.5 ? 1 : -1) * (300 + Math.random() * 400),
         drift: 0,
@@ -94,7 +94,7 @@ const Fireworks = ({ onComplete, originRef }: FireworksProps) => {
         size: 3 + Math.random() * 5,
         color: randColor(),
         delay: Math.random() * 80,
-        duration: 700 + Math.random() * 400,
+        duration: 500 + Math.random() * 300,
         type: "spark",
         rotation: 0, drift: 0,
         angle, speed: 60 + Math.random() * 140,
@@ -109,8 +109,8 @@ const Fireworks = ({ onComplete, originRef }: FireworksProps) => {
         y: 0,
         size: 6 + Math.random() * 10,
         color: randColor(),
-        delay: 50 + Math.random() * 500,
-        duration: 2400 + Math.random() * 1200,
+        delay: 50 + Math.random() * 300,
+        duration: 1200 + Math.random() * 600,
         type: "confetti",
         rotation: Math.random() * 360,
         drift: (Math.random() - 0.5) * 350,
