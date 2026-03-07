@@ -1,14 +1,15 @@
 import { useState } from "react";
+import BulkGenerator from "./BulkGenerator";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   Sparkles, Loader2, BookOpen, Languages, BookText, Headphones, 
-  Save, X, Copy, Check, Upload, FileJson, Wand2, ArrowRight 
+  Save, X, Copy, Check, Upload, FileJson, Wand2, ArrowRight, Zap
 } from "lucide-react";
 import { toast } from "sonner";
 
 type Level = "A1" | "A2" | "B1" | "B2" | "C1";
 type ExerciseType = "vocab" | "grammar" | "reading" | "listening";
-type Mode = "prompt" | "import";
+type Mode = "prompt" | "import" | "bulk";
 
 interface GeneratedExercises {
   vocab_cards?: Array<{ german: string; russian: string; article?: string; example?: string; topic?: string }>;
@@ -311,7 +312,7 @@ const ContentGenerator = ({ level }: { level: Level }) => {
           }`}
         >
           <Wand2 className="w-4 h-4" />
-          Создать промпт
+          Промпт
         </button>
         <button
           onClick={() => setMode("import")}
@@ -322,7 +323,18 @@ const ContentGenerator = ({ level }: { level: Level }) => {
           }`}
         >
           <FileJson className="w-4 h-4" />
-          Импорт JSON
+          Импорт
+        </button>
+        <button
+          onClick={() => setMode("bulk")}
+          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-display font-bold transition-all ${
+            mode === "bulk"
+              ? "bg-primary/15 text-primary border border-primary/30"
+              : "bg-secondary text-muted-foreground border border-border hover:text-foreground"
+          }`}
+        >
+          <Zap className="w-4 h-4" />
+          Массовая
         </button>
       </div>
 
@@ -540,6 +552,8 @@ const ContentGenerator = ({ level }: { level: Level }) => {
           )}
         </div>
       )}
+
+      {mode === "bulk" && <BulkGenerator />}
     </div>
   );
 };
