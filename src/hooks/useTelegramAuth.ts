@@ -15,18 +15,26 @@ export function useTelegramAuth() {
   const [attempted, setAttempted] = useState(false);
 
   useEffect(() => {
-    const tg = (window as any).Telegram?.WebApp;
-    if (!tg?.initData) return; // Not inside TMA
+    if (!isTMA || attempted) {
+      setLoading(false);
+      return;
+    }
 
     const initData = tg.initData;
-    if (!initData || attempted) return;
+    if (!initData) {
+      setLoading(false);
+      return;
+    }
 
     setAttempted(true);
 
     const authenticate = async () => {
       // Check if already logged in
       const { data: { session } } = await supabase.auth.getSession();
-      if (session) return; // Already authenticated
+      if (session) {
+        setLoading(false);
+        return;
+      }
 
       setLoading(true);
       try {
