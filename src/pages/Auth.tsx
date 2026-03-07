@@ -246,7 +246,7 @@ const Auth = () => {
       type: "signup",
     });
     if (error) {
-      setError(error.message);
+      setError(translateAuthError(error.message));
     } else {
       // Profile update + referral after confirmed
       if (signupUserId) {
