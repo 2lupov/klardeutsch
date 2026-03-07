@@ -312,7 +312,7 @@ const ContentGenerator = ({ level }: { level: Level }) => {
           }`}
         >
           <Wand2 className="w-4 h-4" />
-          Создать промпт
+          Промпт
         </button>
         <button
           onClick={() => setMode("import")}
@@ -323,7 +323,18 @@ const ContentGenerator = ({ level }: { level: Level }) => {
           }`}
         >
           <FileJson className="w-4 h-4" />
-          Импорт JSON
+          Импорт
+        </button>
+        <button
+          onClick={() => setMode("bulk")}
+          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-display font-bold transition-all ${
+            mode === "bulk"
+              ? "bg-primary/15 text-primary border border-primary/30"
+              : "bg-secondary text-muted-foreground border border-border hover:text-foreground"
+          }`}
+        >
+          <Zap className="w-4 h-4" />
+          Массовая
         </button>
       </div>
 
