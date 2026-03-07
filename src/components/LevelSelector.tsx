@@ -1,11 +1,9 @@
 import { Level } from "@/data/lessons";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useLevelProgress } from "@/hooks/useLevelProgress";
-import { useDailyBonus } from "@/hooks/useDailyBonus";
 import { useNavigate } from "react-router-dom";
 import LanguageSwitcher from "./LanguageSwitcher";
 import KlarLogo from "./KlarLogo";
-import StreakPlant from "./StreakPlant";
 
 interface LevelSelectorProps {
   onSelect: (level: Level) => void;
