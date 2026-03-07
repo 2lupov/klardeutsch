@@ -75,6 +75,7 @@ const App = () => (
           <BrowserRouter>
             <AppRoutes />
             <ListeningFloatingPlayer />
+            <ReportErrorButton />
           </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>

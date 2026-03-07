@@ -299,6 +299,11 @@ const translations = {
   loginWithTelegram: { ru: "Войти через Telegram", uk: "Увійти через Telegram" },
   telegramAuthLoading: { ru: "Вход через Telegram...", uk: "Вхід через Telegram..." },
   orDivider: { ru: "или", uk: "або" },
+  reportError: { ru: "Сообщить об ошибке", uk: "Повідомити про помилку" },
+  reportPlaceholder: { ru: "Опишите проблему...", uk: "Опишіть проблему..." },
+  reportSend: { ru: "Отправить", uk: "Надіслати" },
+  reportSent: { ru: "Спасибо! Сообщение отправлено", uk: "Дякуємо! Повідомлення надіслано" },
+  reportFailed: { ru: "Не удалось отправить", uk: "Не вдалося надіслати" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;
