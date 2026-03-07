@@ -24,16 +24,17 @@ function parseDialogue(text: string): Line[] | null {
   const hasDialogue = /^[A-Z]:\s/m.test(text);
   if (!hasDialogue) return null;
 
+  // Split by lines and parse each one
+  const rawLines = text.split(/\r?\n/);
   const lines: Line[] = [];
-  const regex = /([A-Z]):\s*(.+?)(?=(?:\n[A-Z]:\s)|$)/gs;
-  let match;
-  while ((match = regex.exec(text)) !== null) {
-    const speaker = match[1].trim();
-    const lineText = match[2].trim();
-    if (lineText) {
-      lines.push({ speaker, text: lineText });
+  
+  for (const raw of rawLines) {
+    const match = raw.match(/^([A-Z]):\s*(.+)$/);
+    if (match && match[2].trim()) {
+      lines.push({ speaker: match[1], text: match[2].trim() });
     }
   }
+  
   return lines.length > 0 ? lines : null;
 }
 
@@ -106,6 +107,7 @@ async function detectGenders(text: string): Promise<Record<string, "m" | "f">> {
 }
 
 async function generateTTS(text: string, voiceId: string, apiKey: string, speed = 0.85): Promise<ArrayBuffer> {
+  console.log(`Generating TTS for voice ${voiceId}: "${text.substring(0, 50)}..."`);
   const response = await fetch(
     `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`,
     {
@@ -132,7 +134,9 @@ async function generateTTS(text: string, voiceId: string, apiKey: string, speed 
     throw new Error(`TTS failed for voice ${voiceId}: ${err}`);
   }
 
-  return response.arrayBuffer();
+  const buf = await response.arrayBuffer();
+  console.log(`TTS generated: ${buf.byteLength} bytes`);
+  return buf;
 }
 
 function createSilence(): Uint8Array {
@@ -184,6 +188,7 @@ serve(async (req) => {
     }
 
     const lines = parseDialogue(text);
+    console.log(`Parsed dialogue: ${lines ? lines.length + ' lines' : 'not a dialogue'}`);
 
     if (!lines) {
       const audioBuffer = await generateTTS(text, VOICES.male1, ELEVENLABS_API_KEY, speed ?? 0.85);
@@ -197,13 +202,11 @@ serve(async (req) => {
     const voiceMap: Record<string, string> = {};
 
     if (voice_config && typeof voice_config === "object") {
-      // Use explicit voice config from admin
       for (const speaker of speakerSet) {
         voiceMap[speaker] = voice_config[speaker] || VOICES.male1;
       }
       console.log(`Using admin voice_config: ${JSON.stringify(voiceMap)}`);
     } else {
-      // Fallback: try AI detection
       const genders = await detectGenders(text);
       let maleIdx = 0;
       let femaleIdx = 0;
@@ -226,10 +229,13 @@ serve(async (req) => {
 
     // Generate lines sequentially to avoid ElevenLabs concurrent request limit
     const audioBuffers: ArrayBuffer[] = [];
-    for (const line of lines) {
-      const buf = await generateTTS(line.text, voiceMap[line.speaker], ELEVENLABS_API_KEY, speed ?? 0.85);
+    for (let i = 0; i < lines.length; i++) {
+      console.log(`Generating line ${i + 1}/${lines.length}: ${lines[i].speaker}: ${lines[i].text.substring(0, 40)}...`);
+      const buf = await generateTTS(lines[i].text, voiceMap[lines[i].speaker], ELEVENLABS_API_KEY, speed ?? 0.85);
       audioBuffers.push(buf);
     }
+
+    console.log(`All ${audioBuffers.length} audio segments generated, concatenating...`);
 
     // Concatenate with silence between lines
     const silence = createSilence();
@@ -249,6 +255,8 @@ serve(async (req) => {
         offset += silence.length;
       }
     }
+
+    console.log(`Final audio: ${combined.length} bytes`);
 
     return new Response(combined.buffer, {
       headers: { ...corsHeaders, "Content-Type": "audio/mpeg" },

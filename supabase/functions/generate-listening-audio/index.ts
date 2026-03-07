@@ -18,12 +18,18 @@ interface Line { speaker: string; text: string; }
 
 function parseDialogue(text: string): Line[] | null {
   if (!/^[A-Z]:\s/m.test(text)) return null;
+  
+  // Split by lines and parse each one — more reliable than complex regex
+  const rawLines = text.split(/\r?\n/);
   const lines: Line[] = [];
-  const regex = /([A-Z]):\s*(.+?)(?=(?:\n[A-Z]:\s)|$)/gs;
-  let match;
-  while ((match = regex.exec(text)) !== null) {
-    if (match[2].trim()) lines.push({ speaker: match[1], text: match[2].trim() });
+  
+  for (const raw of rawLines) {
+    const match = raw.match(/^([A-Z]):\s*(.+)$/);
+    if (match && match[2].trim()) {
+      lines.push({ speaker: match[1], text: match[2].trim() });
+    }
   }
+  
   return lines.length > 0 ? lines : null;
 }
 
@@ -62,6 +68,7 @@ async function detectGenders(text: string): Promise<Record<string, "m" | "f">> {
 }
 
 async function generateTTS(text: string, voiceId: string, apiKey: string, speed = 0.85): Promise<ArrayBuffer> {
+  console.log(`Generating TTS for voice ${voiceId}: "${text.substring(0, 50)}..."`);
   const response = await fetch(
     `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`,
     {
@@ -74,7 +81,9 @@ async function generateTTS(text: string, voiceId: string, apiKey: string, speed 
     }
   );
   if (!response.ok) throw new Error(`TTS failed: ${await response.text()}`);
-  return response.arrayBuffer();
+  const buf = await response.arrayBuffer();
+  console.log(`TTS generated: ${buf.byteLength} bytes`);
+  return buf;
 }
 
 function createSilence(): Uint8Array {
@@ -128,6 +137,8 @@ serve(async (req) => {
     const lines = parseDialogue(text);
     let audioData: Uint8Array;
 
+    console.log(`Generating audio for "${listening.title}": ${lines ? lines.length + ' dialogue lines' : 'solo mode'}`);
+
     if (!lines) {
       // Solo text
       const voiceId = voiceConfig?.narrator || VOICES.male1;
@@ -151,10 +162,15 @@ serve(async (req) => {
         }
       }
 
+      console.log(`Voice mapping: ${JSON.stringify(voiceMap)}`);
+
       const buffers: ArrayBuffer[] = [];
-      for (const line of lines) {
-        buffers.push(await generateTTS(line.text, voiceMap[line.speaker], ELEVENLABS_API_KEY));
+      for (let i = 0; i < lines.length; i++) {
+        console.log(`Generating line ${i + 1}/${lines.length}: ${lines[i].speaker}: ${lines[i].text.substring(0, 40)}...`);
+        buffers.push(await generateTTS(lines[i].text, voiceMap[lines[i].speaker], ELEVENLABS_API_KEY));
       }
+
+      console.log(`All ${buffers.length} segments generated, concatenating...`);
 
       const silence = createSilence();
       let totalLen = 0;
@@ -169,6 +185,8 @@ serve(async (req) => {
       }
       audioData = combined;
     }
+
+    console.log(`Final audio size: ${audioData.length} bytes`);
 
     // Upload to storage
     const filePath = `listening/${listening_id}.mp3`;
