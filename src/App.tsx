@@ -11,6 +11,7 @@ import { usePlatform } from "@/hooks/usePlatform";
 import AppLayout from "@/components/AppLayout";
 import OfflineBanner from "@/components/OfflineBanner";
 import ListeningFloatingPlayer from "@/components/ListeningFloatingPlayer";
+import ReportErrorButton from "@/components/ReportErrorButton";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
@@ -74,6 +75,7 @@ const App = () => (
           <BrowserRouter>
             <AppRoutes />
             <ListeningFloatingPlayer />
+            <ReportErrorButton />
           </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>

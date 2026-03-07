@@ -33,3 +33,5 @@ project_id = "jqqsszwbbxvevebmebfm"
     verify_jwt = false
   [functions.generate-course-prompt]
     verify_jwt = false
+  [functions.report-error]
+    verify_jwt = false
