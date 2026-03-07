@@ -158,15 +158,7 @@ const Index = () => {
         return (
           <div className="flex flex-col gap-6 animate-slide-up">
             <div className="glass-card p-6">
-              <div
-                className="prose prose-invert prose-sm max-w-none [&_h2]:text-primary [&_h2]:font-display [&_strong]:text-foreground"
-                dangerouslySetInnerHTML={{
-                  __html: data.grammar.theory
-                    .replace(/## (.*)/g, "<h2>$1</h2>")
-                    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-                    .replace(/\n\n/g, "<br/><br/>"),
-                }}
-              />
+              <TheoryRenderer theory={data.grammar.theory} lang={lang} />
             </div>
             <Quiz questions={data.grammar.questions} onComplete={handleQuizComplete} level={level} category="grammar" />
           </div>
