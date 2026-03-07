@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Recycle, Coffee, Swords, Mic, ArrowLeft } from "lucide-react";
+import { Recycle, Coffee, Swords, Mic, ArrowLeft, Building2 } from "lucide-react";
 import { usePlatform } from "@/hooks/usePlatform";
 import { useLanguage } from "@/contexts/LanguageContext";
 import ArticleSorter from "@/components/games/ArticleSorter";
 import CafeBestellung from "@/components/games/CafeBestellung";
 import PronunciationTrainer from "@/components/games/PronunciationTrainer";
+import LebenInDeutschland from "@/components/games/LebenInDeutschland";
 import Challenges from "@/pages/Challenges";
 
-type GameScreen = "list" | "article-sorter" | "cafe" | "challenges" | "pronunciation";
+type GameScreen = "list" | "article-sorter" | "cafe" | "challenges" | "pronunciation" | "leben";
 
 const Games = () => {
   const [screen, setScreen] = useState<GameScreen>("list");
@@ -39,6 +40,10 @@ const Games = () => {
 
   if (screen === "pronunciation") {
     return <PronunciationTrainer onBack={() => setScreen("list")} />;
+  }
+
+  if (screen === "leben") {
+    return <LebenInDeutschland onBack={() => setScreen("list")} />;
   }
 
   return (
@@ -126,6 +131,24 @@ const Games = () => {
             </p>
           </div>
           <Mic className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
+        </button>
+
+        <button
+          onClick={() => setScreen("leben")}
+          className="w-full glass-card p-5 flex items-center gap-4 text-left hover:border-primary/30 transition-all group"
+        >
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-muted/30 flex items-center justify-center text-2xl flex-shrink-0">
+            🏛
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-display text-sm font-bold text-foreground group-hover:text-primary transition-colors">
+              {t("gameLebenTitle")}
+            </h3>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              {t("gameLebenDesc")}
+            </p>
+          </div>
+          <Building2 className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
         </button>
       </div>
     </div>

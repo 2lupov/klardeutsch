@@ -294,6 +294,8 @@ const translations = {
   gameDuelsDesc: { ru: "Соревнуйся с друзьями — кто лучше знает немецкий!", uk: "Змагайся з друзями — хто краще знає німецьку!" },
   gamePronunciationTitle: { ru: "Произношение: Sprich nach!", uk: "Вимова: Sprich nach!" },
   gamePronunciationDesc: { ru: "Слушай, повторяй и сравнивай своё произношение с эталоном", uk: "Слухай, повторюй і порівнюй свою вимову з еталоном" },
+  gameLebenTitle: { ru: "Жизнь в Германии: Реальные сценарии", uk: "Життя в Німеччині: Реальні сценарії" },
+  gameLebenDesc: { ru: "Anmeldung, Kündigung, Finanzamt — документы и ситуации из реальной жизни", uk: "Anmeldung, Kündigung, Finanzamt — документи та ситуації з реального життя" },
   loginWithTelegram: { ru: "Войти через Telegram", uk: "Увійти через Telegram" },
   telegramAuthLoading: { ru: "Вход через Telegram...", uk: "Вхід через Telegram..." },
   orDivider: { ru: "или", uk: "або" },
