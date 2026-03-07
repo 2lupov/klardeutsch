@@ -72,7 +72,7 @@ const DailyBonusDialog = () => {
                   {claimed.label}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Приходи завтра — растение ждёт! 🌱
+                  Приходи завтра — панда ждёт! 🐼
                 </p>
               </div>
 
