@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { Gift, Flame, Sparkles } from "lucide-react";
+import { Gift, Sparkles } from "lucide-react";
 import { useDailyBonus, BonusReward } from "@/hooks/useDailyBonus";
+import StreakPlant from "@/components/StreakPlant";
 import {
   Dialog,
   DialogContent,
@@ -42,38 +43,27 @@ const DailyBonusDialog = () => {
         </DialogHeader>
 
         <div className="flex flex-col items-center gap-4 py-4">
-          {/* Streak indicator */}
-          <div className="flex items-center gap-2 text-sm">
-            <Flame className="w-4 h-4 text-primary" />
-            <span className="font-display font-bold text-foreground">
-              {streak} {streak === 1 ? "день" : streak < 5 ? "дня" : "дней"} подряд
-            </span>
-          </div>
+          {/* Streak Plant */}
+          <StreakPlant streak={streak} canClaim={canClaim && !claimed} />
 
           {!claimed ? (
             <>
-              {/* Gift box animation */}
-              <div className="relative">
-                <span className="text-6xl block animate-bounce" role="img" aria-label="gift">🎁</span>
-                <Sparkles className="absolute -top-1 -right-1 w-5 h-5 text-primary animate-pulse" />
-              </div>
-
               <p className="text-sm text-muted-foreground text-center">
-                Забери свой ежедневный подарок!
+                Полей своё растение — забери подарок!
               </p>
 
               <button
                 onClick={handleClaim}
                 disabled={claiming}
-                className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-display font-bold text-sm hover:bg-primary/90 transition-colors disabled:opacity-50"
+                className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-display font-bold text-sm hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                {claiming ? "Открываю..." : "🎉 Забрать подарок"}
+                {claiming ? "Поливаю... 💧" : "💧 Полить и забрать подарок"}
               </button>
             </>
           ) : (
             <>
               {/* Reward reveal */}
-              <span className="text-6xl block animate-scale-in" role="img" aria-label="reward">
+              <span className="text-5xl block animate-scale-in" role="img" aria-label="reward">
                 {claimed.emoji}
               </span>
 
@@ -82,7 +72,7 @@ const DailyBonusDialog = () => {
                   {claimed.label}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Приходи завтра за новым бонусом!
+                  Приходи завтра — растение ждёт! 🌱
                 </p>
               </div>
 

@@ -1,9 +1,11 @@
 import { Level } from "@/data/lessons";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useLevelProgress } from "@/hooks/useLevelProgress";
+import { useDailyBonus } from "@/hooks/useDailyBonus";
 import { useNavigate } from "react-router-dom";
 import LanguageSwitcher from "./LanguageSwitcher";
 import KlarLogo from "./KlarLogo";
+import StreakPlant from "./StreakPlant";
 
 interface LevelSelectorProps {
   onSelect: (level: Level) => void;
@@ -12,6 +14,7 @@ interface LevelSelectorProps {
 const LevelSelector = ({ onSelect }: LevelSelectorProps) => {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const { streak, canClaim, loading: bonusLoading } = useDailyBonus();
 
   // Aggregate progress across all levels for the logo
   const a1 = useLevelProgress("A1");
@@ -34,7 +37,10 @@ const LevelSelector = ({ onSelect }: LevelSelectorProps) => {
   return (
     <div className="flex flex-col gap-4 animate-slide-up w-full max-w-2xl mx-auto h-full justify-center">
       <div className="text-center">
-        <div className="flex justify-end mb-1">
+        <div className="flex justify-between items-center mb-1">
+          {!bonusLoading && (
+            <StreakPlant streak={streak} canClaim={canClaim} compact />
+          )}
           <LanguageSwitcher />
         </div>
         <div className="flex justify-center mb-1">
