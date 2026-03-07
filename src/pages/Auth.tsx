@@ -212,8 +212,7 @@ const Auth = () => {
     );
   }
 
-/** Translate common Supabase Auth error messages to Russian */
-function translateAuthError(msg: string): string {
+
   const map: Record<string, string> = {
     "Invalid login credentials": "Неверный email или пароль",
     "Email not confirmed": "Email не подтверждён. Проверьте почту",
