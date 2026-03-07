@@ -153,6 +153,15 @@ const Auth = () => {
     return () => clearTimeout(timer);
   }, [resendCooldown]);
 
+  // In TMA, show loading while auto-auth is in progress
+  if (isTelegram && authLoading) {
+    return (
+      <div className="min-h-[100dvh] bg-background flex items-center justify-center">
+        <span className="text-muted-foreground animate-pulse font-display text-lg">KLAR</span>
+      </div>
+    );
+  }
+
   const handleResendCode = async () => {
     setError("");
     setLoading(true);
