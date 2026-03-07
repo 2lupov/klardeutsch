@@ -1,4 +1,5 @@
 import { useState } from "react";
+import BulkGenerator from "./BulkGenerator";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   Sparkles, Loader2, BookOpen, Languages, BookText, Headphones, 
