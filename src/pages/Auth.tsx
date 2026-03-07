@@ -138,7 +138,7 @@ const Auth = () => {
         await loginWithTelegramWidget(widgetData);
         setShowFireworks(true);
       } catch (err: any) {
-        setError(err.message);
+        setError(translateAuthError(err.message));
       } finally {
         setTgWidgetLoading(false);
       }
