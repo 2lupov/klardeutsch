@@ -160,7 +160,7 @@ const Auth = () => {
     setError("");
     setLoading(true);
     const { error } = await supabase.auth.resend({ type: "signup", email });
-    if (error) setError(error.message);
+    if (error) setError(translateAuthError(error.message));
     else {
       setMessage(t("codeSentAgain") || "Код отправлен повторно");
       setResendCooldown(5);
