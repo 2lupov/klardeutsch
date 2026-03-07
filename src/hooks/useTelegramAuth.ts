@@ -7,7 +7,10 @@ import { supabase } from "@/integrations/supabase/client";
  * and sets the Supabase session.
  */
 export function useTelegramAuth() {
-  const [loading, setLoading] = useState(false);
+  const tg = (window as any).Telegram?.WebApp;
+  const isTMA = !!tg?.initData;
+  
+  const [loading, setLoading] = useState(isTMA); // Start loading if inside TMA
   const [error, setError] = useState<string | null>(null);
   const [attempted, setAttempted] = useState(false);
 
