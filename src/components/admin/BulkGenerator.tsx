@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Zap, Check, X, RotateCcw } from "lucide-react";
+import { Loader2, Zap, Check, X, RotateCcw, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 
 type Level = "A1" | "A2" | "B1" | "B2" | "C1";
