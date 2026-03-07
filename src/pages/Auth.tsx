@@ -99,15 +99,19 @@ const Auth = () => {
       setTgWidgetLoading(true);
       setError("");
       try {
-        await loginWithTelegramWidget({
+        // Only include fields that Telegram actually sent (non-empty)
+        // Adding empty fields breaks the HMAC signature
+        const widgetData: Record<string, string> = {
           id: String(tgUser.id),
-          first_name: tgUser.first_name || "",
-          last_name: tgUser.last_name || "",
-          username: tgUser.username || "",
-          photo_url: tgUser.photo_url || "",
           auth_date: String(tgUser.auth_date),
           hash: tgUser.hash,
-        });
+        };
+        if (tgUser.first_name) widgetData.first_name = tgUser.first_name;
+        if (tgUser.last_name) widgetData.last_name = tgUser.last_name;
+        if (tgUser.username) widgetData.username = tgUser.username;
+        if (tgUser.photo_url) widgetData.photo_url = tgUser.photo_url;
+
+        await loginWithTelegramWidget(widgetData);
         setShowFireworks(true);
       } catch (err: any) {
         setError(err.message);
