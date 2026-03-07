@@ -193,7 +193,7 @@ const Auth = () => {
     if (isLogin) {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
-        setError(error.message);
+        setError(translateAuthError(error.message));
         setFailedAttempts(prev => prev + 1);
         setCaptchaVerified(false);
       }
