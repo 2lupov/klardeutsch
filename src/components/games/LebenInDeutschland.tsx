@@ -588,6 +588,369 @@ Polizist: Ja, innerhalb von einer Woche.`,
       },
     ],
   },
+  {
+    id: "wohnungssuche",
+    icon: "🔑",
+    titleRu: "Wohnungssuche: Поиск квартиры",
+    titleUk: "Wohnungssuche: Пошук квартири",
+    descRu: "Ответь на объявление, пройди Besichtigung и подпиши Mietvertrag",
+    descUk: "Відповідай на оголошення, пройди Besichtigung і підпиши Mietvertrag",
+    difficulty: "B1",
+    steps: [
+      {
+        type: "document",
+        titleRu: "Объявление о квартире",
+        titleUk: "Оголошення про квартиру",
+        germanText: `2-Zi.-Whg., Prenzlauer Berg, 55 m², 3. OG, Altbau
+
+Kaltmiete: 650 € / Nebenkosten: 200 € / Kaution: 1.950 €
+Bezugsfrei ab: 01.05.2026
+
+Ausstattung: Einbauküche, Balkon, Dielenboden, 
+Badewanne, Kellerabteil, Fahrradstellplatz
+
+Haustiere nach Absprache. 
+Besichtigung nur mit Termin.
+
+Bitte senden Sie Ihre Bewerbungsunterlagen:
+- Selbstauskunft
+- Schufa-Auskunft
+- Gehaltsnachweise (letzte 3 Monate)
+- Mieterselbstauskunft`,
+        explanationRu: "Zi. = Zimmer (комната). Kaltmiete — аренда без коммуналки. Nebenkosten — коммунальные платежи. Kaution — залог (обычно 3 Kaltmieten). Schufa — кредитная история. Gehaltsnachweise — справки о зарплате.",
+        explanationUk: "Zi. = Zimmer (кімната). Kaltmiete — оренда без комуналки. Nebenkosten — комунальні платежі. Kaution — застава (зазвичай 3 Kaltmieten). Schufa — кредитна історія. Gehaltsnachweise — довідки про зарплату.",
+        questions: [
+          {
+            questionRu: "Сколько составляет полная месячная аренда (Warmmiete)?",
+            questionUk: "Скільки складає повна місячна оренда (Warmmiete)?",
+            type: "choice",
+            correctAnswer: "850 €",
+            options: ["650 €", "850 €", "1.950 €", "200 €"],
+          },
+          {
+            questionRu: "Что такое «Kaution»?",
+            questionUk: "Що таке «Kaution»?",
+            type: "choice",
+            correctAnswer: "Залог",
+            options: ["Первый месяц аренды", "Залог", "Комиссия маклера", "Страховка"],
+          },
+          {
+            questionRu: "Как по-немецки «справка о зарплате»?",
+            questionUk: "Як німецькою «довідка про зарплату»?",
+            type: "fill",
+            correctAnswer: "Gehaltsnachweis",
+            hintRu: "Gehalt (зарплата) + Nachweis (подтверждение)",
+            hintUk: "Gehalt (зарплата) + Nachweis (підтвердження)",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "jobcenter",
+    icon: "📂",
+    titleRu: "Jobcenter: Пособие и документы",
+    titleUk: "Jobcenter: Допомога та документи",
+    descRu: "Разберись с Bürgergeld — какие документы нужны и что говорить",
+    descUk: "Розберись з Bürgergeld — які документи потрібні та що говорити",
+    difficulty: "B2",
+    steps: [
+      {
+        type: "document",
+        titleRu: "Письмо из Jobcenter",
+        titleUk: "Лист із Jobcenter",
+        germanText: `Jobcenter Berlin-Mitte
+Ihr Zeichen: BG-123456
+
+Einladung zur Vorsprache
+
+Sehr geehrte/r Antragsteller/in,
+
+Sie werden gebeten, am 20.04.2026 um 09:00 Uhr 
+persönlich bei Ihrem Sachbearbeiter vorzusprechen.
+
+Bitte bringen Sie folgende Unterlagen mit:
+1. Personalausweis / Aufenthaltstitel
+2. Mietvertrag + letzte Nebenkostenabrechnung
+3. Kontoauszüge der letzten 3 Monate
+4. Arbeitsvertrag oder Kündigung
+
+Bei Nichterscheinen kann Ihre Leistung gekürzt werden.
+
+Raum 3.15, 3. Etage`,
+        explanationRu: "Vorsprache — личная явка. Antragsteller — заявитель. Aufenthaltstitel — вид на жительство. Kontoauszüge — выписки из банка. Nebenkostenabrechnung — расчёт коммунальных. Leistung — пособие. Kürzung — сокращение.",
+        explanationUk: "Vorsprache — особиста явка. Antragsteller — заявник. Aufenthaltstitel — посвідка на проживання. Kontoauszüge — виписки з банку. Nebenkostenabrechnung — розрахунок комунальних. Leistung — допомога. Kürzung — скорочення.",
+        questions: [
+          {
+            questionRu: "Что будет, если не прийти?",
+            questionUk: "Що буде, якщо не прийти?",
+            type: "choice",
+            correctAnswer: "Пособие могут сократить",
+            options: ["Ничего не будет", "Пособие могут сократить", "Придёт полиция", "Пришлют повторное письмо"],
+          },
+          {
+            questionRu: "Как по-немецки «выписка из банка»?",
+            questionUk: "Як німецькою «виписка з банку»?",
+            type: "fill",
+            correctAnswer: "Kontoauszug",
+            hintRu: "Konto (счёт) + Auszug (выписка)",
+            hintUk: "Konto (рахунок) + Auszug (виписка)",
+          },
+          {
+            questionRu: "Что такое «Aufenthaltstitel»?",
+            questionUk: "Що таке «Aufenthaltstitel»?",
+            type: "choice",
+            correctAnswer: "Вид на жительство",
+            options: ["Водительские права", "Вид на жительство", "Рабочая виза", "Студенческий билет"],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "einkaufen",
+    icon: "🛒",
+    titleRu: "Supermarkt & Reklamation",
+    titleUk: "Supermarkt & Reklamation",
+    descRu: "Верни товар, пойми чек и разберись с Pfand-системой",
+    descUk: "Поверни товар, зрозумій чек і розберися з Pfand-системою",
+    difficulty: "A2",
+    steps: [
+      {
+        type: "document",
+        titleRu: "Немецкий чек (Kassenbon)",
+        titleUk: "Німецький чек (Kassenbon)",
+        germanText: `REWE Markt GmbH
+Schönhauser Allee 36, 10435 Berlin
+
+Vollmilch 3,5%        1,19 €  B
+Bio-Brot              3,49 €  B
+Mineralwasser 6er     2,99 €  A
+  davon Pfand         1,50 €
+Butter                2,29 €  B
+----------------------------
+Summe                 9,96 €
+  MwSt A (19%)        0,48 €
+  MwSt B (7%)         0,46 €
+----------------------------
+EC-Kartenzahlung      9,96 €
+
+Pfandrückgabe möglich!
+Bon aufbewahren.`,
+        explanationRu: "MwSt = Mehrwertsteuer (НДС). A = 19% (обычная ставка), B = 7% (на продукты). Pfand — залог за бутылки. Kassenbon — чек. EC-Karte — банковская карта. Aufbewahren — сохранить.",
+        explanationUk: "MwSt = Mehrwertsteuer (ПДВ). A = 19% (звичайна ставка), B = 7% (на продукти). Pfand — застава за пляшки. Kassenbon — чек. EC-Karte — банківська картка. Aufbewahren — зберегти.",
+        questions: [
+          {
+            questionRu: "Сколько составляет Pfand за воду?",
+            questionUk: "Скільки складає Pfand за воду?",
+            type: "choice",
+            correctAnswer: "1,50 €",
+            options: ["0,25 €", "0,50 €", "1,50 €", "2,99 €"],
+          },
+          {
+            questionRu: "Что означает буква «B» на чеке?",
+            questionUk: "Що означає літера «B» на чеку?",
+            type: "choice",
+            correctAnswer: "НДС 7% (продукты)",
+            options: ["НДС 19%", "НДС 7% (продукты)", "Без НДС", "Скидка"],
+          },
+          {
+            questionRu: "Как по-немецки «сохранить чек»?",
+            questionUk: "Як німецькою «зберегти чек»?",
+            type: "fill",
+            correctAnswer: "Bon aufbewahren",
+            hintRu: "Bon (чек) + aufbewahren (сохранить)",
+            hintUk: "Bon (чек) + aufbewahren (зберегти)",
+          },
+        ],
+      },
+      {
+        type: "dialogue",
+        titleRu: "Возврат товара (Umtausch)",
+        titleUk: "Повернення товару (Umtausch)",
+        germanText: `Verkäufer: Hallo, wie kann ich Ihnen helfen?
+Sie: Ich möchte diesen Toaster umtauschen. Er funktioniert nicht.
+Verkäufer: Haben Sie den Kassenbon dabei?
+Sie: Ja, hier. Ich habe ihn vor zwei Tagen gekauft.
+Verkäufer: Möchten Sie einen Umtausch oder eine Erstattung?
+Sie: Eine Erstattung, bitte.
+Verkäufer: Kein Problem. Der Betrag wird auf Ihre Karte 
+           zurückgebucht. Das dauert 3-5 Werktage.`,
+        explanationRu: "Umtausch — обмен. Erstattung — возврат денег. Zurückbuchen — вернуть на карту. Werktage — рабочие дни (без выходных). Kassenbon — чек.",
+        explanationUk: "Umtausch — обмін. Erstattung — повернення грошей. Zurückbuchen — повернути на картку. Werktage — робочі дні (без вихідних). Kassenbon — чек.",
+        questions: [
+          {
+            questionRu: "Как по-немецки «возврат денег»?",
+            questionUk: "Як німецькою «повернення грошей»?",
+            type: "fill",
+            correctAnswer: "Erstattung",
+            hintRu: "Erstatt... (возмещение)",
+            hintUk: "Erstatt... (відшкодування)",
+          },
+          {
+            questionRu: "Сколько ждать возврат на карту?",
+            questionUk: "Скільки чекати повернення на картку?",
+            type: "choice",
+            correctAnswer: "3-5 рабочих дней",
+            options: ["Сразу", "1 день", "3-5 рабочих дней", "2 недели"],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "apotheke",
+    icon: "💊",
+    titleRu: "Apotheke: В аптеке",
+    titleUk: "Apotheke: В аптеці",
+    descRu: "Купи лекарство по рецепту и без — знай, что спросить",
+    descUk: "Купи ліки за рецептом і без — знай, що запитати",
+    difficulty: "A2",
+    steps: [
+      {
+        type: "dialogue",
+        titleRu: "В аптеке с рецептом",
+        titleUk: "В аптеці з рецептом",
+        germanText: `Apotheker: Guten Tag, was darf es sein?
+Sie: Guten Tag, ich habe ein Rezept von meinem Arzt.
+Apotheker: Einen Moment... Das Medikament ist leider 
+           nicht vorrätig. Ich kann es bis morgen bestellen.
+Sie: Gibt es eine Alternative?
+Apotheker: Ja, es gibt ein Generikum mit dem gleichen 
+           Wirkstoff. Das ist auch günstiger.
+Sie: Gut, dann nehme ich das. Muss ich etwas zuzahlen?
+Apotheker: Ja, die Zuzahlung beträgt 5 Euro. 
+           Der Rest wird von der Krankenkasse übernommen.
+Sie: Gibt es Nebenwirkungen?
+Apotheker: Mögliche Nebenwirkungen: Müdigkeit und 
+           Magenbeschwerden. Lesen Sie den Beipackzettel.`,
+        explanationRu: "Vorrätig — в наличии. Generikum — дженерик. Wirkstoff — действующее вещество. Zuzahlung — доплата. Krankenkasse — больничная касса (страховая). Nebenwirkungen — побочные эффекты. Beipackzettel — инструкция к лекарству.",
+        explanationUk: "Vorrätig — в наявності. Generikum — дженерик. Wirkstoff — діюча речовина. Zuzahlung — доплата. Krankenkasse — лікарняна каса (страхова). Nebenwirkungen — побічні ефекти. Beipackzettel — інструкція до ліків.",
+        questions: [
+          {
+            questionRu: "Что такое «Zuzahlung»?",
+            questionUk: "Що таке «Zuzahlung»?",
+            type: "choice",
+            correctAnswer: "Доплата пациента",
+            options: ["Полная стоимость", "Доплата пациента", "Скидка", "Страховой взнос"],
+          },
+          {
+            questionRu: "Как по-немецки «побочные эффекты»?",
+            questionUk: "Як німецькою «побічні ефекти»?",
+            type: "fill",
+            correctAnswer: "Nebenwirkungen",
+            hintRu: "Neben (побочные) + Wirkungen (эффекты)",
+            hintUk: "Neben (побічні) + Wirkungen (ефекти)",
+          },
+          {
+            questionRu: "Что такое «Beipackzettel»?",
+            questionUk: "Що таке «Beipackzettel»?",
+            type: "choice",
+            correctAnswer: "Инструкция к лекарству",
+            options: ["Рецепт врача", "Инструкция к лекарству", "Чек из аптеки", "Страховой полис"],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "post",
+    icon: "📮",
+    titleRu: "Post & Paket: Почта и посылки",
+    titleUk: "Post & Paket: Пошта та посилки",
+    descRu: "Отправь посылку, забери Einschreiben и пойми извещение",
+    descUk: "Відправ посилку, забери Einschreiben і зрозумій повідомлення",
+    difficulty: "A2",
+    steps: [
+      {
+        type: "document",
+        titleRu: "Извещение о посылке",
+        titleUk: "Повідомлення про посилку",
+        germanText: `BENACHRICHTIGUNG
+
+Sehr geehrter Empfänger,
+
+für Sie lag heute eine Sendung vor, die nicht zugestellt 
+werden konnte (Empfänger nicht angetroffen).
+
+Sendungsart: Einschreiben mit Rückschein
+Absender: Ausländerbehörde Berlin
+Sendungsnummer: RR 1234 5678 9 DE
+
+Die Sendung kann ab morgen in Ihrer Postfiliale 
+abgeholt werden:
+
+Postfiliale 502, Kastanienallee 12
+Öffnungszeiten: Mo-Fr 9-18, Sa 9-13
+
+Bitte bringen Sie einen Lichtbildausweis mit.
+Lagerfrist: 7 Werktage`,
+        explanationRu: "Benachrichtigung — извещение. Empfänger — получатель. Zugestellt — доставлено. Einschreiben — заказное письмо. Rückschein — уведомление о вручении. Absender — отправитель. Lichtbildausweis — удостоверение с фото. Lagerfrist — срок хранения.",
+        explanationUk: "Benachrichtigung — повідомлення. Empfänger — отримувач. Zugestellt — доставлено. Einschreiben — рекомендований лист. Rückschein — повідомлення про вручення. Absender — відправник. Lichtbildausweis — посвідчення з фото. Lagerfrist — термін зберігання.",
+        questions: [
+          {
+            questionRu: "Кто отправитель письма?",
+            questionUk: "Хто відправник листа?",
+            type: "choice",
+            correctAnswer: "Ausländerbehörde",
+            options: ["Finanzamt", "Ausländerbehörde", "Jobcenter", "Krankenkasse"],
+          },
+          {
+            questionRu: "Что нужно взять с собой на почту?",
+            questionUk: "Що потрібно взяти з собою на пошту?",
+            type: "fill",
+            correctAnswer: "Lichtbildausweis",
+            hintRu: "Lichtbild (фото) + Ausweis (удостоверение)",
+            hintUk: "Lichtbild (фото) + Ausweis (посвідчення)",
+          },
+          {
+            questionRu: "Сколько дней хранится посылка?",
+            questionUk: "Скільки днів зберігається посилка?",
+            type: "choice",
+            correctAnswer: "7 рабочих дней",
+            options: ["3 дня", "7 рабочих дней", "14 дней", "30 дней"],
+          },
+        ],
+      },
+      {
+        type: "dialogue",
+        titleRu: "Отправка посылки",
+        titleUk: "Відправка посилки",
+        germanText: `Postmitarbeiter: Guten Tag, was möchten Sie versenden?
+Sie: Ich möchte dieses Paket nach Ukraine schicken.
+Postmitarbeiter: Wie schwer ist es?
+Sie: Ungefähr 3 Kilo.
+Postmitarbeiter: Möchten Sie Standard- oder Expressversand?
+Sie: Was kostet der Expressversand?
+Postmitarbeiter: 45,99 Euro, Lieferzeit 3-5 Werktage. 
+                 Standard kostet 15,99 Euro, dauert aber 
+                 10-14 Werktage.
+Sie: Standard, bitte. Kann ich das Paket versichern?
+Postmitarbeiter: Ja, bis 500 Euro für 4,50 Euro extra.
+Sie: Ja, bitte mit Versicherung.
+Postmitarbeiter: Füllen Sie bitte die Zollinhaltserklärung aus.`,
+        explanationRu: "Versenden — отправлять. Expressversand — экспресс-доставка. Lieferzeit — срок доставки. Versichern — застраховать. Zollinhaltserklärung — таможенная декларация содержимого.",
+        explanationUk: "Versenden — відправляти. Expressversand — експрес-доставка. Lieferzeit — термін доставки. Versichern — застрахувати. Zollinhaltserklärung — митна декларація вмісту.",
+        questions: [
+          {
+            questionRu: "Что нужно заполнить для международной посылки?",
+            questionUk: "Що потрібно заповнити для міжнародної посилки?",
+            type: "fill",
+            correctAnswer: "Zollinhaltserklärung",
+            hintRu: "Zoll (таможня) + Inhalt (содержимое) + Erklärung (декларация)",
+            hintUk: "Zoll (митниця) + Inhalt (вміст) + Erklärung (декларація)",
+          },
+          {
+            questionRu: "Сколько стоит страховка?",
+            questionUk: "Скільки коштує страховка?",
+            type: "choice",
+            correctAnswer: "4,50 €",
+            options: ["2,50 €", "4,50 €", "10,00 €", "15,99 €"],
+          },
+        ],
+      },
+    ],
+  },
 ];
 
 const LebenInDeutschland = ({ onBack }: { onBack: () => void }) => {
