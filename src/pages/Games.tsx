@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Recycle, Coffee, Swords, Mic, ArrowLeft } from "lucide-react";
+import { Recycle, Coffee, Swords, Mic, ArrowLeft, Building2 } from "lucide-react";
 import { usePlatform } from "@/hooks/usePlatform";
 import { useLanguage } from "@/contexts/LanguageContext";
 import ArticleSorter from "@/components/games/ArticleSorter";
 import CafeBestellung from "@/components/games/CafeBestellung";
 import PronunciationTrainer from "@/components/games/PronunciationTrainer";
+import LebenInDeutschland from "@/components/games/LebenInDeutschland";
 import Challenges from "@/pages/Challenges";
 
-type GameScreen = "list" | "article-sorter" | "cafe" | "challenges" | "pronunciation";
+type GameScreen = "list" | "article-sorter" | "cafe" | "challenges" | "pronunciation" | "leben";
 
 const Games = () => {
   const [screen, setScreen] = useState<GameScreen>("list");
