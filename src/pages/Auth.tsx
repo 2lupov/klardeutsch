@@ -287,7 +287,7 @@ const Auth = () => {
 
   const handleFireworksComplete = () => {
     setFadeOut(true);
-    setTimeout(() => navigate("/"), 600);
+    setTimeout(() => navigate("/"), 250);
   };
 
   // OTP verification screen
