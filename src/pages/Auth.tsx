@@ -207,7 +207,7 @@ const Auth = () => {
         options: { emailRedirectTo: window.location.origin },
       });
       if (error) {
-        setError(error.message);
+        setError(translateAuthError(error.message));
         setFailedAttempts(prev => prev + 1);
         setCaptchaVerified(false);
       } else {
