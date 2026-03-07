@@ -306,6 +306,288 @@ Mit freundlichen Grüßen`,
       },
     ],
   },
+  {
+    id: "arzttermin",
+    icon: "🏥",
+    titleRu: "Arzttermin: Запись к врачу",
+    titleUk: "Arzttermin: Запис до лікаря",
+    descRu: "Запишись к врачу по телефону и объясни симптомы",
+    descUk: "Запишись до лікаря по телефону та поясни симптоми",
+    difficulty: "A2",
+    steps: [
+      {
+        type: "dialogue",
+        titleRu: "Звонок в Arztpraxis",
+        titleUk: "Дзвінок до Arztpraxis",
+        germanText: `Sprechstundenhilfe: Praxis Dr. Müller, guten Tag.
+Sie: Guten Tag, ich möchte bitte einen Termin _________.
+Sprechstundenhilfe: Sind Sie bereits Patient bei uns?
+Sie: Nein, ich bin _________.
+Sprechstundenhilfe: Was für Beschwerden haben Sie?
+Sie: Ich habe seit drei Tagen _________ und Kopfschmerzen.
+Sprechstundenhilfe: Können Sie morgen um 10 Uhr kommen?
+Sie: Ja, das passt. Brauche ich meine _________?
+Sprechstundenhilfe: Ja, bitte bringen Sie die mit.`,
+        explanationRu: "Sprechstundenhilfe — ассистент врача. Termin vereinbaren — записаться на приём. Neupatient — новый пациент. Beschwerden — жалобы. Versichertenkarte (Gesundheitskarte) — страховая карта.",
+        explanationUk: "Sprechstundenhilfe — асистент лікаря. Termin vereinbaren — записатися на прийом. Neupatient — новий пацієнт. Beschwerden — скарги. Versichertenkarte (Gesundheitskarte) — страхова картка.",
+        questions: [
+          {
+            questionRu: "Как сказать «записаться на приём»?",
+            questionUk: "Як сказати «записатися на прийом»?",
+            type: "choice",
+            correctAnswer: "Einen Termin vereinbaren",
+            options: ["Einen Termin vereinbaren", "Einen Termin absagen", "Einen Termin verschieben", "Einen Termin vergessen"],
+          },
+          {
+            questionRu: "Как представиться новым пациентом?",
+            questionUk: "Як представитися новим пацієнтом?",
+            type: "fill",
+            correctAnswer: "Neupatient",
+            hintRu: "Neu (новый) + Patient (пациент)",
+            hintUk: "Neu (новий) + Patient (пацієнт)",
+          },
+          {
+            questionRu: "Что нужно принести к врачу?",
+            questionUk: "Що потрібно принести до лікаря?",
+            type: "choice",
+            correctAnswer: "Versichertenkarte",
+            options: ["Führerschein", "Versichertenkarte", "Geburtsurkunde", "Mietvertrag"],
+          },
+        ],
+      },
+      {
+        type: "dialogue",
+        titleRu: "На приёме у врача",
+        titleUk: "На прийомі у лікаря",
+        germanText: `Arzt: Guten Tag, was kann ich für Sie tun?
+Sie: Ich habe seit drei Tagen starke Halsschmerzen und Fieber.
+Arzt: Haben Sie auch Husten?
+Sie: Ja, besonders nachts.
+Arzt: Nehmen Sie regelmäßig Medikamente ein?
+Sie: Nein, keine.
+Arzt: Ich verschreibe Ihnen ein Antibiotikum. Nehmen Sie dreimal 
+     täglich eine Tablette nach dem Essen. Hier ist Ihr Rezept.
+Sie: Danke. Muss ich nochmal wiederkommen?
+Arzt: Ja, bitte kommen Sie in einer Woche zur Kontrolle.`,
+        explanationRu: "Halsschmerzen — боль в горле. Fieber — температура/жар. Husten — кашель. Medikamente einnehmen — принимать лекарства. Rezept — рецепт. Kontrolle — контрольный осмотр.",
+        explanationUk: "Halsschmerzen — біль у горлі. Fieber — температура. Husten — кашель. Medikamente einnehmen — приймати ліки. Rezept — рецепт. Kontrolle — контрольний огляд.",
+        questions: [
+          {
+            questionRu: "Как по-немецки «боль в горле»?",
+            questionUk: "Як німецькою «біль у горлі»?",
+            type: "fill",
+            correctAnswer: "Halsschmerzen",
+            hintRu: "Hals (горло) + Schmerzen (боли)",
+            hintUk: "Hals (горло) + Schmerzen (болі)",
+          },
+          {
+            questionRu: "Что врач выписал пациенту?",
+            questionUk: "Що лікар виписав пацієнту?",
+            type: "choice",
+            correctAnswer: "Rezept",
+            options: ["Überweisung", "Rezept", "Attest", "Rechnung"],
+          },
+          {
+            questionRu: "Сколько раз в день принимать таблетки?",
+            questionUk: "Скільки разів на день приймати таблетки?",
+            type: "choice",
+            correctAnswer: "Dreimal täglich",
+            options: ["Einmal täglich", "Zweimal täglich", "Dreimal täglich", "Viermal täglich"],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "kontoeroeffnung",
+    icon: "🏦",
+    titleRu: "Kontoeröffnung: Открытие счёта",
+    titleUk: "Kontoeröffnung: Відкриття рахунку",
+    descRu: "Открой банковский счёт — без него в Германии никуда",
+    descUk: "Відкрий банківський рахунок — без нього в Німеччині нікуди",
+    difficulty: "B1",
+    steps: [
+      {
+        type: "dialogue",
+        titleRu: "В банке",
+        titleUk: "У банку",
+        germanText: `Berater: Herzlich willkommen! Wie kann ich Ihnen helfen?
+Sie: Ich möchte gerne ein Girokonto eröffnen.
+Berater: Haben Sie Ihren Reisepass und die Meldebescheinigung dabei?
+Sie: Ja, hier bitte.
+Berater: Möchten Sie ein kostenloses Konto oder unser Premiumkonto 
+         mit Kreditkarte?
+Sie: Was kostet das Premiumkonto?
+Berater: 9,90 Euro monatlich. Dafür bekommen Sie eine Kreditkarte, 
+         kostenlose Auslandsüberweisungen und einen Dispokredit.
+Sie: Ich nehme erstmal das kostenlose Konto.
+Berater: Gut. Dann brauche ich noch Ihre Steuer-ID und eine 
+         Unterschrift hier und hier.`,
+        explanationRu: "Girokonto — расчётный счёт. Meldebescheinigung — справка о регистрации. Überweisung — перевод. Dispokredit — овердрафт. Steuer-ID — налоговый идентификатор. Unterschrift — подпись.",
+        explanationUk: "Girokonto — розрахунковий рахунок. Meldebescheinigung — довідка про реєстрацію. Überweisung — переказ. Dispokredit — овердрафт. Steuer-ID — податковий ідентифікатор. Unterschrift — підпис.",
+        questions: [
+          {
+            questionRu: "Как по-немецки «расчётный счёт»?",
+            questionUk: "Як німецькою «розрахунковий рахунок»?",
+            type: "fill",
+            correctAnswer: "Girokonto",
+            hintRu: "Giro (оборот) + Konto (счёт)",
+            hintUk: "Giro (оборот) + Konto (рахунок)",
+          },
+          {
+            questionRu: "Какой документ, кроме паспорта, нужен для открытия счёта?",
+            questionUk: "Який документ, крім паспорта, потрібен для відкриття рахунку?",
+            type: "choice",
+            correctAnswer: "Meldebescheinigung",
+            options: ["Führerschein", "Meldebescheinigung", "Geburtsurkunde", "Arbeitsvertrag"],
+          },
+          {
+            questionRu: "Что такое «Dispokredit»?",
+            questionUk: "Що таке «Dispokredit»?",
+            type: "choice",
+            correctAnswer: "Овердрафт",
+            options: ["Кредитная карта", "Овердрафт", "Ипотека", "Депозит"],
+          },
+        ],
+      },
+      {
+        type: "document",
+        titleRu: "Онлайн-банкинг: первый вход",
+        titleUk: "Онлайн-банкінг: перший вхід",
+        germanText: `Willkommen bei Ihrem Online-Banking!
+
+Ihre Zugangsdaten:
+- Kontonummer: DE89 3704 0044 0532 0130 00 (IBAN)
+- BLZ / BIC: COBADEFFXXX
+- Erstanmeldung: Benutzername + Start-PIN (per Post)
+
+Bitte ändern Sie Ihre PIN beim ersten Login.
+
+Für Überweisungen benötigen Sie eine TAN.
+TAN-Verfahren: pushTAN (App) oder chipTAN (Kartenleser).
+
+Bei Fragen: Kundenservice 0800 123 456 (kostenlos)`,
+        explanationRu: "Zugangsdaten — данные для входа. IBAN — международный номер счёта. BIC — код банка. PIN — персональный код. TAN — одноразовый код для подтверждения операций. Überweisung — перевод.",
+        explanationUk: "Zugangsdaten — дані для входу. IBAN — міжнародний номер рахунку. BIC — код банку. PIN — персональний код. TAN — одноразовий код для підтвердження операцій. Überweisung — переказ.",
+        questions: [
+          {
+            questionRu: "Что нужно сделать при первом входе?",
+            questionUk: "Що потрібно зробити при першому вході?",
+            type: "choice",
+            correctAnswer: "Сменить PIN",
+            options: ["Заказать карту", "Сменить PIN", "Сделать перевод", "Позвонить в банк"],
+          },
+          {
+            questionRu: "Что такое TAN?",
+            questionUk: "Що таке TAN?",
+            type: "choice",
+            correctAnswer: "Одноразовый код подтверждения",
+            options: ["Номер счёта", "Одноразовый код подтверждения", "Пароль для входа", "Номер карты"],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "polizei",
+    icon: "🚔",
+    titleRu: "Разговор с полицией",
+    titleUk: "Розмова з поліцією",
+    descRu: "Сообщи о краже или ДТП — знай свои права и нужные слова",
+    descUk: "Повідом про крадіжку або ДТП — знай свої права та потрібні слова",
+    difficulty: "B1",
+    steps: [
+      {
+        type: "dialogue",
+        titleRu: "Заявление о краже",
+        titleUk: "Заява про крадіжку",
+        germanText: `Polizist: Guten Tag, wie kann ich Ihnen helfen?
+Sie: Mir wurde mein Fahrrad gestohlen. Ich möchte eine 
+     Anzeige erstatten.
+Polizist: Wann und wo ist das passiert?
+Sie: Heute Morgen, vor dem Supermarkt in der Schillerstraße.
+Polizist: War das Fahrrad abgeschlossen?
+Sie: Ja, mit einem Schloss. Das Schloss wurde aufgebrochen.
+Polizist: Können Sie das Fahrrad beschreiben?
+Sie: Es ist ein schwarzes Herrenrad, Marke Cube, 
+     Rahmennummer 12345.
+Polizist: Haben Sie die Kaufquittung oder eine Rechnung?
+Sie: Ja, ich habe die Rechnung zu Hause.
+Polizist: Gut. Ich nehme Ihre Daten auf. Bitte bringen 
+          Sie die Rechnung vorbei. Sie bekommen ein 
+          Aktenzeichen für Ihre Versicherung.`,
+        explanationRu: "Anzeige erstatten — подать заявление. Schloss — замок. Aufbrechen — взломать. Rahmennummer — номер рамы. Kaufquittung — чек. Aktenzeichen — номер дела. Versicherung — страховка.",
+        explanationUk: "Anzeige erstatten — подати заяву. Schloss — замок. Aufbrechen — зламати. Rahmennummer — номер рами. Kaufquittung — чек. Aktenzeichen — номер справи. Versicherung — страховка.",
+        questions: [
+          {
+            questionRu: "Как сказать «подать заявление в полицию»?",
+            questionUk: "Як сказати «подати заяву в поліцію»?",
+            type: "choice",
+            correctAnswer: "Eine Anzeige erstatten",
+            options: ["Einen Antrag stellen", "Eine Anzeige erstatten", "Eine Beschwerde einreichen", "Einen Bericht schreiben"],
+          },
+          {
+            questionRu: "Как по-немецки «замок» (на велосипеде)?",
+            questionUk: "Як німецькою «замок» (на велосипеді)?",
+            type: "fill",
+            correctAnswer: "Schloss",
+            hintRu: "Schloss — и замок-здание, и замок-запор",
+            hintUk: "Schloss — і замок-будівля, і замок-запор",
+          },
+          {
+            questionRu: "Что нужно для страховой компании?",
+            questionUk: "Що потрібно для страхової компанії?",
+            type: "choice",
+            correctAnswer: "Aktenzeichen",
+            options: ["Führerschein", "Aktenzeichen", "Mietvertrag", "Geburtsurkunde"],
+          },
+        ],
+      },
+      {
+        type: "dialogue",
+        titleRu: "ДТП: обмен данными",
+        titleUk: "ДТП: обмін даними",
+        germanText: `Polizist: Was ist passiert?
+Sie: Ich hatte einen Unfall. Der andere Fahrer ist bei 
+     Rot über die Ampel gefahren.
+Polizist: Ist jemand verletzt?
+Sie: Nein, zum Glück nicht. Nur Blechschaden.
+Polizist: Haben Sie den Unfallbericht schon ausgefüllt?
+Sie: Nein, noch nicht.
+Polizist: Bitte tauschen Sie mit dem anderen Fahrer folgende 
+          Daten aus: Name, Adresse, Versicherungsnummer 
+          und Kennzeichen. Machen Sie Fotos vom Schaden.
+Sie: Muss ich auch meine Versicherung informieren?
+Polizist: Ja, innerhalb von einer Woche.`,
+        explanationRu: "Unfall — авария/ДТП. Ampel — светофор. Blechschaden — повреждение кузова. Unfallbericht — протокол ДТП. Versicherungsnummer — номер страховки. Kennzeichen — номерной знак. Schaden — ущерб.",
+        explanationUk: "Unfall — аварія/ДТП. Ampel — світлофор. Blechschaden — пошкодження кузова. Unfallbericht — протокол ДТП. Versicherungsnummer — номер страховки. Kennzeichen — номерний знак. Schaden — збиток.",
+        questions: [
+          {
+            questionRu: "Как по-немецки «светофор»?",
+            questionUk: "Як німецькою «світлофор»?",
+            type: "fill",
+            correctAnswer: "Ampel",
+            hintRu: "Короткое слово на A...",
+            hintUk: "Коротке слово на A...",
+          },
+          {
+            questionRu: "Что такое «Blechschaden»?",
+            questionUk: "Що таке «Blechschaden»?",
+            type: "choice",
+            correctAnswer: "Повреждение кузова",
+            options: ["Повреждение кузова", "Травма водителя", "Разбитое стекло", "Спущенное колесо"],
+          },
+          {
+            questionRu: "В какой срок нужно сообщить страховой?",
+            questionUk: "У який термін потрібно повідомити страхову?",
+            type: "choice",
+            correctAnswer: "В течение недели",
+            options: ["Сразу на месте", "В течение 24 часов", "В течение недели", "В течение месяца"],
+          },
+        ],
+      },
+    ],
+  },
 ];
 
 const LebenInDeutschland = ({ onBack }: { onBack: () => void }) => {
