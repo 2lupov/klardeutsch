@@ -37,7 +37,10 @@ const LevelSelector = ({ onSelect }: LevelSelectorProps) => {
   return (
     <div className="flex flex-col gap-4 animate-slide-up w-full max-w-2xl mx-auto h-full justify-center">
       <div className="text-center">
-        <div className="flex justify-end mb-1">
+        <div className="flex justify-between items-center mb-1">
+          {!bonusLoading && (
+            <StreakPlant streak={streak} canClaim={canClaim} compact />
+          )}
           <LanguageSwitcher />
         </div>
         <div className="flex justify-center mb-1">
