@@ -629,6 +629,11 @@ const Profile = () => {
           )}
           <p className="text-xs text-muted-foreground truncate">{user.email}</p>
         </div>
+
+        {/* Panda streak button */}
+        {!pandaLoading && (
+          <StreakPlant streak={pandaStreak} canClaim={pandaCanClaim} compact />
+        )}
       </div>
 
       {/* Avatar picker */}
