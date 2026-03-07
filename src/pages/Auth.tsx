@@ -92,27 +92,16 @@ const Auth = () => {
   const { t } = useLanguage();
   const { isTelegram } = usePlatform();
 
-  // In TMA, show loading while auto-auth is in progress
-  if (isTelegram && authLoading) {
-    return (
-      <div className="min-h-[100dvh] bg-background flex items-center justify-center">
-        <span className="text-muted-foreground animate-pulse font-display text-lg">KLAR</span>
-      </div>
-    );
-  }
-
   // Calculate logo fill progress based on form completion
   const getProgress = () => {
     if (forgotMode) {
       return email.length >= 5 ? 1 : email.length / 5;
     }
     if (isLogin) {
-      // 2 fields: email + password
       const emailPart = Math.min(email.length / 5, 1) * 0.5;
       const passPart = Math.min(password.length / 6, 1) * 0.5;
       return emailPart + passPart;
     }
-    // Signup: 3 required fields (email, nickname, password) + optional referral
     const emailPart = Math.min(email.length / 5, 1) * 0.3;
     const nickPart = Math.min(nickname.length / 2, 1) * 0.25;
     const passPart = Math.min(password.length / 6, 1) * 0.35;
@@ -120,8 +109,7 @@ const Auth = () => {
     return Math.min(emailPart + nickPart + passPart + refPart, 1);
   };
 
-  // If in TMA and loading is happening, show loading state (handled by AuthContext)
-  // If user is already logged in via TMA auto-login, redirect
+  // If user is already logged in, redirect
   useEffect(() => {
     if (user && !showFireworks) navigate("/");
   }, [user, navigate, showFireworks]);
