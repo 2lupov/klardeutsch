@@ -49,7 +49,7 @@ const DailyBonusDialog = () => {
           {!claimed ? (
             <>
               <p className="text-sm text-muted-foreground text-center">
-                Полей своё растение — забери подарок!
+                Разбуди панду — забери подарок!
               </p>
 
               <button
@@ -57,7 +57,7 @@ const DailyBonusDialog = () => {
                 disabled={claiming}
                 className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-display font-bold text-sm hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                {claiming ? "Поливаю... 💧" : "💧 Полить и забрать подарок"}
+                {claiming ? "Будим панду... 🐼" : "🐼 Разбудить и забрать подарок"}
               </button>
             </>
           ) : (
