@@ -41,6 +41,14 @@ Deno.serve(async (req) => {
       }
     }
 
+    const { page, description } = await req.json();
+    if (!description?.trim()) {
+      return new Response(JSON.stringify({ error: "Description required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Get admin users' telegram_chat_ids
     const { data: adminRoles } = await supabase
       .from("user_roles")
