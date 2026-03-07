@@ -38,7 +38,7 @@ const DailyBonusDialog = () => {
         <DialogHeader>
           <DialogTitle className="font-display text-center text-lg flex items-center justify-center gap-2">
             <Gift className="w-5 h-5 text-primary" />
-            Ежедневный бонус
+            Ежедневный бонус 🐼
           </DialogTitle>
         </DialogHeader>
 
