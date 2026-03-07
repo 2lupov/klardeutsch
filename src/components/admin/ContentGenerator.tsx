@@ -3,7 +3,7 @@ import BulkGenerator from "./BulkGenerator";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   Sparkles, Loader2, BookOpen, Languages, BookText, Headphones, 
-  Save, X, Copy, Check, Upload, FileJson, Wand2, ArrowRight 
+  Save, X, Copy, Check, Upload, FileJson, Wand2, ArrowRight, Zap
 } from "lucide-react";
 import { toast } from "sonner";
 
