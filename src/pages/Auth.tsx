@@ -88,9 +88,18 @@ const Auth = () => {
   const [googleLoading, setGoogleLoading] = useState(false);
   const navigate = useNavigate();
   const logoRef = useRef<HTMLDivElement>(null);
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { t } = useLanguage();
   const { isTelegram } = usePlatform();
+
+  // In TMA, show loading while auto-auth is in progress
+  if (isTelegram && authLoading) {
+    return (
+      <div className="min-h-[100dvh] bg-background flex items-center justify-center">
+        <span className="text-muted-foreground animate-pulse font-display text-lg">KLAR</span>
+      </div>
+    );
+  }
 
   // Calculate logo fill progress based on form completion
   const getProgress = () => {
