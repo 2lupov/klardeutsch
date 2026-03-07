@@ -212,6 +212,29 @@ const Auth = () => {
     );
   }
 
+/** Translate common Supabase Auth error messages to Russian */
+function translateAuthError(msg: string): string {
+  const map: Record<string, string> = {
+    "Invalid login credentials": "Неверный email или пароль",
+    "Email not confirmed": "Email не подтверждён. Проверьте почту",
+    "User already registered": "Пользователь уже зарегистрирован",
+    "Password should be at least 6 characters": "Пароль должен быть не менее 6 символов",
+    "For security purposes, you can only request this once every 60 seconds": "Подождите 60 секунд перед повторной попыткой",
+    "Unable to validate email address: invalid format": "Неверный формат email",
+    "Signup requires a valid password": "Введите пароль",
+    "Token has expired or is invalid": "Код истёк или неверен",
+    "User not found": "Пользователь не найден",
+    "Invalid Refresh Token: Refresh Token Not Found": "Сессия истекла, войдите заново",
+    "New password should be different from the old password.": "Новый пароль должен отличаться от старого",
+    "Auth session missing!": "Сессия не найдена",
+    "Invalid login widget data": "Ошибка входа через Telegram. Попробуйте снова",
+    "Auth failed": "Ошибка авторизации",
+  };
+  for (const [en, ru] of Object.entries(map)) {
+    if (msg.includes(en)) return ru;
+  }
+  return msg;
+}
 
   const handleVerifyOtp = async () => {
     setError("");
