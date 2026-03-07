@@ -309,7 +309,7 @@ Mit freundlichen Grüßen`,
 ];
 
 const LebenInDeutschland = ({ onBack }: { onBack: () => void }) => {
-  const { t, lang } = useLanguage();
+  const { t, lang useLanguage();
   const { isMobile } = usePlatform();
   const [selectedScenario, setSelectedScenario] = useState<Scenario | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
@@ -322,7 +322,7 @@ const LebenInDeutschland = ({ onBack }: { onBack: () => void }) => {
   const [showExplanation, setShowExplanation] = useState(false);
   const [completed, setCompleted] = useState(false);
 
-  const isRu = language === "ru";
+  const isRu = language "ru";
 
   const resetGame = () => {
     setSelectedScenario(null);

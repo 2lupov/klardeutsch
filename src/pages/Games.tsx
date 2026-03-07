@@ -42,6 +42,10 @@ const Games = () => {
     return <PronunciationTrainer onBack={() => setScreen("list")} />;
   }
 
+  if (screen === "leben") {
+    return <LebenInDeutschland onBack={() => setScreen("list")} />;
+  }
+
   return (
     <div className={`w-full mx-auto px-4 py-6 ${isMobile ? "max-w-md" : "max-w-2xl"}`}>
       <button
