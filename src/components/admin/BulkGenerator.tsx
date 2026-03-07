@@ -153,8 +153,55 @@ const BulkGenerator = () => {
   const totalInserted = jobs.reduce((sum, j) => sum + (j.inserted || 0), 0);
   const progressPct = totalJobs > 0 ? Math.round((totalDone / totalJobs) * 100) : 0;
 
+  const [convertingTheory, setConvertingTheory] = useState(false);
+  const [conversionResult, setConversionResult] = useState<string | null>(null);
+
+  const convertGrammarTheory = async () => {
+    setConvertingTheory(true);
+    setConversionResult(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("convert-grammar-theory", {
+        body: {},
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setConversionResult(`✅ Конвертировано: ${data.converted}/${data.total} уроков`);
+      toast.success(`Конвертировано ${data.converted} уроков грамматики!`);
+    } catch (e: any) {
+      setConversionResult(`❌ Ошибка: ${e.message}`);
+      toast.error("Ошибка конвертации: " + e.message);
+    }
+    setConvertingTheory(false);
+  };
+
   return (
     <div className="space-y-5">
+      {/* Convert Grammar Theory */}
+      <div className="p-4 rounded-xl bg-accent/10 border border-accent/20">
+        <h3 className="font-display font-bold text-sm text-foreground mb-1 flex items-center gap-2">
+          <Wand2 className="w-4 h-4 text-accent-foreground" />
+          Конвертация теории грамматики
+        </h3>
+        <p className="text-xs text-muted-foreground mb-3">
+          Преобразует markdown-теорию в красивые структурированные блоки (таблицы, правила, примеры)
+        </p>
+        <button
+          onClick={convertGrammarTheory}
+          disabled={convertingTheory}
+          className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-bold flex items-center gap-2 hover:bg-primary/90 transition-all disabled:opacity-50"
+        >
+          {convertingTheory ? (
+            <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Конвертация...</>
+          ) : (
+            <><Wand2 className="w-3.5 h-3.5" /> Конвертировать все</>
+          )}
+        </button>
+        {conversionResult && (
+          <p className="text-xs text-muted-foreground mt-2">{conversionResult}</p>
+        )}
+      </div>
+
+      {/* Bulk Generate */}
       <div className="p-4 rounded-xl bg-primary/5 border border-primary/20">
         <h3 className="font-display font-bold text-sm text-primary mb-1 flex items-center gap-2">
           <Zap className="w-4 h-4" />
