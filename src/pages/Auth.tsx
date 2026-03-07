@@ -14,6 +14,30 @@ import SimpleCaptcha from "@/components/auth/SimpleCaptcha";
 import { lovable } from "@/integrations/lovable/index";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
+/** Translate common Supabase Auth error messages to Russian */
+function translateAuthError(msg: string): string {
+  const map: Record<string, string> = {
+    "Invalid login credentials": "Неверный email или пароль",
+    "Email not confirmed": "Email не подтверждён. Проверьте почту",
+    "User already registered": "Пользователь уже зарегистрирован",
+    "Password should be at least 6 characters": "Пароль должен быть не менее 6 символов",
+    "For security purposes, you can only request this once every 60 seconds": "Подождите 60 секунд перед повторной попыткой",
+    "Unable to validate email address: invalid format": "Неверный формат email",
+    "Signup requires a valid password": "Введите пароль",
+    "Token has expired or is invalid": "Код истёк или неверен",
+    "User not found": "Пользователь не найден",
+    "Invalid Refresh Token: Refresh Token Not Found": "Сессия истекла, войдите заново",
+    "New password should be different from the old password.": "Новый пароль должен отличаться от старого",
+    "Auth session missing!": "Сессия не найдена",
+    "Invalid login widget data": "Ошибка входа через Telegram. Попробуйте снова",
+    "Auth failed": "Ошибка авторизации",
+  };
+  for (const [en, ru] of Object.entries(map)) {
+    if (msg.includes(en)) return ru;
+  }
+  return msg;
+}
+
 /** Injects the official Telegram Login Widget script */
 const TelegramLoginButton = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -114,7 +138,7 @@ const Auth = () => {
         await loginWithTelegramWidget(widgetData);
         setShowFireworks(true);
       } catch (err: any) {
-        setError(err.message);
+        setError(translateAuthError(err.message));
       } finally {
         setTgWidgetLoading(false);
       }
@@ -136,7 +160,7 @@ const Auth = () => {
     setError("");
     setLoading(true);
     const { error } = await supabase.auth.resend({ type: "signup", email });
-    if (error) setError(error.message);
+    if (error) setError(translateAuthError(error.message));
     else {
       setMessage(t("codeSentAgain") || "Код отправлен повторно");
       setResendCooldown(5);
@@ -160,7 +184,7 @@ const Auth = () => {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
-      if (error) setError(error.message);
+      if (error) setError(translateAuthError(error.message));
       else setMessage(t("resetPasswordSent"));
       setLoading(false);
       return;
@@ -169,7 +193,7 @@ const Auth = () => {
     if (isLogin) {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
-        setError(error.message);
+        setError(translateAuthError(error.message));
         setFailedAttempts(prev => prev + 1);
         setCaptchaVerified(false);
       }
@@ -183,7 +207,7 @@ const Auth = () => {
         options: { emailRedirectTo: window.location.origin },
       });
       if (error) {
-        setError(error.message);
+        setError(translateAuthError(error.message));
         setFailedAttempts(prev => prev + 1);
         setCaptchaVerified(false);
       } else {
@@ -222,7 +246,7 @@ const Auth = () => {
       type: "signup",
     });
     if (error) {
-      setError(error.message);
+      setError(translateAuthError(error.message));
     } else {
       // Profile update + referral after confirmed
       if (signupUserId) {
