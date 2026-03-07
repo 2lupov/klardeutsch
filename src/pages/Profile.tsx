@@ -14,6 +14,8 @@ import Leaderboard from "@/components/Leaderboard";
 import Referrals from "@/components/Referrals";
 import { useXP } from "@/hooks/useXP";
 import AvatarPicker from "@/components/AvatarPicker";
+import StreakPlant from "@/components/StreakPlant";
+import { useDailyBonus } from "@/hooks/useDailyBonus";
 
 interface ProgressRow {
   level: string;
@@ -58,6 +60,7 @@ const Profile = () => {
   const [challengesSentCount, setChallengesSentCount] = useState(0);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [settingAvatar, setSettingAvatar] = useState(false);
+  const { streak: pandaStreak, canClaim: pandaCanClaim, loading: pandaLoading } = useDailyBonus();
   useEffect(() => {
     if (!user) return;
     const load = async () => {
@@ -626,6 +629,11 @@ const Profile = () => {
           )}
           <p className="text-xs text-muted-foreground truncate">{user.email}</p>
         </div>
+
+        {/* Panda streak button */}
+        {!pandaLoading && (
+          <StreakPlant streak={pandaStreak} canClaim={pandaCanClaim} compact />
+        )}
       </div>
 
       {/* Avatar picker */}
