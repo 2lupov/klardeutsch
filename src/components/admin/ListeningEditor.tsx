@@ -191,10 +191,12 @@ const VoiceSelect = ({ value, onChange, label }: { value: string; onChange: (v: 
 function parseDialogueLines(text: string): { speaker: string; text: string }[] | null {
   if (!/^[A-Z]:\s/m.test(text)) return null;
   const lines: { speaker: string; text: string }[] = [];
-  const regex = /([A-Z]):\s*(.+?)(?=(?:\n[A-Z]:\s)|$)/gs;
-  let match;
-  while ((match = regex.exec(text)) !== null) {
-    if (match[2].trim()) lines.push({ speaker: match[1], text: match[2].trim() });
+  const rawLines = text.split(/\r?\n/);
+  for (const raw of rawLines) {
+    const match = raw.match(/^([A-Z]):\s*(.+)$/);
+    if (match && match[2].trim()) {
+      lines.push({ speaker: match[1], text: match[2].trim() });
+    }
   }
   return lines.length > 0 ? lines : null;
 }
