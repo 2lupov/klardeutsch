@@ -14,6 +14,7 @@ interface LevelSelectorProps {
 const LevelSelector = ({ onSelect }: LevelSelectorProps) => {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const { streak, canClaim, loading: bonusLoading } = useDailyBonus();
 
   // Aggregate progress across all levels for the logo
   const a1 = useLevelProgress("A1");
