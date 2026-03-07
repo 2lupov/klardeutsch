@@ -9,7 +9,7 @@ import { toast } from "sonner";
 
 type Level = "A1" | "A2" | "B1" | "B2" | "C1";
 type ExerciseType = "vocab" | "grammar" | "reading" | "listening";
-type Mode = "prompt" | "import";
+type Mode = "prompt" | "import" | "bulk";
 
 interface GeneratedExercises {
   vocab_cards?: Array<{ german: string; russian: string; article?: string; example?: string; topic?: string }>;
