@@ -552,6 +552,8 @@ const ContentGenerator = ({ level }: { level: Level }) => {
           )}
         </div>
       )}
+
+      {mode === "bulk" && <BulkGenerator />}
     </div>
   );
 };
