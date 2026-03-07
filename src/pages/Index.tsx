@@ -31,7 +31,7 @@ const Index = () => {
   const [clarity, setClarity] = useState(0);
   const { user } = useAuth();
   const { saveProgress } = useProgress();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const { isMobile } = usePlatform();
 
   // Load data when entering exercise
