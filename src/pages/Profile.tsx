@@ -60,6 +60,7 @@ const Profile = () => {
   const [challengesSentCount, setChallengesSentCount] = useState(0);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [settingAvatar, setSettingAvatar] = useState(false);
+  const { streak: pandaStreak, canClaim: pandaCanClaim, loading: pandaLoading } = useDailyBonus();
   useEffect(() => {
     if (!user) return;
     const load = async () => {
