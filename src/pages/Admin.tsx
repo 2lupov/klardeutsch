@@ -13,7 +13,7 @@ import ContentGenerator from "@/components/admin/ContentGenerator";
 import CourseEditor from "@/components/admin/CourseEditor";
 import TranslationChecker from "@/components/admin/TranslationChecker";
 import AllTextsEditor from "@/components/admin/AllTextsEditor";
-import StuffOnlyTab from "@/components/admin/StuffOnlyTab";
+import AdminStats from "@/components/admin/AdminStats";
 import TopicsEditor from "@/components/admin/TopicsEditor";
 import { toast } from "sonner";
 
