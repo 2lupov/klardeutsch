@@ -59,7 +59,7 @@ export const useProgress = () => {
         });
 
         // Activate referral on first completed lesson (for referred users)
-        supabase.rpc("activate_referral", { p_referred_id: user.id }).catch(() => {});
+        supabase.rpc("activate_referral", { p_referred_id: user.id }).then(() => {});
 
         // Haptic feedback
         try {
