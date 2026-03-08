@@ -617,6 +617,7 @@ const LessonEditor = ({ lesson, onChange, level }: { lesson: CourseLesson; onCha
           <button onClick={() => onChange({ ...lesson, exercises: { ...ex, cultural_notes: [...(ex.cultural_notes || []), { title: { ru: "", ua: "" }, content: { ru: "", ua: "" } }] } })} className="w-full py-2 rounded-xl bg-secondary border border-border text-xs text-primary flex items-center justify-center gap-1.5 hover:border-primary/30 transition-colors">
             <Plus className="w-3 h-3" /> Культурный факт
           </button>
+          {level && aiBtn("culture", "🤖 Сгенерировать культурные заметки через ИИ")}
         </div>
       )}
     </div>
