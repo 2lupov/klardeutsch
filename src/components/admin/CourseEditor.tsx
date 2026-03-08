@@ -9,10 +9,9 @@ const withScroll = async (fn: () => Promise<void>) => {
 };
 import { supabase } from "@/integrations/supabase/client";
 import {
-  BookOpen, Wand2, Copy, Check, FileJson, Upload, Loader2, Trash2,
-  Plus, ChevronDown, ChevronUp, Eye, EyeOff, Save, Sparkles, GraduationCap,
-  Edit3, Image, ArrowLeft, X, FileText, Table, MessageSquare, Lightbulb, Languages,
-  GripVertical, CopyPlus, RotateCcw
+  BookOpen, Wand2, Loader2, Trash2, Plus, ChevronDown, ChevronUp, Eye, EyeOff, 
+  Save, Sparkles, GraduationCap, Edit3, ArrowLeft, X, FileText, Table, 
+  MessageSquare, Lightbulb, Languages, CopyPlus, RotateCcw
 } from "lucide-react";
 import { toast } from "sonner";
 import TheoryRenderer, { type TheoryBlock } from "@/components/course/TheoryRenderer";
