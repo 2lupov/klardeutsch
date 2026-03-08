@@ -1174,6 +1174,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
                   <LessonEditor
                     lesson={lesson}
                     onChange={l => { const n = { ...courseData }; n.lessons = [...n.lessons]; n.lessons[i] = l; setCourseData(n); }}
+                    level={courseData?.course?.level}
                   />
                 </div>
               )}
