@@ -1107,6 +1107,13 @@ export type Database = {
           duels_won: number
         }[]
       }
+      get_user_learning_stats: {
+        Args: { p_user_id: string }
+        Returns: {
+          lessons_completed: number
+          words_learned: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
