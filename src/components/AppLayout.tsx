@@ -56,7 +56,7 @@ const AppLayout = () => {
         <EditModeToolbar />
         <LofiFloatingPlayer />
         <DailyBonusDialog />
-        <div className="flex-1 overflow-y-auto overscroll-none pb-14">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden overscroll-none pb-14">
           <PageTransition><Outlet /></PageTransition>
         </div>
         <MobileBottomNav />
