@@ -13,6 +13,7 @@ interface LanguageContextType {
   reloadOverrides: () => Promise<void>;
   languageLocked: boolean;
   lockLanguage: (lang: Lang) => Promise<void>;
+  unlockLanguage: () => Promise<void>;
 }
 
 const LanguageContext = createContext<LanguageContextType>({
