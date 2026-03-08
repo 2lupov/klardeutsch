@@ -82,7 +82,7 @@ const KlarLogo = ({ progress, completed = false, size = "lg" }: KlarLogoProps) =
           const fill = getLetterFill(i);
           const spacing = -2; // negative for tighter
           const isFull = fill >= 1;
-          const x = letters.slice(0, i).reduce((sum, l) => sum + l.width + 2, 0);
+          const x = letters.slice(0, i).reduce((sum, l) => sum + l.width + spacing, 0);
           const maskId = `mask-${letter.char}-${i}`;
           const fillY = height * (1 - fill);
 
