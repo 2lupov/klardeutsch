@@ -152,19 +152,20 @@ const Index = () => {
     if (dataLoading || !data) {
       return <p className="text-muted-foreground text-center">{t("loading")}</p>;
     }
+    const emptyState = (
+      <div className="flex flex-col items-center justify-center gap-4 py-12 animate-slide-up">
+        <p className="text-4xl">📭</p>
+        <p className="text-muted-foreground text-center">Контент для этого уровня пока готовится</p>
+        <button onClick={handleBack} className="text-primary hover:underline text-sm">{t("back")}</button>
+      </div>
+    );
+
     switch (category) {
       case "vocabulary":
+        if (data.vocabulary.length === 0) return emptyState;
         return <Flashcard cards={data.vocabulary} onComplete={handleVocabComplete} />;
       case "grammar":
-        if (!data.grammar.theory && data.grammar.questions.length === 0) {
-          return (
-            <div className="flex flex-col items-center justify-center gap-4 py-12 animate-slide-up">
-              <p className="text-4xl">📭</p>
-              <p className="text-muted-foreground text-center">Контент для этого уровня пока готовится</p>
-              <button onClick={handleBack} className="text-primary hover:underline text-sm">{t("back")}</button>
-            </div>
-          );
-        }
+        if (!data.grammar.theory && data.grammar.questions.length === 0) return emptyState;
         return (
           <div className="flex flex-col gap-6 animate-slide-up">
             <div className="glass-card p-6">
@@ -174,8 +175,10 @@ const Index = () => {
           </div>
         );
       case "reading":
+        if (data.reading.length === 0) return emptyState;
         return <ReadingExercise readings={data.reading} onComplete={handleReadingComplete} level={level} />;
       case "listening":
+        if (data.listening.length === 0) return emptyState;
         return <ListeningExercise listenings={data.listening} onComplete={handleListeningComplete} />;
     }
   };
