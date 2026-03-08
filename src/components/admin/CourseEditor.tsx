@@ -881,10 +881,10 @@ const CourseEditor = ({ level }: { level: Level }) => {
           </div>
         </div>
 
-        {/* Auto-generate 25 lessons */}
-        {editCourse && editLessons.length === 0 && !generating && (
-          <button onClick={() => generateAllLessons(editCourse)} className="w-full py-3 rounded-xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground text-sm font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
-            <Sparkles className="w-4 h-4" /> Авто-генерация 25 уроков ({editCourse.level})
+        {/* Auto-generate lessons up to 25 */}
+        {editCourse && editLessons.length < 25 && !generating && (
+          <button onClick={() => generateAllLessons(editCourse, editLessons.length)} className="w-full py-3 rounded-xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground text-sm font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+            <Sparkles className="w-4 h-4" /> {editLessons.length === 0 ? `Авто-генерация 25 уроков (${editCourse.level})` : `Догенерировать до 25 уроков (есть ${editLessons.length})`}
           </button>
         )}
 
