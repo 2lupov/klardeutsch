@@ -258,9 +258,9 @@ const Shop = () => {
                       <button
                         onClick={() => handleBuyCourse(course)}
                         disabled={!canAfford || buying === course.id}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all active:scale-95 ${
+                        className={`flex items-center justify-center gap-2 w-full px-4 py-2 rounded-xl text-sm font-semibold transition-all active:scale-95 ${
                           canAfford
-                            ? "bg-primary text-primary-foreground hover:opacity-90 hover:scale-[1.02]"
+                            ? "bg-primary text-primary-foreground hover:opacity-90"
                             : "bg-muted text-muted-foreground cursor-not-allowed"
                         }`}
                       >
@@ -268,8 +268,8 @@ const Shop = () => {
                           <span className="animate-pulse">{t("loading")}</span>
                         ) : (
                           <>
-                            {!canAfford && <Lock className="w-3.5 h-3.5" />}
-                            {canAfford ? (lang === "uk" ? "Купити курс" : "Купить курс") : t("notEnoughCoins")}
+                            {!canAfford && <Lock className="w-3.5 h-3.5 shrink-0" />}
+                            <span className="truncate">{canAfford ? (lang === "uk" ? "Купити курс" : "Купить курс") : t("notEnoughCoins")}</span>
                           </>
                         )}
                       </button>
