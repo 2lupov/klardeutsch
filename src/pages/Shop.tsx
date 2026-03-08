@@ -173,7 +173,7 @@ const Shop = () => {
   };
 
   return (
-    <div className={`w-full mx-auto px-4 py-6 ${isMobile ? "max-w-md" : "max-w-2xl"}`}>
+    <div className={`w-full mx-auto px-4 py-6 overflow-x-hidden ${isMobile ? "max-w-md" : "max-w-2xl"}`}>
       {/* Header with balance */}
       <div className="flex items-center justify-between mb-6">
         <div>
