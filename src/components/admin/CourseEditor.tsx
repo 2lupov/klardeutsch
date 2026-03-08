@@ -578,6 +578,7 @@ const LessonEditor = ({ lesson, onChange, level }: { lesson: CourseLesson; onCha
             const qs = [...(ex.reading?.questions || []), { question: "", options: ["", "", "", ""], correct_index: 0, explanation: "" }];
             onChange({ ...lesson, exercises: { ...ex, reading: { ...(ex.reading || { title: "", text: "" }), questions: qs } } });
           }} className="text-xs text-primary flex items-center gap-1"><Plus className="w-3 h-3" /> Вопрос к тексту</button>
+          {level && aiBtn("reading", "🤖 Сгенерировать текст через ИИ")}
         </div>
       )}
 
