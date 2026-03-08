@@ -9,10 +9,9 @@ const withScroll = async (fn: () => Promise<void>) => {
 };
 import { supabase } from "@/integrations/supabase/client";
 import {
-  BookOpen, Wand2, Copy, Check, FileJson, Upload, Loader2, Trash2,
-  Plus, ChevronDown, ChevronUp, Eye, EyeOff, Save, Sparkles, GraduationCap,
-  Edit3, Image, ArrowLeft, X, FileText, Table, MessageSquare, Lightbulb, Languages,
-  GripVertical, CopyPlus, RotateCcw
+  BookOpen, Wand2, Loader2, Trash2, Plus, ChevronDown, ChevronUp, Eye, EyeOff, 
+  Save, Sparkles, GraduationCap, Edit3, ArrowLeft, X, FileText, Table, 
+  MessageSquare, Lightbulb, Languages, CopyPlus, RotateCcw
 } from "lucide-react";
 import { toast } from "sonner";
 import TheoryRenderer, { type TheoryBlock } from "@/components/course/TheoryRenderer";
@@ -32,10 +31,6 @@ interface CourseLesson {
   };
 }
 
-interface CourseData {
-  course: { title: string; description: string; level: string };
-  lessons: CourseLesson[];
-}
 
 interface ExistingCourse {
   id: string;
@@ -629,19 +624,10 @@ const LessonEditor = ({ lesson, onChange, level }: { lesson: CourseLesson; onCha
    ══════════════════════════════════════════ */
 
 const CourseEditor = ({ level }: { level: Level }) => {
-  const [step, setStep] = useState<"list" | "create" | "prompt" | "import" | "preview" | "edit">("list");
+  const [step, setStep] = useState<"list" | "create" | "edit">("list");
   const [courseName, setCourseName] = useState("");
   const [description, setDescription] = useState("");
-  const [lessonsCount, setLessonsCount] = useState("5");
-  const [topics, setTopics] = useState("");
-  const [generatedPrompt, setGeneratedPrompt] = useState("");
-  const [generatingPrompt, setGeneratingPrompt] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [jsonInput, setJsonInput] = useState("");
-  const [validating, setValidating] = useState(false);
-  const [courseData, setCourseData] = useState<CourseData | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [expandedLesson, setExpandedLesson] = useState<number | null>(null);
+  const [lessonsCount, setLessonsCount] = useState("25");
   const [existingCourses, setExistingCourses] = useState<ExistingCourse[]>([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
   const [editingCourseId, setEditingCourseId] = useState<string | null>(null);
@@ -655,22 +641,68 @@ const CourseEditor = ({ level }: { level: Level }) => {
   const [genTotal, setGenTotal] = useState(0);
   const [genLog, setGenLog] = useState<string[]>([]);
   const genAbortRef = useRef(false);
+  const [expandedLesson, setExpandedLesson] = useState<number | null>(null);
+  const [creatingCourse, setCreatingCourse] = useState(false);
 
-  const generateAllLessons = async (course: ExistingCourse, existingCount = 0) => {
-    const remaining = 25 - existingCount;
-    if (remaining <= 0) { toast.info("Уже 25 уроков!"); return; }
-    if (!confirm(`Сгенерировать ${remaining} уроков для ${course.level}? Это займёт несколько минут (по 1 уроку за раз).`)) return;
+  // Create course and auto-generate lessons
+  const handleCreateAndGenerate = async () => {
+    if (!courseName.trim()) { toast.error("Введите название курса"); return; }
+    
+    const count = parseInt(lessonsCount) || 25;
+    if (!confirm(`Создать курс "${courseName}" и сгенерировать ${count} уроков? Это займёт несколько минут.`)) return;
+    
+    setCreatingCourse(true);
+    
+    try {
+      // Create the course first
+      const { data: courseRow, error: courseErr } = await supabase.from("courses").insert({
+        title: courseName.trim(),
+        description: description.trim() || null,
+        level,
+        available: false,
+        price: level === "A1" ? 150 : level === "A2" ? 250 : level === "B1" ? 400 : level === "B2" ? 500 : 650,
+      } as any).select("*").single();
+      
+      if (courseErr) throw courseErr;
+      
+      toast.success(`Курс создан! Начинаем генерацию ${count} уроков...`);
+      
+      // Open edit mode and start generation
+      setEditCourse(courseRow as ExistingCourse);
+      setEditingCourseId((courseRow as any).id);
+      setEditLessons([]);
+      setStep("edit");
+      
+      // Start auto-generation
+      await generateAllLessons(courseRow as ExistingCourse, 0, count);
+      
+      // Reset form
+      setCourseName("");
+      setDescription("");
+      setLessonsCount("25");
+      
+    } catch (err: any) {
+      toast.error("Ошибка создания курса: " + err.message);
+    }
+    
+    setCreatingCourse(false);
+  };
+
+  const generateAllLessons = async (course: ExistingCourse, existingCount = 0, targetCount = 25) => {
+    const remaining = targetCount - existingCount;
+    if (remaining <= 0) { toast.info("Все уроки уже созданы!"); return; }
+    
     setGenerating(true);
     genAbortRef.current = false;
     setGenTotal(remaining);
     setGenProgress(0);
-    setGenLog([existingCount > 0 ? `📚 Уже есть ${existingCount} уроков, догенерируем ещё ${remaining}...` : `⏳ Начинаем генерацию ${remaining} уроков по одному...`]);
+    setGenLog([existingCount > 0 ? `📚 Уже есть ${existingCount} уроков, догенерируем ещё ${remaining}...` : `⏳ Начинаем генерацию ${remaining} уроков...`]);
 
     let retries = 0;
     for (let i = 0; i < remaining; i++) {
       if (genAbortRef.current) { setGenLog(prev => [...prev, `🛑 Остановлено пользователем`]); break; }
       const lessonNum = existingCount + i;
-      setGenLog(prev => [...prev, `⏳ Урок ${lessonNum + 1}/25...`]);
+      setGenLog(prev => [...prev, `⏳ Урок ${lessonNum + 1}/${targetCount}...`]);
       
       try {
         const { data, error } = await supabase.functions.invoke("generate-full-course", {
@@ -697,7 +729,6 @@ const CourseEditor = ({ level }: { level: Level }) => {
         }
         setGenLog(prev => [...prev, `❌ Ошибка урока ${lessonNum + 1}: ${err.message}`]);
         if (retries >= 3) { setGenLog(prev => [...prev, `🛑 Слишком много ошибок, остановка`]); break; }
-        // For non-rate-limit errors, skip and continue
         setGenLog(prev => [...prev, `⏭️ Пропускаем, продолжаем...`]);
         continue;
       }
@@ -710,8 +741,9 @@ const CourseEditor = ({ level }: { level: Level }) => {
     
     setGenerating(false);
     toast.success("Генерация завершена! 🎉");
+    
     // Reload lessons
-    if (editingCourseId === course.id) {
+    if (editingCourseId === course.id || editingCourseId === null) {
       const { data } = await supabase.from("course_lessons").select("*").eq("course_id", course.id).order("sort_order", { ascending: true });
       setEditLessons((data as any[]) || []);
     }
@@ -765,7 +797,6 @@ const CourseEditor = ({ level }: { level: Level }) => {
     withScroll(loadCourses);
   };
 
-  /* ─── Add new lesson ─── */
   const addNewLesson = async () => {
     if (!editingCourseId) return;
     setSavingNewLesson(true);
@@ -784,7 +815,6 @@ const CourseEditor = ({ level }: { level: Level }) => {
     setSavingNewLesson(false);
   };
 
-  /* ─── Delete lesson ─── */
   const deleteLesson = async (lessonId: string, index: number) => {
     if (!confirm("Удалить этот урок?")) return;
     await supabase.from("course_lessons").delete().eq("id", lessonId);
@@ -793,7 +823,6 @@ const CourseEditor = ({ level }: { level: Level }) => {
     toast.success("Урок удалён");
   };
 
-  /* ─── Duplicate lesson ─── */
   const duplicateLesson = async (lesson: any) => {
     if (!editingCourseId) return;
     const nextOrder = editLessons.length > 0 ? Math.max(...editLessons.map(l => l.sort_order)) + 1 : 0;
@@ -809,25 +838,20 @@ const CourseEditor = ({ level }: { level: Level }) => {
     toast.success("Урок скопирован! 📋");
   };
 
-  /* ─── Move lesson up/down ─── */
   const moveLesson = async (index: number, dir: -1 | 1) => {
     const ni = index + dir;
     if (ni < 0 || ni >= editLessons.length) return;
     const newLessons = [...editLessons];
     [newLessons[index], newLessons[ni]] = [newLessons[ni], newLessons[index]];
-    // Update sort_order
     newLessons.forEach((l, i) => l.sort_order = i);
     setEditLessons(newLessons);
-    // Update expanded
     if (expandedLesson === index) setExpandedLesson(ni);
     else if (expandedLesson === ni) setExpandedLesson(index);
-    // Save order to DB
     await Promise.all(newLessons.map((l, i) =>
       supabase.from("course_lessons").update({ sort_order: i } as any).eq("id", l.id)
     ));
   };
 
-  /* ─── Save all lessons ─── */
   const saveAllLessons = async () => {
     setSavingEdit(true);
     let ok = 0;
@@ -839,79 +863,6 @@ const CourseEditor = ({ level }: { level: Level }) => {
     }
     toast.success(`Сохранено ${ok}/${editLessons.length} уроков ✅`);
     setSavingEdit(false);
-  };
-
-  const handleGeneratePrompt = async () => {
-    if (!courseName.trim()) { toast.error("Введите название курса"); return; }
-    setGeneratingPrompt(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("generate-course-prompt", {
-        body: { action: "generate_prompt", courseName: courseName.trim(), level, lessonsCount: parseInt(lessonsCount) || 5, topics: topics.trim() ? topics.split(",").map(t => t.trim()) : [], description: description.trim() },
-      });
-      if (error) {
-        // Try to extract the actual error message from the response
-        const errMsg = data?.error || error?.message || "Unknown error";
-        throw new Error(errMsg);
-      }
-      if (data?.error) throw new Error(data.error);
-      setGeneratedPrompt(data.prompt);
-      setStep("prompt");
-      toast.success("Промпт сгенерирован!");
-    } catch (err: any) { toast.error("Ошибка: " + err.message); }
-    setGeneratingPrompt(false);
-  };
-
-  const copyPrompt = async () => { await navigator.clipboard.writeText(generatedPrompt); setCopied(true); toast.success("Скопировано!"); setTimeout(() => setCopied(false), 2000); };
-
-  const handleJsonFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    try { setJsonInput(await file.text()); toast.success(`Файл ${file.name} загружен`); } catch { toast.error("Не удалось прочитать файл"); }
-  };
-
-  const handleValidateAndPreview = async () => {
-    if (!jsonInput.trim()) { toast.error("Вставьте JSON или загрузите файл"); return; }
-    let clean = jsonInput.trim().replace(/^```(?:json)?\s*\n?/i, "").replace(/\n?```\s*$/i, "").trim();
-    const jsonMatch = clean.match(/(\{[\s\S]*\})/);
-    if (jsonMatch) clean = jsonMatch[1];
-    try {
-      const parsed = JSON.parse(clean) as CourseData;
-      if (!parsed.course || !parsed.lessons?.length) { toast.error("Нет полей 'course' или 'lessons'"); return; }
-      if (!parsed.course.level) parsed.course.level = level;
-      setCourseData(parsed);
-      setStep("preview");
-      toast.success(`Курс "${parsed.course.title}" — ${parsed.lessons.length} уроков`);
-      return;
-    } catch (e: any) { toast.error(`Ошибка JSON: ${e.message}`); }
-
-    setValidating(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("generate-course-prompt", { body: { action: "validate_json", jsonData: clean } });
-      if (error) throw error;
-      if (data?.valid === false) { toast.error("JSON невалидный: " + (data.error || "")); setValidating(false); return; }
-      if (data?.course && data?.lessons) { setCourseData(data); setStep("preview"); toast.success(`Курс: ${data.lessons.length} уроков`); }
-      else toast.error("Не удалось распознать");
-    } catch (err: any) { toast.error("Ошибка: " + err.message); }
-    setValidating(false);
-  };
-
-  const handleSaveCourse = async () => {
-    if (!courseData) return;
-    setSaving(true);
-    try {
-      const { data: courseRow, error: courseErr } = await supabase.from("courses").insert({
-        title: courseData.course.title, description: courseData.course.description || null, level: courseData.course.level || level, available: false,
-      } as any).select("id").single();
-      if (courseErr) throw courseErr;
-      const lessons = courseData.lessons.map((l, i) => ({
-        course_id: (courseRow as any).id, title: l.title, theory: l.theory || "", exercises: l.exercises || {}, sort_order: i,
-      }));
-      const { error: lessonsErr } = await supabase.from("course_lessons").insert(lessons as any);
-      if (lessonsErr) throw lessonsErr;
-      toast.success(`✅ Курс сохранён с ${lessons.length} уроками!`);
-      setCourseData(null); setJsonInput(""); setStep("list"); withScroll(loadCourses);
-    } catch (err: any) { toast.error("Ошибка: " + err.message); }
-    setSaving(false);
   };
 
   const toggleCourseAvailability = async (id: string, current: boolean) => {
@@ -932,7 +883,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
   if (step === "edit" && editCourse) {
     return (
       <div className="flex flex-col gap-3">
-        <button onClick={() => { setStep("list"); setEditCourse(null); }} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors self-start">
+        <button onClick={() => { setStep("list"); setEditCourse(null); loadCourses(); }} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors self-start">
           <ArrowLeft className="w-3.5 h-3.5" /> Назад к курсам
         </button>
 
@@ -977,7 +928,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
           </div>
         </div>
 
-        {/* Auto-generate lessons up to 25 */}
+        {/* Auto-generate lessons */}
         {editCourse && editLessons.length < 25 && !generating && (
           <button onClick={() => generateAllLessons(editCourse, editLessons.length)} className="w-full py-3 rounded-xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground text-sm font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
             <Sparkles className="w-4 h-4" /> {editLessons.length === 0 ? `Авто-генерация 25 уроков (${editCourse.level})` : `Догенерировать до 25 уроков (есть ${editLessons.length})`}
@@ -1004,7 +955,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
 
         {loadingLessons ? (
           <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>
-        ) : editLessons.length === 0 ? (
+        ) : editLessons.length === 0 && !generating ? (
           <div className="glass-card p-8 text-center">
             <BookOpen className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
             <p className="text-sm text-muted-foreground mb-3">В этом курсе пока нет уроков</p>
@@ -1016,19 +967,16 @@ const CourseEditor = ({ level }: { level: Level }) => {
           editLessons.map((lesson, i) => (
             <div key={lesson.id} className="glass-card p-3">
               <div className="flex items-center gap-2">
-                {/* Reorder arrows */}
                 <div className="flex flex-col gap-0.5 shrink-0">
                   <button onClick={() => moveLesson(i, -1)} disabled={i === 0} className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-20"><ChevronUp className="w-3 h-3" /></button>
                   <button onClick={() => moveLesson(i, 1)} disabled={i === editLessons.length - 1} className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-20"><ChevronDown className="w-3 h-3" /></button>
                 </div>
 
-                {/* Lesson header */}
                 <button onClick={() => setExpandedLesson(expandedLesson === i ? null : i)} className="flex-1 flex items-center gap-2 text-left min-w-0">
                   <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center shrink-0">{i + 1}</span>
                   <span className="text-sm font-semibold text-foreground truncate">{lesson.title}</span>
                 </button>
 
-                {/* Actions */}
                 <div className="flex items-center gap-1 shrink-0">
                   <button onClick={(e) => { e.stopPropagation(); saveEditedLesson(lesson); }} className="p-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors" disabled={savingEdit} title="Сохранить">
                     {savingEdit ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
@@ -1057,7 +1005,6 @@ const CourseEditor = ({ level }: { level: Level }) => {
           ))
         )}
 
-        {/* Add lesson at bottom */}
         {editLessons.length > 0 && (
           <button onClick={addNewLesson} disabled={savingNewLesson} className="w-full py-3 rounded-xl border-2 border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/30 text-sm font-medium flex items-center justify-center gap-2 transition-colors">
             {savingNewLesson ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
@@ -1097,99 +1044,32 @@ const CourseEditor = ({ level }: { level: Level }) => {
         )}
       </section>
 
-      {/* Steps for new course */}
+      {/* Simple tabs: list / create */}
       <div className="flex gap-1">
-        {(["list","create","prompt","import","preview"] as const).map((s, i) => (
+        {(["list", "create"] as const).map((s, i) => (
           <button key={s} onClick={() => setStep(s)} className={`flex-1 py-1.5 rounded-lg text-[10px] font-display font-bold transition-all ${step === s ? "bg-primary/15 text-primary border border-primary/30" : "bg-secondary text-muted-foreground"}`}>
-            {["📋","✨","📝","📥","👁️"][i]} {["Курсы","Создать","Промпт","Импорт","Превью"][i]}
+            {["📋", "✨"][i]} {["Курсы", "Создать"][i]}
           </button>
         ))}
       </div>
 
       {step === "create" && (
         <div className="glass-card p-4 flex flex-col gap-3">
-          <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-2"><Sparkles className="w-4 h-4 text-primary" /> Новый курс ({level})</h3>
+          <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-primary" /> Новый курс ({level})
+          </h3>
+          <p className="text-xs text-muted-foreground">
+            ИИ автоматически создаст курс и сгенерирует все уроки с теорией, упражнениями, словарём и диалогами
+          </p>
           <input value={courseName} onChange={e => setCourseName(e.target.value)} placeholder="Название курса" className="w-full px-3 py-2.5 rounded-xl bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none" />
-          <textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="Описание" rows={2} className="w-full px-3 py-2 rounded-xl bg-secondary text-foreground border border-border text-sm resize-y focus:border-primary focus:outline-none" />
-          <div className="flex gap-2">
-            <div className="flex-1"><label className="text-[10px] text-muted-foreground block mb-1">Уроков</label><input type="number" value={lessonsCount} onChange={e => setLessonsCount(e.target.value)} min={1} max={30} className="w-full px-3 py-2 rounded-xl bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none" /></div>
+          <textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="Описание (опционально)" rows={2} className="w-full px-3 py-2 rounded-xl bg-secondary text-foreground border border-border text-sm resize-y focus:border-primary focus:outline-none" />
+          <div>
+            <label className="text-[10px] text-muted-foreground block mb-1">Количество уроков</label>
+            <input type="number" value={lessonsCount} onChange={e => setLessonsCount(e.target.value)} min={1} max={30} className="w-full px-3 py-2 rounded-xl bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none" />
           </div>
-          <div><label className="text-[10px] text-muted-foreground block mb-1">Темы (через запятую)</label><input value={topics} onChange={e => setTopics(e.target.value)} placeholder="Приветствие, В отеле..." className="w-full px-3 py-2 rounded-xl bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none" /></div>
-          <button onClick={handleGeneratePrompt} disabled={generatingPrompt || !courseName.trim()} className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-primary text-primary-foreground font-semibold disabled:opacity-40">
-            {generatingPrompt ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
-            {generatingPrompt ? "ИИ генерирует..." : "Создать промпт через ИИ"}
-          </button>
-        </div>
-      )}
-
-      {step === "prompt" && (
-        <div className="glass-card p-4 flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-2"><Wand2 className="w-4 h-4 text-primary" /> Промпт</h3>
-            <button onClick={copyPrompt} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/10 text-primary text-xs font-medium hover:bg-primary/20">
-              {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />} {copied ? "✓" : "Копировать"}
-            </button>
-          </div>
-          <pre className="whitespace-pre-wrap text-xs text-foreground bg-secondary rounded-xl p-3 border border-border max-h-[400px] overflow-y-auto font-mono">{generatedPrompt}</pre>
-          <div className="flex items-center gap-2 p-3 rounded-xl bg-primary/5 border border-primary/20">
-            <Sparkles className="w-4 h-4 text-primary shrink-0" />
-            <p className="text-xs text-foreground">Скопируйте → вставьте в Claude → получите JSON → Импорт</p>
-          </div>
-          <button onClick={() => setStep("import")} className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-secondary border border-border text-foreground font-semibold hover:bg-muted">
-            <FileJson className="w-4 h-4" /> К импорту
-          </button>
-        </div>
-      )}
-
-      {step === "import" && (
-        <div className="glass-card p-4 flex flex-col gap-3">
-          <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-2"><FileJson className="w-4 h-4 text-primary" /> Импорт JSON</h3>
-          <label className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/50 cursor-pointer transition-all">
-            <Upload className="w-4 h-4" /> Загрузить .json файл
-            <input type="file" accept=".json,.txt" className="hidden" onChange={handleJsonFile} />
-          </label>
-          <div className="text-center text-xs text-muted-foreground">или вставьте:</div>
-          <textarea value={jsonInput} onChange={e => setJsonInput(e.target.value)} placeholder='{"course": {...}, "lessons": [...]}' rows={10} className="w-full px-3 py-2 rounded-xl bg-secondary text-foreground border border-border text-xs font-mono resize-y focus:border-primary focus:outline-none" />
-          <button onClick={handleValidateAndPreview} disabled={validating || !jsonInput.trim()} className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-primary text-primary-foreground font-semibold disabled:opacity-40">
-            {validating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Eye className="w-4 h-4" />}
-            {validating ? "Проверка..." : "Проверить и превью"}
-          </button>
-        </div>
-      )}
-
-      {step === "preview" && courseData && (
-        <div className="flex flex-col gap-3">
-          <div className="glass-card p-4">
-            <h3 className="text-sm font-display font-semibold text-foreground mb-1">{courseData.course.title}</h3>
-            <p className="text-xs text-muted-foreground">{courseData.course.description}</p>
-            <div className="flex gap-2 mt-2">
-              <span className="px-2 py-0.5 rounded-full bg-primary/20 text-primary text-[10px] font-bold">{courseData.course.level}</span>
-              <span className="text-xs text-muted-foreground">{courseData.lessons.length} уроков</span>
-            </div>
-          </div>
-          {courseData.lessons.map((lesson, i) => (
-            <div key={i} className="glass-card p-3">
-              <button onClick={() => setExpandedLesson(expandedLesson === i ? null : i)} className="w-full flex items-center justify-between text-left">
-                <div className="flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center">{i + 1}</span>
-                  <span className="text-sm font-semibold text-foreground">{lesson.title}</span>
-                </div>
-                {expandedLesson === i ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
-              </button>
-              {expandedLesson === i && (
-                <div className="mt-3">
-                  <LessonEditor
-                    lesson={lesson}
-                    onChange={l => { const n = { ...courseData }; n.lessons = [...n.lessons]; n.lessons[i] = l; setCourseData(n); }}
-                    level={courseData?.course?.level}
-                  />
-                </div>
-              )}
-            </div>
-          ))}
-          <button onClick={handleSaveCourse} disabled={saving} className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-primary text-primary-foreground font-semibold glow-yellow disabled:opacity-40">
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            {saving ? "Сохранение..." : "Сохранить курс"}
+          <button onClick={handleCreateAndGenerate} disabled={creatingCourse || !courseName.trim()} className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-semibold disabled:opacity-40">
+            {creatingCourse ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
+            {creatingCourse ? "Создаю курс..." : "Создать и сгенерировать через ИИ"}
           </button>
         </div>
       )}
