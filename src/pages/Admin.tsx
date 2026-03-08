@@ -13,11 +13,13 @@ import ContentGenerator from "@/components/admin/ContentGenerator";
 import CourseEditor from "@/components/admin/CourseEditor";
 import TranslationChecker from "@/components/admin/TranslationChecker";
 import AllTextsEditor from "@/components/admin/AllTextsEditor";
-import AdminStats from "@/components/admin/AdminStatsmport TopicsEditor from "@/components/admin/TopicsEditor";
+import AdminStats from "@/components/admin/AdminStats";
+import StuffOnlyTab from "@/components/admin/StuffOnlyTab";
+import TopicsEditor from "@/components/admin/TopicsEditor";
 import { toast } from "sonner";
 
 type Level = "A1" | "A2" | "B1" | "B2" | "C1";
-type Tab = "topistats" | "cs" | "vocabulary" | "grammar" | "reading" | "listening" | "shop" | "games" | "users" | "translations" | "generator" | "checker" | "alltexts" | "stuffonly" | "courses";
+type Tab = "stats" | "topics" | "vocabulary" | "grammar" | "reading" | "listening" | "shop" | "games" | "users" | "translations" | "generator" | "checker" | "alltexts" | "stuffonly" | "courses";
 
 /** Preserves scroll position of admin container across async reload */
 const withScroll = async (fn: () => Promise<void>) => {
