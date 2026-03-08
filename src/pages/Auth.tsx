@@ -87,6 +87,8 @@ const Auth = () => {
     const params = new URLSearchParams(window.location.search);
     return params.get("ref") ?? "";
   });
+  const [referralValid, setReferralValid] = useState<boolean | null>(null);
+  const [referralChecking, setReferralChecking] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -101,6 +103,25 @@ const Auth = () => {
   const [signupUserId, setSignupUserId] = useState<string | null>(null);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [tgWidgetLoading, setTgWidgetLoading] = useState(false);
+
+  // Validate referral code with debounce
+  useEffect(() => {
+    if (!referralCode.trim() || referralCode.length < 6) {
+      setReferralValid(null);
+      return;
+    }
+    setReferralChecking(true);
+    const timer = setTimeout(async () => {
+      const { data } = await supabase
+        .from("referral_codes")
+        .select("id")
+        .eq("code", referralCode.toUpperCase())
+        .maybeSingle();
+      setReferralValid(!!data);
+      setReferralChecking(false);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [referralCode]);
   const [googleLoading, setGoogleLoading] = useState(false);
   const navigate = useNavigate();
   const logoRef = useRef<HTMLDivElement>(null);
