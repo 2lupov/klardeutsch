@@ -78,6 +78,7 @@ const WritingExercise = ({ level, onComplete, onBack }: WritingExerciseProps) =>
             text: text.trim(),
             task: `${currentTask.task_de} — ${currentTask.task_ru}`,
             level,
+            lang,
         },
       });
 
