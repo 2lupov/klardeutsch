@@ -19,7 +19,7 @@ interface AIFeedbackProps {
 }
 
 const AIFeedback = ({ mistakes, level, category, onClose }: AIFeedbackProps) => {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [started, setStarted] = useState(false);
