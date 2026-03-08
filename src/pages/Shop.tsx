@@ -4,7 +4,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useCoins } from "@/hooks/useCoins";
 import { usePlatform } from "@/hooks/usePlatform";
 import { supabase } from "@/integrations/supabase/client";
-import { Coins, ShoppingBag, Check, Lock, Sparkles, GraduationCap, BookOpen, ChevronRight } from "lucide-react";
+import { Coins, ShoppingBag, Check, Lock, Sparkles, GraduationCap, BookOpen, ChevronRight, ExternalLink, Euro } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
@@ -13,6 +13,8 @@ interface ShopItem {
   title: string;
   description: string | null;
   price: number;
+  price_eur: number | null;
+  payment_link: string | null;
   image_url: string | null;
   available: boolean;
   item_type: string;
@@ -280,17 +282,62 @@ const Shop = () => {
         </div>
       )}
 
-      {/* Regular Items Section */}
-      {items.length > 0 && (
-        <div>
-          {courses.length > 0 && (
-            <h2 className="font-display font-bold text-foreground text-sm flex items-center gap-2 mb-3">
-              <Sparkles className="w-4 h-4 text-primary" />
-              {lang === "uk" ? "Матеріали" : "Материалы"}
-            </h2>
-          )}
+      {/* Premium EUR Items Section */}
+      {items.filter(i => i.price_eur && i.payment_link).length > 0 && (
+        <div className="mb-6">
+          <h2 className="font-display font-bold text-foreground text-sm flex items-center gap-2 mb-3">
+            <Euro className="w-4 h-4 text-primary" />
+            {lang === "uk" ? "Преміум матеріали" : "Премиум материалы"}
+          </h2>
           <div className="grid gap-3">
-            {items.map((item, idx) => {
+            {items.filter(i => i.price_eur && i.payment_link).map((item, idx) => (
+              <div
+                key={item.id}
+                className="glass-card p-4 animate-slide-up border-primary/10"
+                style={{ animationDelay: `${idx * 0.05}s` }}
+              >
+                <div className="flex items-start gap-3">
+                  {item.image_url && (
+                    <div className="w-16 h-16 rounded-lg overflow-hidden bg-secondary flex-shrink-0">
+                      <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-display font-semibold text-foreground text-sm">{item.title}</h3>
+                    {item.description && (
+                      <p className="text-xs text-muted-foreground mt-1">{item.description}</p>
+                    )}
+                    <div className="flex items-center gap-1 mt-1.5 font-display font-bold text-sm text-primary">
+                      €{Number(item.price_eur).toFixed(2)}
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-3">
+                  <a
+                    href={item.payment_link!}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-primary text-primary-foreground hover:opacity-90 hover:scale-[1.02] transition-all active:scale-95"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    {lang === "uk" ? "Купити за €" : "Купить за €"}{Number(item.price_eur).toFixed(2)}
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Regular Coin Items Section */}
+      {items.filter(i => !i.price_eur).length > 0 && (
+        <div>
+          <h2 className="font-display font-bold text-foreground text-sm flex items-center gap-2 mb-3">
+            <Sparkles className="w-4 h-4 text-primary" />
+            {lang === "uk" ? "За монети" : "За монеты"}
+          </h2>
+          <div className="grid gap-3">
+            {items.filter(i => !i.price_eur).map((item, idx) => {
               const owned = purchased.has(item.id);
               const canAfford = balance >= item.price;
               const wasJustPurchased = justPurchased === item.id;
