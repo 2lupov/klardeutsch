@@ -57,7 +57,7 @@ const Fireworks = ({ onComplete, originRef }: FireworksProps) => {
 
   useEffect(() => {
     triggerHaptic();
-    const t = setTimeout(onComplete, 1000);
+    const t = setTimeout(onComplete, 600);
     return () => clearTimeout(t);
   }, [onComplete]);
 
