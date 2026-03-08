@@ -506,10 +506,13 @@ const LessonEditor = ({ lesson, onChange, level }: { lesson: CourseLesson; onCha
       )}
 
       {tab === "exercises" && (
-        <ExercisesEditor
-          exercises={ex.exercises}
-          onChange={exercises => onChange({ ...lesson, exercises: { ...ex, exercises } })}
-        />
+        <div className="space-y-2">
+          <ExercisesEditor
+            exercises={ex.exercises}
+            onChange={exercises => onChange({ ...lesson, exercises: { ...ex, exercises } })}
+          />
+          {level && aiBtn("exercises", "🤖 Догенерировать упражнения через ИИ")}
+        </div>
       )}
 
       {tab === "grammar" && (
