@@ -209,67 +209,54 @@ const Shop = () => {
               return (
                 <div
                   key={course.id}
-                  className={`glass-card p-4 animate-slide-up transition-all duration-500 ${
+                  className={`glass-card p-3 animate-slide-up transition-all duration-500 overflow-hidden ${
                     wasJustPurchased ? "animate-shimmer border-primary/40 glow-yellow" : ""
                   }`}
                   style={{ animationDelay: `${idx * 0.05}s` }}
                 >
-                  <div className="flex items-start gap-3 overflow-hidden">
-                    {course.image_url ? (
-                      <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg overflow-hidden bg-secondary flex-shrink-0">
-                        <img src={course.image_url} alt={course.title} className="w-full h-full object-cover" />
-                      </div>
-                    ) : (
-                      <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <BookOpen className="w-6 h-6 sm:w-7 sm:h-7 text-primary" />
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0 overflow-hidden">
-                      <div className="flex items-center gap-1.5 mb-1 min-w-0">
-                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0 ${levelColors[course.level] || "bg-muted text-muted-foreground"}`}>
-                          {course.level}
-                        </span>
-                        <h3 className="font-display font-semibold text-foreground text-sm truncate">{course.title}</h3>
-                      </div>
-                      {course.description && (
-                        <p className="text-xs text-muted-foreground line-clamp-2 break-words">{course.description}</p>
-                      )}
-                      <div className="flex items-center gap-3 mt-1.5 text-[10px] text-muted-foreground">
-                        <span>{course.lessons_count} {lang === "uk" ? "уроків" : "уроков"}</span>
-                        <span className="flex items-center gap-0.5 text-primary font-bold text-xs">
-                          <Coins className="w-3 h-3" />
-                          {course.price}
-                        </span>
-                      </div>
-                    </div>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0 ${levelColors[course.level] || "bg-muted text-muted-foreground"}`}>
+                      {course.level}
+                    </span>
+                    <h3 className="font-display font-semibold text-foreground text-sm truncate">{course.title}</h3>
+                    <span className="flex items-center gap-0.5 text-primary font-bold text-xs ml-auto shrink-0">
+                      <Coins className="w-3 h-3" />
+                      {course.price}
+                    </span>
                   </div>
 
-                  <div className="mt-3">
+                  {course.description && (
+                    <p className="text-xs text-muted-foreground line-clamp-1 mb-2">{course.description}</p>
+                  )}
+
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[10px] text-muted-foreground shrink-0">
+                      📚 {course.lessons_count} {lang === "uk" ? "уроків" : "уроков"}
+                    </span>
                     {owned ? (
                       <button
                         onClick={() => navigate(`/course/${course.id}`)}
-                        className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-primary/10 text-primary hover:bg-primary/20 transition-all active:scale-95"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary/10 text-primary active:scale-95"
                       >
-                        <BookOpen className="w-3.5 h-3.5" />
-                        {lang === "uk" ? "Відкрити курс" : "Открыть курс"}
-                        <ChevronRight className="w-3.5 h-3.5 ml-auto" />
+                        {lang === "uk" ? "Відкрити" : "Открыть"}
+                        <ChevronRight className="w-3 h-3" />
                       </button>
                     ) : (
                       <button
                         onClick={() => handleBuyCourse(course)}
                         disabled={!canAfford || buying === course.id}
-                        className={`flex items-center justify-center gap-2 w-full px-4 py-2 rounded-xl text-sm font-semibold transition-all active:scale-95 ${
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all active:scale-95 ${
                           canAfford
-                            ? "bg-primary text-primary-foreground hover:opacity-90"
+                            ? "bg-primary text-primary-foreground"
                             : "bg-muted text-muted-foreground cursor-not-allowed"
                         }`}
                       >
                         {buying === course.id ? (
-                          <span className="animate-pulse">{t("loading")}</span>
+                          <span className="animate-pulse">...</span>
                         ) : (
                           <>
-                            {!canAfford && <Lock className="w-3.5 h-3.5 shrink-0" />}
-                            <span className="truncate">{canAfford ? (lang === "uk" ? "Купити курс" : "Купить курс") : t("notEnoughCoins")}</span>
+                            {!canAfford && <Lock className="w-3 h-3" />}
+                            {canAfford ? (lang === "uk" ? "Купити" : "Купить") : (lang === "uk" ? "Мало монет" : "Мало монет")}
                           </>
                         )}
                       </button>
