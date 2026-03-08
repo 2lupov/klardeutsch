@@ -575,30 +575,33 @@ const CourseEditor = ({ level }: { level: Level }) => {
   const [genLog, setGenLog] = useState<string[]>([]);
   const genAbortRef = useRef(false);
 
-  const generateAllLessons = async (course: ExistingCourse) => {
-    if (!confirm(`Сгенерировать 25 уроков для ${course.level}? Это может занять несколько минут.`)) return;
+  const generateAllLessons = async (course: ExistingCourse, existingCount = 0) => {
+    const remaining = 25 - existingCount;
+    if (remaining <= 0) { toast.info("Уже 25 уроков!"); return; }
+    if (!confirm(`Сгенерировать ${remaining} уроков для ${course.level}? Это может занять несколько минут.`)) return;
     setGenerating(true);
     genAbortRef.current = false;
     const batchSize = 5;
-    const totalBatches = 5;
-    setGenTotal(25);
+    const totalBatches = Math.ceil(remaining / batchSize);
+    setGenTotal(remaining);
     setGenProgress(0);
-    setGenLog([]);
+    setGenLog([existingCount > 0 ? `📚 Уже есть ${existingCount} уроков, догенерируем ещё ${remaining}...` : `⏳ Начинаем генерацию 25 уроков...`]);
 
     for (let batch = 0; batch < totalBatches; batch++) {
       if (genAbortRef.current) break;
-      const batchStart = batch * batchSize;
-      setGenLog(prev => [...prev, `⏳ Генерация уроков ${batchStart + 1}-${batchStart + batchSize}...`]);
+      const batchStart = existingCount + batch * batchSize;
+      const currentBatchSize = Math.min(batchSize, 25 - batchStart);
+      setGenLog(prev => [...prev, `⏳ Генерация уроков ${batchStart + 1}-${batchStart + currentBatchSize}...`]);
       
       try {
         const { data, error } = await supabase.functions.invoke("generate-full-course", {
-          body: { courseId: course.id, level: course.level, batchStart, batchSize },
+          body: { courseId: course.id, level: course.level, batchStart, batchSize: currentBatchSize },
         });
         if (error) throw error;
         if (data?.error) throw new Error(data.error);
         
-        setGenProgress((batch + 1) * batchSize);
-        setGenLog(prev => [...prev, `✅ Уроки ${batchStart + 1}-${batchStart + (data?.lessonsGenerated || batchSize)} готовы!`]);
+        setGenProgress(Math.min((batch + 1) * batchSize, remaining));
+        setGenLog(prev => [...prev, `✅ Уроки ${batchStart + 1}-${batchStart + (data?.lessonsGenerated || currentBatchSize)} готовы!`]);
       } catch (err: any) {
         setGenLog(prev => [...prev, `❌ Ошибка батча ${batch + 1}: ${err.message}`]);
         if (err.message?.includes("Rate limit")) {
@@ -881,10 +884,10 @@ const CourseEditor = ({ level }: { level: Level }) => {
           </div>
         </div>
 
-        {/* Auto-generate 25 lessons */}
-        {editCourse && editLessons.length === 0 && !generating && (
-          <button onClick={() => generateAllLessons(editCourse)} className="w-full py-3 rounded-xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground text-sm font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
-            <Sparkles className="w-4 h-4" /> Авто-генерация 25 уроков ({editCourse.level})
+        {/* Auto-generate lessons up to 25 */}
+        {editCourse && editLessons.length < 25 && !generating && (
+          <button onClick={() => generateAllLessons(editCourse, editLessons.length)} className="w-full py-3 rounded-xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground text-sm font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+            <Sparkles className="w-4 h-4" /> {editLessons.length === 0 ? `Авто-генерация 25 уроков (${editCourse.level})` : `Догенерировать до 25 уроков (есть ${editLessons.length})`}
           </button>
         )}
 
