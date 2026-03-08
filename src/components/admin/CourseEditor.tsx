@@ -578,44 +578,49 @@ const CourseEditor = ({ level }: { level: Level }) => {
   const generateAllLessons = async (course: ExistingCourse, existingCount = 0) => {
     const remaining = 25 - existingCount;
     if (remaining <= 0) { toast.info("Уже 25 уроков!"); return; }
-    if (!confirm(`Сгенерировать ${remaining} уроков для ${course.level}? Это может занять несколько минут.`)) return;
+    if (!confirm(`Сгенерировать ${remaining} уроков для ${course.level}? Это займёт несколько минут (по 1 уроку за раз).`)) return;
     setGenerating(true);
     genAbortRef.current = false;
-    const batchSize = 5;
-    const totalBatches = Math.ceil(remaining / batchSize);
     setGenTotal(remaining);
     setGenProgress(0);
-    setGenLog([existingCount > 0 ? `📚 Уже есть ${existingCount} уроков, догенерируем ещё ${remaining}...` : `⏳ Начинаем генерацию 25 уроков...`]);
+    setGenLog([existingCount > 0 ? `📚 Уже есть ${existingCount} уроков, догенерируем ещё ${remaining}...` : `⏳ Начинаем генерацию ${remaining} уроков по одному...`]);
 
-    for (let batch = 0; batch < totalBatches; batch++) {
-      if (genAbortRef.current) break;
-      const batchStart = existingCount + batch * batchSize;
-      const currentBatchSize = Math.min(batchSize, 25 - batchStart);
-      setGenLog(prev => [...prev, `⏳ Генерация уроков ${batchStart + 1}-${batchStart + currentBatchSize}...`]);
+    let retries = 0;
+    for (let i = 0; i < remaining; i++) {
+      if (genAbortRef.current) { setGenLog(prev => [...prev, `🛑 Остановлено пользователем`]); break; }
+      const lessonNum = existingCount + i;
+      setGenLog(prev => [...prev, `⏳ Урок ${lessonNum + 1}/25...`]);
       
       try {
         const { data, error } = await supabase.functions.invoke("generate-full-course", {
-          body: { courseId: course.id, level: course.level, batchStart, batchSize: currentBatchSize },
+          body: { courseId: course.id, level: course.level, batchStart: lessonNum, batchSize: 1 },
         });
         if (error) throw error;
         if (data?.error) throw new Error(data.error);
         
-        setGenProgress(Math.min((batch + 1) * batchSize, remaining));
-        setGenLog(prev => [...prev, `✅ Уроки ${batchStart + 1}-${batchStart + (data?.lessonsGenerated || currentBatchSize)} готовы!`]);
+        retries = 0;
+        setGenProgress(i + 1);
+        const stats = data?.stats?.[0];
+        const info = stats ? ` (${stats.vocab} слов, ${stats.exercises} упр.)` : "";
+        setGenLog(prev => [...prev, `✅ Урок ${lessonNum + 1} готов!${info}`]);
       } catch (err: any) {
-        setGenLog(prev => [...prev, `❌ Ошибка батча ${batch + 1}: ${err.message}`]);
-        if (err.message?.includes("Rate limit")) {
-          setGenLog(prev => [...prev, `⏳ Ждём 60 сек...`]);
+        if (err.message?.includes("Rate limit") && retries < 3) {
+          retries++;
+          setGenLog(prev => [...prev, `⏳ Rate limit — ждём 60 сек (попытка ${retries}/3)...`]);
           await new Promise(r => setTimeout(r, 60000));
-          batch--; // retry
+          i--; // retry same lesson
           continue;
         }
-        break;
+        setGenLog(prev => [...prev, `❌ Ошибка урока ${lessonNum + 1}: ${err.message}`]);
+        if (retries >= 3) { setGenLog(prev => [...prev, `🛑 Слишком много ошибок, остановка`]); break; }
+        // For non-rate-limit errors, skip and continue
+        setGenLog(prev => [...prev, `⏭️ Пропускаем, продолжаем...`]);
+        continue;
       }
       
-      // Small delay between batches
-      if (batch < totalBatches - 1) {
-        await new Promise(r => setTimeout(r, 3000));
+      // Small delay between lessons
+      if (i < remaining - 1) {
+        await new Promise(r => setTimeout(r, 2000));
       }
     }
     
