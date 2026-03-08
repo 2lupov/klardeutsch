@@ -535,6 +535,7 @@ const LessonEditor = ({ lesson, onChange, level }: { lesson: CourseLesson; onCha
           <button onClick={() => onChange({ ...lesson, exercises: { ...ex, grammar_questions: [...(ex.grammar_questions || []), { question: "", options: ["", "", "", ""], correct_index: 0, explanation: "" }] } })} className="w-full py-2 rounded-xl bg-secondary border border-border text-xs text-primary flex items-center justify-center gap-1.5 hover:border-primary/30 transition-colors">
             <Plus className="w-3 h-3" /> Вопрос по грамматике
           </button>
+          {level && aiBtn("grammar", "🤖 Догенерировать грамматику через ИИ")}
         </div>
       )}
 
