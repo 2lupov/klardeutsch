@@ -236,6 +236,23 @@ const ShopEditor = () => {
             className="w-full px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none resize-y"
           />
 
+          {/* EUR pricing */}
+          <div className="flex gap-2">
+            <input
+              type="number"
+              step="0.01"
+              defaultValue={item.price_eur ?? ""}
+              onBlur={(e) => updateItem(item.id, "price_eur", e.target.value ? parseFloat(e.target.value) : null)}
+              placeholder="Цена в € (пусто = за монеты)"
+              className="w-36 px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none"
+            />
+            <input
+              defaultValue={item.payment_link ?? ""}
+              onBlur={(e) => updateItem(item.id, "payment_link", e.target.value || null)}
+              placeholder="Ссылка оплаты (PayPal/Mono)"
+              className="flex-1 px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none"
+            />
+          </div>
 
           {/* File attachment section */}
           <div className="flex items-center gap-2">
