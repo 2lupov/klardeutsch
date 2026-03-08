@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Plus, Trash2, Lock, Check, BookOpen, Languages, Headphones, BookText, ShoppingBag, Gamepad2, Users, Globe, Pencil, Sparkles, ScanSearch, FileText, Bot, GraduationCap, FolderOpen } from "lucide-react";
+import { Plus, Trash2, Lock, Check, BookOpen, Languages, Headphones, BookText, ShoppingBag, Gamepad2, Users, Globe, Pencil, Sparkles, ScanSearch, FileText, Bot, GraduationCap, FolderOpen, BarChart3 } from "lucide-react";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import ShopEditor from "@/components/admin/ShopEditor";
 import ListeningEditor from "@/components/admin/ListeningEditor";
@@ -13,12 +13,13 @@ import ContentGenerator from "@/components/admin/ContentGenerator";
 import CourseEditor from "@/components/admin/CourseEditor";
 import TranslationChecker from "@/components/admin/TranslationChecker";
 import AllTextsEditor from "@/components/admin/AllTextsEditor";
+import AdminStats from "@/components/admin/AdminStats";
 import StuffOnlyTab from "@/components/admin/StuffOnlyTab";
 import TopicsEditor from "@/components/admin/TopicsEditor";
 import { toast } from "sonner";
 
 type Level = "A1" | "A2" | "B1" | "B2" | "C1";
-type Tab = "topics" | "vocabulary" | "grammar" | "reading" | "listening" | "shop" | "games" | "users" | "translations" | "generator" | "checker" | "alltexts" | "stuffonly" | "courses";
+type Tab = "stats" | "topics" | "vocabulary" | "grammar" | "reading" | "listening" | "shop" | "games" | "users" | "translations" | "generator" | "checker" | "alltexts" | "stuffonly" | "courses";
 
 /** Preserves scroll position of admin container across async reload */
 const withScroll = async (fn: () => Promise<void>) => {
@@ -33,6 +34,7 @@ const withScroll = async (fn: () => Promise<void>) => {
 const LEVELS: Level[] = ["A1", "A2", "B1", "B2", "C1"];
 
 const TAB_CONFIG: { key: Tab; icon: React.ElementType; label: string }[] = [
+  { key: "stats", icon: BarChart3, label: "stats" },
   { key: "topics", icon: FolderOpen, label: "topics" },
   { key: "vocabulary", icon: BookOpen, label: "vocabulary" },
   { key: "grammar", icon: Languages, label: "grammar" },
@@ -54,7 +56,7 @@ const Admin = () => {
   const { t } = useLanguage();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [level, setLevel] = useState<Level>("A1");
-  const [tab, setTab] = useState<Tab>("vocabulary");
+  const [tab, setTab] = useState<Tab>("stats");
 
   useEffect(() => {
     if (!user) { setIsAdmin(false); return; }
@@ -132,12 +134,13 @@ const Admin = () => {
               }`}
             >
               <Icon className="w-3.5 h-3.5" />
-              {key === "topics" ? "Темы" : key === "games" ? "Игры" : key === "users" ? "Юзеры" : key === "translations" ? "Языки" : key === "generator" ? "ИИ-генератор" : key === "checker" ? "ИИ-проверка" : key === "alltexts" ? "Все тексты" : key === "stuffonly" ? "Stuff Only" : key === "courses" ? "Курсы" : t(label as any)}
+              {key === "stats" ? "📊 Стата" : key === "topics" ? "Темы" : key === "games" ? "Игры" : key === "users" ? "Юзеры" : key === "translations" ? "Языки" : key === "generator" ? "ИИ-генератор" : key === "checker" ? "ИИ-проверка" : key === "alltexts" ? "Все тексты" : key === "stuffonly" ? "Stuff Only" : key === "courses" ? "Курсы" : t(label as any)}
             </button>
           ))}
         </div>
 
         {/* Hide level selector for non-level tabs */}
+        {tab === "stats" && <AdminStats />}
         {tab === "topics" && <TopicsEditor />}
         {tab === "vocabulary" && <VocabEditor level={level} />}
         {tab === "grammar" && <GrammarEditor level={level} />}
