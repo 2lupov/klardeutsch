@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { ArrowLeft, Send, RefreshCw, Loader2 } from "lucide-react";
 import { Level } from "@/data/lessons";
 import { usePlatform } from "@/hooks/usePlatform";
+import { useLanguage } from "@/contexts/LanguageContext";
 import ReactMarkdown from "react-markdown";
 
 interface WritingExerciseProps {
