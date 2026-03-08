@@ -37,7 +37,7 @@ type ProfileScreen = "main" | "achievements" | "activity" | "mistakes" | "leader
 
 const Profile = () => {
   const { user, signOut } = useAuth();
-  const { t, lang, languageLocked, lockLanguage } = useLanguage();
+  const { t, lang, languageLocked, lockLanguage, unlockLanguage } = useLanguage();
   const { isMobile, isTelegram } = usePlatform();
   const { balance } = useCoins();
   const { totalXP } = useXP();
