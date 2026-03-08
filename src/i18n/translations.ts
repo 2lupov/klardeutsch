@@ -296,6 +296,8 @@ const translations = {
   gamePronunciationDesc: { ru: "Слушай, повторяй и сравнивай своё произношение с эталоном", uk: "Слухай, повторюй і порівнюй свою вимову з еталоном" },
   gameLebenTitle: { ru: "Жизнь в Германии: Реальные сценарии", uk: "Життя в Німеччині: Реальні сценарії" },
   gameLebenDesc: { ru: "Anmeldung, Kündigung, Finanzamt — документы и ситуации из реальной жизни", uk: "Anmeldung, Kündigung, Finanzamt — документи та ситуації з реального життя" },
+  gameWortbaustelleTitle: { ru: "Wortbaustelle: Стройка слов", uk: "Wortbaustelle: Будівництво слів" },
+  gameWortbaustelleDesc: { ru: "Собирай длинные немецкие слова из кубиков — Rindfleischetikettierung и другие!", uk: "Збирай довгі німецькі слова з кубиків — Rindfleischetikettierung та інші!" },
   loginWithTelegram: { ru: "Войти через Telegram", uk: "Увійти через Telegram" },
   telegramAuthLoading: { ru: "Вход через Telegram...", uk: "Вхід через Telegram..." },
   orDivider: { ru: "или", uk: "або" },
