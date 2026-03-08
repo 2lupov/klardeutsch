@@ -12,6 +12,7 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
 
   try {
+    console.log("generate-course-prompt called");
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
