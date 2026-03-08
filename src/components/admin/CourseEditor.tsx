@@ -501,6 +501,7 @@ const LessonEditor = ({ lesson, onChange, level }: { lesson: CourseLesson; onCha
           <button onClick={() => onChange({ ...lesson, exercises: { ...ex, vocab_cards: [...(ex.vocab_cards || []), { german: "", russian: "", ukrainian: "", article: "", example: "" }] } })} className="w-full py-2 rounded-xl bg-secondary border border-border text-xs text-primary flex items-center justify-center gap-1.5 hover:border-primary/30 transition-colors">
             <Plus className="w-3 h-3" /> Добавить слово
           </button>
+          {level && aiBtn("vocab", "🤖 Догенерировать слова через ИИ")}
         </div>
       )}
 
