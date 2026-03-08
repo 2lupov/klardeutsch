@@ -57,6 +57,10 @@ export const useProgress = () => {
           title: `+${coins} 🪙`,
           description: category === "vocabulary" ? "Словарный запас" : category === "grammar" ? "Грамматика" : category === "reading" ? "Чтение" : category === "listening" ? "Аудирование" : category === "writing" ? "Письмо" : category,
         });
+
+        // Activate referral on first completed lesson (for referred users)
+        supabase.rpc("activate_referral", { p_referred_id: user.id }).catch(() => {});
+
         // Haptic feedback
         try {
           (window as any).Telegram?.WebApp?.HapticFeedback?.notificationOccurred("success");
