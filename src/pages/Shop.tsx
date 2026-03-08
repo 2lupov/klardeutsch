@@ -13,6 +13,8 @@ interface ShopItem {
   title: string;
   description: string | null;
   price: number;
+  price_eur: number | null;
+  payment_link: string | null;
   image_url: string | null;
   available: boolean;
   item_type: string;
