@@ -1042,6 +1042,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
                   <LessonEditor
                     lesson={{ title: lesson.title, theory: lesson.theory, exercises: lesson.exercises }}
                     onChange={l => { const n = [...editLessons]; n[i] = { ...n[i], title: l.title, theory: l.theory, exercises: l.exercises }; setEditLessons(n); }}
+                    level={editCourse?.level}
                   />
                 </div>
               )}
