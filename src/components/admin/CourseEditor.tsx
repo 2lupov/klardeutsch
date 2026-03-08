@@ -31,10 +31,6 @@ interface CourseLesson {
   };
 }
 
-interface CourseData {
-  course: { title: string; description: string; level: string };
-  lessons: CourseLesson[];
-}
 
 interface ExistingCourse {
   id: string;
