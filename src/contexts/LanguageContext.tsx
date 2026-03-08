@@ -58,7 +58,6 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => { loadOverrides(); }, [loadOverrides]);
 
-  // Load locked state from profile on auth
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (data?.user?.id) {
@@ -81,7 +80,6 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const setLang = useCallback((l: Lang) => {
     setLangState(l);
     localStorage.setItem("klar-lang", l);
-    // Sync to profile for Telegram notifications
     supabase.auth.getUser().then(({ data }) => {
       if (data?.user?.id) {
         supabase.from("profiles").update({ preferred_lang: l } as any).eq("user_id", data.user.id).then(() => {});
@@ -97,6 +95,15 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     const { data } = await supabase.auth.getUser();
     if (data?.user?.id) {
       await supabase.from("profiles").update({ preferred_lang: l, language_locked: true } as any).eq("user_id", data.user.id);
+    }
+  }, []);
+
+  const unlockLanguage = useCallback(async () => {
+    setLanguageLocked(false);
+    localStorage.setItem("klar-lang-locked", "false");
+    const { data } = await supabase.auth.getUser();
+    if (data?.user?.id) {
+      await supabase.from("profiles").update({ language_locked: false } as any).eq("user_id", data.user.id);
     }
   }, []);
 
