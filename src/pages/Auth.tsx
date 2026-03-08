@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -87,6 +88,8 @@ const Auth = () => {
     const params = new URLSearchParams(window.location.search);
     return params.get("ref") ?? "";
   });
+  const [referralValid, setReferralValid] = useState<boolean | null>(null);
+  const [referralChecking, setReferralChecking] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -101,6 +104,25 @@ const Auth = () => {
   const [signupUserId, setSignupUserId] = useState<string | null>(null);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [tgWidgetLoading, setTgWidgetLoading] = useState(false);
+
+  // Validate referral code with debounce
+  useEffect(() => {
+    if (!referralCode.trim() || referralCode.length < 6) {
+      setReferralValid(null);
+      return;
+    }
+    setReferralChecking(true);
+    const timer = setTimeout(async () => {
+      const { data } = await supabase
+        .from("referral_codes")
+        .select("id")
+        .eq("code", referralCode.toUpperCase())
+        .maybeSingle();
+      setReferralValid(!!data);
+      setReferralChecking(false);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [referralCode]);
   const [googleLoading, setGoogleLoading] = useState(false);
   const navigate = useNavigate();
   const logoRef = useRef<HTMLDivElement>(null);
@@ -273,11 +295,17 @@ const Auth = () => {
       // Profile update + referral after confirmed
       if (signupUserId) {
         await supabase.from("profiles").update({ display_name: nickname }).eq("user_id", signupUserId);
-        if (referralCode.trim()) {
-          await supabase.rpc("apply_referral_code", {
+        if (referralCode.trim() && referralValid) {
+          const { data: refApplied } = await supabase.rpc("apply_referral_code", {
             p_referred_id: signupUserId,
             p_code: referralCode.trim(),
           });
+          if (refApplied) {
+            toast({
+              title: "🎉 Реферальный бонус активирован!",
+              description: "Тебе и другу начислено по 50 монет + 20 XP",
+            });
+          }
         }
       }
       setShowFireworks(true);
@@ -406,14 +434,25 @@ const Auth = () => {
             />
           )}
           {!isLogin && !forgotMode && (
-            <input
-              type="text"
-              placeholder={t("referralCodePlaceholder") || "Код друга (необязательно)"}
-              value={referralCode}
-              onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
-              maxLength={9}
-              className="w-full px-4 py-3 rounded-xl bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:border-primary focus:outline-none transition-colors font-mono tracking-wider"
-            />
+            <div className="relative">
+              <input
+                type="text"
+                placeholder={t("referralCodePlaceholder") || "Код друга (необязательно)"}
+                value={referralCode}
+                onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                maxLength={9}
+                className={`w-full px-4 py-3 pr-10 rounded-xl bg-secondary text-foreground placeholder:text-muted-foreground border transition-colors font-mono tracking-wider focus:outline-none ${
+                  referralValid === true ? "border-green-500 focus:border-green-500" :
+                  referralValid === false ? "border-destructive focus:border-destructive" :
+                  "border-border focus:border-primary"
+                }`}
+              />
+              {referralCode.length >= 6 && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-lg">
+                  {referralChecking ? "⏳" : referralValid === true ? "✅" : referralValid === false ? "❌" : ""}
+                </span>
+              )}
+            </div>
           )}
           {!forgotMode && (
             <input
