@@ -41,13 +41,13 @@ const KlarLogo = ({ progress, completed = false, size = "lg" }: KlarLogoProps) =
   };
 
   const letters = [
-    { char: "K", width: 60 },
-    { char: "L", width: 48 },
-    { char: "A", width: 58 },
-    { char: "R", width: 56 },
+    { char: "K", width: 52 },
+    { char: "L", width: 42 },
+    { char: "A", width: 52 },
+    { char: "R", width: 50 },
   ];
 
-  const totalWidth = letters.reduce((sum, l) => sum + l.width, 0) + 6; // spacing
+  const totalWidth = letters.reduce((sum, l) => sum + l.width, 0) - 8; // tighter spacing
   const height = 64;
 
   return (
