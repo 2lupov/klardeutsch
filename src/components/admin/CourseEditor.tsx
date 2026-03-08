@@ -629,19 +629,10 @@ const LessonEditor = ({ lesson, onChange, level }: { lesson: CourseLesson; onCha
    ══════════════════════════════════════════ */
 
 const CourseEditor = ({ level }: { level: Level }) => {
-  const [step, setStep] = useState<"list" | "create" | "prompt" | "import" | "preview" | "edit">("list");
+  const [step, setStep] = useState<"list" | "create" | "edit">("list");
   const [courseName, setCourseName] = useState("");
   const [description, setDescription] = useState("");
-  const [lessonsCount, setLessonsCount] = useState("5");
-  const [topics, setTopics] = useState("");
-  const [generatedPrompt, setGeneratedPrompt] = useState("");
-  const [generatingPrompt, setGeneratingPrompt] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [jsonInput, setJsonInput] = useState("");
-  const [validating, setValidating] = useState(false);
-  const [courseData, setCourseData] = useState<CourseData | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [expandedLesson, setExpandedLesson] = useState<number | null>(null);
+  const [lessonsCount, setLessonsCount] = useState("25");
   const [existingCourses, setExistingCourses] = useState<ExistingCourse[]>([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
   const [editingCourseId, setEditingCourseId] = useState<string | null>(null);
@@ -655,22 +646,68 @@ const CourseEditor = ({ level }: { level: Level }) => {
   const [genTotal, setGenTotal] = useState(0);
   const [genLog, setGenLog] = useState<string[]>([]);
   const genAbortRef = useRef(false);
+  const [expandedLesson, setExpandedLesson] = useState<number | null>(null);
+  const [creatingCourse, setCreatingCourse] = useState(false);
 
-  const generateAllLessons = async (course: ExistingCourse, existingCount = 0) => {
-    const remaining = 25 - existingCount;
-    if (remaining <= 0) { toast.info("Уже 25 уроков!"); return; }
-    if (!confirm(`Сгенерировать ${remaining} уроков для ${course.level}? Это займёт несколько минут (по 1 уроку за раз).`)) return;
+  // Create course and auto-generate lessons
+  const handleCreateAndGenerate = async () => {
+    if (!courseName.trim()) { toast.error("Введите название курса"); return; }
+    
+    const count = parseInt(lessonsCount) || 25;
+    if (!confirm(`Создать курс "${courseName}" и сгенерировать ${count} уроков? Это займёт несколько минут.`)) return;
+    
+    setCreatingCourse(true);
+    
+    try {
+      // Create the course first
+      const { data: courseRow, error: courseErr } = await supabase.from("courses").insert({
+        title: courseName.trim(),
+        description: description.trim() || null,
+        level,
+        available: false,
+        price: level === "A1" ? 150 : level === "A2" ? 250 : level === "B1" ? 400 : level === "B2" ? 500 : 650,
+      } as any).select("*").single();
+      
+      if (courseErr) throw courseErr;
+      
+      toast.success(`Курс создан! Начинаем генерацию ${count} уроков...`);
+      
+      // Open edit mode and start generation
+      setEditCourse(courseRow as ExistingCourse);
+      setEditingCourseId((courseRow as any).id);
+      setEditLessons([]);
+      setStep("edit");
+      
+      // Start auto-generation
+      await generateAllLessons(courseRow as ExistingCourse, 0, count);
+      
+      // Reset form
+      setCourseName("");
+      setDescription("");
+      setLessonsCount("25");
+      
+    } catch (err: any) {
+      toast.error("Ошибка создания курса: " + err.message);
+    }
+    
+    setCreatingCourse(false);
+  };
+
+  const generateAllLessons = async (course: ExistingCourse, existingCount = 0, targetCount = 25) => {
+    const remaining = targetCount - existingCount;
+    if (remaining <= 0) { toast.info("Все уроки уже созданы!"); return; }
+    
     setGenerating(true);
     genAbortRef.current = false;
     setGenTotal(remaining);
     setGenProgress(0);
-    setGenLog([existingCount > 0 ? `📚 Уже есть ${existingCount} уроков, догенерируем ещё ${remaining}...` : `⏳ Начинаем генерацию ${remaining} уроков по одному...`]);
+    setGenLog([existingCount > 0 ? `📚 Уже есть ${existingCount} уроков, догенерируем ещё ${remaining}...` : `⏳ Начинаем генерацию ${remaining} уроков...`]);
 
     let retries = 0;
     for (let i = 0; i < remaining; i++) {
       if (genAbortRef.current) { setGenLog(prev => [...prev, `🛑 Остановлено пользователем`]); break; }
       const lessonNum = existingCount + i;
-      setGenLog(prev => [...prev, `⏳ Урок ${lessonNum + 1}/25...`]);
+      setGenLog(prev => [...prev, `⏳ Урок ${lessonNum + 1}/${targetCount}...`]);
       
       try {
         const { data, error } = await supabase.functions.invoke("generate-full-course", {
@@ -697,7 +734,6 @@ const CourseEditor = ({ level }: { level: Level }) => {
         }
         setGenLog(prev => [...prev, `❌ Ошибка урока ${lessonNum + 1}: ${err.message}`]);
         if (retries >= 3) { setGenLog(prev => [...prev, `🛑 Слишком много ошибок, остановка`]); break; }
-        // For non-rate-limit errors, skip and continue
         setGenLog(prev => [...prev, `⏭️ Пропускаем, продолжаем...`]);
         continue;
       }
@@ -710,158 +746,14 @@ const CourseEditor = ({ level }: { level: Level }) => {
     
     setGenerating(false);
     toast.success("Генерация завершена! 🎉");
+    
     // Reload lessons
-    if (editingCourseId === course.id) {
+    if (editingCourseId === course.id || editingCourseId === null) {
       const { data } = await supabase.from("course_lessons").select("*").eq("course_id", course.id).order("sort_order", { ascending: true });
       setEditLessons((data as any[]) || []);
     }
     withScroll(loadCourses);
   };
-
-  const loadCourses = useCallback(async () => {
-    setLoadingCourses(true);
-    const { data } = await supabase.from("courses").select("*").order("created_at", { ascending: false });
-    if (data) {
-      const coursesWithCount = await Promise.all(
-        (data as any[]).map(async (c) => {
-          const { count } = await supabase.from("course_lessons").select("*", { count: "exact", head: true }).eq("course_id", c.id);
-          return { ...c, lessons_count: count || 0 };
-        })
-      );
-      setExistingCourses(coursesWithCount);
-    }
-    setLoadingCourses(false);
-  }, []);
-
-  useEffect(() => { loadCourses(); }, [loadCourses]);
-
-  const openEditCourse = async (course: ExistingCourse) => {
-    setEditCourse(course);
-    setEditingCourseId(course.id);
-    setLoadingLessons(true);
-    setStep("edit");
-    setExpandedLesson(null);
-    const { data } = await supabase.from("course_lessons").select("*").eq("course_id", course.id).order("sort_order", { ascending: true });
-    setEditLessons((data as any[]) || []);
-    setLoadingLessons(false);
-  };
-
-  const saveEditedLesson = async (lesson: any) => {
-    setSavingEdit(true);
-    const { error } = await supabase.from("course_lessons").update({
-      title: lesson.title, theory: lesson.theory, exercises: lesson.exercises, sort_order: lesson.sort_order,
-    } as any).eq("id", lesson.id);
-    if (error) toast.error("Ошибка: " + error.message);
-    else toast.success("Урок сохранён ✅");
-    setSavingEdit(false);
-  };
-
-  const saveEditedCourse = async () => {
-    if (!editCourse) return;
-    await supabase.from("courses").update({
-      title: editCourse.title, description: editCourse.description, level: editCourse.level, price: editCourse.price,
-    } as any).eq("id", editCourse.id);
-    toast.success("Курс обновлён ✅");
-    withScroll(loadCourses);
-  };
-
-  /* ─── Add new lesson ─── */
-  const addNewLesson = async () => {
-    if (!editingCourseId) return;
-    setSavingNewLesson(true);
-    const nextOrder = editLessons.length > 0 ? Math.max(...editLessons.map(l => l.sort_order)) + 1 : 0;
-    const { data, error } = await supabase.from("course_lessons").insert({
-      course_id: editingCourseId,
-      title: `Урок ${editLessons.length + 1}`,
-      theory: "[]",
-      exercises: {},
-      sort_order: nextOrder,
-    } as any).select("*").single();
-    if (error) { toast.error("Ошибка: " + error.message); setSavingNewLesson(false); return; }
-    setEditLessons([...editLessons, data as any]);
-    setExpandedLesson(editLessons.length);
-    toast.success("Новый урок создан! 🎉");
-    setSavingNewLesson(false);
-  };
-
-  /* ─── Delete lesson ─── */
-  const deleteLesson = async (lessonId: string, index: number) => {
-    if (!confirm("Удалить этот урок?")) return;
-    await supabase.from("course_lessons").delete().eq("id", lessonId);
-    setEditLessons(editLessons.filter((_, i) => i !== index));
-    if (expandedLesson === index) setExpandedLesson(null);
-    toast.success("Урок удалён");
-  };
-
-  /* ─── Duplicate lesson ─── */
-  const duplicateLesson = async (lesson: any) => {
-    if (!editingCourseId) return;
-    const nextOrder = editLessons.length > 0 ? Math.max(...editLessons.map(l => l.sort_order)) + 1 : 0;
-    const { data, error } = await supabase.from("course_lessons").insert({
-      course_id: editingCourseId,
-      title: lesson.title + " (копия)",
-      theory: lesson.theory,
-      exercises: lesson.exercises,
-      sort_order: nextOrder,
-    } as any).select("*").single();
-    if (error) { toast.error("Ошибка: " + error.message); return; }
-    setEditLessons([...editLessons, data as any]);
-    toast.success("Урок скопирован! 📋");
-  };
-
-  /* ─── Move lesson up/down ─── */
-  const moveLesson = async (index: number, dir: -1 | 1) => {
-    const ni = index + dir;
-    if (ni < 0 || ni >= editLessons.length) return;
-    const newLessons = [...editLessons];
-    [newLessons[index], newLessons[ni]] = [newLessons[ni], newLessons[index]];
-    // Update sort_order
-    newLessons.forEach((l, i) => l.sort_order = i);
-    setEditLessons(newLessons);
-    // Update expanded
-    if (expandedLesson === index) setExpandedLesson(ni);
-    else if (expandedLesson === ni) setExpandedLesson(index);
-    // Save order to DB
-    await Promise.all(newLessons.map((l, i) =>
-      supabase.from("course_lessons").update({ sort_order: i } as any).eq("id", l.id)
-    ));
-  };
-
-  /* ─── Save all lessons ─── */
-  const saveAllLessons = async () => {
-    setSavingEdit(true);
-    let ok = 0;
-    for (const lesson of editLessons) {
-      const { error } = await supabase.from("course_lessons").update({
-        title: lesson.title, theory: lesson.theory, exercises: lesson.exercises, sort_order: lesson.sort_order,
-      } as any).eq("id", lesson.id);
-      if (!error) ok++;
-    }
-    toast.success(`Сохранено ${ok}/${editLessons.length} уроков ✅`);
-    setSavingEdit(false);
-  };
-
-  const handleGeneratePrompt = async () => {
-    if (!courseName.trim()) { toast.error("Введите название курса"); return; }
-    setGeneratingPrompt(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("generate-course-prompt", {
-        body: { action: "generate_prompt", courseName: courseName.trim(), level, lessonsCount: parseInt(lessonsCount) || 5, topics: topics.trim() ? topics.split(",").map(t => t.trim()) : [], description: description.trim() },
-      });
-      if (error) {
-        // Try to extract the actual error message from the response
-        const errMsg = data?.error || error?.message || "Unknown error";
-        throw new Error(errMsg);
-      }
-      if (data?.error) throw new Error(data.error);
-      setGeneratedPrompt(data.prompt);
-      setStep("prompt");
-      toast.success("Промпт сгенерирован!");
-    } catch (err: any) { toast.error("Ошибка: " + err.message); }
-    setGeneratingPrompt(false);
-  };
-
-  const copyPrompt = async () => { await navigator.clipboard.writeText(generatedPrompt); setCopied(true); toast.success("Скопировано!"); setTimeout(() => setCopied(false), 2000); };
 
   const handleJsonFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
