@@ -20,7 +20,6 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
 
   try {
-    // Auth check
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -40,13 +39,11 @@ serve(async (req) => {
       });
     }
 
-    // Service role client for inserts
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Check admin role
     const { data: roleData } = await supabase
       .from("user_roles")
       .select("role")
@@ -85,50 +82,68 @@ serve(async (req) => {
 
     const lessonNumbers = batchTopics.map((_, i) => batchStart + i + 1);
 
-    const systemPrompt = `Du bist ein erstklassiger DaF-Experte (Deutsch als Fremdsprache). Erstelle Lektionen für Niveau ${level}.
-Antworte NUR mit validem JSON — kein Markdown, keine Erklärungen.
+    const systemPrompt = `Ты — лучший преподаватель немецкого как иностранного (DaF). Создавай уроки для уровня ${level}.
 
-Das JSON muss ein Array von Lektionsobjekten sein, jedes mit:
+КРИТИЧЕСКИ ВАЖНО: Ответ — ТОЛЬКО валидный JSON-массив. Без markdown, без пояснений, без \`\`\`.
+
+Каждый урок — объект с ОБЯЗАТЕЛЬНЫМИ полями (пропущенные = брак):
+
 {
-  "title": "Lektion N: Thema",
-  "theory": <TheoryBlock[] als JSON-Array>,
+  "title": "Урок N: Тема",
+  "theory": [массив TheoryBlock — см. ниже],
   "exercises": {
-    "topic": "Thema",
-    "vocabulary": [{"german":"...","russian":"...","ukrainian":"...","article":"der/die/das/null","example":"Beispielsatz"}],
-    "exercises": [
-      {"type":"cloze","sentence":"Satz mit ___","blank_index":0,"options":["A","B","C","D"],"correct":"richtige Antwort"},
-      {"type":"mc","question":"Frage?","options":["A","B","C","D"],"correct_index":0,"explanation":"Erklärung"}
+    "topic": "Тема",
+    "vocabulary": [
+      {"german": "слово", "russian": "перевод_рус", "ukrainian": "перевод_укр", "article": "der/die/das или null", "example": "Примерное предложение на немецком"}
     ],
-    "reading": {"title":"Titel","text":"Lesetext (8-15 Sätze)","questions":[{"question":"?","options":["A","B","C","D"],"correct_index":0,"explanation":"..."}]},
-    "practice_dialog": {"dialog":[{"speaker":"A","text_de":"...","text_ru":"...","text_ua":"..."}]},
-    "cultural_notes": [{"title":{"ru":"...","ua":"..."},"content":{"ru":"...","ua":"..."}}]
+    "exercises": [
+      {"type": "cloze", "sentence": "Предложение с ___", "blank_index": 0, "options": ["A","B","C","D"], "correct": "правильный ответ"},
+      {"type": "mc", "question": "Вопрос?", "options": ["A","B","C","D"], "correct_index": 0, "explanation": "Объяснение"}
+    ],
+    "reading": {
+      "title": "Название текста",
+      "text": "Связный текст для чтения, 8-15 предложений, по теме урока",
+      "questions": [
+        {"question": "Вопрос по тексту?", "options": ["A","B","C","D"], "correct_index": 0, "explanation": "Почему этот ответ правильный"}
+      ]
+    },
+    "practice_dialog": {
+      "dialog": [
+        {"speaker": "A", "text_de": "Немецкий текст", "text_ru": "Русский перевод", "text_ua": "Украинский перевод"}
+      ]
+    },
+    "cultural_notes": [
+      {"title": {"ru": "Заголовок", "ua": "Заголовок"}, "content": {"ru": "Интересный факт о культуре", "ua": "Цікавий факт про культуру"}}
+    ]
   }
 }
 
-TheoryBlock types:
-- {"type":"heading","content":"...","emoji":"📖"}
-- {"type":"text","content":"..."}
-- {"type":"rule","title":"...","content":"...","emoji":"📌"}
-- {"type":"table","headers":["..."],"rows":[["..."]]}
-- {"type":"example","de":"...","ru":"...","uk":"...","highlight":["word"]}
-- {"type":"comparison","items":[{"de":"...","ru":"...","uk":"..."}]}
-- {"type":"tip","variant":"info|warning|remember","title":"...","content":"..."}
-- {"type":"list","items_list":["..."]}
+TheoryBlock типы (используй разнообразно, 8-15 блоков на урок):
+- {"type": "heading", "content": "Заголовок раздела", "emoji": "📖"}
+- {"type": "text", "content": "Объясняющий текст на русском"}
+- {"type": "rule", "title": "Название правила", "content": "Описание правила", "emoji": "📌"}
+- {"type": "table", "headers": ["Столбец1", "Столбец2"], "rows": [["значение1", "значение2"]]}
+- {"type": "example", "de": "Немецкий пример", "ru": "Русский перевод", "uk": "Украинский перевод", "highlight": ["выделенное_слово"]}
+- {"type": "comparison", "items": [{"de": "...", "ru": "...", "uk": "..."}]}
+- {"type": "tip", "variant": "info", "title": "Совет", "content": "Полезная подсказка"}
+- {"type": "list", "items_list": ["пункт1", "пункт2"]}
 
-Anforderungen:
-- Theory: 8-15 Blöcke mit Grammatikregeln, Beispielen, Tabellen, Vergleichen. Alle Übersetzungen auf Russisch UND Ukrainisch.
-- Vocabulary: 10-15 Wörter passend zum Thema und Niveau ${level}
-- Exercises: 3-4 Cloze + 3-4 MC = 6-8 total
-- Reading: Ein zusammenhängender Text zum Thema mit 4-5 Verständnisfragen
-- Dialog: 6-10 Zeilen, alltagsnah
-- Cultural notes: 1-2 Fakten über deutsche Kultur zum Thema
-- Alle Übersetzungen: Russisch + Ukrainisch
-- Niveau ${level} strikt einhalten!`;
+ОБЯЗАТЕЛЬНЫЕ ТРЕБОВАНИЯ для КАЖДОГО урока:
+✅ theory — 8-15 блоков (грамматика, таблицы, правила, примеры)
+✅ vocabulary — 10-15 слов с article, example, russian, ukrainian
+✅ exercises — 3-4 cloze + 3-4 mc = 6-8 упражнений
+✅ reading — ОБЯЗАТЕЛЬНО! Связный текст 8-15 предложений + 4-5 вопросов
+✅ practice_dialog — ОБЯЗАТЕЛЬНО! 6-10 реплик, жизненный диалог
+✅ cultural_notes — ОБЯЗАТЕЛЬНО! 1-2 культурных факта с ru и ua
+✅ Все переводы на РУССКОМ и УКРАИНСКОМ
+✅ Строго уровень ${level}!
 
-    const userPrompt = `Erstelle ${batchTopics.length} Lektionen für Niveau ${level}:
+НЕ ПРОПУСКАЙ НИ ОДИН РАЗДЕЛ. Каждый урок ДОЛЖЕН содержать ВСЕ 6 разделов.`;
+
+    const userPrompt = `Создай ${batchTopics.length} полных уроков для уровня ${level}:
 ${batchTopics.map((t, i) => `${lessonNumbers[i]}. ${t}`).join("\n")}
 
-Antworte NUR mit einem JSON-Array von ${batchTopics.length} Lektionsobjekten.`;
+Ответь ТОЛЬКО JSON-массивом из ${batchTopics.length} объектов. Каждый объект ОБЯЗАН содержать ВСЕ поля: theory, vocabulary, exercises, reading, practice_dialog, cultural_notes.`;
 
     console.log(`Generating ${batchTopics.length} lessons for ${level}, batch starting at ${batchStart}`);
 
@@ -181,9 +196,37 @@ Antworte NUR mit einem JSON-Array von ${batchTopics.length} Lektionsobjekten.`;
       throw new Error("AI returned invalid JSON");
     }
 
+    // Validate and ensure all sections exist
+    const validatedLessons = lessons.map((lesson: any, i: number) => {
+      const ex = lesson.exercises || {};
+      
+      // Ensure all required sections exist with fallbacks
+      if (!ex.vocabulary || !Array.isArray(ex.vocabulary) || ex.vocabulary.length === 0) {
+        console.warn(`Lesson ${batchStart + i + 1}: missing vocabulary`);
+        ex.vocabulary = [];
+      }
+      if (!ex.exercises || !Array.isArray(ex.exercises) || ex.exercises.length === 0) {
+        console.warn(`Lesson ${batchStart + i + 1}: missing exercises`);
+        ex.exercises = [];
+      }
+      if (!ex.reading || !ex.reading.text) {
+        console.warn(`Lesson ${batchStart + i + 1}: missing reading`);
+        ex.reading = ex.reading || { title: batchTopics[i] || "Lesetext", text: "", questions: [] };
+      }
+      if (!ex.practice_dialog || !ex.practice_dialog.dialog) {
+        console.warn(`Lesson ${batchStart + i + 1}: missing dialog`);
+        ex.practice_dialog = ex.practice_dialog || { dialog: [] };
+      }
+      if (!ex.cultural_notes || !Array.isArray(ex.cultural_notes) || ex.cultural_notes.length === 0) {
+        console.warn(`Lesson ${batchStart + i + 1}: missing cultural_notes`);
+        ex.cultural_notes = ex.cultural_notes || [];
+      }
+
+      return { ...lesson, exercises: ex };
+    });
+
     // Insert lessons into DB
-    const inserts = lessons.map((lesson: any, i: number) => {
-      // Ensure theory is a string (JSON)
+    const inserts = validatedLessons.map((lesson: any, i: number) => {
       let theory = lesson.theory;
       if (typeof theory !== "string") {
         theory = JSON.stringify(theory);
@@ -204,13 +247,23 @@ Antworte NUR mit einem JSON-Array von ${batchTopics.length} Lektionsobjekten.`;
       throw new Error("Failed to insert lessons: " + insertErr.message);
     }
 
-    console.log(`Successfully inserted ${inserts.length} lessons for ${level}`);
+    // Log completeness stats
+    const stats = validatedLessons.map((l: any, i: number) => ({
+      lesson: batchStart + i + 1,
+      vocab: l.exercises.vocabulary?.length || 0,
+      exercises: l.exercises.exercises?.length || 0,
+      reading: l.exercises.reading?.text ? "✅" : "❌",
+      dialog: l.exercises.practice_dialog?.dialog?.length || 0,
+      culture: l.exercises.cultural_notes?.length || 0,
+    }));
+    console.log("Lesson completeness:", JSON.stringify(stats));
 
     return new Response(JSON.stringify({
       success: true,
       lessonsGenerated: inserts.length,
       batchStart,
       batchEnd: batchStart + inserts.length,
+      stats,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
