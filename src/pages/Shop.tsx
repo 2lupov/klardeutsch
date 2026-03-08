@@ -296,20 +296,20 @@ const Shop = () => {
                 className="glass-card p-4 animate-slide-up border-primary/10"
                 style={{ animationDelay: `${idx * 0.05}s` }}
               >
-                <div className="flex items-start gap-3">
+              <div className="flex items-start gap-3">
                   {item.image_url && (
-                    <div className="w-16 h-16 rounded-lg overflow-hidden bg-secondary flex-shrink-0">
+                    <div className="w-14 h-14 rounded-lg overflow-hidden bg-secondary flex-shrink-0">
                       <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-display font-semibold text-foreground text-sm">{item.title}</h3>
+                    <h3 className="font-display font-semibold text-foreground text-sm truncate">{item.title}</h3>
                     {item.description && (
-                      <p className="text-xs text-muted-foreground mt-1">{item.description}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{item.description}</p>
                     )}
-                    <div className="flex items-center gap-1 mt-1.5 font-display font-bold text-sm text-primary">
-                      €{Number(item.price_eur).toFixed(2)}
-                    </div>
+                  </div>
+                  <div className="font-display font-bold text-sm text-primary shrink-0">
+                    €{Number(item.price_eur).toFixed(2)}
                   </div>
                 </div>
                 <div className="mt-3">
@@ -317,10 +317,10 @@ const Shop = () => {
                     href={item.payment_link!}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-primary text-primary-foreground hover:opacity-90 hover:scale-[1.02] transition-all active:scale-95"
+                    className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl text-sm font-semibold bg-primary text-primary-foreground hover:opacity-90 hover:scale-[1.02] transition-all active:scale-95"
                   >
-                    <ExternalLink className="w-3.5 h-3.5" />
-                    {lang === "uk" ? "Купити за €" : "Купить за €"}{Number(item.price_eur).toFixed(2)}
+                    <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+                    {lang === "uk" ? "Купити" : "Купить"} €{Number(item.price_eur).toFixed(2)}
                   </a>
                 </div>
               </div>
@@ -358,9 +358,9 @@ const Shop = () => {
                     )}
                     <div className="flex-1 min-w-0 flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-display font-semibold text-foreground text-sm">{item.title}</h3>
+                        <h3 className="font-display font-semibold text-foreground text-sm truncate">{item.title}</h3>
                         {item.description && (
-                          <p className="text-xs text-muted-foreground mt-1">{item.description}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{item.description}</p>
                         )}
                       </div>
                       <div className="flex items-center gap-1 text-primary font-display font-bold text-sm shrink-0">
