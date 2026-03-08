@@ -27,22 +27,31 @@ serve(async (req) => {
       });
     }
 
-    const { messages, topic, level } = await req.json();
+    const { messages, topic, level, lang } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+
+    const isUk = lang === "uk";
+
+    const feedbackLang = isUk ? "українською" : "на русском";
+    const correctionLabel = isUk ? "Виправлення" : "Исправления";
+    const noErrors = isUk ? "Все правильно! ✅" : "Всё правильно! ✅";
+    const newWordsLabel = isUk ? "Нові слова" : "Новые слова";
+    const hintLabel = isUk ? "Підказка" : "Подсказка";
 
     const systemPrompt = `Du bist ein freundlicher Gesprächspartner für Deutschlernende auf Niveau ${level || "A1"}.
 Thema des Gesprächs: ${topic || "Allgemein"}.
 
 REGELN:
 1. Antworte immer auf Deutsch, angepasst an das Niveau ${level || "A1"}.
-2. Nach deiner Antwort auf Deutsch, füge IMMER einen Block "---" hinzu, gefolgt von:
-   - 🔍 **Исправления**: Wenn der Benutzer Fehler gemacht hat, korrigiere sie auf Russisch mit Erklärung. Wenn keine Fehler, schreibe "Всё правильно! ✅"
-   - 💡 **Новые слова**: Liste 1-3 neue Wörter aus deiner Antwort mit Übersetzung auf Russisch
-   - 🗣️ **Подсказка**: Schlage auf Russisch vor, was der Benutzer als nächstes sagen könnte (1-2 Optionen)
+2. Nach deiner Antwort auf Deutsch, füge IMMER einen Block "---" hinzu, gefolgt von (${feedbackLang}):
+   - 🔍 **${correctionLabel}**: Wenn der Benutzer Fehler gemacht hat, korrigiere sie ${feedbackLang} mit Erklärung. Wenn keine Fehler, schreibe "${noErrors}"
+   - 💡 **${newWordsLabel}**: Liste 1-3 neue Wörter aus deiner Antwort mit Übersetzung ${feedbackLang}
+   - 🗣️ **${hintLabel}**: Schlage ${feedbackLang} vor, was der Benutzer als nächstes sagen könnte (1-2 Optionen)
 3. Halte deine deutschen Antworten kurz (2-4 Sätze).
 4. Stelle am Ende deiner deutschen Antwort eine Frage, um das Gespräch fortzusetzen.
-5. Sei ermutigend und hilfsbereit.`;
+5. Sei ermutigend und hilfsbereit.
+6. WICHTIG: Alle Erklärungen, Korrekturen und Hinweise MÜSSEN ${feedbackLang} geschrieben werden!`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -62,22 +71,19 @@ REGELN:
 
     if (!response.ok) {
       if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Слишком много запросов, попробуйте позже." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        return new Response(JSON.stringify({ error: isUk ? "Забагато запитів, спробуйте пізніше." : "Слишком много запросов, попробуйте позже." }), {
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Превышен лимит AI-запросов." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        return new Response(JSON.stringify({ error: isUk ? "Перевищено ліміт AI-запитів." : "Превышен лимит AI-запросов." }), {
+          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       const t = await response.text();
       console.error("AI gateway error:", response.status, t);
-      return new Response(JSON.stringify({ error: "Ошибка AI" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      return new Response(JSON.stringify({ error: isUk ? "Помилка AI" : "Ошибка AI" }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -87,8 +93,7 @@ REGELN:
   } catch (e) {
     console.error("ai-dialogue error:", e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });

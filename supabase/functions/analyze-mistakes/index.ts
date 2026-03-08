@@ -29,16 +29,27 @@ serve(async (req) => {
       });
     }
 
-    const { mistakes, level, category } = await req.json();
+    const { mistakes, level, category, lang } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       return new Response(JSON.stringify({ error: "LOVABLE_API_KEY not configured" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const systemPrompt = `Ты — преподаватель немецкого языка для русскоговорящих студентов уровня ${level}. 
+    const isUk = lang === "uk";
+
+    const systemPrompt = isUk
+      ? `Ти — викладач німецької мови для україномовних студентів рівня ${level}. 
+Учень щойно допустив помилки у вправі з категорії "${category}".
+Проаналізуй кожну помилку коротко та зрозуміло:
+- Поясни ЧОМУ відповідь неправильна (1-2 речення)
+- Дай мнемонічне правило або асоціацію для запам'ятовування
+- Наведи 1 додатковий приклад на це правило
+
+Відповідай УКРАЇНСЬКОЮ. Використовуй markdown для форматування. Будь доброзичливим та мотивуючим.
+Не повторюй умову завдання — одразу переходь до пояснення.`
+      : `Ты — преподаватель немецкого языка для русскоговорящих студентов уровня ${level}. 
 Ученик только что допустил ошибки в упражнении по категории "${category}".
 Проанализируй каждую ошибку кратко и понятно:
 - Объясни ПОЧЕМУ ответ неправильный (1-2 предложения)
@@ -48,8 +59,14 @@ serve(async (req) => {
 Отвечай на русском. Используй markdown для форматирования. Будь дружелюбным и мотивирующим.
 Не повторяй условие задания — сразу переходи к объяснению.`;
 
+    const errorLabel = isUk ? "Помилка" : "Ошибка";
+    const questionLabel = isUk ? "Запитання" : "Вопрос";
+    const studentAnswer = isUk ? "Відповідь учня" : "Ответ ученика";
+    const correctLabel = isUk ? "Правильна відповідь" : "Правильный ответ";
+    const hintLabel = isUk ? "Підказка" : "Подсказка";
+
     const userPrompt = mistakes.map((m: any, i: number) => 
-      `Ошибка ${i + 1}:\nВопрос: ${m.question}\nОтвет ученика: ${m.userAnswer}\nПравильный ответ: ${m.correctAnswer}${m.explanation ? `\nПодсказка: ${m.explanation}` : ""}`
+      `${errorLabel} ${i + 1}:\n${questionLabel}: ${m.question}\n${studentAnswer}: ${m.userAnswer}\n${correctLabel}: ${m.correctAnswer}${m.explanation ? `\n${hintLabel}: ${m.explanation}` : ""}`
     ).join("\n\n");
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -70,22 +87,19 @@ serve(async (req) => {
 
     if (!response.ok) {
       if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Слишком много запросов, попробуйте позже" }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        return new Response(JSON.stringify({ error: isUk ? "Забагато запитів, спробуйте пізніше" : "Слишком много запросов, попробуйте позже" }), {
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Превышен лимит AI-запросов" }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        return new Response(JSON.stringify({ error: isUk ? "Перевищено ліміт AI-запитів" : "Превышен лимит AI-запросов" }), {
+          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       const t = await response.text();
       console.error("AI gateway error:", response.status, t);
       return new Response(JSON.stringify({ error: "AI error" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -95,8 +109,7 @@ serve(async (req) => {
   } catch (e) {
     console.error("analyze-mistakes error:", e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });

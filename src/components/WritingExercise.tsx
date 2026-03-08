@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { ArrowLeft, Send, RefreshCw, Loader2 } from "lucide-react";
 import { Level } from "@/data/lessons";
 import { usePlatform } from "@/hooks/usePlatform";
+import { useLanguage } from "@/contexts/LanguageContext";
 import ReactMarkdown from "react-markdown";
 
 interface WritingExerciseProps {
@@ -45,6 +46,7 @@ const TASKS: Record<string, { emoji: string; task_ru: string; task_de: string }[
 
 const WritingExercise = ({ level, onComplete, onBack }: WritingExerciseProps) => {
   const { isMobile } = usePlatform();
+  const { lang } = useLanguage();
   const tasks = TASKS[level] || TASKS["A1"];
 
   const [taskIndex, setTaskIndex] = useState(() => Math.floor(Math.random() * tasks.length));
@@ -76,6 +78,7 @@ const WritingExercise = ({ level, onComplete, onBack }: WritingExerciseProps) =>
             text: text.trim(),
             task: `${currentTask.task_de} — ${currentTask.task_ru}`,
             level,
+            lang,
         },
       });
 

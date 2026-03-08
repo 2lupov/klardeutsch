@@ -19,7 +19,7 @@ interface AIFeedbackProps {
 }
 
 const AIFeedback = ({ mistakes, level, category, onClose }: AIFeedbackProps) => {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [started, setStarted] = useState(false);
@@ -33,7 +33,7 @@ const AIFeedback = ({ mistakes, level, category, onClose }: AIFeedbackProps) => 
 
     try {
       const resp = await fetchEdgeFunction("analyze-mistakes", {
-        json: { mistakes, level, category },
+        json: { mistakes, level, category, lang },
       });
 
       if (!resp.ok || !resp.body) {
