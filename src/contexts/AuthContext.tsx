@@ -28,7 +28,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { loading: tgLoading } = useTelegramAuth();
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const notifiedUsers = new Set<string>();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -40,6 +42,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           .update({ last_active: new Date().toISOString() } as any)
           .eq("user_id", session.user.id)
           .then();
+
+        // Notify admin on new signup (user created within last 60 seconds)
+        if (event === "SIGNED_IN" && session.user.created_at) {
+          const createdAt = new Date(session.user.created_at).getTime();
+          const now = Date.now();
+          if (now - createdAt < 60000 && !notifiedUsers.has(session.user.id)) {
+            notifiedUsers.add(session.user.id);
+            supabase.functions.invoke("notify-new-user", {
+              body: {
+                email: session.user.email || session.user.phone || "—",
+                method: session.user.app_metadata?.provider || "email",
+                timestamp: session.user.created_at,
+                userAgent: navigator.userAgent,
+              },
+            }).catch(() => {});
+          }
+        }
       }
     });
 
