@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Zap, Check, X, RotateCcw, Wand2 } from "lucide-react";
+import { Loader2, Zap, Check, X, Wand2, Plus, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 type Level = "A1" | "A2" | "B1" | "B2" | "C1";
@@ -27,6 +27,8 @@ const CONTENT_TYPES: { key: ContentType; label: string; emoji: string }[] = [
   { key: "listening", label: "Аудирование", emoji: "🎧" },
 ];
 
+const SUGGESTED_EMOJIS = ["📚", "🏠", "🍎", "✈️", "💼", "🎯", "🎨", "🏥", "🛒", "🎉", "📱", "🌍", "🚗", "👨‍👩‍👧", "💰"];
+
 const BulkGenerator = () => {
   const [topics, setTopics] = useState<TopicInfo[]>([]);
   const [selectedTypes, setSelectedTypes] = useState<ContentType[]>(["grammar", "vocab"]);
@@ -36,6 +38,14 @@ const BulkGenerator = () => {
   const [currentJob, setCurrentJob] = useState("");
   const [totalDone, setTotalDone] = useState(0);
   const [totalJobs, setTotalJobs] = useState(0);
+
+  // New topic creation
+  const [showNewTopic, setShowNewTopic] = useState(false);
+  const [newTopicName, setNewTopicName] = useState("");
+  const [newTopicLevel, setNewTopicLevel] = useState<Level>("A1");
+  const [newTopicEmoji, setNewTopicEmoji] = useState("📚");
+  const [creatingTopic, setCreatingTopic] = useState(false);
+  const [creationResult, setCreationResult] = useState<any>(null);
 
   useEffect(() => {
     loadTopics();
@@ -68,6 +78,39 @@ const BulkGenerator = () => {
     );
   };
 
+  const createNewTopic = async () => {
+    if (!newTopicName.trim()) {
+      toast.error("Введи название темы");
+      return;
+    }
+
+    setCreatingTopic(true);
+    setCreationResult(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-new-topic", {
+        body: {
+          level: newTopicLevel,
+          topicName: newTopicName.trim(),
+          topicEmoji: newTopicEmoji,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      setCreationResult(data.results);
+      toast.success(`Тема "${newTopicName}" создана!`);
+      setNewTopicName("");
+      loadTopics();
+    } catch (e: any) {
+      console.error("Create topic error:", e);
+      toast.error("Ошибка: " + e.message);
+    }
+
+    setCreatingTopic(false);
+  };
+
   const startGeneration = async () => {
     if (selectedTypes.length === 0 || selectedLevels.length === 0) {
       toast.error("Выбери хотя бы один уровень и тип");
@@ -93,13 +136,7 @@ const BulkGenerator = () => {
     let done = 0;
     for (let i = 0; i < allJobs.length; i++) {
       const job = allJobs[i];
-      const [level, topic, type] = [
-        job.key.split("-")[0] as Level,
-        job.key.split("-").slice(1, -1).join("-"),
-        job.key.split("-").pop() as ContentType,
-      ];
 
-      // Parse topic correctly (topic may contain hyphens)
       const parts = job.key.split("-");
       const jobLevel = parts[0] as Level;
       const jobType = parts[parts.length - 1] as ContentType;
@@ -132,12 +169,10 @@ const BulkGenerator = () => {
           )
         );
         done++;
-        // Continue with next job, don't stop
       }
 
       setTotalDone(done);
 
-      // Small delay between requests to avoid rate limiting
       if (i < allJobs.length - 1) {
         await new Promise((r) => setTimeout(r, 1500));
       }
@@ -176,6 +211,117 @@ const BulkGenerator = () => {
 
   return (
     <div className="space-y-5">
+      {/* NEW: Create Topic with AI */}
+      <div className="p-4 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-display font-bold text-sm text-foreground flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-purple-400" />
+            Создать новую тему с ИИ
+          </h3>
+          <button
+            onClick={() => setShowNewTopic(!showNewTopic)}
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {showNewTopic ? "Свернуть" : "Развернуть"}
+          </button>
+        </div>
+
+        {showNewTopic && (
+          <div className="space-y-3">
+            <p className="text-xs text-muted-foreground">
+              ИИ создаст тему и сгенерирует: 15 слов, грамматику с 10 упражнениями, текст для чтения и аудирования
+            </p>
+
+            {/* Level selector */}
+            <div>
+              <p className="text-[10px] text-muted-foreground mb-1.5 uppercase tracking-wider">Уровень</p>
+              <div className="flex gap-1.5 flex-wrap">
+                {LEVELS.map((l) => (
+                  <button
+                    key={l}
+                    onClick={() => setNewTopicLevel(l)}
+                    disabled={creatingTopic}
+                    className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all ${
+                      newTopicLevel === l
+                        ? "bg-purple-500 text-white"
+                        : "bg-secondary text-muted-foreground hover:bg-secondary/80"
+                    }`}
+                  >
+                    {l}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Topic name */}
+            <div>
+              <p className="text-[10px] text-muted-foreground mb-1.5 uppercase tracking-wider">Название темы</p>
+              <input
+                type="text"
+                value={newTopicName}
+                onChange={(e) => setNewTopicName(e.target.value)}
+                placeholder="Например: Einkaufen, Reisen, Familie..."
+                disabled={creatingTopic}
+                className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+              />
+            </div>
+
+            {/* Emoji picker */}
+            <div>
+              <p className="text-[10px] text-muted-foreground mb-1.5 uppercase tracking-wider">Эмодзи</p>
+              <div className="flex gap-1 flex-wrap">
+                {SUGGESTED_EMOJIS.map((emoji) => (
+                  <button
+                    key={emoji}
+                    onClick={() => setNewTopicEmoji(emoji)}
+                    disabled={creatingTopic}
+                    className={`w-8 h-8 rounded-md text-lg flex items-center justify-center transition-all ${
+                      newTopicEmoji === emoji
+                        ? "bg-purple-500 scale-110"
+                        : "bg-secondary hover:bg-secondary/80"
+                    }`}
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Create button */}
+            <button
+              onClick={createNewTopic}
+              disabled={creatingTopic || !newTopicName.trim()}
+              className="w-full py-2.5 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-50"
+            >
+              {creatingTopic ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Создаю тему и контент...
+                </>
+              ) : (
+                <>
+                  <Plus className="w-4 h-4" />
+                  Создать тему с контентом
+                </>
+              )}
+            </button>
+
+            {/* Creation result */}
+            {creationResult && (
+              <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20">
+                <p className="text-xs text-green-400 font-bold mb-1">✅ Тема создана!</p>
+                <div className="grid grid-cols-2 gap-1 text-[10px] text-muted-foreground">
+                  <span>📖 Слова: {creationResult.vocab}</span>
+                  <span>📝 Грамматика: {creationResult.grammar}</span>
+                  <span>📄 Чтение: {creationResult.reading}</span>
+                  <span>🎧 Аудирование: {creationResult.listening}</span>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
       {/* Convert Grammar Theory */}
       <div className="p-4 rounded-xl bg-accent/10 border border-accent/20">
         <h3 className="font-display font-bold text-sm text-foreground mb-1 flex items-center gap-2">
