@@ -42,7 +42,7 @@ const KlarLogo = ({ progress, completed = false, size = "lg" }: KlarLogoProps) =
 
   const letters = [
     { char: "K", width: 44 },
-    { char: "L", width: 36 },
+    { char: "L", width: 40 },
     { char: "A", width: 46 },
     { char: "R", width: 44 },
   ];
