@@ -13,7 +13,7 @@ type Scenario = {
   titleUk: string;
   descRu: string;
   descUk: string;
-  difficulty: "A2" | "B1" | "B2";
+  difficulty: "A2" | "B1" | "B2" | "C1";
   steps: ScenarioStep[];
 };
 
