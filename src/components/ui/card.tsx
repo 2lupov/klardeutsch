@@ -1,5 +1,5 @@
 import * as React from "react";
-import { motion, type HTMLMotionProps } from "framer-motion";
+import { motion } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 
@@ -10,7 +10,7 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  ({ className, animated = false, glass = false, glow = false, ...props }, ref) => {
+  ({ className, animated = false, glass = false, glow = false, children, ...props }, ref) => {
     const baseClasses = cn(
       "rounded-xl border bg-card text-card-foreground shadow-sm transition-all duration-300",
       glass && "bg-card/60 backdrop-blur-xl border-border/30",
@@ -27,12 +27,13 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
           animate={{ opacity: 1, y: 0 }}
           whileHover={{ y: -2, scale: 1.01 }}
           transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          {...(props as HTMLMotionProps<"div">)}
-        />
+        >
+          {children}
+        </motion.div>
       );
     }
 
-    return <div ref={ref} className={baseClasses} {...props} />;
+    return <div ref={ref} className={baseClasses} {...props}>{children}</div>;
   }
 );
 Card.displayName = "Card";

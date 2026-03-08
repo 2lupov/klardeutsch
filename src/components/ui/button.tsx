@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
-import { motion, type HTMLMotionProps } from "framer-motion";
+import { motion } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 
@@ -40,13 +40,24 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, animated = true, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, animated = true, children, onClick, disabled, type, ...props }, ref) => {
     if (asChild) {
-      return <Slot className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />;
+      return <Slot className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props}>{children}</Slot>;
     }
     
     if (!animated) {
-      return <button className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />;
+      return (
+        <button 
+          className={cn(buttonVariants({ variant, size, className }))} 
+          ref={ref} 
+          onClick={onClick}
+          disabled={disabled}
+          type={type}
+          {...props}
+        >
+          {children}
+        </button>
+      );
     }
     
     return (
@@ -56,8 +67,12 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.97 }}
         transition={{ type: "spring", stiffness: 400, damping: 17 }}
-        {...(props as HTMLMotionProps<"button">)}
-      />
+        onClick={onClick}
+        disabled={disabled}
+        type={type}
+      >
+        {children}
+      </motion.button>
     );
   },
 );
