@@ -56,7 +56,7 @@ const Admin = () => {
   const { t } = useLanguage();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [level, setLevel] = useState<Level>("A1");
-  const [tab, setTab] = useState<Tab>("vocabulary");
+  const [tab, setTab] = useState<Tab>("stats");
 
   useEffect(() => {
     if (!user) { setIsAdmin(false); return; }
