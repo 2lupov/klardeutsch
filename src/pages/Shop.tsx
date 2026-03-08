@@ -4,7 +4,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useCoins } from "@/hooks/useCoins";
 import { usePlatform } from "@/hooks/usePlatform";
 import { supabase } from "@/integrations/supabase/client";
-import { Coins, ShoppingBag, Check, Lock, Sparkles, GraduationCap, BookOpen, ChevronRight } from "lucide-react";
+import { Coins, ShoppingBag, Check, Lock, Sparkles, GraduationCap, BookOpen, ChevronRight, ExternalLink, Euro } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
