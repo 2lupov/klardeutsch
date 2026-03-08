@@ -120,7 +120,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   }, [loadOverrides]);
 
   return (
-    <LanguageContext.Provider value={{ lang, setLang, t, editMode, setEditMode, overrides, saveOverride, reloadOverrides: loadOverrides, languageLocked, lockLanguage }}>
+    <LanguageContext.Provider value={{ lang, setLang, t, editMode, setEditMode, overrides, saveOverride, reloadOverrides: loadOverrides, languageLocked, lockLanguage, unlockLanguage }}>
       {children}
     </LanguageContext.Provider>
   );
