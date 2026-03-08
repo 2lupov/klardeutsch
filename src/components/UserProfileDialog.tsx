@@ -90,17 +90,16 @@ const UserProfileDialog = ({
           challengesPlayed: (demoUser as any).duels_played ?? 0,
         });
       } else {
-        // Fetch real stats for actual users
-        const [{ data: duelStats }, { count: wordsCount }, { count: lessonsCount }] = await Promise.all([
+        const [{ data: duelStats }, { data: learnStats }] = await Promise.all([
           supabase.rpc("get_user_duel_stats", { p_user_id: userId }),
-          supabase.from("saved_words").select("id", { count: "exact", head: true }).eq("user_id", userId),
-          supabase.from("user_progress").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("completed", true),
+          supabase.rpc("get_user_learning_stats", { p_user_id: userId }),
         ]);
 
         const ds = Array.isArray(duelStats) ? duelStats[0] : duelStats;
+        const ls = Array.isArray(learnStats) ? learnStats[0] : learnStats;
         setStats({
-          wordsLearned: wordsCount ?? 0,
-          lessonsCompleted: lessonsCount ?? 0,
+          wordsLearned: (ls as any)?.words_learned ?? 0,
+          lessonsCompleted: (ls as any)?.lessons_completed ?? 0,
           duelsWon: ds?.duels_won ?? 0,
           challengesPlayed: ds?.duels_played ?? 0,
         });
