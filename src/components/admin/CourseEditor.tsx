@@ -599,6 +599,7 @@ const LessonEditor = ({ lesson, onChange, level }: { lesson: CourseLesson; onCha
           <button onClick={() => { const d = [...(ex.practice_dialog?.dialog || []), { speaker: "A", text_de: "", text_ru: "", text_ua: "" }]; onChange({ ...lesson, exercises: { ...ex, practice_dialog: { dialog: d } } }); }} className="w-full py-2 rounded-xl bg-secondary border border-border text-xs text-primary flex items-center justify-center gap-1.5 hover:border-primary/30 transition-colors">
             <Plus className="w-3 h-3" /> Реплика
           </button>
+          {level && aiBtn("dialog", "🤖 Сгенерировать диалог через ИИ")}
         </div>
       )}
 
