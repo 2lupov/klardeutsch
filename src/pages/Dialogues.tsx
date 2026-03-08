@@ -249,6 +249,7 @@ const Dialogues = () => {
           messages: allMessages,
           topic: selectedTopic?.de ?? "Allgemein",
           level: selectedLevel,
+          lang,
         }),
       });
 

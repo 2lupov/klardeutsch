@@ -33,7 +33,7 @@ const AIFeedback = ({ mistakes, level, category, onClose }: AIFeedbackProps) => 
 
     try {
       const resp = await fetchEdgeFunction("analyze-mistakes", {
-        json: { mistakes, level, category },
+        json: { mistakes, level, category, lang },
       });
 
       if (!resp.ok || !resp.body) {
