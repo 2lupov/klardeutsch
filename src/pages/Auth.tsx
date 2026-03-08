@@ -427,14 +427,25 @@ const Auth = () => {
             />
           )}
           {!isLogin && !forgotMode && (
-            <input
-              type="text"
-              placeholder={t("referralCodePlaceholder") || "Код друга (необязательно)"}
-              value={referralCode}
-              onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
-              maxLength={9}
-              className="w-full px-4 py-3 rounded-xl bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:border-primary focus:outline-none transition-colors font-mono tracking-wider"
-            />
+            <div className="relative">
+              <input
+                type="text"
+                placeholder={t("referralCodePlaceholder") || "Код друга (необязательно)"}
+                value={referralCode}
+                onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                maxLength={9}
+                className={`w-full px-4 py-3 pr-10 rounded-xl bg-secondary text-foreground placeholder:text-muted-foreground border transition-colors font-mono tracking-wider focus:outline-none ${
+                  referralValid === true ? "border-green-500 focus:border-green-500" :
+                  referralValid === false ? "border-destructive focus:border-destructive" :
+                  "border-border focus:border-primary"
+                }`}
+              />
+              {referralCode.length >= 6 && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-lg">
+                  {referralChecking ? "⏳" : referralValid === true ? "✅" : referralValid === false ? "❌" : ""}
+                </span>
+              )}
+            </div>
           )}
           {!forgotMode && (
             <input
