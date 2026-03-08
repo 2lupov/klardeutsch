@@ -32,6 +32,7 @@ const withScroll = async (fn: () => Promise<void>) => {
 const LEVELS: Level[] = ["A1", "A2", "B1", "B2", "C1"];
 
 const TAB_CONFIG: { key: Tab; icon: React.ElementType; label: string }[] = [
+  { key: "stats", icon: BarChart3, label: "stats" },
   { key: "topics", icon: FolderOpen, label: "topics" },
   { key: "vocabulary", icon: BookOpen, label: "vocabulary" },
   { key: "grammar", icon: Languages, label: "grammar" },
