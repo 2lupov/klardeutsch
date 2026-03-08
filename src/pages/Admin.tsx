@@ -140,6 +140,7 @@ const Admin = () => {
         </div>
 
         {/* Hide level selector for non-level tabs */}
+        {tab === "stats" && <AdminStats />}
         {tab === "topics" && <TopicsEditor />}
         {tab === "vocabulary" && <VocabEditor level={level} />}
         {tab === "grammar" && <GrammarEditor level={level} />}
