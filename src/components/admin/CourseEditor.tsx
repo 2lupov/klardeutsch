@@ -845,7 +845,11 @@ const CourseEditor = ({ level }: { level: Level }) => {
       const { data, error } = await supabase.functions.invoke("generate-course-prompt", {
         body: { action: "generate_prompt", courseName: courseName.trim(), level, lessonsCount: parseInt(lessonsCount) || 5, topics: topics.trim() ? topics.split(",").map(t => t.trim()) : [], description: description.trim() },
       });
-      if (error) throw error;
+      if (error) {
+        // Try to extract the actual error message from the response
+        const errMsg = data?.error || error?.message || "Unknown error";
+        throw new Error(errMsg);
+      }
       if (data?.error) throw new Error(data.error);
       setGeneratedPrompt(data.prompt);
       setStep("prompt");
