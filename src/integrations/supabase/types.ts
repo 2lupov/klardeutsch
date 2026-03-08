@@ -814,7 +814,9 @@ export type Database = {
           id: string
           image_url: string | null
           item_type: string
+          payment_link: string | null
           price: number
+          price_eur: number | null
           title: string
         }
         Insert: {
@@ -826,7 +828,9 @@ export type Database = {
           id?: string
           image_url?: string | null
           item_type?: string
+          payment_link?: string | null
           price?: number
+          price_eur?: number | null
           title: string
         }
         Update: {
@@ -838,7 +842,9 @@ export type Database = {
           id?: string
           image_url?: string | null
           item_type?: string
+          payment_link?: string | null
           price?: number
+          price_eur?: number | null
           title?: string
         }
         Relationships: []
