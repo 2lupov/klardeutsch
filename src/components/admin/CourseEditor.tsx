@@ -385,9 +385,82 @@ const ExercisesEditor = ({ exercises, onChange }: { exercises: CourseLesson["exe
    Lesson Detail Editor (with all tabs)
    ══════════════════════════════════════════ */
 
-const LessonEditor = ({ lesson, onChange }: { lesson: CourseLesson; onChange: (l: CourseLesson) => void }) => {
+const LessonEditor = ({ lesson, onChange, level }: { lesson: CourseLesson; onChange: (l: CourseLesson) => void; level?: string }) => {
   const [tab, setTab] = useState<"theory" | "vocab" | "exercises" | "grammar" | "reading" | "dialog" | "culture">("theory");
+  const [generating, setGenerating] = useState<string | null>(null);
   const ex = lesson.exercises || {};
+
+  const handleAIGenerate = async (section: string) => {
+    if (!level) { toast.error("Уровень курса не определён"); return; }
+    setGenerating(section);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { toast.error("Нет сессии"); return; }
+
+      const existingMap: Record<string, any> = {
+        vocab: ex.vocab_cards,
+        exercises: ex.exercises,
+        grammar: ex.grammar_questions,
+      };
+
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-lesson-section`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          section,
+          level,
+          lesson_title: lesson.title,
+          lesson_theory: lesson.theory,
+          existing_content: existingMap[section] || undefined,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: "Unknown error" }));
+        toast.error(err.error || "Ошибка генерации");
+        return;
+      }
+
+      const { result } = await res.json();
+
+      // Merge generated content with existing
+      const newEx = { ...ex };
+      if (section === "vocab" && result.vocab_cards) {
+        newEx.vocab_cards = [...(ex.vocab_cards || []), ...result.vocab_cards];
+      } else if (section === "exercises" && result.exercises) {
+        newEx.exercises = [...(ex.exercises || []), ...result.exercises];
+      } else if (section === "grammar" && result.grammar_questions) {
+        newEx.grammar_questions = [...(ex.grammar_questions || []), ...result.grammar_questions];
+      } else if (section === "reading" && result.reading) {
+        newEx.reading = result.reading;
+      } else if (section === "dialog" && result.dialog) {
+        newEx.practice_dialog = { dialog: result.dialog };
+      } else if (section === "culture" && result.cultural_notes) {
+        newEx.cultural_notes = [...(ex.cultural_notes || []), ...result.cultural_notes];
+      }
+
+      onChange({ ...lesson, exercises: newEx });
+      toast.success("✨ Контент сгенерирован!");
+    } catch (e: any) {
+      toast.error(e.message || "Ошибка");
+    } finally {
+      setGenerating(null);
+    }
+  };
+
+  const aiBtn = (section: string, label: string) => (
+    <button
+      onClick={() => handleAIGenerate(section)}
+      disabled={!!generating}
+      className="w-full py-2 rounded-xl bg-gradient-to-r from-primary/20 to-accent/20 border border-primary/30 text-xs font-semibold text-primary flex items-center justify-center gap-1.5 hover:from-primary/30 hover:to-accent/30 transition-all disabled:opacity-40"
+    >
+      {generating === section ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+      {generating === section ? "Генерация..." : label}
+    </button>
+  );
 
   const tabs = [
     { k: "theory", l: "📖 Теория", count: null },
@@ -428,14 +501,18 @@ const LessonEditor = ({ lesson, onChange }: { lesson: CourseLesson; onChange: (l
           <button onClick={() => onChange({ ...lesson, exercises: { ...ex, vocab_cards: [...(ex.vocab_cards || []), { german: "", russian: "", ukrainian: "", article: "", example: "" }] } })} className="w-full py-2 rounded-xl bg-secondary border border-border text-xs text-primary flex items-center justify-center gap-1.5 hover:border-primary/30 transition-colors">
             <Plus className="w-3 h-3" /> Добавить слово
           </button>
+          {level && aiBtn("vocab", "🤖 Догенерировать слова через ИИ")}
         </div>
       )}
 
       {tab === "exercises" && (
-        <ExercisesEditor
-          exercises={ex.exercises}
-          onChange={exercises => onChange({ ...lesson, exercises: { ...ex, exercises } })}
-        />
+        <div className="space-y-2">
+          <ExercisesEditor
+            exercises={ex.exercises}
+            onChange={exercises => onChange({ ...lesson, exercises: { ...ex, exercises } })}
+          />
+          {level && aiBtn("exercises", "🤖 Догенерировать упражнения через ИИ")}
+        </div>
       )}
 
       {tab === "grammar" && (
@@ -458,6 +535,7 @@ const LessonEditor = ({ lesson, onChange }: { lesson: CourseLesson; onChange: (l
           <button onClick={() => onChange({ ...lesson, exercises: { ...ex, grammar_questions: [...(ex.grammar_questions || []), { question: "", options: ["", "", "", ""], correct_index: 0, explanation: "" }] } })} className="w-full py-2 rounded-xl bg-secondary border border-border text-xs text-primary flex items-center justify-center gap-1.5 hover:border-primary/30 transition-colors">
             <Plus className="w-3 h-3" /> Вопрос по грамматике
           </button>
+          {level && aiBtn("grammar", "🤖 Догенерировать грамматику через ИИ")}
         </div>
       )}
 
@@ -500,6 +578,7 @@ const LessonEditor = ({ lesson, onChange }: { lesson: CourseLesson; onChange: (l
             const qs = [...(ex.reading?.questions || []), { question: "", options: ["", "", "", ""], correct_index: 0, explanation: "" }];
             onChange({ ...lesson, exercises: { ...ex, reading: { ...(ex.reading || { title: "", text: "" }), questions: qs } } });
           }} className="text-xs text-primary flex items-center gap-1"><Plus className="w-3 h-3" /> Вопрос к тексту</button>
+          {level && aiBtn("reading", "🤖 Сгенерировать текст через ИИ")}
         </div>
       )}
 
@@ -520,6 +599,7 @@ const LessonEditor = ({ lesson, onChange }: { lesson: CourseLesson; onChange: (l
           <button onClick={() => { const d = [...(ex.practice_dialog?.dialog || []), { speaker: "A", text_de: "", text_ru: "", text_ua: "" }]; onChange({ ...lesson, exercises: { ...ex, practice_dialog: { dialog: d } } }); }} className="w-full py-2 rounded-xl bg-secondary border border-border text-xs text-primary flex items-center justify-center gap-1.5 hover:border-primary/30 transition-colors">
             <Plus className="w-3 h-3" /> Реплика
           </button>
+          {level && aiBtn("dialog", "🤖 Сгенерировать диалог через ИИ")}
         </div>
       )}
 
@@ -537,6 +617,7 @@ const LessonEditor = ({ lesson, onChange }: { lesson: CourseLesson; onChange: (l
           <button onClick={() => onChange({ ...lesson, exercises: { ...ex, cultural_notes: [...(ex.cultural_notes || []), { title: { ru: "", ua: "" }, content: { ru: "", ua: "" } }] } })} className="w-full py-2 rounded-xl bg-secondary border border-border text-xs text-primary flex items-center justify-center gap-1.5 hover:border-primary/30 transition-colors">
             <Plus className="w-3 h-3" /> Культурный факт
           </button>
+          {level && aiBtn("culture", "🤖 Сгенерировать культурные заметки через ИИ")}
         </div>
       )}
     </div>
@@ -961,6 +1042,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
                   <LessonEditor
                     lesson={{ title: lesson.title, theory: lesson.theory, exercises: lesson.exercises }}
                     onChange={l => { const n = [...editLessons]; n[i] = { ...n[i], title: l.title, theory: l.theory, exercises: l.exercises }; setEditLessons(n); }}
+                    level={editCourse?.level}
                   />
                 </div>
               )}
@@ -1092,6 +1174,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
                   <LessonEditor
                     lesson={lesson}
                     onChange={l => { const n = { ...courseData }; n.lessons = [...n.lessons]; n.lessons[i] = l; setCourseData(n); }}
+                    level={courseData?.course?.level}
                   />
                 </div>
               )}
