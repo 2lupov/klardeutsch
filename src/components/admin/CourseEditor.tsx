@@ -676,7 +676,10 @@ const CourseEditor = ({ level }: { level: Level }) => {
         const { data, error } = await supabase.functions.invoke("generate-full-course", {
           body: { courseId: course.id, level: course.level, batchStart: lessonNum, batchSize: 1 },
         });
-        if (error) throw error;
+        if (error) {
+          const errMsg = data?.error || error?.message || "Unknown error";
+          throw new Error(errMsg);
+        }
         if (data?.error) throw new Error(data.error);
         
         retries = 0;
