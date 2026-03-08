@@ -358,9 +358,9 @@ const Shop = () => {
                     )}
                     <div className="flex-1 min-w-0 flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-display font-semibold text-foreground text-sm">{item.title}</h3>
+                        <h3 className="font-display font-semibold text-foreground text-sm truncate">{item.title}</h3>
                         {item.description && (
-                          <p className="text-xs text-muted-foreground mt-1">{item.description}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{item.description}</p>
                         )}
                       </div>
                       <div className="flex items-center gap-1 text-primary font-display font-bold text-sm shrink-0">
