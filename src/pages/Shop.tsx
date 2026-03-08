@@ -214,25 +214,25 @@ const Shop = () => {
                   }`}
                   style={{ animationDelay: `${idx * 0.05}s` }}
                 >
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start gap-3 overflow-hidden">
                     {course.image_url ? (
-                      <div className="w-16 h-16 rounded-lg overflow-hidden bg-secondary flex-shrink-0">
+                      <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg overflow-hidden bg-secondary flex-shrink-0">
                         <img src={course.image_url} alt={course.title} className="w-full h-full object-cover" />
                       </div>
                     ) : (
-                      <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <BookOpen className="w-7 h-7 text-primary" />
+                      <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <BookOpen className="w-6 h-6 sm:w-7 sm:h-7 text-primary" />
                       </div>
                     )}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${levelColors[course.level] || "bg-muted text-muted-foreground"}`}>
+                    <div className="flex-1 min-w-0 overflow-hidden">
+                      <div className="flex items-center gap-1.5 mb-1 min-w-0">
+                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0 ${levelColors[course.level] || "bg-muted text-muted-foreground"}`}>
                           {course.level}
                         </span>
                         <h3 className="font-display font-semibold text-foreground text-sm truncate">{course.title}</h3>
                       </div>
                       {course.description && (
-                        <p className="text-xs text-muted-foreground line-clamp-2">{course.description}</p>
+                        <p className="text-xs text-muted-foreground line-clamp-2 break-words">{course.description}</p>
                       )}
                       <div className="flex items-center gap-3 mt-1.5 text-[10px] text-muted-foreground">
                         <span>{course.lessons_count} {lang === "uk" ? "уроків" : "уроков"}</span>
@@ -258,9 +258,9 @@ const Shop = () => {
                       <button
                         onClick={() => handleBuyCourse(course)}
                         disabled={!canAfford || buying === course.id}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all active:scale-95 ${
+                        className={`flex items-center justify-center gap-2 w-full px-4 py-2 rounded-xl text-sm font-semibold transition-all active:scale-95 ${
                           canAfford
-                            ? "bg-primary text-primary-foreground hover:opacity-90 hover:scale-[1.02]"
+                            ? "bg-primary text-primary-foreground hover:opacity-90"
                             : "bg-muted text-muted-foreground cursor-not-allowed"
                         }`}
                       >
@@ -268,8 +268,8 @@ const Shop = () => {
                           <span className="animate-pulse">{t("loading")}</span>
                         ) : (
                           <>
-                            {!canAfford && <Lock className="w-3.5 h-3.5" />}
-                            {canAfford ? (lang === "uk" ? "Купити курс" : "Купить курс") : t("notEnoughCoins")}
+                            {!canAfford && <Lock className="w-3.5 h-3.5 shrink-0" />}
+                            <span className="truncate">{canAfford ? (lang === "uk" ? "Купити курс" : "Купить курс") : t("notEnoughCoins")}</span>
                           </>
                         )}
                       </button>
