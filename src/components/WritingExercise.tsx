@@ -46,6 +46,7 @@ const TASKS: Record<string, { emoji: string; task_ru: string; task_de: string }[
 
 const WritingExercise = ({ level, onComplete, onBack }: WritingExerciseProps) => {
   const { isMobile } = usePlatform();
+  const { lang } = useLanguage();
   const tasks = TASKS[level] || TASKS["A1"];
 
   const [taskIndex, setTaskIndex] = useState(() => Math.floor(Math.random() * tasks.length));
