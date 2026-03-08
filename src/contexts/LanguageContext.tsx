@@ -27,6 +27,7 @@ const LanguageContext = createContext<LanguageContextType>({
   reloadOverrides: async () => {},
   languageLocked: false,
   lockLanguage: async () => {},
+  unlockLanguage: async () => {},
 });
 
 export const useLanguage = () => useContext(LanguageContext);
