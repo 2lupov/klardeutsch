@@ -41,13 +41,13 @@ const KlarLogo = ({ progress, completed = false, size = "lg" }: KlarLogoProps) =
   };
 
   const letters = [
-    { char: "K", width: 60 },
-    { char: "L", width: 48 },
-    { char: "A", width: 58 },
-    { char: "R", width: 56 },
+    { char: "K", width: 52 },
+    { char: "L", width: 42 },
+    { char: "A", width: 52 },
+    { char: "R", width: 50 },
   ];
 
-  const totalWidth = letters.reduce((sum, l) => sum + l.width, 0) + 6; // spacing
+  const totalWidth = letters.reduce((sum, l) => sum + l.width, 0) - 8; // tighter spacing
   const height = 64;
 
   return (
@@ -80,8 +80,9 @@ const KlarLogo = ({ progress, completed = false, size = "lg" }: KlarLogoProps) =
 
         {letters.map((letter, i) => {
           const fill = getLetterFill(i);
+          const spacing = -2; // negative for tighter
           const isFull = fill >= 1;
-          const x = letters.slice(0, i).reduce((sum, l) => sum + l.width + 2, 0);
+          const x = letters.slice(0, i).reduce((sum, l) => sum + l.width + spacing, 0);
           const maskId = `mask-${letter.char}-${i}`;
           const fillY = height * (1 - fill);
 
