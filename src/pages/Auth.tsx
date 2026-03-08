@@ -295,11 +295,17 @@ const Auth = () => {
       // Profile update + referral after confirmed
       if (signupUserId) {
         await supabase.from("profiles").update({ display_name: nickname }).eq("user_id", signupUserId);
-        if (referralCode.trim()) {
-          await supabase.rpc("apply_referral_code", {
+        if (referralCode.trim() && referralValid) {
+          const { data: refApplied } = await supabase.rpc("apply_referral_code", {
             p_referred_id: signupUserId,
             p_code: referralCode.trim(),
           });
+          if (refApplied) {
+            toast({
+              title: "🎉 Реферальный бонус активирован!",
+              description: "Тебе и другу начислено по 50 монет + 20 XP",
+            });
+          }
         }
       }
       setShowFireworks(true);

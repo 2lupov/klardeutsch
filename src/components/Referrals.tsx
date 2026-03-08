@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useReferrals } from "@/hooks/useReferrals";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Copy, Check, Users, Gift, Target, Link2, Sparkles } from "lucide-react";
+import { Copy, Check, Users, Gift, Target, Link2, Sparkles, Share2, MessageCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { QRCodeSVG } from "qrcode.react";
 
@@ -27,6 +27,10 @@ const Referrals = () => {
   const t = (ru: string, uk: string) => (lang === "uk" ? uk : ru);
 
   const referralLink = code ? `${window.location.origin}/auth?ref=${code}` : "";
+  const shareText = t(
+    `🇩🇪 Учи немецкий со мной в KLAR! Получи +50 монет по коду ${code}`,
+    `🇩🇪 Вчи німецьку зі мною в KLAR! Отримай +50 монет за кодом ${code}`
+  );
 
   const copyCode = async () => {
     if (!code) return;
@@ -42,6 +46,25 @@ const Referrals = () => {
     setCopiedLink(true);
     toast({ title: t("Ссылка скопирована!", "Посилання скопійовано!") });
     setTimeout(() => setCopiedLink(false), 2000);
+  };
+
+  const shareNative = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "KLAR — учи немецкий",
+          text: shareText,
+          url: referralLink,
+        });
+      } catch {}
+    } else {
+      copyLink();
+    }
+  };
+
+  const shareTelegram = () => {
+    const url = `https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent(shareText)}`;
+    window.open(url, "_blank");
   };
 
   if (loading) {
@@ -75,9 +98,27 @@ const Referrals = () => {
           {t("Друг вводит этот код при регистрации — вы оба получаете награды", "Друг вводить цей код при реєстрації — ви обидва отримуєте нагороди")}
         </p>
 
+        {/* Share buttons */}
+        <div className="mt-3 pt-3 border-t border-border/20 flex gap-2">
+          <button
+            onClick={shareNative}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity"
+          >
+            <Share2 className="w-4 h-4" />
+            {t("Поделиться", "Поділитися")}
+          </button>
+          <button
+            onClick={shareTelegram}
+            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#54a9eb] text-white font-semibold text-sm hover:opacity-90 transition-opacity"
+          >
+            <MessageCircle className="w-4 h-4" />
+            Telegram
+          </button>
+        </div>
+
         {/* Unique link */}
         <div className="mt-3 pt-3 border-t border-border/20">
-          <p className="text-[11px] text-muted-foreground mb-2">{t("Или поделись ссылкой:", "Або поділись посиланням:")}</p>
+          <p className="text-[11px] text-muted-foreground mb-2">{t("Или скопируй ссылку:", "Або скопіюй посилання:")}</p>
           <div className="flex items-center gap-2">
             <div className="flex-1 px-3 py-2 rounded-lg bg-muted/40 border border-border/20 text-[11px] text-muted-foreground truncate font-mono">
               {referralLink}
