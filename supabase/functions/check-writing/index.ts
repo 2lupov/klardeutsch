@@ -30,16 +30,44 @@ serve(async (req) => {
       });
     }
 
-    const { text, task, level } = await req.json();
+    const { text, task, level, lang } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       return new Response(JSON.stringify({ error: "LOVABLE_API_KEY not configured" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const systemPrompt = `Ты — дружелюбный преподаватель немецкого языка для русскоговорящих студентов уровня ${level}.
+    const isUk = lang === "uk";
+    const responseLang = isUk ? "українською мовою" : "на русском языке";
+
+    const systemPrompt = isUk
+      ? `Ти — доброзичливий викладач німецької мови для україномовних студентів рівня ${level}.
+
+Студент виконав письмове завдання. Перевір його текст і дай зворотний зв'язок.
+
+**Формат відповіді (строго markdown, українською):**
+
+## 📝 Оцінка
+Дай загальну оцінку від 1 до 10 та короткий коментар (1 речення).
+
+## ✅ Що добре
+Відзнач 1-3 вдалі моменти в тексті.
+
+## ❌ Помилки
+Для кожної помилки:
+- **Помилка:** "фраза з помилкою" → **"виправлений варіант"**
+- 💡 Пояснення правила (1-2 речення)
+
+## 💪 Порада
+Одна конкретна порада для покращення на цьому рівні.
+
+## 📊 Підсумок
+Коротко: граматика (/5), словниковий запас (/5), зв'язність (/5).
+
+Будь конструктивним і мотивуючим. Не переписуй весь текст — тільки вказуй конкретні помилки.
+ВАЖЛИВО: Вся відповідь ПОВИННА бути українською мовою!`
+      : `Ты — дружелюбный преподаватель немецкого языка для русскоговорящих студентов уровня ${level}.
 
 Студент выполнил письменное задание. Проверь его текст и дай обратную связь.
 
@@ -64,7 +92,9 @@ serve(async (req) => {
 
 Будь конструктивным и мотивирующим. Не переписывай весь текст — только указывай конкретные ошибки.`;
 
-    const userPrompt = `Задание: ${task}\n\nТекст студента:\n${text}`;
+    const userPrompt = isUk
+      ? `Завдання: ${task}\n\nТекст студента:\n${text}`
+      : `Задание: ${task}\n\nТекст студента:\n${text}`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -84,12 +114,12 @@ serve(async (req) => {
 
     if (!response.ok) {
       if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Слишком много запросов, попробуйте позже" }), {
+        return new Response(JSON.stringify({ error: isUk ? "Забагато запитів, спробуйте пізніше" : "Слишком много запросов, попробуйте позже" }), {
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Превышен лимит AI-запросов" }), {
+        return new Response(JSON.stringify({ error: isUk ? "Перевищено ліміт AI-запитів" : "Превышен лимит AI-запросов" }), {
           status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
