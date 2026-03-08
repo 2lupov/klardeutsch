@@ -160,7 +160,7 @@ const Index = () => {
           return (
             <div className="flex flex-col items-center justify-center gap-4 py-12 animate-slide-up">
               <p className="text-4xl">📭</p>
-              <p className="text-muted-foreground text-center">{t("noContent") || "Контент для этого уровня пока готовится"}</p>
+              <p className="text-muted-foreground text-center">Контент для этого уровня пока готовится</p>
               <button onClick={handleBack} className="text-primary hover:underline text-sm">{t("back")}</button>
             </div>
           );
