@@ -39,3 +39,5 @@ project_id = "jqqsszwbbxvevebmebfm"
     verify_jwt = false
   [functions.phone-conversation]
     verify_jwt = false
+  [functions.elevenlabs-transcribe]
+    verify_jwt = false
