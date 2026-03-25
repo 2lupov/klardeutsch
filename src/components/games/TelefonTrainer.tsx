@@ -7,29 +7,17 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 
+// ========== TYPES ==========
 type DialogOption = { text: string; correct: boolean; feedbackRu: string; feedbackUk: string };
-type DialogLine = {
-  speaker: "other" | "you";
-  text: string;
-  options?: DialogOption[];
-};
+type DialogLine = { speaker: "other" | "you"; text: string; options?: DialogOption[] };
+type PhoneScenario = { title: string; descRu: string; descUk: string; emoji: string; callerName: string; lines: DialogLine[] };
+type AiMsg = { role: "user" | "assistant"; content: string };
 
-type PhoneScenario = {
-  title: string;
-  descRu: string;
-  descUk: string;
-  emoji: string;
-  callerName: string;
-  lines: DialogLine[];
-};
-
+// ========== SCENARIOS ==========
 const scenarios: PhoneScenario[] = [
   {
-    title: "Termin beim Arzt",
-    descRu: "Запись к врачу по телефону",
-    descUk: "Запис до лікаря по телефону",
-    emoji: "🏥",
-    callerName: "Praxis Dr. Müller",
+    title: "Termin beim Arzt", descRu: "Запись к врачу по телефону", descUk: "Запис до лікаря по телефону",
+    emoji: "🏥", callerName: "Praxis Dr. Müller",
     lines: [
       { speaker: "other", text: "Praxis Dr. Müller, guten Tag. Was kann ich für Sie tun?" },
       { speaker: "you", text: "", options: [
@@ -39,69 +27,61 @@ const scenarios: PhoneScenario[] = [
       ]},
       { speaker: "other", text: "Natürlich. Waren Sie schon einmal bei uns?" },
       { speaker: "you", text: "", options: [
-        { text: "Nein, ich bin ein neuer Patient.", correct: true, feedbackRu: "Правильно! Neuer Patient — стандартное выражение.", feedbackUk: "Правильно! Neuer Patient — стандартний вираз." },
-        { text: "Ja, ich war schon da.", correct: true, feedbackRu: "Тоже правильно, если вы уже были у врача.", feedbackUk: "Теж правильно, якщо ви вже були у лікаря." },
-        { text: "Ich weiß nicht.", correct: false, feedbackRu: "Странный ответ — вы должны знать, были ли у врача.", feedbackUk: "Дивна відповідь — ви повинні знати, чи були у лікаря." },
+        { text: "Nein, ich bin ein neuer Patient.", correct: true, feedbackRu: "Правильно!", feedbackUk: "Правильно!" },
+        { text: "Ja, ich war schon da.", correct: true, feedbackRu: "Тоже правильно.", feedbackUk: "Теж правильно." },
+        { text: "Ich weiß nicht.", correct: false, feedbackRu: "Странный ответ.", feedbackUk: "Дивна відповідь." },
       ]},
       { speaker: "other", text: "Gut. Hätten Sie am Donnerstag um 10 Uhr Zeit?" },
       { speaker: "you", text: "", options: [
-        { text: "Ja, das passt mir gut. Vielen Dank!", correct: true, feedbackRu: "Идеально! «Das passt mir» — ключевая фраза для подтверждения времени.", feedbackUk: "Ідеально! «Das passt mir» — ключова фраза для підтвердження часу." },
-        { text: "Geht es auch am Freitag?", correct: true, feedbackRu: "Хороший вариант, если четверг не подходит.", feedbackUk: "Гарний варіант, якщо четвер не підходить." },
-        { text: "Nein.", correct: false, feedbackRu: "Слишком коротко. Предложите альтернативу.", feedbackUk: "Занадто коротко. Запропонуйте альтернативу." },
+        { text: "Ja, das passt mir gut. Vielen Dank!", correct: true, feedbackRu: "Идеально! «Das passt mir» — ключевая фраза.", feedbackUk: "Ідеально! «Das passt mir» — ключова фраза." },
+        { text: "Geht es auch am Freitag?", correct: true, feedbackRu: "Хороший вариант.", feedbackUk: "Гарний варіант." },
+        { text: "Nein.", correct: false, feedbackRu: "Слишком коротко.", feedbackUk: "Занадто коротко." },
       ]},
     ],
   },
   {
-    title: "Vertrag kündigen",
-    descRu: "Отмена договора по телефону",
-    descUk: "Скасування договору по телефону",
-    emoji: "📞",
-    callerName: "Kundenservice",
+    title: "Vertrag kündigen", descRu: "Отмена договора", descUk: "Скасування договору",
+    emoji: "📞", callerName: "Kundenservice",
     lines: [
       { speaker: "other", text: "Kundenservice, mein Name ist Schmidt. Wie kann ich Ihnen helfen?" },
       { speaker: "you", text: "", options: [
-        { text: "Guten Tag, ich möchte meinen Vertrag kündigen.", correct: true, feedbackRu: "Прямо и вежливо — именно так и нужно.", feedbackUk: "Прямо і ввічливо — саме так і потрібно." },
-        { text: "Ich will nicht mehr zahlen!", correct: false, feedbackRu: "Агрессивно. Лучше: «Ich möchte meinen Vertrag kündigen.»", feedbackUk: "Агресивно. Краще: «Ich möchte meinen Vertrag kündigen.»" },
-        { text: "Kündigung machen bitte.", correct: false, feedbackRu: "Грамматически неверно. «Kündigung» не используется с «machen».", feedbackUk: "Граматично невірно. «Kündigung» не використовується з «machen»." },
+        { text: "Guten Tag, ich möchte meinen Vertrag kündigen.", correct: true, feedbackRu: "Прямо и вежливо.", feedbackUk: "Прямо і ввічливо." },
+        { text: "Ich will nicht mehr zahlen!", correct: false, feedbackRu: "Агрессивно.", feedbackUk: "Агресивно." },
+        { text: "Kündigung machen bitte.", correct: false, feedbackRu: "Грамматически неверно.", feedbackUk: "Граматично невірно." },
       ]},
-      { speaker: "other", text: "Das tut mir leid zu hören. Darf ich nach dem Grund fragen?" },
+      { speaker: "other", text: "Das tut mir leid. Darf ich nach dem Grund fragen?" },
       { speaker: "you", text: "", options: [
-        { text: "Ich bin mit dem Service nicht zufrieden.", correct: true, feedbackRu: "Стандартная формулировка для выражения неудовлетворённости.", feedbackUk: "Стандартне формулювання для вираження незадоволеності." },
-        { text: "Ich ziehe um und brauche den Vertrag nicht mehr.", correct: true, feedbackRu: "Хорошая причина — переезд.", feedbackUk: "Гарна причина — переїзд." },
-        { text: "Das geht Sie nichts an.", correct: false, feedbackRu: "Очень грубо! По закону вы не обязаны называть причину, но вежливее ответить.", feedbackUk: "Дуже грубо! За законом ви не зобов'язані називати причину, але ввічливіше відповісти." },
+        { text: "Ich bin mit dem Service nicht zufrieden.", correct: true, feedbackRu: "Стандартная формулировка.", feedbackUk: "Стандартне формулювання." },
+        { text: "Ich ziehe um.", correct: true, feedbackRu: "Хорошая причина.", feedbackUk: "Гарна причина." },
+        { text: "Das geht Sie nichts an.", correct: false, feedbackRu: "Очень грубо!", feedbackUk: "Дуже грубо!" },
       ]},
-      { speaker: "other", text: "Ich verstehe. Möchten Sie die Kündigung schriftlich bestätigen?" },
+      { speaker: "other", text: "Möchten Sie die Kündigung schriftlich bestätigen?" },
       { speaker: "you", text: "", options: [
-        { text: "Ja, bitte schicken Sie mir die Bestätigung per E-Mail.", correct: true, feedbackRu: "Правильно! Всегда просите письменное подтверждение.", feedbackUk: "Правильно! Завжди просіть письмове підтвердження." },
-        { text: "Nein, das reicht so.", correct: false, feedbackRu: "Осторожно! Без письменного подтверждения договор может продолжаться.", feedbackUk: "Обережно! Без письмового підтвердження договір може продовжуватися." },
-        { text: "Ja, per Post an meine Adresse bitte.", correct: true, feedbackRu: "Тоже хороший вариант — почтой.", feedbackUk: "Теж гарний варіант — поштою." },
+        { text: "Ja, bitte per E-Mail.", correct: true, feedbackRu: "Правильно! Всегда просите подтверждение.", feedbackUk: "Правильно!" },
+        { text: "Nein, das reicht so.", correct: false, feedbackRu: "Осторожно! Без подтверждения договор может продолжаться.", feedbackUk: "Обережно!" },
+        { text: "Ja, per Post bitte.", correct: true, feedbackRu: "Тоже хороший вариант.", feedbackUk: "Теж гарний варіант." },
       ]},
     ],
   },
   {
-    title: "Wohnung besichtigen",
-    descRu: "Звонок по объявлению о квартире",
-    descUk: "Дзвінок за оголошенням про квартиру",
-    emoji: "🏠",
-    callerName: "Vermieter Herr Weber",
+    title: "Wohnung besichtigen", descRu: "Звонок по объявлению о квартире", descUk: "Дзвінок за оголошенням про квартиру",
+    emoji: "🏠", callerName: "Herr Weber",
     lines: [
       { speaker: "other", text: "Weber, hallo?" },
       { speaker: "you", text: "", options: [
-        { text: "Guten Tag, Herr Weber. Ich rufe wegen der Wohnungsanzeige an.", correct: true, feedbackRu: "Идеально! «Wegen der Anzeige anrufen» — стандартный оборот.", feedbackUk: "Ідеально! «Wegen der Anzeige anrufen» — стандартний зворот." },
-        { text: "Hallo, ist die Wohnung noch frei?", correct: true, feedbackRu: "Прямо к делу — тоже нормально.", feedbackUk: "Прямо до справи — теж нормально." },
-        { text: "Ich will Wohnung.", correct: false, feedbackRu: "Грамматически неверно и грубо.", feedbackUk: "Граматично невірно та грубо." },
+        { text: "Guten Tag, ich rufe wegen der Wohnungsanzeige an.", correct: true, feedbackRu: "Идеально!", feedbackUk: "Ідеально!" },
+        { text: "Hallo, ist die Wohnung noch frei?", correct: true, feedbackRu: "Прямо к делу — нормально.", feedbackUk: "Прямо до справи." },
+        { text: "Ich will Wohnung.", correct: false, feedbackRu: "Грамматически неверно.", feedbackUk: "Граматично невірно." },
       ]},
       { speaker: "other", text: "Ja, die ist noch frei. Möchten Sie einen Besichtigungstermin?" },
       { speaker: "you", text: "", options: [
-        { text: "Ja, sehr gern. Wann wäre es möglich?", correct: true, feedbackRu: "Вежливая форма Konjunktiv II — «Wann wäre es möglich?»", feedbackUk: "Ввічлива форма Konjunktiv II — «Wann wäre es möglich?»" },
-        { text: "Ja, morgen!", correct: false, feedbackRu: "Слишком настойчиво. Лучше спросить, когда удобно.", feedbackUk: "Занадто наполегливо. Краще запитати, коли зручно." },
-        { text: "Darf ich fragen, wie hoch die Miete ist?", correct: true, feedbackRu: "Хороший вопрос — уточнить цену перед просмотром.", feedbackUk: "Гарне питання — уточнити ціну перед переглядом." },
+        { text: "Ja, sehr gern. Wann wäre es möglich?", correct: true, feedbackRu: "Отлично! Konjunktiv II.", feedbackUk: "Чудово! Konjunktiv II." },
+        { text: "Ja, morgen!", correct: false, feedbackRu: "Слишком настойчиво.", feedbackUk: "Занадто наполегливо." },
+        { text: "Wie hoch ist die Miete?", correct: true, feedbackRu: "Хороший вопрос.", feedbackUk: "Гарне питання." },
       ]},
     ],
   },
 ];
-
-// ========== AI PHONE CONVERSATION ==========
 
 const aiTopics = [
   { id: "arzt", emoji: "🏥", titleDe: "Arzttermin", titleRu: "Запись к врачу", titleUk: "Запис до лікаря" },
@@ -112,19 +92,16 @@ const aiTopics = [
   { id: "versicherung", emoji: "🛡", titleDe: "Versicherung", titleRu: "Страховка", titleUk: "Страхування" },
 ];
 
-type AiMsg = { role: "user" | "assistant"; content: string };
-
 interface Props { onBack: () => void; }
 
 const TelefonTrainer = ({ onBack }: Props) => {
   const { lang } = useLanguage();
   const { isMobile } = usePlatform();
 
-  // Mode: "menu" | "scenario" | "ai-pick" | "ai-chat"
   const [mode, setMode] = useState<"menu" | "scenario" | "ai-pick" | "ai-chat">("menu");
 
-  // === SCENARIO MODE STATE ===
-  const [scenarioIndex, setScenarioIndex] = useState<number>(0);
+  // Scenario state
+  const [scenarioIndex, setScenarioIndex] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [score, setScore] = useState(0);
@@ -133,26 +110,34 @@ const TelefonTrainer = ({ onBack }: Props) => {
   const [chatHistory, setChatHistory] = useState<{ speaker: "other" | "you"; text: string; correct?: boolean }[]>([]);
   const [showingFeedback, setShowingFeedback] = useState(false);
 
-  // === AI MODE STATE ===
-  const [aiTopic, setAiTopic] = useState<string>("");
+  // AI voice state
+  const [aiTopic, setAiTopic] = useState("");
   const [aiMessages, setAiMessages] = useState<AiMsg[]>([]);
   const [aiInput, setAiInput] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
-  const [aiSpeaking, setAiSpeaking] = useState(false);
+  const [recording, setRecording] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
 
   const scrollToBottom = useCallback(() => {
     setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
   }, []);
 
-  // === SCENARIO LOGIC (fixed) ===
-  const scenario = scenarios[scenarioIndex];
+  // Cleanup
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+      if (streamRef.current) { streamRef.current.getTracks().forEach(t => t.stop()); }
+    };
+  }, []);
 
-  // Find current interactive step (the Nth "you" line)
-  const youLineIndices = scenario?.lines
-    .map((l, i) => l.speaker === "you" ? i : -1)
-    .filter(i => i >= 0) ?? [];
+  // ========== SCENARIO LOGIC ==========
+  const scenario = scenarios[scenarioIndex];
+  const youLineIndices = scenario?.lines.map((l, i) => l.speaker === "you" ? i : -1).filter(i => i >= 0) ?? [];
 
   const startScenario = (idx: number) => {
     setScenarioIndex(idx);
@@ -162,7 +147,6 @@ const TelefonTrainer = ({ onBack }: Props) => {
     setTotalQ(0);
     setFinished(false);
     setShowingFeedback(false);
-    // Build initial chat: all "other" lines before first "you" line
     const s = scenarios[idx];
     const initial: { speaker: "other" | "you"; text: string }[] = [];
     for (const line of s.lines) {
@@ -182,25 +166,18 @@ const TelefonTrainer = ({ onBack }: Props) => {
     const opt = line.options?.[optIdx];
     if (opt?.correct) setScore(s => s + 1);
     setTotalQ(t => t + 1);
-    // Add user's answer to chat
     setChatHistory(prev => [...prev, { speaker: "you", text: opt?.text ?? "", correct: opt?.correct }]);
     scrollToBottom();
   };
 
   const advanceScenario = () => {
     const nextStep = currentStep + 1;
-    if (nextStep >= youLineIndices.length) {
-      setFinished(true);
-      return;
-    }
-    // Add all "other" lines between current youLine and next youLine
+    if (nextStep >= youLineIndices.length) { setFinished(true); return; }
     const currentYouIdx = youLineIndices[currentStep];
     const nextYouIdx = youLineIndices[nextStep];
     const newLines: { speaker: "other" | "you"; text: string }[] = [];
     for (let i = currentYouIdx + 1; i < nextYouIdx; i++) {
-      if (scenario.lines[i].speaker === "other") {
-        newLines.push({ speaker: "other", text: scenario.lines[i].text });
-      }
+      if (scenario.lines[i].speaker === "other") newLines.push({ speaker: "other", text: scenario.lines[i].text });
     }
     setChatHistory(prev => [...prev, ...newLines]);
     setCurrentStep(nextStep);
@@ -209,158 +186,190 @@ const TelefonTrainer = ({ onBack }: Props) => {
     scrollToBottom();
   };
 
-  const currentYouLine = youLineIndices[currentStep] !== undefined
-    ? scenario.lines[youLineIndices[currentStep]]
-    : null;
+  const currentYouLine = youLineIndices[currentStep] !== undefined ? scenario.lines[youLineIndices[currentStep]] : null;
 
-  // === AI CHAT LOGIC ===
-  const startAiChat = async (topicId: string) => {
+  // ========== AI VOICE CONVERSATION ==========
+
+  const getToken = async () => {
+    const { data } = await supabase.auth.getSession();
+    return data.session?.access_token;
+  };
+
+  const callPhoneAI = async (msgs: AiMsg[], topicId: string): Promise<{ text: string; audio: string } | null> => {
+    const token = await getToken();
+    if (!token) return null;
     const topic = aiTopics.find(t => t.id === topicId);
-    if (!topic) return;
+
+    const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/phone-conversation`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        messages: msgs,
+        topic: `Telefongespräch: ${topic?.titleDe ?? "Allgemein"}`,
+        level: "A2",
+        lang,
+      }),
+    });
+
+    if (!resp.ok) {
+      if (resp.status === 429 || resp.status === 402) {
+        const err = await resp.json();
+        throw new Error(err.error || "Error");
+      }
+      throw new Error("AI error");
+    }
+
+    return resp.json();
+  };
+
+  const playAudioBase64 = (base64: string): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      if (!base64) { resolve(); return; }
+      const audioUrl = `data:audio/mpeg;base64,${base64}`;
+      const audio = new Audio(audioUrl);
+      audioRef.current = audio;
+      audio.onended = () => { audioRef.current = null; resolve(); };
+      audio.onerror = () => { audioRef.current = null; reject(new Error("Audio error")); };
+      audio.play().catch(reject);
+    });
+  };
+
+  const startAiChat = async (topicId: string) => {
     setAiTopic(topicId);
     setAiMessages([]);
     setAiInput("");
     setMode("ai-chat");
     setAiLoading(true);
+    scrollToBottom();
 
     try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData.session?.access_token;
-      if (!token) throw new Error("Not authenticated");
+      const startMsg: AiMsg[] = [{ role: "user", content: `Starte das Telefongespräch. Du nimmst den Anruf entgegen. Begrüße mich.` }];
+      const result = await callPhoneAI(startMsg, topicId);
+      if (!result) throw new Error("No result");
 
-      const systemTopicName = topic.titleDe;
-      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-dialogue`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          messages: [{ role: "user", content: `Starte ein Telefongespräch zum Thema "${systemTopicName}". Du bist der Gesprächspartner am anderen Ende der Leitung. Beginne mit einer Begrüßung, als ob du den Anruf entgegennimmst. Halte deine Antworten kurz (2-3 Sätze).` }],
-          topic: `Telefongespräch: ${systemTopicName}`,
-          level: "A2",
-          lang,
-        }),
-      });
+      setAiMessages([{ role: "assistant", content: result.text }]);
+      scrollToBottom();
 
-      if (!resp.ok) throw new Error("AI error");
-
-      let fullText = "";
-      const reader = resp.body?.getReader();
-      const decoder = new TextDecoder();
-      if (!reader) throw new Error("No stream");
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value, { stream: true });
-        for (const line of chunk.split("\n")) {
-          if (!line.startsWith("data: ") || line.includes("[DONE]")) continue;
-          try {
-            const parsed = JSON.parse(line.slice(6));
-            const content = parsed.choices?.[0]?.delta?.content;
-            if (content) {
-              fullText += content;
-              setAiMessages([{ role: "assistant", content: fullText }]);
-            }
-          } catch {}
-        }
+      // Auto-play the greeting
+      if (result.audio) {
+        await playAudioBase64(result.audio);
       }
-
-      setAiMessages([{ role: "assistant", content: fullText }]);
-    } catch (e) {
-      console.error("AI phone error:", e);
-      setAiMessages([{ role: "assistant", content: lang === "uk" ? "Помилка підключення. Спробуйте ще раз." : "Ошибка подключения. Попробуйте ещё раз." }]);
+    } catch (e: any) {
+      console.error("AI start error:", e);
+      setAiMessages([{ role: "assistant", content: e.message || (lang === "uk" ? "Помилка." : "Ошибка.") }]);
     } finally {
       setAiLoading(false);
       scrollToBottom();
     }
   };
 
-  const sendAiMessage = async () => {
-    const text = aiInput.trim();
-    if (!text || aiLoading) return;
+  const sendMessage = async (text: string) => {
+    if (!text.trim() || aiLoading) return;
 
-    const newMessages: AiMsg[] = [...aiMessages, { role: "user", content: text }];
+    const newMessages: AiMsg[] = [...aiMessages, { role: "user", content: text.trim() }];
     setAiMessages(newMessages);
     setAiInput("");
     setAiLoading(true);
     scrollToBottom();
 
     try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData.session?.access_token;
-      if (!token) throw new Error("Not authenticated");
+      const result = await callPhoneAI(newMessages, aiTopic);
+      if (!result) throw new Error("No result");
 
-      const topic = aiTopics.find(t => t.id === aiTopic);
-      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-dialogue`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          messages: newMessages,
-          topic: `Telefongespräch: ${topic?.titleDe ?? "Allgemein"}`,
-          level: "A2",
-          lang,
-        }),
-      });
+      setAiMessages([...newMessages, { role: "assistant", content: result.text }]);
+      scrollToBottom();
 
-      if (!resp.ok) {
-        if (resp.status === 429) {
-          setAiMessages(prev => [...prev, { role: "assistant", content: lang === "uk" ? "Забагато запитів, зачекайте." : "Слишком много запросов, подождите." }]);
-          return;
-        }
-        throw new Error("AI error");
+      // Auto-play response
+      if (result.audio) {
+        await playAudioBase64(result.audio);
       }
-
-      let fullText = "";
-      const reader = resp.body?.getReader();
-      const decoder = new TextDecoder();
-      if (!reader) throw new Error("No stream");
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value, { stream: true });
-        for (const line of chunk.split("\n")) {
-          if (!line.startsWith("data: ") || line.includes("[DONE]")) continue;
-          try {
-            const parsed = JSON.parse(line.slice(6));
-            const content = parsed.choices?.[0]?.delta?.content;
-            if (content) {
-              fullText += content;
-              setAiMessages([...newMessages, { role: "assistant", content: fullText }]);
-            }
-          } catch {}
-        }
-      }
-    } catch (e) {
+    } catch (e: any) {
       console.error("AI send error:", e);
-      setAiMessages(prev => [...prev, { role: "assistant", content: lang === "uk" ? "Помилка. Спробуйте ще раз." : "Ошибка. Попробуйте ещё раз." }]);
+      setAiMessages(prev => [...prev, { role: "assistant", content: e.message || (lang === "uk" ? "Помилка." : "Ошибка.") }]);
     } finally {
       setAiLoading(false);
       scrollToBottom();
     }
   };
 
-  // TTS for AI messages
-  const speakText = async (text: string) => {
-    if (aiSpeaking && audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
-      setAiSpeaking(false);
-      return;
-    }
-    setAiSpeaking(true);
+  // Voice recording
+  const startRecording = async () => {
     try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData.session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-      // Extract only German text (before ---)
-      const germanText = text.split("---")[0].trim();
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      chunksRef.current = [];
+
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: MediaRecorder.isTypeSupported("audio/webm;codecs=opus") ? "audio/webm;codecs=opus" : "audio/webm" });
+      mediaRecorderRef.current = mediaRecorder;
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
+
+      mediaRecorder.onstop = async () => {
+        stream.getTracks().forEach(t => t.stop());
+        streamRef.current = null;
+        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+        chunksRef.current = [];
+        await transcribeAndSend(blob);
+      };
+
+      mediaRecorder.start(500);
+      setRecording(true);
+    } catch (e) {
+      console.error("Mic error:", e);
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      mediaRecorderRef.current.stop();
+      mediaRecorderRef.current = null;
+    }
+    setRecording(false);
+  };
+
+  const transcribeAndSend = async (blob: Blob) => {
+    setTranscribing(true);
+    try {
+      const token = await getToken();
+      if (!token) throw new Error("Not auth");
+
+      const formData = new FormData();
+      formData.append("audio", blob, "recording.webm");
+
+      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-transcribe`, {
+        method: "POST",
+        headers: {
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!resp.ok) throw new Error("STT error");
+      const { text } = await resp.json();
+
+      if (text && text.trim()) {
+        await sendMessage(text.trim());
+      }
+    } catch (e) {
+      console.error("Transcribe error:", e);
+    } finally {
+      setTranscribing(false);
+    }
+  };
+
+  const replayAudio = async (msg: AiMsg) => {
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+    // Re-generate TTS for this message
+    try {
+      const token = await getToken();
+      const germanText = msg.content.split("---")[0].trim();
       const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`, {
         method: "POST",
         headers: {
@@ -368,32 +377,28 @@ const TelefonTrainer = ({ onBack }: Props) => {
           apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ text: germanText, speed: 0.85 }),
+        body: JSON.stringify({ text: germanText, speed: 0.9 }),
       });
-      if (!resp.ok) throw new Error("TTS error");
+      if (!resp.ok) return;
       const blob = await resp.blob();
       const url = URL.createObjectURL(blob);
       const audio = new Audio(url);
       audioRef.current = audio;
-      audio.onended = () => { setAiSpeaking(false); audioRef.current = null; };
+      audio.onended = () => { audioRef.current = null; };
       await audio.play();
-    } catch (e) {
-      console.error("TTS error:", e);
-      setAiSpeaking(false);
-    }
+    } catch {}
   };
 
-  // Cleanup audio on unmount
-  useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
-  }, []);
+  const stopAll = () => {
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      mediaRecorderRef.current.stop();
+    }
+    setRecording(false);
+    setMode("menu");
+  };
 
-  // ========== RENDER ==========
+  // ========== RENDERS ==========
 
   // MAIN MENU
   if (mode === "menu") {
@@ -407,25 +412,25 @@ const TelefonTrainer = ({ onBack }: Props) => {
           {lang === "uk" ? "Практикуй телефонні розмови німецькою" : "Практикуй телефонные разговоры на немецком"}
         </p>
 
-        {/* AI Conversation mode */}
+        {/* AI Voice */}
         <button onClick={() => setMode("ai-pick")}
-          className="w-full glass-card p-5 flex items-center gap-4 text-left hover:border-primary/30 transition-all group mb-4 border-primary/10 bg-primary/5">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center text-2xl flex-shrink-0">
-            <Bot className="w-6 h-6 text-primary" />
+          className="w-full glass-card p-5 flex items-center gap-4 text-left hover:border-primary/30 transition-all group mb-6 border-primary/10 bg-primary/5">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center flex-shrink-0">
+            <Mic className="w-7 h-7 text-primary" />
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-display text-sm font-bold text-foreground group-hover:text-primary transition-colors flex items-center gap-2">
-              {lang === "uk" ? "Розмова з ІІ" : "Разговор с ИИ"}
-              <span className="px-1.5 py-0.5 rounded-full bg-primary/15 text-primary text-[9px] font-semibold uppercase">AI</span>
+              {lang === "uk" ? "Голосова розмова з ІІ" : "Голосовой разговор с ИИ"}
+              <span className="px-1.5 py-0.5 rounded-full bg-primary/15 text-primary text-[9px] font-semibold uppercase">voice</span>
             </h3>
             <p className="text-[11px] text-muted-foreground mt-0.5">
-              {lang === "uk" ? "Вільна розмова по телефону з ІІ-співрозмовником" : "Свободный разговор по телефону с ИИ-собеседником"}
+              {lang === "uk" ? "Говори в мікрофон — ІІ відповідає голосом" : "Говори в микрофон — ИИ отвечает голосом"}
             </p>
           </div>
           <Phone className="w-5 h-5 text-primary flex-shrink-0" />
         </button>
 
-        <p className="text-xs text-muted-foreground mb-3 mt-6 font-semibold uppercase tracking-wider">
+        <p className="text-xs text-muted-foreground mb-3 font-semibold uppercase tracking-wider">
           {lang === "uk" ? "Готові сценарії" : "Готовые сценарии"}
         </p>
         <div className="space-y-3">
@@ -455,10 +460,10 @@ const TelefonTrainer = ({ onBack }: Props) => {
           <ArrowLeft className="w-4 h-4" /> {lang === "uk" ? "Назад" : "Назад"}
         </button>
         <h1 className="font-display text-xl font-bold text-foreground mb-1 flex items-center gap-2">
-          <Bot className="w-5 h-5 text-primary" /> {lang === "uk" ? "Обери тему розмови" : "Выбери тему разговора"}
+          <Mic className="w-5 h-5 text-primary" /> {lang === "uk" ? "Обери тему розмови" : "Выбери тему разговора"}
         </h1>
         <p className="text-sm text-muted-foreground mb-6">
-          {lang === "uk" ? "ІІ буде грати роль співрозмовника по телефону" : "ИИ будет играть роль собеседника по телефону"}
+          {lang === "uk" ? "ІІ зателефонує тобі і відповідатиме голосом" : "ИИ позвонит тебе и будет отвечать голосом"}
         </p>
         <div className="space-y-3">
           {aiTopics.map(topic => (
@@ -479,18 +484,21 @@ const TelefonTrainer = ({ onBack }: Props) => {
     );
   }
 
-  // AI CHAT MODE
+  // AI VOICE CHAT
   if (mode === "ai-chat") {
     const topic = aiTopics.find(t => t.id === aiTopic);
+    const isProcessing = aiLoading || transcribing;
+    
     return (
       <div className={`w-full mx-auto px-4 py-6 flex flex-col ${isMobile ? "max-w-md h-[calc(100dvh-120px)]" : "max-w-2xl h-[calc(100vh-120px)]"}`}>
+        {/* Header */}
         <div className="flex items-center justify-between mb-4">
-          <button onClick={() => { setMode("menu"); if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; setAiSpeaking(false); } }}
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
-            <ArrowLeft className="w-4 h-4" /> {lang === "uk" ? "Назад" : "Назад"}
+          <button onClick={stopAll} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <PhoneOff className="w-4 h-4 text-destructive" />
+            <span className="text-destructive">{lang === "uk" ? "Завершити" : "Завершить"}</span>
           </button>
           <div className="flex items-center gap-2">
-            <Phone className="w-3.5 h-3.5 text-primary animate-pulse" />
+            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
             <span className="text-xs text-muted-foreground font-display">{topic?.titleDe}</span>
           </div>
         </div>
@@ -498,60 +506,116 @@ const TelefonTrainer = ({ onBack }: Props) => {
         {/* Messages */}
         <div className="flex-1 overflow-y-auto space-y-3 mb-4 pr-1">
           <AnimatePresence>
-            {aiMessages.map((msg, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                className={cn("flex gap-2 items-start", msg.role === "user" ? "justify-end" : "")}>
-                {msg.role === "assistant" && (
-                  <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs flex-shrink-0">📞</div>
-                )}
-                <div className={cn("max-w-[80%] p-3 rounded-xl text-sm",
-                  msg.role === "user"
-                    ? "bg-primary/10 border border-primary/20 rounded-tr-sm"
-                    : "glass-card rounded-tl-sm"
-                )}>
-                  <p className="whitespace-pre-wrap text-foreground">{msg.content}</p>
-                  {msg.role === "assistant" && (
-                    <button onClick={() => speakText(msg.content)}
-                      className="mt-2 flex items-center gap-1 text-[10px] text-primary hover:text-primary/80 transition-colors">
-                      <Volume2 className={cn("w-3 h-3", aiSpeaking && "animate-pulse")} />
-                      {aiSpeaking ? (lang === "uk" ? "Стоп" : "Стоп") : "🔊"}
-                    </button>
+            {aiMessages.map((msg, i) => {
+              const isAssistant = msg.role === "assistant";
+              const germanPart = isAssistant ? msg.content.split("---")[0].trim() : "";
+              const feedbackPart = isAssistant && msg.content.includes("---") ? msg.content.split("---").slice(1).join("---").trim() : "";
+
+              return (
+                <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                  className={cn("flex gap-2 items-start", !isAssistant && "justify-end")}>
+                  {isAssistant && (
+                    <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs flex-shrink-0">📞</div>
                   )}
-                </div>
-              </motion.div>
-            ))}
+                  <div className={cn("max-w-[85%] rounded-xl text-sm",
+                    !isAssistant
+                      ? "bg-primary/10 border border-primary/20 rounded-tr-sm p-3"
+                      : "space-y-1"
+                  )}>
+                    {isAssistant ? (
+                      <>
+                        <div className="glass-card rounded-tl-sm p-3">
+                          <p className="text-foreground whitespace-pre-wrap">{germanPart}</p>
+                          <button onClick={() => replayAudio(msg)}
+                            className="mt-1.5 flex items-center gap-1 text-[10px] text-primary hover:text-primary/80 transition-colors">
+                            <Volume2 className="w-3 h-3" /> 🔊
+                          </button>
+                        </div>
+                        {feedbackPart && (
+                          <div className="glass-card p-2.5 text-[11px] text-muted-foreground border-primary/10">
+                            <p className="whitespace-pre-wrap">{feedbackPart}</p>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <p className="text-foreground whitespace-pre-wrap">{msg.content}</p>
+                    )}
+                  </div>
+                </motion.div>
+              );
+            })}
           </AnimatePresence>
-          {aiLoading && (
-            <div className="flex gap-2 items-start">
+          
+          {(aiLoading || transcribing) && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-2 items-start">
               <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs flex-shrink-0">📞</div>
-              <div className="glass-card p-3 rounded-tl-sm">
+              <div className="glass-card p-3 rounded-tl-sm flex items-center gap-2">
                 <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">
+                  {transcribing
+                    ? (lang === "uk" ? "Розпізнаю мову..." : "Распознаю речь...")
+                    : (lang === "uk" ? "Думаю..." : "Думаю...")}
+                </span>
               </div>
-            </div>
+            </motion.div>
           )}
           <div ref={chatEndRef} />
         </div>
 
-        {/* Input */}
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={aiInput}
-            onChange={e => setAiInput(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && sendAiMessage()}
-            placeholder={lang === "uk" ? "Напишіть відповідь німецькою..." : "Напишите ответ по-немецки..."}
-            className="flex-1 glass-card px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/30"
-            disabled={aiLoading}
-          />
-          <Button onClick={sendAiMessage} disabled={!aiInput.trim() || aiLoading} size="icon" className="shrink-0">
-            <Send className="w-4 h-4" />
-          </Button>
+        {/* Voice + Text Input */}
+        <div className="space-y-3">
+          {/* Big mic button */}
+          <div className="flex justify-center">
+            <button
+              onClick={recording ? stopRecording : startRecording}
+              disabled={isProcessing}
+              className={cn(
+                "relative w-16 h-16 rounded-full flex items-center justify-center transition-all",
+                recording
+                  ? "bg-destructive text-destructive-foreground scale-110"
+                  : isProcessing
+                    ? "bg-muted text-muted-foreground cursor-not-allowed"
+                    : "bg-primary text-primary-foreground hover:scale-105 active:scale-95"
+              )}
+            >
+              {recording && (
+                <>
+                  <span className="absolute inset-0 rounded-full bg-destructive/30 animate-ping" />
+                  <span className="absolute -inset-2 rounded-full border-2 border-destructive/40 animate-pulse" />
+                </>
+              )}
+              {recording ? <MicOff className="w-7 h-7 relative z-10" /> : <Mic className="w-7 h-7" />}
+            </button>
+          </div>
+          <p className="text-center text-[10px] text-muted-foreground">
+            {recording
+              ? (lang === "uk" ? "🔴 Запис... Натисни щоб зупинити" : "🔴 Запись... Нажми чтобы остановить")
+              : isProcessing
+                ? ""
+                : (lang === "uk" ? "Натисни мікрофон і говори німецькою" : "Нажми микрофон и говори по-немецки")}
+          </p>
+
+          {/* Text fallback */}
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={aiInput}
+              onChange={e => setAiInput(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && sendMessage(aiInput)}
+              placeholder={lang === "uk" ? "Або напиши текстом..." : "Или напиши текстом..."}
+              className="flex-1 glass-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/30"
+              disabled={isProcessing || recording}
+            />
+            <Button onClick={() => sendMessage(aiInput)} disabled={!aiInput.trim() || isProcessing || recording} size="icon" className="shrink-0">
+              <Send className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </div>
     );
   }
 
-  // SCENARIO MODE
+  // SCENARIO: FINISHED
   if (finished) {
     return (
       <div className={`w-full mx-auto px-4 py-6 ${isMobile ? "max-w-md" : "max-w-2xl"}`}>
@@ -562,14 +626,10 @@ const TelefonTrainer = ({ onBack }: Props) => {
           </h2>
           <p className="text-3xl font-display font-bold text-gradient">{score}/{totalQ}</p>
           <p className="text-sm text-muted-foreground">
-            {score === totalQ
-              ? "🔥 " + (lang === "uk" ? "Ідеально!" : "Идеально!")
-              : lang === "uk" ? "Непогано, але є над чим працювати" : "Неплохо, но есть над чем работать"}
+            {score === totalQ ? "🔥 " + (lang === "uk" ? "Ідеально!" : "Идеально!") : lang === "uk" ? "Непогано!" : "Неплохо!"}
           </p>
           <div className="flex gap-3 justify-center">
-            <Button variant="outline" onClick={() => setMode("menu")}>
-              {lang === "uk" ? "Інший сценарій" : "Другой сценарий"}
-            </Button>
+            <Button variant="outline" onClick={() => setMode("menu")}>{lang === "uk" ? "Інший сценарій" : "Другой сценарий"}</Button>
             <Button onClick={() => startScenario(scenarioIndex)}>
               <RotateCcw className="w-4 h-4 mr-1" /> {lang === "uk" ? "Ще раз" : "Ещё раз"}
             </Button>
@@ -579,6 +639,7 @@ const TelefonTrainer = ({ onBack }: Props) => {
     );
   }
 
+  // SCENARIO: IN PROGRESS
   return (
     <div className={`w-full mx-auto px-4 py-6 ${isMobile ? "max-w-md" : "max-w-2xl"}`}>
       <div className="flex items-center justify-between mb-4">
@@ -591,22 +652,19 @@ const TelefonTrainer = ({ onBack }: Props) => {
         </div>
       </div>
 
-      {/* Chat history */}
       <div className="space-y-3 mb-6">
         <AnimatePresence>
           {chatHistory.map((msg, i) => (
             <motion.div key={i} initial={{ opacity: 0, x: msg.speaker === "other" ? -20 : 20 }}
-              animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.05 }}
+              animate={{ opacity: 1, x: 0 }}
               className={cn("flex gap-2 items-start", msg.speaker === "you" ? "justify-end ml-auto max-w-[85%]" : "max-w-[85%]")}>
               {msg.speaker === "other" && (
                 <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs flex-shrink-0">📞</div>
               )}
               <div className={cn("p-3 rounded-xl text-sm",
-                msg.speaker === "other"
-                  ? "glass-card rounded-tl-sm"
-                  : msg.correct
-                    ? "bg-primary/10 border border-primary/20 rounded-tr-sm"
-                    : "bg-destructive/10 border border-destructive/20 rounded-tr-sm"
+                msg.speaker === "other" ? "glass-card rounded-tl-sm"
+                  : msg.correct ? "bg-primary/10 border border-primary/20 rounded-tr-sm"
+                  : "bg-destructive/10 border border-destructive/20 rounded-tr-sm"
               )}>
                 <p className="text-foreground">{msg.text}</p>
               </div>
@@ -615,7 +673,6 @@ const TelefonTrainer = ({ onBack }: Props) => {
         </AnimatePresence>
       </div>
 
-      {/* Options */}
       {currentYouLine?.options && selectedOption === null && !showingFeedback && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-2 mb-4">
           <p className="text-xs text-muted-foreground text-center mb-2">
@@ -630,7 +687,6 @@ const TelefonTrainer = ({ onBack }: Props) => {
         </motion.div>
       )}
 
-      {/* Feedback */}
       {showingFeedback && currentYouLine?.options && selectedOption !== null && (
         <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
           <div className={cn("glass-card p-3 text-sm",
