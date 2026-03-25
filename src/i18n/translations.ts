@@ -44,6 +44,7 @@ const translations = {
   vocabSublabel: { ru: "Словарный запас", uk: "Словниковий запас" },
   grammarSublabel: { ru: "Грамматика", uk: "Граматика" },
   readingSublabel: { ru: "Чтение", uk: "Читання" },
+  writingSublabel: { ru: "Письмо", uk: "Письмо" },
 
   // Flashcard
   learned: { ru: "выучено", uk: "вивчено" },
@@ -231,6 +232,8 @@ const translations = {
   listenAnswer: { ru: "Правильный ответ", uk: "Правильна відповідь" },
   playbackSpeed: { ru: "Скорость", uk: "Швидкість" },
   readAloud: { ru: "Прослушать", uk: "Прослухати" },
+  duelsPlayed: { ru: "Дуэлей", uk: "Дуелей" },
+  duelsWon: { ru: "Побед", uk: "Перемог" },
 
   // Levels
   levelC1: { ru: "Продвинутый", uk: "Просунутий" },

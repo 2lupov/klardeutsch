@@ -18,6 +18,8 @@ const COLORS = [
   "hsl(45, 92%, 52%)",   // primary/yellow
   "hsl(142, 76%, 36%)",  // success/green
   "hsl(220, 25%, 40%)",  // muted blue
+  "hsl(280, 60%, 50%)",  // purple for listening
+  "hsl(15, 80%, 50%)",   // orange for writing
 ];
 
 const Statistics = () => {
@@ -27,19 +29,31 @@ const Statistics = () => {
   const [progress, setProgress] = useState<ProgressRow[]>([]);
   const [savedCount, setSavedCount] = useState(0);
   const [customCount, setCustomCount] = useState(0);
+  const [totalXp, setTotalXp] = useState(0);
+  const [coinBalance, setCoinBalance] = useState(0);
+  const [duelsPlayed, setDuelsPlayed] = useState(0);
+  const [duelsWon, setDuelsWon] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
     const load = async () => {
-      const [{ data: prog }, { count: saved }, { count: custom }] = await Promise.all([
+      const [{ data: prog }, { count: saved }, { count: custom }, xpRes, coinRes, duelRes] = await Promise.all([
         supabase.from("user_progress").select("level, category, score, completed, updated_at").eq("user_id", user.id),
         supabase.from("saved_words").select("*", { count: "exact", head: true }).eq("user_id", user.id),
         supabase.from("custom_words").select("*", { count: "exact", head: true }).eq("user_id", user.id),
+        supabase.from("user_xp").select("total_xp").eq("user_id", user.id).maybeSingle(),
+        supabase.from("user_coins").select("balance").eq("user_id", user.id).maybeSingle(),
+        supabase.rpc("get_user_duel_stats", { p_user_id: user.id }),
       ]);
       setProgress(prog ?? []);
       setSavedCount(saved ?? 0);
       setCustomCount(custom ?? 0);
+      setTotalXp(xpRes.data?.total_xp ?? 0);
+      setCoinBalance(coinRes.data?.balance ?? 0);
+      const duelData = (duelRes.data as any)?.[0];
+      setDuelsPlayed(duelData?.duels_played ?? 0);
+      setDuelsWon(duelData?.duels_won ?? 0);
       setLoading(false);
     };
     load();
@@ -66,7 +80,7 @@ const Statistics = () => {
 
   // Category breakdown
   const categoryData = useMemo(() => {
-    const cats = { vocabulary: 0, grammar: 0, reading: 0 };
+    const cats = { vocabulary: 0, grammar: 0, reading: 0, listening: 0, writing: 0 };
     progress.filter((p) => p.completed).forEach((p) => {
       if (p.category in cats) cats[p.category as keyof typeof cats]++;
     });
@@ -74,16 +88,18 @@ const Statistics = () => {
       { name: t("vocabSublabel"), value: cats.vocabulary },
       { name: t("grammarSublabel"), value: cats.grammar },
       { name: t("readingSublabel"), value: cats.reading },
+      { name: t("listeningSublabel"), value: cats.listening },
+      { name: t("writingSublabel"), value: cats.writing },
     ].filter((c) => c.value > 0);
   }, [progress, t]);
 
   // Level progress
   const levelData = useMemo(() => {
-    const levels = ["A1", "A2", "B1", "B2"];
+    const levels = ["A1", "A2", "B1", "B2", "C1"];
     return levels.map((lvl) => {
-      const total = 3; // 3 categories per level
-      const completed = progress.filter((p) => p.level === lvl && p.completed).length;
-      return { level: lvl, completed: Math.min(completed, total), total };
+      const total = 5; // 5 categories per level (vocab, grammar, reading, listening, writing)
+      const done = new Set(progress.filter((p) => p.level === lvl && p.completed).map(p => p.category));
+      return { level: lvl, completed: Math.min(done.size, total), total };
     });
   }, [progress]);
 
@@ -118,10 +134,16 @@ const Statistics = () => {
       </div>
 
       {/* Summary cards */}
-      <div className="grid grid-cols-4 gap-2 mb-6">
+      <div className="grid grid-cols-3 gap-2 mb-3">
         <MiniStat value={totalCompleted} label={t("lessonsCompleted")} />
         <MiniStat value={savedCount + customCount} label={t("wordsTotal")} />
         <MiniStat value={streak} label={t("streakDays")} />
+      </div>
+      <div className="grid grid-cols-4 gap-2 mb-6">
+        <MiniStat value={totalXp} label="XP" />
+        <MiniStat value={coinBalance} label="🪙" />
+        <MiniStat value={duelsPlayed} label={t("duelsPlayed")} />
+        <MiniStat value={duelsWon} label={t("duelsWon")} />
         <MiniStat
           value={
             progress.filter((p) => p.category === "grammar" && p.score !== null).length > 0
