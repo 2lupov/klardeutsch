@@ -81,6 +81,78 @@ const scenarios: PhoneScenario[] = [
       ]},
     ],
   },
+  {
+    title: "Kind in der Schule anmelden", descRu: "Запись ребёнка в школу", descUk: "Запис дитини до школи",
+    emoji: "🎒", callerName: "Sekretariat Grundschule",
+    lines: [
+      { speaker: "other", text: "Grundschule am Park, Sekretariat. Guten Tag!" },
+      { speaker: "you", text: "", options: [
+        { text: "Guten Tag, ich möchte mein Kind an Ihrer Schule anmelden.", correct: true, feedbackRu: "Отлично! Правильная формулировка для записи.", feedbackUk: "Чудово! Правильне формулювання для запису." },
+        { text: "Hallo, mein Kind braucht Schule.", correct: false, feedbackRu: "Грамматически неверно. Лучше: «Ich möchte mein Kind anmelden.»", feedbackUk: "Граматично невірно. Краще: «Ich möchte mein Kind anmelden.»" },
+        { text: "Nehmen Sie noch Kinder?", correct: false, feedbackRu: "Невежливо для первого звонка.", feedbackUk: "Неввічливо для першого дзвінка." },
+      ]},
+      { speaker: "other", text: "Gerne! Wie alt ist Ihr Kind und in welche Klasse soll es gehen?" },
+      { speaker: "you", text: "", options: [
+        { text: "Mein Sohn ist sechs Jahre alt und kommt in die erste Klasse.", correct: true, feedbackRu: "Идеально! Полная и точная информация.", feedbackUk: "Ідеально! Повна і точна інформація." },
+        { text: "Meine Tochter ist acht und geht in die dritte Klasse.", correct: true, feedbackRu: "Тоже правильно.", feedbackUk: "Теж правильно." },
+        { text: "Sechs. Erste.", correct: false, feedbackRu: "Слишком коротко, невежливо по телефону.", feedbackUk: "Занадто коротко, неввічливо по телефону." },
+      ]},
+      { speaker: "other", text: "Gut. Können Sie am Montag um 9 Uhr mit den Unterlagen vorbeikommen?" },
+      { speaker: "you", text: "", options: [
+        { text: "Ja, das passt. Welche Unterlagen brauche ich?", correct: true, feedbackRu: "Отлично! Важно спросить о документах.", feedbackUk: "Чудово! Важливо запитати про документи." },
+        { text: "Geht es auch nachmittags? Ich arbeite vormittags.", correct: true, feedbackRu: "Хорошая альтернатива с объяснением.", feedbackUk: "Гарна альтернатива з поясненням." },
+        { text: "Nein, keine Zeit.", correct: false, feedbackRu: "Грубо. Лучше предложить другое время.", feedbackUk: "Грубо. Краще запропонувати інший час." },
+      ]},
+    ],
+  },
+  {
+    title: "Handwerker rufen", descRu: "Вызов мастера на дом", descUk: "Виклик майстра додому",
+    emoji: "🔧", callerName: "Müller Sanitär & Heizung",
+    lines: [
+      { speaker: "other", text: "Müller Sanitär und Heizung, guten Tag. Was kann ich für Sie tun?" },
+      { speaker: "you", text: "", options: [
+        { text: "Guten Tag, ich habe ein Problem mit meiner Heizung. Sie funktioniert nicht mehr.", correct: true, feedbackRu: "Идеально! Чётко описана проблема.", feedbackUk: "Ідеально! Чітко описана проблема." },
+        { text: "Hallo, meine Heizung ist kaputt. Können Sie jemanden schicken?", correct: true, feedbackRu: "Тоже хорошо — прямо и вежливо.", feedbackUk: "Теж добре — прямо і ввічливо." },
+        { text: "Heizung kaputt, kommen Sie!", correct: false, feedbackRu: "Слишком резко, без приветствия.", feedbackUk: "Занадто різко, без привітання." },
+      ]},
+      { speaker: "other", text: "Das ist natürlich unangenehm. Seit wann haben Sie das Problem?" },
+      { speaker: "you", text: "", options: [
+        { text: "Seit gestern Abend. Die Heizung wird gar nicht mehr warm.", correct: true, feedbackRu: "Отлично! Конкретная информация помогает мастеру.", feedbackUk: "Чудово! Конкретна інформація допомагає майстру." },
+        { text: "Seit ein paar Tagen, aber jetzt ist es ganz kalt.", correct: true, feedbackRu: "Хорошо описано.", feedbackUk: "Добре описано." },
+        { text: "Weiß ich nicht genau.", correct: false, feedbackRu: "Постарайтесь вспомнить — это важно для диагностики.", feedbackUk: "Спробуйте згадати — це важливо для діагностики." },
+      ]},
+      { speaker: "other", text: "Wir könnten morgen Vormittag zwischen 8 und 12 Uhr kommen. Passt Ihnen das?" },
+      { speaker: "you", text: "", options: [
+        { text: "Ja, das passt mir. Wie viel kostet der Einsatz ungefähr?", correct: true, feedbackRu: "Правильно! Всегда спрашивайте о стоимости заранее.", feedbackUk: "Правильно! Завжди питайте про вартість заздалегідь." },
+        { text: "Geht es auch am Nachmittag? Vormittags bin ich nicht da.", correct: true, feedbackRu: "Хорошо — предлагаете альтернативу.", feedbackUk: "Добре — пропонуєте альтернативу." },
+        { text: "Warum nicht heute?!", correct: false, feedbackRu: "Невежливо. Лучше: «Wäre es möglich, noch heute zu kommen?»", feedbackUk: "Неввічливо. Краще: «Wäre es möglich, noch heute zu kommen?»" },
+      ]},
+    ],
+  },
+  {
+    title: "Lieferung bestellen", descRu: "Заказ доставки еды", descUk: "Замовлення доставки їжі",
+    emoji: "🍕", callerName: "Pizzeria Roma",
+    lines: [
+      { speaker: "other", text: "Pizzeria Roma, guten Abend! Möchten Sie bestellen?" },
+      { speaker: "you", text: "", options: [
+        { text: "Guten Abend! Ja, ich möchte gerne etwas zur Lieferung bestellen.", correct: true, feedbackRu: "Идеально! Вежливое начало заказа.", feedbackUk: "Ідеально! Ввічливий початок замовлення." },
+        { text: "Hallo, kann ich bei Ihnen etwas bestellen und liefern lassen?", correct: true, feedbackRu: "Тоже правильно.", feedbackUk: "Теж правильно." },
+        { text: "Pizza! Schnell!", correct: false, feedbackRu: "Грубо и невежливо.", feedbackUk: "Грубо і неввічливо." },
+      ]},
+      { speaker: "other", text: "Natürlich! Was darf es sein?" },
+      { speaker: "you", text: "", options: [
+        { text: "Ich hätte gerne eine Pizza Margherita und eine Cola, bitte.", correct: true, feedbackRu: "Отлично! «Ich hätte gerne» — идеальная формулировка для заказа.", feedbackUk: "Чудово! «Ich hätte gerne» — ідеальне формулювання для замовлення." },
+        { text: "Eine große Pizza Salami und einen Salat dazu.", correct: true, feedbackRu: "Хорошо и конкретно.", feedbackUk: "Добре і конкретно." },
+        { text: "Geben Sie mir irgendwas.", correct: false, feedbackRu: "Нужно конкретно назвать, что хотите.", feedbackUk: "Потрібно конкретно назвати, що хочете." },
+      ]},
+      { speaker: "other", text: "Gerne! Wie ist Ihre Adresse?" },
+      { speaker: "you", text: "", options: [
+        { text: "Berliner Straße 15, dritter Stock, bei Müller.", correct: true, feedbackRu: "Идеально! Улица, номер, этаж и фамилия на звонке.", feedbackUk: "Ідеально! Вулиця, номер, поверх і прізвище на дзвінку." },
+        { text: "Hauptstraße 7. Soll ich den Namen auf der Klingel sagen?", correct: true, feedbackRu: "Хорошо! Предлагаете дополнительную информацию.", feedbackUk: "Добре! Пропонуєте додаткову інформацію." },
+        { text: "Kommen Sie einfach, ich warte draußen.", correct: false, feedbackRu: "Нужно дать точный адрес.", feedbackUk: "Потрібно дати точну адресу." },
+      ]},
+    ],
+  },
 ];
 
 const aiTopics = [
@@ -90,6 +162,9 @@ const aiTopics = [
   { id: "behoerde", emoji: "🏛", titleDe: "Amt anrufen", titleRu: "Звонок в ведомство", titleUk: "Дзвінок у відомство" },
   { id: "restaurant", emoji: "🍽", titleDe: "Tisch reservieren", titleRu: "Бронь столика", titleUk: "Бронювання столика" },
   { id: "versicherung", emoji: "🛡", titleDe: "Versicherung", titleRu: "Страховка", titleUk: "Страхування" },
+  { id: "schule", emoji: "🎒", titleDe: "Schulanmeldung", titleRu: "Запись в школу", titleUk: "Запис до школи" },
+  { id: "handwerker", emoji: "🔧", titleDe: "Handwerker rufen", titleRu: "Вызов мастера", titleUk: "Виклик майстра" },
+  { id: "lieferung", emoji: "🍕", titleDe: "Lieferung bestellen", titleRu: "Заказ доставки", titleUk: "Замовлення доставки" },
 ];
 
 interface Props { onBack: () => void; }
