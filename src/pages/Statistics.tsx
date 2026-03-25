@@ -18,6 +18,8 @@ const COLORS = [
   "hsl(45, 92%, 52%)",   // primary/yellow
   "hsl(142, 76%, 36%)",  // success/green
   "hsl(220, 25%, 40%)",  // muted blue
+  "hsl(280, 60%, 50%)",  // purple for listening
+  "hsl(15, 80%, 50%)",   // orange for writing
 ];
 
 const Statistics = () => {
