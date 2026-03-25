@@ -37,3 +37,5 @@ project_id = "jqqsszwbbxvevebmebfm"
     verify_jwt = false
   [functions.generate-lesson-section]
     verify_jwt = false
+  [functions.phone-conversation]
+    verify_jwt = false
