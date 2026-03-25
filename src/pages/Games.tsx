@@ -82,13 +82,13 @@ const Games = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-display text-sm font-bold text-foreground group-hover:text-primary transition-colors flex items-center gap-2">
-                  {t(game.titleKey)}
-                  {(game as any).isNew && (
+                  {t(game.titleKey as any)}
+                  {game.isNew && (
                     <span className="px-1.5 py-0.5 rounded-full bg-primary/15 text-primary text-[9px] font-semibold uppercase">new</span>
                   )}
                 </h3>
                 <p className="text-[11px] text-muted-foreground mt-0.5">
-                  {t(game.descKey)}
+                  {t(game.descKey as any)}
                 </p>
               </div>
               <Icon className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
