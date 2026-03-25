@@ -229,6 +229,8 @@ const translations = {
   listenCorrect: { ru: "Правильно! 🎉", uk: "Правильно! 🎉" },
   listenWrong: { ru: "Неправильно", uk: "Неправильно" },
   listenAnswer: { ru: "Правильный ответ", uk: "Правильна відповідь" },
+  playbackSpeed: { ru: "Скорость", uk: "Швидкість" },
+  readAloud: { ru: "Прослушать", uk: "Прослухати" },
 
   // Levels
   levelC1: { ru: "Продвинутый", uk: "Просунутий" },
