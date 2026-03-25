@@ -78,7 +78,7 @@ const Statistics = () => {
 
   // Category breakdown
   const categoryData = useMemo(() => {
-    const cats = { vocabulary: 0, grammar: 0, reading: 0 };
+    const cats = { vocabulary: 0, grammar: 0, reading: 0, listening: 0, writing: 0 };
     progress.filter((p) => p.completed).forEach((p) => {
       if (p.category in cats) cats[p.category as keyof typeof cats]++;
     });
@@ -86,6 +86,8 @@ const Statistics = () => {
       { name: t("vocabSublabel"), value: cats.vocabulary },
       { name: t("grammarSublabel"), value: cats.grammar },
       { name: t("readingSublabel"), value: cats.reading },
+      { name: t("listeningSublabel"), value: cats.listening },
+      { name: t("writingSublabel"), value: cats.writing },
     ].filter((c) => c.value > 0);
   }, [progress, t]);
 
