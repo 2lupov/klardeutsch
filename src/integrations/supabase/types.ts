@@ -1074,13 +1074,17 @@ export type Database = {
           avatar_url: string
           coin_balance: number
           display_name: string
+          duels_played: number
+          duels_won: number
           email: string
           email_confirmed: boolean
           last_active: string
+          lessons_completed: number
           roles: string[]
           total_xp: number
           user_created_at: string
           user_id: string
+          words_learned: number
         }[]
       }
       get_leaderboard: {
