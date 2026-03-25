@@ -95,11 +95,11 @@ const Statistics = () => {
 
   // Level progress
   const levelData = useMemo(() => {
-    const levels = ["A1", "A2", "B1", "B2"];
+    const levels = ["A1", "A2", "B1", "B2", "C1"];
     return levels.map((lvl) => {
-      const total = 3; // 3 categories per level
-      const completed = progress.filter((p) => p.level === lvl && p.completed).length;
-      return { level: lvl, completed: Math.min(completed, total), total };
+      const total = 5; // 5 categories per level (vocab, grammar, reading, listening, writing)
+      const done = new Set(progress.filter((p) => p.level === lvl && p.completed).map(p => p.category));
+      return { level: lvl, completed: Math.min(done.size, total), total };
     });
   }, [progress]);
 
