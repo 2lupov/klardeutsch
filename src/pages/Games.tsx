@@ -44,10 +44,10 @@ const Games = () => {
   const games = [
     { id: "article-sorter" as const, emoji: "♻️", icon: Recycle, titleKey: "gameArticleSorterTitle", descKey: "gameArticleSorterDesc" },
     { id: "cafe" as const, emoji: "☕", icon: Coffee, titleKey: "gameCafeTitle", descKey: "gameCafeDesc" },
-    { id: "satzpuzzle" as const, emoji: "🧩", icon: Puzzle, titleKey: "gameSatzpuzzleTitle" as any, descKey: "gameSatzpuzzleDesc" as any, isNew: true },
-    { id: "formular" as const, emoji: "📬", icon: FileText, titleKey: "gameFormularTitle" as any, descKey: "gameFormularDesc" as any, isNew: true },
-    { id: "redewendungen" as const, emoji: "🔗", icon: Link2, titleKey: "gameRedewendungenTitle" as any, descKey: "gameRedewendungenDesc" as any, isNew: true },
-    { id: "telefon" as const, emoji: "📞", icon: Phone, titleKey: "gameTelefonTitle" as any, descKey: "gameTelefonDesc" as any, isNew: true },
+    { id: "satzpuzzle" as const, emoji: "🧩", icon: Puzzle, titleKey: "gameSatzpuzzleTitle", descKey: "gameSatzpuzzleDesc", isNew: true },
+    { id: "formular" as const, emoji: "📬", icon: FileText, titleKey: "gameFormularTitle", descKey: "gameFormularDesc", isNew: true },
+    { id: "redewendungen" as const, emoji: "🔗", icon: Link2, titleKey: "gameRedewendungenTitle", descKey: "gameRedewendungenDesc", isNew: true },
+    { id: "telefon" as const, emoji: "📞", icon: Phone, titleKey: "gameTelefonTitle", descKey: "gameTelefonDesc", isNew: true },
     { id: "challenges" as const, emoji: "⚔️", icon: Swords, titleKey: "gameDuelsTitle", descKey: "gameDuelsDesc" },
     { id: "pronunciation" as const, emoji: "🗣", icon: Mic, titleKey: "gamePronunciationTitle", descKey: "gamePronunciationDesc" },
     { id: "leben" as const, emoji: "🏛", icon: Building2, titleKey: "gameLebenTitle", descKey: "gameLebenDesc" },
@@ -82,13 +82,13 @@ const Games = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-display text-sm font-bold text-foreground group-hover:text-primary transition-colors flex items-center gap-2">
-                  {t(game.titleKey)}
-                  {(game as any).isNew && (
+                  {t(game.titleKey as any)}
+                  {game.isNew && (
                     <span className="px-1.5 py-0.5 rounded-full bg-primary/15 text-primary text-[9px] font-semibold uppercase">new</span>
                   )}
                 </h3>
                 <p className="text-[11px] text-muted-foreground mt-0.5">
-                  {t(game.descKey)}
+                  {t(game.descKey as any)}
                 </p>
               </div>
               <Icon className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />

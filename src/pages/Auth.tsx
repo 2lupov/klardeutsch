@@ -123,7 +123,6 @@ const Auth = () => {
     }, 500);
     return () => clearTimeout(timer);
   }, [referralCode]);
-  const [googleLoading, setGoogleLoading] = useState(false);
   const navigate = useNavigate();
   const logoRef = useRef<HTMLDivElement>(null);
   const { user, loading: authLoading } = useAuth();

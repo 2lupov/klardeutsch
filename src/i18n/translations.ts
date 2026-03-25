@@ -4,6 +4,7 @@ const translations = {
   // Common
   back: { ru: "Назад", uk: "Повернутися" },
   loading: { ru: "Загрузка...", uk: "Завантаження..." },
+  contentComingSoon: { ru: "Контент для этого уровня пока готовится", uk: "Контент для цього рівня ще готується" },
   signOut: { ru: "Выйти", uk: "Вийти" },
 
   // Auth
