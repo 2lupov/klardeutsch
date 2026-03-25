@@ -134,10 +134,16 @@ const Statistics = () => {
       </div>
 
       {/* Summary cards */}
-      <div className="grid grid-cols-4 gap-2 mb-6">
+      <div className="grid grid-cols-3 gap-2 mb-3">
         <MiniStat value={totalCompleted} label={t("lessonsCompleted")} />
         <MiniStat value={savedCount + customCount} label={t("wordsTotal")} />
         <MiniStat value={streak} label={t("streakDays")} />
+      </div>
+      <div className="grid grid-cols-4 gap-2 mb-6">
+        <MiniStat value={totalXp} label="XP" />
+        <MiniStat value={coinBalance} label="🪙" />
+        <MiniStat value={duelsPlayed} label={t("duelsPlayed")} />
+        <MiniStat value={duelsWon} label={t("duelsWon")} />
         <MiniStat
           value={
             progress.filter((p) => p.category === "grammar" && p.score !== null).length > 0
