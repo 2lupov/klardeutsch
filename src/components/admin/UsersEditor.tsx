@@ -538,7 +538,7 @@ const UsersEditor = () => {
               )}
             </div>
 
-            <div className="flex items-center gap-4 text-xs text-muted-foreground pl-7">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground pl-7">
               <span className="flex items-center gap-1">
                 <Star className="w-3 h-3 text-primary" />
                 <button
@@ -596,9 +596,28 @@ const UsersEditor = () => {
                   −Снять
                 </button>
               </span>
-              <span className="text-[10px]">
-                {user.user_created_at ? new Date(user.user_created_at).toLocaleDateString("ru") : "—"}
+            </div>
+
+            {/* Learning stats row */}
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pl-7 mt-1">
+              <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                📚 <span className="font-semibold text-foreground">{user.lessons_completed}</span> уроков
               </span>
+              <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                📝 <span className="font-semibold text-foreground">{user.words_learned}</span> слов
+              </span>
+              <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                ⚔️ <span className="font-semibold text-foreground">{user.duels_played}</span> дуэлей
+                {user.duels_won > 0 && <span className="text-primary font-bold">({user.duels_won} W)</span>}
+              </span>
+              <span className="text-[10px] text-muted-foreground">
+                📅 {user.user_created_at ? new Date(user.user_created_at).toLocaleDateString("ru") : "—"}
+              </span>
+              {user.last_active && (
+                <span className="text-[10px] text-muted-foreground">
+                  🕐 {new Date(user.last_active).toLocaleDateString("ru")}
+                </span>
+              )}
             </div>
 
             <div className="flex justify-end gap-1.5 flex-wrap">

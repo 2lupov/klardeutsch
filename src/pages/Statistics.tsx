@@ -27,19 +27,31 @@ const Statistics = () => {
   const [progress, setProgress] = useState<ProgressRow[]>([]);
   const [savedCount, setSavedCount] = useState(0);
   const [customCount, setCustomCount] = useState(0);
+  const [totalXp, setTotalXp] = useState(0);
+  const [coinBalance, setCoinBalance] = useState(0);
+  const [duelsPlayed, setDuelsPlayed] = useState(0);
+  const [duelsWon, setDuelsWon] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
     const load = async () => {
-      const [{ data: prog }, { count: saved }, { count: custom }] = await Promise.all([
+      const [{ data: prog }, { count: saved }, { count: custom }, xpRes, coinRes, duelRes] = await Promise.all([
         supabase.from("user_progress").select("level, category, score, completed, updated_at").eq("user_id", user.id),
         supabase.from("saved_words").select("*", { count: "exact", head: true }).eq("user_id", user.id),
         supabase.from("custom_words").select("*", { count: "exact", head: true }).eq("user_id", user.id),
+        supabase.from("user_xp").select("total_xp").eq("user_id", user.id).maybeSingle(),
+        supabase.from("user_coins").select("balance").eq("user_id", user.id).maybeSingle(),
+        supabase.rpc("get_user_duel_stats", { p_user_id: user.id }),
       ]);
       setProgress(prog ?? []);
       setSavedCount(saved ?? 0);
       setCustomCount(custom ?? 0);
+      setTotalXp(xpRes.data?.total_xp ?? 0);
+      setCoinBalance(coinRes.data?.balance ?? 0);
+      const duelData = (duelRes.data as any)?.[0];
+      setDuelsPlayed(duelData?.duels_played ?? 0);
+      setDuelsWon(duelData?.duels_won ?? 0);
       setLoading(false);
     };
     load();
