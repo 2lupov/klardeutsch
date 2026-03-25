@@ -232,6 +232,8 @@ const translations = {
   listenAnswer: { ru: "Правильный ответ", uk: "Правильна відповідь" },
   playbackSpeed: { ru: "Скорость", uk: "Швидкість" },
   readAloud: { ru: "Прослушать", uk: "Прослухати" },
+  duelsPlayed: { ru: "Дуэлей", uk: "Дуелей" },
+  duelsWon: { ru: "Побед", uk: "Перемог" },
 
   // Levels
   levelC1: { ru: "Продвинутый", uk: "Просунутий" },
