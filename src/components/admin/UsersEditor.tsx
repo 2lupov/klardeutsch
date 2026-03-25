@@ -521,9 +521,17 @@ const UsersEditor = () => {
                 </label>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-foreground truncate">
-                  {user.display_name || "Без имени"}
-                </p>
+                <div className="flex items-center gap-1.5">
+                  <p className="text-sm font-semibold text-foreground truncate">
+                    {user.display_name || "Без имени"}
+                  </p>
+                  {(() => {
+                    const isOnline = user.last_active && (Date.now() - new Date(user.last_active).getTime()) < 5 * 60 * 1000;
+                    return (
+                      <span className={`shrink-0 w-2 h-2 rounded-full ${isOnline ? "bg-green-500 shadow-[0_0_4px_hsl(142,76%,36%)]" : "bg-muted-foreground/30"}`} title={isOnline ? "Онлайн" : user.last_active ? `Был(а) ${new Date(user.last_active).toLocaleString("ru")}` : "Нет данных"} />
+                    );
+                  })()}
+                </div>
                 <div className="flex items-center gap-1.5">
                   <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                   {user.email_confirmed ? (
