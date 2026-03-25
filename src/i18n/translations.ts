@@ -44,6 +44,7 @@ const translations = {
   vocabSublabel: { ru: "Словарный запас", uk: "Словниковий запас" },
   grammarSublabel: { ru: "Грамматика", uk: "Граматика" },
   readingSublabel: { ru: "Чтение", uk: "Читання" },
+  writingSublabel: { ru: "Письмо", uk: "Письмо" },
 
   // Flashcard
   learned: { ru: "выучено", uk: "вивчено" },
