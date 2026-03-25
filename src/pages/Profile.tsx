@@ -5,7 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { usePlatform } from "@/hooks/usePlatform";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { BookOpen, Brain, Flame, RotateCcw, TrendingUp, Calendar, LogOut, Camera, Pencil, Check, X, Coins, Trophy, ArrowLeft, ChevronRight, Award, Bell, Send, Unlink2, Users, WifiOff, Trash2, HardDrive, Globe, Lock } from "lucide-react";
+import { BookOpen, Brain, Flame, RotateCcw, TrendingUp, Calendar, LogOut, Camera, Pencil, Check, X, Coins, Trophy, ArrowLeft, ChevronRight, Award, Bell, Send, Unlink2, Users, WifiOff, Trash2, HardDrive, Globe, Lock, ShoppingBag, ExternalLink } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useCoins } from "@/hooks/useCoins";
 import Achievements, { type AchievementStats } from "@/components/Achievements";
@@ -755,6 +755,39 @@ const Profile = () => {
           label="Офлайн-режим"
           onClick={() => setScreen("offline")}
         />
+        {/* Shop banner for mobile */}
+        {isMobile && (
+          <div className="glass-card p-4 flex items-center gap-3 border-primary/20 bg-primary/5">
+            <ShoppingBag className="w-5 h-5 text-primary flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-display font-semibold text-foreground">
+                {lang === "uk" ? "Магазин курсів" : "Магазин курсов"}
+              </p>
+              <p className="text-[11px] text-muted-foreground leading-tight">
+                {lang === "uk" ? "Додаткові курси та матеріали для вивчення німецької" : "Дополнительные курсы и материалы для изучения немецкого"}
+              </p>
+            </div>
+            {isTelegram ? (
+              <a
+                href="https://klardeutsch.lovable.app/shop"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-display font-medium hover:bg-primary/90 transition-colors flex-shrink-0"
+              >
+                {lang === "uk" ? "Відкрити" : "Открыть"}
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            ) : (
+              <button
+                onClick={() => navigate("/shop")}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-display font-medium hover:bg-primary/90 transition-colors flex-shrink-0"
+              >
+                {lang === "uk" ? "Відкрити" : "Открыть"}
+                <ChevronRight className="w-3 h-3" />
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Info links (mobile) */}
