@@ -15,6 +15,10 @@ interface AdminUser {
   user_created_at: string;
   last_active: string | null;
   email_confirmed: boolean;
+  words_learned: number;
+  lessons_completed: number;
+  duels_played: number;
+  duels_won: number;
 }
 
 interface DemoUser {
