@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { ReadingText } from "@/data/lessons";
 import Quiz from "./Quiz";
-import { BookOpen } from "lucide-react";
+import { BookOpen, Volume2, Pause } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useListeningAudio } from "@/contexts/ListeningAudioContext";
 
 interface ReadingExerciseProps {
   readings: ReadingText[];
@@ -14,8 +15,13 @@ const ReadingExercise = ({ readings, onComplete, level = "A1" }: ReadingExercise
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showQuestions, setShowQuestions] = useState(false);
   const { t } = useLanguage();
+  const { playing, loading, play: playAudio } = useListeningAudio();
 
   const reading = readings[currentIndex];
+
+  const handlePlayReading = () => {
+    playAudio(reading.text, reading.title);
+  };
 
   if (showQuestions) {
     return (
@@ -38,9 +44,25 @@ const ReadingExercise = ({ readings, onComplete, level = "A1" }: ReadingExercise
   return (
     <div className="flex flex-col gap-6 animate-slide-up">
       <div className="glass-card p-6">
-        <div className="flex items-center gap-3 mb-4">
-          <BookOpen className="w-5 h-5 text-primary" />
-          <h3 className="text-lg font-display font-semibold">{reading.title}</h3>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <BookOpen className="w-5 h-5 text-primary" />
+            <h3 className="text-lg font-display font-semibold">{reading.title}</h3>
+          </div>
+          <button
+            onClick={handlePlayReading}
+            disabled={loading}
+            className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary hover:bg-primary/20 transition-colors"
+            title={t("readAloud")}
+          >
+            {loading ? (
+              <span className="animate-pulse text-xs">...</span>
+            ) : playing ? (
+              <Pause className="w-4 h-4" />
+            ) : (
+              <Volume2 className="w-4 h-4" />
+            )}
+          </button>
         </div>
         <p className="text-foreground/90 leading-relaxed text-base">{reading.text}</p>
       </div>
