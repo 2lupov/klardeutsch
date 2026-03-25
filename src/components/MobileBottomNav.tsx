@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, User, BookOpen, ShoppingBag, MessageCircle } from "lucide-react";
+import { Home, User, BookOpen, Gamepad2, MessageCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const MobileBottomNav = () => {
@@ -9,8 +9,8 @@ const MobileBottomNav = () => {
   const items = [
     { to: "/", icon: Home, label: t("navHome") },
     { to: "/profile", icon: User, label: t("myProfile") },
+    { to: "/games", icon: Gamepad2, label: t("gamesTitle") },
     { to: "/dictionary", icon: BookOpen, label: t("navDictionary") },
-    { to: "/shop", icon: ShoppingBag, label: t("navShop") },
     { to: "/dialogues", icon: MessageCircle, label: t("navDialogues") },
   ];
 
