@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Recycle, Coffee, Swords, Mic, ArrowLeft, Building2, Hammer } from "lucide-react";
+import { Recycle, Coffee, Swords, Mic, ArrowLeft, Building2, Hammer, Puzzle, FileText, Link2, Phone } from "lucide-react";
 import { usePlatform } from "@/hooks/usePlatform";
 import { useLanguage } from "@/contexts/LanguageContext";
 import ArticleSorter from "@/components/games/ArticleSorter";
@@ -8,9 +8,13 @@ import CafeBestellung from "@/components/games/CafeBestellung";
 import PronunciationTrainer from "@/components/games/PronunciationTrainer";
 import LebenInDeutschland from "@/components/games/LebenInDeutschland";
 import Wortbaustelle from "@/components/games/Wortbaustelle";
+import Satzpuzzle from "@/components/games/Satzpuzzle";
+import FormularHeld from "@/components/games/FormularHeld";
+import RedewendungenMatch from "@/components/games/RedewendungenMatch";
+import TelefonTrainer from "@/components/games/TelefonTrainer";
 import Challenges from "@/pages/Challenges";
 
-type GameScreen = "list" | "article-sorter" | "cafe" | "challenges" | "pronunciation" | "leben" | "wortbaustelle";
+type GameScreen = "list" | "article-sorter" | "cafe" | "challenges" | "pronunciation" | "leben" | "wortbaustelle" | "satzpuzzle" | "formular" | "redewendungen" | "telefon";
 
 const Games = () => {
   const [screen, setScreen] = useState<GameScreen>("list");
@@ -19,7 +23,6 @@ const Games = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Handle navigation from UserProfileDialog
   useEffect(() => {
     const state = location.state as any;
     if (state?.screen === "challenges") {
@@ -27,29 +30,29 @@ const Games = () => {
     }
   }, [location.state]);
 
-  if (screen === "article-sorter") {
-    return <ArticleSorter onBack={() => setScreen("list")} />;
-  }
+  if (screen === "article-sorter") return <ArticleSorter onBack={() => setScreen("list")} />;
+  if (screen === "cafe") return <CafeBestellung onBack={() => setScreen("list")} />;
+  if (screen === "challenges") return <Challenges onBack={() => setScreen("list")} />;
+  if (screen === "pronunciation") return <PronunciationTrainer onBack={() => setScreen("list")} />;
+  if (screen === "leben") return <LebenInDeutschland onBack={() => setScreen("list")} />;
+  if (screen === "wortbaustelle") return <Wortbaustelle onBack={() => setScreen("list")} />;
+  if (screen === "satzpuzzle") return <Satzpuzzle onBack={() => setScreen("list")} />;
+  if (screen === "formular") return <FormularHeld onBack={() => setScreen("list")} />;
+  if (screen === "redewendungen") return <RedewendungenMatch onBack={() => setScreen("list")} />;
+  if (screen === "telefon") return <TelefonTrainer onBack={() => setScreen("list")} />;
 
-  if (screen === "cafe") {
-    return <CafeBestellung onBack={() => setScreen("list")} />;
-  }
-
-  if (screen === "challenges") {
-    return <Challenges onBack={() => setScreen("list")} />;
-  }
-
-  if (screen === "pronunciation") {
-    return <PronunciationTrainer onBack={() => setScreen("list")} />;
-  }
-
-  if (screen === "leben") {
-    return <LebenInDeutschland onBack={() => setScreen("list")} />;
-  }
-
-  if (screen === "wortbaustelle") {
-    return <Wortbaustelle onBack={() => setScreen("list")} />;
-  }
+  const games = [
+    { id: "article-sorter" as const, emoji: "♻️", icon: Recycle, titleKey: "gameArticleSorterTitle", descKey: "gameArticleSorterDesc" },
+    { id: "cafe" as const, emoji: "☕", icon: Coffee, titleKey: "gameCafeTitle", descKey: "gameCafeDesc" },
+    { id: "satzpuzzle" as const, emoji: "🧩", icon: Puzzle, titleKey: "gameSatzpuzzleTitle" as any, descKey: "gameSatzpuzzleDesc" as any, isNew: true },
+    { id: "formular" as const, emoji: "📬", icon: FileText, titleKey: "gameFormularTitle" as any, descKey: "gameFormularDesc" as any, isNew: true },
+    { id: "redewendungen" as const, emoji: "🔗", icon: Link2, titleKey: "gameRedewendungenTitle" as any, descKey: "gameRedewendungenDesc" as any, isNew: true },
+    { id: "telefon" as const, emoji: "📞", icon: Phone, titleKey: "gameTelefonTitle" as any, descKey: "gameTelefonDesc" as any, isNew: true },
+    { id: "challenges" as const, emoji: "⚔️", icon: Swords, titleKey: "gameDuelsTitle", descKey: "gameDuelsDesc" },
+    { id: "pronunciation" as const, emoji: "🗣", icon: Mic, titleKey: "gamePronunciationTitle", descKey: "gamePronunciationDesc" },
+    { id: "leben" as const, emoji: "🏛", icon: Building2, titleKey: "gameLebenTitle", descKey: "gameLebenDesc" },
+    { id: "wortbaustelle" as const, emoji: "🏗️", icon: Hammer, titleKey: "gameWortbaustelleTitle", descKey: "gameWortbaustelleDesc" },
+  ];
 
   return (
     <div className={`w-full mx-auto px-4 py-6 ${isMobile ? "max-w-md" : "max-w-2xl"}`}>
@@ -66,113 +69,32 @@ const Games = () => {
       <p className="text-sm text-muted-foreground mb-6">{t("gamesSubtitle")}</p>
 
       <div className="space-y-3">
-        <button
-          onClick={() => setScreen("article-sorter")}
-          className="w-full glass-card p-5 flex items-center gap-4 text-left hover:border-primary/30 transition-all group"
-        >
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-yellow-glow/20 flex items-center justify-center text-2xl flex-shrink-0">
-            ♻️
-          </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="font-display text-sm font-bold text-foreground group-hover:text-primary transition-colors">
-              {t("gameArticleSorterTitle")}
-            </h3>
-            <p className="text-[11px] text-muted-foreground mt-0.5">
-              {t("gameArticleSorterDesc")}
-            </p>
-          </div>
-          <Recycle className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
-        </button>
-
-        <button
-          onClick={() => setScreen("cafe")}
-          className="w-full glass-card p-5 flex items-center gap-4 text-left hover:border-primary/30 transition-all group"
-        >
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-muted/30 to-primary/20 flex items-center justify-center text-2xl flex-shrink-0">
-            ☕
-          </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="font-display text-sm font-bold text-foreground group-hover:text-primary transition-colors">
-              {t("gameCafeTitle")}
-            </h3>
-            <p className="text-[11px] text-muted-foreground mt-0.5">
-              {t("gameCafeDesc")}
-            </p>
-          </div>
-          <Coffee className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
-        </button>
-
-        <button
-          onClick={() => setScreen("challenges")}
-          className="w-full glass-card p-5 flex items-center gap-4 text-left hover:border-primary/30 transition-all group"
-        >
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-destructive/20 flex items-center justify-center text-2xl flex-shrink-0">
-            ⚔️
-          </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="font-display text-sm font-bold text-foreground group-hover:text-primary transition-colors">
-              {t("gameDuelsTitle")}
-            </h3>
-            <p className="text-[11px] text-muted-foreground mt-0.5">
-              {t("gameDuelsDesc")}
-            </p>
-          </div>
-          <Swords className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
-        </button>
-
-        <button
-          onClick={() => setScreen("pronunciation")}
-          className="w-full glass-card p-5 flex items-center gap-4 text-left hover:border-primary/30 transition-all group"
-        >
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center text-2xl flex-shrink-0">
-            🗣
-          </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="font-display text-sm font-bold text-foreground group-hover:text-primary transition-colors">
-              {t("gamePronunciationTitle")}
-            </h3>
-            <p className="text-[11px] text-muted-foreground mt-0.5">
-              {t("gamePronunciationDesc")}
-            </p>
-          </div>
-          <Mic className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
-        </button>
-
-        <button
-          onClick={() => setScreen("leben")}
-          className="w-full glass-card p-5 flex items-center gap-4 text-left hover:border-primary/30 transition-all group"
-        >
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-muted/30 flex items-center justify-center text-2xl flex-shrink-0">
-            🏛
-          </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="font-display text-sm font-bold text-foreground group-hover:text-primary transition-colors">
-              {t("gameLebenTitle")}
-            </h3>
-            <p className="text-[11px] text-muted-foreground mt-0.5">
-              {t("gameLebenDesc")}
-            </p>
-          </div>
-          <Building2 className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
-        </button>
-
-        <button
-          onClick={() => setScreen("wortbaustelle")}
-          className="w-full glass-card p-5 flex items-center gap-4 text-left hover:border-primary/30 transition-all group"
-        >
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-yellow-500/20 flex items-center justify-center text-2xl flex-shrink-0">
-            🏗️
-          </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="font-display text-sm font-bold text-foreground group-hover:text-primary transition-colors">
-              {t("gameWortbaustelleTitle")}
-            </h3>
-            <p className="text-[11px] text-muted-foreground mt-0.5">
-              {t("gameWortbaustelleDesc")}
-            </p>
-          </div>
-          <Hammer className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
-        </button>
+        {games.map(game => {
+          const Icon = game.icon;
+          return (
+            <button
+              key={game.id}
+              onClick={() => setScreen(game.id)}
+              className="w-full glass-card p-5 flex items-center gap-4 text-left hover:border-primary/30 transition-all group relative"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-muted/30 flex items-center justify-center text-2xl flex-shrink-0">
+                {game.emoji}
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-display text-sm font-bold text-foreground group-hover:text-primary transition-colors flex items-center gap-2">
+                  {t(game.titleKey)}
+                  {(game as any).isNew && (
+                    <span className="px-1.5 py-0.5 rounded-full bg-primary/15 text-primary text-[9px] font-semibold uppercase">new</span>
+                  )}
+                </h3>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  {t(game.descKey)}
+                </p>
+              </div>
+              <Icon className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
+            </button>
+          );
+        })}
       </div>
     </div>
   );
