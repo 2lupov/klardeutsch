@@ -90,6 +90,7 @@ const App = () => (
             <AppRoutes />
             <ListeningFloatingPlayer />
             <ReportErrorButton />
+            <CookieBanner />
           </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>
