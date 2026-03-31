@@ -17,6 +17,8 @@ interface CohortMessage {
 interface Props {
   courseId: string;
   lang: string;
+  open: boolean;
+  onClose: () => void;
 }
 
 const CohortChat = ({ courseId, lang }: Props) => {
