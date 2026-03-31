@@ -516,6 +516,11 @@ const CommunityChat = () => {
     await supabase.from("community_messages").insert({ user_id: user.id, content: "🎤", audio_url: audioUrl });
   };
 
+  const sendImage = async (imageUrl: string) => {
+    if (!user) return;
+    await supabase.from("community_messages").insert({ user_id: user.id, content: "📷", image_url: imageUrl });
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
