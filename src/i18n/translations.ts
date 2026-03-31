@@ -341,6 +341,23 @@ const translations = {
   dailySummaryTitle: { ru: "Отличный день!", uk: "Чудовий день!" },
   dailySummaryShare: { ru: "Поделиться", uk: "Поділитися" },
   dailySummaryClose: { ru: "Закрыть", uk: "Закрити" },
+
+  // Academy lesson types
+  lessonArticleReadTime: { ru: "~{n} мин чтения", uk: "~{n} хв читання" },
+  lessonArticleCompleted: { ru: "Статья прочитана", uk: "Статтю прочитано" },
+  lessonGrammarFormula: { ru: "Формула", uk: "Формула" },
+  lessonGrammarExamples: { ru: "Примеры", uk: "Приклади" },
+  lessonGrammarExceptions: { ru: "Исключения", uk: "Винятки" },
+  lessonGrammarTip: { ru: "Запомни", uk: "Запам'ятай" },
+  lessonReadingShowTranslation: { ru: "Показать перевод", uk: "Показати переклад" },
+  lessonReadingHideTranslation: { ru: "Скрыть перевод", uk: "Приховати переклад" },
+  lessonDialoguePractice: { ru: "Практиковать с AI", uk: "Практикувати з AI" },
+  lessonWordlistAddAll: { ru: "Добавить все в словарь", uk: "Додати всі до словника" },
+  lessonWordlistFlashcards: { ru: "Режим карточек", uk: "Режим карток" },
+  lessonQuizQuestion: { ru: "Вопрос {n} из {total}", uk: "Питання {n} з {total}" },
+  lessonQuizCorrect: { ru: "Правильно! 🎉", uk: "Правильно! 🎉" },
+  lessonQuizWrong: { ru: "Неверно", uk: "Неправильно" },
+  lessonQuizExplanation: { ru: "Объяснение", uk: "Пояснення" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;
