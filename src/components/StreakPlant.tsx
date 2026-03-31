@@ -217,41 +217,24 @@ const StreakPlant = ({ streak, canClaim, compact = false }: StreakPlantProps) =>
     );
   }
 
-  /* ── Full "Моя панда" button + dialog ── */
+  /* ── Simple panda circle button + dialog ── */
   return (
-    <div className="flex flex-col items-center gap-3">
+    <>
       <motion.button
         onClick={() => setShowDialog(true)}
-        className="relative w-full rounded-2xl overflow-hidden border border-primary/20 hover:border-primary/40 transition-colors cursor-pointer"
-        style={{ height: 140 }}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
+        className="relative flex items-center justify-center w-14 h-14 rounded-full bg-primary/10 border-2 border-primary/20 hover:bg-primary/20 hover:border-primary/40 transition-all overflow-hidden"
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
       >
-        {/* Mini mountain bg */}
-        <MountainScene />
-        {/* Panda */}
-        <motion.img
-          src={stage.img}
-          alt="KLAR Panda"
-          className="absolute bottom-1 left-1/2 -translate-x-1/2 w-20 h-20 object-contain drop-shadow-xl z-10"
-          animate={stageIdx === 0 ? { y: [0, 3, 0], opacity: [0.6, 0.85, 0.6] } : { y: [0, -3, 0] }}
-          transition={{ repeat: Infinity, duration: stageIdx === 0 ? 3 : 2.5, ease: "easeInOut" }}
-          loading="lazy"
-          width={512}
-          height={512}
-        />
-        {/* Label */}
-        <div className="absolute top-2 left-0 right-0 z-10 text-center">
-          <span className="text-[11px] font-display font-bold text-white drop-shadow-md px-2 py-0.5 rounded-full bg-black/20 backdrop-blur-sm">
-            🐼 {isRu ? "Моя панда" : "Моя панда"}
+        <span className="text-2xl">🐼</span>
+        {streak > 0 && (
+          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
+            {streak}
           </span>
-        </div>
-        {/* Streak badge */}
-        <div className="absolute bottom-2 right-2 z-10">
-          <span className="text-[10px] font-bold text-white drop-shadow-md px-2 py-0.5 rounded-full bg-black/25 backdrop-blur-sm flex items-center gap-1">
-            🔥 {streak}
-          </span>
-        </div>
+        )}
+        {canClaim && (
+          <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-500 border-2 border-background animate-pulse" />
+        )}
       </motion.button>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
@@ -266,7 +249,7 @@ const StreakPlant = ({ streak, canClaim, compact = false }: StreakPlantProps) =>
           />
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 };
 
