@@ -1466,7 +1466,7 @@ const Chat = () => {
         animate={{ x: 0 }}
         exit={{ x: "100%" }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="h-full flex flex-col"
+        className="h-[calc(100dvh-3.5rem)] md:h-[100dvh] -mb-14 md:mb-0 flex flex-col"
       >
         <DMConversation peerId={selectedPeer} onBack={() => setSelectedPeer(null)} />
       </motion.div>
