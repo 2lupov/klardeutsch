@@ -206,11 +206,28 @@ const Profile = () => {
     toast({ title: t("profileSaved") });
   };
 
+  const usernameRegex = /^[a-zA-Zа-яА-ЯёЁіІїЇєЄґҐ][a-zA-Zа-яА-ЯёЁіІїЇєЄґҐ0-9._]{4,19}$/;
+
   const handleSaveName = async () => {
     if (!user) return;
     const trimmed = editName.trim();
-    await supabase.from("profiles").update({ display_name: trimmed || null }).eq("user_id", user.id);
-    setProfile((p) => ({ ...p, display_name: trimmed || null }));
+    if (!trimmed || !usernameRegex.test(trimmed)) {
+      toast({ title: lang === "uk" ? "Нікнейм має починатися з букви, мін. 5 символів" : "Никнейм должен начинаться с буквы, мин. 5 символов", variant: "destructive" });
+      return;
+    }
+    // Check uniqueness
+    const { data: existing } = await supabase
+      .from("profiles")
+      .select("user_id")
+      .ilike("display_name", trimmed)
+      .neq("user_id", user.id)
+      .limit(1);
+    if (existing && existing.length > 0) {
+      toast({ title: lang === "uk" ? "Цей нікнейм вже зайнятий" : "Этот никнейм уже занят", variant: "destructive" });
+      return;
+    }
+    await supabase.from("profiles").update({ display_name: trimmed }).eq("user_id", user.id);
+    setProfile((p) => ({ ...p, display_name: trimmed }));
     setEditing(false);
     toast({ title: t("profileSaved") });
   };
