@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, User, BookOpen, Gamepad2, MessageCircle } from "lucide-react";
+import { Home, User, BookOpen, Gamepad2, MessageSquare } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const MobileBottomNav = () => {
