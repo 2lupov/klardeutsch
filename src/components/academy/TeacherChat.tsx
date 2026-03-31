@@ -62,8 +62,8 @@ const TeacherChat = ({ lessonId, courseId, lang }: Props) => {
         if (msg.lesson_id === lessonId) {
           const newMsg: Message = { id: msg.id, sender: msg.sender, content: msg.content, created_at: msg.created_at, audio_url: msg.audio_url };
           setMessages((prev) => {
-            if (prev.some((m) => m.id === msg.id)) return prev;
-            return [...prev, msg];
+            if (prev.some((m) => m.id === newMsg.id)) return prev;
+            return [...prev, newMsg];
           });
           if (!open && msg.sender === "teacher") setUnread((p) => p + 1);
           scrollToBottom();

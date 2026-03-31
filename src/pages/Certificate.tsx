@@ -114,7 +114,7 @@ const Certificate = () => {
               <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-bold">{cert.course_level}</span>
               {cert.final_score !== null && (
                 <span className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <CheckCircle className="w-4 h-4 text-green-500" />
+                  <CheckCircle className="w-4 h-4 text-primary" />
                   {cert.final_score}%
                 </span>
               )}
