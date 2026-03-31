@@ -3,7 +3,7 @@ import { Home, User, BookOpen, Gamepad2, MessageSquare } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const MobileBottomNav = () => {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const location = useLocation();
 
   const items = [
