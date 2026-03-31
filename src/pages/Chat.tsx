@@ -1151,9 +1151,20 @@ const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void
     fetchEdgeFunction("notify-dm", { json: { receiver_id: peerId, message_preview: `📎 ${fileName}` } }).catch(() => {});
   };
 
+  const sendGameInvite = async (gameId: string) => {
+    if (!user) return;
+    await supabase.from("direct_messages").insert({ sender_id: user.id, receiver_id: peerId, content: `🎮:${gameId}` });
+    fetchEdgeFunction("notify-dm", { json: { receiver_id: peerId, message_preview: "🎮 Приглашение в игру" } }).catch(() => {});
+  };
+
+  const sendVideoCircle = async (videoUrl: string) => {
+    if (!user) return;
+    await supabase.from("direct_messages").insert({ sender_id: user.id, receiver_id: peerId, content: "🎥", audio_url: videoUrl });
+    fetchEdgeFunction("notify-dm", { json: { receiver_id: peerId, message_preview: "🎥 Видеокружок" } }).catch(() => {});
+  };
+
   return (
     <div className="flex flex-col h-full">
-      {/* DM Header */}
       <motion.div
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -1175,7 +1186,6 @@ const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void
         </div>
       </motion.div>
 
-      {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-2.5">
         {messages.map((m, i) => {
           const isMe = m.sender_id === user?.id;
@@ -1202,6 +1212,8 @@ const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void
         onSendVoice={sendVoice}
         onSendImages={sendImages}
         onSendFile={sendFile}
+        onSendGameInvite={sendGameInvite}
+        onSendVideoCircle={sendVideoCircle}
         placeholder={lang === "uk" ? "Написати…" : "Написать…"}
         userId={user?.id || ""}
       />
