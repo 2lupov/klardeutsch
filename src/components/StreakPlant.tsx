@@ -1,6 +1,8 @@
-import { useMemo, useState } from "react";
+import { Suspense, lazy, useMemo, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
+
+const Panda3D = lazy(() => import("@/components/Panda3D"));
 import {
   Dialog,
   DialogContent,
@@ -303,27 +305,29 @@ const PandaSceneCard = ({ stage, stageIdx, streak, motivation, progressToNext, i
         </h3>
       </motion.div>
 
-      {/* Panda character */}
+      {/* 3D Panda character */}
       <motion.div
-        className="flex-1 flex items-center justify-center"
+        className="flex-1 flex items-center justify-center w-full min-h-[200px]"
         initial={{ scale: 0.5, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: "spring", stiffness: 150, damping: 12, delay: 0.2 }}
       >
-        <motion.img
-          src={stage.img}
-          alt="KLAR Panda"
-          className="w-36 h-36 object-contain drop-shadow-2xl"
-          animate={
-            stageIdx === 0
-              ? { y: [0, 6, 0], opacity: [0.6, 0.85, 0.6], rotate: [0, -2, 0] }
-              : { y: [0, -6, 0], rotate: [0, 2, 0] }
+        <Suspense
+          fallback={
+            <motion.img
+              src={stage.img}
+              alt="KLAR Panda"
+              className="w-36 h-36 object-contain drop-shadow-2xl"
+              animate={{ y: [0, -6, 0] }}
+              transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
+              loading="lazy"
+              width={512}
+              height={512}
+            />
           }
-          transition={{ repeat: Infinity, duration: stageIdx === 0 ? 3.5 : 2.5, ease: "easeInOut" }}
-          loading="lazy"
-          width={512}
-          height={512}
-        />
+        >
+          <Panda3D isSleeping={stageIdx === 0} className="w-full h-[200px]" />
+        </Suspense>
       </motion.div>
 
       {/* Bottom info card */}
