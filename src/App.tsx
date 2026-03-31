@@ -64,7 +64,6 @@ const AppRoutes = () => {
         <Route path="/shop" element={<Shop />} />
         <Route path="/challenges" element={<Challenges />} />
         <Route path="/dialogues" element={<Dialogues />} />
-        <Route path="/games" element={<Games />} />
         <Route path="/chat" element={<Chat />} />
         <Route path="/course/:id" element={<Course />} />
         <Route path="/academy" element={<Academy />} />
