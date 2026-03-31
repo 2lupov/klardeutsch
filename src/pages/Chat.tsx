@@ -21,6 +21,7 @@ interface CommunityMsg {
   user_id: string;
   content: string;
   audio_url?: string | null;
+  image_url?: string | null;
   created_at: string;
   profile?: Profile;
 }
@@ -31,6 +32,7 @@ interface DirectMsg {
   receiver_id: string;
   content: string;
   audio_url?: string | null;
+  image_url?: string | null;
   is_read: boolean;
   created_at: string;
 }
