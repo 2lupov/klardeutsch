@@ -125,10 +125,10 @@ const TypewriterKLAR = () => {
   }, []);
 
   return (
-    <span className="inline-flex align-baseline" style={{ verticalAlign: "baseline" }}>
+    <span className="inline-block" style={{ lineHeight: 0 }}>
       <svg
         viewBox={`0 0 ${totalWidth} ${height}`}
-        style={{ height: "1em", width: "auto", overflow: "visible", display: "inline-block", verticalAlign: "baseline" }}
+        style={{ height: "1.1em", width: "auto", overflow: "visible", display: "block" }}
       >
         <defs>
           <linearGradient id="method-klar-gold" x1="0%" y1="100%" x2="0%" y2="0%">
@@ -136,7 +136,7 @@ const TypewriterKLAR = () => {
             <stop offset="100%" stopColor="hsl(45, 80%, 65%)" />
           </linearGradient>
           <filter id="method-klar-glow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feGaussianBlur stdDeviation="2.5" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
@@ -167,7 +167,7 @@ const TypewriterKLAR = () => {
                 </clipPath>
               </defs>
 
-              {/* Outline */}
+              {/* Outline — visible while not filled */}
               <text
                 x="0"
                 y={height * 0.82}
@@ -175,16 +175,16 @@ const TypewriterKLAR = () => {
                 fontWeight="700"
                 fontSize="56"
                 fill="none"
-                stroke="hsl(215, 15%, 35%)"
-                strokeWidth={isFull ? 0 : 1.5}
-                opacity={isFull ? 0 : 0.4}
+                stroke="hsl(var(--muted-foreground))"
+                strokeWidth={isFull ? 0 : 1.2}
+                opacity={isFull ? 0 : 0.3}
                 letterSpacing="-0.02em"
-                style={{ transition: "all 0.5s ease" }}
+                style={{ transition: "all 0.6s ease" }}
               >
                 {letter.char}
               </text>
 
-              {/* Fill */}
+              {/* Fill rising from bottom */}
               <g clipPath={`url(#method-clip-${i})`}>
                 <rect
                   x="-5"
@@ -193,10 +193,11 @@ const TypewriterKLAR = () => {
                   height={height}
                   fill="url(#method-klar-gold)"
                   filter={isFull ? "url(#method-klar-glow)" : undefined}
-                  style={{ transition: "y 0.7s cubic-bezier(0.4, 0, 0.2, 1)" }}
+                  style={{ transition: "y 0.8s cubic-bezier(0.22, 1, 0.36, 1)" }}
                 />
               </g>
 
+              {/* Subtle glow overlay when full */}
               {isFull && (
                 <text
                   x="0"
@@ -206,7 +207,7 @@ const TypewriterKLAR = () => {
                   fontSize="56"
                   fill="url(#method-klar-gold)"
                   filter="url(#method-klar-glow)"
-                  opacity={0.5}
+                  opacity={0.4}
                   letterSpacing="-0.02em"
                 >
                   {letter.char}
