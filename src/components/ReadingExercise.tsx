@@ -53,13 +53,13 @@ const ReadingExercise = ({ readings, onComplete, level = "A1" }: ReadingExercise
           </div>
           <button
             onClick={handlePlayReading}
-            disabled={loading}
+            disabled={isThisLoading}
             className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary hover:bg-primary/20 transition-colors"
             title={t("readAloud")}
           >
-            {loading ? (
+            {isThisLoading ? (
               <span className="animate-pulse text-xs">...</span>
-            ) : playing ? (
+            ) : isThisPlaying ? (
               <Pause className="w-4 h-4" />
             ) : (
               <Volume2 className="w-4 h-4" />
