@@ -101,11 +101,16 @@ export default {
           from: { transform: "translateY(-100%)", opacity: "0" },
           to: { transform: "translateY(0)", opacity: "1" },
         },
+        "pulse-glow": {
+          "0%, 100%": { boxShadow: "0 0 8px 2px hsl(var(--primary) / 0.25)" },
+          "50%": { boxShadow: "0 0 18px 6px hsl(var(--primary) / 0.45)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "slide-down": "slide-down 0.3s ease-out",
+        "pulse-glow": "pulse-glow 2s ease-in-out infinite",
       },
     },
   },
