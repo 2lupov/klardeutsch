@@ -14,6 +14,7 @@ import Leaderboard from "@/components/Leaderboard";
 import Referrals from "@/components/Referrals";
 import { useXP } from "@/hooks/useXP";
 import AvatarPicker from "@/components/AvatarPicker";
+import ImageCropper from "@/components/ImageCropper";
 import StreakPlant from "@/components/StreakPlant";
 import { useDailyBonus } from "@/hooks/useDailyBonus";
 
