@@ -68,6 +68,7 @@ const UserProfileDialog = ({
   const navigate = useNavigate();
   const [stats, setStats] = useState<UserStats | null>(null);
   const [loading, setLoading] = useState(false);
+  const [giftDialogOpen, setGiftDialogOpen] = useState(false);
 
   const isMe = userId === user?.id;
   const name = displayName || "User";
