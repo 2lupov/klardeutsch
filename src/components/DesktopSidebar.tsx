@@ -21,6 +21,7 @@ const DesktopSidebar = () => {
 
   const links = [
     { to: "/", icon: Home, label: t("navHome") },
+    { to: "/academy", icon: GraduationCap, label: lang === "uk" ? "Академія" : "Академия" },
     { to: "/profile", icon: User, label: t("myProfile") },
     { to: "/stats", icon: BarChart3, label: t("navStats") },
     { to: "/dictionary", icon: BookOpen, label: t("navDictionary") },

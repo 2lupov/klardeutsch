@@ -61,6 +61,8 @@ const AppRoutes = () => {
         <Route path="/dialogues" element={<Dialogues />} />
         <Route path="/games" element={<Games />} />
         <Route path="/course/:id" element={<Course />} />
+        <Route path="/academy" element={<Academy />} />
+        <Route path="/academy/:courseId" element={<Academy />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
