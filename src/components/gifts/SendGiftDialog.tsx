@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCoins } from "@/hooks/useCoins";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchEdgeFunction } from "@/lib/auth-fetch";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Gift, Coins, Send, Loader2, Sparkles } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
@@ -112,6 +113,17 @@ const SendGiftDialog = ({ open, onOpenChange, receiverId, receiverName }: SendGi
     }
     setSent(true);
     reloadCoins();
+
+    // Send notifications (Telegram + in-app DM) — fire and forget
+    fetchEdgeFunction("notify-gift", {
+      json: {
+        receiver_id: receiverId,
+        gift_name: selectedGift.name,
+        gift_emoji: selectedGift.emoji,
+        message: message.trim() || null,
+      },
+    }).catch(() => {});
+
     setTimeout(() => onOpenChange(false), 2000);
   };
 
