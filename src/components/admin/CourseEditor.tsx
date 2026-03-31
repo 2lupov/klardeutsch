@@ -986,6 +986,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
 
                 <button onClick={() => setExpandedLesson(expandedLesson === i ? null : i)} className="flex-1 flex items-center gap-2 text-left min-w-0">
                   <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center shrink-0">{i + 1}</span>
+                  <span className="text-xs shrink-0">{{"article":"📄","grammar":"📐","reading":"📖","dialogue_text":"💬","word_list":"📋","quiz":"📝","ai_tutor":"🤖","writing":"✍️","speaking":"🎙️","notebook":"📓","video":"🎬","video_quiz":"🎬📝","exam":"🏆"}[lesson.lesson_type || "article"] || "📄"}</span>
                   <span className="text-sm font-semibold text-foreground truncate">{lesson.title}</span>
                 </button>
 
