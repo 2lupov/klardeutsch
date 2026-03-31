@@ -273,9 +273,22 @@ const AcademyLearn = () => {
         )}
       </div>
 
-      {/* Teacher Chat FAB */}
+      {/* Teacher Chat Panel */}
       {activeLessonId && courseId && (
-        <TeacherChat lessonId={activeLessonId} courseId={courseId} lang={lang} />
+        <TeacherChatPanel
+          lessonId={activeLessonId}
+          courseId={courseId}
+          lessonTitle={activeLesson?.title ?? ""}
+          courseLevel={courseLevel}
+          lang={lang}
+          open={teacherPanelOpen}
+          onClose={() => setTeacherPanelOpen(false)}
+        />
+      )}
+
+      {/* Overlay for teacher panel on mobile */}
+      {teacherPanelOpen && (
+        <div className="fixed inset-0 bg-background/60 backdrop-blur-sm z-40" onClick={() => setTeacherPanelOpen(false)} />
       )}
 
       {/* Cohort Chat FAB */}
