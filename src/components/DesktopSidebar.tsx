@@ -30,7 +30,6 @@ const DesktopSidebar = () => {
     { to: "/shop", icon: ShoppingBag, label: t("navShop"), badge: 0 },
     { to: "/games", icon: Gamepad2, label: "Игры", badge: 0 },
     { to: "/chat", icon: MessageSquare, label: lang === "uk" ? "Чат" : "Чат", badge: unread },
-    { to: "/dialogues", icon: MessageCircle, label: t("navDialogues"), badge: 0 },
   ];
 
   return (
