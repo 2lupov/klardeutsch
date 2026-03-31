@@ -53,7 +53,9 @@ const NicknameGate = ({ onComplete }: Props) => {
     setSaving(true);
     setChecking(false);
     await supabase.from("profiles").update({ display_name: trimmed }).eq("user_id", user.id);
-    toast({ title: "Отлично! 🎉" });
+    // Award 50 coins for creating a nickname
+    await supabase.rpc("award_coins", { p_user_id: user.id, p_amount: 50, p_reason: "nickname_created" });
+    toast({ title: "Отлично! +50 монет 🎉🪙" });
     onComplete(trimmed);
     setSaving(false);
   };
