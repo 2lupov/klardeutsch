@@ -38,10 +38,28 @@ const Index = () => {
   const [clarity, setClarity] = useState(0);
   const { user } = useAuth();
   const { saveProgress } = useProgress();
-  const { t, lang } = useLanguage();
+  const { t, lang, languageLocked } = useLanguage();
   const { isMobile } = usePlatform();
   const { showSummary, triggerSummary, closeSummary } = useDailySummary();
   const navigate = useNavigate();
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [displayName, setDisplayName] = useState<string | null>(null);
+
+  // Fetch user avatar
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("profiles")
+      .select("avatar_url, display_name")
+      .eq("user_id", user.id)
+      .single()
+      .then(({ data }) => {
+        if (data) {
+          setAvatarUrl(data.avatar_url);
+          setDisplayName(data.display_name);
+        }
+      });
+  }, [user]);
 
   // Load data when entering exercise
   useEffect(() => {
