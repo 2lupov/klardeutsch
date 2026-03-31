@@ -6,6 +6,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import TheoryRenderer from "@/components/course/TheoryRenderer";
 import { useProgress } from "@/hooks/useProgress";
 import { usePlatform } from "@/hooks/usePlatform";
+import { useDailySummary } from "@/hooks/useDailySummary";
 import LevelSelector from "@/components/LevelSelector";
 import CategorySelector from "@/components/CategorySelector";
 import TopicSelector from "@/components/TopicSelector";
@@ -15,6 +16,8 @@ import ReadingExercise from "@/components/ReadingExercise";
 import ListeningExercise from "@/components/ListeningExercise";
 import WritingExercise from "@/components/WritingExercise";
 import DailyChallenge from "@/components/DailyChallenge";
+import SRSWidget from "@/components/SRSWidget";
+import DailySummaryModal from "@/components/daily/DailySummaryModal";
 import { ArrowLeft } from "lucide-react";
 
 type Category = "vocabulary" | "grammar" | "reading" | "listening" | "writing";
