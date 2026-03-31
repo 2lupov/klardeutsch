@@ -61,6 +61,7 @@ const Profile = () => {
   const [dialoguesCount, setDialoguesCount] = useState(0);
   const [dailyBonusStreakVal, setDailyBonusStreakVal] = useState(0);
   const [challengesSentCount, setChallengesSentCount] = useState(0);
+  const [pendingFriendRequests, setPendingFriendRequests] = useState(0);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [settingAvatar, setSettingAvatar] = useState(false);
   const [cropFile, setCropFile] = useState<File | null>(null);
@@ -90,6 +91,14 @@ const Profile = () => {
       setDuelsWonCount(duelsRes.count ?? 0);
       setChallengesSentCount(challengesSentRes.count ?? 0);
       setDailyBonusStreakVal(dailyBonusRes.data?.streak ?? 0);
+
+      // Fetch pending incoming friend requests
+      const { count: friendReqCount } = await supabase
+        .from("friendships")
+        .select("id", { count: "exact", head: true })
+        .eq("friend_id", user.id)
+        .eq("status", "pending");
+      setPendingFriendRequests(friendReqCount ?? 0);
       // Dialogues completed = progress entries with category containing "dialogue"
       const dialogueEntries = (prog ?? []).filter((p: any) => p.category === "dialogue" || p.exercise_id?.includes("dialogue"));
       setDialoguesCount(dialogueEntries.length);
@@ -798,6 +807,7 @@ const Profile = () => {
         <NavButton
           icon={<Users className="w-4 h-4 text-primary" />}
           label={lang === "uk" ? "Друзі" : "Друзья"}
+          badge={pendingFriendRequests > 0 ? pendingFriendRequests : undefined}
           onClick={() => setScreen("friends")}
         />
         <NavButton
