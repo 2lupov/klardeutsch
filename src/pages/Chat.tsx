@@ -668,9 +668,14 @@ const CommunityChat = () => {
     await supabase.from("community_messages").insert({ user_id: user.id, content: "🎤", audio_url: audioUrl });
   };
 
-  const sendImage = async (imageUrl: string) => {
+  const sendImages = async (imageUrls: string[]) => {
     if (!user) return;
-    await supabase.from("community_messages").insert({ user_id: user.id, content: "📷", image_url: imageUrl });
+    await supabase.from("community_messages").insert({ user_id: user.id, content: "📷", image_urls: imageUrls });
+  };
+
+  const sendFile = async (fileUrl: string, fileName: string) => {
+    if (!user) return;
+    await supabase.from("community_messages").insert({ user_id: user.id, content: "📎", file_url: fileUrl, file_name: fileName });
   };
 
   if (loading) {
@@ -703,6 +708,9 @@ const CommunityChat = () => {
               content={m.content}
               audioUrl={m.audio_url}
               imageUrl={m.image_url}
+              imageUrls={m.image_urls}
+              fileUrl={m.file_url}
+              fileName={m.file_name}
               time={format(new Date(m.created_at), "HH:mm")}
               senderName={prof?.display_name || undefined}
               avatarUrl={prof?.avatar_url}
@@ -716,7 +724,8 @@ const CommunityChat = () => {
       <ChatInputBar
         onSendText={sendText}
         onSendVoice={sendVoice}
-        onSendImage={sendImage}
+        onSendImages={sendImages}
+        onSendFile={sendFile}
         placeholder={lang === "uk" ? "Написати повідомлення…" : "Написать сообщение…"}
         userId={user?.id || ""}
       />
