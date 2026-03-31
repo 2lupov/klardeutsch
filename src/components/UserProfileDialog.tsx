@@ -4,8 +4,10 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Trophy, Swords, BookOpen, Star, Loader2 } from "lucide-react";
+import { Trophy, Swords, BookOpen, Star, Loader2, Gift } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import GiftShelf from "@/components/gifts/GiftShelf";
+import SendGiftDialog from "@/components/gifts/SendGiftDialog";
 
 interface UserProfileDialogProps {
   userId: string | null;
