@@ -767,6 +767,7 @@ const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void
       <ChatInputBar
         onSendText={sendText}
         onSendVoice={sendVoice}
+        onSendImage={sendImage}
         placeholder={lang === "uk" ? "Написати…" : "Написать…"}
         userId={user?.id || ""}
       />
