@@ -1,15 +1,13 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { fetchEdgeFunction } from "@/lib/auth-fetch";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send, Search, MessageCircle, Users, Mail, ArrowLeft } from "lucide-react";
+import { Send, Search, MessageCircle, Users, Mail, ArrowLeft, Mic, Square, Play, Pause } from "lucide-react";
 import { format } from "date-fns";
-import { toast } from "@/hooks/use-toast";
+import { motion, AnimatePresence } from "framer-motion";
 
 /* ───── types ───── */
 interface Profile {
@@ -22,6 +20,7 @@ interface CommunityMsg {
   id: string;
   user_id: string;
   content: string;
+  audio_url?: string | null;
   created_at: string;
   profile?: Profile;
 }
@@ -31,9 +30,278 @@ interface DirectMsg {
   sender_id: string;
   receiver_id: string;
   content: string;
+  audio_url?: string | null;
   is_read: boolean;
   created_at: string;
 }
+
+/* ───── Voice Player ───── */
+const VoicePlayer = ({ url }: { url: string }) => {
+  const [playing, setPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    const audio = new Audio(url);
+    audioRef.current = audio;
+    audio.addEventListener("loadedmetadata", () => setDuration(audio.duration));
+    audio.addEventListener("timeupdate", () => setProgress(audio.currentTime / (audio.duration || 1)));
+    audio.addEventListener("ended", () => { setPlaying(false); setProgress(0); });
+    return () => { audio.pause(); audio.src = ""; };
+  }, [url]);
+
+  const toggle = () => {
+    if (!audioRef.current) return;
+    if (playing) { audioRef.current.pause(); } else { audioRef.current.play(); }
+    setPlaying(!playing);
+  };
+
+  return (
+    <button onClick={toggle} className="flex items-center gap-2 min-w-[140px]">
+      <div className="w-7 h-7 rounded-full bg-background/20 flex items-center justify-center shrink-0">
+        {playing ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 ml-0.5" />}
+      </div>
+      <div className="flex-1 flex flex-col gap-1">
+        <div className="h-1 rounded-full bg-background/20 overflow-hidden">
+          <motion.div
+            className="h-full bg-current rounded-full"
+            style={{ width: `${progress * 100}%` }}
+            transition={{ duration: 0.1 }}
+          />
+        </div>
+        <span className="text-[9px] opacity-60">
+          {duration > 0 ? `${Math.floor(duration)}с` : "…"}
+        </span>
+      </div>
+    </button>
+  );
+};
+
+/* ───── Voice Recorder Hook ───── */
+const useVoiceRecorder = () => {
+  const [recording, setRecording] = useState(false);
+  const [elapsed, setElapsed] = useState(0);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const timerRef = useRef<ReturnType<typeof setInterval>>();
+
+  const start = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mr = new MediaRecorder(stream, { mimeType: "audio/webm" });
+      chunksRef.current = [];
+      mr.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
+      mr.start(500);
+      mediaRecorderRef.current = mr;
+      setRecording(true);
+      setElapsed(0);
+      timerRef.current = setInterval(() => setElapsed((p) => p + 1), 1000);
+    } catch { /* mic not available */ }
+  }, []);
+
+  const stop = useCallback((): Promise<Blob | null> => {
+    return new Promise((resolve) => {
+      const mr = mediaRecorderRef.current;
+      if (!mr || mr.state === "inactive") { resolve(null); return; }
+      clearInterval(timerRef.current);
+      mr.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+        mr.stream.getTracks().forEach((t) => t.stop());
+        setRecording(false);
+        setElapsed(0);
+        resolve(blob);
+      };
+      mr.stop();
+    });
+  }, []);
+
+  const cancel = useCallback(() => {
+    const mr = mediaRecorderRef.current;
+    if (mr && mr.state !== "inactive") {
+      clearInterval(timerRef.current);
+      mr.stream.getTracks().forEach((t) => t.stop());
+      mr.stop();
+    }
+    chunksRef.current = [];
+    setRecording(false);
+    setElapsed(0);
+  }, []);
+
+  return { recording, elapsed, start, stop, cancel };
+};
+
+/* ───── Upload voice helper ───── */
+const uploadVoice = async (blob: Blob, userId: string): Promise<string | null> => {
+  const filename = `${userId}/${Date.now()}.webm`;
+  const { error } = await supabase.storage.from("voice-messages").upload(filename, blob, { contentType: "audio/webm" });
+  if (error) return null;
+  const { data } = supabase.storage.from("voice-messages").getPublicUrl(filename);
+  return data.publicUrl;
+};
+
+/* ───── Message Bubble ───── */
+const MessageBubble = ({ isMe, content, audioUrl, time, senderName, avatarUrl, index }: {
+  isMe: boolean; content: string; audioUrl?: string | null; time: string;
+  senderName?: string; avatarUrl?: string | null; index: number;
+}) => (
+  <motion.div
+    initial={{ opacity: 0, y: 12, scale: 0.95 }}
+    animate={{ opacity: 1, y: 0, scale: 1 }}
+    transition={{ duration: 0.25, delay: Math.min(index * 0.02, 0.3) }}
+    className={`flex gap-2 ${isMe ? "flex-row-reverse" : ""}`}
+  >
+    {!isMe && (
+      <Avatar className="w-7 h-7 shrink-0 mt-auto">
+        <AvatarImage src={avatarUrl || ""} className="object-cover" />
+        <AvatarFallback className="text-[10px] bg-primary/10 text-primary">
+          {(senderName || "?")[0]}
+        </AvatarFallback>
+      </Avatar>
+    )}
+    <div className={`max-w-[75%] ${isMe ? "items-end" : "items-start"}`}>
+      {!isMe && senderName && (
+        <p className="text-[10px] mb-0.5 text-muted-foreground font-medium px-1">{senderName}</p>
+      )}
+      <div className={`rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed backdrop-blur-sm ${
+        isMe
+          ? "bg-primary text-primary-foreground rounded-br-md shadow-lg shadow-primary/20"
+          : "bg-card border border-border rounded-bl-md shadow-sm"
+      }`}>
+        {audioUrl ? <VoicePlayer url={audioUrl} /> : content}
+      </div>
+      <p className={`text-[9px] mt-0.5 px-1 ${isMe ? "text-right" : ""} text-muted-foreground/50`}>
+        {time}
+      </p>
+    </div>
+  </motion.div>
+);
+
+/* ───── Chat Input Bar ───── */
+const ChatInputBar = ({ onSendText, onSendVoice, placeholder, userId }: {
+  onSendText: (text: string) => void;
+  onSendVoice: (audioUrl: string) => void;
+  placeholder: string;
+  userId: string;
+}) => {
+  const [text, setText] = useState("");
+  const { recording, elapsed, start, stop, cancel } = useVoiceRecorder();
+  const [uploading, setUploading] = useState(false);
+
+  const handleSend = () => {
+    if (!text.trim()) return;
+    onSendText(text.trim());
+    setText("");
+  };
+
+  const handleStopRecording = async () => {
+    const blob = await stop();
+    if (!blob) return;
+    setUploading(true);
+    const url = await uploadVoice(blob, userId);
+    setUploading(false);
+    if (url) onSendVoice(url);
+  };
+
+  return (
+    <motion.div
+      layout
+      className="border-t border-border bg-card/80 backdrop-blur-xl p-3 flex items-center gap-2"
+    >
+      <AnimatePresence mode="wait">
+        {recording ? (
+          <motion.div
+            key="recording"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="flex-1 flex items-center gap-3"
+          >
+            <button onClick={cancel} className="text-destructive text-xs font-medium hover:underline">
+              ✕
+            </button>
+            <div className="flex items-center gap-2 flex-1">
+              <motion.div
+                animate={{ scale: [1, 1.3, 1] }}
+                transition={{ duration: 1.2, repeat: Infinity }}
+                className="w-2.5 h-2.5 rounded-full bg-destructive"
+              />
+              <span className="text-sm text-muted-foreground font-mono">
+                {Math.floor(elapsed / 60).toString().padStart(2, "0")}:{(elapsed % 60).toString().padStart(2, "0")}
+              </span>
+            </div>
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={handleStopRecording}
+              className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/30"
+            >
+              <Square className="w-4 h-4" />
+            </motion.button>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="input"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            className="flex-1 flex items-center gap-2"
+          >
+            <Input
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
+              placeholder={placeholder}
+              className="flex-1 bg-muted/50 border-0 focus-visible:ring-1 focus-visible:ring-primary/30 rounded-full px-4"
+            />
+            {text.trim() ? (
+              <motion.button
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                whileTap={{ scale: 0.85 }}
+                onClick={handleSend}
+                className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/30"
+              >
+                <Send className="w-4 h-4" />
+              </motion.button>
+            ) : (
+              <motion.button
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                whileTap={{ scale: 0.85 }}
+                onClick={start}
+                disabled={uploading}
+                className="w-10 h-10 rounded-full bg-muted hover:bg-primary/10 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors"
+              >
+                <Mic className="w-4 h-4" />
+              </motion.button>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+};
+
+/* ───── Tab Button ───── */
+const TabButton = ({ active, icon: Icon, label, badge, onClick }: {
+  active: boolean; icon: React.ElementType; label: string; badge?: number; onClick: () => void;
+}) => (
+  <motion.button
+    whileTap={{ scale: 0.95 }}
+    onClick={onClick}
+    className={`relative flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-medium transition-colors ${
+      active ? "bg-primary text-primary-foreground shadow-md shadow-primary/20" : "text-muted-foreground hover:bg-muted/50"
+    }`}
+  >
+    <Icon className="w-3.5 h-3.5" />
+    {label}
+    {(badge ?? 0) > 0 && (
+      <span className="absolute -top-1 -right-0.5 bg-destructive text-destructive-foreground text-[8px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-1">
+        {badge}
+      </span>
+    )}
+  </motion.button>
+);
 
 /* ───── Community Chat ───── */
 const CommunityChat = () => {
@@ -41,7 +309,6 @@ const CommunityChat = () => {
   const { lang } = useLanguage();
   const [messages, setMessages] = useState<CommunityMsg[]>([]);
   const [profiles, setProfiles] = useState<Record<string, Profile>>({});
-  const [text, setText] = useState("");
   const [loading, setLoading] = useState(true);
   const endRef = useRef<HTMLDivElement>(null);
 
@@ -94,63 +361,61 @@ const CommunityChat = () => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const send = async () => {
-    if (!text.trim() || !user) return;
-    const content = text.trim();
-    setText("");
+  const sendText = async (content: string) => {
+    if (!user) return;
     await supabase.from("community_messages").insert({ user_id: user.id, content });
   };
 
-  if (loading) return <div className="flex items-center justify-center h-64 text-muted-foreground animate-pulse">Loading…</div>;
+  const sendVoice = async (audioUrl: string) => {
+    if (!user) return;
+    await supabase.from("community_messages").insert({ user_id: user.id, content: "🎤", audio_url: audioUrl });
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.length === 0 && (
-          <p className="text-center text-muted-foreground text-sm py-12">
-            {lang === "uk" ? "Поки немає повідомлень. Напишіть перше!" : "Пока нет сообщений. Напишите первое!"}
-          </p>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16">
+            <p className="text-4xl mb-3">💬</p>
+            <p className="text-muted-foreground text-sm">
+              {lang === "uk" ? "Поки немає повідомлень. Напишіть перше!" : "Пока нет сообщений. Напишите первое!"}
+            </p>
+          </motion.div>
         )}
-        {messages.map((m) => {
+        {messages.map((m, i) => {
           const isMe = m.user_id === user?.id;
           const prof = profiles[m.user_id];
           return (
-            <div key={m.id} className={`flex gap-2 ${isMe ? "flex-row-reverse" : ""}`}>
-              <Avatar className="w-8 h-8 shrink-0">
-                <AvatarImage src={prof?.avatar_url || ""} />
-                <AvatarFallback className="text-xs bg-primary/10 text-primary">
-                  {(prof?.display_name || "?")[0]}
-                </AvatarFallback>
-              </Avatar>
-              <div className={`max-w-[75%] ${isMe ? "items-end" : "items-start"}`}>
-                <p className={`text-[11px] mb-0.5 ${isMe ? "text-right" : ""} text-muted-foreground`}>
-                  {prof?.display_name || "…"}
-                </p>
-                <div className={`rounded-2xl px-3 py-2 text-sm ${isMe ? "bg-primary text-primary-foreground rounded-tr-sm" : "bg-muted rounded-tl-sm"}`}>
-                  {m.content}
-                </div>
-                <p className={`text-[10px] mt-0.5 ${isMe ? "text-right" : ""} text-muted-foreground/60`}>
-                  {format(new Date(m.created_at), "HH:mm")}
-                </p>
-              </div>
-            </div>
+            <MessageBubble
+              key={m.id}
+              isMe={isMe}
+              content={m.content}
+              audioUrl={m.audio_url}
+              time={format(new Date(m.created_at), "HH:mm")}
+              senderName={prof?.display_name || undefined}
+              avatarUrl={prof?.avatar_url}
+              index={i}
+            />
           );
         })}
         <div ref={endRef} />
       </div>
 
-      <div className="border-t border-border p-3 flex gap-2">
-        <Input
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && send()}
-          placeholder={lang === "uk" ? "Написати повідомлення…" : "Написать сообщение…"}
-          className="flex-1"
-        />
-        <Button size="icon" onClick={send} disabled={!text.trim()}>
-          <Send className="w-4 h-4" />
-        </Button>
-      </div>
+      <ChatInputBar
+        onSendText={sendText}
+        onSendVoice={sendVoice}
+        placeholder={lang === "uk" ? "Написати повідомлення…" : "Написать сообщение…"}
+        userId={user?.id || ""}
+      />
     </div>
   );
 };
@@ -177,31 +442,40 @@ const FindUsers = ({ onSelectUser }: { onSelectUser: (uid: string) => void }) =>
   };
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="p-4 space-y-3">
       <div className="flex gap-2">
         <Input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && doSearch()}
           placeholder={lang === "uk" ? "Пошук за іменем…" : "Поиск по имени…"}
-          className="flex-1"
+          className="flex-1 bg-muted/50 border-0 focus-visible:ring-1 focus-visible:ring-primary/30 rounded-full px-4"
         />
-        <Button size="icon" variant="outline" onClick={doSearch}>
+        <motion.button whileTap={{ scale: 0.9 }} onClick={doSearch}
+          className="w-10 h-10 rounded-full bg-muted hover:bg-primary/10 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors">
           <Search className="w-4 h-4" />
-        </Button>
+        </motion.button>
       </div>
 
-      {loading && <p className="text-center text-muted-foreground text-sm animate-pulse">…</p>}
+      {loading && (
+        <div className="flex justify-center py-8">
+          <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full" />
+        </div>
+      )}
 
-      <div className="space-y-2">
-        {users.map((u) => (
-          <button
+      <div className="space-y-1">
+        {users.map((u, i) => (
+          <motion.button
             key={u.user_id}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: i * 0.05 }}
             onClick={() => onSelectUser(u.user_id)}
-            className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-muted/50 transition-colors text-left"
+            className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-muted/60 active:scale-[0.98] transition-all text-left"
           >
-            <Avatar className="w-10 h-10">
-              <AvatarImage src={u.avatar_url || ""} />
+            <Avatar className="w-11 h-11 ring-2 ring-border">
+              <AvatarImage src={u.avatar_url || ""} className="object-cover" />
               <AvatarFallback className="bg-primary/10 text-primary text-sm">
                 {(u.display_name || "?")[0]}
               </AvatarFallback>
@@ -209,13 +483,13 @@ const FindUsers = ({ onSelectUser }: { onSelectUser: (uid: string) => void }) =>
             <div className="flex-1 min-w-0">
               <p className="font-medium text-sm truncate">{u.display_name || "—"}</p>
             </div>
-            <Mail className="w-4 h-4 text-muted-foreground" />
-          </button>
+            <Mail className="w-4 h-4 text-muted-foreground/50" />
+          </motion.button>
         ))}
         {!loading && users.length === 0 && search && (
-          <p className="text-center text-muted-foreground text-sm py-8">
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center text-muted-foreground text-sm py-12">
             {lang === "uk" ? "Нікого не знайдено" : "Никого не найдено"}
-          </p>
+          </motion.p>
         )}
       </div>
     </div>
@@ -228,7 +502,6 @@ const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void
   const { lang } = useLanguage();
   const [peer, setPeer] = useState<Profile | null>(null);
   const [messages, setMessages] = useState<DirectMsg[]>([]);
-  const [text, setText] = useState("");
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -249,7 +522,6 @@ const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void
         .limit(200);
       if (msgs) setMessages(msgs);
 
-      // mark as read
       await supabase
         .from("direct_messages")
         .update({ is_read: true })
@@ -279,64 +551,71 @@ const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const send = async () => {
-    if (!text.trim() || !user) return;
-    const content = text.trim();
-    setText("");
+  const sendText = async (content: string) => {
+    if (!user) return;
     await supabase.from("direct_messages").insert({ sender_id: user.id, receiver_id: peerId, content });
-    // Notify receiver via Telegram bot (fire-and-forget)
     fetchEdgeFunction("notify-dm", { json: { receiver_id: peerId, message_preview: content } }).catch(() => {});
+  };
+
+  const sendVoice = async (audioUrl: string) => {
+    if (!user) return;
+    await supabase.from("direct_messages").insert({ sender_id: user.id, receiver_id: peerId, content: "🎤", audio_url: audioUrl });
+    fetchEdgeFunction("notify-dm", { json: { receiver_id: peerId, message_preview: "🎤 Голосовое сообщение" } }).catch(() => {});
   };
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center gap-3 p-3 border-b border-border">
-        <Button size="icon" variant="ghost" onClick={onBack}>
+      {/* DM Header */}
+      <motion.div
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="flex items-center gap-3 p-3 border-b border-border bg-card/80 backdrop-blur-xl"
+      >
+        <motion.button whileTap={{ scale: 0.85 }} onClick={onBack}
+          className="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center transition-colors">
           <ArrowLeft className="w-4 h-4" />
-        </Button>
-        <Avatar className="w-8 h-8">
-          <AvatarImage src={peer?.avatar_url || ""} />
+        </motion.button>
+        <Avatar className="w-9 h-9 ring-2 ring-primary/20">
+          <AvatarImage src={peer?.avatar_url || ""} className="object-cover" />
           <AvatarFallback className="text-xs bg-primary/10 text-primary">
             {(peer?.display_name || "?")[0]}
           </AvatarFallback>
         </Avatar>
-        <span className="font-medium text-sm">{peer?.display_name || "…"}</span>
-      </div>
+        <div>
+          <p className="font-display font-bold text-sm">{peer?.display_name || "…"}</p>
+          <p className="text-[10px] text-muted-foreground">online</p>
+        </div>
+      </motion.div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-2">
-        {messages.map((m) => {
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-2.5">
+        {messages.map((m, i) => {
           const isMe = m.sender_id === user?.id;
           return (
-            <div key={m.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
-              <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${isMe ? "bg-primary text-primary-foreground rounded-tr-sm" : "bg-muted rounded-tl-sm"}`}>
-                {m.content}
-                <p className={`text-[10px] mt-0.5 ${isMe ? "text-primary-foreground/60" : "text-muted-foreground/60"}`}>
-                  {format(new Date(m.created_at), "HH:mm")}
-                </p>
-              </div>
-            </div>
+            <MessageBubble
+              key={m.id}
+              isMe={isMe}
+              content={m.content}
+              audioUrl={m.audio_url}
+              time={format(new Date(m.created_at), "HH:mm")}
+              index={i}
+            />
           );
         })}
         <div ref={endRef} />
       </div>
 
-      <div className="border-t border-border p-3 flex gap-2">
-        <Input
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && send()}
-          placeholder={lang === "uk" ? "Написати…" : "Написать…"}
-          className="flex-1"
-        />
-        <Button size="icon" onClick={send} disabled={!text.trim()}>
-          <Send className="w-4 h-4" />
-        </Button>
-      </div>
+      <ChatInputBar
+        onSendText={sendText}
+        onSendVoice={sendVoice}
+        placeholder={lang === "uk" ? "Написати…" : "Написать…"}
+        userId={user?.id || ""}
+      />
     </div>
   );
 };
 
-/* ───── DM List (conversations) ───── */
+/* ───── DM List ───── */
 const DMList = ({ onSelectPeer }: { onSelectPeer: (uid: string) => void }) => {
   const { user } = useAuth();
   const { lang } = useLanguage();
@@ -346,7 +625,6 @@ const DMList = ({ onSelectPeer }: { onSelectPeer: (uid: string) => void }) => {
   useEffect(() => {
     if (!user) return;
     const load = async () => {
-      // Get all DMs involving this user
       const { data: msgs } = await supabase
         .from("direct_messages")
         .select("*")
@@ -356,7 +634,6 @@ const DMList = ({ onSelectPeer }: { onSelectPeer: (uid: string) => void }) => {
 
       if (!msgs || msgs.length === 0) { setLoading(false); return; }
 
-      // Group by peer
       const peerMap: Record<string, { lastMsg: string; lastAt: string; unread: number }> = {};
       msgs.forEach((m) => {
         const peerId = m.sender_id === user.id ? m.receiver_id : m.sender_id;
@@ -385,43 +662,58 @@ const DMList = ({ onSelectPeer }: { onSelectPeer: (uid: string) => void }) => {
     load();
   }, [user]);
 
-  if (loading) return <div className="flex items-center justify-center h-32 text-muted-foreground animate-pulse">…</div>;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-32">
+        <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
 
   if (convos.length === 0) {
     return (
-      <p className="text-center text-muted-foreground text-sm py-12">
-        {lang === "uk" ? "Ще немає повідомлень. Знайдіть користувача!" : "Пока нет сообщений. Найдите пользователя!"}
-      </p>
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16">
+        <p className="text-4xl mb-3">✉️</p>
+        <p className="text-muted-foreground text-sm">
+          {lang === "uk" ? "Ще немає повідомлень. Знайдіть користувача!" : "Пока нет сообщений. Найдите пользователя!"}
+        </p>
+      </motion.div>
     );
   }
 
   return (
-    <div className="divide-y divide-border">
-      {convos.map((c) => (
-        <button
+    <div className="py-1">
+      {convos.map((c, i) => (
+        <motion.button
           key={c.peerId}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: i * 0.04 }}
           onClick={() => onSelectPeer(c.peerId)}
-          className="w-full flex items-center gap-3 p-4 hover:bg-muted/50 transition-colors text-left"
+          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/40 active:bg-muted/60 transition-colors text-left"
         >
-          <Avatar className="w-10 h-10">
-            <AvatarImage src={c.profile?.avatar_url || ""} />
-            <AvatarFallback className="bg-primary/10 text-primary text-sm">
-              {(c.profile?.display_name || "?")[0]}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <p className="font-medium text-sm truncate">{c.profile?.display_name || "…"}</p>
-            <p className="text-xs text-muted-foreground truncate">{c.lastMsg}</p>
-          </div>
-          <div className="flex flex-col items-end gap-1">
-            <span className="text-[10px] text-muted-foreground">{format(new Date(c.lastAt), "HH:mm")}</span>
+          <div className="relative">
+            <Avatar className="w-12 h-12 ring-2 ring-border">
+              <AvatarImage src={c.profile?.avatar_url || ""} className="object-cover" />
+              <AvatarFallback className="bg-primary/10 text-primary">
+                {(c.profile?.display_name || "?")[0]}
+              </AvatarFallback>
+            </Avatar>
             {c.unread > 0 && (
-              <span className="bg-primary text-primary-foreground text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+              <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[9px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shadow-md">
                 {c.unread}
               </span>
             )}
           </div>
-        </button>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-baseline justify-between gap-2">
+              <p className="font-display font-bold text-sm truncate">{c.profile?.display_name || "…"}</p>
+              <span className="text-[10px] text-muted-foreground/60 shrink-0">{format(new Date(c.lastAt), "HH:mm")}</span>
+            </div>
+            <p className="text-xs text-muted-foreground truncate mt-0.5">{c.lastMsg}</p>
+          </div>
+        </motion.button>
       ))}
     </div>
   );
@@ -430,57 +722,81 @@ const DMList = ({ onSelectPeer }: { onSelectPeer: (uid: string) => void }) => {
 /* ───── Main Chat Page ───── */
 const Chat = () => {
   const { lang } = useLanguage();
-  const [tab, setTab] = useState("community");
+  const [tab, setTab] = useState<"community" | "dm" | "find">("community");
   const [selectedPeer, setSelectedPeer] = useState<string | null>(null);
 
   const handleSelectUser = (uid: string) => {
     setSelectedPeer(uid);
-    setTab("dm");
   };
 
-  // If DM conversation is open
   if (selectedPeer) {
     return (
-      <div className="h-full flex flex-col">
+      <motion.div
+        initial={{ x: "100%" }}
+        animate={{ x: 0 }}
+        exit={{ x: "100%" }}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        className="h-full flex flex-col"
+      >
         <DMConversation peerId={selectedPeer} onBack={() => setSelectedPeer(null)} />
-      </div>
+      </motion.div>
     );
   }
 
   return (
     <div className="h-full flex flex-col">
-      <div className="p-4 pb-0">
-        <h1 className="text-xl font-display font-bold mb-3">
-          {lang === "uk" ? "Чат" : "Чат"}
+      {/* Header */}
+      <motion.div
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="p-4 pb-3"
+      >
+        <h1 className="text-2xl font-display font-bold mb-4">
+          {lang === "uk" ? "Чат" : "Чат"} <span className="text-primary">💬</span>
         </h1>
-        <Tabs value={tab} onValueChange={setTab} className="w-full">
-          <TabsList className="w-full">
-            <TabsTrigger value="community" className="flex-1 gap-1.5">
-              <MessageCircle className="w-3.5 h-3.5" />
-              {lang === "uk" ? "Спільнота" : "Общий"}
-            </TabsTrigger>
-            <TabsTrigger value="dm" className="flex-1 gap-1.5">
-              <Mail className="w-3.5 h-3.5" />
-              {lang === "uk" ? "Особисті" : "Личные"}
-            </TabsTrigger>
-            <TabsTrigger value="find" className="flex-1 gap-1.5">
-              <Users className="w-3.5 h-3.5" />
-              {lang === "uk" ? "Знайти" : "Найти"}
-            </TabsTrigger>
-          </TabsList>
 
-          <TabsContent value="community" className="flex-1 -mx-4 mt-0" style={{ height: "calc(100dvh - 180px)" }}>
-            <CommunityChat />
-          </TabsContent>
+        {/* Tab bar */}
+        <div className="flex gap-1 p-1 bg-muted/50 rounded-2xl">
+          <TabButton
+            active={tab === "community"}
+            icon={MessageCircle}
+            label={lang === "uk" ? "Спільнота" : "Общий"}
+            onClick={() => setTab("community")}
+          />
+          <TabButton
+            active={tab === "dm"}
+            icon={Mail}
+            label={lang === "uk" ? "Особисті" : "Личные"}
+            onClick={() => setTab("dm")}
+          />
+          <TabButton
+            active={tab === "find"}
+            icon={Users}
+            label={lang === "uk" ? "Знайти" : "Найти"}
+            onClick={() => setTab("find")}
+          />
+        </div>
+      </motion.div>
 
-          <TabsContent value="dm" className="mt-0">
-            <DMList onSelectPeer={(uid) => setSelectedPeer(uid)} />
-          </TabsContent>
-
-          <TabsContent value="find" className="mt-0 -mx-4">
-            <FindUsers onSelectUser={handleSelectUser} />
-          </TabsContent>
-        </Tabs>
+      {/* Content */}
+      <div className="flex-1 overflow-hidden">
+        <AnimatePresence mode="wait">
+          {tab === "community" && (
+            <motion.div key="community" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="h-full">
+              <CommunityChat />
+            </motion.div>
+          )}
+          {tab === "dm" && (
+            <motion.div key="dm" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="h-full overflow-y-auto">
+              <DMList onSelectPeer={handleSelectUser} />
+            </motion.div>
+          )}
+          {tab === "find" && (
+            <motion.div key="find" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="h-full overflow-y-auto">
+              <FindUsers onSelectUser={handleSelectUser} />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

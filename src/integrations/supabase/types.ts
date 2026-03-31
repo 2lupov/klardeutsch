@@ -145,18 +145,21 @@ export type Database = {
       }
       community_messages: {
         Row: {
+          audio_url: string | null
           content: string
           created_at: string
           id: string
           user_id: string
         }
         Insert: {
+          audio_url?: string | null
           content: string
           created_at?: string
           id?: string
           user_id: string
         }
         Update: {
+          audio_url?: string | null
           content?: string
           created_at?: string
           id?: string
@@ -692,6 +695,7 @@ export type Database = {
       }
       direct_messages: {
         Row: {
+          audio_url: string | null
           content: string
           created_at: string
           id: string
@@ -700,6 +704,7 @@ export type Database = {
           sender_id: string
         }
         Insert: {
+          audio_url?: string | null
           content: string
           created_at?: string
           id?: string
@@ -708,6 +713,7 @@ export type Database = {
           sender_id: string
         }
         Update: {
+          audio_url?: string | null
           content?: string
           created_at?: string
           id?: string
