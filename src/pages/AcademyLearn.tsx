@@ -298,9 +298,8 @@ const AcademyLearn = () => {
         <div className="fixed inset-0 bg-background/60 backdrop-blur-sm z-40" onClick={() => setTeacherPanelOpen(false)} />
       )}
 
-      {/* Cohort Chat FAB */}
       {courseId && (
-        <CohortChat courseId={courseId} lang={lang} />
+        <CohortChat courseId={courseId} lang={lang} open={cohortChatOpen} onClose={() => setCohortChatOpen(false)} />
       )}
     </div>
   );
