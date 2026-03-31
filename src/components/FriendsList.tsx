@@ -5,10 +5,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { fetchEdgeFunction } from "@/lib/auth-fetch";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { Search, UserPlus, UserCheck, UserX, Loader2, ArrowLeft, Users, Clock, Check, X } from "lucide-react";
+import { Search, UserPlus, UserCheck, UserX, Loader2, ArrowLeft, Users, Clock, Check, X, Gift } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import UserProfileDialog from "@/components/UserProfileDialog";
+import SendGiftDialog from "@/components/gifts/SendGiftDialog";
 
 interface FriendRow {
   id: string;
