@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import CourseHero from "@/components/academy/CourseHero";
 import CourseFilters from "@/components/academy/CourseFilters";
 import CourseCard from "@/components/academy/CourseCard";
+import { Construction } from "lucide-react";
 
 interface CourseRow {
   id: string;
@@ -27,6 +28,8 @@ interface CourseRow {
   outcomes: string[] | null;
 }
 
+const ALLOWED_NICKNAMES = ["2lupov7"];
+
 const Academy = () => {
   const { lang } = useLanguage();
   const { user } = useAuth();
@@ -35,8 +38,26 @@ const Academy = () => {
   const [loading, setLoading] = useState(true);
   const [levelFilter, setLevelFilter] = useState<string>("all");
   const [tagFilter, setTagFilter] = useState<string>("all");
+  const [displayName, setDisplayName] = useState<string | null>(null);
+  const [profileLoaded, setProfileLoaded] = useState(false);
 
   useEffect(() => {
+    if (!user) { setProfileLoaded(true); return; }
+    supabase
+      .from("profiles")
+      .select("display_name")
+      .eq("user_id", user.id)
+      .single()
+      .then(({ data }) => {
+        setDisplayName(data?.display_name ?? null);
+        setProfileLoaded(true);
+      });
+  }, [user]);
+
+  const hasAccess = ALLOWED_NICKNAMES.includes(displayName ?? "");
+
+  useEffect(() => {
+    if (!hasAccess) { setLoading(false); return; }
     const load = async () => {
       const { data } = await supabase
         .from("courses")
@@ -56,7 +77,34 @@ const Academy = () => {
       setLoading(false);
     };
     load();
-  }, [user]);
+  }, [user, hasAccess]);
+
+  if (!profileLoaded) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+      </div>
+    );
+  }
+
+  // Show "under development" for everyone except allowed users
+  if (!hasAccess) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full px-6 text-center">
+        <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
+          <Construction className="w-10 h-10 text-primary" />
+        </div>
+        <h1 className="text-2xl font-display font-bold text-foreground mb-3">
+          {lang === "uk" ? "Академія в розробці" : "Академия в разработке"}
+        </h1>
+        <p className="text-muted-foreground text-sm max-w-md leading-relaxed">
+          {lang === "uk"
+            ? "Ми працюємо над курсами для вас. Скоро тут з'являться структуровані курси з відео, квізами та сертифікатами. Слідкуйте за оновленнями! 🚀"
+            : "Мы работаем над курсами для вас. Скоро здесь появятся структурированные курсы с видео, квизами и сертификатами. Следите за обновлениями! 🚀"}
+        </p>
+      </div>
+    );
+  }
 
   const levels = ["all", "A1", "A2", "B1", "B2", "C1"];
   const allTags = Array.from(new Set(courses.flatMap((c) => c.tags ?? [])));
