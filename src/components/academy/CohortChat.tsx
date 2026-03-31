@@ -24,7 +24,6 @@ interface Props {
 const CohortChat = ({ courseId, lang, open, onClose }: Props) => {
   const { user } = useAuth();
   const [messages, setMessages] = useState<CohortMessage[]>([]);
-  const [messages, setMessages] = useState<CohortMessage[]>([]);
   const [profiles, setProfiles] = useState<Record<string, { display_name: string; avatar_url: string | null }>>({});
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
