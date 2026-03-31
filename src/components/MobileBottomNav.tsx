@@ -1,9 +1,9 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, User, BookOpen, Gamepad2, MessageCircle } from "lucide-react";
+import { Home, User, BookOpen, Gamepad2, MessageSquare } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const MobileBottomNav = () => {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const location = useLocation();
 
   const items = [
@@ -11,7 +11,7 @@ const MobileBottomNav = () => {
     { to: "/profile", icon: User, label: t("myProfile") },
     { to: "/games", icon: Gamepad2, label: t("gamesTitle") },
     { to: "/dictionary", icon: BookOpen, label: t("navDictionary") },
-    { to: "/dialogues", icon: MessageCircle, label: t("navDialogues") },
+    { to: "/chat", icon: MessageSquare, label: lang === "uk" ? "Чат" : "Чат" },
   ];
 
   return (

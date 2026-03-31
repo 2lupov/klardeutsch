@@ -34,6 +34,7 @@ import AcademyLearn from "./pages/AcademyLearn";
 import Onboarding from "./pages/Onboarding";
 import Review from "./pages/Review";
 import Certificate from "./pages/Certificate";
+import Chat from "./pages/Chat";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -64,6 +65,7 @@ const AppRoutes = () => {
         <Route path="/challenges" element={<Challenges />} />
         <Route path="/dialogues" element={<Dialogues />} />
         <Route path="/games" element={<Games />} />
+        <Route path="/chat" element={<Chat />} />
         <Route path="/course/:id" element={<Course />} />
         <Route path="/academy" element={<Academy />} />
         <Route path="/academy/:courseId" element={<AcademyCourse />} />
