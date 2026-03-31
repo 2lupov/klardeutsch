@@ -1060,6 +1060,7 @@ export type Database = {
           last_active: string | null
           last_reminder_sent_at: string | null
           learning_goal: string | null
+          nickname_changed_at: string | null
           onboarding_completed: boolean | null
           preferred_lang: string
           recommended_level: string | null
@@ -1077,6 +1078,7 @@ export type Database = {
           last_active?: string | null
           last_reminder_sent_at?: string | null
           learning_goal?: string | null
+          nickname_changed_at?: string | null
           onboarding_completed?: boolean | null
           preferred_lang?: string
           recommended_level?: string | null
@@ -1094,6 +1096,7 @@ export type Database = {
           last_active?: string | null
           last_reminder_sent_at?: string | null
           learning_goal?: string | null
+          nickname_changed_at?: string | null
           onboarding_completed?: boolean | null
           preferred_lang?: string
           recommended_level?: string | null
