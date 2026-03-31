@@ -209,14 +209,23 @@ const FriendsList = ({ onBack }: FriendsListProps) => {
                   const p = getProfile(friendId);
                   return (
                     <UserRow key={f.id} profile={p} right={
-                      <button
-                        onClick={() => rejectOrRemove(f.id)}
-                        disabled={actionLoading === f.id}
-                        className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-                        title={t("Удалить", "Видалити")}
-                      >
-                        {actionLoading === f.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserX className="w-4 h-4" />}
-                      </button>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => setGiftTarget({ id: friendId, name: p.display_name || "User" })}
+                          className="p-2 rounded-lg text-primary hover:bg-primary/10 transition-colors"
+                          title={t("Подарок", "Подарунок")}
+                        >
+                          <Gift className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => rejectOrRemove(f.id)}
+                          disabled={actionLoading === f.id}
+                          className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                          title={t("Удалить", "Видалити")}
+                        >
+                          {actionLoading === f.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserX className="w-4 h-4" />}
+                        </button>
+                      </div>
                     } />
                   );
                 })
