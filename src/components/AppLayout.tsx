@@ -73,7 +73,7 @@ const AppLayout = () => {
   return (
     <div className="h-[100dvh] bg-background flex overflow-hidden">
       <DesktopSidebar />
-      <main className="flex-1 overflow-y-auto relative">
+      <main className="flex-1 overflow-y-auto relative w-full">
         <EditModeToolbar />
         <LofiFloatingPlayer />
         <ListeningFloatingPlayer />

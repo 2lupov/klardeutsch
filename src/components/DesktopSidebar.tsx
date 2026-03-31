@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
-  Home, User, BookOpen, BarChart3, Gamepad2, GraduationCap,
-  MessageSquare, Flame, Coins, Star, ChevronLeft, ChevronRight,
-  Swords
+  Home, BookOpen, Gamepad2, GraduationCap,
+  MessageSquare, Flame, Coins, Star,
+  Swords, Menu, X
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -16,7 +16,6 @@ import { useXP } from "@/hooks/useXP";
 import { useDailyBonus } from "@/hooks/useDailyBonus";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface SidebarLink {
   to: string;
@@ -24,6 +23,8 @@ interface SidebarLink {
   label: string;
   badge?: number;
 }
+
+const SIDEBAR_W = 260;
 
 const DesktopSidebar = () => {
   const { t, lang } = useLanguage();
@@ -34,7 +35,7 @@ const DesktopSidebar = () => {
   const { totalXP } = useXP();
   const { streak } = useDailyBonus();
   const { user } = useAuth();
-  const [collapsed, setCollapsed] = useState(false);
+  const [open, setOpen] = useState(true);
   const [profile, setProfile] = useState<{ display_name?: string; avatar_url?: string } | null>(null);
 
   const a1 = useLevelProgress("A1");
@@ -52,9 +53,7 @@ const DesktopSidebar = () => {
       .select("display_name, avatar_url")
       .eq("user_id", user.id)
       .single()
-      .then(({ data }) => {
-        if (data) setProfile(data);
-      });
+      .then(({ data }) => { if (data) setProfile(data); });
   }, [user]);
 
   const learnLinks: SidebarLink[] = [
@@ -69,46 +68,30 @@ const DesktopSidebar = () => {
     { to: "/challenges", icon: Swords, label: lang === "uk" ? "Дуелі" : "Дуэли" },
   ];
 
-  const profileLinks: SidebarLink[] = [
-    { to: "/profile", icon: User, label: t("myProfile") },
-    { to: "/stats", icon: BarChart3, label: t("navStats") },
-  ];
-
   const sectionLabel = (text: string) => (
-    <AnimatePresence>
-      {!collapsed && (
-        <motion.p
-          initial={{ opacity: 0, x: -8 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -8 }}
-          className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider px-3 pt-4 pb-1"
-        >
-          {text}
-        </motion.p>
-      )}
-    </AnimatePresence>
+    <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider px-3 pt-5 pb-1.5">
+      {text}
+    </p>
   );
 
   const renderLink = (item: SidebarLink) => {
-    const active = location.pathname === item.to || 
+    const active = location.pathname === item.to ||
       (item.to !== "/" && location.pathname.startsWith(item.to));
 
-    const linkContent = (
+    return (
       <NavLink
         key={item.to}
         to={item.to}
-        className={`group relative flex items-center gap-3 rounded-xl font-display text-sm font-medium transition-all duration-200 ${
-          collapsed ? "justify-center px-2 py-3" : "px-3 py-2.5"
-        } ${
+        onClick={() => {}} // keep sidebar open on desktop
+        className={`group relative flex items-center gap-3 px-3 py-2.5 rounded-xl font-display text-sm font-medium transition-all duration-200 ${
           active
             ? "bg-primary/10 text-primary"
             : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
         }`}
       >
-        {/* Active indicator bar */}
         {active && (
           <motion.div
-            layoutId="sidebar-indicator"
+            layoutId="sidebar-active"
             className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-primary"
             transition={{ type: "spring", stiffness: 350, damping: 30 }}
           />
@@ -123,164 +106,132 @@ const DesktopSidebar = () => {
           )}
         </div>
 
-        <AnimatePresence>
-          {!collapsed && (
-            <motion.span
-              initial={{ opacity: 0, width: 0 }}
-              animate={{ opacity: 1, width: "auto" }}
-              exit={{ opacity: 0, width: 0 }}
-              className="whitespace-nowrap overflow-hidden"
-            >
-              {item.label}
-            </motion.span>
-          )}
-        </AnimatePresence>
+        <span className="whitespace-nowrap">{item.label}</span>
       </NavLink>
     );
-
-    if (collapsed) {
-      return (
-        <TooltipProvider key={item.to} delayDuration={100}>
-          <Tooltip>
-            <TooltipTrigger asChild>{linkContent}</TooltipTrigger>
-            <TooltipContent side="right" className="font-display text-xs">
-              {item.label}
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      );
-    }
-
-    return <div key={item.to}>{linkContent}</div>;
   };
 
   const displayName = profile?.display_name || "User";
   const avatarUrl = profile?.avatar_url;
 
   return (
-    <motion.aside
-      animate={{ width: collapsed ? 72 : 256 }}
-      transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      className="hidden lg:flex flex-col h-screen sticky top-0 border-r border-border bg-card/60 backdrop-blur-2xl overflow-hidden z-20"
-    >
-      {/* Logo + Collapse toggle */}
-      <div className={`relative flex items-center border-b border-border ${collapsed ? "justify-center py-4 px-2" : "p-5 gap-3"}`}>
-        <div className={collapsed ? "scale-75" : ""}>
-          <KlarLogo progress={totalProgress} completed={allCompleted} />
-        </div>
-        <AnimatePresence>
-          {!collapsed && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex flex-col min-w-0"
-            >
-              <span className="text-sm font-display font-bold text-foreground">KLAR</span>
-              <span className="text-[10px] text-muted-foreground truncate">{t("appSubtitle")}</span>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className={`absolute ${collapsed ? "-right-3" : "right-3"} top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors z-30`}
-        >
-          {collapsed ? <ChevronRight className="w-3 h-3" /> : <ChevronLeft className="w-3 h-3" />}
-        </button>
-      </div>
-
-      {/* User profile widget */}
-      <NavLink
-        to="/profile"
-        className={`mx-2 mt-3 rounded-xl transition-colors hover:bg-muted/50 ${collapsed ? "p-2 flex justify-center" : "p-3"}`}
+    <>
+      {/* Toggle button — always visible top-left */}
+      <button
+        onClick={() => setOpen(!open)}
+        className="hidden lg:flex fixed top-4 left-4 z-50 w-9 h-9 rounded-xl bg-card/80 backdrop-blur-lg border border-border items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
       >
-        <div className={`flex items-center ${collapsed ? "justify-center" : "gap-3"}`}>
-          <div className="relative shrink-0">
-            {avatarUrl ? (
-              <img
-                src={avatarUrl}
-                alt={displayName}
-                className="w-9 h-9 rounded-full object-cover border-2 border-primary/20"
-              />
-            ) : (
-              <div className="w-9 h-9 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center">
-                <span className="text-sm font-bold text-primary">
-                  {displayName.charAt(0).toUpperCase()}
-                </span>
+        {open ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+      </button>
+
+      {/* Overlay when sidebar is open */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setOpen(false)}
+            className="hidden lg:block fixed inset-0 bg-background/30 backdrop-blur-sm z-30"
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Sidebar drawer */}
+      <AnimatePresence>
+        {open && (
+          <motion.aside
+            initial={{ x: -SIDEBAR_W }}
+            animate={{ x: 0 }}
+            exit={{ x: -SIDEBAR_W }}
+            transition={{ type: "spring", stiffness: 350, damping: 35 }}
+            className="hidden lg:flex fixed left-0 top-0 bottom-0 flex-col z-40 border-r border-border bg-card/95 backdrop-blur-2xl overflow-hidden"
+            style={{ width: SIDEBAR_W }}
+          >
+            {/* Logo header */}
+            <div className="flex items-center gap-3 px-5 pt-4 pb-3 border-b border-border">
+              <KlarLogo progress={totalProgress} completed={allCompleted} />
+              <div className="flex flex-col min-w-0">
+                <span className="text-sm font-display font-bold text-foreground">KLAR</span>
+                <span className="text-[10px] text-muted-foreground truncate">{t("appSubtitle")}</span>
+              </div>
+            </div>
+
+            {/* Navigation */}
+            <nav className="flex-1 px-2 flex flex-col gap-0.5 overflow-y-auto mt-1">
+              {sectionLabel(lang === "uk" ? "Навчання" : "Обучение")}
+              {learnLinks.map(renderLink)}
+
+              <div className="h-px bg-border mx-2 mt-2" />
+              {sectionLabel(lang === "uk" ? "Спільнота" : "Сообщество")}
+              {socialLinks.map(renderLink)}
+            </nav>
+
+            {/* Footer links — web only */}
+            {!isTelegram && (
+              <div className="px-3 py-2 border-t border-border space-y-0.5 flex-shrink-0">
+                {[
+                  { to: "/method", label: lang === "uk" ? "Про метод KLAR" : "О методе KLAR" },
+                  { to: "/privacy", label: lang === "uk" ? "Конфіденційність" : "Конфиденциальность" },
+                  { to: "/terms", label: lang === "uk" ? "Оферта" : "Оферта" },
+                ].map((item) => (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    className={`block px-3 py-1 text-[10px] rounded-md transition-colors ${
+                      location.pathname === item.to
+                        ? "text-foreground"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {item.label}
+                  </NavLink>
+                ))}
               </div>
             )}
-            {/* Online dot */}
-            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-500 border-2 border-card" />
-          </div>
 
-          <AnimatePresence>
-            {!collapsed && (
-              <motion.div
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: "auto" }}
-                exit={{ opacity: 0, width: 0 }}
-                className="min-w-0 overflow-hidden"
-              >
-                <p className="text-sm font-display font-bold text-foreground truncate">{displayName}</p>
-                <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-                  <span className="flex items-center gap-0.5">
-                    <Star className="w-3 h-3 text-primary" /> {totalXP}
-                  </span>
-                  <span className="flex items-center gap-0.5">
-                    <Coins className="w-3 h-3 text-yellow-500" /> {balance}
-                  </span>
-                  <span className="flex items-center gap-0.5">
-                    <Flame className="w-3 h-3 text-orange-500" /> {streak}
-                  </span>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </NavLink>
-
-      {/* Navigation sections */}
-      <nav className="flex-1 px-2 flex flex-col gap-0.5 overflow-y-auto mt-1">
-        {/* Learning */}
-        {!collapsed && <div className="h-px bg-border mx-2 mt-2" />}
-        {sectionLabel(lang === "uk" ? "Навчання" : "Обучение")}
-        {learnLinks.map(renderLink)}
-
-        {/* Social */}
-        {!collapsed && <div className="h-px bg-border mx-2 mt-2" />}
-        {sectionLabel(lang === "uk" ? "Спільнота" : "Сообщество")}
-        {socialLinks.map(renderLink)}
-
-        {/* Profile & Stats */}
-        {!collapsed && <div className="h-px bg-border mx-2 mt-2" />}
-        {sectionLabel(lang === "uk" ? "Профіль" : "Профиль")}
-        {profileLinks.map(renderLink)}
-      </nav>
-
-      {/* Footer — web only */}
-      {!isTelegram && !collapsed && (
-        <div className="p-3 border-t border-border space-y-0.5 flex-shrink-0">
-          {[
-            { to: "/method", label: lang === "uk" ? "Про метод KLAR" : "О методе KLAR" },
-            { to: "/privacy", label: lang === "uk" ? "Конфіденційність" : "Конфиденциальность" },
-            { to: "/terms", label: lang === "uk" ? "Оферта" : "Оферта" },
-          ].map((item) => (
+            {/* Profile widget at bottom */}
             <NavLink
-              key={item.to}
-              to={item.to}
-              className={`block px-3 py-1 text-[10px] rounded-md transition-colors ${
-                location.pathname === item.to
-                  ? "text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
+              to="/profile"
+              className="mx-2 mb-2 p-3 rounded-xl border border-border bg-muted/30 hover:bg-muted/60 transition-colors"
             >
-              {item.label}
+              <div className="flex items-center gap-3">
+                <div className="relative shrink-0">
+                  {avatarUrl ? (
+                    <img
+                      src={avatarUrl}
+                      alt={displayName}
+                      className="w-9 h-9 rounded-full object-cover border-2 border-primary/20"
+                    />
+                  ) : (
+                    <div className="w-9 h-9 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center">
+                      <span className="text-sm font-bold text-primary">
+                        {displayName.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-display font-bold text-foreground truncate">{displayName}</p>
+                  <div className="flex items-center gap-2.5 text-[10px] text-muted-foreground mt-0.5">
+                    <span className="flex items-center gap-0.5">
+                      <Star className="w-3 h-3 text-primary" /> {totalXP}
+                    </span>
+                    <span className="flex items-center gap-0.5">
+                      <Coins className="w-3 h-3 text-yellow-500" /> {balance}
+                    </span>
+                    <span className="flex items-center gap-0.5">
+                      <Flame className="w-3 h-3 text-orange-500" /> {streak}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </NavLink>
-          ))}
-        </div>
-      )}
-    </motion.aside>
+          </motion.aside>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 
