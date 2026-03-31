@@ -36,7 +36,6 @@ const DesktopSidebar = () => {
   const { streak } = useDailyBonus();
   const { user } = useAuth();
   const [open, setOpen] = useState(true);
-  const [hasClicked, setHasClicked] = useState(false);
   const [profile, setProfile] = useState<{ display_name?: string; avatar_url?: string } | null>(null);
 
   const a1 = useLevelProgress("A1");
@@ -119,9 +118,9 @@ const DesktopSidebar = () => {
     <>
       {/* Toggle button — always visible top-left */}
       <button
-        onClick={() => { if (!hasClicked) setHasClicked(true); setOpen(!open); }}
+        onClick={() => setOpen(!open)}
         className={`hidden lg:flex fixed top-4 left-4 z-50 w-9 h-9 rounded-xl bg-card/80 backdrop-blur-lg border border-border items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-300 ${
-          !open && !hasClicked ? "animate-pulse-glow" : ""
+          !open ? "animate-pulse-glow-twice" : ""
         }`}
       >
         {open ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
