@@ -209,7 +209,8 @@ const Index = () => {
         {screen === "levels" && (
           <>
             <LevelSelector onSelect={handleLevelSelect} />
-            <div className={`w-full mt-3 ${isMobile ? "max-w-md" : "max-w-2xl"} mx-auto`}>
+            <div className={`w-full mt-3 ${isMobile ? "max-w-md" : "max-w-2xl"} mx-auto space-y-3`}>
+              <SRSWidget />
               <DailyChallenge />
             </div>
           </>
