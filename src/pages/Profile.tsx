@@ -17,6 +17,7 @@ import AvatarPicker from "@/components/AvatarPicker";
 import ImageCropper from "@/components/ImageCropper";
 import StreakPlant from "@/components/StreakPlant";
 import { useDailyBonus } from "@/hooks/useDailyBonus";
+import GiftShelf from "@/components/gifts/GiftShelf";
 
 interface ProgressRow {
   level: string;
