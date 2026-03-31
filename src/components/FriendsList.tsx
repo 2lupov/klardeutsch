@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchEdgeFunction } from "@/lib/auth-fetch";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Search, UserPlus, UserCheck, UserX, Loader2, ArrowLeft, Users, Clock, Check, X } from "lucide-react";
@@ -106,6 +107,8 @@ const FriendsList = ({ onBack }: FriendsListProps) => {
       toast({ title: t("Ошибка", "Помилка"), description: error.message, variant: "destructive" });
     } else {
       toast({ title: t("Заявка отправлена!", "Заявку відправлено!") });
+      // Notify via Telegram — fire and forget
+      fetchEdgeFunction("notify-friend-request", { json: { friend_id: friendId } }).catch(() => {});
       loadFriendships();
     }
     setActionLoading(null);
