@@ -343,13 +343,19 @@ const FriendsList = ({ onBack }: FriendsListProps) => {
         </AnimatePresence>
       )}
 
-      {selectedUserId && (
-        <UserProfileDialog
-          userId={selectedUserId}
-          open={!!selectedUserId}
-          onOpenChange={open => !open && setSelectedUserId(null)}
-        />
-      )}
+      {selectedUserId && (() => {
+        const p = profiles[selectedUserId] || searchResults.find(r => r.user_id === selectedUserId);
+        return (
+          <UserProfileDialog
+            userId={selectedUserId}
+            displayName={p?.display_name ?? null}
+            avatarUrl={p?.avatar_url ?? null}
+            totalXp={0}
+            open={!!selectedUserId}
+            onOpenChange={open => !open && setSelectedUserId(null)}
+          />
+        );
+      })()}
     </div>
   );
 };
