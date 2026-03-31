@@ -715,6 +715,12 @@ const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void
     fetchEdgeFunction("notify-dm", { json: { receiver_id: peerId, message_preview: "🎤 Голосовое сообщение" } }).catch(() => {});
   };
 
+  const sendImage = async (imageUrl: string) => {
+    if (!user) return;
+    await supabase.from("direct_messages").insert({ sender_id: user.id, receiver_id: peerId, content: "📷", image_url: imageUrl });
+    fetchEdgeFunction("notify-dm", { json: { receiver_id: peerId, message_preview: "📷 Фото" } }).catch(() => {});
+  };
+
   return (
     <div className="flex flex-col h-full">
       {/* DM Header */}
