@@ -18,6 +18,7 @@ import ImageCropper from "@/components/ImageCropper";
 import StreakPlant from "@/components/StreakPlant";
 import { useDailyBonus } from "@/hooks/useDailyBonus";
 import GiftShelf from "@/components/gifts/GiftShelf";
+import FriendsList from "@/components/FriendsList";
 
 interface ProgressRow {
   level: string;
@@ -35,7 +36,7 @@ interface ProfileData {
   telegram_chat_id: number | null;
 }
 
-type ProfileScreen = "main" | "achievements" | "activity" | "mistakes" | "leaderboard" | "notifications" | "referrals" | "offline";
+type ProfileScreen = "main" | "achievements" | "activity" | "mistakes" | "leaderboard" | "notifications" | "referrals" | "offline" | "friends";
 
 const Profile = () => {
   const { user, signOut } = useAuth();
@@ -248,6 +249,11 @@ const Profile = () => {
       default: return "";
     }
   };
+
+  // Sub-screen: Friends
+  if (screen === "friends") {
+    return <FriendsList onBack={() => setScreen("main")} />;
+  }
 
   // Sub-screen: Referrals
   if (screen === "referrals") {
@@ -774,6 +780,11 @@ const Profile = () => {
         />
         <NavButton
           icon={<Users className="w-4 h-4 text-primary" />}
+          label={lang === "uk" ? "Друзі" : "Друзья"}
+          onClick={() => setScreen("friends")}
+        />
+        <NavButton
+          icon={<Send className="w-4 h-4 text-primary" />}
           label={t("referralsTitle")}
           onClick={() => setScreen("referrals")}
         />
