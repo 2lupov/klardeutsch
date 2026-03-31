@@ -36,6 +36,7 @@ const Index = () => {
   const { saveProgress } = useProgress();
   const { t, lang } = useLanguage();
   const { isMobile } = usePlatform();
+  const { showSummary, triggerSummary, closeSummary } = useDailySummary();
 
   // Load data when entering exercise
   useEffect(() => {
