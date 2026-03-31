@@ -18,6 +18,7 @@ import ImageCropper from "@/components/ImageCropper";
 import StreakPlant from "@/components/StreakPlant";
 import { useDailyBonus } from "@/hooks/useDailyBonus";
 import GiftShelf from "@/components/gifts/GiftShelf";
+import GiftUnboxing from "@/components/gifts/GiftUnboxing";
 import FriendsList from "@/components/FriendsList";
 
 interface ProgressRow {
@@ -766,6 +767,9 @@ const Profile = () => {
         <StatCard icon={<Brain className="w-4 h-4" />} value={completedLessons} label={t("lessonsCompleted")} />
         <StatCard icon={<Flame className="w-4 h-4" />} value={streak} label={t("streakDays")} />
       </div>
+
+      {/* Gift unboxing on profile entry */}
+      {user && <GiftUnboxing userId={user.id} />}
 
       {/* Gift shelf */}
       {user && (
