@@ -201,6 +201,16 @@ const uploadVoice = async (blob: Blob, userId: string): Promise<string | null> =
   return data.publicUrl;
 };
 
+/* ───── Upload image helper ───── */
+const uploadChatImage = async (file: File, userId: string): Promise<string | null> => {
+  const ext = file.name.split(".").pop() || "jpg";
+  const filename = `${userId}/${Date.now()}.${ext}`;
+  const { error } = await supabase.storage.from("chat-images").upload(filename, file, { contentType: file.type });
+  if (error) return null;
+  const { data } = supabase.storage.from("chat-images").getPublicUrl(filename);
+  return data.publicUrl;
+};
+
 /* ───── Message Bubble ───── */
 const MessageBubble = ({ isMe, content, audioUrl, time, senderName, avatarUrl, index }: {
   isMe: boolean; content: string; audioUrl?: string | null; time: string;
