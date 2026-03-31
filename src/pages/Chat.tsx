@@ -1265,7 +1265,7 @@ const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-[calc(100dvh-3.5rem)] md:h-[100dvh] -mb-14 md:mb-0">
       <motion.div
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
