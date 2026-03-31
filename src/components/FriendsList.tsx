@@ -41,6 +41,7 @@ const FriendsList = ({ onBack }: FriendsListProps) => {
   const [searching, setSearching] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [giftTarget, setGiftTarget] = useState<{ id: string; name: string } | null>(null);
 
   const t = useCallback((ru: string, uk: string) => lang === "uk" ? uk : ru, [lang]);
 
