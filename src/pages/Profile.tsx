@@ -61,6 +61,7 @@ const Profile = () => {
   const [dialoguesCount, setDialoguesCount] = useState(0);
   const [dailyBonusStreakVal, setDailyBonusStreakVal] = useState(0);
   const [challengesSentCount, setChallengesSentCount] = useState(0);
+  const [pendingFriendRequests, setPendingFriendRequests] = useState(0);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [settingAvatar, setSettingAvatar] = useState(false);
   const [cropFile, setCropFile] = useState<File | null>(null);
