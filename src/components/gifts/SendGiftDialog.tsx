@@ -113,6 +113,15 @@ const SendGiftDialog = ({ open, onOpenChange, receiverId, receiverName }: SendGi
     }
     setSent(true);
     reloadCoins();
+
+    // Send notifications (Telegram + in-app DM) — fire and forget
+    fetchEdgeFunction("notify-gift", {
+      receiver_id: receiverId,
+      gift_name: selectedGift.name,
+      gift_emoji: selectedGift.emoji,
+      message: message.trim() || null,
+    }).catch(() => {});
+
     setTimeout(() => onOpenChange(false), 2000);
   };
 
