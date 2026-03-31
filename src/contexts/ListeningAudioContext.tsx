@@ -122,8 +122,9 @@ export const ListeningAudioProvider = ({ children }: { children: ReactNode }) =>
         if (!response.ok) throw new Error("TTS failed");
 
         const blob = await response.blob();
+        if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
         url = URL.createObjectURL(blob);
-      }
+        objectUrlRef.current = url;
 
       const audio = new Audio(url);
       audio.playbackRate = playbackSpeed;
