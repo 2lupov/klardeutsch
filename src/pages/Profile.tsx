@@ -645,7 +645,7 @@ const Profile = () => {
       </div>
 
       {/* Avatar picker */}
-      {showAvatarPicker && (
+      {showAvatarPicker && !cropFile && (
         <div className="glass-card p-4 mb-4 flex flex-col gap-3">
           <p className="text-xs font-medium text-foreground">Выбери аватарку:</p>
           <AvatarPicker
@@ -664,6 +664,17 @@ const Profile = () => {
           >
             Завантажити своє фото
           </button>
+        </div>
+      )}
+
+      {/* Image cropper */}
+      {cropFile && (
+        <div className="glass-card p-4 mb-4">
+          <ImageCropper
+            imageFile={cropFile}
+            onCrop={handleCroppedAvatar}
+            onCancel={() => setCropFile(null)}
+          />
         </div>
       )}
 
