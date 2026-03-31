@@ -41,8 +41,19 @@ const Games = () => {
   if (screen === "formular") return <FormularHeld onBack={() => setScreen("list")} />;
   if (screen === "redewendungen") return <RedewendungenMatch onBack={() => setScreen("list")} />;
   if (screen === "telefon") return <TelefonTrainer onBack={() => setScreen("list")} />;
+  if (screen === "dialogues") return (
+    <div className="relative">
+      <div className="absolute top-4 left-4 z-10">
+        <button onClick={() => setScreen("list")} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <ArrowLeft className="w-4 h-4" /> {t("back")}
+        </button>
+      </div>
+      <Dialogues />
+    </div>
+  );
 
   const games = [
+    { id: "dialogues" as const, emoji: "💬", icon: MessageCircle, titleKey: "navDialogues", descKey: "gameDialoguesDesc" },
     { id: "article-sorter" as const, emoji: "♻️", icon: Recycle, titleKey: "gameArticleSorterTitle", descKey: "gameArticleSorterDesc" },
     { id: "cafe" as const, emoji: "☕", icon: Coffee, titleKey: "gameCafeTitle", descKey: "gameCafeDesc" },
     { id: "satzpuzzle" as const, emoji: "🧩", icon: Puzzle, titleKey: "gameSatzpuzzleTitle", descKey: "gameSatzpuzzleDesc", isNew: true },
