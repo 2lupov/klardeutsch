@@ -1165,19 +1165,23 @@ const FindUsers = ({ onSelectUser }: { onSelectUser: (uid: string) => void }) =>
 const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void }) => {
   const { user } = useAuth();
   const { lang } = useLanguage();
-  const [peer, setPeer] = useState<Profile | null>(null);
+  const [peer, setPeer] = useState<(Profile & { last_active?: string | null }) | null>(null);
   const [messages, setMessages] = useState<DirectMsg[]>([]);
   const endRef = useRef<HTMLDivElement>(null);
+  const [replyTo, setReplyTo] = useState<ReplyInfo | null>(null);
+  const [profileOpen, setProfileOpen] = useState(false);
+
+  const peerOnline = isUserOnline(peer?.last_active ?? null);
 
   useEffect(() => {
     if (!user) return;
     const load = async () => {
       const { data: prof } = await supabase
         .from("profiles")
-        .select("user_id, display_name, avatar_url")
+        .select("user_id, display_name, avatar_url, last_active")
         .eq("user_id", peerId)
         .single();
-      if (prof) setPeer(prof);
+      if (prof) setPeer(prof as any);
 
       const { data: msgs } = await supabase
         .from("direct_messages")
@@ -1218,7 +1222,14 @@ const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void
 
   const sendText = async (content: string) => {
     if (!user) return;
-    await supabase.from("direct_messages").insert({ sender_id: user.id, receiver_id: peerId, content });
+    const insert: any = { sender_id: user.id, receiver_id: peerId, content };
+    if (replyTo) {
+      insert.reply_to_id = replyTo.id;
+      insert.reply_to_content = replyTo.content.slice(0, 100);
+      insert.reply_to_sender = replyTo.senderName;
+    }
+    await supabase.from("direct_messages").insert(insert);
+    setReplyTo(null);
     fetchEdgeFunction("notify-dm", { json: { receiver_id: peerId, message_preview: content } }).catch(() => {});
   };
 
@@ -1263,24 +1274,32 @@ const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void
           className="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center transition-colors">
           <ArrowLeft className="w-4 h-4" />
         </motion.button>
-        <Avatar className="w-9 h-9 ring-2 ring-primary/20">
-          <AvatarImage src={peer?.avatar_url || ""} className="object-cover" />
-          <AvatarFallback className="text-xs bg-primary/10 text-primary">
-            {(peer?.display_name || "?")[0]}
-          </AvatarFallback>
-        </Avatar>
-        <div>
+        <button onClick={() => setProfileOpen(true)} className="relative">
+          <Avatar className="w-9 h-9 ring-2 ring-primary/20 hover:ring-primary/40 transition-all">
+            <AvatarImage src={peer?.avatar_url || ""} className="object-cover" />
+            <AvatarFallback className="text-xs bg-primary/10 text-primary">
+              {(peer?.display_name || "?")[0]}
+            </AvatarFallback>
+          </Avatar>
+          <span className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-card ${peerOnline ? "bg-green-500" : "bg-muted-foreground/40"}`} />
+        </button>
+        <button onClick={() => setProfileOpen(true)} className="text-left">
           <p className="font-display font-bold text-sm">{peer?.display_name || "…"}</p>
-          <p className="text-[10px] text-muted-foreground">online</p>
-        </div>
+          <p className={`text-[10px] ${peerOnline ? "text-green-500" : "text-muted-foreground"}`}>
+            {peerOnline ? "online" : "offline"}
+          </p>
+        </button>
       </motion.div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-2.5">
         {messages.map((m, i) => {
           const isMe = m.sender_id === user?.id;
+          const msg = m as any;
+          const senderName = isMe ? undefined : peer?.display_name || undefined;
           return (
             <MessageBubble
               key={m.id}
+              messageId={m.id}
               isMe={isMe}
               content={m.content}
               audioUrl={m.audio_url}
@@ -1289,6 +1308,9 @@ const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void
               fileUrl={m.file_url}
               fileName={m.file_name}
               time={format(new Date(m.created_at), "HH:mm")}
+              replyToContent={msg.reply_to_content}
+              replyToSender={msg.reply_to_sender}
+              onReply={() => setReplyTo({ id: m.id, content: m.content, senderName: isMe ? "Вы" : (peer?.display_name || "?") })}
               index={i}
             />
           );
@@ -1305,6 +1327,17 @@ const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void
         onSendVideoCircle={sendVideoCircle}
         placeholder={lang === "uk" ? "Написати…" : "Написать…"}
         userId={user?.id || ""}
+        replyTo={replyTo}
+        onCancelReply={() => setReplyTo(null)}
+      />
+
+      <UserProfileDialog
+        userId={peerId}
+        displayName={peer?.display_name || null}
+        avatarUrl={peer?.avatar_url || null}
+        totalXp={0}
+        open={profileOpen}
+        onOpenChange={setProfileOpen}
       />
     </div>
   );
