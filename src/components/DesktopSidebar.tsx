@@ -120,7 +120,7 @@ const DesktopSidebar = () => {
       <button
         onClick={() => setOpen(!open)}
         className={`hidden lg:flex fixed top-4 left-4 z-50 w-9 h-9 rounded-xl bg-card/80 backdrop-blur-lg border border-border items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-300 ${
-          !open ? "shadow-[0_0_12px_3px_hsl(var(--primary)/0.35)]" : ""
+          !open ? "shadow-[0_0_12px_3px_hsl(var(--primary)/0.35)] animate-[pulse-glow_2s_ease-in-out_infinite]" : ""
         }`}
       >
         {open ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
