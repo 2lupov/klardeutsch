@@ -5,6 +5,7 @@ import { usePlatform } from "@/hooks/usePlatform";
 import KlarLogo from "@/components/KlarLogo";
 import { useLevelProgress } from "@/hooks/useLevelProgress";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { useUnreadDMs } from "@/hooks/useUnreadDMs";
 
 const DesktopSidebar = () => {
   const { t, lang } = useLanguage();
