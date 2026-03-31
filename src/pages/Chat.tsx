@@ -410,21 +410,41 @@ const MessageBubble = ({ isMe, content, audioUrl, imageUrl, imageUrls, fileUrl, 
 };
 
 /* ───── Chat Input Bar ───── */
-const ChatInputBar = ({ onSendText, onSendVoice, onSendImage, placeholder, userId }: {
+const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, placeholder, userId }: {
   onSendText: (text: string) => void;
   onSendVoice: (audioUrl: string) => void;
-  onSendImage: (imageUrl: string) => void;
+  onSendImages: (imageUrls: string[]) => void;
+  onSendFile: (fileUrl: string, fileName: string) => void;
   placeholder: string;
   userId: string;
 }) => {
   const [text, setText] = useState("");
   const { recording, elapsed, start, stop, cancel } = useVoiceRecorder();
   const [uploading, setUploading] = useState(false);
+  const [pendingImages, setPendingImages] = useState<{ file: File; preview: string }[]>([]);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSend = () => {
+    if (pendingImages.length > 0) {
+      handleSendImages();
+      return;
+    }
     if (!text.trim()) return;
     onSendText(text.trim());
+    setText("");
+  };
+
+  const handleSendImages = async () => {
+    if (pendingImages.length === 0) return;
+    setUploading(true);
+    const urls = await uploadChatImages(pendingImages.map(p => p.file), userId);
+    setUploading(false);
+    if (urls.length > 0) {
+      onSendImages(urls);
+    }
+    pendingImages.forEach(p => URL.revokeObjectURL(p.preview));
+    setPendingImages([]);
     setText("");
   };
 
@@ -437,100 +457,118 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImage, placeholder, userI
     if (url) onSendVoice(url);
   };
 
-  const handleImagePick = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
-    const url = await uploadChatImage(file, userId);
-    setUploading(false);
-    if (url) onSendImage(url);
+  const handleImagePick = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    const newPending = files.map(f => ({ file: f, preview: URL.createObjectURL(f) }));
+    setPendingImages(prev => [...prev, ...newPending].slice(0, 10));
     e.target.value = "";
   };
 
+  const handleFilePick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const result = await uploadChatFile(file, userId);
+    setUploading(false);
+    if (result) onSendFile(result.url, result.name);
+    e.target.value = "";
+  };
+
+  const removePendingImage = (idx: number) => {
+    setPendingImages(prev => {
+      const copy = [...prev];
+      URL.revokeObjectURL(copy[idx].preview);
+      copy.splice(idx, 1);
+      return copy;
+    });
+  };
+
   return (
-    <motion.div
-      layout
-      className="relative border-t border-border bg-card/80 backdrop-blur-xl p-3 flex items-center gap-2"
-    >
-      <AnimatePresence mode="wait">
-        {recording ? (
+    <motion.div layout className="relative border-t border-border bg-card/80 backdrop-blur-xl">
+      {/* Pending images preview */}
+      <AnimatePresence>
+        {pendingImages.length > 0 && (
           <motion.div
-            key="recording"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="flex-1 flex items-center gap-3"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden"
           >
-            <button onClick={cancel} className="text-destructive text-xs font-medium hover:underline">
-              ✕
-            </button>
-            <div className="flex items-center gap-2 flex-1">
-              <motion.div
-                animate={{ scale: [1, 1.3, 1] }}
-                transition={{ duration: 1.2, repeat: Infinity }}
-                className="w-2.5 h-2.5 rounded-full bg-destructive"
-              />
-              <span className="text-sm text-muted-foreground font-mono">
-                {Math.floor(elapsed / 60).toString().padStart(2, "0")}:{(elapsed % 60).toString().padStart(2, "0")}
-              </span>
+            <div className="flex gap-2 p-3 pb-0 overflow-x-auto">
+              {pendingImages.map((p, i) => (
+                <div key={i} className="relative shrink-0">
+                  <img src={p.preview} alt="" className="w-16 h-16 object-cover rounded-xl border border-border" />
+                  <button
+                    onClick={() => removePendingImage(i)}
+                    className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center text-[10px]"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
             </div>
-            <motion.button
-              whileTap={{ scale: 0.9 }}
-              onClick={handleStopRecording}
-              className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/30"
-            >
-              <Square className="w-4 h-4" />
-            </motion.button>
-          </motion.div>
-        ) : (
-          <motion.div
-            key="input"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            className="flex-1 flex items-center gap-2"
-          >
-            <motion.button
-              whileTap={{ scale: 0.9 }}
-              onClick={() => imageInputRef.current?.click()}
-              disabled={uploading}
-              className="w-9 h-9 rounded-full hover:bg-muted/80 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors shrink-0"
-            >
-              <ImagePlus className="w-4 h-4" />
-            </motion.button>
-            <input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={handleImagePick} />
-            <Input
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
-              placeholder={placeholder}
-              className="flex-1 bg-muted/50 border-0 focus-visible:ring-1 focus-visible:ring-primary/30 rounded-full px-4"
-            />
-            {text.trim() ? (
-              <motion.button
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                whileTap={{ scale: 0.85 }}
-                onClick={handleSend}
-                className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/30"
-              >
-                <Send className="w-4 h-4" />
-              </motion.button>
-            ) : (
-              <motion.button
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                whileTap={{ scale: 0.85 }}
-                onClick={start}
-                disabled={uploading}
-                className="w-10 h-10 rounded-full bg-muted hover:bg-primary/10 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors"
-              >
-                <Mic className="w-4 h-4" />
-              </motion.button>
-            )}
           </motion.div>
         )}
       </AnimatePresence>
+
+      <div className="p-3 flex items-center gap-2">
+        <AnimatePresence mode="wait">
+          {recording ? (
+            <motion.div
+              key="recording"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="flex-1 flex items-center gap-3"
+            >
+              <button onClick={cancel} className="text-destructive text-xs font-medium hover:underline">✕</button>
+              <div className="flex items-center gap-2 flex-1">
+                <motion.div animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 1.2, repeat: Infinity }} className="w-2.5 h-2.5 rounded-full bg-destructive" />
+                <span className="text-sm text-muted-foreground font-mono">
+                  {Math.floor(elapsed / 60).toString().padStart(2, "0")}:{(elapsed % 60).toString().padStart(2, "0")}
+                </span>
+              </div>
+              <motion.button whileTap={{ scale: 0.9 }} onClick={handleStopRecording}
+                className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/30">
+                <Square className="w-4 h-4" />
+              </motion.button>
+            </motion.div>
+          ) : (
+            <motion.div key="input" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="flex-1 flex items-center gap-1.5">
+              <motion.button whileTap={{ scale: 0.9 }} onClick={() => imageInputRef.current?.click()} disabled={uploading}
+                className="w-8 h-8 rounded-full hover:bg-muted/80 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors shrink-0">
+                <ImagePlus className="w-4 h-4" />
+              </motion.button>
+              <motion.button whileTap={{ scale: 0.9 }} onClick={() => fileInputRef.current?.click()} disabled={uploading}
+                className="w-8 h-8 rounded-full hover:bg-muted/80 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors shrink-0">
+                <Paperclip className="w-4 h-4" />
+              </motion.button>
+              <input ref={imageInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleImagePick} />
+              <input ref={fileInputRef} type="file" className="hidden" onChange={handleFilePick} />
+              <Input
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
+                placeholder={placeholder}
+                className="flex-1 bg-muted/50 border-0 focus-visible:ring-1 focus-visible:ring-primary/30 rounded-full px-4"
+              />
+              {text.trim() || pendingImages.length > 0 ? (
+                <motion.button initial={{ scale: 0 }} animate={{ scale: 1 }} whileTap={{ scale: 0.85 }} onClick={handleSend}
+                  className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/30">
+                  <Send className="w-4 h-4" />
+                </motion.button>
+              ) : (
+                <motion.button initial={{ scale: 0 }} animate={{ scale: 1 }} whileTap={{ scale: 0.85 }} onClick={start} disabled={uploading}
+                  className="w-10 h-10 rounded-full bg-muted hover:bg-primary/10 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors">
+                  <Mic className="w-4 h-4" />
+                </motion.button>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
       {uploading && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 bg-card/80 backdrop-blur-sm flex items-center justify-center rounded-lg">
           <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
