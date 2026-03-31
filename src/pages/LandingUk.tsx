@@ -1,7 +1,7 @@
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Brain, Sparkles, Target, Zap, GraduationCap, BookOpen, Headphones, Swords, Star, ArrowRight, CheckCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
 import KlarLogo from "@/components/KlarLogo";
 
 const features = [
