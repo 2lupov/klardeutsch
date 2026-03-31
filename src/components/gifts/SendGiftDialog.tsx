@@ -58,7 +58,7 @@ const categoryTabs = [
 const SendGiftDialog = ({ open, onOpenChange, receiverId, receiverName }: SendGiftDialogProps) => {
   const { user } = useAuth();
   const { lang } = useLanguage();
-  const { balance, reload: reloadCoins } = useCoins();
+  const { balance, refetch: reloadCoins } = useCoins();
   const [gifts, setGifts] = useState<GiftItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
