@@ -1052,7 +1052,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
                   </div>
 
                   {/* Content JSON editor for new types */}
-                  {["article", "grammar", "reading", "dialogue_text", "word_list", "quiz"].includes(lesson.lesson_type || "") && (
+                  {["article", "grammar", "reading", "dialogue_text", "word_list", "quiz", "video", "ai_tutor"].includes(lesson.lesson_type || "") && (
                     <div>
                       <label className="text-[10px] text-muted-foreground block mb-1">Content (JSON)</label>
                       <textarea 

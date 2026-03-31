@@ -27,7 +27,7 @@ serve(async (req) => {
       });
     }
 
-    const { messages, topic, level, lang } = await req.json();
+    const { messages, topic, level, lang, lesson_context } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -39,8 +39,12 @@ serve(async (req) => {
     const newWordsLabel = isUk ? "Нові слова" : "Новые слова";
     const hintLabel = isUk ? "Підказка" : "Подсказка";
 
+    const lessonCtx = lesson_context
+      ? `\nKontext der Lektion: ${lesson_context.situation || ""}. Deine Rolle: ${lesson_context.role || "Partner"}. Thema: ${lesson_context.topic || topic || "Allgemein"}. ${lesson_context.theory_summary ? `Zusammenfassung: ${lesson_context.theory_summary}` : ""}`
+      : "";
+
     const systemPrompt = `Du bist ein freundlicher Gesprächspartner für Deutschlernende auf Niveau ${level || "A1"}.
-Thema des Gesprächs: ${topic || "Allgemein"}.
+Thema des Gesprächs: ${topic || "Allgemein"}.${lessonCtx}
 
 REGELN:
 1. Antworte immer auf Deutsch, angepasst an das Niveau ${level || "A1"}.

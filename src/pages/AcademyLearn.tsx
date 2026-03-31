@@ -4,12 +4,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePlatform } from "@/hooks/usePlatform";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Menu, X } from "lucide-react";
+import { ArrowLeft, Menu, X, GraduationCap } from "lucide-react";
 import LearnSidebar from "@/components/academy/LearnSidebar";
 import VideoLessonPlayer from "@/components/academy/lessons/VideoLessonPlayer";
 import VideoQuizLesson from "@/components/academy/lessons/VideoQuizLesson";
 import AITutorLesson from "@/components/academy/lessons/AITutorLesson";
 import WritingTaskLesson from "@/components/academy/lessons/WritingTaskLesson";
+import TeacherChatPanel from "@/components/academy/TeacherChatPanel";
 import SpeakingChallengeLesson from "@/components/academy/lessons/SpeakingChallengeLesson";
 import FinalExamLesson from "@/components/academy/lessons/FinalExamLesson";
 import NotebookLesson from "@/components/academy/lessons/NotebookLesson";
@@ -19,7 +20,6 @@ import ReadingLesson from "@/components/academy/lessons/ReadingLesson";
 import DialogueTextLesson from "@/components/academy/lessons/DialogueTextLesson";
 import WordListLesson from "@/components/academy/lessons/WordListLesson";
 import QuizLesson from "@/components/academy/lessons/QuizLesson";
-import TeacherChat from "@/components/academy/TeacherChat";
 import CohortChat from "@/components/academy/CohortChat";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
@@ -68,6 +68,7 @@ const AcademyLearn = () => {
   const [progress, setProgress] = useState<ProgressRow[]>([]);
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
+  const [teacherPanelOpen, setTeacherPanelOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -181,6 +182,13 @@ const AcademyLearn = () => {
         </button>
         <span className="text-sm font-display font-bold text-foreground truncate flex-1">{courseTitle}</span>
         <button
+          onClick={() => setTeacherPanelOpen(true)}
+          className="text-muted-foreground hover:text-primary transition-colors relative"
+          title={lang === "uk" ? "Допомога" : "Помощь"}
+        >
+          <GraduationCap className="w-4.5 h-4.5" />
+        </button>
+        <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
           className="lg:hidden text-muted-foreground hover:text-foreground transition-colors"
         >
@@ -264,9 +272,22 @@ const AcademyLearn = () => {
         )}
       </div>
 
-      {/* Teacher Chat FAB */}
+      {/* Teacher Chat Panel */}
       {activeLessonId && courseId && (
-        <TeacherChat lessonId={activeLessonId} courseId={courseId} lang={lang} />
+        <TeacherChatPanel
+          lessonId={activeLessonId}
+          courseId={courseId}
+          lessonTitle={activeLesson?.title ?? ""}
+          courseLevel={courseLevel}
+          lang={lang}
+          open={teacherPanelOpen}
+          onClose={() => setTeacherPanelOpen(false)}
+        />
+      )}
+
+      {/* Overlay for teacher panel on mobile */}
+      {teacherPanelOpen && (
+        <div className="fixed inset-0 bg-background/60 backdrop-blur-sm z-40" onClick={() => setTeacherPanelOpen(false)} />
       )}
 
       {/* Cohort Chat FAB */}
