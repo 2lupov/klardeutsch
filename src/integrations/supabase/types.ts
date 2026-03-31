@@ -316,21 +316,27 @@ export type Database = {
           created_at: string
           id: string
           last_claimed_at: string
+          last_shield_used_at: string | null
           streak: number
+          streak_shields: number | null
           user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
           last_claimed_at?: string
+          last_shield_used_at?: string | null
           streak?: number
+          streak_shields?: number | null
           user_id: string
         }
         Update: {
           created_at?: string
           id?: string
           last_claimed_at?: string
+          last_shield_used_at?: string | null
           streak?: number
+          streak_shields?: number | null
           user_id?: string
         }
         Relationships: []
@@ -543,15 +549,50 @@ export type Database = {
         }
         Relationships: []
       }
+      placement_questions: {
+        Row: {
+          correct: number
+          created_at: string | null
+          id: string
+          level: string
+          options: Json
+          question_de: string
+          sort_order: number | null
+        }
+        Insert: {
+          correct: number
+          created_at?: string | null
+          id?: string
+          level: string
+          options: Json
+          question_de: string
+          sort_order?: number | null
+        }
+        Update: {
+          correct?: number
+          created_at?: string | null
+          id?: string
+          level?: string
+          options?: Json
+          question_de?: string
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           created_at: string
+          daily_goal_minutes: number | null
           display_name: string | null
           id: string
           language_locked: boolean
           last_active: string | null
+          last_reminder_sent_at: string | null
+          learning_goal: string | null
+          onboarding_completed: boolean | null
           preferred_lang: string
+          recommended_level: string | null
           telegram_chat_id: number | null
           updated_at: string
           user_id: string
@@ -559,11 +600,16 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          daily_goal_minutes?: number | null
           display_name?: string | null
           id?: string
           language_locked?: boolean
           last_active?: string | null
+          last_reminder_sent_at?: string | null
+          learning_goal?: string | null
+          onboarding_completed?: boolean | null
           preferred_lang?: string
+          recommended_level?: string | null
           telegram_chat_id?: number | null
           updated_at?: string
           user_id: string
@@ -571,11 +617,16 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           created_at?: string
+          daily_goal_minutes?: number | null
           display_name?: string | null
           id?: string
           language_locked?: boolean
           last_active?: string | null
+          last_reminder_sent_at?: string | null
+          learning_goal?: string | null
+          onboarding_completed?: boolean | null
           preferred_lang?: string
+          recommended_level?: string | null
           telegram_chat_id?: number | null
           updated_at?: string
           user_id?: string
@@ -849,6 +900,84 @@ export type Database = {
         }
         Relationships: []
       }
+      srs_cards: {
+        Row: {
+          created_at: string | null
+          custom_word_id: string | null
+          ease_factor: number | null
+          id: string
+          interval_days: number | null
+          last_reviewed_at: string | null
+          next_review_at: string | null
+          repetitions: number | null
+          user_id: string
+          vocab_card_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          custom_word_id?: string | null
+          ease_factor?: number | null
+          id?: string
+          interval_days?: number | null
+          last_reviewed_at?: string | null
+          next_review_at?: string | null
+          repetitions?: number | null
+          user_id: string
+          vocab_card_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          custom_word_id?: string | null
+          ease_factor?: number | null
+          id?: string
+          interval_days?: number | null
+          last_reviewed_at?: string | null
+          next_review_at?: string | null
+          repetitions?: number | null
+          user_id?: string
+          vocab_card_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "srs_cards_custom_word_id_fkey"
+            columns: ["custom_word_id"]
+            isOneToOne: false
+            referencedRelation: "custom_words"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "srs_cards_vocab_card_id_fkey"
+            columns: ["vocab_card_id"]
+            isOneToOne: false
+            referencedRelation: "vocab_cards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      streak_milestones: {
+        Row: {
+          achieved_at: string | null
+          coins_awarded: number
+          id: string
+          milestone_days: number
+          user_id: string
+        }
+        Insert: {
+          achieved_at?: string | null
+          coins_awarded: number
+          id?: string
+          milestone_days: number
+          user_id: string
+        }
+        Update: {
+          achieved_at?: string | null
+          coins_awarded?: number
+          id?: string
+          milestone_days?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       topics: {
         Row: {
           created_at: string
@@ -1041,6 +1170,30 @@ export type Database = {
         }
         Relationships: []
       }
+      xp_transactions: {
+        Row: {
+          amount: number
+          created_at: string | null
+          id: string
+          reason: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          id?: string
+          reason?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          id?: string
+          reason?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -1132,6 +1285,10 @@ export type Database = {
       purchase_item: {
         Args: { p_item_id: string; p_user_id: string }
         Returns: boolean
+      }
+      review_srs_card: {
+        Args: { p_card_id: string; p_quality: number; p_user_id: string }
+        Returns: undefined
       }
     }
     Enums: {
