@@ -309,6 +309,75 @@ const FileAttachment = ({ url, name, isMe }: { url: string; name: string; isMe: 
   </a>
 );
 
+/* ───── Game Invite Bubble ───── */
+const GameInviteBubble = ({ content, isMe }: { content: string; isMe: boolean }) => {
+  const { lang } = useLanguage();
+  const navigate = useNavigate();
+  // content format: "🎮:game_id"
+  const gameId = content.replace("🎮:", "");
+  const game = gameList.find(g => g.id === gameId);
+  if (!game) return <span>{content}</span>;
+
+  return (
+    <motion.button
+      whileTap={{ scale: 0.95 }}
+      onClick={() => navigate("/games", { state: { screen: gameId } })}
+      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl w-full text-left transition-colors ${
+        isMe ? "bg-primary-foreground/10 hover:bg-primary-foreground/20" : "bg-muted/50 hover:bg-muted"
+      }`}
+    >
+      <span className="text-2xl">{game.emoji}</span>
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-bold">{lang === "uk" ? game.name_uk : game.name_ru}</p>
+        <p className="text-[10px] opacity-60">{lang === "uk" ? "Натисни щоб грати!" : "Нажми чтобы играть!"}</p>
+      </div>
+      <Gamepad2 className="w-4 h-4 opacity-50 shrink-0" />
+    </motion.button>
+  );
+};
+
+/* ───── Video Circle Player ───── */
+const VideoCirclePlayer = ({ url }: { url: string }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [playing, setPlaying] = useState(false);
+
+  const toggle = () => {
+    if (!videoRef.current) return;
+    if (playing) videoRef.current.pause();
+    else videoRef.current.play();
+    setPlaying(!playing);
+  };
+
+  return (
+    <motion.div
+      whileTap={{ scale: 0.95 }}
+      onClick={toggle}
+      className="relative w-40 h-40 rounded-full overflow-hidden cursor-pointer ring-2 ring-primary/30 shadow-lg"
+    >
+      <video
+        ref={videoRef}
+        src={url}
+        className="w-full h-full object-cover"
+        loop
+        playsInline
+        onEnded={() => setPlaying(false)}
+      />
+      {!playing && (
+        <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+          <Play className="w-8 h-8 text-white" />
+        </div>
+      )}
+      {playing && (
+        <motion.div
+          className="absolute inset-0 rounded-full border-2 border-primary"
+          animate={{ scale: [1, 1.05, 1] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        />
+      )}
+    </motion.div>
+  );
+};
+
 /* ───── Message Bubble ───── */
 const MessageBubble = ({ isMe, content, audioUrl, imageUrl, imageUrls, fileUrl, fileName, time, senderName, avatarUrl, index }: {
   isMe: boolean; content: string; audioUrl?: string | null; imageUrl?: string | null;
