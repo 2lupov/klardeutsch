@@ -49,6 +49,10 @@ export const ListeningAudioProvider = ({ children }: { children: ReactNode }) =>
       audioRef.current.onpause = null;
       audioRef.current = null;
     }
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = null;
+    }
     setPlaying(false);
     setLoading(false);
     setCurrentTitle(null);
