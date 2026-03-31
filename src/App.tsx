@@ -57,6 +57,7 @@ const AppRoutes = () => {
       <Route path="/privacy" element={isTelegram ? <Navigate to="/" replace /> : <Privacy />} />
       <Route path="/terms" element={isTelegram ? <Navigate to="/" replace /> : <Terms />} />
       <Route path="/qr" element={isTelegram ? <Navigate to="/" replace /> : <QR />} />
+      <Route path="/uk" element={isTelegram ? <Navigate to="/" replace /> : <LandingUk />} />
       {/* Authenticated routes with responsive layout */}
       <Route element={<AppLayout />}>
         <Route path="/" element={<Index />} />
