@@ -153,6 +153,9 @@ export type Database = {
           id: string
           image_url: string | null
           image_urls: Json | null
+          reply_to_content: string | null
+          reply_to_id: string | null
+          reply_to_sender: string | null
           user_id: string
         }
         Insert: {
@@ -164,6 +167,9 @@ export type Database = {
           id?: string
           image_url?: string | null
           image_urls?: Json | null
+          reply_to_content?: string | null
+          reply_to_id?: string | null
+          reply_to_sender?: string | null
           user_id: string
         }
         Update: {
@@ -175,9 +181,20 @@ export type Database = {
           id?: string
           image_url?: string | null
           image_urls?: Json | null
+          reply_to_content?: string | null
+          reply_to_id?: string | null
+          reply_to_sender?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "community_messages_reply_to_id_fkey"
+            columns: ["reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "community_messages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       course_certificates: {
         Row: {
@@ -717,6 +734,9 @@ export type Database = {
           image_urls: Json | null
           is_read: boolean
           receiver_id: string
+          reply_to_content: string | null
+          reply_to_id: string | null
+          reply_to_sender: string | null
           sender_id: string
         }
         Insert: {
@@ -730,6 +750,9 @@ export type Database = {
           image_urls?: Json | null
           is_read?: boolean
           receiver_id: string
+          reply_to_content?: string | null
+          reply_to_id?: string | null
+          reply_to_sender?: string | null
           sender_id: string
         }
         Update: {
@@ -743,9 +766,20 @@ export type Database = {
           image_urls?: Json | null
           is_read?: boolean
           receiver_id?: string
+          reply_to_content?: string | null
+          reply_to_id?: string | null
+          reply_to_sender?: string | null
           sender_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "direct_messages_reply_to_id_fkey"
+            columns: ["reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "direct_messages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       grammar_lessons: {
         Row: {
