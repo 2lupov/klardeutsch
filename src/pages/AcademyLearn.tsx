@@ -13,6 +13,8 @@ import WritingTaskLesson from "@/components/academy/lessons/WritingTaskLesson";
 import SpeakingChallengeLesson from "@/components/academy/lessons/SpeakingChallengeLesson";
 import FinalExamLesson from "@/components/academy/lessons/FinalExamLesson";
 import NotebookLesson from "@/components/academy/lessons/NotebookLesson";
+import TeacherChat from "@/components/academy/TeacherChat";
+import CohortChat from "@/components/academy/CohortChat";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 
