@@ -20,7 +20,6 @@ import ReadingLesson from "@/components/academy/lessons/ReadingLesson";
 import DialogueTextLesson from "@/components/academy/lessons/DialogueTextLesson";
 import WordListLesson from "@/components/academy/lessons/WordListLesson";
 import QuizLesson from "@/components/academy/lessons/QuizLesson";
-import TeacherChat from "@/components/academy/TeacherChat";
 import CohortChat from "@/components/academy/CohortChat";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
