@@ -107,7 +107,7 @@ const GiftShelf = ({ userId, compact = false }: GiftShelfProps) => {
           {lang === "uk" ? "Подарунки" : "Подарки"} ({gifts.length})
         </h3>
       )}
-      <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
+      <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide overscroll-x-contain" style={{ overflowY: "hidden" }}>
         {gifts.map((g, i) => {
           const gi = g.gift_items;
           const isNew = !g.displayed;
