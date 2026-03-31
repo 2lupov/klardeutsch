@@ -77,6 +77,7 @@ const AppLayout = () => {
         <EditModeToolbar />
         <LofiFloatingPlayer />
         <ListeningFloatingPlayer />
+        <DailyBonusDialog />
         <PageTransition><Outlet /></PageTransition>
       </main>
     </div>
