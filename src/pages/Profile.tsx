@@ -167,14 +167,20 @@ const Profile = () => {
     };
   }, [progress, savedWordsCount, customWordsCount, completedLessons, streak, duelsWonCount, dialoguesCount, dailyBonusStreakVal, challengesSentCount]);
 
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
+    setCropFile(file);
+    e.target.value = "";
+  };
+
+  const handleCroppedAvatar = async (blob: Blob) => {
+    if (!user) return;
     setUploading(true);
-    const ext = file.name.split(".").pop();
-    const path = `${user.id}/avatar.${ext}`;
+    setCropFile(null);
+    const path = `${user.id}/avatar.png`;
     await supabase.storage.from("avatars").remove([path]);
-    const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+    const { error } = await supabase.storage.from("avatars").upload(path, blob, { upsert: true, contentType: "image/png" });
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
       setUploading(false);
