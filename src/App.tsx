@@ -28,6 +28,7 @@ import Games from "./pages/Games";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import QR from "./pages/QR";
+import LandingUk from "./pages/LandingUk";
 import Course from "./pages/Course";
 import Academy from "./pages/Academy";
 import AcademyCourse from "./pages/AcademyCourse";
@@ -56,6 +57,7 @@ const AppRoutes = () => {
       <Route path="/privacy" element={isTelegram ? <Navigate to="/" replace /> : <Privacy />} />
       <Route path="/terms" element={isTelegram ? <Navigate to="/" replace /> : <Terms />} />
       <Route path="/qr" element={isTelegram ? <Navigate to="/" replace /> : <QR />} />
+      <Route path="/uk" element={isTelegram ? <Navigate to="/" replace /> : <LandingUk />} />
       {/* Authenticated routes with responsive layout */}
       <Route element={<AppLayout />}>
         <Route path="/" element={<Index />} />
