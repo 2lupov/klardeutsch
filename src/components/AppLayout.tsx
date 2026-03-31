@@ -7,6 +7,7 @@ import MobileBottomNav from "@/components/MobileBottomNav";
 import DesktopSidebar from "@/components/DesktopSidebar";
 import PageTransition from "@/components/PageTransition";
 import LofiFloatingPlayer from "@/components/LofiFloatingPlayer";
+import ListeningFloatingPlayer from "@/components/ListeningFloatingPlayer";
 import NicknameGate from "@/components/NicknameGate";
 import EditModeToolbar from "@/components/EditModeToolbar";
 import DailyBonusDialog from "@/components/DailyBonusDialog";

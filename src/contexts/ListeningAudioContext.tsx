@@ -32,6 +32,7 @@ export const ListeningAudioProvider = ({ children }: { children: ReactNode }) =>
   const [playbackSpeed, setPlaybackSpeedState] = useState(0.85);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const currentTextRef = useRef<string | null>(null);
+  const objectUrlRef = useRef<string | null>(null);
 
   const setPlaybackSpeed = useCallback((speed: number) => {
     setPlaybackSpeedState(speed);

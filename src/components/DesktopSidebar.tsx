@@ -28,7 +28,7 @@ const DesktopSidebar = () => {
     { to: "/stats", icon: BarChart3, label: t("navStats"), badge: 0 },
     { to: "/dictionary", icon: BookOpen, label: t("navDictionary"), badge: 0 },
     // { to: "/shop", icon: ShoppingBag, label: t("navShop"), badge: 0 }, // temporarily hidden
-    { to: "/games", icon: Gamepad2, label: "Игры", badge: 0 },
+    { to: "/games", icon: Gamepad2, label: lang === "uk" ? "Ігри" : "Игры", badge: 0 },
     { to: "/chat", icon: MessageSquare, label: lang === "uk" ? "Чат" : "Чат", badge: unread },
   ];
 
