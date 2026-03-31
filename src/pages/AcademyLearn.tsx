@@ -13,6 +13,8 @@ import WritingTaskLesson from "@/components/academy/lessons/WritingTaskLesson";
 import SpeakingChallengeLesson from "@/components/academy/lessons/SpeakingChallengeLesson";
 import FinalExamLesson from "@/components/academy/lessons/FinalExamLesson";
 import NotebookLesson from "@/components/academy/lessons/NotebookLesson";
+import TeacherChat from "@/components/academy/TeacherChat";
+import CohortChat from "@/components/academy/CohortChat";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -243,6 +245,16 @@ const AcademyLearn = () => {
           <div className="absolute inset-0 bg-background/60 backdrop-blur-sm z-20" onClick={() => setSidebarOpen(false)} />
         )}
       </div>
+
+      {/* Teacher Chat FAB */}
+      {activeLessonId && courseId && (
+        <TeacherChat lessonId={activeLessonId} courseId={courseId} lang={lang} />
+      )}
+
+      {/* Cohort Chat FAB */}
+      {courseId && (
+        <CohortChat courseId={courseId} lang={lang} />
+      )}
     </div>
   );
 };

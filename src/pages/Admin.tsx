@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Plus, Trash2, Lock, Check, BookOpen, Languages, Headphones, BookText, ShoppingBag, Gamepad2, Users, Globe, Pencil, Sparkles, ScanSearch, FileText, Bot, GraduationCap, FolderOpen, BarChart3 } from "lucide-react";
+import { Plus, Trash2, Lock, Check, BookOpen, Languages, Headphones, BookText, ShoppingBag, Gamepad2, Users, Globe, Pencil, Sparkles, ScanSearch, FileText, Bot, GraduationCap, FolderOpen, BarChart3, MessageCircle } from "lucide-react";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import ShopEditor from "@/components/admin/ShopEditor";
 import ListeningEditor from "@/components/admin/ListeningEditor";
@@ -14,12 +14,13 @@ import CourseEditor from "@/components/admin/CourseEditor";
 import TranslationChecker from "@/components/admin/TranslationChecker";
 import AllTextsEditor from "@/components/admin/AllTextsEditor";
 import AdminStats from "@/components/admin/AdminStats";
+import AdminChats from "@/components/admin/AdminChats";
 import StuffOnlyTab from "@/components/admin/StuffOnlyTab";
 import TopicsEditor from "@/components/admin/TopicsEditor";
 import { toast } from "sonner";
 
 type Level = "A1" | "A2" | "B1" | "B2" | "C1";
-type Tab = "stats" | "topics" | "vocabulary" | "grammar" | "reading" | "listening" | "shop" | "games" | "users" | "translations" | "generator" | "checker" | "alltexts" | "stuffonly" | "courses";
+type Tab = "stats" | "topics" | "vocabulary" | "grammar" | "reading" | "listening" | "shop" | "games" | "users" | "translations" | "generator" | "checker" | "alltexts" | "stuffonly" | "courses" | "chats";
 
 /** Preserves scroll position of admin container across async reload */
 const withScroll = async (fn: () => Promise<void>) => {
@@ -49,6 +50,7 @@ const TAB_CONFIG: { key: Tab; icon: React.ElementType; label: string }[] = [
   { key: "alltexts", icon: FileText, label: "alltexts" },
   { key: "stuffonly", icon: Bot, label: "stuffonly" },
   { key: "courses", icon: GraduationCap, label: "courses" },
+  { key: "chats", icon: MessageCircle, label: "chats" },
 ];
 
 const Admin = () => {
@@ -134,7 +136,7 @@ const Admin = () => {
               }`}
             >
               <Icon className="w-3.5 h-3.5" />
-              {key === "stats" ? "📊 Стата" : key === "topics" ? "Темы" : key === "games" ? "Игры" : key === "users" ? "Юзеры" : key === "translations" ? "Языки" : key === "generator" ? "ИИ-генератор" : key === "checker" ? "ИИ-проверка" : key === "alltexts" ? "Все тексты" : key === "stuffonly" ? "Stuff Only" : key === "courses" ? "Курсы" : t(label as any)}
+              {key === "stats" ? "📊 Стата" : key === "topics" ? "Темы" : key === "games" ? "Игры" : key === "users" ? "Юзеры" : key === "translations" ? "Языки" : key === "generator" ? "ИИ-генератор" : key === "checker" ? "ИИ-проверка" : key === "alltexts" ? "Все тексты" : key === "stuffonly" ? "Stuff Only" : key === "courses" ? "Курсы" : key === "chats" ? "Чаты" : t(label as any)}
             </button>
           ))}
         </div>
@@ -155,6 +157,7 @@ const Admin = () => {
         {tab === "alltexts" && <AllTextsEditor />}
         {tab === "stuffonly" && <StuffOnlyTab />}
         {tab === "courses" && <CourseEditor level={level} />}
+        {tab === "chats" && <AdminChats />}
       </div>
     </div>
   );

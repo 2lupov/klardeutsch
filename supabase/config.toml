@@ -43,3 +43,7 @@ project_id = "jqqsszwbbxvevebmebfm"
     verify_jwt = false
   [functions.demo-stats]
     verify_jwt = false
+  [functions.course-teacher-reply]
+    verify_jwt = false
+  [functions.video-quiz-check]
+    verify_jwt = false
