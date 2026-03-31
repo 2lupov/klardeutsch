@@ -12,6 +12,7 @@ import AppLayout from "@/components/AppLayout";
 import OfflineBanner from "@/components/OfflineBanner";
 import ListeningFloatingPlayer from "@/components/ListeningFloatingPlayer";
 import ReportErrorButton from "@/components/ReportErrorButton";
+import CookieBanner from "@/components/CookieBanner";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
@@ -89,6 +90,7 @@ const App = () => (
             <AppRoutes />
             <ListeningFloatingPlayer />
             <ReportErrorButton />
+            <CookieBanner />
           </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>
