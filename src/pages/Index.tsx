@@ -38,6 +38,7 @@ const Index = () => {
   const { t, lang } = useLanguage();
   const { isMobile } = usePlatform();
   const { showSummary, triggerSummary, closeSummary } = useDailySummary();
+  const navigate = useNavigate();
 
   // Load data when entering exercise
   useEffect(() => {
