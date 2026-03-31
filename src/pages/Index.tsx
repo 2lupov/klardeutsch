@@ -18,7 +18,10 @@ import WritingExercise from "@/components/WritingExercise";
 import DailyChallenge from "@/components/DailyChallenge";
 import SRSWidget from "@/components/SRSWidget";
 import DailySummaryModal from "@/components/daily/DailySummaryModal";
-import { ArrowLeft, User } from "lucide-react";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { supabase } from "@/integrations/supabase/client";
+import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 type Category = "vocabulary" | "grammar" | "reading" | "listening" | "writing";
@@ -35,10 +38,28 @@ const Index = () => {
   const [clarity, setClarity] = useState(0);
   const { user } = useAuth();
   const { saveProgress } = useProgress();
-  const { t, lang } = useLanguage();
+  const { t, lang, languageLocked } = useLanguage();
   const { isMobile } = usePlatform();
   const { showSummary, triggerSummary, closeSummary } = useDailySummary();
   const navigate = useNavigate();
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [displayName, setDisplayName] = useState<string | null>(null);
+
+  // Fetch user avatar
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("profiles")
+      .select("avatar_url, display_name")
+      .eq("user_id", user.id)
+      .single()
+      .then(({ data }) => {
+        if (data) {
+          setAvatarUrl(data.avatar_url);
+          setDisplayName(data.display_name);
+        }
+      });
+  }, [user]);
 
   // Load data when entering exercise
   useEffect(() => {
@@ -194,12 +215,20 @@ const Index = () => {
   return (
     <div className={`flex flex-col ${isMobile ? "min-h-full" : "h-full"}`}>
       {isMobile && screen === "levels" && (
-        <div className="flex justify-end px-4 pt-3">
+        <div className="flex items-center justify-between px-4 pt-3">
+          <div>{!languageLocked && <LanguageSwitcher />}</div>
           <button
             onClick={() => navigate("/profile")}
-            className="flex items-center justify-center w-9 h-9 rounded-full bg-muted/60 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            className="rounded-full overflow-hidden"
           >
-            <User className="w-5 h-5" />
+            <Avatar className="w-9 h-9 border-2 border-primary/20">
+              {avatarUrl ? (
+                <AvatarImage src={avatarUrl} alt={displayName || "Profile"} className="object-cover" />
+              ) : null}
+              <AvatarFallback className="text-sm font-bold bg-primary/10 text-primary">
+                {displayName?.charAt(0)?.toUpperCase() || "?"}
+              </AvatarFallback>
+            </Avatar>
           </button>
         </div>
       )}
