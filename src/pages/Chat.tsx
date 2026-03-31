@@ -336,7 +336,7 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImage, placeholder, userI
   return (
     <motion.div
       layout
-      className="border-t border-border bg-card/80 backdrop-blur-xl p-3 flex items-center gap-2"
+      className="relative border-t border-border bg-card/80 backdrop-blur-xl p-3 flex items-center gap-2"
     >
       <AnimatePresence mode="wait">
         {recording ? (
