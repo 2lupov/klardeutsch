@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { fetchEdgeFunction } from "@/lib/auth-fetch";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
