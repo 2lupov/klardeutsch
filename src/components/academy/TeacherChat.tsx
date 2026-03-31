@@ -58,8 +58,9 @@ const TeacherChat = ({ lessonId, courseId, lang }: Props) => {
         table: "teacher_chat_messages",
         filter: `user_id=eq.${user.id}`,
       }, (payload) => {
-        const msg = payload.new as Message;
+        const msg = payload.new as any;
         if (msg.lesson_id === lessonId) {
+          const newMsg: Message = { id: msg.id, sender: msg.sender, content: msg.content, created_at: msg.created_at, audio_url: msg.audio_url };
           setMessages((prev) => {
             if (prev.some((m) => m.id === msg.id)) return prev;
             return [...prev, msg];
