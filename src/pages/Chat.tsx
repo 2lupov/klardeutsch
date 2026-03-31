@@ -236,6 +236,28 @@ const uploadChatFile = async (file: File, userId: string): Promise<{ url: string
   return { url: data.publicUrl, name: file.name };
 };
 
+/* ───── Upload video circle helper ───── */
+const uploadVideoCircle = async (blob: Blob, userId: string): Promise<string | null> => {
+  const filename = `${userId}/${Date.now()}-circle.webm`;
+  const { error } = await supabase.storage.from("voice-messages").upload(filename, blob, { contentType: "video/webm" });
+  if (error) return null;
+  const { data } = supabase.storage.from("voice-messages").getPublicUrl(filename);
+  return data.publicUrl;
+};
+
+/* ───── Game list for invites ───── */
+const gameList = [
+  { id: "article-sorter", emoji: "🔀", name_ru: "Сортировка артиклей", name_uk: "Сортування артиклів" },
+  { id: "cafe", emoji: "☕", name_ru: "Кафе Bestellung", name_uk: "Кафе Bestellung" },
+  { id: "challenges", emoji: "⚔️", name_ru: "Дуэли", name_uk: "Дуелі" },
+  { id: "pronunciation", emoji: "🎙️", name_ru: "Произношение", name_uk: "Вимова" },
+  { id: "leben", emoji: "🏛️", name_ru: "Leben in Deutschland", name_uk: "Leben in Deutschland" },
+  { id: "wortbaustelle", emoji: "🔨", name_ru: "Wortbaustelle", name_uk: "Wortbaustelle" },
+  { id: "satzpuzzle", emoji: "🧩", name_ru: "Satzpuzzle", name_uk: "Satzpuzzle" },
+  { id: "telefon", emoji: "📞", name_ru: "Telefon-Trainer", name_uk: "Telefon-Trainer" },
+  { id: "dialogues", emoji: "💬", name_ru: "Диалоги", name_uk: "Діалоги" },
+];
+
 /* ───── Image Gallery ───── */
 const ImageGallery = ({ urls, onOpen }: { urls: string[]; onOpen: (idx: number) => void }) => {
   const count = urls.length;
