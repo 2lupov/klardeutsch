@@ -18,7 +18,8 @@ import WritingExercise from "@/components/WritingExercise";
 import DailyChallenge from "@/components/DailyChallenge";
 import SRSWidget from "@/components/SRSWidget";
 import DailySummaryModal from "@/components/daily/DailySummaryModal";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 type Category = "vocabulary" | "grammar" | "reading" | "listening" | "writing";
 type Screen = "levels" | "categories" | "topics" | "exercise";
