@@ -1428,6 +1428,7 @@ const DMList = ({ onSelectPeer }: { onSelectPeer: (uid: string) => void }) => {
                 {(c.profile?.display_name || "?")[0]}
               </AvatarFallback>
             </Avatar>
+            <span className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-card ${isUserOnline((c.profile as any)?.last_active) ? "bg-green-500" : "bg-muted-foreground/40"}`} />
             {c.unread > 0 && (
               <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[9px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shadow-md">
                 {c.unread}
