@@ -35,6 +35,7 @@ interface ProfileData {
   display_name: string | null;
   avatar_url: string | null;
   telegram_chat_id: number | null;
+  nickname_changed_at: string | null;
 }
 
 type ProfileScreen = "main" | "achievements" | "activity" | "mistakes" | "leaderboard" | "notifications" | "referrals" | "offline" | "friends";
@@ -54,7 +55,7 @@ const Profile = () => {
   const [customWordsCount, setCustomWordsCount] = useState(0);
   const [savedWordsCount, setSavedWordsCount] = useState(0);
   const [fetching, setFetching] = useState(true);
-  const [profile, setProfile] = useState<ProfileData>({ display_name: null, avatar_url: null, telegram_chat_id: null });
+  const [profile, setProfile] = useState<ProfileData>({ display_name: null, avatar_url: null, telegram_chat_id: null, nickname_changed_at: null });
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -73,7 +74,7 @@ const Profile = () => {
       const [{ data: prog }, { count }, { data: prof }, { count: customCount }, { count: savedCount }] = await Promise.all([
         supabase.from("user_progress").select("*").eq("user_id", user.id),
         supabase.from("vocab_cards").select("*", { count: "exact", head: true }),
-        supabase.from("profiles").select("display_name, avatar_url, telegram_chat_id").eq("user_id", user.id).single(),
+        supabase.from("profiles").select("display_name, avatar_url, telegram_chat_id, nickname_changed_at").eq("user_id", user.id).single(),
         supabase.from("custom_words").select("*", { count: "exact", head: true }).eq("user_id", user.id),
         supabase.from("saved_words").select("*", { count: "exact", head: true }).eq("user_id", user.id),
       ]);
@@ -81,7 +82,7 @@ const Profile = () => {
       setTotalCards(count ?? 0);
       setCustomWordsCount(customCount ?? 0);
       setSavedWordsCount(savedCount ?? 0);
-      if (prof) setProfile({ display_name: prof.display_name, avatar_url: prof.avatar_url, telegram_chat_id: (prof as any).telegram_chat_id ?? null });
+      if (prof) setProfile({ display_name: prof.display_name, avatar_url: prof.avatar_url, telegram_chat_id: (prof as any).telegram_chat_id ?? null, nickname_changed_at: (prof as any).nickname_changed_at ?? null });
 
       // Fetch extra achievement stats
       const [duelsRes, challengesSentRes, dailyBonusRes] = await Promise.all([
@@ -225,6 +226,17 @@ const Profile = () => {
       toast({ title: lang === "uk" ? "Нікнейм має починатися з букви, мін. 5 символів" : "Никнейм должен начинаться с буквы, мин. 5 символов", variant: "destructive" });
       return;
     }
+    // 2-week cooldown check
+    if (profile.nickname_changed_at) {
+      const lastChanged = new Date(profile.nickname_changed_at).getTime();
+      const twoWeeks = 14 * 24 * 60 * 60 * 1000;
+      if (Date.now() - lastChanged < twoWeeks) {
+        const nextDate = new Date(lastChanged + twoWeeks);
+        const formatted = nextDate.toLocaleDateString(lang === "uk" ? "uk-UA" : "ru-RU", { day: "numeric", month: "long" });
+        toast({ title: lang === "uk" ? `Змінити нікнейм можна після ${formatted}` : `Изменить никнейм можно после ${formatted}`, variant: "destructive" });
+        return;
+      }
+    }
     // Check uniqueness
     const { data: existing } = await supabase
       .from("profiles")
@@ -236,8 +248,9 @@ const Profile = () => {
       toast({ title: lang === "uk" ? "Цей нікнейм вже зайнятий" : "Этот никнейм уже занят", variant: "destructive" });
       return;
     }
-    await supabase.from("profiles").update({ display_name: trimmed }).eq("user_id", user.id);
-    setProfile((p) => ({ ...p, display_name: trimmed }));
+    const now = new Date().toISOString();
+    await supabase.from("profiles").update({ display_name: trimmed, nickname_changed_at: now } as any).eq("user_id", user.id);
+    setProfile((p) => ({ ...p, display_name: trimmed, nickname_changed_at: now }));
     setEditing(false);
     toast({ title: t("profileSaved") });
   };
