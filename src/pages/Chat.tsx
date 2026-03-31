@@ -548,6 +548,8 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
   onSendVideoCircle: (videoUrl: string) => void;
   placeholder: string;
   userId: string;
+  replyTo?: ReplyInfo | null;
+  onCancelReply?: () => void;
 }) => {
   const { lang } = useLanguage();
   const [text, setText] = useState("");
