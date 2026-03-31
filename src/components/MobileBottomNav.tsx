@@ -11,7 +11,7 @@ const MobileBottomNav = () => {
     { to: "/profile", icon: User, label: t("myProfile") },
     { to: "/games", icon: Gamepad2, label: t("gamesTitle") },
     { to: "/dictionary", icon: BookOpen, label: t("navDictionary") },
-    { to: "/dialogues", icon: MessageCircle, label: t("navDialogues") },
+    { to: "/chat", icon: MessageSquare, label: lang === "uk" ? "Чат" : "Чат" },
   ];
 
   return (
