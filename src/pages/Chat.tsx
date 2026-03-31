@@ -236,12 +236,74 @@ const uploadChatFile = async (file: File, userId: string): Promise<{ url: string
   return { url: data.publicUrl, name: file.name };
 };
 
+/* ───── Image Gallery ───── */
+const ImageGallery = ({ urls, onOpen }: { urls: string[]; onOpen: (idx: number) => void }) => {
+  const count = urls.length;
+  if (count === 0) return null;
+  if (count === 1) {
+    return (
+      <div className="cursor-pointer" onClick={() => onOpen(0)}>
+        <img src={urls[0]} alt="shared" className="max-w-[260px] max-h-[300px] object-cover rounded-2xl" loading="lazy" />
+      </div>
+    );
+  }
+  const gridClass = count === 2 ? "grid-cols-2" : count === 3 ? "grid-cols-2" : "grid-cols-2";
+  return (
+    <div className={`grid ${gridClass} gap-1 max-w-[280px]`}>
+      {urls.slice(0, 4).map((url, i) => (
+        <div key={i} className="relative cursor-pointer aspect-square" onClick={() => onOpen(i)}>
+          <img src={url} alt="" className="w-full h-full object-cover rounded-lg" loading="lazy" />
+          {i === 3 && count > 4 && (
+            <div className="absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-lg">+{count - 4}</span>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+/* ───── File Attachment Display ───── */
+const FileAttachment = ({ url, name, isMe }: { url: string; name: string; isMe: boolean }) => (
+  <a
+    href={url}
+    target="_blank"
+    rel="noopener noreferrer"
+    className={`flex items-center gap-2.5 px-3 py-2 rounded-xl transition-colors ${
+      isMe ? "bg-primary-foreground/10 hover:bg-primary-foreground/20" : "bg-muted/50 hover:bg-muted"
+    }`}
+  >
+    <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
+      isMe ? "bg-primary-foreground/20" : "bg-primary/10"
+    }`}>
+      <FileText className={`w-4 h-4 ${isMe ? "text-primary-foreground" : "text-primary"}`} />
+    </div>
+    <div className="flex-1 min-w-0">
+      <p className="text-xs font-medium truncate">{name}</p>
+      <p className="text-[10px] opacity-60">Файл</p>
+    </div>
+    <Download className="w-3.5 h-3.5 opacity-50 shrink-0" />
+  </a>
+);
+
 /* ───── Message Bubble ───── */
-const MessageBubble = ({ isMe, content, audioUrl, imageUrl, time, senderName, avatarUrl, index }: {
-  isMe: boolean; content: string; audioUrl?: string | null; imageUrl?: string | null; time: string;
-  senderName?: string; avatarUrl?: string | null; index: number;
+const MessageBubble = ({ isMe, content, audioUrl, imageUrl, imageUrls, fileUrl, fileName, time, senderName, avatarUrl, index }: {
+  isMe: boolean; content: string; audioUrl?: string | null; imageUrl?: string | null;
+  imageUrls?: string[] | null; fileUrl?: string | null; fileName?: string | null;
+  time: string; senderName?: string; avatarUrl?: string | null; index: number;
 }) => {
-  const [imgFullscreen, setImgFullscreen] = useState(false);
+  const [galleryOpen, setGalleryOpen] = useState<number | null>(null);
+
+  // Combine legacy single image_url with new image_urls array
+  const allImages: string[] = [];
+  if (imageUrls && Array.isArray(imageUrls) && imageUrls.length > 0) {
+    allImages.push(...imageUrls);
+  } else if (imageUrl) {
+    allImages.push(imageUrl);
+  }
+
+  const hasMedia = allImages.length > 0 || fileUrl;
 
   return (
     <>
@@ -267,21 +329,23 @@ const MessageBubble = ({ isMe, content, audioUrl, imageUrl, time, senderName, av
             isMe
               ? "bg-primary text-primary-foreground rounded-br-md shadow-lg shadow-primary/20"
               : "bg-card border border-border rounded-bl-md shadow-sm"
-          } ${imageUrl && !audioUrl ? "p-0" : "px-3.5 py-2.5"}`}>
-            {imageUrl ? (
-              <div className="cursor-pointer" onClick={() => setImgFullscreen(true)}>
-                <img
-                  src={imageUrl}
-                  alt="shared"
-                  className="max-w-[260px] max-h-[300px] object-cover rounded-2xl"
-                  loading="lazy"
-                />
-                {content && content !== "📷" && (
-                  <p className="px-3.5 py-2 text-sm">{content}</p>
+          } ${allImages.length > 0 && !audioUrl ? "p-1.5" : "px-3.5 py-2.5"}`}>
+            {allImages.length > 0 ? (
+              <div>
+                <ImageGallery urls={allImages} onOpen={(idx) => setGalleryOpen(idx)} />
+                {content && content !== "📷" && content !== "📷📎" && (
+                  <p className="px-2 py-1.5 text-sm">{content}</p>
                 )}
               </div>
             ) : audioUrl ? (
               <VoicePlayer url={audioUrl} />
+            ) : fileUrl && fileName ? (
+              <div>
+                <FileAttachment url={fileUrl} name={fileName} isMe={isMe} />
+                {content && content !== "📎" && (
+                  <p className="px-1 pt-1.5 text-sm">{content}</p>
+                )}
+              </div>
             ) : (
               content
             )}
@@ -292,27 +356,52 @@ const MessageBubble = ({ isMe, content, audioUrl, imageUrl, time, senderName, av
         </div>
       </motion.div>
 
-      {/* Fullscreen image viewer */}
+      {/* Fullscreen gallery viewer */}
       <AnimatePresence>
-        {imgFullscreen && imageUrl && (
+        {galleryOpen !== null && allImages.length > 0 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setImgFullscreen(false)}
-            className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 cursor-pointer"
+            className="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-4"
           >
             <motion.img
-              initial={{ scale: 0.8 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.8 }}
-              src={imageUrl}
+              key={galleryOpen}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              src={allImages[galleryOpen]}
               alt="fullscreen"
-              className="max-w-full max-h-full object-contain rounded-lg"
+              className="max-w-full max-h-[80vh] object-contain rounded-lg"
             />
-            <button className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white">
+            {allImages.length > 1 && (
+              <div className="flex items-center gap-3 mt-4">
+                {allImages.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setGalleryOpen(i)}
+                    className={`w-2 h-2 rounded-full transition-all ${i === galleryOpen ? "bg-white scale-125" : "bg-white/40"}`}
+                  />
+                ))}
+              </div>
+            )}
+            <button
+              onClick={() => setGalleryOpen(null)}
+              className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white"
+            >
               <X className="w-5 h-5" />
             </button>
+            {/* Left/Right navigation */}
+            {galleryOpen > 0 && (
+              <button onClick={() => setGalleryOpen(galleryOpen - 1)} className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white">
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+            )}
+            {galleryOpen < allImages.length - 1 && (
+              <button onClick={() => setGalleryOpen(galleryOpen + 1)} className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white rotate-180">
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
