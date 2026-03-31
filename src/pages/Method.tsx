@@ -25,9 +25,9 @@ const motivationText: Record<string, string> = {
   uk: "Привіт! Я — KLAR, твій помічник у вивченні німецької мови. Забудь нудні підручники та нескінченне зубріння. Тут все інакше: короткі уроки, розумні картки, квізи та аудіювання — лише 5–10 хвилин на день. Штучний інтелект аналізує саме твої помилки і підказує, над чим працювати. А система XP, досягнень та дуелей з друзями перетворює навчання на захопливу гру. Від A1 до C1 — ясно, просто і безкоштовно. Починай прямо зараз!",
 };
 
-const voiceIdMap: Record<string, string> = {
-  ru: "ycbyWsnf4hqZgdpKHqiU",
-  uk: "2OXYbN1uGomXXJtv9Dq6",
+const motivationAudioUrl: Record<string, string> = {
+  ru: "https://jqqsszwbbxvevebmebfm.supabase.co/storage/v1/object/public/tts-audio/motivation-ru.mp3",
+  uk: "https://jqqsszwbbxvevebmebfm.supabase.co/storage/v1/object/public/tts-audio/motivation-uk.mp3",
 };
 
 const faqItems = {
