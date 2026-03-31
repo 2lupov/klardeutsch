@@ -69,6 +69,7 @@ const AcademyLearn = () => {
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
   const [teacherPanelOpen, setTeacherPanelOpen] = useState(false);
+  const [cohortChatOpen, setCohortChatOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
