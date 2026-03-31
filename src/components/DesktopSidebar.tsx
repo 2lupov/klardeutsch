@@ -22,15 +22,15 @@ const DesktopSidebar = () => {
   const allCompleted = a1.completed && a2.completed && b1.completed && b2.completed && c1.completed;
 
   const links = [
-    { to: "/", icon: Home, label: t("navHome") },
-    { to: "/academy", icon: GraduationCap, label: lang === "uk" ? "Академія" : "Академия" },
-    { to: "/profile", icon: User, label: t("myProfile") },
-    { to: "/stats", icon: BarChart3, label: t("navStats") },
-    { to: "/dictionary", icon: BookOpen, label: t("navDictionary") },
-    { to: "/shop", icon: ShoppingBag, label: t("navShop") },
-    { to: "/games", icon: Gamepad2, label: "Игры" },
-    { to: "/chat", icon: MessageSquare, label: lang === "uk" ? "Чат" : "Чат" },
-    { to: "/dialogues", icon: MessageCircle, label: t("navDialogues") },
+    { to: "/", icon: Home, label: t("navHome"), badge: 0 },
+    { to: "/academy", icon: GraduationCap, label: lang === "uk" ? "Академія" : "Академия", badge: 0 },
+    { to: "/profile", icon: User, label: t("myProfile"), badge: 0 },
+    { to: "/stats", icon: BarChart3, label: t("navStats"), badge: 0 },
+    { to: "/dictionary", icon: BookOpen, label: t("navDictionary"), badge: 0 },
+    { to: "/shop", icon: ShoppingBag, label: t("navShop"), badge: 0 },
+    { to: "/games", icon: Gamepad2, label: "Игры", badge: 0 },
+    { to: "/chat", icon: MessageSquare, label: lang === "uk" ? "Чат" : "Чат", badge: unread },
+    { to: "/dialogues", icon: MessageCircle, label: t("navDialogues"), badge: 0 },
   ];
 
   return (
