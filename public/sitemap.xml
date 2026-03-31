@@ -26,14 +26,34 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://klardeutsch.org/shop</loc>
+    <loc>https://klardeutsch.org/academy</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
+    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://klardeutsch.org/challenges</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://klardeutsch.org/shop</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://klardeutsch.org/course</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://klardeutsch.org/dialogues</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://klardeutsch.org/review</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.4</priority>
   </url>
   <url>
     <loc>https://klardeutsch.org/privacy</loc>
