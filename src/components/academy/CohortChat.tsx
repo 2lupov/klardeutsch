@@ -126,7 +126,7 @@ const CohortChat = ({ courseId, lang, open, onClose }: Props) => {
                 <Users className="w-4 h-4 text-accent-foreground" />
                 <span className="text-sm font-display font-bold">{lang === "uk" ? "Чат потоку" : "Чат потока"}</span>
               </div>
-              <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground">
+              <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
                 <X className="w-4 h-4" />
               </button>
             </div>
