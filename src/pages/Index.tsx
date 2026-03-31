@@ -6,6 +6,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import TheoryRenderer from "@/components/course/TheoryRenderer";
 import { useProgress } from "@/hooks/useProgress";
 import { usePlatform } from "@/hooks/usePlatform";
+import { useDailySummary } from "@/hooks/useDailySummary";
 import LevelSelector from "@/components/LevelSelector";
 import CategorySelector from "@/components/CategorySelector";
 import TopicSelector from "@/components/TopicSelector";
@@ -15,6 +16,8 @@ import ReadingExercise from "@/components/ReadingExercise";
 import ListeningExercise from "@/components/ListeningExercise";
 import WritingExercise from "@/components/WritingExercise";
 import DailyChallenge from "@/components/DailyChallenge";
+import SRSWidget from "@/components/SRSWidget";
+import DailySummaryModal from "@/components/daily/DailySummaryModal";
 import { ArrowLeft } from "lucide-react";
 
 type Category = "vocabulary" | "grammar" | "reading" | "listening" | "writing";
@@ -33,6 +36,7 @@ const Index = () => {
   const { saveProgress } = useProgress();
   const { t, lang } = useLanguage();
   const { isMobile } = usePlatform();
+  const { showSummary, triggerSummary, closeSummary } = useDailySummary();
 
   // Load data when entering exercise
   useEffect(() => {
@@ -111,12 +115,14 @@ const Index = () => {
   const handleVocabComplete = () => {
     bumpClarity(1);
     saveProgress(level, "vocabulary", "flashcards", 0, true);
+    triggerSummary();
     handleBack();
   };
 
   const handleQuizComplete = (score: number) => {
     bumpClarity(1);
     saveProgress(level, "grammar", "quiz", score, true);
+    triggerSummary();
     handleBack();
   };
 
@@ -203,7 +209,8 @@ const Index = () => {
         {screen === "levels" && (
           <>
             <LevelSelector onSelect={handleLevelSelect} />
-            <div className={`w-full mt-3 ${isMobile ? "max-w-md" : "max-w-2xl"} mx-auto`}>
+            <div className={`w-full mt-3 ${isMobile ? "max-w-md" : "max-w-2xl"} mx-auto space-y-3`}>
+              <SRSWidget />
               <DailyChallenge />
             </div>
           </>
@@ -226,6 +233,7 @@ const Index = () => {
         )}
         {screen === "exercise" && renderExercise()}
       </div>
+      <DailySummaryModal open={showSummary} onClose={closeSummary} />
     </div>
   );
 };

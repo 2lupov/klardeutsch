@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
-import { Gift, Sparkles } from "lucide-react";
+import { Gift, Sparkles, Shield } from "lucide-react";
 import { useDailyBonus, BonusReward } from "@/hooks/useDailyBonus";
+import { useLanguage } from "@/contexts/LanguageContext";
 import StreakPlant from "@/components/StreakPlant";
+import MilestoneCelebration from "@/components/streak/MilestoneCelebration";
 import {
   Dialog,
   DialogContent,
@@ -10,7 +12,8 @@ import {
 } from "@/components/ui/dialog";
 
 const DailyBonusDialog = () => {
-  const { canClaim, streak, loading, claim } = useDailyBonus();
+  const { canClaim, streak, loading, claim, shields, milestoneStreak, clearMilestone } = useDailyBonus();
+  const { lang } = useLanguage();
   const [open, setOpen] = useState(false);
   const [claimed, setClaimed] = useState<BonusReward | null>(null);
   const [claiming, setClaiming] = useState(false);
@@ -33,12 +36,14 @@ const DailyBonusDialog = () => {
   if (loading || (!canClaim && !open && !claimed)) return null;
 
   return (
+    <>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="glass-card border-primary/20 max-w-sm">
         <DialogHeader>
           <DialogTitle className="font-display text-center text-lg flex items-center justify-center gap-2">
             <Gift className="w-5 h-5 text-primary" />
-            Ежедневный бонус 🐼
+            {lang === "uk" ? "Щоденний бонус 🐼" : "Ежедневный бонус 🐼"}
+            {shields > 0 && <span className="text-xs ml-1">🛡️×{shields}</span>}
           </DialogTitle>
         </DialogHeader>
 
@@ -87,6 +92,10 @@ const DailyBonusDialog = () => {
         </div>
       </DialogContent>
     </Dialog>
+    {milestoneStreak && (
+      <MilestoneCelebration streak={milestoneStreak} lang={lang} onClose={clearMilestone} />
+    )}
+    </>
   );
 };
 

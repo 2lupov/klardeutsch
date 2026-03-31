@@ -320,6 +320,27 @@ const translations = {
   reportSend: { ru: "Отправить", uk: "Надіслати" },
   reportSent: { ru: "Спасибо! Сообщение отправлено", uk: "Дякуємо! Повідомлення надіслано" },
   reportFailed: { ru: "Не удалось отправить", uk: "Не вдалося надіслати" },
+
+  // Onboarding
+  onboardingStep1Title: { ru: "Давай узнаем твой уровень 🎯", uk: "Давай дізнаємось твій рівень 🎯" },
+  onboardingStep2Title: { ru: "Зачем тебе немецкий? 🌍", uk: "Навіщо тобі німецька? 🌍" },
+  onboardingStep3Title: { ru: "Сколько времени в день? ⏱", uk: "Скільки часу на день? ⏱" },
+  onboardingStep4Title: { ru: "Первый урок прямо сейчас! 🚀", uk: "Перший урок просто зараз! 🚀" },
+  onboardingStart: { ru: "Начать учиться", uk: "Почати вчитися" },
+
+  // SRS
+  srsTitle: { ru: "🔁 Повторение слов", uk: "🔁 Повторення слів" },
+  srsDueToday: { ru: "слов ждут повторения", uk: "слів чекають повторення" },
+  srsStart: { ru: "Начать повторение", uk: "Почати повторення" },
+
+  // Streak
+  streakShield: { ru: "Защита серии", uk: "Захист серії" },
+  streakShieldDesc: { ru: "Сохрани серию при пропуске дня", uk: "Збережи серію при пропуску дня" },
+
+  // Daily Summary
+  dailySummaryTitle: { ru: "Отличный день!", uk: "Чудовий день!" },
+  dailySummaryShare: { ru: "Поделиться", uk: "Поділитися" },
+  dailySummaryClose: { ru: "Закрыть", uk: "Закрити" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;
