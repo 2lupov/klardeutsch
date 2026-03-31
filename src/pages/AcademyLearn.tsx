@@ -183,6 +183,13 @@ const AcademyLearn = () => {
         </button>
         <span className="text-sm font-display font-bold text-foreground truncate flex-1">{courseTitle}</span>
         <button
+          onClick={() => setTeacherPanelOpen(true)}
+          className="text-muted-foreground hover:text-primary transition-colors relative"
+          title={lang === "uk" ? "Допомога" : "Помощь"}
+        >
+          <GraduationCap className="w-4.5 h-4.5" />
+        </button>
+        <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
           className="lg:hidden text-muted-foreground hover:text-foreground transition-colors"
         >
