@@ -550,6 +550,7 @@ const CommunityChat = () => {
               isMe={isMe}
               content={m.content}
               audioUrl={m.audio_url}
+              imageUrl={m.image_url}
               time={format(new Date(m.created_at), "HH:mm")}
               senderName={prof?.display_name || undefined}
               avatarUrl={prof?.avatar_url}
