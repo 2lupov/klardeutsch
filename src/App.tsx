@@ -33,6 +33,7 @@ import AcademyCourse from "./pages/AcademyCourse";
 import AcademyLearn from "./pages/AcademyLearn";
 import Onboarding from "./pages/Onboarding";
 import Review from "./pages/Review";
+import Certificate from "./pages/Certificate";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
