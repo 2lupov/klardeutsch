@@ -35,6 +35,7 @@ interface ProfileData {
   display_name: string | null;
   avatar_url: string | null;
   telegram_chat_id: number | null;
+  nickname_changed_at: string | null;
 }
 
 type ProfileScreen = "main" | "achievements" | "activity" | "mistakes" | "leaderboard" | "notifications" | "referrals" | "offline" | "friends";
