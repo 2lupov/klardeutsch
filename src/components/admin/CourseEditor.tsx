@@ -631,7 +631,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
   const [existingCourses, setExistingCourses] = useState<ExistingCourse[]>([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
   const [editingCourseId, setEditingCourseId] = useState<string | null>(null);
-  const [editLessons, setEditLessons] = useState<Array<{ id: string; title: string; theory: string; exercises: any; sort_order: number }>>([]);
+  const [editLessons, setEditLessons] = useState<Array<{ id: string; title: string; theory: string; exercises: any; sort_order: number; lesson_type?: string; description?: string | null; estimated_minutes?: number; xp_reward?: number; coins_reward?: number; content?: any }>>([]);
   const [editCourse, setEditCourse] = useState<ExistingCourse | null>(null);
   const [loadingLessons, setLoadingLessons] = useState(false);
   const [savingEdit, setSavingEdit] = useState(false);
@@ -782,6 +782,12 @@ const CourseEditor = ({ level }: { level: Level }) => {
     setSavingEdit(true);
     const { error } = await supabase.from("course_lessons").update({
       title: lesson.title, theory: lesson.theory, exercises: lesson.exercises, sort_order: lesson.sort_order,
+      lesson_type: lesson.lesson_type || "article",
+      description: lesson.description || null,
+      estimated_minutes: lesson.estimated_minutes || 10,
+      xp_reward: lesson.xp_reward || 20,
+      coins_reward: lesson.coins_reward || 10,
+      content: lesson.content || null,
     } as any).eq("id", lesson.id);
     if (error) toast.error("Ошибка: " + error.message);
     else toast.success("Урок сохранён ✅");
@@ -858,6 +864,12 @@ const CourseEditor = ({ level }: { level: Level }) => {
     for (const lesson of editLessons) {
       const { error } = await supabase.from("course_lessons").update({
         title: lesson.title, theory: lesson.theory, exercises: lesson.exercises, sort_order: lesson.sort_order,
+        lesson_type: lesson.lesson_type || "article",
+        description: lesson.description || null,
+        estimated_minutes: lesson.estimated_minutes || 10,
+        xp_reward: lesson.xp_reward || 20,
+        coins_reward: lesson.coins_reward || 10,
+        content: lesson.content || null,
       } as any).eq("id", lesson.id);
       if (!error) ok++;
     }
@@ -974,6 +986,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
 
                 <button onClick={() => setExpandedLesson(expandedLesson === i ? null : i)} className="flex-1 flex items-center gap-2 text-left min-w-0">
                   <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center shrink-0">{i + 1}</span>
+                  <span className="text-xs shrink-0">{{"article":"📄","grammar":"📐","reading":"📖","dialogue_text":"💬","word_list":"📋","quiz":"📝","ai_tutor":"🤖","writing":"✍️","speaking":"🎙️","notebook":"📓","video":"🎬","video_quiz":"🎬📝","exam":"🏆"}[lesson.lesson_type || "article"] || "📄"}</span>
                   <span className="text-sm font-semibold text-foreground truncate">{lesson.title}</span>
                 </button>
 
@@ -992,8 +1005,70 @@ const CourseEditor = ({ level }: { level: Level }) => {
               </div>
 
               {expandedLesson === i && (
-                <div className="mt-3 border-t border-border/20 pt-3">
-                  <input value={lesson.title} onChange={e => { const n = [...editLessons]; n[i] = { ...n[i], title: e.target.value }; setEditLessons(n); }} placeholder="Название урока" className="w-full px-3 py-2 rounded-xl bg-secondary text-foreground border border-border text-sm mb-3 focus:border-primary focus:outline-none" />
+                <div className="mt-3 border-t border-border/20 pt-3 space-y-3">
+                  <input value={lesson.title} onChange={e => { const n = [...editLessons]; n[i] = { ...n[i], title: e.target.value }; setEditLessons(n); }} placeholder="Название урока" className="w-full px-3 py-2 rounded-xl bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none" />
+                  
+                  {/* Lesson type selector */}
+                  <div>
+                    <label className="text-[10px] text-muted-foreground block mb-1">Тип урока</label>
+                    <select 
+                      value={lesson.lesson_type || "article"} 
+                      onChange={e => { const n = [...editLessons]; n[i] = { ...n[i], lesson_type: e.target.value }; setEditLessons(n); }}
+                      className="w-full px-3 py-2 rounded-xl bg-secondary text-foreground border border-border text-xs focus:border-primary focus:outline-none"
+                    >
+                      <option value="article">📄 Статья / теория</option>
+                      <option value="grammar">📐 Грамматика</option>
+                      <option value="reading">📖 Чтение</option>
+                      <option value="dialogue_text">💬 Диалог</option>
+                      <option value="word_list">📋 Слова темы</option>
+                      <option value="quiz">📝 Квиз</option>
+                      <option value="ai_tutor">🤖 AI-тьютор</option>
+                      <option value="writing">✍️ Письмо</option>
+                      <option value="speaking">🎙️ Говорение</option>
+                      <option value="notebook">📓 Тетрадь</option>
+                      <option value="video">🎬 Видео</option>
+                      <option value="video_quiz">🎬📝 Квиз по видео</option>
+                      <option value="exam">🏆 Экзамен</option>
+                    </select>
+                  </div>
+
+                  {/* Description */}
+                  <input value={lesson.description || ""} onChange={e => { const n = [...editLessons]; n[i] = { ...n[i], description: e.target.value }; setEditLessons(n); }} placeholder="Описание урока (опционально)" className="w-full px-3 py-2 rounded-xl bg-secondary text-foreground border border-border text-xs focus:border-primary focus:outline-none" />
+
+                  {/* Estimated minutes */}
+                  <div className="flex gap-2">
+                    <div>
+                      <label className="text-[10px] text-muted-foreground block mb-1">Минут</label>
+                      <input type="number" value={lesson.estimated_minutes || 10} onChange={e => { const n = [...editLessons]; n[i] = { ...n[i], estimated_minutes: parseInt(e.target.value) || 10 }; setEditLessons(n); }} className="w-20 px-2 py-1.5 rounded-lg bg-secondary text-foreground border border-border text-xs" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-muted-foreground block mb-1">XP</label>
+                      <input type="number" value={lesson.xp_reward || 20} onChange={e => { const n = [...editLessons]; n[i] = { ...n[i], xp_reward: parseInt(e.target.value) || 20 }; setEditLessons(n); }} className="w-20 px-2 py-1.5 rounded-lg bg-secondary text-foreground border border-border text-xs" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-muted-foreground block mb-1">Монеты</label>
+                      <input type="number" value={lesson.coins_reward || 10} onChange={e => { const n = [...editLessons]; n[i] = { ...n[i], coins_reward: parseInt(e.target.value) || 10 }; setEditLessons(n); }} className="w-20 px-2 py-1.5 rounded-lg bg-secondary text-foreground border border-border text-xs" />
+                    </div>
+                  </div>
+
+                  {/* Content JSON editor for new types */}
+                  {["article", "grammar", "reading", "dialogue_text", "word_list", "quiz"].includes(lesson.lesson_type || "") && (
+                    <div>
+                      <label className="text-[10px] text-muted-foreground block mb-1">Content (JSON)</label>
+                      <textarea 
+                        value={typeof lesson.content === "string" ? lesson.content : JSON.stringify(lesson.content || {}, null, 2)} 
+                        onChange={e => { 
+                          const n = [...editLessons]; 
+                          try { n[i] = { ...n[i], content: JSON.parse(e.target.value) }; } 
+                          catch { n[i] = { ...n[i], content: e.target.value }; }
+                          setEditLessons(n); 
+                        }} 
+                        rows={8} 
+                        className="w-full px-3 py-2 rounded-xl bg-secondary text-foreground border border-border text-[10px] font-mono resize-y focus:border-primary focus:outline-none" 
+                      />
+                    </div>
+                  )}
+
                   <LessonEditor
                     lesson={{ title: lesson.title, theory: lesson.theory, exercises: lesson.exercises }}
                     onChange={l => { const n = [...editLessons]; n[i] = { ...n[i], title: l.title, theory: l.theory, exercises: l.exercises }; setEditLessons(n); }}

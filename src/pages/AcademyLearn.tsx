@@ -13,6 +13,12 @@ import WritingTaskLesson from "@/components/academy/lessons/WritingTaskLesson";
 import SpeakingChallengeLesson from "@/components/academy/lessons/SpeakingChallengeLesson";
 import FinalExamLesson from "@/components/academy/lessons/FinalExamLesson";
 import NotebookLesson from "@/components/academy/lessons/NotebookLesson";
+import ArticleLesson from "@/components/academy/lessons/ArticleLesson";
+import GrammarLesson from "@/components/academy/lessons/GrammarLesson";
+import ReadingLesson from "@/components/academy/lessons/ReadingLesson";
+import DialogueTextLesson from "@/components/academy/lessons/DialogueTextLesson";
+import WordListLesson from "@/components/academy/lessons/WordListLesson";
+import QuizLesson from "@/components/academy/lessons/QuizLesson";
 import TeacherChat from "@/components/academy/TeacherChat";
 import CohortChat from "@/components/academy/CohortChat";
 import { Button } from "@/components/ui/button";
@@ -139,6 +145,18 @@ const AcademyLearn = () => {
         return <VideoLessonPlayer key={key} lesson={activeLesson} onComplete={() => handleComplete()} lang={lang} />;
       case "video_quiz":
         return <VideoQuizLesson key={key} lesson={activeLesson} onComplete={(s) => handleComplete(s)} lang={lang} />;
+      case "article":
+        return <ArticleLesson key={key} lesson={activeLesson} onComplete={() => handleComplete()} lang={lang} />;
+      case "grammar":
+        return <GrammarLesson key={key} lesson={activeLesson} onComplete={() => handleComplete()} lang={lang} />;
+      case "reading":
+        return <ReadingLesson key={key} lesson={activeLesson} onComplete={(s) => handleComplete(s)} lang={lang} />;
+      case "dialogue_text":
+        return <DialogueTextLesson key={key} lesson={activeLesson} onComplete={() => handleComplete()} lang={lang} />;
+      case "word_list":
+        return <WordListLesson key={key} lesson={activeLesson} onComplete={() => handleComplete()} lang={lang} />;
+      case "quiz":
+        return <QuizLesson key={key} lesson={activeLesson} onComplete={(s) => handleComplete(s)} lang={lang} />;
       case "ai_tutor":
         return <AITutorLesson key={key} lesson={activeLesson} onComplete={() => handleComplete()} lang={lang} />;
       case "writing":
@@ -150,7 +168,7 @@ const AcademyLearn = () => {
       case "notebook":
         return <NotebookLesson key={key} lesson={activeLesson} onComplete={() => handleComplete()} lang={lang} />;
       default:
-        return <VideoLessonPlayer key={key} lesson={activeLesson} onComplete={() => handleComplete()} lang={lang} />;
+        return <ArticleLesson key={key} lesson={activeLesson} onComplete={() => handleComplete()} lang={lang} />;
     }
   };
 
