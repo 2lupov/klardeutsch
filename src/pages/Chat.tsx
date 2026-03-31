@@ -210,11 +210,30 @@ const uploadVoice = async (blob: Blob, userId: string): Promise<string | null> =
 /* ───── Upload image helper ───── */
 const uploadChatImage = async (file: File, userId: string): Promise<string | null> => {
   const ext = file.name.split(".").pop() || "jpg";
-  const filename = `${userId}/${Date.now()}.${ext}`;
+  const filename = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2, 6)}.${ext}`;
   const { error } = await supabase.storage.from("chat-images").upload(filename, file, { contentType: file.type });
   if (error) return null;
   const { data } = supabase.storage.from("chat-images").getPublicUrl(filename);
   return data.publicUrl;
+};
+
+/* ───── Upload multiple images ───── */
+const uploadChatImages = async (files: File[], userId: string): Promise<string[]> => {
+  const urls: string[] = [];
+  for (const file of files) {
+    const url = await uploadChatImage(file, userId);
+    if (url) urls.push(url);
+  }
+  return urls;
+};
+
+/* ───── Upload file helper ───── */
+const uploadChatFile = async (file: File, userId: string): Promise<{ url: string; name: string } | null> => {
+  const filename = `${userId}/${Date.now()}-${file.name}`;
+  const { error } = await supabase.storage.from("chat-files").upload(filename, file, { contentType: file.type });
+  if (error) return null;
+  const { data } = supabase.storage.from("chat-files").getPublicUrl(filename);
+  return { url: data.publicUrl, name: file.name };
 };
 
 /* ───── Message Bubble ───── */
