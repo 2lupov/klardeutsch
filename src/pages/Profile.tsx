@@ -91,6 +91,14 @@ const Profile = () => {
       setDuelsWonCount(duelsRes.count ?? 0);
       setChallengesSentCount(challengesSentRes.count ?? 0);
       setDailyBonusStreakVal(dailyBonusRes.data?.streak ?? 0);
+
+      // Fetch pending incoming friend requests
+      const { count: friendReqCount } = await supabase
+        .from("friendships")
+        .select("id", { count: "exact", head: true })
+        .eq("friend_id", user.id)
+        .eq("status", "pending");
+      setPendingFriendRequests(friendReqCount ?? 0);
       // Dialogues completed = progress entries with category containing "dialogue"
       const dialogueEntries = (prog ?? []).filter((p: any) => p.category === "dialogue" || p.exercise_id?.includes("dialogue"));
       setDialoguesCount(dialogueEntries.length);
