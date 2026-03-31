@@ -11,6 +11,7 @@ const DesktopSidebar = () => {
   const { t, lang } = useLanguage();
   const location = useLocation();
   const { isTelegram } = usePlatform();
+  const unread = useUnreadDMs();
 
   const a1 = useLevelProgress("A1");
   const a2 = useLevelProgress("A2");
