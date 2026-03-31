@@ -212,52 +212,101 @@ const uploadChatImage = async (file: File, userId: string): Promise<string | nul
 };
 
 /* ───── Message Bubble ───── */
-const MessageBubble = ({ isMe, content, audioUrl, time, senderName, avatarUrl, index }: {
-  isMe: boolean; content: string; audioUrl?: string | null; time: string;
+const MessageBubble = ({ isMe, content, audioUrl, imageUrl, time, senderName, avatarUrl, index }: {
+  isMe: boolean; content: string; audioUrl?: string | null; imageUrl?: string | null; time: string;
   senderName?: string; avatarUrl?: string | null; index: number;
-}) => (
-  <motion.div
-    initial={{ opacity: 0, y: 12, scale: 0.95 }}
-    animate={{ opacity: 1, y: 0, scale: 1 }}
-    transition={{ duration: 0.25, delay: Math.min(index * 0.02, 0.3) }}
-    className={`flex gap-2 ${isMe ? "flex-row-reverse" : ""}`}
-  >
-    {!isMe && (
-      <Avatar className="w-7 h-7 shrink-0 mt-auto">
-        <AvatarImage src={avatarUrl || ""} className="object-cover" />
-        <AvatarFallback className="text-[10px] bg-primary/10 text-primary">
-          {(senderName || "?")[0]}
-        </AvatarFallback>
-      </Avatar>
-    )}
-    <div className={`max-w-[75%] ${isMe ? "items-end" : "items-start"}`}>
-      {!isMe && senderName && (
-        <p className="text-[10px] mb-0.5 text-muted-foreground font-medium px-1">{senderName}</p>
-      )}
-      <div className={`rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed backdrop-blur-sm ${
-        isMe
-          ? "bg-primary text-primary-foreground rounded-br-md shadow-lg shadow-primary/20"
-          : "bg-card border border-border rounded-bl-md shadow-sm"
-      }`}>
-        {audioUrl ? <VoicePlayer url={audioUrl} /> : content}
-      </div>
-      <p className={`text-[9px] mt-0.5 px-1 ${isMe ? "text-right" : ""} text-muted-foreground/50`}>
-        {time}
-      </p>
-    </div>
-  </motion.div>
-);
+}) => {
+  const [imgFullscreen, setImgFullscreen] = useState(false);
+
+  return (
+    <>
+      <motion.div
+        initial={{ opacity: 0, y: 12, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.25, delay: Math.min(index * 0.02, 0.3) }}
+        className={`flex gap-2 ${isMe ? "flex-row-reverse" : ""}`}
+      >
+        {!isMe && (
+          <Avatar className="w-7 h-7 shrink-0 mt-auto">
+            <AvatarImage src={avatarUrl || ""} className="object-cover" />
+            <AvatarFallback className="text-[10px] bg-primary/10 text-primary">
+              {(senderName || "?")[0]}
+            </AvatarFallback>
+          </Avatar>
+        )}
+        <div className={`max-w-[75%] ${isMe ? "items-end" : "items-start"}`}>
+          {!isMe && senderName && (
+            <p className="text-[10px] mb-0.5 text-muted-foreground font-medium px-1">{senderName}</p>
+          )}
+          <div className={`rounded-2xl overflow-hidden text-sm leading-relaxed backdrop-blur-sm ${
+            isMe
+              ? "bg-primary text-primary-foreground rounded-br-md shadow-lg shadow-primary/20"
+              : "bg-card border border-border rounded-bl-md shadow-sm"
+          } ${imageUrl && !audioUrl ? "p-0" : "px-3.5 py-2.5"}`}>
+            {imageUrl ? (
+              <div className="cursor-pointer" onClick={() => setImgFullscreen(true)}>
+                <img
+                  src={imageUrl}
+                  alt="shared"
+                  className="max-w-[260px] max-h-[300px] object-cover rounded-2xl"
+                  loading="lazy"
+                />
+                {content && content !== "📷" && (
+                  <p className="px-3.5 py-2 text-sm">{content}</p>
+                )}
+              </div>
+            ) : audioUrl ? (
+              <VoicePlayer url={audioUrl} />
+            ) : (
+              content
+            )}
+          </div>
+          <p className={`text-[9px] mt-0.5 px-1 ${isMe ? "text-right" : ""} text-muted-foreground/50`}>
+            {time}
+          </p>
+        </div>
+      </motion.div>
+
+      {/* Fullscreen image viewer */}
+      <AnimatePresence>
+        {imgFullscreen && imageUrl && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setImgFullscreen(false)}
+            className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 cursor-pointer"
+          >
+            <motion.img
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.8 }}
+              src={imageUrl}
+              alt="fullscreen"
+              className="max-w-full max-h-full object-contain rounded-lg"
+            />
+            <button className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white">
+              <X className="w-5 h-5" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+};
 
 /* ───── Chat Input Bar ───── */
-const ChatInputBar = ({ onSendText, onSendVoice, placeholder, userId }: {
+const ChatInputBar = ({ onSendText, onSendVoice, onSendImage, placeholder, userId }: {
   onSendText: (text: string) => void;
   onSendVoice: (audioUrl: string) => void;
+  onSendImage: (imageUrl: string) => void;
   placeholder: string;
   userId: string;
 }) => {
   const [text, setText] = useState("");
   const { recording, elapsed, start, stop, cancel } = useVoiceRecorder();
   const [uploading, setUploading] = useState(false);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const handleSend = () => {
     if (!text.trim()) return;
