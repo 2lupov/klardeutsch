@@ -15,9 +15,11 @@ const ReadingExercise = ({ readings, onComplete, level = "A1" }: ReadingExercise
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showQuestions, setShowQuestions] = useState(false);
   const { t } = useLanguage();
-  const { playing, loading, play: playAudio } = useListeningAudio();
+  const { playing, loading, play: playAudio, currentTitle } = useListeningAudio();
 
   const reading = readings[currentIndex];
+  const isThisPlaying = playing && currentTitle === reading.title;
+  const isThisLoading = loading && currentTitle === reading.title;
 
   const handlePlayReading = () => {
     playAudio(reading.text, reading.title);
