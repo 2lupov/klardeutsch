@@ -55,7 +55,14 @@ const DesktopSidebar = () => {
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
               }`}
             >
-              <item.icon className="w-4 h-4" />
+              <div className="relative">
+                <item.icon className="w-4 h-4" />
+                {item.badge > 0 && (
+                  <span className="absolute -top-1.5 -right-2.5 bg-destructive text-destructive-foreground text-[9px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-1">
+                    {item.badge > 99 ? "99+" : item.badge}
+                  </span>
+                )}
+              </div>
               {item.label}
             </NavLink>
           );
