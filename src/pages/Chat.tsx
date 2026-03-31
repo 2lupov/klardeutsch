@@ -586,6 +586,7 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
     if (!text.trim()) return;
     onSendText(text.trim());
     setText("");
+    onCancelReply?.();
   };
 
   const handleSendImages = async () => {
