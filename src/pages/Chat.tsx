@@ -876,10 +876,16 @@ const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void
     fetchEdgeFunction("notify-dm", { json: { receiver_id: peerId, message_preview: "🎤 Голосовое сообщение" } }).catch(() => {});
   };
 
-  const sendImage = async (imageUrl: string) => {
+  const sendImages = async (imageUrls: string[]) => {
     if (!user) return;
-    await supabase.from("direct_messages").insert({ sender_id: user.id, receiver_id: peerId, content: "📷", image_url: imageUrl });
-    fetchEdgeFunction("notify-dm", { json: { receiver_id: peerId, message_preview: "📷 Фото" } }).catch(() => {});
+    await supabase.from("direct_messages").insert({ sender_id: user.id, receiver_id: peerId, content: "📷", image_urls: imageUrls });
+    fetchEdgeFunction("notify-dm", { json: { receiver_id: peerId, message_preview: `📷 ${imageUrls.length > 1 ? imageUrls.length + " фото" : "Фото"}` } }).catch(() => {});
+  };
+
+  const sendFile = async (fileUrl: string, fileName: string) => {
+    if (!user) return;
+    await supabase.from("direct_messages").insert({ sender_id: user.id, receiver_id: peerId, content: "📎", file_url: fileUrl, file_name: fileName });
+    fetchEdgeFunction("notify-dm", { json: { receiver_id: peerId, message_preview: `📎 ${fileName}` } }).catch(() => {});
   };
 
   return (
@@ -917,6 +923,9 @@ const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void
               content={m.content}
               audioUrl={m.audio_url}
               imageUrl={m.image_url}
+              imageUrls={m.image_urls}
+              fileUrl={m.file_url}
+              fileName={m.file_name}
               time={format(new Date(m.created_at), "HH:mm")}
               index={i}
             />
@@ -928,7 +937,8 @@ const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void
       <ChatInputBar
         onSendText={sendText}
         onSendVoice={sendVoice}
-        onSendImage={sendImage}
+        onSendImages={sendImages}
+        onSendFile={sendFile}
         placeholder={lang === "uk" ? "Написати…" : "Написать…"}
         userId={user?.id || ""}
       />
