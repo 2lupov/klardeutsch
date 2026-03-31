@@ -107,6 +107,8 @@ const FriendsList = ({ onBack }: FriendsListProps) => {
       toast({ title: t("Ошибка", "Помилка"), description: error.message, variant: "destructive" });
     } else {
       toast({ title: t("Заявка отправлена!", "Заявку відправлено!") });
+      // Notify via Telegram — fire and forget
+      fetchEdgeFunction("notify-friend-request", { json: { friend_id: friendId } }).catch(() => {});
       loadFriendships();
     }
     setActionLoading(null);
