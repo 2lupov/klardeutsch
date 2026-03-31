@@ -18,7 +18,8 @@ import WritingExercise from "@/components/WritingExercise";
 import DailyChallenge from "@/components/DailyChallenge";
 import SRSWidget from "@/components/SRSWidget";
 import DailySummaryModal from "@/components/daily/DailySummaryModal";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 type Category = "vocabulary" | "grammar" | "reading" | "listening" | "writing";
 type Screen = "levels" | "categories" | "topics" | "exercise";
@@ -37,6 +38,7 @@ const Index = () => {
   const { t, lang } = useLanguage();
   const { isMobile } = usePlatform();
   const { showSummary, triggerSummary, closeSummary } = useDailySummary();
+  const navigate = useNavigate();
 
   // Load data when entering exercise
   useEffect(() => {
@@ -191,6 +193,16 @@ const Index = () => {
 
   return (
     <div className={`flex flex-col ${isMobile ? "min-h-full" : "h-full"}`}>
+      {isMobile && screen === "levels" && (
+        <div className="flex justify-end px-4 pt-3">
+          <button
+            onClick={() => navigate("/profile")}
+            className="flex items-center justify-center w-9 h-9 rounded-full bg-muted/60 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          >
+            <User className="w-5 h-5" />
+          </button>
+        </div>
+      )}
       {screen === "exercise" && (
         <div className="fog-overlay" style={{ "--clarity": clarity } as React.CSSProperties} />
       )}
