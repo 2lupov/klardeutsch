@@ -178,20 +178,10 @@ const Method = () => {
       return;
     }
 
+    // Use pre-recorded audio from storage
     setAudioState("loading");
     try {
-      const text = motivationText[lang] || motivationText.ru;
-      const voiceId = voiceIdMap[lang] || voiceIdMap.ru;
-
-      const { fetchEdgeFunction } = await import("@/lib/auth-fetch");
-      const response = await fetchEdgeFunction("elevenlabs-tts", {
-        json: { text, voiceId, speed: 1.1 },
-      });
-
-      if (!response.ok) throw new Error("TTS failed");
-
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
+      const url = motivationAudioUrl[lang] || motivationAudioUrl.ru;
       audioCacheRef.current.set(lang, url);
       const audio = new Audio(url);
       audioRef.current = audio;
