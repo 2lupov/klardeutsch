@@ -74,7 +74,7 @@ const Profile = () => {
       const [{ data: prog }, { count }, { data: prof }, { count: customCount }, { count: savedCount }] = await Promise.all([
         supabase.from("user_progress").select("*").eq("user_id", user.id),
         supabase.from("vocab_cards").select("*", { count: "exact", head: true }),
-        supabase.from("profiles").select("display_name, avatar_url, telegram_chat_id").eq("user_id", user.id).single(),
+        supabase.from("profiles").select("display_name, avatar_url, telegram_chat_id, nickname_changed_at").eq("user_id", user.id).single(),
         supabase.from("custom_words").select("*", { count: "exact", head: true }).eq("user_id", user.id),
         supabase.from("saved_words").select("*", { count: "exact", head: true }).eq("user_id", user.id),
       ]);
