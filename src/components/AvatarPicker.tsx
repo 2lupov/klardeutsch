@@ -4,14 +4,14 @@ import { Check } from "lucide-react";
 const PRESET_AVATARS = [
   { id: "ua-1", url: "/avatars/ua-1.png", label: "🇺🇦 Вишиванка" },
   { id: "ua-2", url: "/avatars/ua-2.png", label: "🇺🇦 Козак" },
-  { id: "de-1", url: "/avatars/de-1.png", label: "🇩🇪 Lederhosen" },
-  { id: "de-2", url: "/avatars/de-2.png", label: "🇩🇪 Schäferhund" },
-  { id: "neutral-1", url: "/avatars/neutral-1.png", label: "🦊 Лисичка" },
-  { id: "neutral-2", url: "/avatars/neutral-2.png", label: "🐱 Космокіт" },
-  { id: "neutral-3", url: "/avatars/neutral-3.png", label: "🐼 Панда" },
-  { id: "neutral-4", url: "/avatars/neutral-4.png", label: "🤖 Робот" },
-  { id: "neutral-5", url: "/avatars/neutral-5.png", label: "🐧 Пінгвін" },
-  { id: "neutral-6", url: "/avatars/neutral-6.png", label: "🦉 Сова" },
+  { id: "de-1", url: "/avatars/de-1.png", label: "🇩🇪 Баварець" },
+  { id: "de-2", url: "/avatars/de-2.png", label: "🇩🇪 Поліцай" },
+  { id: "neutral-1", url: "/avatars/neutral-1.png", label: "🥷 Ніндзя" },
+  { id: "neutral-2", url: "/avatars/neutral-2.png", label: "🚀 Космонавт" },
+  { id: "neutral-3", url: "/avatars/neutral-3.png", label: "🎓 Професор" },
+  { id: "neutral-4", url: "/avatars/neutral-4.png", label: "🎧 Діджей" },
+  { id: "neutral-5", url: "/avatars/neutral-5.png", label: "🎨 Художник" },
+  { id: "neutral-6", url: "/avatars/neutral-6.png", label: "🧙 Чарівник" },
 ];
 
 interface AvatarPickerProps {
