@@ -99,37 +99,123 @@ const ui = {
   },
 };
 
-/* Typewriter component for KLAR */
+/* Typewriter KLAR — fills from bottom like KlarLogo */
 const TypewriterKLAR = () => {
-  const letters = ["K", "L", "A", "R"];
-  const [visibleCount, setVisibleCount] = useState(0);
+  const letters = [
+    { char: "K", width: 44 },
+    { char: "L", width: 40 },
+    { char: "A", width: 46 },
+    { char: "R", width: 44 },
+  ];
+  const totalWidth = letters.reduce((sum, l) => sum + l.width, 0) - 18;
+  const height = 64;
+  const spacing = -6;
+  const [fills, setFills] = useState([0, 0, 0, 0]);
 
   useEffect(() => {
-    if (visibleCount < letters.length) {
-      const timer = setTimeout(() => setVisibleCount((c) => c + 1), 400);
-      return () => clearTimeout(timer);
-    }
-  }, [visibleCount, letters.length]);
+    letters.forEach((_, i) => {
+      setTimeout(() => {
+        setFills(prev => {
+          const next = [...prev];
+          next[i] = 1;
+          return next;
+        });
+      }, 400 + i * 350);
+    });
+  }, []);
 
   return (
-    <span className="text-gradient inline-flex">
-      {letters.map((letter, i) => (
-        <motion.span
-          key={i}
-          initial={{ opacity: 0, y: 12, scale: 0.7 }}
-          animate={i < visibleCount ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 12, scale: 0.7 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-        >
-          {letter}
-        </motion.span>
-      ))}
-      {visibleCount < letters.length && (
-        <motion.span
-          className="inline-block w-[2px] h-[1em] bg-primary ml-0.5 self-center"
-          animate={{ opacity: [1, 0] }}
-          transition={{ duration: 0.6, repeat: Infinity, repeatType: "reverse" }}
-        />
-      )}
+    <span className="inline-flex align-baseline" style={{ verticalAlign: "baseline" }}>
+      <svg
+        viewBox={`0 0 ${totalWidth} ${height}`}
+        style={{ height: "1em", width: "auto", overflow: "visible", display: "inline-block", verticalAlign: "baseline" }}
+      >
+        <defs>
+          <linearGradient id="method-klar-gold" x1="0%" y1="100%" x2="0%" y2="0%">
+            <stop offset="0%" stopColor="hsl(45, 92%, 52%)" />
+            <stop offset="100%" stopColor="hsl(45, 80%, 65%)" />
+          </linearGradient>
+          <filter id="method-klar-glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+
+        {letters.map((letter, i) => {
+          const x = letters.slice(0, i).reduce((sum, l) => sum + l.width + spacing, 0);
+          const fill = fills[i];
+          const fillY = height * (1 - fill);
+          const isFull = fill >= 1;
+
+          return (
+            <g key={i} transform={`translate(${x}, 0)`}>
+              <defs>
+                <clipPath id={`method-clip-${i}`}>
+                  <text
+                    x="0"
+                    y={height * 0.82}
+                    fontFamily="'Space Grotesk', sans-serif"
+                    fontWeight="700"
+                    fontSize="56"
+                    letterSpacing="-0.02em"
+                  >
+                    {letter.char}
+                  </text>
+                </clipPath>
+              </defs>
+
+              {/* Outline */}
+              <text
+                x="0"
+                y={height * 0.82}
+                fontFamily="'Space Grotesk', sans-serif"
+                fontWeight="700"
+                fontSize="56"
+                fill="none"
+                stroke="hsl(215, 15%, 35%)"
+                strokeWidth={isFull ? 0 : 1.5}
+                opacity={isFull ? 0 : 0.4}
+                letterSpacing="-0.02em"
+                style={{ transition: "all 0.5s ease" }}
+              >
+                {letter.char}
+              </text>
+
+              {/* Fill */}
+              <g clipPath={`url(#method-clip-${i})`}>
+                <rect
+                  x="-5"
+                  y={fillY}
+                  width={letter.width + 10}
+                  height={height}
+                  fill="url(#method-klar-gold)"
+                  filter={isFull ? "url(#method-klar-glow)" : undefined}
+                  style={{ transition: "y 0.7s cubic-bezier(0.4, 0, 0.2, 1)" }}
+                />
+              </g>
+
+              {isFull && (
+                <text
+                  x="0"
+                  y={height * 0.82}
+                  fontFamily="'Space Grotesk', sans-serif"
+                  fontWeight="700"
+                  fontSize="56"
+                  fill="url(#method-klar-gold)"
+                  filter="url(#method-klar-glow)"
+                  opacity={0.5}
+                  letterSpacing="-0.02em"
+                >
+                  {letter.char}
+                </text>
+              )}
+            </g>
+          );
+        })}
+      </svg>
     </span>
   );
 };
