@@ -226,6 +226,17 @@ const Profile = () => {
       toast({ title: lang === "uk" ? "Нікнейм має починатися з букви, мін. 5 символів" : "Никнейм должен начинаться с буквы, мин. 5 символов", variant: "destructive" });
       return;
     }
+    // 2-week cooldown check
+    if (profile.nickname_changed_at) {
+      const lastChanged = new Date(profile.nickname_changed_at).getTime();
+      const twoWeeks = 14 * 24 * 60 * 60 * 1000;
+      if (Date.now() - lastChanged < twoWeeks) {
+        const nextDate = new Date(lastChanged + twoWeeks);
+        const formatted = nextDate.toLocaleDateString(lang === "uk" ? "uk-UA" : "ru-RU", { day: "numeric", month: "long" });
+        toast({ title: lang === "uk" ? `Змінити нікнейм можна після ${formatted}` : `Изменить никнейм можно после ${formatted}`, variant: "destructive" });
+        return;
+      }
+    }
     // Check uniqueness
     const { data: existing } = await supabase
       .from("profiles")
@@ -237,8 +248,9 @@ const Profile = () => {
       toast({ title: lang === "uk" ? "Цей нікнейм вже зайнятий" : "Этот никнейм уже занят", variant: "destructive" });
       return;
     }
-    await supabase.from("profiles").update({ display_name: trimmed }).eq("user_id", user.id);
-    setProfile((p) => ({ ...p, display_name: trimmed }));
+    const now = new Date().toISOString();
+    await supabase.from("profiles").update({ display_name: trimmed, nickname_changed_at: now } as any).eq("user_id", user.id);
+    setProfile((p) => ({ ...p, display_name: trimmed, nickname_changed_at: now }));
     setEditing(false);
     toast({ title: t("profileSaved") });
   };
