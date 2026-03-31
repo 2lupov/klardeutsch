@@ -755,6 +755,7 @@ const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void
               isMe={isMe}
               content={m.content}
               audioUrl={m.audio_url}
+              imageUrl={m.image_url}
               time={format(new Date(m.created_at), "HH:mm")}
               index={i}
             />
