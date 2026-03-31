@@ -807,6 +807,7 @@ const Profile = () => {
         <NavButton
           icon={<Users className="w-4 h-4 text-primary" />}
           label={lang === "uk" ? "Друзі" : "Друзья"}
+          badge={pendingFriendRequests > 0 ? pendingFriendRequests : undefined}
           onClick={() => setScreen("friends")}
         />
         <NavButton
