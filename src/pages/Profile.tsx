@@ -659,7 +659,7 @@ const Profile = () => {
               </button>
             </div>
           )}
-          <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+          <p className="text-xs text-muted-foreground truncate">@{profile.display_name || "nickname"}</p>
         </div>
 
         {/* Panda streak button */}
