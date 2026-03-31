@@ -90,7 +90,7 @@ const Academy = () => {
   // Show "under development" for everyone except allowed users
   if (!hasAccess) {
     return (
-      <div className="flex flex-col items-center justify-center h-full px-6 text-center">
+      <div className="flex flex-col items-center justify-center min-h-[100dvh] px-6 text-center">
         <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
           <Construction className="w-10 h-10 text-primary" />
         </div>
