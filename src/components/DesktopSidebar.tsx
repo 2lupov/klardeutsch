@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, User, BookOpen, BarChart3, ShoppingBag, Gamepad2, MessageCircle, GraduationCap } from "lucide-react";
+import { Home, User, BookOpen, BarChart3, ShoppingBag, Gamepad2, MessageCircle, GraduationCap, MessageSquare } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePlatform } from "@/hooks/usePlatform";
 import KlarLogo from "@/components/KlarLogo";
