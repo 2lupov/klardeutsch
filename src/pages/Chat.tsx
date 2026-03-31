@@ -1374,11 +1374,11 @@ const DMList = ({ onSelectPeer }: { onSelectPeer: (uid: string) => void }) => {
       const peerIds = Object.keys(peerMap);
       const { data: profs } = await supabase
         .from("profiles")
-        .select("user_id, display_name, avatar_url")
+        .select("user_id, display_name, avatar_url, last_active")
         .in("user_id", peerIds);
 
       const profMap: Record<string, Profile> = {};
-      profs?.forEach((p) => (profMap[p.user_id] = p));
+      profs?.forEach((p) => (profMap[p.user_id] = p as any));
 
       const sorted = peerIds
         .map((pid) => ({ peerId: pid, ...peerMap[pid], profile: profMap[pid] }))
