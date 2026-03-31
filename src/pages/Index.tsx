@@ -115,6 +115,7 @@ const Index = () => {
   const handleVocabComplete = () => {
     bumpClarity(1);
     saveProgress(level, "vocabulary", "flashcards", 0, true);
+    triggerSummary();
     handleBack();
   };
 
