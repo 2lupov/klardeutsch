@@ -149,6 +149,7 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          image_url: string | null
           user_id: string
         }
         Insert: {
@@ -156,6 +157,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          image_url?: string | null
           user_id: string
         }
         Update: {
@@ -163,6 +165,7 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          image_url?: string | null
           user_id?: string
         }
         Relationships: []
@@ -699,6 +702,7 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          image_url: string | null
           is_read: boolean
           receiver_id: string
           sender_id: string
@@ -708,6 +712,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          image_url?: string | null
           is_read?: boolean
           receiver_id: string
           sender_id: string
@@ -717,6 +722,7 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          image_url?: string | null
           is_read?: boolean
           receiver_id?: string
           sender_id?: string
