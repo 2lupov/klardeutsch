@@ -1,6 +1,8 @@
-import { useMemo, useState } from "react";
+import { Suspense, lazy, useMemo, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
+
+const Panda3D = lazy(() => import("@/components/Panda3D"));
 import {
   Dialog,
   DialogContent,
