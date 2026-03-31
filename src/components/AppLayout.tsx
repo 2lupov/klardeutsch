@@ -7,6 +7,7 @@ import MobileBottomNav from "@/components/MobileBottomNav";
 import DesktopSidebar from "@/components/DesktopSidebar";
 import PageTransition from "@/components/PageTransition";
 import LofiFloatingPlayer from "@/components/LofiFloatingPlayer";
+import ListeningFloatingPlayer from "@/components/ListeningFloatingPlayer";
 import NicknameGate from "@/components/NicknameGate";
 import EditModeToolbar from "@/components/EditModeToolbar";
 import DailyBonusDialog from "@/components/DailyBonusDialog";
@@ -59,6 +60,7 @@ const AppLayout = () => {
       <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
         <EditModeToolbar />
         <LofiFloatingPlayer />
+        <ListeningFloatingPlayer />
         <DailyBonusDialog />
         <div className="flex-1 overflow-y-auto overflow-x-hidden overscroll-none pb-14">
           <PageTransition><Outlet /></PageTransition>
@@ -74,6 +76,7 @@ const AppLayout = () => {
       <main className="flex-1 overflow-y-auto relative">
         <EditModeToolbar />
         <LofiFloatingPlayer />
+        <ListeningFloatingPlayer />
         <DailyBonusDialog />
         <PageTransition><Outlet /></PageTransition>
       </main>

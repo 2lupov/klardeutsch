@@ -41,7 +41,7 @@ const TAB_CONFIG: { key: Tab; icon: React.ElementType; label: string }[] = [
   { key: "grammar", icon: Languages, label: "grammar" },
   { key: "reading", icon: BookText, label: "reading" },
   { key: "listening", icon: Headphones, label: "listening" },
-  { key: "shop", icon: ShoppingBag, label: "shopTab" },
+  // { key: "shop", icon: ShoppingBag, label: "shopTab" }, // temporarily hidden
   { key: "games", icon: Gamepad2, label: "games" },
   { key: "users", icon: Users, label: "users" },
   { key: "translations", icon: Globe, label: "translations" },

@@ -32,6 +32,7 @@ export const ListeningAudioProvider = ({ children }: { children: ReactNode }) =>
   const [playbackSpeed, setPlaybackSpeedState] = useState(0.85);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const currentTextRef = useRef<string | null>(null);
+  const objectUrlRef = useRef<string | null>(null);
 
   const setPlaybackSpeed = useCallback((speed: number) => {
     setPlaybackSpeedState(speed);
@@ -47,6 +48,10 @@ export const ListeningAudioProvider = ({ children }: { children: ReactNode }) =>
       audioRef.current.onended = null;
       audioRef.current.onpause = null;
       audioRef.current = null;
+    }
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = null;
     }
     setPlaying(false);
     setLoading(false);
@@ -117,7 +122,9 @@ export const ListeningAudioProvider = ({ children }: { children: ReactNode }) =>
         if (!response.ok) throw new Error("TTS failed");
 
         const blob = await response.blob();
+        if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
         url = URL.createObjectURL(blob);
+        objectUrlRef.current = url;
       }
 
       const audio = new Audio(url);
