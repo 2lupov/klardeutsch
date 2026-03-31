@@ -82,7 +82,7 @@ const Profile = () => {
       setTotalCards(count ?? 0);
       setCustomWordsCount(customCount ?? 0);
       setSavedWordsCount(savedCount ?? 0);
-      if (prof) setProfile({ display_name: prof.display_name, avatar_url: prof.avatar_url, telegram_chat_id: (prof as any).telegram_chat_id ?? null });
+      if (prof) setProfile({ display_name: prof.display_name, avatar_url: prof.avatar_url, telegram_chat_id: (prof as any).telegram_chat_id ?? null, nickname_changed_at: (prof as any).nickname_changed_at ?? null });
 
       // Fetch extra achievement stats
       const [duelsRes, challengesSentRes, dailyBonusRes] = await Promise.all([
