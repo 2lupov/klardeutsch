@@ -780,6 +780,11 @@ const Profile = () => {
         />
         <NavButton
           icon={<Users className="w-4 h-4 text-primary" />}
+          label={lang === "uk" ? "Друзі" : "Друзья"}
+          onClick={() => setScreen("friends")}
+        />
+        <NavButton
+          icon={<Send className="w-4 h-4 text-primary" />}
           label={t("referralsTitle")}
           onClick={() => setScreen("referrals")}
         />
