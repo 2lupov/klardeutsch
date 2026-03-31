@@ -292,6 +292,7 @@ const translations = {
   // Mini-games
   gamesTitle: { ru: "Мини-игры", uk: "Міні-ігри" },
   gamesSubtitle: { ru: "Учи немецкий играючи", uk: "Вчи німецьку граючись" },
+  gameDialoguesDesc: { ru: "Практикуй разговорный немецкий с AI-собеседником", uk: "Практикуй розмовну німецьку з AI-співрозмовником" },
   gameArticleSorterTitle: { ru: "Der/Die/Das: Сортировка мусора", uk: "Der/Die/Das: Сортування сміття" },
   gameArticleSorterDesc: { ru: "Сортируй слова по артиклям — как мусор в Германии!", uk: "Сортуй слова за артиклями — як сміття в Німеччині!" },
   gameCafeTitle: { ru: "Café Bestellung: Не будь туристом", uk: "Café Bestellung: Не будь туристом" },

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Recycle, Coffee, Swords, Mic, ArrowLeft, Building2, Hammer, Puzzle, FileText, Link2, Phone } from "lucide-react";
+import { Recycle, Coffee, Swords, Mic, ArrowLeft, Building2, Hammer, Puzzle, FileText, Link2, Phone, MessageCircle } from "lucide-react";
 import { usePlatform } from "@/hooks/usePlatform";
 import { useLanguage } from "@/contexts/LanguageContext";
 import ArticleSorter from "@/components/games/ArticleSorter";
@@ -13,8 +13,9 @@ import FormularHeld from "@/components/games/FormularHeld";
 import RedewendungenMatch from "@/components/games/RedewendungenMatch";
 import TelefonTrainer from "@/components/games/TelefonTrainer";
 import Challenges from "@/pages/Challenges";
+import Dialogues from "@/pages/Dialogues";
 
-type GameScreen = "list" | "article-sorter" | "cafe" | "challenges" | "pronunciation" | "leben" | "wortbaustelle" | "satzpuzzle" | "formular" | "redewendungen" | "telefon";
+type GameScreen = "list" | "article-sorter" | "cafe" | "challenges" | "pronunciation" | "leben" | "wortbaustelle" | "satzpuzzle" | "formular" | "redewendungen" | "telefon" | "dialogues";
 
 const Games = () => {
   const [screen, setScreen] = useState<GameScreen>("list");
@@ -40,8 +41,19 @@ const Games = () => {
   if (screen === "formular") return <FormularHeld onBack={() => setScreen("list")} />;
   if (screen === "redewendungen") return <RedewendungenMatch onBack={() => setScreen("list")} />;
   if (screen === "telefon") return <TelefonTrainer onBack={() => setScreen("list")} />;
+  if (screen === "dialogues") return (
+    <div className="relative">
+      <div className="absolute top-4 left-4 z-10">
+        <button onClick={() => setScreen("list")} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <ArrowLeft className="w-4 h-4" /> {t("back")}
+        </button>
+      </div>
+      <Dialogues />
+    </div>
+  );
 
   const games = [
+    { id: "dialogues" as const, emoji: "💬", icon: MessageCircle, titleKey: "navDialogues", descKey: "gameDialoguesDesc" },
     { id: "article-sorter" as const, emoji: "♻️", icon: Recycle, titleKey: "gameArticleSorterTitle", descKey: "gameArticleSorterDesc" },
     { id: "cafe" as const, emoji: "☕", icon: Coffee, titleKey: "gameCafeTitle", descKey: "gameCafeDesc" },
     { id: "satzpuzzle" as const, emoji: "🧩", icon: Puzzle, titleKey: "gameSatzpuzzleTitle", descKey: "gameSatzpuzzleDesc", isNew: true },
