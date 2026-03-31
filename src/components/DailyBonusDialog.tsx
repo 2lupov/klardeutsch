@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
-import { Gift, Sparkles } from "lucide-react";
+import { Gift, Sparkles, Shield } from "lucide-react";
 import { useDailyBonus, BonusReward } from "@/hooks/useDailyBonus";
+import { useLanguage } from "@/contexts/LanguageContext";
 import StreakPlant from "@/components/StreakPlant";
+import MilestoneCelebration from "@/components/streak/MilestoneCelebration";
 import {
   Dialog,
   DialogContent,
@@ -10,7 +12,8 @@ import {
 } from "@/components/ui/dialog";
 
 const DailyBonusDialog = () => {
-  const { canClaim, streak, loading, claim } = useDailyBonus();
+  const { canClaim, streak, loading, claim, shields, milestoneStreak, clearMilestone } = useDailyBonus();
+  const { lang } = useLanguage();
   const [open, setOpen] = useState(false);
   const [claimed, setClaimed] = useState<BonusReward | null>(null);
   const [claiming, setClaiming] = useState(false);
