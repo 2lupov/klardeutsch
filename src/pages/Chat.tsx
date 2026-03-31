@@ -5,7 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send, Search, MessageCircle, Users, Mail, ArrowLeft, Mic, Square, Play, Pause, ImagePlus, X } from "lucide-react";
+import { Send, Search, MessageCircle, Users, Mail, ArrowLeft, Mic, Square, Play, Pause, ImagePlus, X, Paperclip, FileText, Download } from "lucide-react";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -22,6 +22,9 @@ interface CommunityMsg {
   content: string;
   audio_url?: string | null;
   image_url?: string | null;
+  image_urls?: any;
+  file_url?: string | null;
+  file_name?: string | null;
   created_at: string;
   profile?: Profile;
 }
@@ -33,6 +36,9 @@ interface DirectMsg {
   content: string;
   audio_url?: string | null;
   image_url?: string | null;
+  image_urls?: any;
+  file_url?: string | null;
+  file_name?: string | null;
   is_read: boolean;
   created_at: string;
 }
@@ -204,19 +210,100 @@ const uploadVoice = async (blob: Blob, userId: string): Promise<string | null> =
 /* ───── Upload image helper ───── */
 const uploadChatImage = async (file: File, userId: string): Promise<string | null> => {
   const ext = file.name.split(".").pop() || "jpg";
-  const filename = `${userId}/${Date.now()}.${ext}`;
+  const filename = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2, 6)}.${ext}`;
   const { error } = await supabase.storage.from("chat-images").upload(filename, file, { contentType: file.type });
   if (error) return null;
   const { data } = supabase.storage.from("chat-images").getPublicUrl(filename);
   return data.publicUrl;
 };
 
+/* ───── Upload multiple images ───── */
+const uploadChatImages = async (files: File[], userId: string): Promise<string[]> => {
+  const urls: string[] = [];
+  for (const file of files) {
+    const url = await uploadChatImage(file, userId);
+    if (url) urls.push(url);
+  }
+  return urls;
+};
+
+/* ───── Upload file helper ───── */
+const uploadChatFile = async (file: File, userId: string): Promise<{ url: string; name: string } | null> => {
+  const filename = `${userId}/${Date.now()}-${file.name}`;
+  const { error } = await supabase.storage.from("chat-files").upload(filename, file, { contentType: file.type });
+  if (error) return null;
+  const { data } = supabase.storage.from("chat-files").getPublicUrl(filename);
+  return { url: data.publicUrl, name: file.name };
+};
+
+/* ───── Image Gallery ───── */
+const ImageGallery = ({ urls, onOpen }: { urls: string[]; onOpen: (idx: number) => void }) => {
+  const count = urls.length;
+  if (count === 0) return null;
+  if (count === 1) {
+    return (
+      <div className="cursor-pointer" onClick={() => onOpen(0)}>
+        <img src={urls[0]} alt="shared" className="max-w-[260px] max-h-[300px] object-cover rounded-2xl" loading="lazy" />
+      </div>
+    );
+  }
+  const gridClass = count === 2 ? "grid-cols-2" : count === 3 ? "grid-cols-2" : "grid-cols-2";
+  return (
+    <div className={`grid ${gridClass} gap-1 max-w-[280px]`}>
+      {urls.slice(0, 4).map((url, i) => (
+        <div key={i} className="relative cursor-pointer aspect-square" onClick={() => onOpen(i)}>
+          <img src={url} alt="" className="w-full h-full object-cover rounded-lg" loading="lazy" />
+          {i === 3 && count > 4 && (
+            <div className="absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-lg">+{count - 4}</span>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+/* ───── File Attachment Display ───── */
+const FileAttachment = ({ url, name, isMe }: { url: string; name: string; isMe: boolean }) => (
+  <a
+    href={url}
+    target="_blank"
+    rel="noopener noreferrer"
+    className={`flex items-center gap-2.5 px-3 py-2 rounded-xl transition-colors ${
+      isMe ? "bg-primary-foreground/10 hover:bg-primary-foreground/20" : "bg-muted/50 hover:bg-muted"
+    }`}
+  >
+    <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
+      isMe ? "bg-primary-foreground/20" : "bg-primary/10"
+    }`}>
+      <FileText className={`w-4 h-4 ${isMe ? "text-primary-foreground" : "text-primary"}`} />
+    </div>
+    <div className="flex-1 min-w-0">
+      <p className="text-xs font-medium truncate">{name}</p>
+      <p className="text-[10px] opacity-60">Файл</p>
+    </div>
+    <Download className="w-3.5 h-3.5 opacity-50 shrink-0" />
+  </a>
+);
+
 /* ───── Message Bubble ───── */
-const MessageBubble = ({ isMe, content, audioUrl, imageUrl, time, senderName, avatarUrl, index }: {
-  isMe: boolean; content: string; audioUrl?: string | null; imageUrl?: string | null; time: string;
-  senderName?: string; avatarUrl?: string | null; index: number;
+const MessageBubble = ({ isMe, content, audioUrl, imageUrl, imageUrls, fileUrl, fileName, time, senderName, avatarUrl, index }: {
+  isMe: boolean; content: string; audioUrl?: string | null; imageUrl?: string | null;
+  imageUrls?: string[] | null; fileUrl?: string | null; fileName?: string | null;
+  time: string; senderName?: string; avatarUrl?: string | null; index: number;
 }) => {
-  const [imgFullscreen, setImgFullscreen] = useState(false);
+  const [galleryOpen, setGalleryOpen] = useState<number | null>(null);
+
+  // Combine legacy single image_url with new image_urls array
+  const allImages: string[] = [];
+  if (imageUrls && Array.isArray(imageUrls) && imageUrls.length > 0) {
+    allImages.push(...imageUrls);
+  } else if (imageUrl) {
+    allImages.push(imageUrl);
+  }
+
+  const hasMedia = allImages.length > 0 || fileUrl;
 
   return (
     <>
@@ -242,21 +329,23 @@ const MessageBubble = ({ isMe, content, audioUrl, imageUrl, time, senderName, av
             isMe
               ? "bg-primary text-primary-foreground rounded-br-md shadow-lg shadow-primary/20"
               : "bg-card border border-border rounded-bl-md shadow-sm"
-          } ${imageUrl && !audioUrl ? "p-0" : "px-3.5 py-2.5"}`}>
-            {imageUrl ? (
-              <div className="cursor-pointer" onClick={() => setImgFullscreen(true)}>
-                <img
-                  src={imageUrl}
-                  alt="shared"
-                  className="max-w-[260px] max-h-[300px] object-cover rounded-2xl"
-                  loading="lazy"
-                />
-                {content && content !== "📷" && (
-                  <p className="px-3.5 py-2 text-sm">{content}</p>
+          } ${allImages.length > 0 && !audioUrl ? "p-1.5" : "px-3.5 py-2.5"}`}>
+            {allImages.length > 0 ? (
+              <div>
+                <ImageGallery urls={allImages} onOpen={(idx) => setGalleryOpen(idx)} />
+                {content && content !== "📷" && content !== "📷📎" && (
+                  <p className="px-2 py-1.5 text-sm">{content}</p>
                 )}
               </div>
             ) : audioUrl ? (
               <VoicePlayer url={audioUrl} />
+            ) : fileUrl && fileName ? (
+              <div>
+                <FileAttachment url={fileUrl} name={fileName} isMe={isMe} />
+                {content && content !== "📎" && (
+                  <p className="px-1 pt-1.5 text-sm">{content}</p>
+                )}
+              </div>
             ) : (
               content
             )}
@@ -267,27 +356,52 @@ const MessageBubble = ({ isMe, content, audioUrl, imageUrl, time, senderName, av
         </div>
       </motion.div>
 
-      {/* Fullscreen image viewer */}
+      {/* Fullscreen gallery viewer */}
       <AnimatePresence>
-        {imgFullscreen && imageUrl && (
+        {galleryOpen !== null && allImages.length > 0 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setImgFullscreen(false)}
-            className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 cursor-pointer"
+            className="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-4"
           >
             <motion.img
-              initial={{ scale: 0.8 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.8 }}
-              src={imageUrl}
+              key={galleryOpen}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              src={allImages[galleryOpen]}
               alt="fullscreen"
-              className="max-w-full max-h-full object-contain rounded-lg"
+              className="max-w-full max-h-[80vh] object-contain rounded-lg"
             />
-            <button className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white">
+            {allImages.length > 1 && (
+              <div className="flex items-center gap-3 mt-4">
+                {allImages.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setGalleryOpen(i)}
+                    className={`w-2 h-2 rounded-full transition-all ${i === galleryOpen ? "bg-white scale-125" : "bg-white/40"}`}
+                  />
+                ))}
+              </div>
+            )}
+            <button
+              onClick={() => setGalleryOpen(null)}
+              className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white"
+            >
               <X className="w-5 h-5" />
             </button>
+            {/* Left/Right navigation */}
+            {galleryOpen > 0 && (
+              <button onClick={() => setGalleryOpen(galleryOpen - 1)} className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white">
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+            )}
+            {galleryOpen < allImages.length - 1 && (
+              <button onClick={() => setGalleryOpen(galleryOpen + 1)} className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white rotate-180">
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
@@ -296,21 +410,41 @@ const MessageBubble = ({ isMe, content, audioUrl, imageUrl, time, senderName, av
 };
 
 /* ───── Chat Input Bar ───── */
-const ChatInputBar = ({ onSendText, onSendVoice, onSendImage, placeholder, userId }: {
+const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, placeholder, userId }: {
   onSendText: (text: string) => void;
   onSendVoice: (audioUrl: string) => void;
-  onSendImage: (imageUrl: string) => void;
+  onSendImages: (imageUrls: string[]) => void;
+  onSendFile: (fileUrl: string, fileName: string) => void;
   placeholder: string;
   userId: string;
 }) => {
   const [text, setText] = useState("");
   const { recording, elapsed, start, stop, cancel } = useVoiceRecorder();
   const [uploading, setUploading] = useState(false);
+  const [pendingImages, setPendingImages] = useState<{ file: File; preview: string }[]>([]);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSend = () => {
+    if (pendingImages.length > 0) {
+      handleSendImages();
+      return;
+    }
     if (!text.trim()) return;
     onSendText(text.trim());
+    setText("");
+  };
+
+  const handleSendImages = async () => {
+    if (pendingImages.length === 0) return;
+    setUploading(true);
+    const urls = await uploadChatImages(pendingImages.map(p => p.file), userId);
+    setUploading(false);
+    if (urls.length > 0) {
+      onSendImages(urls);
+    }
+    pendingImages.forEach(p => URL.revokeObjectURL(p.preview));
+    setPendingImages([]);
     setText("");
   };
 
@@ -323,100 +457,118 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImage, placeholder, userI
     if (url) onSendVoice(url);
   };
 
-  const handleImagePick = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
-    const url = await uploadChatImage(file, userId);
-    setUploading(false);
-    if (url) onSendImage(url);
+  const handleImagePick = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    const newPending = files.map(f => ({ file: f, preview: URL.createObjectURL(f) }));
+    setPendingImages(prev => [...prev, ...newPending].slice(0, 10));
     e.target.value = "";
   };
 
+  const handleFilePick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const result = await uploadChatFile(file, userId);
+    setUploading(false);
+    if (result) onSendFile(result.url, result.name);
+    e.target.value = "";
+  };
+
+  const removePendingImage = (idx: number) => {
+    setPendingImages(prev => {
+      const copy = [...prev];
+      URL.revokeObjectURL(copy[idx].preview);
+      copy.splice(idx, 1);
+      return copy;
+    });
+  };
+
   return (
-    <motion.div
-      layout
-      className="relative border-t border-border bg-card/80 backdrop-blur-xl p-3 flex items-center gap-2"
-    >
-      <AnimatePresence mode="wait">
-        {recording ? (
+    <motion.div layout className="relative border-t border-border bg-card/80 backdrop-blur-xl">
+      {/* Pending images preview */}
+      <AnimatePresence>
+        {pendingImages.length > 0 && (
           <motion.div
-            key="recording"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="flex-1 flex items-center gap-3"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden"
           >
-            <button onClick={cancel} className="text-destructive text-xs font-medium hover:underline">
-              ✕
-            </button>
-            <div className="flex items-center gap-2 flex-1">
-              <motion.div
-                animate={{ scale: [1, 1.3, 1] }}
-                transition={{ duration: 1.2, repeat: Infinity }}
-                className="w-2.5 h-2.5 rounded-full bg-destructive"
-              />
-              <span className="text-sm text-muted-foreground font-mono">
-                {Math.floor(elapsed / 60).toString().padStart(2, "0")}:{(elapsed % 60).toString().padStart(2, "0")}
-              </span>
+            <div className="flex gap-2 p-3 pb-0 overflow-x-auto">
+              {pendingImages.map((p, i) => (
+                <div key={i} className="relative shrink-0">
+                  <img src={p.preview} alt="" className="w-16 h-16 object-cover rounded-xl border border-border" />
+                  <button
+                    onClick={() => removePendingImage(i)}
+                    className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center text-[10px]"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
             </div>
-            <motion.button
-              whileTap={{ scale: 0.9 }}
-              onClick={handleStopRecording}
-              className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/30"
-            >
-              <Square className="w-4 h-4" />
-            </motion.button>
-          </motion.div>
-        ) : (
-          <motion.div
-            key="input"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            className="flex-1 flex items-center gap-2"
-          >
-            <motion.button
-              whileTap={{ scale: 0.9 }}
-              onClick={() => imageInputRef.current?.click()}
-              disabled={uploading}
-              className="w-9 h-9 rounded-full hover:bg-muted/80 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors shrink-0"
-            >
-              <ImagePlus className="w-4 h-4" />
-            </motion.button>
-            <input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={handleImagePick} />
-            <Input
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
-              placeholder={placeholder}
-              className="flex-1 bg-muted/50 border-0 focus-visible:ring-1 focus-visible:ring-primary/30 rounded-full px-4"
-            />
-            {text.trim() ? (
-              <motion.button
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                whileTap={{ scale: 0.85 }}
-                onClick={handleSend}
-                className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/30"
-              >
-                <Send className="w-4 h-4" />
-              </motion.button>
-            ) : (
-              <motion.button
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                whileTap={{ scale: 0.85 }}
-                onClick={start}
-                disabled={uploading}
-                className="w-10 h-10 rounded-full bg-muted hover:bg-primary/10 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors"
-              >
-                <Mic className="w-4 h-4" />
-              </motion.button>
-            )}
           </motion.div>
         )}
       </AnimatePresence>
+
+      <div className="p-3 flex items-center gap-2">
+        <AnimatePresence mode="wait">
+          {recording ? (
+            <motion.div
+              key="recording"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="flex-1 flex items-center gap-3"
+            >
+              <button onClick={cancel} className="text-destructive text-xs font-medium hover:underline">✕</button>
+              <div className="flex items-center gap-2 flex-1">
+                <motion.div animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 1.2, repeat: Infinity }} className="w-2.5 h-2.5 rounded-full bg-destructive" />
+                <span className="text-sm text-muted-foreground font-mono">
+                  {Math.floor(elapsed / 60).toString().padStart(2, "0")}:{(elapsed % 60).toString().padStart(2, "0")}
+                </span>
+              </div>
+              <motion.button whileTap={{ scale: 0.9 }} onClick={handleStopRecording}
+                className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/30">
+                <Square className="w-4 h-4" />
+              </motion.button>
+            </motion.div>
+          ) : (
+            <motion.div key="input" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="flex-1 flex items-center gap-1.5">
+              <motion.button whileTap={{ scale: 0.9 }} onClick={() => imageInputRef.current?.click()} disabled={uploading}
+                className="w-8 h-8 rounded-full hover:bg-muted/80 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors shrink-0">
+                <ImagePlus className="w-4 h-4" />
+              </motion.button>
+              <motion.button whileTap={{ scale: 0.9 }} onClick={() => fileInputRef.current?.click()} disabled={uploading}
+                className="w-8 h-8 rounded-full hover:bg-muted/80 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors shrink-0">
+                <Paperclip className="w-4 h-4" />
+              </motion.button>
+              <input ref={imageInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleImagePick} />
+              <input ref={fileInputRef} type="file" className="hidden" onChange={handleFilePick} />
+              <Input
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
+                placeholder={placeholder}
+                className="flex-1 bg-muted/50 border-0 focus-visible:ring-1 focus-visible:ring-primary/30 rounded-full px-4"
+              />
+              {text.trim() || pendingImages.length > 0 ? (
+                <motion.button initial={{ scale: 0 }} animate={{ scale: 1 }} whileTap={{ scale: 0.85 }} onClick={handleSend}
+                  className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/30">
+                  <Send className="w-4 h-4" />
+                </motion.button>
+              ) : (
+                <motion.button initial={{ scale: 0 }} animate={{ scale: 1 }} whileTap={{ scale: 0.85 }} onClick={start} disabled={uploading}
+                  className="w-10 h-10 rounded-full bg-muted hover:bg-primary/10 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors">
+                  <Mic className="w-4 h-4" />
+                </motion.button>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
       {uploading && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 bg-card/80 backdrop-blur-sm flex items-center justify-center rounded-lg">
           <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
@@ -516,9 +668,14 @@ const CommunityChat = () => {
     await supabase.from("community_messages").insert({ user_id: user.id, content: "🎤", audio_url: audioUrl });
   };
 
-  const sendImage = async (imageUrl: string) => {
+  const sendImages = async (imageUrls: string[]) => {
     if (!user) return;
-    await supabase.from("community_messages").insert({ user_id: user.id, content: "📷", image_url: imageUrl });
+    await supabase.from("community_messages").insert({ user_id: user.id, content: "📷", image_urls: imageUrls });
+  };
+
+  const sendFile = async (fileUrl: string, fileName: string) => {
+    if (!user) return;
+    await supabase.from("community_messages").insert({ user_id: user.id, content: "📎", file_url: fileUrl, file_name: fileName });
   };
 
   if (loading) {
@@ -551,6 +708,9 @@ const CommunityChat = () => {
               content={m.content}
               audioUrl={m.audio_url}
               imageUrl={m.image_url}
+              imageUrls={m.image_urls}
+              fileUrl={m.file_url}
+              fileName={m.file_name}
               time={format(new Date(m.created_at), "HH:mm")}
               senderName={prof?.display_name || undefined}
               avatarUrl={prof?.avatar_url}
@@ -564,7 +724,8 @@ const CommunityChat = () => {
       <ChatInputBar
         onSendText={sendText}
         onSendVoice={sendVoice}
-        onSendImage={sendImage}
+        onSendImages={sendImages}
+        onSendFile={sendFile}
         placeholder={lang === "uk" ? "Написати повідомлення…" : "Написать сообщение…"}
         userId={user?.id || ""}
       />
@@ -715,10 +876,16 @@ const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void
     fetchEdgeFunction("notify-dm", { json: { receiver_id: peerId, message_preview: "🎤 Голосовое сообщение" } }).catch(() => {});
   };
 
-  const sendImage = async (imageUrl: string) => {
+  const sendImages = async (imageUrls: string[]) => {
     if (!user) return;
-    await supabase.from("direct_messages").insert({ sender_id: user.id, receiver_id: peerId, content: "📷", image_url: imageUrl });
-    fetchEdgeFunction("notify-dm", { json: { receiver_id: peerId, message_preview: "📷 Фото" } }).catch(() => {});
+    await supabase.from("direct_messages").insert({ sender_id: user.id, receiver_id: peerId, content: "📷", image_urls: imageUrls });
+    fetchEdgeFunction("notify-dm", { json: { receiver_id: peerId, message_preview: `📷 ${imageUrls.length > 1 ? imageUrls.length + " фото" : "Фото"}` } }).catch(() => {});
+  };
+
+  const sendFile = async (fileUrl: string, fileName: string) => {
+    if (!user) return;
+    await supabase.from("direct_messages").insert({ sender_id: user.id, receiver_id: peerId, content: "📎", file_url: fileUrl, file_name: fileName });
+    fetchEdgeFunction("notify-dm", { json: { receiver_id: peerId, message_preview: `📎 ${fileName}` } }).catch(() => {});
   };
 
   return (
@@ -756,6 +923,9 @@ const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void
               content={m.content}
               audioUrl={m.audio_url}
               imageUrl={m.image_url}
+              imageUrls={m.image_urls}
+              fileUrl={m.file_url}
+              fileName={m.file_name}
               time={format(new Date(m.created_at), "HH:mm")}
               index={i}
             />
@@ -767,7 +937,8 @@ const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void
       <ChatInputBar
         onSendText={sendText}
         onSendVoice={sendVoice}
-        onSendImage={sendImage}
+        onSendImages={sendImages}
+        onSendFile={sendFile}
         placeholder={lang === "uk" ? "Написати…" : "Написать…"}
         userId={user?.id || ""}
       />
