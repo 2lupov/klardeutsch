@@ -782,6 +782,12 @@ const CourseEditor = ({ level }: { level: Level }) => {
     setSavingEdit(true);
     const { error } = await supabase.from("course_lessons").update({
       title: lesson.title, theory: lesson.theory, exercises: lesson.exercises, sort_order: lesson.sort_order,
+      lesson_type: lesson.lesson_type || "article",
+      description: lesson.description || null,
+      estimated_minutes: lesson.estimated_minutes || 10,
+      xp_reward: lesson.xp_reward || 20,
+      coins_reward: lesson.coins_reward || 10,
+      content: lesson.content || null,
     } as any).eq("id", lesson.id);
     if (error) toast.error("Ошибка: " + error.message);
     else toast.success("Урок сохранён ✅");
