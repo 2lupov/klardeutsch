@@ -18,6 +18,7 @@ import ImageCropper from "@/components/ImageCropper";
 import StreakPlant from "@/components/StreakPlant";
 import { useDailyBonus } from "@/hooks/useDailyBonus";
 import GiftShelf from "@/components/gifts/GiftShelf";
+import FriendsList from "@/components/FriendsList";
 
 interface ProgressRow {
   level: string;
