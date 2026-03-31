@@ -30,6 +30,7 @@ import QR from "./pages/QR";
 import Course from "./pages/Course";
 import Academy from "./pages/Academy";
 import AcademyCourse from "./pages/AcademyCourse";
+import AcademyLearn from "./pages/AcademyLearn";
 import Onboarding from "./pages/Onboarding";
 import Review from "./pages/Review";
 import NotFound from "./pages/NotFound";
@@ -64,6 +65,7 @@ const AppRoutes = () => {
         <Route path="/course/:id" element={<Course />} />
         <Route path="/academy" element={<Academy />} />
         <Route path="/academy/:courseId" element={<AcademyCourse />} />
+        <Route path="/academy/:courseId/learn" element={<AcademyLearn />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
