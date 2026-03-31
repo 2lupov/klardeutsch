@@ -29,6 +29,7 @@ import Terms from "./pages/Terms";
 import QR from "./pages/QR";
 import Course from "./pages/Course";
 import Academy from "./pages/Academy";
+import AcademyCourse from "./pages/AcademyCourse";
 import Onboarding from "./pages/Onboarding";
 import Review from "./pages/Review";
 import NotFound from "./pages/NotFound";
@@ -62,7 +63,7 @@ const AppRoutes = () => {
         <Route path="/games" element={<Games />} />
         <Route path="/course/:id" element={<Course />} />
         <Route path="/academy" element={<Academy />} />
-        <Route path="/academy/:courseId" element={<Academy />} />
+        <Route path="/academy/:courseId" element={<AcademyCourse />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
