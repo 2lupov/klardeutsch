@@ -4,9 +4,15 @@ import type { Lang } from "@/i18n/translations";
 
 const LESSON_TYPE_ICONS: Record<string, string> = {
   video: "🎬",
-  video_quiz: "📝",
+  video_quiz: "🎬📝",
+  article: "📄",
+  grammar: "📐",
+  reading: "📖",
+  dialogue_text: "💬",
+  word_list: "📋",
+  quiz: "📝",
   ai_tutor: "🤖",
-  teacher_chat: "💬",
+  teacher_chat: "👨‍🏫",
   writing: "✍️",
   speaking: "🎙️",
   notebook: "📓",
