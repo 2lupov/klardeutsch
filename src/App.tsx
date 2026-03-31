@@ -28,6 +28,7 @@ import Games from "./pages/Games";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import QR from "./pages/QR";
+import LandingUk from "./pages/LandingUk";
 import Course from "./pages/Course";
 import Academy from "./pages/Academy";
 import AcademyCourse from "./pages/AcademyCourse";
