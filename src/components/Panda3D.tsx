@@ -51,9 +51,9 @@ const PandaSprite = ({ isSleeping = false }: { isSleeping?: boolean }) => {
   });
 
   return (
-    <group ref={groupRef} position={[0, -0.1, 0]} onClick={handleClick}>
+    <group ref={groupRef} position={[0, 0, 0]} onClick={handleClick}>
       <mesh ref={meshRef}>
-        <planeGeometry args={[2.2, 2.2]} />
+        <planeGeometry args={[2.8, 2.8]} />
         <meshStandardMaterial
           map={texture}
           transparent
@@ -73,9 +73,9 @@ interface Panda3DProps {
 }
 
 const Panda3D = ({ isSleeping = false, className = "" }: Panda3DProps) => (
-  <div className={`w-full ${className}`} style={{ minHeight: 240 }}>
+  <div className={`w-full ${className}`} style={{ minHeight: 300 }}>
     <Canvas
-      camera={{ position: [0, 0, 3.2], fov: 36 }}
+      camera={{ position: [0, 0, 3.5], fov: 40 }}
       dpr={[1, 2]}
       gl={{ antialias: true, alpha: true }}
       style={{ background: "transparent", width: "100%", height: "100%" }}
