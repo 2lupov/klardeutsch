@@ -63,7 +63,7 @@ const AppRoutes = () => {
         <Route path="/games" element={<Games />} />
         <Route path="/course/:id" element={<Course />} />
         <Route path="/academy" element={<Academy />} />
-        <Route path="/academy/:courseId" element={<Academy />} />
+        <Route path="/academy/:courseId" element={<AcademyCourse />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
