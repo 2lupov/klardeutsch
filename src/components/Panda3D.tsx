@@ -73,7 +73,7 @@ interface Panda3DProps {
 }
 
 const Panda3D = ({ isSleeping = false, className = "" }: Panda3DProps) => (
-  <div className={`w-full ${className}`} style={{ minHeight: 240 }}>
+  <div className={`w-full ${className}`} style={{ minHeight: 300 }}>
     <Canvas
       camera={{ position: [0, 0, 3.2], fov: 36 }}
       dpr={[1, 2]}
