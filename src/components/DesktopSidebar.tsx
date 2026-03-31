@@ -3,7 +3,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import {
   Home, User, BookOpen, BarChart3, Gamepad2, GraduationCap,
   MessageSquare, Flame, Coins, Star, ChevronLeft, ChevronRight,
-  Swords, Settings
+  Swords
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
