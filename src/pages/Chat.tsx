@@ -1020,7 +1020,7 @@ const CommunityChat = () => {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-[calc(100dvh-3.5rem)] md:h-[100dvh] -mb-14 md:mb-0">
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.length === 0 && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16">
@@ -1265,7 +1265,7 @@ const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-[calc(100dvh-3.5rem)] md:h-[100dvh] -mb-14 md:mb-0">
       <motion.div
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -1466,7 +1466,7 @@ const Chat = () => {
         animate={{ x: 0 }}
         exit={{ x: "100%" }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="h-full flex flex-col"
+        className="h-[calc(100dvh-3.5rem)] md:h-[100dvh] -mb-14 md:mb-0 flex flex-col"
       >
         <DMConversation peerId={selectedPeer} onBack={() => setSelectedPeer(null)} />
       </motion.div>
@@ -1474,7 +1474,7 @@ const Chat = () => {
   }
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-[calc(100dvh-3.5rem)] md:h-[100dvh] -mb-14 md:mb-0 flex flex-col">
       {/* Header */}
       <motion.div
         initial={{ y: -20, opacity: 0 }}
