@@ -12,6 +12,10 @@ const ReportErrorButton = () => {
   const [description, setDescription] = useState("");
   const [sending, setSending] = useState(false);
 
+  // Hide on chat page
+  if (location.pathname === "/chat") return null;
+  const [sending, setSending] = useState(false);
+
   const handleSubmit = async () => {
     if (!description.trim()) return;
     setSending(true);
