@@ -1068,6 +1068,18 @@ const CommunityChat = () => {
         onSendVideoCircle={sendVideoCircle}
         placeholder={lang === "uk" ? "Написати повідомлення…" : "Написать сообщение…"}
         userId={user?.id || ""}
+        replyTo={replyTo}
+        onCancelReply={() => setReplyTo(null)}
+      />
+
+      {/* Profile dialog */}
+      <UserProfileDialog
+        userId={profileUserId}
+        displayName={profileUser?.display_name || null}
+        avatarUrl={profileUser?.avatar_url || null}
+        totalXp={0}
+        open={!!profileUserId}
+        onOpenChange={(open) => { if (!open) setProfileUserId(null); }}
       />
     </div>
   );
