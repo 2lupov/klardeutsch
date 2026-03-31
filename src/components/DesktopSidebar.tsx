@@ -5,11 +5,13 @@ import { usePlatform } from "@/hooks/usePlatform";
 import KlarLogo from "@/components/KlarLogo";
 import { useLevelProgress } from "@/hooks/useLevelProgress";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { useUnreadDMs } from "@/hooks/useUnreadDMs";
 
 const DesktopSidebar = () => {
   const { t, lang } = useLanguage();
   const location = useLocation();
   const { isTelegram } = usePlatform();
+  const unread = useUnreadDMs();
 
   const a1 = useLevelProgress("A1");
   const a2 = useLevelProgress("A2");
@@ -20,15 +22,15 @@ const DesktopSidebar = () => {
   const allCompleted = a1.completed && a2.completed && b1.completed && b2.completed && c1.completed;
 
   const links = [
-    { to: "/", icon: Home, label: t("navHome") },
-    { to: "/academy", icon: GraduationCap, label: lang === "uk" ? "Академія" : "Академия" },
-    { to: "/profile", icon: User, label: t("myProfile") },
-    { to: "/stats", icon: BarChart3, label: t("navStats") },
-    { to: "/dictionary", icon: BookOpen, label: t("navDictionary") },
-    { to: "/shop", icon: ShoppingBag, label: t("navShop") },
-    { to: "/games", icon: Gamepad2, label: "Игры" },
-    { to: "/chat", icon: MessageSquare, label: lang === "uk" ? "Чат" : "Чат" },
-    { to: "/dialogues", icon: MessageCircle, label: t("navDialogues") },
+    { to: "/", icon: Home, label: t("navHome"), badge: 0 },
+    { to: "/academy", icon: GraduationCap, label: lang === "uk" ? "Академія" : "Академия", badge: 0 },
+    { to: "/profile", icon: User, label: t("myProfile"), badge: 0 },
+    { to: "/stats", icon: BarChart3, label: t("navStats"), badge: 0 },
+    { to: "/dictionary", icon: BookOpen, label: t("navDictionary"), badge: 0 },
+    { to: "/shop", icon: ShoppingBag, label: t("navShop"), badge: 0 },
+    { to: "/games", icon: Gamepad2, label: "Игры", badge: 0 },
+    { to: "/chat", icon: MessageSquare, label: lang === "uk" ? "Чат" : "Чат", badge: unread },
+    { to: "/dialogues", icon: MessageCircle, label: t("navDialogues"), badge: 0 },
   ];
 
   return (
@@ -53,7 +55,14 @@ const DesktopSidebar = () => {
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
               }`}
             >
-              <item.icon className="w-4 h-4" />
+              <div className="relative">
+                <item.icon className="w-4 h-4" />
+                {item.badge > 0 && (
+                  <span className="absolute -top-1.5 -right-2.5 bg-destructive text-destructive-foreground text-[9px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-1">
+                    {item.badge > 99 ? "99+" : item.badge}
+                  </span>
+                )}
+              </div>
               {item.label}
             </NavLink>
           );

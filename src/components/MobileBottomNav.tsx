@@ -1,17 +1,19 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { Home, User, BookOpen, Gamepad2, MessageSquare } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useUnreadDMs } from "@/hooks/useUnreadDMs";
 
 const MobileBottomNav = () => {
   const { t, lang } = useLanguage();
   const location = useLocation();
+  const unread = useUnreadDMs();
 
   const items = [
-    { to: "/", icon: Home, label: t("navHome") },
-    { to: "/profile", icon: User, label: t("myProfile") },
-    { to: "/games", icon: Gamepad2, label: t("gamesTitle") },
-    { to: "/dictionary", icon: BookOpen, label: t("navDictionary") },
-    { to: "/chat", icon: MessageSquare, label: lang === "uk" ? "Чат" : "Чат" },
+    { to: "/", icon: Home, label: t("navHome"), badge: 0 },
+    { to: "/profile", icon: User, label: t("myProfile"), badge: 0 },
+    { to: "/games", icon: Gamepad2, label: t("gamesTitle"), badge: 0 },
+    { to: "/dictionary", icon: BookOpen, label: t("navDictionary"), badge: 0 },
+    { to: "/chat", icon: MessageSquare, label: lang === "uk" ? "Чат" : "Чат", badge: unread },
   ];
 
   return (
@@ -23,11 +25,18 @@ const MobileBottomNav = () => {
             <NavLink
               key={item.to}
               to={item.to}
-              className={`flex flex-col items-center gap-0.5 px-3 py-1.5 transition-colors ${
+              className={`flex flex-col items-center gap-0.5 px-3 py-1.5 transition-colors relative ${
                 active ? "text-primary" : "text-muted-foreground"
               }`}
             >
-              <item.icon className="w-5 h-5" />
+              <div className="relative">
+                <item.icon className="w-5 h-5" />
+                {item.badge > 0 && (
+                  <span className="absolute -top-1.5 -right-2.5 bg-destructive text-destructive-foreground text-[9px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-1">
+                    {item.badge > 99 ? "99+" : item.badge}
+                  </span>
+                )}
+              </div>
               <span className="text-[10px] font-display font-medium">{item.label}</span>
             </NavLink>
           );
