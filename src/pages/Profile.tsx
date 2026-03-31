@@ -735,6 +735,13 @@ const Profile = () => {
         <StatCard icon={<Flame className="w-4 h-4" />} value={streak} label={t("streakDays")} />
       </div>
 
+      {/* Gift shelf */}
+      {user && (
+        <div className="mb-4">
+          <GiftShelf userId={user.id} />
+        </div>
+      )}
+
       {/* Navigation buttons */}
       <div className="flex flex-col gap-2 mb-4">
         <NavButton
