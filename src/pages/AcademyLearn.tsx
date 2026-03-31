@@ -183,6 +183,13 @@ const AcademyLearn = () => {
         </button>
         <span className="text-sm font-display font-bold text-foreground truncate flex-1">{courseTitle}</span>
         <button
+          onClick={() => setCohortChatOpen(true)}
+          className="text-muted-foreground hover:text-primary transition-colors"
+          title={lang === "uk" ? "Чат потоку" : "Чат потока"}
+        >
+          <Users className="w-4.5 h-4.5" />
+        </button>
+        <button
           onClick={() => setTeacherPanelOpen(true)}
           className="text-muted-foreground hover:text-primary transition-colors relative"
           title={lang === "uk" ? "Допомога" : "Помощь"}
