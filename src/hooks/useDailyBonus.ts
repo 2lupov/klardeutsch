@@ -53,25 +53,49 @@ export const useDailyBonus = () => {
   const [streak, setStreak] = useState(1);
   const [loading, setLoading] = useState(true);
   const [reward, setReward] = useState<BonusReward | null>(null);
+  const [shields, setShields] = useState(0);
+  const [milestoneStreak, setMilestoneStreak] = useState<number | null>(null);
 
   useEffect(() => {
     if (!user) { setLoading(false); return; }
 
     supabase
       .from("daily_bonuses" as any)
-      .select("last_claimed_at, streak")
+      .select("last_claimed_at, streak, streak_shields")
       .eq("user_id", user.id)
       .maybeSingle()
       .then(({ data }: any) => {
         if (!data) {
           setCanClaim(true);
           setStreak(1);
+          setShields(0);
         } else if (isToday(data.last_claimed_at)) {
           setCanClaim(false);
           setStreak(data.streak);
+          setShields(data.streak_shields ?? 0);
         } else {
           setCanClaim(true);
-          setStreak(isYesterday(data.last_claimed_at) ? data.streak + 1 : 1);
+          setShields(data.streak_shields ?? 0);
+          if (isYesterday(data.last_claimed_at)) {
+            setStreak(data.streak + 1);
+          } else {
+            // Missed day — check shields
+            if ((data.streak_shields ?? 0) > 0) {
+              setStreak(data.streak + 1);
+              // Use shield
+              (supabase as any)
+                .from("daily_bonuses")
+                .update({
+                  streak_shields: Math.max(0, (data.streak_shields ?? 1) - 1),
+                  last_shield_used_at: new Date().toISOString().slice(0, 10),
+                })
+                .eq("user_id", user.id)
+                .then();
+              setShields(Math.max(0, (data.streak_shields ?? 1) - 1));
+            } else {
+              setStreak(1);
+            }
+          }
         }
         setLoading(false);
       });
@@ -98,11 +122,25 @@ export const useDailyBonus = () => {
       await supabase.rpc("award_xp", { p_user_id: user.id, p_amount: picked.amount });
     }
 
+    // Check milestones
+    const MILESTONE_MAP: Record<number, number> = { 3: 20, 7: 50, 14: 100, 30: 200, 60: 400, 100: 700 };
+    if (MILESTONE_MAP[newStreak]) {
+      const { error } = await (supabase as any)
+        .from("streak_milestones")
+        .insert({ user_id: user.id, milestone_days: newStreak, coins_awarded: MILESTONE_MAP[newStreak] });
+      if (!error) {
+        await supabase.rpc("award_coins", { p_user_id: user.id, p_amount: MILESTONE_MAP[newStreak], p_reason: `milestone_${newStreak}` });
+        setMilestoneStreak(newStreak);
+      }
+    }
+
     setCanClaim(false);
     setStreak(newStreak);
     setReward(picked);
     return picked;
   }, [user, canClaim, streak]);
 
-  return { canClaim, streak, loading, reward, claim };
+  const clearMilestone = useCallback(() => setMilestoneStreak(null), []);
+
+  return { canClaim, streak, loading, reward, claim, shields, milestoneStreak, clearMilestone };
 };
