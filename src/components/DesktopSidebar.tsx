@@ -150,12 +150,8 @@ const DesktopSidebar = () => {
             style={{ width: SIDEBAR_W }}
           >
             {/* Logo header */}
-            <div className="flex items-center gap-3 px-5 pt-4 pb-3 border-b border-border">
-              <KlarLogo progress={totalProgress} completed={allCompleted} />
-              <div className="flex flex-col min-w-0">
-                <span className="text-sm font-display font-bold text-foreground">KLAR</span>
-                <span className="text-[10px] text-muted-foreground truncate">{t("appSubtitle")}</span>
-              </div>
+            <div className="flex items-center justify-center px-5 pt-5 pb-4 border-b border-border">
+              <KlarLogo progress={totalProgress} completed={allCompleted} size="md" />
             </div>
 
             {/* Navigation */}
