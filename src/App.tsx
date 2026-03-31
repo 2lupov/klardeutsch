@@ -21,7 +21,7 @@ import Dictionary from "./pages/Dictionary";
 import Statistics from "./pages/Statistics";
 import Shop from "./pages/Shop";
 import Challenges from "./pages/Challenges";
-import Dialogues from "./pages/Dialogues";
+
 import Method from "./pages/Method";
 import Games from "./pages/Games";
 import Privacy from "./pages/Privacy";
