@@ -693,6 +693,29 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
       className="relative border-t border-border bg-card/80 backdrop-blur-xl"
       style={{ marginBottom: keyboardOffset > 0 ? keyboardOffset : undefined }}
     >
+      {/* Reply preview */}
+      <AnimatePresence>
+        {replyTo && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="flex items-center gap-2 px-4 py-2 bg-muted/40 border-b border-border/50">
+              <CornerUpRight className="w-3.5 h-3.5 text-primary shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] font-semibold text-primary">{replyTo.senderName}</p>
+                <p className="text-[11px] text-muted-foreground truncate">{replyTo.content.slice(0, 80)}</p>
+              </div>
+              <button onClick={onCancelReply} className="text-muted-foreground hover:text-foreground shrink-0">
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Game picker */}
       <AnimatePresence>
         {showGamePicker && (
