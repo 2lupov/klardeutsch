@@ -918,6 +918,10 @@ const CommunityChat = () => {
   const [profiles, setProfiles] = useState<Record<string, Profile>>({});
   const [loading, setLoading] = useState(true);
   const endRef = useRef<HTMLDivElement>(null);
+  const [replyTo, setReplyTo] = useState<ReplyInfo | null>(null);
+  const [profileUserId, setProfileUserId] = useState<string | null>(null);
+
+  const profileUser = profileUserId ? profiles[profileUserId] : null;
 
   useEffect(() => {
     const load = async () => {
@@ -932,11 +936,11 @@ const CommunityChat = () => {
         if (uids.length) {
           const { data: profs } = await supabase
             .from("profiles")
-            .select("user_id, display_name, avatar_url")
+            .select("user_id, display_name, avatar_url, last_active")
             .in("user_id", uids);
           if (profs) {
             const map: Record<string, Profile> = {};
-            profs.forEach((p) => (map[p.user_id] = p));
+            profs.forEach((p) => (map[p.user_id] = p as any));
             setProfiles(map);
           }
         }
@@ -953,10 +957,10 @@ const CommunityChat = () => {
         if (!profiles[msg.user_id]) {
           const { data } = await supabase
             .from("profiles")
-            .select("user_id, display_name, avatar_url")
+            .select("user_id, display_name, avatar_url, last_active")
             .eq("user_id", msg.user_id)
             .single();
-          if (data) setProfiles((prev) => ({ ...prev, [data.user_id]: data }));
+          if (data) setProfiles((prev) => ({ ...prev, [data.user_id]: data as any }));
         }
       })
       .subscribe();
@@ -970,7 +974,14 @@ const CommunityChat = () => {
 
   const sendText = async (content: string) => {
     if (!user) return;
-    await supabase.from("community_messages").insert({ user_id: user.id, content });
+    const insert: any = { user_id: user.id, content };
+    if (replyTo) {
+      insert.reply_to_id = replyTo.id;
+      insert.reply_to_content = replyTo.content.slice(0, 100);
+      insert.reply_to_sender = replyTo.senderName;
+    }
+    await supabase.from("community_messages").insert(insert);
+    setReplyTo(null);
   };
 
   const sendVoice = async (audioUrl: string) => {
@@ -1021,9 +1032,11 @@ const CommunityChat = () => {
         {messages.map((m, i) => {
           const isMe = m.user_id === user?.id;
           const prof = profiles[m.user_id];
+          const msg = m as any;
           return (
             <MessageBubble
               key={m.id}
+              messageId={m.id}
               isMe={isMe}
               content={m.content}
               audioUrl={m.audio_url}
@@ -1034,6 +1047,11 @@ const CommunityChat = () => {
               time={format(new Date(m.created_at), "HH:mm")}
               senderName={prof?.display_name || undefined}
               avatarUrl={prof?.avatar_url}
+              senderId={m.user_id}
+              replyToContent={msg.reply_to_content}
+              replyToSender={msg.reply_to_sender}
+              onReply={() => setReplyTo({ id: m.id, content: m.content, senderName: prof?.display_name || "?" })}
+              onAvatarClick={(uid) => setProfileUserId(uid)}
               index={i}
             />
           );
