@@ -29,6 +29,7 @@ interface Profile {
   user_id: string;
   display_name: string | null;
   avatar_url: string | null;
+  last_active?: string | null;
 }
 
 interface CommunityMsg {
