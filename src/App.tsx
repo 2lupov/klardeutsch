@@ -41,6 +41,8 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/auth" element={<Auth />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/onboarding" element={<Onboarding />} />
+      <Route path="/review" element={<Review />} />
       {/* Web-only routes — redirect to home in Telegram */}
       <Route path="/admin" element={isTelegram ? <Navigate to="/" replace /> : <Admin />} />
       <Route path="/method" element={isTelegram ? <Navigate to="/" replace /> : <Method />} />
