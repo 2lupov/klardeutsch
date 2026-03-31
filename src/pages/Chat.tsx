@@ -22,7 +22,7 @@ interface CommunityMsg {
   content: string;
   audio_url?: string | null;
   image_url?: string | null;
-  image_urls?: string[] | null;
+  image_urls?: any;
   file_url?: string | null;
   file_name?: string | null;
   created_at: string;
