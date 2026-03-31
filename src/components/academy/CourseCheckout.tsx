@@ -43,9 +43,9 @@ const CourseCheckout = ({ course, isPurchased, purchasing, onPurchase, onStart, 
       <div className="p-5 space-y-4">
         {isPurchased ? (
           <>
-            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span className="text-xs font-semibold text-emerald-400">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/10 border border-primary/20">
+              <ShieldCheck className="w-4 h-4 text-primary" />
+              <span className="text-xs font-semibold text-primary">
                 {lang === "uk" ? "Придбано" : "Куплено"}
               </span>
             </div>
