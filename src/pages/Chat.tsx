@@ -376,6 +376,15 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImage, placeholder, userI
             exit={{ opacity: 0, x: 20 }}
             className="flex-1 flex items-center gap-2"
           >
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={() => imageInputRef.current?.click()}
+              disabled={uploading}
+              className="w-9 h-9 rounded-full hover:bg-muted/80 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors shrink-0"
+            >
+              <ImagePlus className="w-4 h-4" />
+            </motion.button>
+            <input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={handleImagePick} />
             <Input
               value={text}
               onChange={(e) => setText(e.target.value)}
@@ -408,6 +417,12 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImage, placeholder, userI
           </motion.div>
         )}
       </AnimatePresence>
+      {uploading && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 bg-card/80 backdrop-blur-sm flex items-center justify-center rounded-lg">
+          <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full" />
+        </motion.div>
+      )}
     </motion.div>
   );
 };
