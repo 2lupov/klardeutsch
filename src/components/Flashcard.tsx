@@ -51,6 +51,13 @@ const Flashcard = ({ cards, onComplete }: FlashcardProps) => {
           [{ user_id: user.id, vocab_card_id: card.id, is_difficult: false }],
           { onConflict: "user_id,vocab_card_id" }
         );
+      // Auto-add to SRS for spaced repetition
+      await (supabase as any)
+        .from("srs_cards")
+        .upsert(
+          { user_id: user.id, vocab_card_id: card.id, next_review_at: new Date().toISOString() },
+          { onConflict: "user_id,vocab_card_id" }
+        );
     }
     setLearned((prev) => new Set(prev).add(card.id));
     handleNext();
