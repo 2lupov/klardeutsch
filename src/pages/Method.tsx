@@ -291,8 +291,9 @@ const Method = () => {
         </button>
 
         <div className="relative z-10 max-w-xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-display font-bold mb-3">
-            {t.heroTitle} <TypewriterKLAR />
+          <h1 className="text-4xl md:text-5xl font-display font-bold mb-3 flex items-center justify-center gap-3">
+            <span>{t.heroTitle}</span>
+            <TypewriterKLAR />
           </h1>
           <p className="text-muted-foreground text-lg mb-8">
             {t.heroSub1}<br />
