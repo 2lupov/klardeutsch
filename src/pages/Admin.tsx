@@ -14,6 +14,7 @@ import CourseEditor from "@/components/admin/CourseEditor";
 import TranslationChecker from "@/components/admin/TranslationChecker";
 import AllTextsEditor from "@/components/admin/AllTextsEditor";
 import AdminStats from "@/components/admin/AdminStats";
+import AdminChats from "@/components/admin/AdminChats";
 import StuffOnlyTab from "@/components/admin/StuffOnlyTab";
 import TopicsEditor from "@/components/admin/TopicsEditor";
 import { toast } from "sonner";
