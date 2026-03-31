@@ -564,6 +564,7 @@ const CommunityChat = () => {
       <ChatInputBar
         onSendText={sendText}
         onSendVoice={sendVoice}
+        onSendImage={sendImage}
         placeholder={lang === "uk" ? "Написати повідомлення…" : "Написать сообщение…"}
         userId={user?.id || ""}
       />
