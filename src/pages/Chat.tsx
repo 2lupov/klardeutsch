@@ -421,8 +421,12 @@ const MessageBubble = ({ isMe, content, audioUrl, imageUrl, imageUrls, fileUrl, 
             isMe
               ? "bg-primary text-primary-foreground rounded-br-md shadow-lg shadow-primary/20"
               : "bg-card border border-border rounded-bl-md shadow-sm"
-          } ${allImages.length > 0 && !audioUrl ? "p-1.5" : "px-3.5 py-2.5"}`}>
-            {allImages.length > 0 ? (
+          } ${content.startsWith("🎮:") ? "p-2" : content === "🎥" && audioUrl ? "p-1" : allImages.length > 0 && !audioUrl ? "p-1.5" : "px-3.5 py-2.5"}`}>
+            {content.startsWith("🎮:") ? (
+              <GameInviteBubble content={content} isMe={isMe} />
+            ) : content === "🎥" && audioUrl ? (
+              <VideoCirclePlayer url={audioUrl} />
+            ) : allImages.length > 0 ? (
               <div>
                 <ImageGallery urls={allImages} onOpen={(idx) => setGalleryOpen(idx)} />
                 {content && content !== "📷" && content !== "📷📎" && (
