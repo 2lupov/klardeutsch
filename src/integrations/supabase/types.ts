@@ -781,6 +781,51 @@ export type Database = {
           },
         ]
       }
+      gift_items: {
+        Row: {
+          available: boolean
+          category: string
+          created_at: string
+          description_ru: string | null
+          description_uk: string | null
+          emoji: string
+          id: string
+          image_url: string | null
+          name: string
+          price: number
+          rarity: string
+          sort_order: number | null
+        }
+        Insert: {
+          available?: boolean
+          category?: string
+          created_at?: string
+          description_ru?: string | null
+          description_uk?: string | null
+          emoji?: string
+          id?: string
+          image_url?: string | null
+          name: string
+          price?: number
+          rarity?: string
+          sort_order?: number | null
+        }
+        Update: {
+          available?: boolean
+          category?: string
+          created_at?: string
+          description_ru?: string | null
+          description_uk?: string | null
+          emoji?: string
+          id?: string
+          image_url?: string | null
+          name?: string
+          price?: number
+          rarity?: string
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
       grammar_lessons: {
         Row: {
           created_at: string
@@ -1498,6 +1543,44 @@ export type Database = {
         }
         Relationships: []
       }
+      user_gifts: {
+        Row: {
+          created_at: string
+          displayed: boolean
+          gift_id: string
+          id: string
+          message: string | null
+          receiver_id: string
+          sender_id: string
+        }
+        Insert: {
+          created_at?: string
+          displayed?: boolean
+          gift_id: string
+          id?: string
+          message?: string | null
+          receiver_id: string
+          sender_id: string
+        }
+        Update: {
+          created_at?: string
+          displayed?: boolean
+          gift_id?: string
+          id?: string
+          message?: string | null
+          receiver_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_gifts_gift_id_fkey"
+            columns: ["gift_id"]
+            isOneToOne: false
+            referencedRelation: "gift_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_progress: {
         Row: {
           category: string
@@ -1751,6 +1834,15 @@ export type Database = {
       review_srs_card: {
         Args: { p_card_id: string; p_quality: number; p_user_id: string }
         Returns: undefined
+      }
+      send_gift: {
+        Args: {
+          p_gift_id: string
+          p_message?: string
+          p_receiver_id: string
+          p_sender_id: string
+        }
+        Returns: boolean
       }
     }
     Enums: {
