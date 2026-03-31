@@ -17,11 +17,12 @@ interface CohortMessage {
 interface Props {
   courseId: string;
   lang: string;
+  open: boolean;
+  onClose: () => void;
 }
 
-const CohortChat = ({ courseId, lang }: Props) => {
+const CohortChat = ({ courseId, lang, open, onClose }: Props) => {
   const { user } = useAuth();
-  const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<CohortMessage[]>([]);
   const [profiles, setProfiles] = useState<Record<string, { display_name: string; avatar_url: string | null }>>({});
   const [input, setInput] = useState("");
@@ -109,13 +110,6 @@ const CohortChat = ({ courseId, lang }: Props) => {
 
   return (
     <>
-      {/* FAB */}
-      <button
-        onClick={() => setOpen(true)}
-        className={`fixed bottom-20 left-4 z-40 w-12 h-12 rounded-full bg-accent text-accent-foreground shadow-lg flex items-center justify-center hover:scale-105 transition-transform ${open ? "hidden" : ""}`}
-      >
-        <Users className="w-5 h-5" />
-      </button>
 
       {/* Chat panel */}
       <AnimatePresence>
@@ -132,7 +126,7 @@ const CohortChat = ({ courseId, lang }: Props) => {
                 <Users className="w-4 h-4 text-accent-foreground" />
                 <span className="text-sm font-display font-bold">{lang === "uk" ? "Чат потоку" : "Чат потока"}</span>
               </div>
-              <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground">
+              <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
                 <X className="w-4 h-4" />
               </button>
             </div>

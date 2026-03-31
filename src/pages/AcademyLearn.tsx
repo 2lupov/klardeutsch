@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePlatform } from "@/hooks/usePlatform";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Menu, X, GraduationCap } from "lucide-react";
+import { ArrowLeft, Menu, X, GraduationCap, Users } from "lucide-react";
 import LearnSidebar from "@/components/academy/LearnSidebar";
 import VideoLessonPlayer from "@/components/academy/lessons/VideoLessonPlayer";
 import VideoQuizLesson from "@/components/academy/lessons/VideoQuizLesson";
@@ -69,6 +69,7 @@ const AcademyLearn = () => {
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
   const [teacherPanelOpen, setTeacherPanelOpen] = useState(false);
+  const [cohortChatOpen, setCohortChatOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -182,6 +183,13 @@ const AcademyLearn = () => {
         </button>
         <span className="text-sm font-display font-bold text-foreground truncate flex-1">{courseTitle}</span>
         <button
+          onClick={() => setCohortChatOpen(true)}
+          className="text-muted-foreground hover:text-primary transition-colors"
+          title={lang === "uk" ? "Чат потоку" : "Чат потока"}
+        >
+          <Users className="w-4.5 h-4.5" />
+        </button>
+        <button
           onClick={() => setTeacherPanelOpen(true)}
           className="text-muted-foreground hover:text-primary transition-colors relative"
           title={lang === "uk" ? "Допомога" : "Помощь"}
@@ -290,9 +298,8 @@ const AcademyLearn = () => {
         <div className="fixed inset-0 bg-background/60 backdrop-blur-sm z-40" onClick={() => setTeacherPanelOpen(false)} />
       )}
 
-      {/* Cohort Chat FAB */}
       {courseId && (
-        <CohortChat courseId={courseId} lang={lang} />
+        <CohortChat courseId={courseId} lang={lang} open={cohortChatOpen} onClose={() => setCohortChatOpen(false)} />
       )}
     </div>
   );
