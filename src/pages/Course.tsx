@@ -128,6 +128,23 @@ const Course = () => {
     );
   }
 
+  if (lessons.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-4 px-4">
+        <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-3xl">🚧</div>
+        <h2 className="font-display text-lg font-bold text-foreground">
+          {lang === "uk" ? "Уроки скоро з'являться" : "Уроки скоро появятся"}
+        </h2>
+        <p className="text-muted-foreground text-center text-sm max-w-xs">
+          {lang === "uk" ? "Ми готуємо матеріали для цього курсу. Поверніться пізніше!" : "Мы готовим материалы для этого курса. Вернитесь позже!"}
+        </p>
+        <button onClick={() => navigate("/shop")} className="text-primary text-sm hover:underline">
+          ← {lang === "uk" ? "До магазину" : "В магазин"}
+        </button>
+      </div>
+    );
+  }
+
   if (!hasAccess) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4 px-4">
