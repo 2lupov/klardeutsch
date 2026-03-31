@@ -55,7 +55,7 @@ const Profile = () => {
   const [customWordsCount, setCustomWordsCount] = useState(0);
   const [savedWordsCount, setSavedWordsCount] = useState(0);
   const [fetching, setFetching] = useState(true);
-  const [profile, setProfile] = useState<ProfileData>({ display_name: null, avatar_url: null, telegram_chat_id: null });
+  const [profile, setProfile] = useState<ProfileData>({ display_name: null, avatar_url: null, telegram_chat_id: null, nickname_changed_at: null });
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState("");
   const [uploading, setUploading] = useState(false);
