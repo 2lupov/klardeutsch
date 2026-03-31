@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { fetchEdgeFunction } from "@/lib/auth-fetch";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -283,6 +284,8 @@ const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void
     const content = text.trim();
     setText("");
     await supabase.from("direct_messages").insert({ sender_id: user.id, receiver_id: peerId, content });
+    // Notify receiver via Telegram bot (fire-and-forget)
+    fetchEdgeFunction("notify-dm", { json: { receiver_id: peerId, message_preview: content } }).catch(() => {});
   };
 
   return (
