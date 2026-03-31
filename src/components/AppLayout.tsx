@@ -75,7 +75,7 @@ const AppLayout = () => {
       <main className="flex-1 overflow-y-auto relative">
         <EditModeToolbar />
         <LofiFloatingPlayer />
-        <DailyBonusDialog />
+        <ListeningFloatingPlayer />
         <PageTransition><Outlet /></PageTransition>
       </main>
     </div>
