@@ -61,24 +61,35 @@ const DailySummaryModal = ({ open, onClose }: Props) => {
         .eq("user_id", user.id)
         .maybeSingle();
 
-      // Word of day (cached)
+      // Get user's level
+      let userLevel = "A1";
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("recommended_level")
+        .eq("user_id", user.id)
+        .single();
+      if ((profile as any)?.recommended_level) userLevel = (profile as any).recommended_level;
+
+      // Word of day (cached per level+date)
       const dateKey = new Date().toISOString().slice(0, 10);
-      const cacheKey = `klar_word_of_day_${dateKey}`;
+      const cacheKey = `klar_word_of_day_${userLevel}_${dateKey}`;
       let wordOfDay = null;
       const cached = localStorage.getItem(cacheKey);
       if (cached) {
         wordOfDay = JSON.parse(cached);
       } else {
+        const seed = new Date().getDate();
         const { data: wod } = await supabase
           .from("vocab_cards")
           .select("german, russian, ukrainian, article, example")
-          .limit(1)
+          .eq("level", userLevel)
           .order("id");
-        if (wod?.[0]) {
+        if (wod?.length) {
+          const pick = wod[seed % wod.length];
           wordOfDay = {
-            german: (wod[0].article ? wod[0].article + " " : "") + wod[0].german,
-            translation: lang === "uk" ? (wod[0].ukrainian || wod[0].russian) : wod[0].russian,
-            example: wod[0].example || "",
+            german: (pick.article ? pick.article + " " : "") + pick.german,
+            translation: lang === "uk" ? (pick.ukrainian || pick.russian) : pick.russian,
+            example: pick.example || "",
           };
           localStorage.setItem(cacheKey, JSON.stringify(wordOfDay));
         }
