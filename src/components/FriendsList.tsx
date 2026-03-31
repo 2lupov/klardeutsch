@@ -370,6 +370,15 @@ const FriendsList = ({ onBack }: FriendsListProps) => {
           />
         );
       })()}
+
+      {giftTarget && (
+        <SendGiftDialog
+          open={!!giftTarget}
+          onOpenChange={(open) => !open && setGiftTarget(null)}
+          receiverId={giftTarget.id}
+          receiverName={giftTarget.name}
+        />
+      )}
     </div>
   );
 };
