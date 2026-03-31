@@ -230,7 +230,6 @@ const LandingUk = () => {
           </p>
         </footer>
       </div>
-    </>
   );
 };
 
