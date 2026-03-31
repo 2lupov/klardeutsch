@@ -5,7 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send, Search, MessageCircle, Users, Mail, ArrowLeft, Mic, Square, Play, Pause } from "lucide-react";
+import { Send, Search, MessageCircle, Users, Mail, ArrowLeft, Mic, Square, Play, Pause, ImagePlus, X } from "lucide-react";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -21,6 +21,7 @@ interface CommunityMsg {
   user_id: string;
   content: string;
   audio_url?: string | null;
+  image_url?: string | null;
   created_at: string;
   profile?: Profile;
 }
@@ -31,6 +32,7 @@ interface DirectMsg {
   receiver_id: string;
   content: string;
   audio_url?: string | null;
+  image_url?: string | null;
   is_read: boolean;
   created_at: string;
 }
@@ -199,53 +201,112 @@ const uploadVoice = async (blob: Blob, userId: string): Promise<string | null> =
   return data.publicUrl;
 };
 
+/* ───── Upload image helper ───── */
+const uploadChatImage = async (file: File, userId: string): Promise<string | null> => {
+  const ext = file.name.split(".").pop() || "jpg";
+  const filename = `${userId}/${Date.now()}.${ext}`;
+  const { error } = await supabase.storage.from("chat-images").upload(filename, file, { contentType: file.type });
+  if (error) return null;
+  const { data } = supabase.storage.from("chat-images").getPublicUrl(filename);
+  return data.publicUrl;
+};
+
 /* ───── Message Bubble ───── */
-const MessageBubble = ({ isMe, content, audioUrl, time, senderName, avatarUrl, index }: {
-  isMe: boolean; content: string; audioUrl?: string | null; time: string;
+const MessageBubble = ({ isMe, content, audioUrl, imageUrl, time, senderName, avatarUrl, index }: {
+  isMe: boolean; content: string; audioUrl?: string | null; imageUrl?: string | null; time: string;
   senderName?: string; avatarUrl?: string | null; index: number;
-}) => (
-  <motion.div
-    initial={{ opacity: 0, y: 12, scale: 0.95 }}
-    animate={{ opacity: 1, y: 0, scale: 1 }}
-    transition={{ duration: 0.25, delay: Math.min(index * 0.02, 0.3) }}
-    className={`flex gap-2 ${isMe ? "flex-row-reverse" : ""}`}
-  >
-    {!isMe && (
-      <Avatar className="w-7 h-7 shrink-0 mt-auto">
-        <AvatarImage src={avatarUrl || ""} className="object-cover" />
-        <AvatarFallback className="text-[10px] bg-primary/10 text-primary">
-          {(senderName || "?")[0]}
-        </AvatarFallback>
-      </Avatar>
-    )}
-    <div className={`max-w-[75%] ${isMe ? "items-end" : "items-start"}`}>
-      {!isMe && senderName && (
-        <p className="text-[10px] mb-0.5 text-muted-foreground font-medium px-1">{senderName}</p>
-      )}
-      <div className={`rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed backdrop-blur-sm ${
-        isMe
-          ? "bg-primary text-primary-foreground rounded-br-md shadow-lg shadow-primary/20"
-          : "bg-card border border-border rounded-bl-md shadow-sm"
-      }`}>
-        {audioUrl ? <VoicePlayer url={audioUrl} /> : content}
-      </div>
-      <p className={`text-[9px] mt-0.5 px-1 ${isMe ? "text-right" : ""} text-muted-foreground/50`}>
-        {time}
-      </p>
-    </div>
-  </motion.div>
-);
+}) => {
+  const [imgFullscreen, setImgFullscreen] = useState(false);
+
+  return (
+    <>
+      <motion.div
+        initial={{ opacity: 0, y: 12, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.25, delay: Math.min(index * 0.02, 0.3) }}
+        className={`flex gap-2 ${isMe ? "flex-row-reverse" : ""}`}
+      >
+        {!isMe && (
+          <Avatar className="w-7 h-7 shrink-0 mt-auto">
+            <AvatarImage src={avatarUrl || ""} className="object-cover" />
+            <AvatarFallback className="text-[10px] bg-primary/10 text-primary">
+              {(senderName || "?")[0]}
+            </AvatarFallback>
+          </Avatar>
+        )}
+        <div className={`max-w-[75%] ${isMe ? "items-end" : "items-start"}`}>
+          {!isMe && senderName && (
+            <p className="text-[10px] mb-0.5 text-muted-foreground font-medium px-1">{senderName}</p>
+          )}
+          <div className={`rounded-2xl overflow-hidden text-sm leading-relaxed backdrop-blur-sm ${
+            isMe
+              ? "bg-primary text-primary-foreground rounded-br-md shadow-lg shadow-primary/20"
+              : "bg-card border border-border rounded-bl-md shadow-sm"
+          } ${imageUrl && !audioUrl ? "p-0" : "px-3.5 py-2.5"}`}>
+            {imageUrl ? (
+              <div className="cursor-pointer" onClick={() => setImgFullscreen(true)}>
+                <img
+                  src={imageUrl}
+                  alt="shared"
+                  className="max-w-[260px] max-h-[300px] object-cover rounded-2xl"
+                  loading="lazy"
+                />
+                {content && content !== "📷" && (
+                  <p className="px-3.5 py-2 text-sm">{content}</p>
+                )}
+              </div>
+            ) : audioUrl ? (
+              <VoicePlayer url={audioUrl} />
+            ) : (
+              content
+            )}
+          </div>
+          <p className={`text-[9px] mt-0.5 px-1 ${isMe ? "text-right" : ""} text-muted-foreground/50`}>
+            {time}
+          </p>
+        </div>
+      </motion.div>
+
+      {/* Fullscreen image viewer */}
+      <AnimatePresence>
+        {imgFullscreen && imageUrl && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setImgFullscreen(false)}
+            className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 cursor-pointer"
+          >
+            <motion.img
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.8 }}
+              src={imageUrl}
+              alt="fullscreen"
+              className="max-w-full max-h-full object-contain rounded-lg"
+            />
+            <button className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white">
+              <X className="w-5 h-5" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+};
 
 /* ───── Chat Input Bar ───── */
-const ChatInputBar = ({ onSendText, onSendVoice, placeholder, userId }: {
+const ChatInputBar = ({ onSendText, onSendVoice, onSendImage, placeholder, userId }: {
   onSendText: (text: string) => void;
   onSendVoice: (audioUrl: string) => void;
+  onSendImage: (imageUrl: string) => void;
   placeholder: string;
   userId: string;
 }) => {
   const [text, setText] = useState("");
   const { recording, elapsed, start, stop, cancel } = useVoiceRecorder();
   const [uploading, setUploading] = useState(false);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const handleSend = () => {
     if (!text.trim()) return;
@@ -262,10 +323,20 @@ const ChatInputBar = ({ onSendText, onSendVoice, placeholder, userId }: {
     if (url) onSendVoice(url);
   };
 
+  const handleImagePick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const url = await uploadChatImage(file, userId);
+    setUploading(false);
+    if (url) onSendImage(url);
+    e.target.value = "";
+  };
+
   return (
     <motion.div
       layout
-      className="border-t border-border bg-card/80 backdrop-blur-xl p-3 flex items-center gap-2"
+      className="relative border-t border-border bg-card/80 backdrop-blur-xl p-3 flex items-center gap-2"
     >
       <AnimatePresence mode="wait">
         {recording ? (
@@ -305,6 +376,15 @@ const ChatInputBar = ({ onSendText, onSendVoice, placeholder, userId }: {
             exit={{ opacity: 0, x: 20 }}
             className="flex-1 flex items-center gap-2"
           >
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={() => imageInputRef.current?.click()}
+              disabled={uploading}
+              className="w-9 h-9 rounded-full hover:bg-muted/80 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors shrink-0"
+            >
+              <ImagePlus className="w-4 h-4" />
+            </motion.button>
+            <input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={handleImagePick} />
             <Input
               value={text}
               onChange={(e) => setText(e.target.value)}
@@ -337,6 +417,12 @@ const ChatInputBar = ({ onSendText, onSendVoice, placeholder, userId }: {
           </motion.div>
         )}
       </AnimatePresence>
+      {uploading && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 bg-card/80 backdrop-blur-sm flex items-center justify-center rounded-lg">
+          <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full" />
+        </motion.div>
+      )}
     </motion.div>
   );
 };
@@ -430,6 +516,11 @@ const CommunityChat = () => {
     await supabase.from("community_messages").insert({ user_id: user.id, content: "🎤", audio_url: audioUrl });
   };
 
+  const sendImage = async (imageUrl: string) => {
+    if (!user) return;
+    await supabase.from("community_messages").insert({ user_id: user.id, content: "📷", image_url: imageUrl });
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -459,6 +550,7 @@ const CommunityChat = () => {
               isMe={isMe}
               content={m.content}
               audioUrl={m.audio_url}
+              imageUrl={m.image_url}
               time={format(new Date(m.created_at), "HH:mm")}
               senderName={prof?.display_name || undefined}
               avatarUrl={prof?.avatar_url}
@@ -472,6 +564,7 @@ const CommunityChat = () => {
       <ChatInputBar
         onSendText={sendText}
         onSendVoice={sendVoice}
+        onSendImage={sendImage}
         placeholder={lang === "uk" ? "Написати повідомлення…" : "Написать сообщение…"}
         userId={user?.id || ""}
       />
@@ -622,6 +715,12 @@ const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void
     fetchEdgeFunction("notify-dm", { json: { receiver_id: peerId, message_preview: "🎤 Голосовое сообщение" } }).catch(() => {});
   };
 
+  const sendImage = async (imageUrl: string) => {
+    if (!user) return;
+    await supabase.from("direct_messages").insert({ sender_id: user.id, receiver_id: peerId, content: "📷", image_url: imageUrl });
+    fetchEdgeFunction("notify-dm", { json: { receiver_id: peerId, message_preview: "📷 Фото" } }).catch(() => {});
+  };
+
   return (
     <div className="flex flex-col h-full">
       {/* DM Header */}
@@ -656,6 +755,7 @@ const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void
               isMe={isMe}
               content={m.content}
               audioUrl={m.audio_url}
+              imageUrl={m.image_url}
               time={format(new Date(m.created_at), "HH:mm")}
               index={i}
             />
@@ -667,6 +767,7 @@ const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void
       <ChatInputBar
         onSendText={sendText}
         onSendVoice={sendVoice}
+        onSendImage={sendImage}
         placeholder={lang === "uk" ? "Написати…" : "Написать…"}
         userId={user?.id || ""}
       />

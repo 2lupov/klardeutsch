@@ -14,6 +14,7 @@ import Leaderboard from "@/components/Leaderboard";
 import Referrals from "@/components/Referrals";
 import { useXP } from "@/hooks/useXP";
 import AvatarPicker from "@/components/AvatarPicker";
+import ImageCropper from "@/components/ImageCropper";
 import StreakPlant from "@/components/StreakPlant";
 import { useDailyBonus } from "@/hooks/useDailyBonus";
 
@@ -60,6 +61,7 @@ const Profile = () => {
   const [challengesSentCount, setChallengesSentCount] = useState(0);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [settingAvatar, setSettingAvatar] = useState(false);
+  const [cropFile, setCropFile] = useState<File | null>(null);
   const { streak: pandaStreak, canClaim: pandaCanClaim, loading: pandaLoading } = useDailyBonus();
   useEffect(() => {
     if (!user) return;
@@ -165,14 +167,20 @@ const Profile = () => {
     };
   }, [progress, savedWordsCount, customWordsCount, completedLessons, streak, duelsWonCount, dialoguesCount, dailyBonusStreakVal, challengesSentCount]);
 
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
+    setCropFile(file);
+    e.target.value = "";
+  };
+
+  const handleCroppedAvatar = async (blob: Blob) => {
+    if (!user) return;
     setUploading(true);
-    const ext = file.name.split(".").pop();
-    const path = `${user.id}/avatar.${ext}`;
+    setCropFile(null);
+    const path = `${user.id}/avatar.png`;
     await supabase.storage.from("avatars").remove([path]);
-    const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+    const { error } = await supabase.storage.from("avatars").upload(path, blob, { upsert: true, contentType: "image/png" });
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
       setUploading(false);
@@ -637,7 +645,7 @@ const Profile = () => {
       </div>
 
       {/* Avatar picker */}
-      {showAvatarPicker && (
+      {showAvatarPicker && !cropFile && (
         <div className="glass-card p-4 mb-4 flex flex-col gap-3">
           <p className="text-xs font-medium text-foreground">Выбери аватарку:</p>
           <AvatarPicker
@@ -656,6 +664,17 @@ const Profile = () => {
           >
             Завантажити своє фото
           </button>
+        </div>
+      )}
+
+      {/* Image cropper */}
+      {cropFile && (
+        <div className="glass-card p-4 mb-4">
+          <ImageCropper
+            imageFile={cropFile}
+            onCrop={handleCroppedAvatar}
+            onCancel={() => setCropFile(null)}
+          />
         </div>
       )}
 
