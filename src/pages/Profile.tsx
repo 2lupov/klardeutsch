@@ -36,7 +36,7 @@ interface ProfileData {
   telegram_chat_id: number | null;
 }
 
-type ProfileScreen = "main" | "achievements" | "activity" | "mistakes" | "leaderboard" | "notifications" | "referrals" | "offline";
+type ProfileScreen = "main" | "achievements" | "activity" | "mistakes" | "leaderboard" | "notifications" | "referrals" | "offline" | "friends";
 
 const Profile = () => {
   const { user, signOut } = useAuth();
