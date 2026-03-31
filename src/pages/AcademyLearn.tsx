@@ -245,6 +245,16 @@ const AcademyLearn = () => {
           <div className="absolute inset-0 bg-background/60 backdrop-blur-sm z-20" onClick={() => setSidebarOpen(false)} />
         )}
       </div>
+
+      {/* Teacher Chat FAB */}
+      {activeLessonId && courseId && (
+        <TeacherChat lessonId={activeLessonId} courseId={courseId} lang={lang} />
+      )}
+
+      {/* Cohort Chat FAB */}
+      {courseId && (
+        <CohortChat courseId={courseId} lang={lang} />
+      )}
     </div>
   );
 };
