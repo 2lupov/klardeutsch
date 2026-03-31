@@ -35,12 +35,31 @@ interface DirectMsg {
   created_at: string;
 }
 
+/* ───── Waveform generator (deterministic from url hash) ───── */
+const generateWaveform = (seed: string, bars: number): number[] => {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) hash = ((hash << 5) - hash + seed.charCodeAt(i)) | 0;
+  const wave: number[] = [];
+  for (let i = 0; i < bars; i++) {
+    hash = ((hash * 16807) % 2147483647);
+    const base = 0.2 + (Math.abs(hash % 100) / 100) * 0.8;
+    // create natural speech envelope
+    const pos = i / bars;
+    const envelope = Math.sin(pos * Math.PI) * 0.5 + 0.5;
+    wave.push(base * (0.4 + envelope * 0.6));
+  }
+  return wave;
+};
+
 /* ───── Voice Player ───── */
+const WAVEFORM_BARS = 32;
+
 const VoicePlayer = ({ url }: { url: string }) => {
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const waveform = useRef(generateWaveform(url, WAVEFORM_BARS)).current;
 
   useEffect(() => {
     const audio = new Audio(url);
@@ -57,21 +76,61 @@ const VoicePlayer = ({ url }: { url: string }) => {
     setPlaying(!playing);
   };
 
+  const formatTime = (s: number) => {
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return `${m}:${sec.toString().padStart(2, "0")}`;
+  };
+
+  const currentTime = duration > 0 ? progress * duration : 0;
+
   return (
-    <button onClick={toggle} className="flex items-center gap-2 min-w-[140px]">
-      <div className="w-7 h-7 rounded-full bg-background/20 flex items-center justify-center shrink-0">
-        {playing ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 ml-0.5" />}
-      </div>
+    <button onClick={toggle} className="flex items-center gap-2.5 min-w-[160px]">
+      <motion.div
+        whileTap={{ scale: 0.85 }}
+        className="w-8 h-8 rounded-full bg-background/20 flex items-center justify-center shrink-0"
+      >
+        <AnimatePresence mode="wait">
+          {playing ? (
+            <motion.div key="pause" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
+              <Pause className="w-3.5 h-3.5" />
+            </motion.div>
+          ) : (
+            <motion.div key="play" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
+              <Play className="w-3.5 h-3.5 ml-0.5" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
       <div className="flex-1 flex flex-col gap-1">
-        <div className="h-1 rounded-full bg-background/20 overflow-hidden">
-          <motion.div
-            className="h-full bg-current rounded-full"
-            style={{ width: `${progress * 100}%` }}
-            transition={{ duration: 0.1 }}
-          />
+        <div className="flex items-end gap-[2px] h-5">
+          {waveform.map((h, i) => {
+            const barProgress = i / WAVEFORM_BARS;
+            const isActive = barProgress <= progress;
+            return (
+              <motion.div
+                key={i}
+                className="flex-1 rounded-full transition-colors duration-150"
+                style={{
+                  height: `${h * 100}%`,
+                  minWidth: 2,
+                  backgroundColor: isActive ? "currentColor" : "currentColor",
+                  opacity: isActive ? 1 : 0.25,
+                }}
+                animate={playing && isActive ? {
+                  scaleY: [1, 1.15, 1],
+                } : { scaleY: 1 }}
+                transition={playing && isActive ? {
+                  duration: 0.4,
+                  repeat: Infinity,
+                  delay: i * 0.02,
+                } : {}}
+              />
+            );
+          })}
         </div>
-        <span className="text-[9px] opacity-60">
-          {duration > 0 ? `${Math.floor(duration)}с` : "…"}
+        <span className="text-[9px] opacity-60 tabular-nums">
+          {playing || progress > 0 ? formatTime(currentTime) : (duration > 0 ? formatTime(duration) : "…")}
         </span>
       </div>
     </button>
