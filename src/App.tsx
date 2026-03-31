@@ -28,6 +28,7 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import QR from "./pages/QR";
 import Course from "./pages/Course";
+import Academy from "./pages/Academy";
 import Onboarding from "./pages/Onboarding";
 import Review from "./pages/Review";
 import NotFound from "./pages/NotFound";
