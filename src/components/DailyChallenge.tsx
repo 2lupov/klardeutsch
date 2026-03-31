@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Sparkles, Check, X } from "lucide-react";
 
@@ -25,6 +26,7 @@ const dateSeed = () => {
 
 const DailyChallenge = () => {
   const { t, lang } = useLanguage();
+  const { user } = useAuth();
   const [word, setWord] = useState<WordOfDay | null>(null);
   const [question, setQuestion] = useState<MiniQuestion | null>(null);
   const [loading, setLoading] = useState(true);
@@ -35,7 +37,6 @@ const DailyChallenge = () => {
   const todayKey = useMemo(() => `daily_${dateSeed()}`, []);
 
   useEffect(() => {
-    // Check if already completed today
     const done = localStorage.getItem(todayKey);
     if (done) setCompleted(true);
     fetchDaily();
@@ -45,9 +46,20 @@ const DailyChallenge = () => {
     setLoading(true);
     const seed = dateSeed();
 
+    // Get user's level
+    let userLevel = "A1";
+    if (user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("recommended_level")
+        .eq("user_id", user.id)
+        .single();
+      if ((profile as any)?.recommended_level) userLevel = (profile as any).recommended_level;
+    }
+
     const [{ data: words }, { data: questions }] = await Promise.all([
-      supabase.from("vocab_cards").select("german, russian, ukrainian, article, example").order("id"),
-      supabase.from("grammar_questions").select("question, options, correct_index, explanation").order("id"),
+      supabase.from("vocab_cards").select("german, russian, ukrainian, article, example").eq("level", userLevel).order("id"),
+      supabase.from("grammar_questions").select("question, options, correct_index, explanation").eq("level", userLevel).order("id"),
     ]);
 
     if (words && words.length > 0) {
