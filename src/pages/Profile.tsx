@@ -250,6 +250,11 @@ const Profile = () => {
     }
   };
 
+  // Sub-screen: Friends
+  if (screen === "friends") {
+    return <FriendsList onBack={() => setScreen("main")} />;
+  }
+
   // Sub-screen: Referrals
   if (screen === "referrals") {
     return (
