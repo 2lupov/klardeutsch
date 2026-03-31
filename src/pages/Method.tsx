@@ -1,8 +1,9 @@
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Brain, Sparkles, Target, Zap, Star, ArrowLeft, Volume2, Loader2, Pause } from "lucide-react";
+import { Brain, Sparkles, Target, Zap, Star, ArrowLeft, Volume2, Loader2, Pause, Play } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { motion, AnimatePresence } from "framer-motion";
 
 const testimonials = {
   ru: [
@@ -68,7 +69,8 @@ const ui = {
     heroSub2: "От A1 до C1 с AI-поддержкой.",
     audioLabel: "🎧 Послушай мотивацию KLAR",
     audioLoading: "Загрузка...",
-    audioPlaying: "Сейчас играет — нажми чтобы остановить",
+    audioPlaying: "Сейчас играет",
+    audioPaused: "На паузе — нажми чтобы продолжить",
     audioIdle: "Нажми, чтобы услышать",
     whyTitle: "Почему KLAR?",
     reviewsTitle: "Отзывы учеников",
@@ -84,7 +86,8 @@ const ui = {
     heroSub2: "Від A1 до C1 з AI-підтримкою.",
     audioLabel: "🎧 Послухай мотивацію KLAR",
     audioLoading: "Завантаження...",
-    audioPlaying: "Зараз грає — натисни щоб зупинити",
+    audioPlaying: "Зараз грає",
+    audioPaused: "На паузі — натисни щоб продовжити",
     audioIdle: "Натисни, щоб почути",
     whyTitle: "Чому KLAR?",
     reviewsTitle: "Відгуки учнів",
@@ -96,10 +99,45 @@ const ui = {
   },
 };
 
+/* Typewriter component for KLAR */
+const TypewriterKLAR = () => {
+  const letters = ["K", "L", "A", "R"];
+  const [visibleCount, setVisibleCount] = useState(0);
+
+  useEffect(() => {
+    if (visibleCount < letters.length) {
+      const timer = setTimeout(() => setVisibleCount((c) => c + 1), 400);
+      return () => clearTimeout(timer);
+    }
+  }, [visibleCount, letters.length]);
+
+  return (
+    <span className="text-gradient inline-flex">
+      {letters.map((letter, i) => (
+        <motion.span
+          key={i}
+          initial={{ opacity: 0, y: 12, scale: 0.7 }}
+          animate={i < visibleCount ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 12, scale: 0.7 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        >
+          {letter}
+        </motion.span>
+      ))}
+      {visibleCount < letters.length && (
+        <motion.span
+          className="inline-block w-[2px] h-[1em] bg-primary ml-0.5 self-center"
+          animate={{ opacity: [1, 0] }}
+          transition={{ duration: 0.6, repeat: Infinity, repeatType: "reverse" }}
+        />
+      )}
+    </span>
+  );
+};
+
 const Method = () => {
   const { lang } = useLanguage();
   const navigate = useNavigate();
-  const [audioState, setAudioState] = useState<"idle" | "loading" | "playing">("idle");
+  const [audioState, setAudioState] = useState<"idle" | "loading" | "playing" | "paused">("idle");
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioCacheRef = useRef<Map<string, string>>(new Map());
 
@@ -109,20 +147,34 @@ const Method = () => {
   const faqs = faqItems[lang] || faqItems.ru;
 
   const playMotivation = useCallback(async () => {
+    // Playing → pause
     if (audioState === "playing" && audioRef.current) {
       audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      setAudioState("idle");
+      setAudioState("paused");
       return;
     }
 
+    // Paused → resume
+    if (audioState === "paused" && audioRef.current) {
+      await audioRef.current.play();
+      setAudioState("playing");
+      return;
+    }
+
+    // Check cache first
     const cachedUrl = audioCacheRef.current.get(lang);
     if (cachedUrl) {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
       const audio = new Audio(cachedUrl);
       audioRef.current = audio;
       audio.onended = () => setAudioState("idle");
+      audio.onpause = () => {
+        if (!audio.ended) setAudioState("paused");
+      };
+      audio.onplay = () => setAudioState("playing");
       await audio.play();
-      setAudioState("playing");
       return;
     }
 
@@ -133,7 +185,7 @@ const Method = () => {
 
       const { fetchEdgeFunction } = await import("@/lib/auth-fetch");
       const response = await fetchEdgeFunction("elevenlabs-tts", {
-        json: { text, voiceId },
+        json: { text, voiceId, speed: 1.1 },
       });
 
       if (!response.ok) throw new Error("TTS failed");
@@ -144,8 +196,11 @@ const Method = () => {
       const audio = new Audio(url);
       audioRef.current = audio;
       audio.onended = () => setAudioState("idle");
+      audio.onpause = () => {
+        if (!audio.ended) setAudioState("paused");
+      };
+      audio.onplay = () => setAudioState("playing");
       await audio.play();
-      setAudioState("playing");
     } catch {
       setAudioState("idle");
     }
@@ -161,7 +216,7 @@ const Method = () => {
 
         <div className="relative z-10 max-w-xl mx-auto">
           <h1 className="text-4xl md:text-5xl font-display font-bold mb-3">
-            {t.heroTitle} <span className="text-gradient">KLAR</span>
+            {t.heroTitle} <TypewriterKLAR />
           </h1>
           <p className="text-muted-foreground text-lg mb-8">
             {t.heroSub1}<br />
@@ -173,20 +228,44 @@ const Method = () => {
             className="glass-card max-w-md mx-auto flex items-center gap-4 px-6 py-5 mb-4 cursor-pointer hover:border-primary/30 transition-all group"
           >
             <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
-              {audioState === "loading" ? (
-                <Loader2 className="w-6 h-6 text-primary animate-spin" />
-              ) : audioState === "playing" ? (
-                <Pause className="w-6 h-6 text-primary" />
-              ) : (
-                <Volume2 className="w-6 h-6 text-primary" />
-              )}
+              <AnimatePresence mode="wait">
+                {audioState === "loading" ? (
+                  <motion.div key="load" initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.5 }}>
+                    <Loader2 className="w-6 h-6 text-primary animate-spin" />
+                  </motion.div>
+                ) : audioState === "playing" ? (
+                  <motion.div key="pause" initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.5 }}>
+                    <Pause className="w-6 h-6 text-primary" />
+                  </motion.div>
+                ) : audioState === "paused" ? (
+                  <motion.div key="play" initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.5 }}>
+                    <Play className="w-6 h-6 text-primary" />
+                  </motion.div>
+                ) : (
+                  <motion.div key="vol" initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.5 }}>
+                    <Volume2 className="w-6 h-6 text-primary" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
             <div className="text-left">
               <p className="font-display font-semibold text-sm">{t.audioLabel}</p>
               <p className="text-xs text-muted-foreground">
-                {audioState === "loading" ? t.audioLoading : audioState === "playing" ? t.audioPlaying : t.audioIdle}
+                {audioState === "loading" ? t.audioLoading : audioState === "playing" ? t.audioPlaying : audioState === "paused" ? t.audioPaused : t.audioIdle}
               </p>
             </div>
+            {audioState === "playing" && (
+              <div className="flex items-center gap-0.5 ml-auto">
+                {[0, 1, 2, 3].map((i) => (
+                  <motion.div
+                    key={i}
+                    className="w-1 rounded-full bg-primary"
+                    animate={{ height: [8, 20, 8] }}
+                    transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15, ease: "easeInOut" }}
+                  />
+                ))}
+              </div>
+            )}
           </button>
         </div>
 
