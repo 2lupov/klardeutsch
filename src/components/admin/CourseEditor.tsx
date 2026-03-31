@@ -631,7 +631,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
   const [existingCourses, setExistingCourses] = useState<ExistingCourse[]>([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
   const [editingCourseId, setEditingCourseId] = useState<string | null>(null);
-  const [editLessons, setEditLessons] = useState<Array<{ id: string; title: string; theory: string; exercises: any; sort_order: number }>>([]);
+  const [editLessons, setEditLessons] = useState<Array<{ id: string; title: string; theory: string; exercises: any; sort_order: number; lesson_type?: string; description?: string | null; estimated_minutes?: number; xp_reward?: number; coins_reward?: number; content?: any }>>([]);
   const [editCourse, setEditCourse] = useState<ExistingCourse | null>(null);
   const [loadingLessons, setLoadingLessons] = useState(false);
   const [savingEdit, setSavingEdit] = useState(false);
