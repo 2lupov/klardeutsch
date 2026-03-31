@@ -20,7 +20,7 @@ import TopicsEditor from "@/components/admin/TopicsEditor";
 import { toast } from "sonner";
 
 type Level = "A1" | "A2" | "B1" | "B2" | "C1";
-type Tab = "stats" | "topics" | "vocabulary" | "grammar" | "reading" | "listening" | "shop" | "games" | "users" | "translations" | "generator" | "checker" | "alltexts" | "stuffonly" | "courses";
+type Tab = "stats" | "topics" | "vocabulary" | "grammar" | "reading" | "listening" | "shop" | "games" | "users" | "translations" | "generator" | "checker" | "alltexts" | "stuffonly" | "courses" | "chats";
 
 /** Preserves scroll position of admin container across async reload */
 const withScroll = async (fn: () => Promise<void>) => {
