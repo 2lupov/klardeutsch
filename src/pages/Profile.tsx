@@ -5,7 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { usePlatform } from "@/hooks/usePlatform";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { BookOpen, Brain, Flame, RotateCcw, TrendingUp, Calendar, LogOut, Camera, Pencil, Check, X, Coins, Trophy, ArrowLeft, ChevronRight, Award, Bell, Send, Unlink2, Users, WifiOff, Trash2, HardDrive, Globe, Lock, ShoppingBag, ExternalLink } from "lucide-react";
+import { BookOpen, Brain, Flame, RotateCcw, TrendingUp, Calendar, LogOut, Camera, Pencil, Check, X, Coins, Trophy, ArrowLeft, ChevronRight, Award, Bell, Send, Unlink2, Users, WifiOff, Trash2, HardDrive, Globe, Lock, ShoppingBag, ExternalLink, Gift } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useCoins } from "@/hooks/useCoins";
 import Achievements, { type AchievementStats } from "@/components/Achievements";
@@ -17,6 +17,7 @@ import AvatarPicker from "@/components/AvatarPicker";
 import ImageCropper from "@/components/ImageCropper";
 import StreakPlant from "@/components/StreakPlant";
 import { useDailyBonus } from "@/hooks/useDailyBonus";
+import GiftShelf from "@/components/gifts/GiftShelf";
 
 interface ProgressRow {
   level: string;
@@ -733,6 +734,13 @@ const Profile = () => {
         <StatCard icon={<Brain className="w-4 h-4" />} value={completedLessons} label={t("lessonsCompleted")} />
         <StatCard icon={<Flame className="w-4 h-4" />} value={streak} label={t("streakDays")} />
       </div>
+
+      {/* Gift shelf */}
+      {user && (
+        <div className="mb-4">
+          <GiftShelf userId={user.id} />
+        </div>
+      )}
 
       {/* Navigation buttons */}
       <div className="flex flex-col gap-2 mb-4">

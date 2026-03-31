@@ -4,8 +4,10 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Trophy, Swords, BookOpen, Star, Loader2 } from "lucide-react";
+import { Trophy, Swords, BookOpen, Star, Loader2, Gift } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import GiftShelf from "@/components/gifts/GiftShelf";
+import SendGiftDialog from "@/components/gifts/SendGiftDialog";
 
 interface UserProfileDialogProps {
   userId: string | null;
@@ -66,6 +68,7 @@ const UserProfileDialog = ({
   const navigate = useNavigate();
   const [stats, setStats] = useState<UserStats | null>(null);
   const [loading, setLoading] = useState(false);
+  const [giftDialogOpen, setGiftDialogOpen] = useState(false);
 
   const isMe = userId === user?.id;
   const name = displayName || "User";
@@ -182,20 +185,44 @@ const UserProfileDialog = ({
             </div>
           ) : null}
 
+          {/* Gift shelf */}
+          {userId && <GiftShelf userId={userId} compact />}
+
           {!isMe && userId && (
-            <button
-              onClick={handleChallenge}
-              className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-display font-semibold text-sm hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
-            >
-              <Swords className="w-4 h-4" />
-              Вызвать на дуэль
-            </button>
+            <div className="flex gap-2 w-full">
+              <button
+                onClick={() => setGiftDialogOpen(true)}
+                className="flex-1 py-3 rounded-xl bg-accent text-accent-foreground font-display font-semibold text-sm hover:bg-accent/80 transition-colors flex items-center justify-center gap-2"
+              >
+                <Gift className="w-4 h-4" />
+                Подарить
+              </button>
+              <button
+                onClick={handleChallenge}
+                className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground font-display font-semibold text-sm hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+              >
+                <Swords className="w-4 h-4" />
+                Дуэль
+              </button>
+            </div>
           )}
+
+          {isMe && userId && <GiftShelf userId={userId} />}
 
           {isMe && (
             <p className="text-xs text-muted-foreground text-center">Это ты! 🎉</p>
           )}
         </div>
+
+        {/* Send gift dialog */}
+        {!isMe && userId && (
+          <SendGiftDialog
+            open={giftDialogOpen}
+            onOpenChange={setGiftDialogOpen}
+            receiverId={userId}
+            receiverName={displayName || "User"}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );
