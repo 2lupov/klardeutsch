@@ -22,6 +22,9 @@ interface CommunityMsg {
   content: string;
   audio_url?: string | null;
   image_url?: string | null;
+  image_urls?: string[] | null;
+  file_url?: string | null;
+  file_name?: string | null;
   created_at: string;
   profile?: Profile;
 }
@@ -33,6 +36,9 @@ interface DirectMsg {
   content: string;
   audio_url?: string | null;
   image_url?: string | null;
+  image_urls?: string[] | null;
+  file_url?: string | null;
+  file_name?: string | null;
   is_read: boolean;
   created_at: string;
 }
