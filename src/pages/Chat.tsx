@@ -394,10 +394,12 @@ const VideoCirclePlayer = ({ url }: { url: string }) => {
 };
 
 /* ───── Message Bubble ───── */
-const MessageBubble = ({ isMe, content, audioUrl, imageUrl, imageUrls, fileUrl, fileName, time, senderName, avatarUrl, index }: {
+const MessageBubble = ({ isMe, content, audioUrl, imageUrl, imageUrls, fileUrl, fileName, time, senderName, avatarUrl, index, senderId, replyToContent, replyToSender, onReply, onAvatarClick, messageId }: {
   isMe: boolean; content: string; audioUrl?: string | null; imageUrl?: string | null;
   imageUrls?: string[] | null; fileUrl?: string | null; fileName?: string | null;
   time: string; senderName?: string; avatarUrl?: string | null; index: number;
+  senderId?: string; replyToContent?: string | null; replyToSender?: string | null;
+  onReply?: () => void; onAvatarClick?: (userId: string) => void; messageId?: string;
 }) => {
   const [galleryOpen, setGalleryOpen] = useState<number | null>(null);
 
@@ -417,20 +419,33 @@ const MessageBubble = ({ isMe, content, audioUrl, imageUrl, imageUrls, fileUrl, 
         initial={{ opacity: 0, y: 12, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.25, delay: Math.min(index * 0.02, 0.3) }}
-        className={`flex gap-2 ${isMe ? "flex-row-reverse" : ""}`}
+        className={`flex gap-2 group ${isMe ? "flex-row-reverse" : ""}`}
       >
         {!isMe && (
-          <Avatar className="w-7 h-7 shrink-0 mt-auto">
-            <AvatarImage src={avatarUrl || ""} className="object-cover" />
-            <AvatarFallback className="text-[10px] bg-primary/10 text-primary">
-              {(senderName || "?")[0]}
-            </AvatarFallback>
-          </Avatar>
+          <button onClick={() => senderId && onAvatarClick?.(senderId)} className="shrink-0 mt-auto">
+            <Avatar className="w-7 h-7 hover:ring-2 hover:ring-primary/40 transition-all">
+              <AvatarImage src={avatarUrl || ""} className="object-cover" />
+              <AvatarFallback className="text-[10px] bg-primary/10 text-primary">
+                {(senderName || "?")[0]}
+              </AvatarFallback>
+            </Avatar>
+          </button>
         )}
         <div className={`max-w-[75%] ${isMe ? "items-end" : "items-start"}`}>
           {!isMe && senderName && (
-            <p className="text-[10px] mb-0.5 text-muted-foreground font-medium px-1">{senderName}</p>
+            <button onClick={() => senderId && onAvatarClick?.(senderId)} className="text-[10px] mb-0.5 text-muted-foreground font-medium px-1 hover:text-primary transition-colors">
+              {senderName}
+            </button>
           )}
+
+          {/* Reply preview */}
+          {replyToContent && (
+            <div className={`text-[10px] mb-1 px-2.5 py-1 rounded-lg border-l-2 border-primary/40 ${isMe ? "bg-primary/10 ml-auto" : "bg-muted/60"} max-w-full truncate`}>
+              <span className="font-semibold text-primary/70">{replyToSender || "?"}</span>
+              <span className="text-muted-foreground ml-1">{replyToContent.slice(0, 60)}</span>
+            </div>
+          )}
+
           <div className={`rounded-2xl overflow-hidden text-sm leading-relaxed backdrop-blur-sm ${
             isMe
               ? "bg-primary text-primary-foreground rounded-br-md shadow-lg shadow-primary/20"
@@ -460,9 +475,14 @@ const MessageBubble = ({ isMe, content, audioUrl, imageUrl, imageUrls, fileUrl, 
               content
             )}
           </div>
-          <p className={`text-[9px] mt-0.5 px-1 ${isMe ? "text-right" : ""} text-muted-foreground/50`}>
-            {time}
-          </p>
+          <div className={`flex items-center gap-1.5 mt-0.5 px-1 ${isMe ? "flex-row-reverse" : ""}`}>
+            <p className="text-[9px] text-muted-foreground/50">{time}</p>
+            {onReply && (
+              <button onClick={onReply} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground/40 hover:text-primary">
+                <Reply className="w-3 h-3" />
+              </button>
+            )}
+          </div>
         </div>
       </motion.div>
 
@@ -501,7 +521,6 @@ const MessageBubble = ({ isMe, content, audioUrl, imageUrl, imageUrls, fileUrl, 
             >
               <X className="w-5 h-5" />
             </button>
-            {/* Left/Right navigation */}
             {galleryOpen > 0 && (
               <button onClick={() => setGalleryOpen(galleryOpen - 1)} className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white">
                 <ArrowLeft className="w-5 h-5" />
@@ -520,7 +539,7 @@ const MessageBubble = ({ isMe, content, audioUrl, imageUrl, imageUrls, fileUrl, 
 };
 
 /* ───── Chat Input Bar ───── */
-const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSendGameInvite, onSendVideoCircle, placeholder, userId }: {
+const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSendGameInvite, onSendVideoCircle, placeholder, userId, replyTo, onCancelReply }: {
   onSendText: (text: string) => void;
   onSendVoice: (audioUrl: string) => void;
   onSendImages: (imageUrls: string[]) => void;
