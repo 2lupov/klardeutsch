@@ -27,6 +27,7 @@ const DesktopSidebar = () => {
     { to: "/dictionary", icon: BookOpen, label: t("navDictionary") },
     { to: "/shop", icon: ShoppingBag, label: t("navShop") },
     { to: "/games", icon: Gamepad2, label: "Игры" },
+    { to: "/chat", icon: MessageSquare, label: lang === "uk" ? "Чат" : "Чат" },
     { to: "/dialogues", icon: MessageCircle, label: t("navDialogues") },
   ];
 
