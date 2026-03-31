@@ -119,7 +119,9 @@ const DesktopSidebar = () => {
       {/* Toggle button — always visible top-left */}
       <button
         onClick={() => setOpen(!open)}
-        className="hidden lg:flex fixed top-4 left-4 z-50 w-9 h-9 rounded-xl bg-card/80 backdrop-blur-lg border border-border items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+        className={`hidden lg:flex fixed top-4 left-4 z-50 w-9 h-9 rounded-xl bg-card/80 backdrop-blur-lg border border-border items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-300 ${
+          !open ? "shadow-[0_0_12px_3px_hsl(var(--primary)/0.35)]" : ""
+        }`}
       >
         {open ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
       </button>
@@ -142,12 +144,12 @@ const DesktopSidebar = () => {
       <AnimatePresence>
         {open && (
           <motion.aside
-            initial={{ opacity: 0, scale: 0.15, x: -SIDEBAR_W * 0.3, y: -200, borderRadius: "24px" }}
-            animate={{ opacity: 1, scale: 1, x: 0, y: 0, borderRadius: "0px" }}
-            exit={{ opacity: 0, scale: 0.15, x: -SIDEBAR_W * 0.3, y: -200, borderRadius: "24px" }}
-            transition={{ type: "spring", stiffness: 400, damping: 32, mass: 0.8 }}
+            initial={{ x: -SIDEBAR_W }}
+            animate={{ x: 0 }}
+            exit={{ x: -SIDEBAR_W }}
+            transition={{ type: "spring", stiffness: 350, damping: 35 }}
             className="hidden lg:flex fixed left-0 top-0 bottom-0 flex-col z-40 border-r border-border bg-card/95 backdrop-blur-2xl overflow-hidden"
-            style={{ width: SIDEBAR_W, transformOrigin: "24px 24px" }}
+            style={{ width: SIDEBAR_W }}
           >
             {/* Logo header */}
             <div className="flex items-center justify-center px-5 pt-5 pb-4 border-b border-border">
