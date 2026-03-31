@@ -53,7 +53,7 @@ const PandaSprite = ({ isSleeping = false }: { isSleeping?: boolean }) => {
   return (
     <group ref={groupRef} position={[0, 0, 0]} onClick={handleClick}>
       <mesh ref={meshRef}>
-        <planeGeometry args={[2.2, 2.2]} />
+        <planeGeometry args={[2.8, 2.8]} />
         <meshStandardMaterial
           map={texture}
           transparent
