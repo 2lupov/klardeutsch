@@ -359,6 +359,31 @@ const translations = {
   lessonQuizCorrect: { ru: "Правильно! 🎉", uk: "Правильно! 🎉" },
   lessonQuizWrong: { ru: "Неверно", uk: "Неправильно" },
   lessonQuizExplanation: { ru: "Объяснение", uk: "Пояснення" },
+
+  // Theory block
+  lessonTheoryReadTime: { ru: "~{n} мин чтения", uk: "~{n} хв читання" },
+  lessonTheoryDone: { ru: "Теорию изучил ✓", uk: "Теорію вивчив ✓" },
+  lessonTheoryScrollHint: { ru: "Прокрути до конца чтобы завершить", uk: "Прокрути до кінця щоб завершити" },
+
+  // AI tutor
+  lessonAiTyping: { ru: "AI печатает...", uk: "AI друкує..." },
+  lessonAiHint: { ru: "Подсказка", uk: "Підказка" },
+  lessonAiFinish: { ru: "Завершить диалог", uk: "Завершити діалог" },
+  lessonAiAnalysis: { ru: "Разбор диалога", uk: "Розбір діалогу" },
+  lessonAiErrors: { ru: "Ошибки", uk: "Помилки" },
+  lessonAiNewWords: { ru: "Новые слова", uk: "Нові слова" },
+  lessonAiAdvice: { ru: "Что улучшить", uk: "Що покращити" },
+
+  // Teacher chat panel
+  chatAiTab: { ru: "AI-помощник", uk: "AI-помічник" },
+  chatTeacherTab: { ru: "Учитель", uk: "Вчитель" },
+  chatTeacherOnline: { ru: "Онлайн", uk: "Онлайн" },
+  chatTeacherOffline: { ru: "Отвечает за 24ч", uk: "Відповідає за 24год" },
+  chatSent: { ru: "Вопрос отправлен", uk: "Питання надіслано" },
+  chatAttachTimecode: { ru: "Прикрепить момент из урока", uk: "Прикріпити момент з уроку" },
+  chatQuickExplain: { ru: "Объясни проще", uk: "Поясни простіше" },
+  chatQuickExamples: { ru: "Дай ещё примеры", uk: "Дай ще приклади" },
+  chatQuickCheck: { ru: "Проверь мой ответ", uk: "Перевір мою відповідь" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;
