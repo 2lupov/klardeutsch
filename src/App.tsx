@@ -65,6 +65,7 @@ const AppRoutes = () => {
         <Route path="/course/:id" element={<Course />} />
         <Route path="/academy" element={<Academy />} />
         <Route path="/academy/:courseId" element={<AcademyCourse />} />
+        <Route path="/academy/:courseId/learn" element={<AcademyLearn />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
