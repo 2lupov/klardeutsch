@@ -122,6 +122,7 @@ const Index = () => {
   const handleQuizComplete = (score: number) => {
     bumpClarity(1);
     saveProgress(level, "grammar", "quiz", score, true);
+    triggerSummary();
     handleBack();
   };
 
