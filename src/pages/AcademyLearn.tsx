@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePlatform } from "@/hooks/usePlatform";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Menu, X, GraduationCap } from "lucide-react";
+import { ArrowLeft, Menu, X, GraduationCap, Users } from "lucide-react";
 import LearnSidebar from "@/components/academy/LearnSidebar";
 import VideoLessonPlayer from "@/components/academy/lessons/VideoLessonPlayer";
 import VideoQuizLesson from "@/components/academy/lessons/VideoQuizLesson";
