@@ -28,6 +28,7 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import QR from "./pages/QR";
 import Course from "./pages/Course";
+import Academy from "./pages/Academy";
 import Onboarding from "./pages/Onboarding";
 import Review from "./pages/Review";
 import NotFound from "./pages/NotFound";
@@ -60,6 +61,8 @@ const AppRoutes = () => {
         <Route path="/dialogues" element={<Dialogues />} />
         <Route path="/games" element={<Games />} />
         <Route path="/course/:id" element={<Course />} />
+        <Route path="/academy" element={<Academy />} />
+        <Route path="/academy/:courseId" element={<Academy />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
