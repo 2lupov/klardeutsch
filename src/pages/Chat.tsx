@@ -323,6 +323,16 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImage, placeholder, userI
     if (url) onSendVoice(url);
   };
 
+  const handleImagePick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const url = await uploadChatImage(file, userId);
+    setUploading(false);
+    if (url) onSendImage(url);
+    e.target.value = "";
+  };
+
   return (
     <motion.div
       layout
