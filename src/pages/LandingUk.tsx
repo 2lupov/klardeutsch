@@ -38,20 +38,20 @@ const faq = [
 const LandingUk = () => {
   const navigate = useNavigate();
 
-  return (
-    <>
-      <Helmet>
-        <title>KLAR — Вивчай німецьку мову безкоштовно | Уроки A1–C1 онлайн</title>
-        <meta name="description" content="KLAR — безкоштовна онлайн-школа німецької мови для україномовних. Рівні A1–C1: розумні картки, квізи, аудіювання, граматика та AI-розбір помилок. Вчи німецьку легко!" />
-        <meta name="keywords" content="німецька мова, вивчати німецьку, німецька онлайн, A1 німецька, B1 німецька, картки німецька, граматика німецької, Deutsch lernen, німецька безкоштовно, уроки німецької, німецька для українців" />
-        <link rel="canonical" href="https://klardeutsch.org/uk" />
-        <meta property="og:title" content="KLAR — Вивчай німецьку мову безкоштовно | A1–C1" />
-        <meta property="og:description" content="Безкоштовна онлайн-школа німецької мови. Картки, квізи, аудіювання, граматика та AI-розбір помилок." />
-        <meta property="og:locale" content="uk_UA" />
-        <meta property="og:url" content="https://klardeutsch.org/uk" />
-        <html lang="uk" />
-      </Helmet>
+  useEffect(() => {
+    document.title = "KLAR — Вивчай німецьку мову безкоштовно | Уроки A1–C1 онлайн";
+    document.documentElement.lang = "uk";
+    const setMeta = (name: string, content: string, attr = "name") => {
+      let el = document.querySelector(`meta[${attr}="${name}"]`);
+      if (!el) { el = document.createElement("meta"); el.setAttribute(attr, name); document.head.appendChild(el); }
+      el.setAttribute("content", content);
+    };
+    setMeta("description", "KLAR — безкоштовна онлайн-школа німецької мови для україномовних. Рівні A1–C1: розумні картки, квізи, аудіювання, граматика та AI-розбір помилок.");
+    setMeta("keywords", "німецька мова, вивчати німецьку, німецька онлайн, A1 німецька, B1 німецька, картки німецька, граматика німецької, Deutsch lernen, німецька безкоштовно, уроки німецької, німецька для українців");
+    return () => { document.documentElement.lang = "ru"; };
+  }, []);
 
+  return (
       <div className="min-h-[100dvh] bg-background text-foreground overflow-x-hidden">
         {/* Hero */}
         <section className="relative py-20 px-4 text-center overflow-hidden">
