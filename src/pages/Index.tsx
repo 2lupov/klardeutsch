@@ -233,6 +233,7 @@ const Index = () => {
         )}
         {screen === "exercise" && renderExercise()}
       </div>
+      <DailySummaryModal open={showSummary} onClose={closeSummary} />
     </div>
   );
 };
