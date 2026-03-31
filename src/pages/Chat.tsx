@@ -506,26 +506,48 @@ const MessageBubble = ({ isMe, content, audioUrl, imageUrl, imageUrls, fileUrl, 
 };
 
 /* ───── Chat Input Bar ───── */
-const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, placeholder, userId }: {
+const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSendGameInvite, onSendVideoCircle, placeholder, userId }: {
   onSendText: (text: string) => void;
   onSendVoice: (audioUrl: string) => void;
   onSendImages: (imageUrls: string[]) => void;
   onSendFile: (fileUrl: string, fileName: string) => void;
+  onSendGameInvite: (gameId: string) => void;
+  onSendVideoCircle: (videoUrl: string) => void;
   placeholder: string;
   userId: string;
 }) => {
+  const { lang } = useLanguage();
   const [text, setText] = useState("");
   const { recording, elapsed, start, stop, cancel } = useVoiceRecorder();
   const [uploading, setUploading] = useState(false);
   const [pendingImages, setPendingImages] = useState<{ file: File; preview: string }[]>([]);
+  const [showGamePicker, setShowGamePicker] = useState(false);
+  const [recordingVideo, setRecordingVideo] = useState(false);
+  const [videoElapsed, setVideoElapsed] = useState(0);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoRecorderRef = useRef<MediaRecorder | null>(null);
+  const videoChunksRef = useRef<Blob[]>([]);
+  const videoTimerRef = useRef<ReturnType<typeof setInterval>>();
+  const videoStreamRef = useRef<MediaStream | null>(null);
+  const [keyboardOffset, setKeyboardOffset] = useState(0);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Keyboard-aware offset via VisualViewport API
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const onResize = () => {
+      const diff = window.innerHeight - vv.height;
+      setKeyboardOffset(diff > 50 ? diff : 0);
+    };
+    vv.addEventListener("resize", onResize);
+    return () => vv.removeEventListener("resize", onResize);
+  }, []);
 
   const handleSend = () => {
-    if (pendingImages.length > 0) {
-      handleSendImages();
-      return;
-    }
+    if (pendingImages.length > 0) { handleSendImages(); return; }
     if (!text.trim()) return;
     onSendText(text.trim());
     setText("");
@@ -536,9 +558,7 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, place
     setUploading(true);
     const urls = await uploadChatImages(pendingImages.map(p => p.file), userId);
     setUploading(false);
-    if (urls.length > 0) {
-      onSendImages(urls);
-    }
+    if (urls.length > 0) onSendImages(urls);
     pendingImages.forEach(p => URL.revokeObjectURL(p.preview));
     setPendingImages([]);
     setText("");
@@ -580,8 +600,132 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, place
     });
   };
 
+  // Video circle recording
+  const startVideoCircle = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: 480, height: 480 }, audio: true });
+      videoStreamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play();
+      }
+      videoChunksRef.current = [];
+      const mr = new MediaRecorder(stream, { mimeType: "video/webm" });
+      mr.ondataavailable = (e) => { if (e.data.size > 0) videoChunksRef.current.push(e.data); };
+      mr.start(500);
+      videoRecorderRef.current = mr;
+      setRecordingVideo(true);
+      setVideoElapsed(0);
+      videoTimerRef.current = setInterval(() => setVideoElapsed(p => p + 1), 1000);
+    } catch { /* camera not available */ }
+  };
+
+  const stopVideoCircle = async () => {
+    clearInterval(videoTimerRef.current);
+    const mr = videoRecorderRef.current;
+    if (!mr || mr.state === "inactive") return;
+    return new Promise<void>((resolve) => {
+      mr.onstop = async () => {
+        const blob = new Blob(videoChunksRef.current, { type: "video/webm" });
+        videoStreamRef.current?.getTracks().forEach(t => t.stop());
+        if (videoRef.current) videoRef.current.srcObject = null;
+        setRecordingVideo(false);
+        setVideoElapsed(0);
+        setUploading(true);
+        const url = await uploadVideoCircle(blob, userId);
+        setUploading(false);
+        if (url) onSendVideoCircle(url);
+        resolve();
+      };
+      mr.stop();
+    });
+  };
+
+  const cancelVideoCircle = () => {
+    clearInterval(videoTimerRef.current);
+    const mr = videoRecorderRef.current;
+    if (mr && mr.state !== "inactive") mr.stop();
+    videoStreamRef.current?.getTracks().forEach(t => t.stop());
+    if (videoRef.current) videoRef.current.srcObject = null;
+    videoChunksRef.current = [];
+    setRecordingVideo(false);
+    setVideoElapsed(0);
+  };
+
   return (
-    <motion.div layout className="relative border-t border-border bg-card/80 backdrop-blur-xl">
+    <motion.div
+      layout
+      className="relative border-t border-border bg-card/80 backdrop-blur-xl"
+      style={{ marginBottom: keyboardOffset > 0 ? keyboardOffset : undefined }}
+    >
+      {/* Game picker */}
+      <AnimatePresence>
+        {showGamePicker && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden border-b border-border"
+          >
+            <div className="p-3 space-y-1 max-h-[200px] overflow-y-auto">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold px-1 mb-2">
+                {lang === "uk" ? "Запросити в гру" : "Пригласить в игру"}
+              </p>
+              {gameList.map(game => (
+                <motion.button
+                  key={game.id}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => { onSendGameInvite(game.id); setShowGamePicker(false); }}
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-muted/60 transition-colors text-left"
+                >
+                  <span className="text-lg">{game.emoji}</span>
+                  <span className="text-sm font-medium">{lang === "uk" ? game.name_uk : game.name_ru}</span>
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Video circle recording overlay */}
+      <AnimatePresence>
+        {recordingVideo && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            className="absolute bottom-full left-0 right-0 flex flex-col items-center justify-center p-6 bg-background/95 backdrop-blur-xl border-t border-border"
+          >
+            <div className="relative w-36 h-36 rounded-full overflow-hidden ring-4 ring-destructive/50 shadow-2xl">
+              <video ref={videoRef} className="w-full h-full object-cover" playsInline muted />
+              <motion.div
+                className="absolute inset-0 rounded-full border-2 border-destructive"
+                animate={{ scale: [1, 1.08, 1] }}
+                transition={{ duration: 1.2, repeat: Infinity }}
+              />
+            </div>
+            <div className="flex items-center gap-2 mt-3">
+              <motion.div animate={{ scale: [1, 1.4, 1] }} transition={{ duration: 1, repeat: Infinity }} className="w-2 h-2 rounded-full bg-destructive" />
+              <span className="text-sm font-mono text-muted-foreground">
+                {Math.floor(videoElapsed / 60).toString().padStart(2, "0")}:{(videoElapsed % 60).toString().padStart(2, "0")}
+              </span>
+            </div>
+            <div className="flex items-center gap-4 mt-4">
+              <button onClick={cancelVideoCircle} className="text-xs text-destructive font-medium hover:underline">
+                {lang === "uk" ? "Скасувати" : "Отменить"}
+              </button>
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={stopVideoCircle}
+                className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/30"
+              >
+                <Send className="w-5 h-5" />
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Pending images preview */}
       <AnimatePresence>
         {pendingImages.length > 0 && (
@@ -640,9 +784,14 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, place
                 className="w-8 h-8 rounded-full hover:bg-muted/80 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors shrink-0">
                 <Paperclip className="w-4 h-4" />
               </motion.button>
+              <motion.button whileTap={{ scale: 0.9 }} onClick={() => setShowGamePicker(!showGamePicker)}
+                className={`w-8 h-8 rounded-full hover:bg-muted/80 flex items-center justify-center transition-colors shrink-0 ${showGamePicker ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-primary"}`}>
+                <Gamepad2 className="w-4 h-4" />
+              </motion.button>
               <input ref={imageInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleImagePick} />
               <input ref={fileInputRef} type="file" className="hidden" onChange={handleFilePick} />
               <Input
+                ref={inputRef}
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
@@ -655,10 +804,16 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, place
                   <Send className="w-4 h-4" />
                 </motion.button>
               ) : (
-                <motion.button initial={{ scale: 0 }} animate={{ scale: 1 }} whileTap={{ scale: 0.85 }} onClick={start} disabled={uploading}
-                  className="w-10 h-10 rounded-full bg-muted hover:bg-primary/10 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors">
-                  <Mic className="w-4 h-4" />
-                </motion.button>
+                <div className="flex items-center gap-1">
+                  <motion.button initial={{ scale: 0 }} animate={{ scale: 1 }} whileTap={{ scale: 0.85 }} onClick={startVideoCircle} disabled={uploading}
+                    className="w-10 h-10 rounded-full bg-muted hover:bg-primary/10 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors">
+                    <Circle className="w-4 h-4" />
+                  </motion.button>
+                  <motion.button initial={{ scale: 0 }} animate={{ scale: 1 }} whileTap={{ scale: 0.85 }} onClick={start} disabled={uploading}
+                    className="w-10 h-10 rounded-full bg-muted hover:bg-primary/10 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors">
+                    <Mic className="w-4 h-4" />
+                  </motion.button>
+                </div>
               )}
             </motion.div>
           )}
