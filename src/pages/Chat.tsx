@@ -929,6 +929,16 @@ const CommunityChat = () => {
     await supabase.from("community_messages").insert({ user_id: user.id, content: "📎", file_url: fileUrl, file_name: fileName });
   };
 
+  const sendGameInvite = async (gameId: string) => {
+    if (!user) return;
+    await supabase.from("community_messages").insert({ user_id: user.id, content: `🎮:${gameId}` });
+  };
+
+  const sendVideoCircle = async (videoUrl: string) => {
+    if (!user) return;
+    await supabase.from("community_messages").insert({ user_id: user.id, content: "🎥", audio_url: videoUrl });
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -977,6 +987,8 @@ const CommunityChat = () => {
         onSendVoice={sendVoice}
         onSendImages={sendImages}
         onSendFile={sendFile}
+        onSendGameInvite={sendGameInvite}
+        onSendVideoCircle={sendVideoCircle}
         placeholder={lang === "uk" ? "Написати повідомлення…" : "Написать сообщение…"}
         userId={user?.id || ""}
       />
