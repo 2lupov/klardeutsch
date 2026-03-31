@@ -5,10 +5,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { fetchEdgeFunction } from "@/lib/auth-fetch";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { Search, UserPlus, UserCheck, UserX, Loader2, ArrowLeft, Users, Clock, Check, X } from "lucide-react";
+import { Search, UserPlus, UserCheck, UserX, Loader2, ArrowLeft, Users, Clock, Check, X, Gift } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import UserProfileDialog from "@/components/UserProfileDialog";
+import SendGiftDialog from "@/components/gifts/SendGiftDialog";
 
 interface FriendRow {
   id: string;
@@ -40,6 +41,7 @@ const FriendsList = ({ onBack }: FriendsListProps) => {
   const [searching, setSearching] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [giftTarget, setGiftTarget] = useState<{ id: string; name: string } | null>(null);
 
   const t = useCallback((ru: string, uk: string) => lang === "uk" ? uk : ru, [lang]);
 
@@ -207,14 +209,23 @@ const FriendsList = ({ onBack }: FriendsListProps) => {
                   const p = getProfile(friendId);
                   return (
                     <UserRow key={f.id} profile={p} right={
-                      <button
-                        onClick={() => rejectOrRemove(f.id)}
-                        disabled={actionLoading === f.id}
-                        className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-                        title={t("Удалить", "Видалити")}
-                      >
-                        {actionLoading === f.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserX className="w-4 h-4" />}
-                      </button>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => setGiftTarget({ id: friendId, name: p.display_name || "User" })}
+                          className="p-2 rounded-lg text-primary hover:bg-primary/10 transition-colors"
+                          title={t("Подарок", "Подарунок")}
+                        >
+                          <Gift className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => rejectOrRemove(f.id)}
+                          disabled={actionLoading === f.id}
+                          className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                          title={t("Удалить", "Видалити")}
+                        >
+                          {actionLoading === f.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserX className="w-4 h-4" />}
+                        </button>
+                      </div>
                     } />
                   );
                 })
@@ -359,6 +370,15 @@ const FriendsList = ({ onBack }: FriendsListProps) => {
           />
         );
       })()}
+
+      {giftTarget && (
+        <SendGiftDialog
+          open={!!giftTarget}
+          onOpenChange={(open) => !open && setGiftTarget(null)}
+          receiverId={giftTarget.id}
+          receiverName={giftTarget.name}
+        />
+      )}
     </div>
   );
 };
