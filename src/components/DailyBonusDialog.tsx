@@ -91,6 +91,10 @@ const DailyBonusDialog = () => {
         </div>
       </DialogContent>
     </Dialog>
+    {milestoneStreak && (
+      <MilestoneCelebration streak={milestoneStreak} lang={lang} onClose={clearMilestone} />
+    )}
+    </>
   );
 };
 
