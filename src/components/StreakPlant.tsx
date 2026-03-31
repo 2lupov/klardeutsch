@@ -4,8 +4,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
 } from "@/components/ui/dialog";
 
 import pandaSleeping from "@/assets/mascot/panda-sleeping.png";
@@ -60,6 +58,104 @@ function getStageIndex(streak: number, canClaim: boolean): number {
   return 6;
 }
 
+/* ── Animated mountain SVG background ── */
+const MountainScene = () => (
+  <div className="absolute inset-0 overflow-hidden rounded-2xl">
+    {/* Sky gradient */}
+    <div className="absolute inset-0 bg-gradient-to-b from-sky-300 via-sky-200 to-amber-100 dark:from-indigo-900 dark:via-purple-900 dark:to-amber-900" />
+
+    {/* Animated clouds */}
+    <motion.div
+      className="absolute top-[10%] w-16 h-6 rounded-full bg-white/60 dark:bg-white/20 blur-sm"
+      animate={{ x: ["-10%", "110%"] }}
+      transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+    />
+    <motion.div
+      className="absolute top-[18%] w-12 h-4 rounded-full bg-white/50 dark:bg-white/15 blur-sm"
+      animate={{ x: ["110%", "-10%"] }}
+      transition={{ duration: 32, repeat: Infinity, ease: "linear" }}
+    />
+    <motion.div
+      className="absolute top-[6%] w-20 h-5 rounded-full bg-white/40 dark:bg-white/10 blur-sm"
+      animate={{ x: ["-20%", "120%"] }}
+      transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+    />
+
+    {/* Sun / Moon */}
+    <motion.div
+      className="absolute top-[8%] right-[15%] w-10 h-10 rounded-full bg-amber-300 dark:bg-indigo-300 shadow-lg shadow-amber-300/50 dark:shadow-indigo-300/30"
+      animate={{ scale: [1, 1.08, 1], opacity: [0.9, 1, 0.9] }}
+      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+    />
+
+    {/* Far mountains */}
+    <svg className="absolute bottom-0 w-full" viewBox="0 0 400 200" preserveAspectRatio="none" style={{ height: "65%" }}>
+      <motion.path
+        d="M0,200 L0,120 Q50,60 100,100 Q130,70 160,90 Q200,30 240,80 Q280,50 320,70 Q360,40 400,90 L400,200 Z"
+        className="fill-emerald-800/40 dark:fill-emerald-900/50"
+        animate={{ d: [
+          "M0,200 L0,120 Q50,60 100,100 Q130,70 160,90 Q200,30 240,80 Q280,50 320,70 Q360,40 400,90 L400,200 Z",
+          "M0,200 L0,115 Q50,55 100,95 Q130,75 160,85 Q200,35 240,75 Q280,55 320,75 Q360,35 400,85 L400,200 Z",
+          "M0,200 L0,120 Q50,60 100,100 Q130,70 160,90 Q200,30 240,80 Q280,50 320,70 Q360,40 400,90 L400,200 Z",
+        ] }}
+        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+      />
+      {/* Mid mountains */}
+      <motion.path
+        d="M0,200 L0,140 Q40,100 80,130 Q120,90 160,120 Q200,80 240,110 Q280,85 320,105 Q360,75 400,120 L400,200 Z"
+        className="fill-emerald-700/60 dark:fill-emerald-800/60"
+        animate={{ d: [
+          "M0,200 L0,140 Q40,100 80,130 Q120,90 160,120 Q200,80 240,110 Q280,85 320,105 Q360,75 400,120 L400,200 Z",
+          "M0,200 L0,145 Q40,105 80,125 Q120,95 160,115 Q200,85 240,115 Q280,80 320,110 Q360,80 400,115 L400,200 Z",
+          "M0,200 L0,140 Q40,100 80,130 Q120,90 160,120 Q200,80 240,110 Q280,85 320,105 Q360,75 400,120 L400,200 Z",
+        ] }}
+        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+      />
+      {/* Snow caps */}
+      <motion.path
+        d="M185,80 L200,30 L215,80 Z"
+        className="fill-white/70 dark:fill-white/30"
+        animate={{ opacity: [0.5, 0.8, 0.5] }}
+        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.path
+        d="M345,75 L360,40 L375,75 Z"
+        className="fill-white/60 dark:fill-white/25"
+        animate={{ opacity: [0.4, 0.7, 0.4] }}
+        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+      />
+      {/* Near mountains */}
+      <motion.path
+        d="M0,200 L0,160 Q30,130 70,155 Q110,120 150,145 Q190,110 230,140 Q270,115 310,135 Q350,105 400,145 L400,200 Z"
+        className="fill-emerald-600/80 dark:fill-emerald-700/70"
+        animate={{ d: [
+          "M0,200 L0,160 Q30,130 70,155 Q110,120 150,145 Q190,110 230,140 Q270,115 310,135 Q350,105 400,145 L400,200 Z",
+          "M0,200 L0,155 Q30,135 70,150 Q110,125 150,140 Q190,115 230,145 Q270,110 310,140 Q350,110 400,140 L400,200 Z",
+          "M0,200 L0,160 Q30,130 70,155 Q110,120 150,145 Q190,110 230,140 Q270,115 310,135 Q350,105 400,145 L400,200 Z",
+        ] }}
+        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+      />
+      {/* Grass foreground */}
+      <rect x="0" y="175" width="400" height="25" className="fill-emerald-500/90 dark:fill-emerald-800/80" />
+    </svg>
+
+    {/* Floating particles / fireflies */}
+    {[...Array(6)].map((_, i) => (
+      <motion.div
+        key={i}
+        className="absolute w-1.5 h-1.5 rounded-full bg-amber-300/60 dark:bg-amber-200/40"
+        style={{ left: `${15 + i * 14}%`, top: `${50 + (i % 3) * 12}%` }}
+        animate={{
+          y: [0, -12, 0],
+          opacity: [0.3, 0.8, 0.3],
+          scale: [0.8, 1.2, 0.8],
+        }}
+        transition={{ duration: 3 + i * 0.5, repeat: Infinity, ease: "easeInOut", delay: i * 0.4 }}
+      />
+    ))}
+  </div>
+);
+
 const StreakPlant = ({ streak, canClaim, compact = false }: StreakPlantProps) => {
   const { lang } = useLanguage();
   const isRu = lang === "ru";
@@ -77,29 +173,7 @@ const StreakPlant = ({ streak, canClaim, compact = false }: StreakPlantProps) =>
     return Math.min(100, Math.round(((streak - current) / (next - current)) * 100));
   }, [streak, stageIdx]);
 
-  const PandaImage = ({ size = "w-24 h-24" }: { size?: string }) => (
-    <motion.div
-      initial={{ scale: 0.8, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      transition={{ type: "spring", stiffness: 200, damping: 15 }}
-    >
-      <motion.img
-        src={stage.img}
-        alt="KLAR Panda"
-        className={`${size} object-contain drop-shadow-lg`}
-        animate={
-          stageIdx === 0
-            ? { y: [0, 4, 0], opacity: [0.6, 0.8, 0.6] }
-            : { y: [0, -4, 0] }
-        }
-        transition={{ repeat: Infinity, duration: stageIdx === 0 ? 3 : 2.5, ease: "easeInOut" }}
-        loading="lazy"
-        width={512}
-        height={512}
-      />
-    </motion.div>
-  );
-
+  /* ── Compact button (used in header) ── */
   if (compact) {
     return (
       <>
@@ -126,106 +200,182 @@ const StreakPlant = ({ streak, canClaim, compact = false }: StreakPlantProps) =>
         </button>
 
         <Dialog open={showDialog} onOpenChange={setShowDialog}>
-          <DialogContent className="glass-card border-primary/20 max-w-xs">
-            <DialogHeader>
-              <DialogTitle className="font-display text-center text-base">
-                🐼 {isRu ? "Твоя панда" : "Твоя панда"}
-              </DialogTitle>
-            </DialogHeader>
-            <div className="flex flex-col items-center gap-3 py-3">
-              <PandaImage />
-
-              <div className="text-center">
-                <p className={`font-display font-bold text-sm ${stage.color}`}>
-                  {isRu ? stage.nameRu : stage.nameUk}
-                </p>
-                <p className="text-[11px] text-muted-foreground mt-0.5">{motivation}</p>
-              </div>
-
-              <div className="w-full max-w-[180px]">
-                <div className="w-full h-2 rounded-full bg-muted overflow-hidden">
-                  <motion.div
-                    className="h-full rounded-full"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${progressToNext}%` }}
-                    transition={{ duration: 0.8, ease: "easeOut" }}
-                    style={{
-                      background: stageIdx === 0
-                        ? "hsl(var(--muted-foreground))"
-                        : "linear-gradient(90deg, hsl(142 76% 36%), hsl(var(--primary)))",
-                    }}
-                  />
-                </div>
-                <div className="flex justify-between mt-1">
-                  <span className="text-[10px] text-muted-foreground">
-                    {isRu ? stage.nameRu : stage.nameUk}
-                  </span>
-                  {stageIdx < 6 && (
-                    <span className="text-[10px] text-muted-foreground">
-                      {isRu ? STAGES[stageIdx + 1].nameRu : STAGES[stageIdx + 1].nameUk}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10">
-                <span className="text-xs">🔥</span>
-                <span className="text-xs font-display font-bold text-primary">
-                  {streak} {isRu ? (streak === 1 ? "день" : streak < 5 ? "дня" : "дней") : (streak === 1 ? "день" : streak < 5 ? "дні" : "днів")}
-                </span>
-              </div>
-            </div>
+          <DialogContent className="p-0 border-0 bg-transparent shadow-none max-w-sm overflow-hidden rounded-2xl">
+            <PandaSceneCard
+              stage={stage}
+              stageIdx={stageIdx}
+              streak={streak}
+              motivation={motivation}
+              progressToNext={progressToNext}
+              isRu={isRu}
+            />
           </DialogContent>
         </Dialog>
       </>
     );
   }
 
+  /* ── Full "Моя панда" button + dialog ── */
   return (
     <div className="flex flex-col items-center gap-3">
-      <PandaImage />
-
-      <div className="text-center">
-        <p className={`font-display font-bold text-sm ${stage.color}`}>
-          {isRu ? stage.nameRu : stage.nameUk}
-        </p>
-        <p className="text-[11px] text-muted-foreground mt-0.5">{motivation}</p>
-      </div>
-
-      <div className="w-full max-w-[180px]">
-        <div className="w-full h-2 rounded-full bg-muted overflow-hidden">
-          <motion.div
-            className="h-full rounded-full"
-            initial={{ width: 0 }}
-            animate={{ width: `${progressToNext}%` }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            style={{
-              background: stageIdx === 0
-                ? "hsl(var(--muted-foreground))"
-                : "linear-gradient(90deg, hsl(142 76% 36%), hsl(var(--primary)))",
-            }}
-          />
-        </div>
-        <div className="flex justify-between mt-1">
-          <span className="text-[10px] text-muted-foreground">
-            {isRu ? stage.nameRu : stage.nameUk}
+      <motion.button
+        onClick={() => setShowDialog(true)}
+        className="relative w-full rounded-2xl overflow-hidden border border-primary/20 hover:border-primary/40 transition-colors cursor-pointer"
+        style={{ height: 140 }}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+      >
+        {/* Mini mountain bg */}
+        <MountainScene />
+        {/* Panda */}
+        <motion.img
+          src={stage.img}
+          alt="KLAR Panda"
+          className="absolute bottom-1 left-1/2 -translate-x-1/2 w-20 h-20 object-contain drop-shadow-xl z-10"
+          animate={stageIdx === 0 ? { y: [0, 3, 0], opacity: [0.6, 0.85, 0.6] } : { y: [0, -3, 0] }}
+          transition={{ repeat: Infinity, duration: stageIdx === 0 ? 3 : 2.5, ease: "easeInOut" }}
+          loading="lazy"
+          width={512}
+          height={512}
+        />
+        {/* Label */}
+        <div className="absolute top-2 left-0 right-0 z-10 text-center">
+          <span className="text-[11px] font-display font-bold text-white drop-shadow-md px-2 py-0.5 rounded-full bg-black/20 backdrop-blur-sm">
+            🐼 {isRu ? "Моя панда" : "Моя панда"}
           </span>
-          {stageIdx < 6 && (
-            <span className="text-[10px] text-muted-foreground">
-              {isRu ? STAGES[stageIdx + 1].nameRu : STAGES[stageIdx + 1].nameUk}
-            </span>
-          )}
         </div>
-      </div>
+        {/* Streak badge */}
+        <div className="absolute bottom-2 right-2 z-10">
+          <span className="text-[10px] font-bold text-white drop-shadow-md px-2 py-0.5 rounded-full bg-black/25 backdrop-blur-sm flex items-center gap-1">
+            🔥 {streak}
+          </span>
+        </div>
+      </motion.button>
 
-      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10">
-        <span className="text-xs">🔥</span>
-        <span className="text-xs font-display font-bold text-primary">
-          {streak} {isRu ? (streak === 1 ? "день" : streak < 5 ? "дня" : "дней") : (streak === 1 ? "день" : streak < 5 ? "дні" : "днів")}
-        </span>
-      </div>
+      <Dialog open={showDialog} onOpenChange={setShowDialog}>
+        <DialogContent className="p-0 border-0 bg-transparent shadow-none max-w-sm overflow-hidden rounded-2xl">
+          <PandaSceneCard
+            stage={stage}
+            stageIdx={stageIdx}
+            streak={streak}
+            motivation={motivation}
+            progressToNext={progressToNext}
+            isRu={isRu}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
+
+/* ── Full scene card (used inside dialog) ── */
+interface PandaSceneCardProps {
+  stage: typeof STAGES[number];
+  stageIdx: number;
+  streak: number;
+  motivation: string;
+  progressToNext: number;
+  isRu: boolean;
+}
+
+const PandaSceneCard = ({ stage, stageIdx, streak, motivation, progressToNext, isRu }: PandaSceneCardProps) => (
+  <motion.div
+    className="relative w-full overflow-hidden rounded-2xl"
+    style={{ aspectRatio: "3/4" }}
+    initial={{ scale: 0.9, opacity: 0 }}
+    animate={{ scale: 1, opacity: 1 }}
+    transition={{ type: "spring", stiffness: 200, damping: 20 }}
+  >
+    {/* Mountain background */}
+    <MountainScene />
+
+    {/* Content overlay */}
+    <div className="relative z-10 flex flex-col items-center justify-between h-full p-5">
+      {/* Title */}
+      <motion.div
+        className="text-center"
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.15 }}
+      >
+        <h3 className="font-display font-bold text-lg text-white drop-shadow-lg">
+          🐼 {isRu ? "Моя панда" : "Моя панда"}
+        </h3>
+      </motion.div>
+
+      {/* Panda character */}
+      <motion.div
+        className="flex-1 flex items-center justify-center"
+        initial={{ scale: 0.5, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 150, damping: 12, delay: 0.2 }}
+      >
+        <motion.img
+          src={stage.img}
+          alt="KLAR Panda"
+          className="w-36 h-36 object-contain drop-shadow-2xl"
+          animate={
+            stageIdx === 0
+              ? { y: [0, 6, 0], opacity: [0.6, 0.85, 0.6], rotate: [0, -2, 0] }
+              : { y: [0, -6, 0], rotate: [0, 2, 0] }
+          }
+          transition={{ repeat: Infinity, duration: stageIdx === 0 ? 3.5 : 2.5, ease: "easeInOut" }}
+          loading="lazy"
+          width={512}
+          height={512}
+        />
+      </motion.div>
+
+      {/* Bottom info card */}
+      <motion.div
+        className="w-full rounded-xl bg-black/30 backdrop-blur-md p-3 space-y-2"
+        initial={{ y: 30, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.3 }}
+      >
+        <div className="text-center">
+          <p className="font-display font-bold text-sm text-white">
+            {isRu ? stage.nameRu : stage.nameUk}
+          </p>
+          <p className="text-[11px] text-white/70 mt-0.5">{motivation}</p>
+        </div>
+
+        {/* Progress bar */}
+        <div className="w-full">
+          <div className="w-full h-2 rounded-full bg-white/20 overflow-hidden">
+            <motion.div
+              className="h-full rounded-full"
+              initial={{ width: 0 }}
+              animate={{ width: `${progressToNext}%` }}
+              transition={{ duration: 1, ease: "easeOut", delay: 0.4 }}
+              style={{
+                background: stageIdx === 0
+                  ? "rgba(255,255,255,0.3)"
+                  : "linear-gradient(90deg, #4ade80, #facc15)",
+              }}
+            />
+          </div>
+          <div className="flex justify-between mt-1">
+            <span className="text-[9px] text-white/50">
+              {isRu ? stage.nameRu : stage.nameUk}
+            </span>
+            {stageIdx < 6 && (
+              <span className="text-[9px] text-white/50">
+                {isRu ? STAGES[stageIdx + 1].nameRu : STAGES[stageIdx + 1].nameUk}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Streak counter */}
+        <div className="flex justify-center">
+          <span className="text-xs font-display font-bold text-white px-3 py-1 rounded-full bg-white/15">
+            🔥 {streak} {isRu ? (streak === 1 ? "день" : streak < 5 ? "дня" : "дней") : (streak === 1 ? "день" : streak < 5 ? "дні" : "днів")}
+          </span>
+        </div>
+      </motion.div>
+    </div>
+  </motion.div>
+);
 
 export default StreakPlant;
