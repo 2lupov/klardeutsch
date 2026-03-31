@@ -185,20 +185,44 @@ const UserProfileDialog = ({
             </div>
           ) : null}
 
+          {/* Gift shelf */}
+          {userId && <GiftShelf userId={userId} compact />}
+
           {!isMe && userId && (
-            <button
-              onClick={handleChallenge}
-              className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-display font-semibold text-sm hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
-            >
-              <Swords className="w-4 h-4" />
-              Вызвать на дуэль
-            </button>
+            <div className="flex gap-2 w-full">
+              <button
+                onClick={() => setGiftDialogOpen(true)}
+                className="flex-1 py-3 rounded-xl bg-accent text-accent-foreground font-display font-semibold text-sm hover:bg-accent/80 transition-colors flex items-center justify-center gap-2"
+              >
+                <Gift className="w-4 h-4" />
+                Подарить
+              </button>
+              <button
+                onClick={handleChallenge}
+                className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground font-display font-semibold text-sm hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+              >
+                <Swords className="w-4 h-4" />
+                Дуэль
+              </button>
+            </div>
           )}
+
+          {isMe && userId && <GiftShelf userId={userId} />}
 
           {isMe && (
             <p className="text-xs text-muted-foreground text-center">Это ты! 🎉</p>
           )}
         </div>
+
+        {/* Send gift dialog */}
+        {!isMe && userId && (
+          <SendGiftDialog
+            open={giftDialogOpen}
+            onOpenChange={setGiftDialogOpen}
+            receiverId={userId}
+            receiverName={displayName || "User"}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );
