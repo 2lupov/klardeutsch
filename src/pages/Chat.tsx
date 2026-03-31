@@ -1451,6 +1451,7 @@ const DMList = ({ onSelectPeer }: { onSelectPeer: (uid: string) => void }) => {
 
 /* ───── Main Chat Page ───── */
 const Chat = () => {
+  const navigate = useNavigate();
   const { lang } = useLanguage();
   const [tab, setTab] = useState<"community" | "dm" | "find">("community");
   const [selectedPeer, setSelectedPeer] = useState<string | null>(null);
@@ -1481,9 +1482,15 @@ const Chat = () => {
         animate={{ y: 0, opacity: 1 }}
         className="p-4 pb-3"
       >
-        <h1 className="text-2xl font-display font-bold mb-4">
-          {lang === "uk" ? "Чат" : "Чат"} <span className="text-primary">💬</span>
-        </h1>
+        <div className="flex items-center gap-3 mb-4">
+          <motion.button whileTap={{ scale: 0.85 }} onClick={() => navigate("/")}
+            className="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center transition-colors">
+            <ArrowLeft className="w-4 h-4" />
+          </motion.button>
+          <h1 className="text-2xl font-display font-bold">
+            {lang === "uk" ? "Чат" : "Чат"} <span className="text-primary">💬</span>
+          </h1>
+        </div>
 
         {/* Tab bar */}
         <div className="flex gap-1 p-1 bg-muted/50 rounded-2xl">
