@@ -148,24 +148,33 @@ export type Database = {
           audio_url: string | null
           content: string
           created_at: string
+          file_name: string | null
+          file_url: string | null
           id: string
           image_url: string | null
+          image_urls: Json | null
           user_id: string
         }
         Insert: {
           audio_url?: string | null
           content: string
           created_at?: string
+          file_name?: string | null
+          file_url?: string | null
           id?: string
           image_url?: string | null
+          image_urls?: Json | null
           user_id: string
         }
         Update: {
           audio_url?: string | null
           content?: string
           created_at?: string
+          file_name?: string | null
+          file_url?: string | null
           id?: string
           image_url?: string | null
+          image_urls?: Json | null
           user_id?: string
         }
         Relationships: []
@@ -701,8 +710,11 @@ export type Database = {
           audio_url: string | null
           content: string
           created_at: string
+          file_name: string | null
+          file_url: string | null
           id: string
           image_url: string | null
+          image_urls: Json | null
           is_read: boolean
           receiver_id: string
           sender_id: string
@@ -711,8 +723,11 @@ export type Database = {
           audio_url?: string | null
           content: string
           created_at?: string
+          file_name?: string | null
+          file_url?: string | null
           id?: string
           image_url?: string | null
+          image_urls?: Json | null
           is_read?: boolean
           receiver_id: string
           sender_id: string
@@ -721,8 +736,11 @@ export type Database = {
           audio_url?: string | null
           content?: string
           created_at?: string
+          file_name?: string | null
+          file_url?: string | null
           id?: string
           image_url?: string | null
+          image_urls?: Json | null
           is_read?: boolean
           receiver_id?: string
           sender_id?: string
