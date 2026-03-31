@@ -36,6 +36,7 @@ const DailyBonusDialog = () => {
   if (loading || (!canClaim && !open && !claimed)) return null;
 
   return (
+    <>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="glass-card border-primary/20 max-w-sm">
         <DialogHeader>
