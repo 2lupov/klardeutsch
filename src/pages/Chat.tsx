@@ -6,9 +6,23 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send, Search, MessageCircle, Users, Mail, ArrowLeft, Mic, Square, Play, Pause, ImagePlus, X, Paperclip, FileText, Download, Gamepad2, Video, Circle } from "lucide-react";
+import { Send, Search, MessageCircle, Users, Mail, ArrowLeft, Mic, Square, Play, Pause, ImagePlus, X, Paperclip, FileText, Download, Gamepad2, Video, Circle, Reply, CornerUpRight } from "lucide-react";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
+import UserProfileDialog from "@/components/UserProfileDialog";
+
+/* ───── Reply info type ───── */
+interface ReplyInfo {
+  id: string;
+  content: string;
+  senderName: string;
+}
+
+/* ───── Online status helper ───── */
+const isUserOnline = (lastActive: string | null): boolean => {
+  if (!lastActive) return false;
+  return Date.now() - new Date(lastActive).getTime() < 5 * 60 * 1000;
+};
 
 /* ───── types ───── */
 interface Profile {
