@@ -1414,8 +1414,10 @@ const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void
     fetchEdgeFunction("notify-dm", { json: { receiver_id: peerId, message_preview: "🎥 Видеокружок" } }).catch(() => {});
   };
 
+  const viewportH = useViewportHeight();
+
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col" style={{ height: viewportH }}>
       <motion.div
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
