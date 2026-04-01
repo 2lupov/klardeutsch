@@ -717,7 +717,6 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
     <motion.div
       layout
       className="relative border-t border-border bg-card/80 backdrop-blur-xl"
-      style={{ marginBottom: keyboardOffset > 0 ? keyboardOffset : undefined }}
     >
       {/* Reply preview */}
       <AnimatePresence>
