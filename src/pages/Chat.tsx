@@ -15,25 +15,23 @@ import StickerPicker, { isStickerMessage, getStickerSrc, STICKER_PREFIX } from "
 import { Smile } from "lucide-react";
 import chatBgImage from "@/assets/chat-bg.png";
 
-/* ───── Visual-viewport height for iOS keyboard handling ───── */
-const useViewportHeight = () => {
-  const [vh, setVh] = useState(() => {
-    if (typeof window !== "undefined" && window.visualViewport) {
-      const initial = window.visualViewport.height;
-      if (initial && initial > 50) return `${initial}px`;
-    }
-    return "100dvh";
-  });
+/* ───── iOS keyboard: track bottom offset so input sticks to keyboard ───── */
+const useKeyboardBottom = () => {
+  const [bottom, setBottom] = useState(0);
 
   useEffect(() => {
     const vv = window.visualViewport;
     if (!vv) return;
 
     const update = () => {
-      const h = vv.height;
-      if (h && h > 50) {
-        setVh(`${h}px`);
-      }
+      // offsetTop = how far the visual viewport is scrolled from layout viewport top
+      // When keyboard opens, visualViewport shrinks and may have offsetTop > 0
+      // bottom = distance from visual viewport bottom to layout viewport bottom
+      const layoutH = window.innerHeight;
+      const vvH = vv.height;
+      const vvTop = vv.offsetTop;
+      const gap = layoutH - vvH - vvTop;
+      setBottom(Math.max(0, gap));
     };
 
     update();
@@ -46,7 +44,7 @@ const useViewportHeight = () => {
     };
   }, []);
 
-  return vh;
+  return bottom;
 };
 
 /* ───── Reply info type ───── */
