@@ -324,9 +324,17 @@ const WordLookup = () => {
                       </span>
                     </div>
                   </div>
-                  <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity }} className="text-2xl shrink-0">
-                    🐼
-                  </motion.div>
+                  {user && (
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleSaveWord}
+                      disabled={saved || saving}
+                      className={`shrink-0 p-3 rounded-xl border transition-all ${saved ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400" : "bg-primary/10 border-primary/30 text-primary hover:bg-primary/20"}`}
+                    >
+                      {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : saved ? <Check className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+                    </motion.button>
+                  )}
                 </div>
               </motion.div>
 
