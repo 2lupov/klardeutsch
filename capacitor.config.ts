@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'klardeutsch',
   webDir: 'dist',
   server: {
-    url: 'https://klardeutsch.lovable.app?forceHideBadge=true',
+    url: 'https://klardeutsch.lovable.app',
     cleartext: true,
   },
 };
