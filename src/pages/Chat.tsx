@@ -454,8 +454,10 @@ const MessageBubble = ({ isMe, content, audioUrl, imageUrl, imageUrls, fileUrl, 
             isMe
               ? "bg-primary text-primary-foreground rounded-br-md shadow-lg shadow-primary/20"
               : "bg-card border border-border rounded-bl-md shadow-sm"
-          } ${content.startsWith("🎮:") ? "p-2" : content === "🎥" && audioUrl ? "p-1" : allImages.length > 0 && !audioUrl ? "p-1.5" : hasMediaEmbed(content) ? "p-1.5" : "px-3.5 py-2.5"}`}>
-            {content.startsWith("🎮:") ? (
+          } ${isStickerMessage(content) ? "p-1 bg-transparent border-0 shadow-none !bg-transparent" : content.startsWith("🎮:") ? "p-2" : content === "🎥" && audioUrl ? "p-1" : allImages.length > 0 && !audioUrl ? "p-1.5" : hasMediaEmbed(content) ? "p-1.5" : "px-3.5 py-2.5"}`}>
+            {isStickerMessage(content) ? (
+              <img src={getStickerSrc(content) || ""} alt="sticker" className="w-28 h-28 object-contain" loading="lazy" />
+            ) : content.startsWith("🎮:") ? (
               <GameInviteBubble content={content} isMe={isMe} />
             ) : content === "🎥" && audioUrl ? (
               <VideoCirclePlayer url={audioUrl} />
