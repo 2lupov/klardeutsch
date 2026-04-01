@@ -80,6 +80,32 @@ const Dictionary = () => {
   const [lookupWord, setLookupWord] = useState("");
   const [lookupResult, setLookupResult] = useState("");
   const [lookupLoading, setLookupLoading] = useState(false);
+  const [suggestions, setSuggestions] = useState<{ german: string; article: string | null }[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  // Autocomplete: fetch suggestions from vocab_cards as user types
+  useEffect(() => {
+    const q = lookupWord.trim().toLowerCase();
+    if (q.length < 2) { setSuggestions([]); setShowSuggestions(false); return; }
+    const timer = setTimeout(async () => {
+      const { data } = await supabase
+        .from("vocab_cards")
+        .select("german, article")
+        .ilike("german", `${q}%`)
+        .order("german")
+        .limit(8);
+      if (data && data.length > 0) {
+        // deduplicate
+        const unique = Array.from(new Map(data.map(d => [d.german.toLowerCase(), d])).values());
+        setSuggestions(unique);
+        setShowSuggestions(true);
+      } else {
+        setSuggestions([]);
+        setShowSuggestions(false);
+      }
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [lookupWord]);
 
   useEffect(() => {
     if (!user) return;
@@ -542,16 +568,45 @@ const Dictionary = () => {
                 {lang === "uk" ? "🔍 Знайти слово" : "🔍 Найти слово"}
               </p>
               <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder={lang === "uk" ? "Введіть слово німецькою..." : "Введите слово на немецком..."}
-                  value={lookupWord}
-                  onChange={(e) => setLookupWord(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleLookup()}
-                  maxLength={60}
-                  autoFocus
-                  className="flex-1 px-3 py-2.5 rounded-xl bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-                />
+                <div className="flex-1 relative">
+                  <input
+                    type="text"
+                    placeholder={lang === "uk" ? "Введіть слово німецькою..." : "Введите слово на немецком..."}
+                    value={lookupWord}
+                    onChange={(e) => setLookupWord(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleLookup()}
+                    onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+                    onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                    maxLength={60}
+                    autoFocus
+                    className="w-full px-3 py-2.5 rounded-xl bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                  {showSuggestions && suggestions.length > 0 && (
+                    <div className="absolute z-50 left-0 right-0 top-full mt-1 rounded-xl border border-border bg-card shadow-lg overflow-hidden">
+                      {suggestions.map((s, i) => (
+                        <button
+                          key={i}
+                          className="w-full px-3 py-2 text-left text-sm hover:bg-primary/10 transition-colors flex items-center gap-2 text-foreground"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            setLookupWord(s.german);
+                            setShowSuggestions(false);
+                            setSuggestions([]);
+                          }}
+                        >
+                          {s.article && (
+                            <span className={`text-xs font-medium ${
+                              s.article === "der" ? "text-blue-400" :
+                              s.article === "die" ? "text-pink-400" :
+                              s.article === "das" ? "text-emerald-400" : "text-muted-foreground"
+                            }`}>{s.article}</span>
+                          )}
+                          <span>{s.german}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <button
                   onClick={handleLookup}
                   disabled={!lookupWord.trim() || lookupLoading}
