@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchEdgeFunction } from "@/lib/auth-fetch";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,6 +13,26 @@ import UserProfileDialog from "@/components/UserProfileDialog";
 import MediaEmbed, { hasMediaEmbed } from "@/components/chat/MediaEmbed";
 import StickerPicker, { isStickerMessage, getStickerSrc, STICKER_PREFIX } from "@/components/chat/StickerPicker";
 import { Smile } from "lucide-react";
+
+/* ───── Visual Viewport height (keyboard-aware) ───── */
+const useKeyboardHeight = () => {
+  const [height, setHeight] = useState<string>("100dvh");
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const update = () => {
+      setHeight(`${vv.height}px`);
+    };
+    update();
+    vv.addEventListener("resize", update);
+    vv.addEventListener("scroll", update);
+    return () => {
+      vv.removeEventListener("resize", update);
+      vv.removeEventListener("scroll", update);
+    };
+  }, []);
+  return height;
+};
 
 /* ───── Reply info type ───── */
 interface ReplyInfo {
@@ -1029,6 +1049,7 @@ const TabButton = ({ active, icon: Icon, label, badge, onClick }: {
 const CommunityChat = () => {
   const { user } = useAuth();
   const { lang } = useLanguage();
+  const kvh = useKeyboardHeight();
   const [messages, setMessages] = useState<CommunityMsg[]>([]);
   const [profiles, setProfiles] = useState<Record<string, Profile>>({});
   const [loading, setLoading] = useState(true);
@@ -1134,7 +1155,7 @@ const CommunityChat = () => {
   }
 
   return (
-    <div className="flex flex-col h-[100dvh]">
+    <div className="flex flex-col" style={{ height: kvh }}>
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.length === 0 && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16">
@@ -1281,6 +1302,7 @@ const FindUsers = ({ onSelectUser }: { onSelectUser: (uid: string) => void }) =>
 const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void }) => {
   const { user } = useAuth();
   const { lang } = useLanguage();
+  const kvh = useKeyboardHeight();
   const [peer, setPeer] = useState<(Profile & { last_active?: string | null }) | null>(null);
   const [messages, setMessages] = useState<DirectMsg[]>([]);
   const endRef = useRef<HTMLDivElement>(null);
@@ -1380,7 +1402,7 @@ const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void
   };
 
   return (
-    <div className="flex flex-col h-[100dvh]">
+    <div className="flex flex-col" style={{ height: kvh }}>
       <motion.div
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -1573,6 +1595,7 @@ const DMList = ({ onSelectPeer }: { onSelectPeer: (uid: string) => void }) => {
 const Chat = () => {
   const navigate = useNavigate();
   const { lang } = useLanguage();
+  const kvh = useKeyboardHeight();
   const [tab, setTab] = useState<"community" | "dm" | "find">("community");
   const [selectedPeer, setSelectedPeer] = useState<string | null>(null);
 
@@ -1587,7 +1610,7 @@ const Chat = () => {
         animate={{ x: 0 }}
         exit={{ x: "100%" }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="h-[100dvh] flex flex-col"
+        className="flex flex-col" style={{ height: kvh }}
       >
         <DMConversation peerId={selectedPeer} onBack={() => setSelectedPeer(null)} />
       </motion.div>
@@ -1595,7 +1618,7 @@ const Chat = () => {
   }
 
   return (
-    <div className="h-[100dvh] flex flex-col">
+    <div className="flex flex-col" style={{ height: kvh }}>
       {/* Header */}
       <motion.div
         initial={{ y: -20, opacity: 0 }}
