@@ -804,8 +804,8 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
   return (
     <motion.div
       layout
-      className="fixed left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur-xl rounded-t-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.3)]"
-      style={{ bottom: keyboardBottom }}
+      className="fixed left-2 right-2 z-50 bg-card/90 backdrop-blur-2xl rounded-[1.25rem] shadow-[0_2px_24px_rgba(0,0,0,0.25)] border border-border/30"
+      style={{ bottom: Math.max(keyboardBottom, 6) + (keyboardBottom > 0 ? 0 : 4) }}
     >
       {/* Reply preview */}
       <AnimatePresence>
