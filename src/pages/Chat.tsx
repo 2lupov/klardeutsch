@@ -571,6 +571,7 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
    const [recordingVideo, setRecordingVideo] = useState(false);
    const [videoElapsed, setVideoElapsed] = useState(0);
    const [videoFacingMode, setVideoFacingMode] = useState<"user" | "environment">("user");
+   const [videoFlipping, setVideoFlipping] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
