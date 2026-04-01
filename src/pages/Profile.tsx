@@ -637,7 +637,7 @@ const Profile = () => {
 
       {/* Profile header */}
       <div className={`flex items-center gap-4 mb-4 ${!isMobile ? "gap-6" : ""}`}>
-        <div className="relative group">
+        <div className="relative group cursor-pointer" onClick={() => setShowAvatarPicker(!showAvatarPicker)}>
           <Avatar className={`border-2 border-primary/20 ${isMobile ? "w-14 h-14" : "w-20 h-20"}`}>
             {profile.avatar_url ? (
               <AvatarImage src={profile.avatar_url} alt={displayName} />
@@ -646,13 +646,9 @@ const Profile = () => {
               {initials}
             </AvatarFallback>
           </Avatar>
-          <button
-            onClick={() => setShowAvatarPicker(!showAvatarPicker)}
-            disabled={uploading}
-            className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-          >
+          <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
             <Camera className="w-5 h-5 text-white" />
-          </button>
+          </div>
           <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
         </div>
 
