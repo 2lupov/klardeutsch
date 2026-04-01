@@ -221,7 +221,6 @@ const WordLookup = () => {
             </motion.div>
           ) : (
             <motion.div key="small" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-3 mb-4">
-              <motion.div animate={{ y: [0, -4, 0] }} transition={{ duration: 2, repeat: Infinity }} className="text-3xl">🐼</motion.div>
               {loading && (
                 <motion.p initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="text-sm text-muted-foreground italic">
                   {lang === "uk" ? "Шукаю... 🔍" : "Ищу... 🔍"}
