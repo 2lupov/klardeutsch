@@ -644,7 +644,12 @@ const Profile = () => {
   // Main profile screen
   return (
     <div className={`w-full mx-auto px-4 py-4 pb-8 ${isMobile ? "max-w-md" : "max-w-3xl"}`}>
-      <div className="flex items-center justify-between mb-3">
+      {/* Top bar */}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center justify-between mb-5"
+      >
         <button
           onClick={signOut}
           className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
@@ -655,120 +660,141 @@ const Profile = () => {
         <div className="relative">
           <LofiRadio />
         </div>
-      </div>
+      </motion.div>
 
-      {/* Profile header */}
-      <div className={`flex items-center gap-4 mb-4 ${!isMobile ? "gap-6" : ""}`}>
-        <div className="relative group cursor-pointer" onClick={() => setShowAvatarPicker(!showAvatarPicker)}>
-          <Avatar className={`border-2 border-primary/20 ${isMobile ? "w-14 h-14" : "w-20 h-20"}`}>
-            {profile.avatar_url ? (
-              <AvatarImage src={profile.avatar_url} alt={displayName} />
-            ) : null}
-            <AvatarFallback className={`font-display font-bold bg-primary/10 text-primary ${isMobile ? "text-lg" : "text-2xl"}`}>
-              {initials}
-            </AvatarFallback>
-          </Avatar>
-          <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-            <Camera className="w-5 h-5 text-white" />
+      {/* ─── Hero Profile Card ─── */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.05 }}
+        className="relative overflow-hidden rounded-3xl mb-5"
+        style={{
+          background: "linear-gradient(135deg, hsl(var(--primary) / 0.15) 0%, hsl(var(--card)) 50%, hsl(var(--secondary)) 100%)",
+        }}
+      >
+        {/* Decorative glow */}
+        <div className="absolute -top-20 -right-20 w-40 h-40 rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute -bottom-10 -left-10 w-32 h-32 rounded-full bg-primary/5 blur-2xl" />
+
+        <div className="relative p-6">
+          <div className="flex items-center gap-5">
+            {/* Avatar */}
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="relative group cursor-pointer"
+              onClick={() => setShowAvatarPicker(!showAvatarPicker)}
+            >
+              <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-primary/60 to-primary/20 blur-sm" />
+              <Avatar className={`relative border-2 border-primary/30 shadow-xl shadow-primary/10 ${isMobile ? "w-20 h-20" : "w-24 h-24"}`}>
+                {profile.avatar_url ? (
+                  <AvatarImage src={profile.avatar_url} alt={displayName} />
+                ) : null}
+                <AvatarFallback className={`font-display font-bold bg-primary/10 text-primary ${isMobile ? "text-xl" : "text-3xl"}`}>
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                <Camera className="w-5 h-5 text-white" />
+              </div>
+              <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+            </motion.div>
+
+            {/* Name & nickname */}
+            <div className="flex-1 min-w-0">
+              {editing ? (
+                <div className="flex items-center gap-2">
+                  <input
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    className="flex-1 min-w-0 bg-background/50 border border-border rounded-xl px-3 py-2 text-sm font-display font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-sm"
+                    placeholder={t("nickname")}
+                    autoFocus
+                    onKeyDown={(e) => e.key === "Enter" && handleSaveName()}
+                  />
+                  <button onClick={handleSaveName} className="p-2 rounded-xl bg-primary/15 text-primary hover:bg-primary/25 transition-colors">
+                    <Check className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => setEditing(false)} className="p-2 rounded-xl bg-muted text-muted-foreground hover:bg-muted/80 transition-colors">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <h1 className={`font-display font-bold text-foreground truncate ${isMobile ? "text-xl" : "text-2xl"}`}>{displayName}</h1>
+                  <button onClick={startEdit} className="p-1 rounded-lg text-muted-foreground/50 hover:text-foreground transition-colors">
+                    <Pencil className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+              {editingNickname ? (
+                <div className="flex items-center gap-1.5 mt-1">
+                  <span className="text-xs text-muted-foreground">@</span>
+                  <input
+                    value={editNickname}
+                    onChange={(e) => setEditNickname(e.target.value.replace(/\s/g, "").slice(0, 20))}
+                    className="min-w-0 bg-background/50 border border-border rounded-lg px-2 py-1 text-xs font-display font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-sm"
+                    placeholder="nickname"
+                    autoFocus
+                    onKeyDown={(e) => e.key === "Enter" && handleSaveNickname()}
+                  />
+                  <button onClick={handleSaveNickname} className="p-1 rounded-lg bg-primary/15 text-primary hover:bg-primary/25 transition-colors">
+                    <Check className="w-3 h-3" />
+                  </button>
+                  <button onClick={() => setEditingNickname(false)} className="p-1 rounded-lg bg-muted text-muted-foreground hover:bg-muted/80 transition-colors">
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground/70 mt-0.5 cursor-pointer hover:text-muted-foreground transition-colors group/nick" onClick={startEditNickname}>
+                  @{profile.nickname || "nickname"}
+                  <Pencil className="w-2.5 h-2.5 inline-block ml-1 opacity-0 group-hover/nick:opacity-100 transition-opacity" />
+                </p>
+              )}
+
+              {/* XP badge */}
+              <div className="flex items-center gap-2 mt-2">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20">
+                  <TrendingUp className="w-3 h-3 text-primary" />
+                  <span className="text-xs font-display font-bold text-primary">{totalXP} XP</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Panda streak */}
+            {!pandaLoading && (
+              <StreakPlant streak={pandaStreak} canClaim={pandaCanClaim} compact />
+            )}
           </div>
-          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
         </div>
-
-        <div className="flex-1 min-w-0">
-          {editing ? (
-            <div className="flex items-center gap-2">
-              <input
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-                className="flex-1 min-w-0 bg-muted/50 border border-border rounded-lg px-3 py-1.5 text-sm font-display font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-                placeholder={t("nickname")}
-                autoFocus
-                onKeyDown={(e) => e.key === "Enter" && handleSaveName()}
-              />
-              <button onClick={handleSaveName} className="p-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
-                <Check className="w-4 h-4" />
-              </button>
-              <button onClick={() => setEditing(false)} className="p-1.5 rounded-lg bg-muted text-muted-foreground hover:bg-muted/80 transition-colors">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <h1 className={`font-display font-bold text-foreground truncate ${isMobile ? "text-xl" : "text-2xl"}`}>{displayName}</h1>
-              <button onClick={startEdit} className="p-1 rounded-md text-muted-foreground hover:text-foreground transition-colors">
-                <Pencil className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          )}
-          {editingNickname ? (
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs text-muted-foreground">@</span>
-              <input
-                value={editNickname}
-                onChange={(e) => setEditNickname(e.target.value.replace(/\s/g, "").slice(0, 20))}
-                className="min-w-0 bg-muted/50 border border-border rounded-md px-2 py-0.5 text-xs font-display font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-                placeholder="nickname"
-                autoFocus
-                onKeyDown={(e) => e.key === "Enter" && handleSaveNickname()}
-              />
-              <button onClick={handleSaveNickname} className="p-0.5 rounded bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
-                <Check className="w-3 h-3" />
-              </button>
-              <button onClick={() => setEditingNickname(false)} className="p-0.5 rounded bg-muted text-muted-foreground hover:bg-muted/80 transition-colors">
-                <X className="w-3 h-3" />
-              </button>
-            </div>
-          ) : (
-            <p className="text-xs text-muted-foreground truncate cursor-pointer hover:text-foreground transition-colors group/nick" onClick={startEditNickname}>
-              @{profile.nickname || "nickname"}
-              <Pencil className="w-2.5 h-2.5 inline-block ml-1 opacity-0 group-hover/nick:opacity-100 transition-opacity" />
-            </p>
-          )}
-        </div>
-
-        {/* Panda streak button */}
-        {!pandaLoading && (
-          <StreakPlant streak={pandaStreak} canClaim={pandaCanClaim} compact />
-        )}
-      </div>
+      </motion.div>
 
       {/* Avatar picker */}
       {showAvatarPicker && !cropFile && (
-        <div className="glass-card p-4 mb-4 flex flex-col gap-3">
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-4 mb-5 flex flex-col gap-3 rounded-2xl">
           <p className="text-xs font-medium text-foreground">Выбери аватарку:</p>
-          <AvatarPicker
-            currentUrl={profile.avatar_url}
-            onSelect={handlePresetAvatar}
-            loading={settingAvatar}
-          />
+          <AvatarPicker currentUrl={profile.avatar_url} onSelect={handlePresetAvatar} loading={settingAvatar} />
           <div className="flex items-center gap-2">
             <div className="flex-1 h-px bg-border" />
             <span className="text-[10px] text-muted-foreground">або</span>
             <div className="flex-1 h-px bg-border" />
           </div>
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="text-xs text-primary hover:underline"
-          >
+          <button onClick={() => fileInputRef.current?.click()} className="text-xs text-primary hover:underline">
             Завантажити своє фото
           </button>
-        </div>
+        </motion.div>
       )}
 
       {/* Image cropper */}
       {cropFile && (
-        <div className="glass-card p-4 mb-4">
-          <ImageCropper
-            imageFile={cropFile}
-            onCrop={handleCroppedAvatar}
-            onCancel={() => setCropFile(null)}
-          />
+        <div className="glass-card p-4 mb-5 rounded-2xl">
+          <ImageCropper imageFile={cropFile} onCrop={handleCroppedAvatar} onCancel={() => setCropFile(null)} />
         </div>
       )}
 
       {/* Language choice */}
       {!languageLocked ? (
-        <div className="glass-card p-4 mb-4 space-y-3">
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass-card p-4 mb-5 space-y-3 rounded-2xl">
           <div className="flex items-center gap-2">
             <Globe className="w-4 h-4 text-primary" />
             <p className="text-sm font-display font-semibold text-foreground">
@@ -781,22 +807,18 @@ const Profile = () => {
           <div className="flex gap-2">
             <button
               onClick={() => lockLanguage("ru")}
-              className={`flex-1 py-3 rounded-xl border-2 text-sm font-bold transition-all ${
-                lang === "ru" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/30"
-              }`}
+              className={`flex-1 py-3 rounded-xl border-2 text-sm font-bold transition-all ${lang === "ru" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/30"}`}
             >
               💬 Русский
             </button>
             <button
               onClick={() => lockLanguage("uk")}
-              className={`flex-1 py-3 rounded-xl border-2 text-sm font-bold transition-all ${
-                lang === "uk" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/30"
-              }`}
+              className={`flex-1 py-3 rounded-xl border-2 text-sm font-bold transition-all ${lang === "uk" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/30"}`}
             >
               ✨ Українська
             </button>
           </div>
-        </div>
+        </motion.div>
       ) : (
         <div className="flex items-center justify-between mb-4 px-1">
           <div className="flex items-center gap-2">
@@ -805,113 +827,79 @@ const Profile = () => {
               {lang === "uk" ? "✨ Українська" : "💬 Русский"} — {lang === "uk" ? "мову зафіксовано" : "язык зафиксирован"}
             </span>
           </div>
-          <button
-            onClick={unlockLanguage}
-            className="text-[10px] text-primary hover:underline"
-          >
+          <button onClick={unlockLanguage} className="text-[10px] text-primary hover:underline">
             {lang === "uk" ? "Змінити" : "Сменить"}
           </button>
         </div>
       )}
 
-      {/* Stat cards */}
-      <div className={`grid gap-2 mb-4 ${isMobile ? "grid-cols-4" : "grid-cols-4"}`}>
-        <StatCard icon={<Coins className="w-4 h-4" />} value={balance} label={t("coinsLabel")} />
-        <StatCard icon={<BookOpen className="w-4 h-4" />} value={wordsLearned} label={t("wordsLearned")} />
-        <StatCard icon={<Brain className="w-4 h-4" />} value={completedLessons} label={t("lessonsCompleted")} />
-        <StatCard icon={<Flame className="w-4 h-4" />} value={streak} label={t("streakDays")} />
-      </div>
+      {/* ─── Stat Cards ─── */}
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.12 }}
+        className={`grid gap-2.5 mb-5 ${isMobile ? "grid-cols-4" : "grid-cols-4"}`}
+      >
+        <StatCard icon={<Coins className="w-4 h-4" />} value={balance} label={t("coinsLabel")} color="from-yellow-500/20 to-amber-600/10" />
+        <StatCard icon={<BookOpen className="w-4 h-4" />} value={wordsLearned} label={t("wordsLearned")} color="from-blue-500/20 to-cyan-500/10" />
+        <StatCard icon={<Brain className="w-4 h-4" />} value={completedLessons} label={t("lessonsCompleted")} color="from-purple-500/20 to-violet-500/10" />
+        <StatCard icon={<Flame className="w-4 h-4" />} value={streak} label={t("streakDays")} color="from-orange-500/20 to-red-500/10" />
+      </motion.div>
 
       {/* Gift unboxing on profile entry */}
       {user && <GiftUnboxing userId={user.id} />}
 
       {/* Gift shelf */}
       {user && (
-        <div className="mb-4">
+        <div className="mb-5">
           <GiftShelf userId={user.id} />
         </div>
       )}
 
-      {/* Navigation buttons */}
-      <div className={`gap-2 mb-4 ${isMobile ? "flex flex-col" : "grid grid-cols-2"}`}>
-        <NavButton
-          icon={<Award className="w-4 h-4 text-primary" />}
-          label={t("leaderboardTitle")}
-          subtitle={`${totalXP} XP`}
-          onClick={() => setScreen("leaderboard")}
-        />
-        <NavButton
-          icon={<Trophy className="w-4 h-4 text-primary" />}
-          label={t("achievementsTitle")}
-          onClick={() => setScreen("achievements")}
-        />
-        <NavButton
-          icon={<Calendar className="w-4 h-4 text-muted-foreground" />}
-          label={t("activityHistory")}
-          onClick={() => setScreen("activity")}
-        />
-        <NavButton
-          icon={<RotateCcw className="w-4 h-4 text-destructive" />}
-          label={t("mistakesSection")}
-          badge={weakAreas.length > 0 ? weakAreas.length : undefined}
-          onClick={() => setScreen("mistakes")}
-        />
-        <NavButton
-          icon={<Bell className="w-4 h-4 text-[#2AABEE]" />}
-          label={t("notificationsTitle")}
-          subtitle={profile.telegram_chat_id ? "Telegram ✅" : undefined}
-          onClick={() => setScreen("notifications")}
-        />
-        <NavButton
-          icon={<Users className="w-4 h-4 text-primary" />}
-          label={lang === "uk" ? "Друзі" : "Друзья"}
-          badge={pendingFriendRequests > 0 ? pendingFriendRequests : undefined}
-          onClick={() => setScreen("friends")}
-        />
-        <NavButton
-          icon={<Send className="w-4 h-4 text-primary" />}
-          label={t("referralsTitle")}
-          onClick={() => setScreen("referrals")}
-        />
-        <NavButton
-          icon={<WifiOff className="w-4 h-4 text-muted-foreground" />}
-          label="Офлайн-режим"
-          onClick={() => setScreen("offline")}
-        />
+      {/* ─── Navigation Grid ─── */}
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.18 }}
+        className={`gap-2.5 mb-5 ${isMobile ? "flex flex-col" : "grid grid-cols-2"}`}
+      >
+        <NavButton icon={<Award className="w-4.5 h-4.5" />} label={t("leaderboardTitle")} subtitle={`${totalXP} XP`} onClick={() => setScreen("leaderboard")} iconBg="bg-primary/15 text-primary" />
+        <NavButton icon={<Trophy className="w-4.5 h-4.5" />} label={t("achievementsTitle")} onClick={() => setScreen("achievements")} iconBg="bg-amber-500/15 text-amber-400" />
+        <NavButton icon={<Calendar className="w-4.5 h-4.5" />} label={t("activityHistory")} onClick={() => setScreen("activity")} iconBg="bg-blue-500/15 text-blue-400" />
+        <NavButton icon={<RotateCcw className="w-4.5 h-4.5" />} label={t("mistakesSection")} badge={weakAreas.length > 0 ? weakAreas.length : undefined} onClick={() => setScreen("mistakes")} iconBg="bg-destructive/15 text-destructive" />
+        <NavButton icon={<Bell className="w-4.5 h-4.5" />} label={t("notificationsTitle")} subtitle={profile.telegram_chat_id ? "Telegram ✅" : undefined} onClick={() => setScreen("notifications")} iconBg="bg-sky-500/15 text-sky-400" />
+        <NavButton icon={<Users className="w-4.5 h-4.5" />} label={lang === "uk" ? "Друзі" : "Друзья"} badge={pendingFriendRequests > 0 ? pendingFriendRequests : undefined} onClick={() => setScreen("friends")} iconBg="bg-green-500/15 text-green-400" />
+        <NavButton icon={<Send className="w-4.5 h-4.5" />} label={t("referralsTitle")} onClick={() => setScreen("referrals")} iconBg="bg-violet-500/15 text-violet-400" />
+        <NavButton icon={<WifiOff className="w-4.5 h-4.5" />} label="Офлайн-режим" onClick={() => setScreen("offline")} iconBg="bg-muted text-muted-foreground" />
+
         {/* Shop banner for mobile */}
         {isMobile && (
-          <div className="glass-card p-4 flex items-center gap-3 border-primary/20 bg-primary/5">
-            <ShoppingBag className="w-5 h-5 text-primary flex-shrink-0" />
+          <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }} className="relative overflow-hidden rounded-2xl border border-primary/20 p-4 flex items-center gap-3" style={{ background: "linear-gradient(135deg, hsl(var(--primary) / 0.08), hsl(var(--card)))" }}>
+            <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center flex-shrink-0">
+              <ShoppingBag className="w-5 h-5 text-primary" />
+            </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-display font-semibold text-foreground">
                 {lang === "uk" ? "Магазин курсів" : "Магазин курсов"}
               </p>
               <p className="text-[11px] text-muted-foreground leading-tight">
-                {lang === "uk" ? "Додаткові курси та матеріали для вивчення німецької" : "Дополнительные курсы и материалы для изучения немецкого"}
+                {lang === "uk" ? "Додаткові курси та матеріали" : "Дополнительные курсы и материалы"}
               </p>
             </div>
             {isTelegram ? (
-              <a
-                href="https://klardeutsch.lovable.app/shop"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-display font-medium hover:bg-primary/90 transition-colors flex-shrink-0"
-              >
-                {lang === "uk" ? "Відкрити" : "Открыть"}
-                <ExternalLink className="w-3 h-3" />
+              <a href="https://klardeutsch.lovable.app/shop" target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-display font-medium hover:bg-primary/90 transition-colors flex-shrink-0">
+                {lang === "uk" ? "Відкрити" : "Открыть"} <ExternalLink className="w-3 h-3" />
               </a>
             ) : (
-              <button
-                onClick={() => navigate("/shop")}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-display font-medium hover:bg-primary/90 transition-colors flex-shrink-0"
-              >
-                {lang === "uk" ? "Відкрити" : "Открыть"}
-                <ChevronRight className="w-3 h-3" />
+              <button onClick={() => navigate("/shop")}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-display font-medium hover:bg-primary/90 transition-colors flex-shrink-0">
+                {lang === "uk" ? "Відкрити" : "Открыть"} <ChevronRight className="w-3 h-3" />
               </button>
             )}
-          </div>
+          </motion.div>
         )}
-      </div>
+      </motion.div>
 
       {/* Info links (mobile) */}
       {isMobile && !isTelegram && (
@@ -923,34 +911,43 @@ const Profile = () => {
           <Link to="/terms" className="hover:text-foreground transition-colors">Оферта</Link>
         </div>
       )}
-
     </div>
   );
 };
 
-const StatCard = ({ icon, value, label }: { icon: React.ReactNode; value: number; label: string }) => (
-  <div className="glass-card p-3 flex flex-col items-center gap-1 text-center">
+/* ─── Stat Card ─── */
+const StatCard = ({ icon, value, label, color }: { icon: React.ReactNode; value: number; label: string; color?: string }) => (
+  <motion.div
+    whileHover={{ scale: 1.04, y: -2 }}
+    whileTap={{ scale: 0.97 }}
+    className={`relative overflow-hidden rounded-2xl p-3 flex flex-col items-center gap-1.5 text-center border border-border/50 bg-gradient-to-br ${color || "from-muted/50 to-card"}`}
+  >
     <div className="text-muted-foreground">{icon}</div>
-    <span className="text-xl font-display font-bold text-gradient">{value}</span>
-    <span className="text-[10px] text-muted-foreground leading-tight">{label}</span>
-  </div>
+    <span className="text-2xl font-display font-bold text-gradient leading-none">{value}</span>
+    <span className="text-[9px] text-muted-foreground leading-tight">{label}</span>
+  </motion.div>
 );
 
-const NavButton = ({ icon, label, badge, subtitle, onClick }: { icon: React.ReactNode; label: string; badge?: number; subtitle?: string; onClick: () => void }) => (
-  <button
+/* ─── Nav Button ─── */
+const NavButton = ({ icon, label, badge, subtitle, onClick, iconBg }: { icon: React.ReactNode; label: string; badge?: number; subtitle?: string; onClick: () => void; iconBg?: string }) => (
+  <motion.button
+    whileHover={{ scale: 1.01, x: 3 }}
+    whileTap={{ scale: 0.98 }}
     onClick={onClick}
-    className="glass-card px-4 py-3 flex items-center gap-3 text-left hover:border-primary/20 transition-colors group"
+    className="relative overflow-hidden rounded-2xl px-4 py-3.5 flex items-center gap-3.5 text-left border border-border/50 bg-card/80 backdrop-blur-sm hover:border-primary/20 transition-all group"
   >
-    {icon}
+    <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${iconBg || "bg-primary/15 text-primary"}`}>
+      {icon}
+    </div>
     <div className="flex-1 min-w-0">
       <span className="text-sm font-display font-medium text-foreground block">{label}</span>
       {subtitle && <span className="text-[10px] text-muted-foreground">{subtitle}</span>}
     </div>
     {badge !== undefined && (
-      <span className="px-2 py-0.5 rounded-full bg-destructive/15 text-destructive text-[10px] font-semibold">{badge}</span>
+      <span className="px-2 py-0.5 rounded-full bg-destructive/15 text-destructive text-[10px] font-bold animate-pulse">{badge}</span>
     )}
-    <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-  </button>
+    <ChevronRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+  </motion.button>
 );
 
 export default Profile;
