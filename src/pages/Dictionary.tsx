@@ -25,6 +25,31 @@ const ARTICLE_COLORS: Record<string, { bg: string; text: string; border: string;
   das: { bg: "bg-emerald-500/10", text: "text-emerald-400", border: "border-emerald-500/30", dot: "bg-emerald-400" },
 };
 
+type WordType = "nomen" | "verb" | "adjektiv" | "andere";
+
+const WORD_TYPE_META: Record<WordType, { label: string; labelUk: string; emoji: string; bg: string; text: string; border: string }> = {
+  nomen:    { label: "Существительные", labelUk: "Іменники",    emoji: "📦", bg: "bg-sky-500/10",    text: "text-sky-400",    border: "border-sky-500/20" },
+  verb:     { label: "Глаголы",         labelUk: "Дієслова",    emoji: "⚡", bg: "bg-orange-500/10", text: "text-orange-400", border: "border-orange-500/20" },
+  adjektiv: { label: "Прилагательные",  labelUk: "Прикметники", emoji: "🎨", bg: "bg-purple-500/10", text: "text-purple-400", border: "border-purple-500/20" },
+  andere:   { label: "Другое",          labelUk: "Інше",        emoji: "📝", bg: "bg-muted",         text: "text-muted-foreground", border: "border-border" },
+};
+
+const VERB_ENDINGS = ["en", "ern", "eln"];
+const ADJ_ENDINGS = ["ig", "lich", "isch", "bar", "sam", "haft", "los", "voll", "reich"];
+
+function detectWordType(word: DictWord): WordType {
+  if (word.article) return "nomen";
+  const g = word.german.toLowerCase().trim();
+  // Check if it starts with "sich " (reflexive verb)
+  const base = g.startsWith("sich ") ? g.slice(5) : g;
+  if (g.startsWith("sich ")) return "verb";
+  if (VERB_ENDINGS.some(e => base.endsWith(e)) && base.length > 3) return "verb";
+  if (ADJ_ENDINGS.some(e => base.endsWith(e))) return "adjektiv";
+  // Nouns in German start with uppercase (if no article provided)
+  if (word.german.trim()[0] === word.german.trim()[0]?.toUpperCase() && /^[A-ZÄÖÜ]/.test(word.german.trim())) return "nomen";
+  return "andere";
+}
+
 const getArticleStyle = (article: string | null) => {
   if (!article) return null;
   return ARTICLE_COLORS[article.toLowerCase()] ?? null;
