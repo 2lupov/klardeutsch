@@ -1,7 +1,9 @@
 import { Level } from "@/data/lessons";
 import { BookOpen, Languages, FileText, Headphones, PenLine, ArrowLeft, ChevronRight } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import pandaGraduate from "@/assets/mascot/panda-graduate.png";
 
 type Category = "vocabulary" | "grammar" | "reading" | "listening" | "writing";
 
