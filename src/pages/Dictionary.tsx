@@ -25,6 +25,31 @@ const ARTICLE_COLORS: Record<string, { bg: string; text: string; border: string;
   das: { bg: "bg-emerald-500/10", text: "text-emerald-400", border: "border-emerald-500/30", dot: "bg-emerald-400" },
 };
 
+type WordType = "nomen" | "verb" | "adjektiv" | "andere";
+
+const WORD_TYPE_META: Record<WordType, { label: string; labelUk: string; emoji: string; bg: string; text: string; border: string }> = {
+  nomen:    { label: "Существительные", labelUk: "Іменники",    emoji: "📦", bg: "bg-sky-500/10",    text: "text-sky-400",    border: "border-sky-500/20" },
+  verb:     { label: "Глаголы",         labelUk: "Дієслова",    emoji: "⚡", bg: "bg-orange-500/10", text: "text-orange-400", border: "border-orange-500/20" },
+  adjektiv: { label: "Прилагательные",  labelUk: "Прикметники", emoji: "🎨", bg: "bg-purple-500/10", text: "text-purple-400", border: "border-purple-500/20" },
+  andere:   { label: "Другое",          labelUk: "Інше",        emoji: "📝", bg: "bg-muted",         text: "text-muted-foreground", border: "border-border" },
+};
+
+const VERB_ENDINGS = ["en", "ern", "eln"];
+const ADJ_ENDINGS = ["ig", "lich", "isch", "bar", "sam", "haft", "los", "voll", "reich"];
+
+function detectWordType(word: DictWord): WordType {
+  if (word.article) return "nomen";
+  const g = word.german.toLowerCase().trim();
+  // Check if it starts with "sich " (reflexive verb)
+  const base = g.startsWith("sich ") ? g.slice(5) : g;
+  if (g.startsWith("sich ")) return "verb";
+  if (VERB_ENDINGS.some(e => base.endsWith(e)) && base.length > 3) return "verb";
+  if (ADJ_ENDINGS.some(e => base.endsWith(e))) return "adjektiv";
+  // Nouns in German start with uppercase (if no article provided)
+  if (word.german.trim()[0] === word.german.trim()[0]?.toUpperCase() && /^[A-ZÄÖÜ]/.test(word.german.trim())) return "nomen";
+  return "andere";
+}
+
 const getArticleStyle = (article: string | null) => {
   if (!article) return null;
   return ARTICLE_COLORS[article.toLowerCase()] ?? null;
@@ -48,6 +73,7 @@ const Dictionary = () => {
   const [newArticle, setNewArticle] = useState("");
   const [newExample, setNewExample] = useState("");
   const [adding, setAdding] = useState(false);
+  const [wordTypeFilter, setWordTypeFilter] = useState<WordType | "all">("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -153,18 +179,21 @@ const Dictionary = () => {
     setAdding(false);
   };
 
-  const filtered = useMemo(() => words.filter((w) => {
+  const wordsWithType = useMemo(() => words.map(w => ({ ...w, wordType: detectWordType(w) })), [words]);
+
+  const filtered = useMemo(() => wordsWithType.filter((w) => {
     if (filter === "difficult" && !w.is_difficult) return false;
     if (filter === "custom" && w.source !== "custom") return false;
     if (articleFilter !== "all" && w.article?.toLowerCase() !== articleFilter) return false;
+    if (wordTypeFilter !== "all" && w.wordType !== wordTypeFilter) return false;
     if (search) {
       const s = search.toLowerCase();
       return w.german.toLowerCase().includes(s) || w.russian.toLowerCase().includes(s);
     }
     return true;
-  }), [words, filter, articleFilter, search]);
+  }), [wordsWithType, filter, articleFilter, wordTypeFilter, search]);
 
-  const difficultWords = useMemo(() => words.filter((w) => w.is_difficult), [words]);
+  const difficultWords = useMemo(() => wordsWithType.filter((w) => w.is_difficult), [wordsWithType]);
 
   const stats = useMemo(() => ({
     total: words.length,
@@ -173,7 +202,11 @@ const Dictionary = () => {
     der: words.filter(w => w.article?.toLowerCase() === "der").length,
     die: words.filter(w => w.article?.toLowerCase() === "die").length,
     das: words.filter(w => w.article?.toLowerCase() === "das").length,
-  }), [words, difficultWords]);
+    nomen: wordsWithType.filter(w => w.wordType === "nomen").length,
+    verb: wordsWithType.filter(w => w.wordType === "verb").length,
+    adjektiv: wordsWithType.filter(w => w.wordType === "adjektiv").length,
+    andere: wordsWithType.filter(w => w.wordType === "andere").length,
+  }), [words, wordsWithType, difficultWords]);
 
   const startReview = () => {
     if (difficultWords.length === 0) {
@@ -363,6 +396,25 @@ const Dictionary = () => {
               </button>
             );
           })}
+          <div className="w-px bg-border mx-1 self-stretch" />
+          {(["nomen", "verb", "adjektiv", "andere"] as WordType[]).map((wt) => {
+            const meta = WORD_TYPE_META[wt];
+            return (
+              <button
+                key={wt}
+                onClick={() => setWordTypeFilter(wordTypeFilter === wt ? "all" : wt)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all whitespace-nowrap ${
+                  wordTypeFilter === wt
+                    ? `${meta.bg} ${meta.text} ${meta.border}`
+                    : "bg-secondary border-border text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <span>{meta.emoji}</span>
+                {lang === "uk" ? meta.labelUk : meta.label}
+                <span className="opacity-70">{stats[wt]}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -458,7 +510,7 @@ const Dictionary = () => {
       </div>
 
       {/* Results count */}
-      {(search || filter !== "all" || articleFilter !== "all") && (
+      {(search || filter !== "all" || articleFilter !== "all" || wordTypeFilter !== "all") && (
         <p className="text-xs text-muted-foreground mb-2 px-1">
           {lang === "uk" ? "Знайдено" : "Найдено"}: {filtered.length}
         </p>
@@ -494,6 +546,7 @@ const Dictionary = () => {
         ) : (
           filtered.map((word, i) => {
             const articleStyle = getArticleStyle(word.article);
+            const typeMeta = WORD_TYPE_META[word.wordType];
             const isExpanded = expandedId === word.id;
 
             return (
@@ -539,6 +592,9 @@ const Dictionary = () => {
                         {word.level}
                       </span>
                     )}
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${typeMeta.bg} ${typeMeta.text}`}>
+                      {typeMeta.emoji}
+                    </span>
                     {word.source === "custom" && (
                       <span className="text-[10px] px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-400 font-medium">✎</span>
                     )}
