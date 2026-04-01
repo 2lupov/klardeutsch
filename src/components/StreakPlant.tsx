@@ -181,7 +181,7 @@ const StreakPlant = ({ streak, canClaim, compact = false }: StreakPlantProps) =>
       <>
         <button
           onClick={() => setShowDialog(true)}
-          className="relative flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-all overflow-hidden"
+          className="relative flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-all overflow-hidden"
         >
           <img
             src={stageIdx === 0 ? pandaSleeping : pandaWaving}
