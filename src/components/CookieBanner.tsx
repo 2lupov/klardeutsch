@@ -17,14 +17,18 @@ const CookieBanner = () => {
   }, [consent]);
 
   const accept = () => {
-    localStorage.setItem(COOKIE_KEY, "accepted");
+    try { localStorage.setItem(COOKIE_KEY, "accepted"); } catch {}
+    setConsent("accepted");
     setVisible(false);
   };
 
   const decline = () => {
-    localStorage.setItem(COOKIE_KEY, "declined");
+    try { localStorage.setItem(COOKIE_KEY, "declined"); } catch {}
+    setConsent("declined");
     setVisible(false);
   };
+
+  if (consent) return null;
 
   return (
     <AnimatePresence>
