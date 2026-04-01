@@ -902,7 +902,7 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
                 </motion.button>
               ) : (
                 <div className="flex items-center gap-1">
-                  <motion.button initial={{ scale: 0 }} animate={{ scale: 1 }} whileTap={{ scale: 0.85 }} onClick={startVideoCircle} disabled={uploading}
+                  <motion.button initial={{ scale: 0 }} animate={{ scale: 1 }} whileTap={{ scale: 0.85 }} onClick={() => startVideoCircle()} disabled={uploading}
                     className="w-10 h-10 rounded-full bg-muted hover:bg-primary/10 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors">
                     <Circle className="w-4 h-4" />
                   </motion.button>
