@@ -322,7 +322,7 @@ const PandaSceneCard = ({ stage, stageIdx, streak, motivation, progressToNext, i
             />
           }
         >
-          <Panda3D isSleeping={stageIdx === 0} stageImage={stage.img} className="w-full h-[300px]" />
+          <Panda3D isSleeping={isNight || stageIdx === 0} stageImage={stage.img} className="w-full h-[300px]" />
         </Suspense>
       </motion.div>
 
