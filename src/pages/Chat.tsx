@@ -488,8 +488,8 @@ const MessageBubble = ({ isMe, content, audioUrl, imageUrl, imageUrls, fileUrl, 
           <div className={`flex items-center gap-1.5 mt-0.5 px-1 ${isMe ? "flex-row-reverse" : ""}`}>
             <p className="text-[9px] text-muted-foreground/50">{time}</p>
             {onReply && (
-              <button onClick={onReply} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground/40 hover:text-primary">
-                <Reply className="w-3 h-3" />
+              <button onClick={onReply} className="opacity-60 md:opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground/60 hover:text-primary active:text-primary p-1">
+                <Reply className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
