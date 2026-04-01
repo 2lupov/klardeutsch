@@ -19,7 +19,8 @@ import chatBgImage from "@/assets/chat-bg.png";
 const useViewportHeight = () => {
   const [vh, setVh] = useState(() => {
     if (typeof window !== "undefined" && window.visualViewport) {
-      return `${window.visualViewport.height}px`;
+      const initial = window.visualViewport.height;
+      if (initial && initial > 50) return `${initial}px`;
     }
     return "100dvh";
   });
