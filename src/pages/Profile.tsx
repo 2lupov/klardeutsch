@@ -792,7 +792,7 @@ const Profile = () => {
       )}
 
       {/* Navigation buttons */}
-      <div className="flex flex-col gap-2 mb-4">
+      <div className={`gap-2 mb-4 ${isMobile ? "flex flex-col" : "grid grid-cols-2"}`}>
         <NavButton
           icon={<Award className="w-4 h-4 text-primary" />}
           label={t("leaderboardTitle")}
