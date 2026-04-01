@@ -643,12 +643,12 @@ const Profile = () => {
 
   // Main profile screen
   return (
-    <div className={`w-full mx-auto px-4 py-4 pb-8 ${isMobile ? "max-w-md" : "max-w-3xl"}`}>
+    <div className={`w-full mx-auto px-4 ${isTelegram ? "py-2 pb-4" : "py-4 pb-8"} ${isMobile ? "max-w-md" : "max-w-3xl"}`}>
       {/* Top bar */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between mb-5"
+        className={`flex items-center justify-between ${isTelegram ? "mb-2" : "mb-5"}`}
       >
         <button
           onClick={signOut}
@@ -667,7 +667,7 @@ const Profile = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.05 }}
-        className="relative overflow-hidden rounded-3xl mb-5"
+        className={`relative overflow-hidden ${isTelegram ? "rounded-2xl mb-3" : "rounded-3xl mb-5"}`}
         style={{
           background: "linear-gradient(135deg, hsl(var(--primary) / 0.15) 0%, hsl(var(--card)) 50%, hsl(var(--secondary)) 100%)",
         }}
@@ -676,8 +676,8 @@ const Profile = () => {
         <div className="absolute -top-20 -right-20 w-40 h-40 rounded-full bg-primary/10 blur-3xl" />
         <div className="absolute -bottom-10 -left-10 w-32 h-32 rounded-full bg-primary/5 blur-2xl" />
 
-        <div className="relative p-6">
-          <div className="flex items-center gap-5">
+        <div className={`relative ${isTelegram ? "p-4" : "p-6"}`}>
+          <div className={`flex items-center ${isTelegram ? "gap-3" : "gap-5"}`}>
             {/* Avatar */}
             <motion.div
               whileHover={{ scale: 1.05 }}
@@ -686,7 +686,7 @@ const Profile = () => {
               onClick={() => setShowAvatarPicker(!showAvatarPicker)}
             >
               <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-primary/60 to-primary/20 blur-sm" />
-              <Avatar className={`relative border-2 border-primary/30 shadow-xl shadow-primary/10 ${isMobile ? "w-20 h-20" : "w-24 h-24"}`}>
+              <Avatar className={`relative border-2 border-primary/30 shadow-xl shadow-primary/10 ${isTelegram ? "w-16 h-16" : isMobile ? "w-20 h-20" : "w-24 h-24"}`}>
                 {profile.avatar_url ? (
                   <AvatarImage src={profile.avatar_url} alt={displayName} />
                 ) : null}
@@ -794,7 +794,7 @@ const Profile = () => {
 
       {/* Language choice */}
       {!languageLocked ? (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass-card p-4 mb-5 space-y-3 rounded-2xl">
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className={`glass-card p-4 ${isTelegram ? "mb-3" : "mb-5"} space-y-3 rounded-2xl`}>
           <div className="flex items-center gap-2">
             <Globe className="w-4 h-4 text-primary" />
             <p className="text-sm font-display font-semibold text-foreground">
@@ -838,7 +838,7 @@ const Profile = () => {
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.12 }}
-        className={`grid gap-2.5 mb-5 ${isMobile ? "grid-cols-4" : "grid-cols-4"}`}
+        className={`grid gap-2 ${isTelegram ? "grid-cols-4 mb-3" : "grid-cols-4 gap-2.5 mb-5"}`}
       >
         <StatCard icon={<Coins className="w-4 h-4" />} value={balance} label={t("coinsLabel")} color="from-yellow-500/20 to-amber-600/10" />
         <StatCard icon={<BookOpen className="w-4 h-4" />} value={wordsLearned} label={t("wordsLearned")} color="from-blue-500/20 to-cyan-500/10" />
@@ -851,7 +851,7 @@ const Profile = () => {
 
       {/* Gift shelf */}
       {user && (
-        <div className="mb-5">
+        <div className={isTelegram ? "mb-3" : "mb-5"}>
           <GiftShelf userId={user.id} />
         </div>
       )}
@@ -861,7 +861,7 @@ const Profile = () => {
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.18 }}
-        className={`gap-2.5 mb-5 ${isMobile ? "flex flex-col" : "grid grid-cols-2"}`}
+        className={`${isTelegram ? "gap-1.5 mb-3" : "gap-2.5 mb-5"} ${isMobile ? "flex flex-col" : "grid grid-cols-2"}`}
       >
         <NavButton icon={<Award className="w-4.5 h-4.5" />} label={t("leaderboardTitle")} subtitle={`${totalXP} XP`} onClick={() => setScreen("leaderboard")} iconBg="bg-primary/15 text-primary" />
         <NavButton icon={<Trophy className="w-4.5 h-4.5" />} label={t("achievementsTitle")} onClick={() => setScreen("achievements")} iconBg="bg-amber-500/15 text-amber-400" />
