@@ -734,30 +734,7 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
     } catch { /* camera not available */ }
   };
 
-  const flipVideoCamera = async () => {
-    const newFacing = videoFacingMode === "user" ? "environment" : "user";
-    setVideoFacingMode(newFacing);
-    setVideoFlipping(true);
-    // Stop current stream & recorder without sending
-    const mr = videoRecorderRef.current;
-    if (mr && mr.state !== "inactive") mr.stop();
-    videoStreamRef.current?.getTracks().forEach(t => t.stop());
-    if (videoRef.current) videoRef.current.srcObject = null;
-    // Restart with new facing, keep accumulated chunks
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: newFacing, width: 480, height: 480 }, audio: true });
-      videoStreamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
-      }
-      const newMr = new MediaRecorder(stream, { mimeType: "video/webm" });
-      newMr.ondataavailable = (e) => { if (e.data.size > 0) videoChunksRef.current.push(e.data); };
-      newMr.start(500);
-      videoRecorderRef.current = newMr;
-    } catch { /* camera not available */ }
-    setTimeout(() => setVideoFlipping(false), 500);
-  };
+  // No camera flip — front only
 
   const stopVideoCircle = async () => {
     clearInterval(videoTimerRef.current);
