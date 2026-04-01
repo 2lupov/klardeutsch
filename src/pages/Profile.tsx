@@ -851,7 +851,7 @@ const Profile = () => {
 
       {/* Gift shelf */}
       {user && (
-        <div className="mb-5">
+        <div className={isTelegram ? "mb-3" : "mb-5"}>
           <GiftShelf userId={user.id} />
         </div>
       )}
