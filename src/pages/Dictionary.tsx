@@ -80,6 +80,8 @@ const Dictionary = () => {
   const [lookupWord, setLookupWord] = useState("");
   const [lookupResult, setLookupResult] = useState("");
   const [lookupLoading, setLookupLoading] = useState(false);
+  const [suggestions, setSuggestions] = useState<{ german: string; article: string | null }[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   useEffect(() => {
     if (!user) return;
