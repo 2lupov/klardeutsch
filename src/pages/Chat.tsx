@@ -781,7 +781,14 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
         )}
       </AnimatePresence>
 
-      {/* Video circle recording overlay */}
+      {/* Sticker picker */}
+      <StickerPicker
+        open={showStickerPicker}
+        onClose={() => setShowStickerPicker(false)}
+        onSelect={(stickerId) => { onSendText(`${STICKER_PREFIX}${stickerId}]`); setShowStickerPicker(false); }}
+      />
+
+
       <AnimatePresence>
         {recordingVideo && (
           <motion.div
