@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Search, Loader2, Sparkles, BookOpen, Volume2 } from "lucide-react";
+import { ArrowLeft, Search, Loader2, Sparkles, BookOpen } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import Panda3D from "@/components/Panda3D";
 import pandaStudying from "@/assets/mascot/panda-studying.png";
