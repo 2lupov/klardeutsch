@@ -16,6 +16,7 @@ const AppLayout = () => {
   const { user, loading } = useAuth();
   const { isMobile } = usePlatform();
   const navigate = useNavigate();
+  const location = useLocation();
   const [nicknameChecked, setNicknameChecked] = useState(false);
   const [hasNickname, setHasNickname] = useState(true);
 
