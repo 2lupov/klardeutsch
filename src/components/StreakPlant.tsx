@@ -184,18 +184,10 @@ const StreakPlant = ({ streak, canClaim, compact = false }: StreakPlantProps) =>
           className="relative flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-all overflow-hidden"
         >
           <span className={`text-xl md:text-2xl ${stageIdx === 0 ? "opacity-60" : ""}`}>🐼</span>
-          {streak > 0 && (
-            <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-primary text-primary-foreground text-[9px] font-bold flex items-center justify-center">
-              {streak}
-            </span>
-          )}
-          {canClaim && (
-            <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-background animate-pulse" />
-          )}
         </button>
 
         <Dialog open={showDialog} onOpenChange={setShowDialog}>
-          <DialogContent className="p-0 border-0 bg-transparent shadow-none max-w-sm md:max-w-md overflow-hidden rounded-2xl">
+          <DialogContent className="p-0 border-0 bg-transparent shadow-none max-w-sm md:max-w-md overflow-hidden rounded-2xl [&>button.absolute]:hidden">
             <PandaSceneCard
               stage={stage}
               stageIdx={stageIdx}
@@ -203,6 +195,7 @@ const StreakPlant = ({ streak, canClaim, compact = false }: StreakPlantProps) =>
               motivation={motivation}
               progressToNext={progressToNext}
               isRu={isRu}
+              onClose={() => setShowDialog(false)}
             />
           </DialogContent>
         </Dialog>
@@ -231,7 +224,7 @@ const StreakPlant = ({ streak, canClaim, compact = false }: StreakPlantProps) =>
       </motion.button>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="p-0 border-0 bg-transparent shadow-none max-w-sm md:max-w-md overflow-hidden rounded-2xl">
+        <DialogContent className="p-0 border-0 bg-transparent shadow-none max-w-sm md:max-w-md overflow-hidden rounded-2xl [&>button.absolute]:hidden">
           <PandaSceneCard
             stage={stage}
             stageIdx={stageIdx}
@@ -239,6 +232,7 @@ const StreakPlant = ({ streak, canClaim, compact = false }: StreakPlantProps) =>
             motivation={motivation}
             progressToNext={progressToNext}
             isRu={isRu}
+            onClose={() => setShowDialog(false)}
           />
         </DialogContent>
       </Dialog>
@@ -254,9 +248,10 @@ interface PandaSceneCardProps {
   motivation: string;
   progressToNext: number;
   isRu: boolean;
+  onClose?: () => void;
 }
 
-const PandaSceneCard = ({ stage, stageIdx, streak, motivation, progressToNext, isRu }: PandaSceneCardProps) => (
+const PandaSceneCard = ({ stage, stageIdx, streak, motivation, progressToNext, isRu, onClose }: PandaSceneCardProps) => (
   <motion.div
     className="relative w-full overflow-hidden rounded-2xl"
     style={{ aspectRatio: "3/4" }}
@@ -266,6 +261,16 @@ const PandaSceneCard = ({ stage, stageIdx, streak, motivation, progressToNext, i
   >
     {/* Mountain background */}
     <MountainScene />
+
+    {/* Close button */}
+    {onClose && (
+      <button
+        onClick={onClose}
+        className="absolute top-3 right-3 z-20 w-8 h-8 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/50 transition-colors"
+      >
+        <span className="text-lg leading-none">×</span>
+      </button>
+    )}
 
     {/* Content overlay */}
     <div className="relative z-10 flex flex-col items-center justify-between h-full p-5">
