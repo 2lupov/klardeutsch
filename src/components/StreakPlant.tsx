@@ -184,14 +184,6 @@ const StreakPlant = ({ streak, canClaim, compact = false }: StreakPlantProps) =>
           className="relative flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-all overflow-hidden"
         >
           <span className={`text-xl md:text-2xl ${stageIdx === 0 ? "opacity-60" : ""}`}>🐼</span>
-          {streak > 0 && (
-            <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-primary text-primary-foreground text-[9px] font-bold flex items-center justify-center">
-              {streak}
-            </span>
-          )}
-          {canClaim && (
-            <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-background animate-pulse" />
-          )}
         </button>
 
         <Dialog open={showDialog} onOpenChange={setShowDialog}>
