@@ -33,6 +33,7 @@ interface ProgressRow {
 
 interface ProfileData {
   display_name: string | null;
+  nickname: string | null;
   avatar_url: string | null;
   telegram_chat_id: number | null;
   nickname_changed_at: string | null;
