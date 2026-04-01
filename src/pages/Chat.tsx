@@ -1302,6 +1302,7 @@ const FindUsers = ({ onSelectUser }: { onSelectUser: (uid: string) => void }) =>
 const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void }) => {
   const { user } = useAuth();
   const { lang } = useLanguage();
+  const kvh = useKeyboardHeight();
   const [peer, setPeer] = useState<(Profile & { last_active?: string | null }) | null>(null);
   const [messages, setMessages] = useState<DirectMsg[]>([]);
   const endRef = useRef<HTMLDivElement>(null);
