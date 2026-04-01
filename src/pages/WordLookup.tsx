@@ -144,6 +144,7 @@ const WordLookup = () => {
     setFallbackResult("");
     setSearched(true);
     setShowSuggestions(false);
+    setSaved(false);
     try {
       const { data, error } = await supabase.functions.invoke("lookup-word", {
         body: { word: word.trim(), lang },
