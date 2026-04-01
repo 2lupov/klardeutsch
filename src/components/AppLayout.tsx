@@ -58,9 +58,11 @@ const AppLayout = () => {
 
   const isChat = location.pathname === "/chat";
 
+  const { viewportHeight } = usePlatform();
+
   if (isMobile) {
     return (
-      <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
+      <div className="bg-background flex flex-col overflow-hidden" style={{ height: viewportHeight }}>
         <EditModeToolbar />
         <LofiFloatingPlayer />
         <ListeningFloatingPlayer />
