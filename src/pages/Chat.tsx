@@ -655,6 +655,7 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
   scrollToBottom?: () => void;
 }) => {
   const { lang } = useLanguage();
+  const keyboardBottom = useKeyboardBottom();
   const [text, setText] = useState("");
   const { recording, elapsed, start, stop, cancel } = useVoiceRecorder();
   const [uploading, setUploading] = useState(false);
