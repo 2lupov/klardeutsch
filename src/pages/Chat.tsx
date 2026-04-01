@@ -1199,6 +1199,7 @@ const CommunityChat = () => {
         userId={user?.id || ""}
         replyTo={replyTo}
         onCancelReply={() => setReplyTo(null)}
+        scrollToBottom={() => endRef.current?.scrollIntoView({ behavior: "smooth" })}
       />
 
       {/* Profile dialog */}
