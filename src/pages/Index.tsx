@@ -3,7 +3,7 @@ import { Level, CategoryData } from "@/data/lessons";
 import { fetchLevelData, fetchTopics } from "@/hooks/useLessons";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
-import TheoryRenderer from "@/components/course/TheoryRenderer";
+
 import { useProgress } from "@/hooks/useProgress";
 import { usePlatform } from "@/hooks/usePlatform";
 import { useDailySummary } from "@/hooks/useDailySummary";
