@@ -812,7 +812,7 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
                 animate={{ scale: [1, 1.08, 1] }}
                 transition={{ duration: 1.2, repeat: Infinity }}
               />
-            </div>
+            </motion.div>
             <div className="flex items-center gap-2 mt-3">
               <motion.div animate={{ scale: [1, 1.4, 1] }} transition={{ duration: 1, repeat: Infinity }} className="w-2 h-2 rounded-full bg-destructive" />
               <span className="text-sm font-mono text-muted-foreground">
