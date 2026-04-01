@@ -672,6 +672,7 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
   const flipVideoCamera = async () => {
     const newFacing = videoFacingMode === "user" ? "environment" : "user";
     setVideoFacingMode(newFacing);
+    setVideoFlipping(true);
     // Stop current stream & recorder without sending
     const mr = videoRecorderRef.current;
     if (mr && mr.state !== "inactive") mr.stop();
@@ -690,6 +691,7 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
       newMr.start(500);
       videoRecorderRef.current = newMr;
     } catch { /* camera not available */ }
+    setTimeout(() => setVideoFlipping(false), 500);
   };
 
   const stopVideoCircle = async () => {
