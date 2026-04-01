@@ -636,13 +636,13 @@ const Profile = () => {
       </div>
 
       {/* Profile header */}
-      <div className="flex items-center gap-4 mb-4">
+      <div className={`flex items-center gap-4 mb-4 ${!isMobile ? "gap-6" : ""}`}>
         <div className="relative group">
-          <Avatar className="w-14 h-14 border-2 border-primary/20">
+          <Avatar className={`border-2 border-primary/20 ${isMobile ? "w-14 h-14" : "w-20 h-20"}`}>
             {profile.avatar_url ? (
               <AvatarImage src={profile.avatar_url} alt={displayName} />
             ) : null}
-            <AvatarFallback className="text-lg font-display font-bold bg-primary/10 text-primary">
+            <AvatarFallback className={`font-display font-bold bg-primary/10 text-primary ${isMobile ? "text-lg" : "text-2xl"}`}>
               {initials}
             </AvatarFallback>
           </Avatar>
@@ -676,7 +676,7 @@ const Profile = () => {
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <h1 className="font-display text-xl font-bold text-foreground truncate">{displayName}</h1>
+              <h1 className={`font-display font-bold text-foreground truncate ${isMobile ? "text-xl" : "text-2xl"}`}>{displayName}</h1>
               <button onClick={startEdit} className="p-1 rounded-md text-muted-foreground hover:text-foreground transition-colors">
                 <Pencil className="w-3.5 h-3.5" />
               </button>
