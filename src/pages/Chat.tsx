@@ -15,25 +15,23 @@ import StickerPicker, { isStickerMessage, getStickerSrc, STICKER_PREFIX } from "
 import { Smile } from "lucide-react";
 import chatBgImage from "@/assets/chat-bg.png";
 
-/* ───── Visual-viewport height for iOS keyboard handling ───── */
-const useViewportHeight = () => {
-  const [vh, setVh] = useState(() => {
-    if (typeof window !== "undefined" && window.visualViewport) {
-      const initial = window.visualViewport.height;
-      if (initial && initial > 50) return `${initial}px`;
-    }
-    return "100dvh";
-  });
+/* ───── iOS keyboard: track bottom offset so input sticks to keyboard ───── */
+const useKeyboardBottom = () => {
+  const [bottom, setBottom] = useState(0);
 
   useEffect(() => {
     const vv = window.visualViewport;
     if (!vv) return;
 
     const update = () => {
-      const h = vv.height;
-      if (h && h > 50) {
-        setVh(`${h}px`);
-      }
+      // offsetTop = how far the visual viewport is scrolled from layout viewport top
+      // When keyboard opens, visualViewport shrinks and may have offsetTop > 0
+      // bottom = distance from visual viewport bottom to layout viewport bottom
+      const layoutH = window.innerHeight;
+      const vvH = vv.height;
+      const vvTop = vv.offsetTop;
+      const gap = layoutH - vvH - vvTop;
+      setBottom(Math.max(0, gap));
     };
 
     update();
@@ -46,7 +44,7 @@ const useViewportHeight = () => {
     };
   }, []);
 
-  return vh;
+  return bottom;
 };
 
 /* ───── Reply info type ───── */
@@ -657,6 +655,7 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
   scrollToBottom?: () => void;
 }) => {
   const { lang } = useLanguage();
+  const keyboardBottom = useKeyboardBottom();
   const [text, setText] = useState("");
   const { recording, elapsed, start, stop, cancel } = useVoiceRecorder();
   const [uploading, setUploading] = useState(false);
@@ -805,7 +804,8 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
   return (
     <motion.div
       layout
-      className="relative border-t border-border bg-card/80 backdrop-blur-xl"
+      className="fixed left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur-xl rounded-t-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.3)]"
+      style={{ bottom: keyboardBottom }}
     >
       {/* Reply preview */}
       <AnimatePresence>
@@ -1175,7 +1175,7 @@ const CommunityChat = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto p-4 space-y-3" style={{ backgroundImage: `url(${chatBgImage})`, backgroundSize: '35%', backgroundPosition: 'center 45%', backgroundRepeat: 'no-repeat', backgroundAttachment: 'local' }}>
+      <div className="flex-1 overflow-y-auto p-4 pb-20 space-y-3" style={{ backgroundImage: `url(${chatBgImage})`, backgroundSize: '35%', backgroundPosition: 'center 45%', backgroundRepeat: 'no-repeat', backgroundAttachment: 'local' }}>
         {messages.length === 0 && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16">
             <p className="text-4xl mb-3">💬</p>
@@ -1447,7 +1447,7 @@ const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void
         </button>
       </motion.div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-2.5" style={{ backgroundImage: `url(${chatBgImage})`, backgroundSize: '35%', backgroundPosition: 'center 45%', backgroundRepeat: 'no-repeat', backgroundAttachment: 'local' }}>
+      <div className="flex-1 overflow-y-auto p-4 pb-20 space-y-2.5" style={{ backgroundImage: `url(${chatBgImage})`, backgroundSize: '35%', backgroundPosition: 'center 45%', backgroundRepeat: 'no-repeat', backgroundAttachment: 'local' }}>
         {messages.map((m, i) => {
           const isMe = m.sender_id === user?.id;
           const msg = m as any;
@@ -1613,7 +1613,6 @@ const DMList = ({ onSelectPeer }: { onSelectPeer: (uid: string) => void }) => {
 const Chat = () => {
   const navigate = useNavigate();
   const { lang } = useLanguage();
-  const viewportH = useViewportHeight();
   const [tab, setTab] = useState<"community" | "dm" | "find">("community");
   const [selectedPeer, setSelectedPeer] = useState<string | null>(null);
 
@@ -1628,7 +1627,7 @@ const Chat = () => {
         animate={{ x: 0 }}
         exit={{ x: "100%" }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="flex flex-col" style={{ height: viewportH }}
+        className="flex flex-col h-full"
       >
         <DMConversation peerId={selectedPeer} onBack={() => setSelectedPeer(null)} />
       </motion.div>
@@ -1636,7 +1635,7 @@ const Chat = () => {
   }
 
   return (
-    <div className="flex flex-col" style={{ height: viewportH }}>
+    <div className="flex flex-col h-full">
       {/* Header */}
       <motion.div
         initial={{ y: -20, opacity: 0 }}
