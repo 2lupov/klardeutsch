@@ -184,6 +184,23 @@ const Dictionary = () => {
     setAdding(false);
   };
 
+  const handleLookup = async () => {
+    if (!lookupWord.trim()) return;
+    setLookupLoading(true);
+    setLookupResult("");
+    try {
+      const { data, error } = await supabase.functions.invoke("lookup-word", {
+        body: { word: lookupWord.trim(), lang },
+      });
+      if (error) throw error;
+      setLookupResult(data?.result || (lang === "uk" ? "Нічого не знайдено" : "Ничего не найдено"));
+    } catch (e: any) {
+      toast({ title: lang === "uk" ? "Помилка пошуку" : "Ошибка поиска", variant: "destructive" });
+    } finally {
+      setLookupLoading(false);
+    }
+  };
+
   const wordsWithType = useMemo(() => words.map(w => ({ ...w, wordType: detectWordType(w) })), [words]);
 
   const filtered = useMemo(() => wordsWithType.filter((w) => {
