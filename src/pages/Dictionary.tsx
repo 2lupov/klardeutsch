@@ -76,36 +76,7 @@ const Dictionary = () => {
   const [adding, setAdding] = useState(false);
   const [wordTypeFilter, setWordTypeFilter] = useState<WordType | "all">("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [showLookup, setShowLookup] = useState(false);
-  const [lookupWord, setLookupWord] = useState("");
-  const [lookupResult, setLookupResult] = useState("");
-  const [lookupLoading, setLookupLoading] = useState(false);
-  const [suggestions, setSuggestions] = useState<{ german: string; article: string | null }[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-
-  // Autocomplete: fetch suggestions from vocab_cards as user types
-  useEffect(() => {
-    const q = lookupWord.trim().toLowerCase();
-    if (q.length < 2) { setSuggestions([]); setShowSuggestions(false); return; }
-    const timer = setTimeout(async () => {
-      const { data } = await supabase
-        .from("vocab_cards")
-        .select("german, article")
-        .ilike("german", `${q}%`)
-        .order("german")
-        .limit(8);
-      if (data && data.length > 0) {
-        // deduplicate
-        const unique = Array.from(new Map(data.map(d => [d.german.toLowerCase(), d])).values());
-        setSuggestions(unique);
-        setShowSuggestions(true);
-      } else {
-        setSuggestions([]);
-        setShowSuggestions(false);
-      }
-    }, 250);
-    return () => clearTimeout(timer);
-  }, [lookupWord]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!user) return;
