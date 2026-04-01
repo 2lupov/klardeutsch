@@ -488,8 +488,8 @@ const MessageBubble = ({ isMe, content, audioUrl, imageUrl, imageUrls, fileUrl, 
           <div className={`flex items-center gap-1.5 mt-0.5 px-1 ${isMe ? "flex-row-reverse" : ""}`}>
             <p className="text-[9px] text-muted-foreground/50">{time}</p>
             {onReply && (
-              <button onClick={onReply} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground/40 hover:text-primary">
-                <Reply className="w-3 h-3" />
+              <button onClick={onReply} className="opacity-60 md:opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground/60 hover:text-primary active:text-primary p-1">
+                <Reply className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
@@ -915,8 +915,8 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
               ) : (
                 <div className="flex items-center gap-1">
                   <motion.button initial={{ scale: 0 }} animate={{ scale: 1 }} whileTap={{ scale: 0.85 }} onClick={() => startVideoCircle()} disabled={uploading}
-                    className="w-10 h-10 rounded-full bg-muted hover:bg-primary/10 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors">
-                    <Circle className="w-4 h-4" />
+                     className="w-10 h-10 rounded-full bg-muted hover:bg-primary/10 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors">
+                     <Video className="w-4 h-4" />
                   </motion.button>
                   <motion.button initial={{ scale: 0 }} animate={{ scale: 1 }} whileTap={{ scale: 0.85 }} onClick={start} disabled={uploading}
                     className="w-10 h-10 rounded-full bg-muted hover:bg-primary/10 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors">
@@ -1358,9 +1358,13 @@ const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void
               fileUrl={m.file_url}
               fileName={m.file_name}
               time={format(new Date(m.created_at), "HH:mm")}
+              senderName={senderName}
+              avatarUrl={isMe ? undefined : peer?.avatar_url}
+              senderId={isMe ? undefined : peerId}
               replyToContent={msg.reply_to_content}
               replyToSender={msg.reply_to_sender}
               onReply={() => setReplyTo({ id: m.id, content: m.content, senderName: isMe ? "Вы" : (peer?.display_name || "?") })}
+              onAvatarClick={(uid) => setProfileOpen(true)}
               index={i}
             />
           );
