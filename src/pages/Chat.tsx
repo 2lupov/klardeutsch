@@ -14,42 +14,32 @@ import MediaEmbed, { hasMediaEmbed } from "@/components/chat/MediaEmbed";
 import StickerPicker, { isStickerMessage, getStickerSrc, STICKER_PREFIX } from "@/components/chat/StickerPicker";
 import { Smile } from "lucide-react";
 
-/* ───── Keyboard inset (follows keyboard height + movement) ───── */
-const useKeyboardInset = () => {
-  const [inset, setInset] = useState(0);
+/* ───── Visual-viewport height for iOS keyboard handling ───── */
+const useViewportHeight = () => {
+  const [vh, setVh] = useState("100%");
 
   useEffect(() => {
     const vv = window.visualViewport;
     if (!vv) return;
 
     const update = () => {
-      const active = document.activeElement as HTMLElement | null;
-      const isEditable = !!active && (
-        active.tagName === "INPUT" ||
-        active.tagName === "TEXTAREA" ||
-        active.isContentEditable
-      );
-
-      const rawInset = Math.max(0, window.innerHeight - (vv.height + vv.offsetTop));
-      const nextInset = isEditable && rawInset > 80 ? rawInset : 0;
-      setInset((prev) => (Math.abs(prev - nextInset) < 1 ? prev : nextInset));
+      // On iOS PWA, when keyboard opens visualViewport shrinks.
+      // We set the container to exactly that height so the input
+      // bar stays just above the keyboard.
+      setVh(`${vv.height}px`);
     };
 
     update();
     vv.addEventListener("resize", update);
     vv.addEventListener("scroll", update);
-    window.addEventListener("focusin", update);
-    window.addEventListener("focusout", update);
 
     return () => {
       vv.removeEventListener("resize", update);
       vv.removeEventListener("scroll", update);
-      window.removeEventListener("focusin", update);
-      window.removeEventListener("focusout", update);
     };
   }, []);
 
-  return inset;
+  return vh;
 };
 
 /* ───── Reply info type ───── */
