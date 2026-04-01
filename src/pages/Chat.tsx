@@ -579,20 +579,7 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
   const videoChunksRef = useRef<Blob[]>([]);
   const videoTimerRef = useRef<ReturnType<typeof setInterval>>();
   const videoStreamRef = useRef<MediaStream | null>(null);
-  const [keyboardOffset, setKeyboardOffset] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  // Keyboard-aware offset via VisualViewport API
-  useEffect(() => {
-    const vv = window.visualViewport;
-    if (!vv) return;
-    const onResize = () => {
-      const diff = window.innerHeight - vv.height;
-      setKeyboardOffset(diff > 50 ? diff : 0);
-    };
-    vv.addEventListener("resize", onResize);
-    return () => vv.removeEventListener("resize", onResize);
-  }, []);
 
   const handleSend = () => {
     if (pendingImages.length > 0) { handleSendImages(); return; }
