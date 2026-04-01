@@ -667,7 +667,7 @@ const Profile = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.05 }}
-        className="relative overflow-hidden rounded-3xl mb-5"
+        className={`relative overflow-hidden ${isTelegram ? "rounded-2xl mb-3" : "rounded-3xl mb-5"}`}
         style={{
           background: "linear-gradient(135deg, hsl(var(--primary) / 0.15) 0%, hsl(var(--card)) 50%, hsl(var(--secondary)) 100%)",
         }}
