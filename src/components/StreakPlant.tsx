@@ -183,14 +183,7 @@ const StreakPlant = ({ streak, canClaim, compact = false }: StreakPlantProps) =>
           onClick={() => setShowDialog(true)}
           className="relative flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-all overflow-hidden"
         >
-          <img
-            src={stage.img}
-            alt="Panda"
-            className={`w-8 h-8 md:w-10 md:h-10 object-contain ${stageIdx === 0 ? "opacity-60" : ""}`}
-            loading="lazy"
-            width={512}
-            height={512}
-          />
+          <span className={`text-xl md:text-2xl ${stageIdx === 0 ? "opacity-60" : ""}`}>🐼</span>
           {streak > 0 && (
             <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-primary text-primary-foreground text-[9px] font-bold flex items-center justify-center">
               {streak}
