@@ -240,11 +240,12 @@ const StreakPlant = ({ streak, canClaim, compact = false }: StreakPlantProps) =>
         <DialogContent className="p-0 border-0 bg-transparent shadow-none max-w-sm md:max-w-md overflow-hidden rounded-2xl [&>button.absolute]:hidden">
           <PandaSceneCard
             stage={stage}
-            stageIdx={stageIdx}
+            stageIdx={night ? 0 : stageIdx}
             streak={streak}
             motivation={motivation}
             progressToNext={progressToNext}
             isRu={isRu}
+            isNight={night}
             onClose={() => setShowDialog(false)}
           />
         </DialogContent>
