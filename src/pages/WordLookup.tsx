@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Search, Loader2, Sparkles, BookOpen, Languages, Lightbulb, Table2, Layers } from "lucide-react";
-import Panda3D from "@/components/Panda3D";
 import pandaWriting from "@/assets/mascot/panda-writing.png";
 
 interface WordData {
