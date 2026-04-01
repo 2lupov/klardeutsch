@@ -360,61 +360,64 @@ const Dictionary = () => {
         </div>
 
         {/* Stats mini-bar */}
-        <div className="flex flex-wrap gap-2 pb-1">
-          {[
-            { key: "all" as const, label: lang === "uk" ? "Усі" : "Все", count: stats.total, color: "bg-primary/10 text-primary border-primary/20" },
-            { key: "difficult" as const, label: "★", count: stats.difficult, color: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
-            { key: "custom" as const, label: "✎", count: stats.custom, color: "bg-violet-500/10 text-violet-400 border-violet-500/20" },
-          ].map((f) => (
-            <button
-              key={f.key}
-              onClick={() => setFilter(f.key)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all whitespace-nowrap ${
-                filter === f.key ? f.color : "bg-secondary border-border text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {f.label}
-              <span className="opacity-70">{f.count}</span>
-            </button>
-          ))}
-          <div className="w-px bg-border mx-1 self-stretch" />
-          {(["der", "die", "das"] as const).map((a) => {
-            const style = ARTICLE_COLORS[a];
-            return (
+        <div className="flex items-start justify-between gap-3 pb-1">
+          <div className="flex flex-wrap gap-2">
+            {[
+              { key: "all" as const, label: lang === "uk" ? "Усі" : "Все", count: stats.total, color: "bg-primary/10 text-primary border-primary/20" },
+              { key: "difficult" as const, label: "★", count: stats.difficult, color: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
+              { key: "custom" as const, label: "✎", count: stats.custom, color: "bg-violet-500/10 text-violet-400 border-violet-500/20" },
+            ].map((f) => (
               <button
-                key={a}
-                onClick={() => setArticleFilter(articleFilter === a ? "all" : a)}
+                key={f.key}
+                onClick={() => setFilter(f.key)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all whitespace-nowrap ${
-                  articleFilter === a
-                    ? `${style.bg} ${style.text} ${style.border}`
-                    : "bg-secondary border-border text-muted-foreground hover:text-foreground"
+                  filter === f.key ? f.color : "bg-secondary border-border text-muted-foreground hover:text-foreground"
                 }`}
               >
-                <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />
-                {a}
-                <span className="opacity-70">{stats[a]}</span>
+                {f.label}
+                <span className="opacity-70">{f.count}</span>
               </button>
-            );
-          })}
-          <div className="w-px bg-border mx-1 self-stretch" />
-          {(["nomen", "verb", "adjektiv", "andere"] as WordType[]).map((wt) => {
-            const meta = WORD_TYPE_META[wt];
-            return (
-              <button
-                key={wt}
-                onClick={() => setWordTypeFilter(wordTypeFilter === wt ? "all" : wt)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all whitespace-nowrap ${
-                  wordTypeFilter === wt
-                    ? `${meta.bg} ${meta.text} ${meta.border}`
-                    : "bg-secondary border-border text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <span>{meta.emoji}</span>
-                {lang === "uk" ? meta.labelUk : meta.label}
-                <span className="opacity-70">{stats[wt]}</span>
-              </button>
-            );
-          })}
+            ))}
+            <div className="w-px bg-border mx-1 self-stretch" />
+            {(["der", "die", "das"] as const).map((a) => {
+              const style = ARTICLE_COLORS[a];
+              return (
+                <button
+                  key={a}
+                  onClick={() => setArticleFilter(articleFilter === a ? "all" : a)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all whitespace-nowrap ${
+                    articleFilter === a
+                      ? `${style.bg} ${style.text} ${style.border}`
+                      : "bg-secondary border-border text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />
+                  {a}
+                  <span className="opacity-70">{stats[a]}</span>
+                </button>
+              );
+            })}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {(["nomen", "verb", "adjektiv", "andere"] as WordType[]).map((wt) => {
+              const meta = WORD_TYPE_META[wt];
+              return (
+                <button
+                  key={wt}
+                  onClick={() => setWordTypeFilter(wordTypeFilter === wt ? "all" : wt)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all whitespace-nowrap ${
+                    wordTypeFilter === wt
+                      ? `${meta.bg} ${meta.text} ${meta.border}`
+                      : "bg-secondary border-border text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <span>{meta.emoji}</span>
+                  {lang === "uk" ? meta.labelUk : meta.label}
+                  <span className="opacity-70">{stats[wt]}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
