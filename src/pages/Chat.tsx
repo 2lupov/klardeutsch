@@ -13,6 +13,7 @@ import UserProfileDialog from "@/components/UserProfileDialog";
 import MediaEmbed, { hasMediaEmbed } from "@/components/chat/MediaEmbed";
 import StickerPicker, { isStickerMessage, getStickerSrc, STICKER_PREFIX } from "@/components/chat/StickerPicker";
 import { Smile } from "lucide-react";
+import chatBgImage from "@/assets/chat-bg.png";
 
 /* ───── Visual-viewport height for iOS keyboard handling ───── */
 const useViewportHeight = () => {
@@ -1170,7 +1171,7 @@ const CommunityChat = () => {
 
   return (
     <div className="flex flex-col" style={{ height: viewportH }}>
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div className="flex-1 overflow-y-auto p-4 space-y-3" style={{ backgroundImage: `url(${chatBgImage})`, backgroundSize: '35%', backgroundPosition: 'center 45%', backgroundRepeat: 'no-repeat', backgroundAttachment: 'local' }}>
         {messages.length === 0 && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16">
             <p className="text-4xl mb-3">💬</p>
@@ -1444,7 +1445,7 @@ const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void
         </button>
       </motion.div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-2.5">
+      <div className="flex-1 overflow-y-auto p-4 space-y-2.5" style={{ backgroundImage: `url(${chatBgImage})`, backgroundSize: '35%', backgroundPosition: 'center 45%', backgroundRepeat: 'no-repeat', backgroundAttachment: 'local' }}>
         {messages.map((m, i) => {
           const isMe = m.sender_id === user?.id;
           const msg = m as any;
