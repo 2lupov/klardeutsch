@@ -360,8 +360,9 @@ const Dictionary = () => {
         </div>
 
         {/* Stats mini-bar */}
-        <div className="flex items-start justify-between gap-3 pb-1">
-          <div className="flex flex-wrap gap-2">
+        <div className="space-y-2 pb-1">
+          {/* Row 1: Source filters + Article filters */}
+          <div className="flex items-center gap-2">
             {[
               { key: "all" as const, label: lang === "uk" ? "Усі" : "Все", count: stats.total, color: "bg-primary/10 text-primary border-primary/20" },
               { key: "difficult" as const, label: "★", count: stats.difficult, color: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
@@ -378,7 +379,7 @@ const Dictionary = () => {
                 <span className="opacity-70">{f.count}</span>
               </button>
             ))}
-            <div className="w-px bg-border mx-1 self-stretch" />
+            <div className="w-px bg-border mx-1 self-stretch min-h-[24px]" />
             {(["der", "die", "das"] as const).map((a) => {
               const style = ARTICLE_COLORS[a];
               return (
@@ -397,8 +398,7 @@ const Dictionary = () => {
                 </button>
               );
             })}
-          </div>
-          <div className="flex flex-wrap gap-2">
+            <div className="w-px bg-border mx-1 self-stretch min-h-[24px]" />
             {(["nomen", "verb", "adjektiv", "andere"] as WordType[]).map((wt) => {
               const meta = WORD_TYPE_META[wt];
               return (
