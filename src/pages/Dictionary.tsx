@@ -360,7 +360,7 @@ const Dictionary = () => {
         </div>
 
         {/* Stats mini-bar */}
-        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+        <div className="flex flex-wrap gap-2 pb-1">
           {[
             { key: "all" as const, label: lang === "uk" ? "Усі" : "Все", count: stats.total, color: "bg-primary/10 text-primary border-primary/20" },
             { key: "difficult" as const, label: "★", count: stats.difficult, color: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
