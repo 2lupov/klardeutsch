@@ -1638,7 +1638,7 @@ const Chat = () => {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col" style={{ height: viewportH }}>
       {/* Header */}
       <motion.div
         initial={{ y: -20, opacity: 0 }}
