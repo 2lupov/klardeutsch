@@ -29,17 +29,17 @@ const AppLayout = () => {
     const check = async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("display_name, onboarding_completed")
+        .select("nickname, onboarding_completed")
         .eq("user_id", user.id)
         .single();
-      setHasNickname(!!data?.display_name?.trim());
+      setHasNickname(!!data?.nickname?.trim());
       if (data && !(data as any).onboarding_completed) {
         navigate("/onboarding", { replace: true });
       }
       setNicknameChecked(true);
     };
     check();
-  }, [user]);
+  }, [user, navigate]);
 
   if (loading || !nicknameChecked) {
     return (
