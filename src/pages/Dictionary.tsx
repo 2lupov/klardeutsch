@@ -592,6 +592,9 @@ const Dictionary = () => {
                         {word.level}
                       </span>
                     )}
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${typeMeta.bg} ${typeMeta.text}`}>
+                      {typeMeta.emoji}
+                    </span>
                     {word.source === "custom" && (
                       <span className="text-[10px] px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-400 font-medium">✎</span>
                     )}
