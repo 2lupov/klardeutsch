@@ -14,7 +14,7 @@ import DailyBonusDialog from "@/components/DailyBonusDialog";
 
 const AppLayout = () => {
   const { user, loading } = useAuth();
-  const { isMobile } = usePlatform();
+  const { isMobile, viewportHeight } = usePlatform();
   const navigate = useNavigate();
   const location = useLocation();
   const [nicknameChecked, setNicknameChecked] = useState(false);
@@ -33,7 +33,6 @@ const AppLayout = () => {
         .eq("user_id", user.id)
         .single();
       setHasNickname(!!data?.display_name?.trim());
-      // Check onboarding
       if (data && !(data as any).onboarding_completed) {
         navigate("/onboarding", { replace: true });
       }
@@ -57,8 +56,6 @@ const AppLayout = () => {
   }
 
   const isChat = location.pathname === "/chat";
-
-  const { viewportHeight } = usePlatform();
 
   if (isMobile) {
     return (
