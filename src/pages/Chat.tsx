@@ -1173,10 +1173,8 @@ const CommunityChat = () => {
     );
   }
 
-  const viewportH = useViewportHeight();
-
   return (
-    <div className="flex flex-col" style={{ height: viewportH }}>
+    <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto p-4 space-y-3" style={{ backgroundImage: `url(${chatBgImage})`, backgroundSize: '35%', backgroundPosition: 'center 45%', backgroundRepeat: 'no-repeat', backgroundAttachment: 'local' }}>
         {messages.length === 0 && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16">
