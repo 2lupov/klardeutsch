@@ -982,6 +982,7 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
+                onFocus={handleInputFocus}
                 placeholder={placeholder}
                 className="flex-1 bg-muted/50 border-0 focus-visible:ring-1 focus-visible:ring-primary/30 rounded-full px-4"
               />
