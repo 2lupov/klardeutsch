@@ -225,6 +225,19 @@ const Profile = () => {
   const handleSaveName = async () => {
     if (!user) return;
     const trimmed = editName.trim();
+    if (!trimmed) {
+      toast({ title: lang === "uk" ? "Ім'я не може бути порожнім" : "Имя не может быть пустым", variant: "destructive" });
+      return;
+    }
+    await supabase.from("profiles").update({ display_name: trimmed } as any).eq("user_id", user.id);
+    setProfile((p) => ({ ...p, display_name: trimmed }));
+    setEditing(false);
+    toast({ title: t("profileSaved") });
+  };
+
+  const handleSaveNickname = async () => {
+    if (!user) return;
+    const trimmed = editNickname.trim();
     if (!trimmed || !usernameRegex.test(trimmed)) {
       toast({ title: lang === "uk" ? "Нікнейм має починатися з букви, мін. 5 символів" : "Никнейм должен начинаться с буквы, мин. 5 символов", variant: "destructive" });
       return;
@@ -244,7 +257,7 @@ const Profile = () => {
     const { data: existing } = await supabase
       .from("profiles")
       .select("user_id")
-      .ilike("display_name", trimmed)
+      .ilike("nickname" as any, trimmed)
       .neq("user_id", user.id)
       .limit(1);
     if (existing && existing.length > 0) {
@@ -252,15 +265,20 @@ const Profile = () => {
       return;
     }
     const now = new Date().toISOString();
-    await supabase.from("profiles").update({ display_name: trimmed, nickname_changed_at: now } as any).eq("user_id", user.id);
-    setProfile((p) => ({ ...p, display_name: trimmed, nickname_changed_at: now }));
-    setEditing(false);
+    await supabase.from("profiles").update({ nickname: trimmed, nickname_changed_at: now } as any).eq("user_id", user.id);
+    setProfile((p) => ({ ...p, nickname: trimmed, nickname_changed_at: now }));
+    setEditingNickname(false);
     toast({ title: t("profileSaved") });
   };
 
   const startEdit = () => {
     setEditName(profile.display_name ?? "");
     setEditing(true);
+  };
+
+  const startEditNickname = () => {
+    setEditNickname(profile.nickname ?? "");
+    setEditingNickname(true);
   };
 
   if (!user || fetching) {
