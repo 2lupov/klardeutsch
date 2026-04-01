@@ -608,7 +608,7 @@ const MessageBubble = ({ isMe, content, audioUrl, imageUrl, imageUrls, fileUrl, 
 };
 
 /* ───── Chat Input Bar ───── */
-const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSendGameInvite, onSendVideoCircle, placeholder, userId, replyTo, onCancelReply }: {
+const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSendGameInvite, onSendVideoCircle, placeholder, userId, replyTo, onCancelReply, scrollToBottom }: {
   onSendText: (text: string) => void;
   onSendVoice: (audioUrl: string) => void;
   onSendImages: (imageUrls: string[]) => void;
@@ -619,6 +619,7 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
   userId: string;
   replyTo?: ReplyInfo | null;
   onCancelReply?: () => void;
+  scrollToBottom?: () => void;
 }) => {
   const { lang } = useLanguage();
   const [text, setText] = useState("");
@@ -639,6 +640,24 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
   const videoTimerRef = useRef<ReturnType<typeof setInterval>>();
   const videoStreamRef = useRef<MediaStream | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Scroll chat to bottom when keyboard opens via visualViewport
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv || !scrollToBottom) return;
+    const onResize = () => {
+      // Keyboard opened — scroll to bottom immediately
+      scrollToBottom();
+    };
+    vv.addEventListener("resize", onResize);
+    return () => vv.removeEventListener("resize", onResize);
+  }, [scrollToBottom]);
+
+  const handleInputFocus = () => {
+    // Instant scroll on focus
+    setTimeout(() => scrollToBottom?.(), 100);
+    setTimeout(() => scrollToBottom?.(), 300);
+  };
 
   const handleSend = () => {
     if (pendingImages.length > 0) { handleSendImages(); return; }
