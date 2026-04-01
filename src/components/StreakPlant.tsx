@@ -163,14 +163,21 @@ const MountainScene = () => (
   </div>
 );
 
+const NIGHT_STAGE = { img: pandaSleeping, nameRu: "Спит 🌙", nameUk: "Спить 🌙", color: "text-muted-foreground" };
+const NIGHT_MOTIVATION_RU = "Уже ночь — панда легла спать. И тебе пора! 💤";
+const NIGHT_MOTIVATION_UK = "Вже ніч — панда лягла спати. І тобі час! 💤";
+
 const StreakPlant = ({ streak, canClaim, compact = false }: StreakPlantProps) => {
   const { lang } = useLanguage();
   const isRu = lang === "ru";
   const [showDialog, setShowDialog] = useState(false);
+  const night = isNightTime();
 
   const stageIdx = useMemo(() => getStageIndex(streak, canClaim), [streak, canClaim]);
-  const stage = STAGES[stageIdx];
-  const motivation = isRu ? MOTIVATIONS_RU[stageIdx] : MOTIVATIONS_UK[stageIdx];
+  const stage = night ? NIGHT_STAGE : STAGES[stageIdx];
+  const motivation = night
+    ? (isRu ? NIGHT_MOTIVATION_RU : NIGHT_MOTIVATION_UK)
+    : (isRu ? MOTIVATIONS_RU[stageIdx] : MOTIVATIONS_UK[stageIdx]);
 
   const progressToNext = useMemo(() => {
     if (stageIdx >= 6) return 100;
