@@ -1595,6 +1595,7 @@ const DMList = ({ onSelectPeer }: { onSelectPeer: (uid: string) => void }) => {
 const Chat = () => {
   const navigate = useNavigate();
   const { lang } = useLanguage();
+  const kvh = useKeyboardHeight();
   const [tab, setTab] = useState<"community" | "dm" | "find">("community");
   const [selectedPeer, setSelectedPeer] = useState<string | null>(null);
 
