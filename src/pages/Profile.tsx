@@ -699,7 +699,30 @@ const Profile = () => {
               </button>
             </div>
           )}
-          <p className="text-xs text-muted-foreground truncate">@{profile.display_name || "nickname"}</p>
+          {editingNickname ? (
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs text-muted-foreground">@</span>
+              <input
+                value={editNickname}
+                onChange={(e) => setEditNickname(e.target.value.replace(/\s/g, "").slice(0, 20))}
+                className="min-w-0 bg-muted/50 border border-border rounded-md px-2 py-0.5 text-xs font-display font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                placeholder="nickname"
+                autoFocus
+                onKeyDown={(e) => e.key === "Enter" && handleSaveNickname()}
+              />
+              <button onClick={handleSaveNickname} className="p-0.5 rounded bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
+                <Check className="w-3 h-3" />
+              </button>
+              <button onClick={() => setEditingNickname(false)} className="p-0.5 rounded bg-muted text-muted-foreground hover:bg-muted/80 transition-colors">
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground truncate cursor-pointer hover:text-foreground transition-colors group/nick" onClick={startEditNickname}>
+              @{profile.nickname || "nickname"}
+              <Pencil className="w-2.5 h-2.5 inline-block ml-1 opacity-0 group-hover/nick:opacity-100 transition-opacity" />
+            </p>
+          )}
         </div>
 
         {/* Panda streak button */}
