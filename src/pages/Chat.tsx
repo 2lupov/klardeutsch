@@ -6,7 +6,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send, Search, MessageCircle, Users, Mail, ArrowLeft, Mic, Square, Play, Pause, ImagePlus, X, Paperclip, FileText, Download, Gamepad2, Video, Circle, Reply, CornerUpRight, RefreshCw } from "lucide-react";
+import { Send, Search, MessageCircle, Users, Mail, ArrowLeft, Mic, Square, Play, Pause, ImagePlus, X, Paperclip, FileText, Download, Gamepad2, Video, Circle, Reply, CornerUpRight, RefreshCw, MoreHorizontal } from "lucide-react";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import UserProfileDialog from "@/components/UserProfileDialog";
@@ -630,8 +630,7 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
    const [showStickerPicker, setShowStickerPicker] = useState(false);
    const [recordingVideo, setRecordingVideo] = useState(false);
    const [videoElapsed, setVideoElapsed] = useState(0);
-   const [videoFacingMode, setVideoFacingMode] = useState<"user" | "environment">("user");
-   const [videoFlipping, setVideoFlipping] = useState(false);
+   const [showAttachMenu, setShowAttachMenu] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -714,10 +713,10 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
     });
   };
 
-  // Video circle recording
-   const startVideoCircle = async (facing: "user" | "environment" = videoFacingMode) => {
+  // Video circle recording — front camera only, no mirror
+   const startVideoCircle = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: 480, height: 480 }, audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: 480, height: 480 }, audio: true });
       videoStreamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
@@ -734,30 +733,7 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
     } catch { /* camera not available */ }
   };
 
-  const flipVideoCamera = async () => {
-    const newFacing = videoFacingMode === "user" ? "environment" : "user";
-    setVideoFacingMode(newFacing);
-    setVideoFlipping(true);
-    // Stop current stream & recorder without sending
-    const mr = videoRecorderRef.current;
-    if (mr && mr.state !== "inactive") mr.stop();
-    videoStreamRef.current?.getTracks().forEach(t => t.stop());
-    if (videoRef.current) videoRef.current.srcObject = null;
-    // Restart with new facing, keep accumulated chunks
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: newFacing, width: 480, height: 480 }, audio: true });
-      videoStreamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
-      }
-      const newMr = new MediaRecorder(stream, { mimeType: "video/webm" });
-      newMr.ondataavailable = (e) => { if (e.data.size > 0) videoChunksRef.current.push(e.data); };
-      newMr.start(500);
-      videoRecorderRef.current = newMr;
-    } catch { /* camera not available */ }
-    setTimeout(() => setVideoFlipping(false), 500);
-  };
+  // No camera flip — front only
 
   const stopVideoCircle = async () => {
     clearInterval(videoTimerRef.current);
@@ -864,19 +840,14 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
             exit={{ opacity: 0, scale: 0.8 }}
             className="absolute bottom-full left-0 right-0 flex flex-col items-center justify-center p-6 bg-background/95 backdrop-blur-xl border-t border-border"
           >
-            <motion.div
-              className="relative w-36 h-36 rounded-full overflow-hidden ring-4 ring-destructive/50 shadow-2xl"
-              animate={{ rotateY: videoFlipping ? 180 : 0, scale: videoFlipping ? 0.85 : 1 }}
-              transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              style={{ perspective: 600 }}
-            >
-              <video ref={(el) => { videoRef.current = el; if (el && videoStreamRef.current && !el.srcObject) { el.srcObject = videoStreamRef.current; el.play(); } }} className="w-full h-full object-cover" style={{ transform: videoFlipping ? "scaleX(-1)" : "none" }} playsInline muted />
+            <div className="relative w-36 h-36 rounded-full overflow-hidden ring-4 ring-destructive/50 shadow-2xl">
+              <video ref={(el) => { videoRef.current = el; if (el && videoStreamRef.current && !el.srcObject) { el.srcObject = videoStreamRef.current; el.play(); } }} className="w-full h-full object-cover" playsInline muted />
               <motion.div
                 className="absolute inset-0 rounded-full border-2 border-destructive"
                 animate={{ scale: [1, 1.08, 1] }}
                 transition={{ duration: 1.2, repeat: Infinity }}
               />
-            </motion.div>
+            </div>
             <div className="flex items-center gap-2 mt-3">
               <motion.div animate={{ scale: [1, 1.4, 1] }} transition={{ duration: 1, repeat: Infinity }} className="w-2 h-2 rounded-full bg-destructive" />
               <span className="text-sm font-mono text-muted-foreground">
@@ -887,16 +858,6 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
               <button onClick={cancelVideoCircle} className="text-xs text-destructive font-medium hover:underline">
                 {lang === "uk" ? "Скасувати" : "Отменить"}
               </button>
-              <motion.button
-                whileTap={{ scale: 0.9 }}
-                animate={{ rotate: videoFlipping ? 180 : 0 }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                onClick={flipVideoCamera}
-                className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-foreground"
-                title={lang === "uk" ? "Перевернути камеру" : "Переключить камеру"}
-              >
-                <RefreshCw className="w-4 h-4" />
-              </motion.button>
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={stopVideoCircle}
@@ -935,7 +896,7 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
         )}
       </AnimatePresence>
 
-      <div className="p-3 flex items-center gap-2">
+      <div className="px-3 pt-2 pb-3" style={{ paddingBottom: `max(0.75rem, env(safe-area-inset-bottom, 0.75rem))` }}>
         <AnimatePresence mode="wait">
           {recording ? (
             <motion.div
@@ -943,7 +904,7 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="flex-1 flex items-center gap-3"
+              className="flex items-center gap-3"
             >
               <button onClick={cancel} className="text-destructive text-xs font-medium hover:underline">✕</button>
               <div className="flex items-center gap-2 flex-1">
@@ -958,25 +919,55 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
               </motion.button>
             </motion.div>
           ) : (
-            <motion.div key="input" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="flex-1 flex items-center gap-1.5">
-              <motion.button whileTap={{ scale: 0.9 }} onClick={() => imageInputRef.current?.click()} disabled={uploading}
-                className="w-8 h-8 rounded-full hover:bg-muted/80 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors shrink-0">
-                <ImagePlus className="w-4 h-4" />
-              </motion.button>
-              <motion.button whileTap={{ scale: 0.9 }} onClick={() => fileInputRef.current?.click()} disabled={uploading}
-                className="w-8 h-8 rounded-full hover:bg-muted/80 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors shrink-0">
-                <Paperclip className="w-4 h-4" />
-              </motion.button>
-              <motion.button whileTap={{ scale: 0.9 }} onClick={() => setShowGamePicker(!showGamePicker)}
-                className={`w-8 h-8 rounded-full hover:bg-muted/80 flex items-center justify-center transition-colors shrink-0 ${showGamePicker ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-primary"}`}>
-                <Gamepad2 className="w-4 h-4" />
-              </motion.button>
-              <motion.button whileTap={{ scale: 0.9 }} onClick={() => { setShowStickerPicker(!showStickerPicker); setShowGamePicker(false); }}
-                className={`w-8 h-8 rounded-full hover:bg-muted/80 flex items-center justify-center transition-colors shrink-0 ${showStickerPicker ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-primary"}`}>
-                <Smile className="w-4 h-4" />
-              </motion.button>
+            <motion.div key="input" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="flex items-center gap-2">
+              {/* Attach menu trigger */}
+              <div className="relative shrink-0">
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => { setShowAttachMenu(!showAttachMenu); setShowGamePicker(false); setShowStickerPicker(false); }}
+                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors ${showAttachMenu ? "bg-primary text-primary-foreground" : "bg-muted/60 text-muted-foreground hover:text-primary hover:bg-muted"}`}
+                >
+                  {showAttachMenu ? <X className="w-4 h-4" /> : <MoreHorizontal className="w-4 h-4" />}
+                </motion.button>
+
+                {/* Attach menu popover */}
+                <AnimatePresence>
+                  {showAttachMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.9 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.9 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute bottom-full left-0 mb-2 bg-card border border-border rounded-2xl shadow-xl overflow-hidden min-w-[180px] z-10"
+                    >
+                      <button onClick={() => { imageInputRef.current?.click(); setShowAttachMenu(false); }}
+                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/60 transition-colors text-left">
+                        <ImagePlus className="w-4 h-4 text-primary" />
+                        <span className="text-sm">{lang === "uk" ? "Фото" : "Фото"}</span>
+                      </button>
+                      <button onClick={() => { startVideoCircle(); setShowAttachMenu(false); }}
+                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/60 transition-colors text-left">
+                        <Video className="w-4 h-4 text-primary" />
+                        <span className="text-sm">{lang === "uk" ? "Відеокружок" : "Видеокружок"}</span>
+                      </button>
+                      <button onClick={() => { setShowGamePicker(true); setShowAttachMenu(false); }}
+                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/60 transition-colors text-left">
+                        <Gamepad2 className="w-4 h-4 text-primary" />
+                        <span className="text-sm">{lang === "uk" ? "Запросити в гру" : "Пригласить в игру"}</span>
+                      </button>
+                      <button onClick={() => { setShowStickerPicker(true); setShowAttachMenu(false); }}
+                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/60 transition-colors text-left">
+                        <Smile className="w-4 h-4 text-primary" />
+                        <span className="text-sm">{lang === "uk" ? "Стікери" : "Стикеры"}</span>
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
               <input ref={imageInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleImagePick} />
               <input ref={fileInputRef} type="file" className="hidden" onChange={handleFilePick} />
+
               <Input
                 ref={inputRef}
                 value={text}
@@ -984,24 +975,19 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
                 onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
                 onFocus={handleInputFocus}
                 placeholder={placeholder}
-                className="flex-1 bg-muted/50 border-0 focus-visible:ring-1 focus-visible:ring-primary/30 rounded-full px-4"
+                className="flex-1 bg-muted/50 border-0 focus-visible:ring-1 focus-visible:ring-primary/30 rounded-full h-10 px-4"
               />
+
               {text.trim() || pendingImages.length > 0 ? (
                 <motion.button initial={{ scale: 0 }} animate={{ scale: 1 }} whileTap={{ scale: 0.85 }} onClick={handleSend}
-                  className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/30">
+                  className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/30 shrink-0">
                   <Send className="w-4 h-4" />
                 </motion.button>
               ) : (
-                <div className="flex items-center gap-1">
-                  <motion.button initial={{ scale: 0 }} animate={{ scale: 1 }} whileTap={{ scale: 0.85 }} onClick={() => startVideoCircle()} disabled={uploading}
-                     className="w-10 h-10 rounded-full bg-muted hover:bg-primary/10 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors">
-                     <Video className="w-4 h-4" />
-                  </motion.button>
-                  <motion.button initial={{ scale: 0 }} animate={{ scale: 1 }} whileTap={{ scale: 0.85 }} onClick={start} disabled={uploading}
-                    className="w-10 h-10 rounded-full bg-muted hover:bg-primary/10 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors">
-                    <Mic className="w-4 h-4" />
-                  </motion.button>
-                </div>
+                <motion.button initial={{ scale: 0 }} animate={{ scale: 1 }} whileTap={{ scale: 0.85 }} onClick={start} disabled={uploading}
+                  className="w-10 h-10 rounded-full bg-muted hover:bg-primary/10 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors shrink-0">
+                  <Mic className="w-4 h-4" />
+                </motion.button>
               )}
             </motion.div>
           )}
