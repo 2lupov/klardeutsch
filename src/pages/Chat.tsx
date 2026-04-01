@@ -757,7 +757,7 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
             className="absolute bottom-full left-0 right-0 flex flex-col items-center justify-center p-6 bg-background/95 backdrop-blur-xl border-t border-border"
           >
             <div className="relative w-36 h-36 rounded-full overflow-hidden ring-4 ring-destructive/50 shadow-2xl">
-              <video ref={videoRef} className="w-full h-full object-cover" playsInline muted />
+              <video ref={(el) => { videoRef.current = el; if (el && videoStreamRef.current && !el.srcObject) { el.srcObject = videoStreamRef.current; el.play(); } }} className="w-full h-full object-cover" playsInline muted />
               <motion.div
                 className="absolute inset-0 rounded-full border-2 border-destructive"
                 animate={{ scale: [1, 1.08, 1] }}
