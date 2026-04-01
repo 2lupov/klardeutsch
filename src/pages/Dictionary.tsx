@@ -546,6 +546,7 @@ const Dictionary = () => {
         ) : (
           filtered.map((word, i) => {
             const articleStyle = getArticleStyle(word.article);
+            const typeMeta = WORD_TYPE_META[word.wordType];
             const isExpanded = expandedId === word.id;
 
             return (
