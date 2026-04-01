@@ -396,6 +396,25 @@ const Dictionary = () => {
               </button>
             );
           })}
+          <div className="w-px bg-border mx-1 self-stretch" />
+          {(["nomen", "verb", "adjektiv", "andere"] as WordType[]).map((wt) => {
+            const meta = WORD_TYPE_META[wt];
+            return (
+              <button
+                key={wt}
+                onClick={() => setWordTypeFilter(wordTypeFilter === wt ? "all" : wt)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all whitespace-nowrap ${
+                  wordTypeFilter === wt
+                    ? `${meta.bg} ${meta.text} ${meta.border}`
+                    : "bg-secondary border-border text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <span>{meta.emoji}</span>
+                {lang === "uk" ? meta.labelUk : meta.label}
+                <span className="opacity-70">{stats[wt]}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
