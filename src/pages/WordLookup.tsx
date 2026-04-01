@@ -2,8 +2,10 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Search, Loader2, Sparkles, BookOpen, Languages, Lightbulb, Table2, Layers } from "lucide-react";
+import { ArrowLeft, Search, Loader2, Sparkles, BookOpen, Languages, Lightbulb, Table2, Layers, Plus, Check } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 import pandaWriting from "@/assets/mascot/panda-writing.png";
 
 interface WordData {
