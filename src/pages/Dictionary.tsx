@@ -1,11 +1,12 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePlatform } from "@/hooks/usePlatform";
 import { supabase } from "@/integrations/supabase/client";
-import { Star, StarOff, RotateCcw, Search, BookOpen, Plus, X, Trash2, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { Star, StarOff, RotateCcw, Search, BookOpen, Plus, X, Trash2, ChevronLeft, ChevronRight, Sparkles, BookMarked, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import ReactMarkdown from "react-markdown";
 
 interface DictWord {
   id: string;
