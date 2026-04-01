@@ -14,42 +14,32 @@ import MediaEmbed, { hasMediaEmbed } from "@/components/chat/MediaEmbed";
 import StickerPicker, { isStickerMessage, getStickerSrc, STICKER_PREFIX } from "@/components/chat/StickerPicker";
 import { Smile } from "lucide-react";
 
-/* ───── Keyboard inset (follows keyboard height + movement) ───── */
-const useKeyboardInset = () => {
-  const [inset, setInset] = useState(0);
+/* ───── Visual-viewport height for iOS keyboard handling ───── */
+const useViewportHeight = () => {
+  const [vh, setVh] = useState("100%");
 
   useEffect(() => {
     const vv = window.visualViewport;
     if (!vv) return;
 
     const update = () => {
-      const active = document.activeElement as HTMLElement | null;
-      const isEditable = !!active && (
-        active.tagName === "INPUT" ||
-        active.tagName === "TEXTAREA" ||
-        active.isContentEditable
-      );
-
-      const rawInset = Math.max(0, window.innerHeight - (vv.height + vv.offsetTop));
-      const nextInset = isEditable && rawInset > 80 ? rawInset : 0;
-      setInset((prev) => (Math.abs(prev - nextInset) < 1 ? prev : nextInset));
+      // On iOS PWA, when keyboard opens visualViewport shrinks.
+      // We set the container to exactly that height so the input
+      // bar stays just above the keyboard.
+      setVh(`${vv.height}px`);
     };
 
     update();
     vv.addEventListener("resize", update);
     vv.addEventListener("scroll", update);
-    window.addEventListener("focusin", update);
-    window.addEventListener("focusout", update);
 
     return () => {
       vv.removeEventListener("resize", update);
       vv.removeEventListener("scroll", update);
-      window.removeEventListener("focusin", update);
-      window.removeEventListener("focusout", update);
     };
   }, []);
 
-  return inset;
+  return vh;
 };
 
 /* ───── Reply info type ───── */
@@ -660,7 +650,6 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
   scrollToBottom?: () => void;
 }) => {
   const { lang } = useLanguage();
-  const keyboardInset = useKeyboardInset();
   const [text, setText] = useState("");
   const { recording, elapsed, start, stop, cancel } = useVoiceRecorder();
   const [uploading, setUploading] = useState(false);
@@ -936,9 +925,9 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
       </AnimatePresence>
 
       <div
-        className="px-3 pt-2 pb-3 transition-[padding-bottom] duration-150"
+        className="px-3 pt-2 pb-3"
         style={{
-          paddingBottom: `calc(max(0.75rem, env(safe-area-inset-bottom, 0.75rem)) + ${keyboardInset}px)`,
+          paddingBottom: `max(0.75rem, env(safe-area-inset-bottom, 0.75rem))`,
         }}
       >
         <AnimatePresence mode="wait">
@@ -1177,8 +1166,10 @@ const CommunityChat = () => {
     );
   }
 
+  const viewportH = useViewportHeight();
+
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col" style={{ height: viewportH }}>
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.length === 0 && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16">
@@ -1423,8 +1414,10 @@ const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void
     fetchEdgeFunction("notify-dm", { json: { receiver_id: peerId, message_preview: "🎥 Видеокружок" } }).catch(() => {});
   };
 
+  const viewportH = useViewportHeight();
+
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col" style={{ height: viewportH }}>
       <motion.div
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
