@@ -1611,7 +1611,6 @@ const DMList = ({ onSelectPeer }: { onSelectPeer: (uid: string) => void }) => {
 const Chat = () => {
   const navigate = useNavigate();
   const { lang } = useLanguage();
-  const viewportH = useViewportHeight();
   const [tab, setTab] = useState<"community" | "dm" | "find">("community");
   const [selectedPeer, setSelectedPeer] = useState<string | null>(null);
 
@@ -1626,7 +1625,7 @@ const Chat = () => {
         animate={{ x: 0 }}
         exit={{ x: "100%" }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="flex flex-col" style={{ height: viewportH }}
+        className="flex flex-col h-full"
       >
         <DMConversation peerId={selectedPeer} onBack={() => setSelectedPeer(null)} />
       </motion.div>
@@ -1634,7 +1633,7 @@ const Chat = () => {
   }
 
   return (
-    <div className="flex flex-col" style={{ height: viewportH }}>
+    <div className="flex flex-col h-full">
       {/* Header */}
       <motion.div
         initial={{ y: -20, opacity: 0 }}
