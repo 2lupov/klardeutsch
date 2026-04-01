@@ -510,7 +510,7 @@ const Dictionary = () => {
       </div>
 
       {/* Results count */}
-      {(search || filter !== "all" || articleFilter !== "all") && (
+      {(search || filter !== "all" || articleFilter !== "all" || wordTypeFilter !== "all") && (
         <p className="text-xs text-muted-foreground mb-2 px-1">
           {lang === "uk" ? "Знайдено" : "Найдено"}: {filtered.length}
         </p>
