@@ -1358,9 +1358,13 @@ const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void
               fileUrl={m.file_url}
               fileName={m.file_name}
               time={format(new Date(m.created_at), "HH:mm")}
+              senderName={senderName}
+              avatarUrl={isMe ? undefined : peer?.avatar_url}
+              senderId={isMe ? undefined : peerId}
               replyToContent={msg.reply_to_content}
               replyToSender={msg.reply_to_sender}
               onReply={() => setReplyTo({ id: m.id, content: m.content, senderName: isMe ? "Вы" : (peer?.display_name || "?") })}
+              onAvatarClick={(uid) => setProfileOpen(true)}
               index={i}
             />
           );
