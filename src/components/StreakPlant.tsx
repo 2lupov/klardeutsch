@@ -49,6 +49,11 @@ const MOTIVATIONS_UK = [
   "Панда — справжній майстер! 🌟",
 ];
 
+function isNightTime(): boolean {
+  const hour = new Date().getHours();
+  return hour >= 23 || hour < 6;
+}
+
 function getStageIndex(streak: number, canClaim: boolean): number {
   if (canClaim && streak <= 1) return 0;
   if (streak <= 0) return 0;
