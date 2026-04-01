@@ -348,12 +348,8 @@ const Dictionary = () => {
             </motion.button>
             <motion.button
               whileTap={{ scale: 0.95 }}
-              onClick={() => { setShowLookup(!showLookup); setLookupResult(""); setLookupWord(""); }}
-              className={`p-2.5 rounded-xl border transition-colors ${
-                showLookup
-                  ? "bg-primary/10 border-primary/30 text-primary"
-                  : "bg-secondary border-border text-muted-foreground hover:text-foreground"
-              }`}
+              onClick={() => navigate("/word-lookup")}
+              className="p-2.5 rounded-xl border transition-colors bg-secondary border-border text-muted-foreground hover:text-foreground"
             >
               <BookMarked className="w-5 h-5" />
             </motion.button>
