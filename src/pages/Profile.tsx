@@ -56,9 +56,11 @@ const Profile = () => {
   const [customWordsCount, setCustomWordsCount] = useState(0);
   const [savedWordsCount, setSavedWordsCount] = useState(0);
   const [fetching, setFetching] = useState(true);
-  const [profile, setProfile] = useState<ProfileData>({ display_name: null, avatar_url: null, telegram_chat_id: null, nickname_changed_at: null });
+  const [profile, setProfile] = useState<ProfileData>({ display_name: null, nickname: null, avatar_url: null, telegram_chat_id: null, nickname_changed_at: null });
   const [editing, setEditing] = useState(false);
+  const [editingNickname, setEditingNickname] = useState(false);
   const [editName, setEditName] = useState("");
+  const [editNickname, setEditNickname] = useState("");
   const [uploading, setUploading] = useState(false);
   const [duelsWonCount, setDuelsWonCount] = useState(0);
   const [dialoguesCount, setDialoguesCount] = useState(0);
