@@ -137,8 +137,10 @@ const WordLookup = () => {
     return () => clearTimeout(timer);
   }, [word]);
 
-  const handleLookup = async () => {
-    if (!word.trim()) return;
+  const handleLookup = async (overrideWord?: string) => {
+    const searchWord = (overrideWord || word).trim();
+    if (!searchWord) return;
+    if (overrideWord) setWord(overrideWord);
     setLoading(true);
     setWordData(null);
     setFallbackResult("");
@@ -147,7 +149,7 @@ const WordLookup = () => {
     setSaved(false);
     try {
       const { data, error } = await supabase.functions.invoke("lookup-word", {
-        body: { word: word.trim(), lang },
+        body: { word: searchWord, lang },
       });
       if (error) throw error;
       if (data?.structured) {
@@ -266,7 +268,7 @@ const WordLookup = () => {
                 </AnimatePresence>
               </div>
               <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-                onClick={handleLookup} disabled={!word.trim() || loading}
+                onClick={() => handleLookup()} disabled={!word.trim() || loading}
                 className="px-6 py-4 rounded-2xl bg-primary text-primary-foreground font-display font-bold text-sm disabled:opacity-40 transition-all hover:shadow-lg hover:shadow-primary/20 flex items-center gap-2">
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <BookOpen className="w-5 h-5" />}
                 <span className="hidden sm:inline">{lang === "uk" ? "Знайти" : "Найти"}</span>
@@ -435,7 +437,7 @@ const WordLookup = () => {
                   <div className="px-5 py-4 flex flex-wrap gap-2">
                     {wordData.synonyms.map((s, i) => (
                       <motion.button key={i} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                        onClick={() => { setWord(s); handleLookup(); }}
+                        onClick={() => handleLookup(s)}
                         className="px-4 py-2 rounded-xl bg-secondary border border-border text-sm font-medium text-foreground hover:bg-primary/10 hover:border-primary/30 transition-colors">
                         {s}
                       </motion.button>
