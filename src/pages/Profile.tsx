@@ -676,8 +676,8 @@ const Profile = () => {
         <div className="absolute -top-20 -right-20 w-40 h-40 rounded-full bg-primary/10 blur-3xl" />
         <div className="absolute -bottom-10 -left-10 w-32 h-32 rounded-full bg-primary/5 blur-2xl" />
 
-        <div className="relative p-6">
-          <div className="flex items-center gap-5">
+        <div className={`relative ${isTelegram ? "p-4" : "p-6"}`}>
+          <div className={`flex items-center ${isTelegram ? "gap-3" : "gap-5"}`}>
             {/* Avatar */}
             <motion.div
               whileHover={{ scale: 1.05 }}
