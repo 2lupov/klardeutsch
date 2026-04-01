@@ -238,7 +238,7 @@ const StreakPlant = ({ streak, canClaim, compact = false }: StreakPlantProps) =>
       </motion.button>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="p-0 border-0 bg-transparent shadow-none max-w-sm overflow-hidden rounded-2xl">
+        <DialogContent className="p-0 border-0 bg-transparent shadow-none max-w-sm md:max-w-md overflow-hidden rounded-2xl">
           <PandaSceneCard
             stage={stage}
             stageIdx={stageIdx}
