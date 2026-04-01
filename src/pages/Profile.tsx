@@ -838,7 +838,7 @@ const Profile = () => {
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.12 }}
-        className={`grid gap-2.5 mb-5 ${isMobile ? "grid-cols-4" : "grid-cols-4"}`}
+        className={`grid gap-2 ${isTelegram ? "grid-cols-4 mb-3" : "grid-cols-4 gap-2.5 mb-5"}`}
       >
         <StatCard icon={<Coins className="w-4 h-4" />} value={balance} label={t("coinsLabel")} color="from-yellow-500/20 to-amber-600/10" />
         <StatCard icon={<BookOpen className="w-4 h-4" />} value={wordsLearned} label={t("wordsLearned")} color="from-blue-500/20 to-cyan-500/10" />
