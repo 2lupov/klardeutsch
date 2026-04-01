@@ -14,24 +14,42 @@ import MediaEmbed, { hasMediaEmbed } from "@/components/chat/MediaEmbed";
 import StickerPicker, { isStickerMessage, getStickerSrc, STICKER_PREFIX } from "@/components/chat/StickerPicker";
 import { Smile } from "lucide-react";
 
-/* ───── Visual Viewport height (keyboard-aware) ───── */
-const useKeyboardHeight = () => {
-  const [height, setHeight] = useState<string>("100dvh");
+/* ───── Keyboard inset (follows keyboard height + movement) ───── */
+const useKeyboardInset = () => {
+  const [inset, setInset] = useState(0);
+
   useEffect(() => {
     const vv = window.visualViewport;
     if (!vv) return;
+
     const update = () => {
-      setHeight(`${vv.height}px`);
+      const active = document.activeElement as HTMLElement | null;
+      const isEditable = !!active && (
+        active.tagName === "INPUT" ||
+        active.tagName === "TEXTAREA" ||
+        active.isContentEditable
+      );
+
+      const rawInset = Math.max(0, window.innerHeight - (vv.height + vv.offsetTop));
+      const nextInset = isEditable && rawInset > 80 ? rawInset : 0;
+      setInset((prev) => (Math.abs(prev - nextInset) < 1 ? prev : nextInset));
     };
+
     update();
     vv.addEventListener("resize", update);
     vv.addEventListener("scroll", update);
+    window.addEventListener("focusin", update);
+    window.addEventListener("focusout", update);
+
     return () => {
       vv.removeEventListener("resize", update);
       vv.removeEventListener("scroll", update);
+      window.removeEventListener("focusin", update);
+      window.removeEventListener("focusout", update);
     };
   }, []);
-  return height;
+
+  return inset;
 };
 
 /* ───── Reply info type ───── */
@@ -642,6 +660,7 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
   scrollToBottom?: () => void;
 }) => {
   const { lang } = useLanguage();
+  const keyboardInset = useKeyboardInset();
   const [text, setText] = useState("");
   const { recording, elapsed, start, stop, cancel } = useVoiceRecorder();
   const [uploading, setUploading] = useState(false);
@@ -916,7 +935,12 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
         )}
       </AnimatePresence>
 
-      <div className="px-3 pt-2 pb-3" style={{ paddingBottom: `max(0.75rem, env(safe-area-inset-bottom, 0.75rem))` }}>
+      <div
+        className="px-3 pt-2 pb-3 transition-[padding-bottom] duration-150"
+        style={{
+          paddingBottom: `calc(max(0.75rem, env(safe-area-inset-bottom, 0.75rem)) + ${keyboardInset}px)`,
+        }}
+      >
         <AnimatePresence mode="wait">
           {recording ? (
             <motion.div
@@ -1049,7 +1073,6 @@ const TabButton = ({ active, icon: Icon, label, badge, onClick }: {
 const CommunityChat = () => {
   const { user } = useAuth();
   const { lang } = useLanguage();
-  const kvh = useKeyboardHeight();
   const [messages, setMessages] = useState<CommunityMsg[]>([]);
   const [profiles, setProfiles] = useState<Record<string, Profile>>({});
   const [loading, setLoading] = useState(true);
@@ -1155,7 +1178,7 @@ const CommunityChat = () => {
   }
 
   return (
-    <div className="flex flex-col" style={{ height: kvh }}>
+    <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.length === 0 && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16">
@@ -1302,7 +1325,6 @@ const FindUsers = ({ onSelectUser }: { onSelectUser: (uid: string) => void }) =>
 const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void }) => {
   const { user } = useAuth();
   const { lang } = useLanguage();
-  const kvh = useKeyboardHeight();
   const [peer, setPeer] = useState<(Profile & { last_active?: string | null }) | null>(null);
   const [messages, setMessages] = useState<DirectMsg[]>([]);
   const endRef = useRef<HTMLDivElement>(null);
@@ -1402,7 +1424,7 @@ const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void
   };
 
   return (
-    <div className="flex flex-col" style={{ height: kvh }}>
+    <div className="flex flex-col h-full">
       <motion.div
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -1595,7 +1617,6 @@ const DMList = ({ onSelectPeer }: { onSelectPeer: (uid: string) => void }) => {
 const Chat = () => {
   const navigate = useNavigate();
   const { lang } = useLanguage();
-  const kvh = useKeyboardHeight();
   const [tab, setTab] = useState<"community" | "dm" | "find">("community");
   const [selectedPeer, setSelectedPeer] = useState<string | null>(null);
 
@@ -1610,7 +1631,7 @@ const Chat = () => {
         animate={{ x: 0 }}
         exit={{ x: "100%" }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="flex flex-col" style={{ height: kvh }}
+        className="flex flex-col h-full"
       >
         <DMConversation peerId={selectedPeer} onBack={() => setSelectedPeer(null)} />
       </motion.div>
@@ -1618,7 +1639,7 @@ const Chat = () => {
   }
 
   return (
-    <div className="flex flex-col" style={{ height: kvh }}>
+    <div className="flex flex-col h-full">
       {/* Header */}
       <motion.div
         initial={{ y: -20, opacity: 0 }}
