@@ -10,6 +10,7 @@ import { Send, Search, MessageCircle, Users, Mail, ArrowLeft, Mic, Square, Play,
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import UserProfileDialog from "@/components/UserProfileDialog";
+import MediaEmbed, { hasMediaEmbed } from "@/components/chat/MediaEmbed";
 
 /* ───── Reply info type ───── */
 interface ReplyInfo {
@@ -451,7 +452,7 @@ const MessageBubble = ({ isMe, content, audioUrl, imageUrl, imageUrls, fileUrl, 
             isMe
               ? "bg-primary text-primary-foreground rounded-br-md shadow-lg shadow-primary/20"
               : "bg-card border border-border rounded-bl-md shadow-sm"
-          } ${content.startsWith("🎮:") ? "p-2" : content === "🎥" && audioUrl ? "p-1" : allImages.length > 0 && !audioUrl ? "p-1.5" : "px-3.5 py-2.5"}`}>
+          } ${content.startsWith("🎮:") ? "p-2" : content === "🎥" && audioUrl ? "p-1" : allImages.length > 0 && !audioUrl ? "p-1.5" : hasMediaEmbed(content) ? "p-1.5" : "px-3.5 py-2.5"}`}>
             {content.startsWith("🎮:") ? (
               <GameInviteBubble content={content} isMe={isMe} />
             ) : content === "🎥" && audioUrl ? (
@@ -471,6 +472,10 @@ const MessageBubble = ({ isMe, content, audioUrl, imageUrl, imageUrls, fileUrl, 
                 {content && content !== "📎" && (
                   <p className="px-1 pt-1.5 text-sm">{content}</p>
                 )}
+              </div>
+            ) : hasMediaEmbed(content) ? (
+              <div>
+                <MediaEmbed url={content} isMe={isMe} />
               </div>
             ) : (
               content
