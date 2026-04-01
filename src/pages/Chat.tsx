@@ -1618,7 +1618,7 @@ const Chat = () => {
   }
 
   return (
-    <div className="h-[100dvh] flex flex-col">
+    <div className="flex flex-col" style={{ height: kvh }}>
       {/* Header */}
       <motion.div
         initial={{ y: -20, opacity: 0 }}
