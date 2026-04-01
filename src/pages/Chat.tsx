@@ -17,17 +17,22 @@ import chatBgImage from "@/assets/chat-bg.png";
 
 /* ───── Visual-viewport height for iOS keyboard handling ───── */
 const useViewportHeight = () => {
-  const [vh, setVh] = useState("100%");
+  const [vh, setVh] = useState(() => {
+    if (typeof window !== "undefined" && window.visualViewport) {
+      return `${window.visualViewport.height}px`;
+    }
+    return "100dvh";
+  });
 
   useEffect(() => {
     const vv = window.visualViewport;
     if (!vv) return;
 
     const update = () => {
-      // On iOS PWA, when keyboard opens visualViewport shrinks.
-      // We set the container to exactly that height so the input
-      // bar stays just above the keyboard.
-      setVh(`${vv.height}px`);
+      const h = vv.height;
+      if (h && h > 50) {
+        setVh(`${h}px`);
+      }
     };
 
     update();
