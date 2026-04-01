@@ -184,7 +184,7 @@ const StreakPlant = ({ streak, canClaim, compact = false }: StreakPlantProps) =>
           className="relative flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-all overflow-hidden"
         >
           <img
-            src={stageIdx === 0 ? pandaSleeping : pandaWaving}
+            src={stage.img}
             alt="Panda"
             className={`w-8 h-8 md:w-10 md:h-10 object-contain ${stageIdx === 0 ? "opacity-60" : ""}`}
             loading="lazy"
@@ -309,7 +309,7 @@ const PandaSceneCard = ({ stage, stageIdx, streak, motivation, progressToNext, i
             />
           }
         >
-          <Panda3D isSleeping={stageIdx === 0} className="w-full h-[300px]" />
+          <Panda3D isSleeping={stageIdx === 0} stageImage={stage.img} className="w-full h-[300px]" />
         </Suspense>
       </motion.div>
 
