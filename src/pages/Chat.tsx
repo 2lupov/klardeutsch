@@ -896,7 +896,7 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
         )}
       </AnimatePresence>
 
-      <div className="p-3 flex items-center gap-2">
+      <div className="px-3 pt-2 pb-3" style={{ paddingBottom: `max(0.75rem, env(safe-area-inset-bottom, 0.75rem))` }}>
         <AnimatePresence mode="wait">
           {recording ? (
             <motion.div
@@ -904,7 +904,7 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="flex-1 flex items-center gap-3"
+              className="flex items-center gap-3"
             >
               <button onClick={cancel} className="text-destructive text-xs font-medium hover:underline">✕</button>
               <div className="flex items-center gap-2 flex-1">
@@ -919,25 +919,55 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
               </motion.button>
             </motion.div>
           ) : (
-            <motion.div key="input" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="flex-1 flex items-center gap-1.5">
-              <motion.button whileTap={{ scale: 0.9 }} onClick={() => imageInputRef.current?.click()} disabled={uploading}
-                className="w-8 h-8 rounded-full hover:bg-muted/80 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors shrink-0">
-                <ImagePlus className="w-4 h-4" />
-              </motion.button>
-              <motion.button whileTap={{ scale: 0.9 }} onClick={() => fileInputRef.current?.click()} disabled={uploading}
-                className="w-8 h-8 rounded-full hover:bg-muted/80 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors shrink-0">
-                <Paperclip className="w-4 h-4" />
-              </motion.button>
-              <motion.button whileTap={{ scale: 0.9 }} onClick={() => setShowGamePicker(!showGamePicker)}
-                className={`w-8 h-8 rounded-full hover:bg-muted/80 flex items-center justify-center transition-colors shrink-0 ${showGamePicker ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-primary"}`}>
-                <Gamepad2 className="w-4 h-4" />
-              </motion.button>
-              <motion.button whileTap={{ scale: 0.9 }} onClick={() => { setShowStickerPicker(!showStickerPicker); setShowGamePicker(false); }}
-                className={`w-8 h-8 rounded-full hover:bg-muted/80 flex items-center justify-center transition-colors shrink-0 ${showStickerPicker ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-primary"}`}>
-                <Smile className="w-4 h-4" />
-              </motion.button>
+            <motion.div key="input" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="flex items-center gap-2">
+              {/* Attach menu trigger */}
+              <div className="relative shrink-0">
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => { setShowAttachMenu(!showAttachMenu); setShowGamePicker(false); setShowStickerPicker(false); }}
+                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors ${showAttachMenu ? "bg-primary text-primary-foreground" : "bg-muted/60 text-muted-foreground hover:text-primary hover:bg-muted"}`}
+                >
+                  {showAttachMenu ? <X className="w-4 h-4" /> : <MoreHorizontal className="w-4 h-4" />}
+                </motion.button>
+
+                {/* Attach menu popover */}
+                <AnimatePresence>
+                  {showAttachMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.9 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.9 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute bottom-full left-0 mb-2 bg-card border border-border rounded-2xl shadow-xl overflow-hidden min-w-[180px] z-10"
+                    >
+                      <button onClick={() => { imageInputRef.current?.click(); setShowAttachMenu(false); }}
+                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/60 transition-colors text-left">
+                        <ImagePlus className="w-4 h-4 text-primary" />
+                        <span className="text-sm">{lang === "uk" ? "Фото" : "Фото"}</span>
+                      </button>
+                      <button onClick={() => { startVideoCircle(); setShowAttachMenu(false); }}
+                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/60 transition-colors text-left">
+                        <Video className="w-4 h-4 text-primary" />
+                        <span className="text-sm">{lang === "uk" ? "Відеокружок" : "Видеокружок"}</span>
+                      </button>
+                      <button onClick={() => { setShowGamePicker(true); setShowAttachMenu(false); }}
+                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/60 transition-colors text-left">
+                        <Gamepad2 className="w-4 h-4 text-primary" />
+                        <span className="text-sm">{lang === "uk" ? "Запросити в гру" : "Пригласить в игру"}</span>
+                      </button>
+                      <button onClick={() => { setShowStickerPicker(true); setShowAttachMenu(false); }}
+                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/60 transition-colors text-left">
+                        <Smile className="w-4 h-4 text-primary" />
+                        <span className="text-sm">{lang === "uk" ? "Стікери" : "Стикеры"}</span>
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
               <input ref={imageInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleImagePick} />
               <input ref={fileInputRef} type="file" className="hidden" onChange={handleFilePick} />
+
               <Input
                 ref={inputRef}
                 value={text}
@@ -945,24 +975,19 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
                 onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
                 onFocus={handleInputFocus}
                 placeholder={placeholder}
-                className="flex-1 bg-muted/50 border-0 focus-visible:ring-1 focus-visible:ring-primary/30 rounded-full px-4"
+                className="flex-1 bg-muted/50 border-0 focus-visible:ring-1 focus-visible:ring-primary/30 rounded-full h-10 px-4"
               />
+
               {text.trim() || pendingImages.length > 0 ? (
                 <motion.button initial={{ scale: 0 }} animate={{ scale: 1 }} whileTap={{ scale: 0.85 }} onClick={handleSend}
-                  className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/30">
+                  className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/30 shrink-0">
                   <Send className="w-4 h-4" />
                 </motion.button>
               ) : (
-                <div className="flex items-center gap-1">
-                  <motion.button initial={{ scale: 0 }} animate={{ scale: 1 }} whileTap={{ scale: 0.85 }} onClick={() => startVideoCircle()} disabled={uploading}
-                     className="w-10 h-10 rounded-full bg-muted hover:bg-primary/10 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors">
-                     <Video className="w-4 h-4" />
-                  </motion.button>
-                  <motion.button initial={{ scale: 0 }} animate={{ scale: 1 }} whileTap={{ scale: 0.85 }} onClick={start} disabled={uploading}
-                    className="w-10 h-10 rounded-full bg-muted hover:bg-primary/10 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors">
-                    <Mic className="w-4 h-4" />
-                  </motion.button>
-                </div>
+                <motion.button initial={{ scale: 0 }} animate={{ scale: 1 }} whileTap={{ scale: 0.85 }} onClick={start} disabled={uploading}
+                  className="w-10 h-10 rounded-full bg-muted hover:bg-primary/10 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors shrink-0">
+                  <Mic className="w-4 h-4" />
+                </motion.button>
               )}
             </motion.div>
           )}
