@@ -360,10 +360,28 @@ const VideoCirclePlayer = ({ url }: { url: string }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
 
-  const toggle = () => {
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    // Force inline playback on iOS/Telegram WebView
+    v.setAttribute("playsinline", "");
+    v.setAttribute("webkit-playsinline", "");
+    v.setAttribute("x-webkit-airplay", "deny");
+    // Prevent fullscreen requests
+    const prevent = (e: Event) => e.preventDefault();
+    v.addEventListener("webkitbeginfullscreen", prevent);
+    v.addEventListener("fullscreenchange", prevent);
+    return () => {
+      v.removeEventListener("webkitbeginfullscreen", prevent);
+      v.removeEventListener("fullscreenchange", prevent);
+    };
+  }, []);
+
+  const toggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (!videoRef.current) return;
     if (playing) videoRef.current.pause();
-    else videoRef.current.play();
+    else videoRef.current.play().catch(() => {});
     setPlaying(!playing);
   };
 
@@ -379,7 +397,10 @@ const VideoCirclePlayer = ({ url }: { url: string }) => {
         className="w-full h-full object-cover"
         loop
         playsInline
+        muted={false}
+        preload="metadata"
         onEnded={() => setPlaying(false)}
+        style={{ objectFit: "cover" }}
       />
       {!playing && (
         <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
@@ -388,7 +409,7 @@ const VideoCirclePlayer = ({ url }: { url: string }) => {
       )}
       {playing && (
         <motion.div
-          className="absolute inset-0 rounded-full border-2 border-primary"
+          className="absolute inset-0 rounded-full border-2 border-primary pointer-events-none"
           animate={{ scale: [1, 1.05, 1] }}
           transition={{ duration: 2, repeat: Infinity }}
         />
