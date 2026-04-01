@@ -78,6 +78,7 @@ const ConjugationTable = ({ title, data, icon }: { title: string; data: Record<s
 
 const WordLookup = () => {
   const { lang } = useLanguage();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [word, setWord] = useState("");
   const [wordData, setWordData] = useState<WordData | null>(null);
@@ -86,7 +87,40 @@ const WordLookup = () => {
   const [suggestions, setSuggestions] = useState<{ german: string; article: string | null }[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [searched, setSearched] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
 
+  const handleSaveWord = async () => {
+    if (!user || !wordData || saving) return;
+    setSaving(true);
+    try {
+      // Check if word already exists in custom_words
+      const { data: existing } = await supabase
+        .from("custom_words")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("german", wordData.word)
+        .maybeSingle();
+      if (existing) {
+        setSaved(true);
+        toast({ title: lang === "uk" ? "Вже у словнику ✅" : "Уже в словаре ✅" });
+        return;
+      }
+      await supabase.from("custom_words").insert({
+        user_id: user.id,
+        german: wordData.word,
+        russian: wordData.translation,
+        article: wordData.article || null,
+        example: wordData.meanings?.[0]?.example_de || null,
+      });
+      setSaved(true);
+      toast({ title: lang === "uk" ? "Додано у словник! 🐼" : "Добавлено в словарь! 🐼" });
+    } catch {
+      toast({ title: lang === "uk" ? "Помилка збереження" : "Ошибка сохранения", variant: "destructive" });
+    } finally {
+      setSaving(false);
+    }
+  };
   useEffect(() => {
     const q = word.trim().toLowerCase();
     if (q.length < 2) { setSuggestions([]); setShowSuggestions(false); return; }
