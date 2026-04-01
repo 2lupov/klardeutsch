@@ -260,6 +260,16 @@ const PandaSceneCard = ({ stage, stageIdx, streak, motivation, progressToNext, i
     {/* Mountain background */}
     <MountainScene />
 
+    {/* Close button */}
+    {onClose && (
+      <button
+        onClick={onClose}
+        className="absolute top-3 right-3 z-20 w-8 h-8 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/50 transition-colors"
+      >
+        <span className="text-lg leading-none">×</span>
+      </button>
+    )}
+
     {/* Content overlay */}
     <div className="relative z-10 flex flex-col items-center justify-between h-full p-5">
       {/* Title */}
