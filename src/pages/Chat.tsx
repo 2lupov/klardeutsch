@@ -13,6 +13,7 @@ import UserProfileDialog from "@/components/UserProfileDialog";
 import MediaEmbed, { hasMediaEmbed } from "@/components/chat/MediaEmbed";
 import StickerPicker, { isStickerMessage, getStickerSrc, STICKER_PREFIX } from "@/components/chat/StickerPicker";
 import { Smile } from "lucide-react";
+import chatBgImage from "@/assets/chat-bg.png";
 
 /* ───── Visual-viewport height for iOS keyboard handling ───── */
 const useViewportHeight = () => {
