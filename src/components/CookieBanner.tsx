@@ -5,15 +5,16 @@ import { motion, AnimatePresence } from "framer-motion";
 const COOKIE_KEY = "klar_cookie_consent";
 
 const CookieBanner = () => {
+  const [consent, setConsent] = useState<string | null>(() => {
+    try { return localStorage.getItem(COOKIE_KEY); } catch { return null; }
+  });
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const consent = localStorage.getItem(COOKIE_KEY);
-    if (!consent) {
-      const timer = setTimeout(() => setVisible(true), 1500);
-      return () => clearTimeout(timer);
-    }
-  }, []);
+    if (consent) return;
+    const timer = setTimeout(() => setVisible(true), 1500);
+    return () => clearTimeout(timer);
+  }, [consent]);
 
   const accept = () => {
     localStorage.setItem(COOKIE_KEY, "accepted");
