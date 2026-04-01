@@ -22,7 +22,8 @@ const CATEGORY_CONFIG: Record<Category, { gradient: string; iconBg: string; acce
 };
 
 const CategorySelector = ({ level, onSelect, onBack }: CategorySelectorProps) => {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const navigate = useNavigate();
 
   const categories: { key: Category; label: string; sublabel: string; icon: React.ReactNode; emoji: string }[] = [
     { key: "vocabulary", label: "Wortschatz", sublabel: t("vocabSublabel"), icon: <Languages className="w-5 h-5" />, emoji: "📚" },
