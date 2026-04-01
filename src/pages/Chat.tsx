@@ -1049,6 +1049,7 @@ const TabButton = ({ active, icon: Icon, label, badge, onClick }: {
 const CommunityChat = () => {
   const { user } = useAuth();
   const { lang } = useLanguage();
+  const kvh = useKeyboardHeight();
   const [messages, setMessages] = useState<CommunityMsg[]>([]);
   const [profiles, setProfiles] = useState<Record<string, Profile>>({});
   const [loading, setLoading] = useState(true);
