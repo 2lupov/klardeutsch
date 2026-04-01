@@ -714,10 +714,10 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
     });
   };
 
-  // Video circle recording
-   const startVideoCircle = async (facing: "user" | "environment" = videoFacingMode) => {
+  // Video circle recording — front camera only, no mirror
+   const startVideoCircle = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: 480, height: 480 }, audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: 480, height: 480 }, audio: true });
       videoStreamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
