@@ -686,7 +686,7 @@ const Profile = () => {
               onClick={() => setShowAvatarPicker(!showAvatarPicker)}
             >
               <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-primary/60 to-primary/20 blur-sm" />
-              <Avatar className={`relative border-2 border-primary/30 shadow-xl shadow-primary/10 ${isMobile ? "w-20 h-20" : "w-24 h-24"}`}>
+              <Avatar className={`relative border-2 border-primary/30 shadow-xl shadow-primary/10 ${isTelegram ? "w-16 h-16" : isMobile ? "w-20 h-20" : "w-24 h-24"}`}>
                 {profile.avatar_url ? (
                   <AvatarImage src={profile.avatar_url} alt={displayName} />
                 ) : null}
