@@ -262,10 +262,11 @@ interface PandaSceneCardProps {
   motivation: string;
   progressToNext: number;
   isRu: boolean;
+  isNight?: boolean;
   onClose?: () => void;
 }
 
-const PandaSceneCard = ({ stage, stageIdx, streak, motivation, progressToNext, isRu, onClose }: PandaSceneCardProps) => (
+const PandaSceneCard = ({ stage, stageIdx, streak, motivation, progressToNext, isRu, isNight, onClose }: PandaSceneCardProps) => (
   <motion.div
     className="relative w-full overflow-hidden rounded-2xl"
     style={{ aspectRatio: "3/4" }}
