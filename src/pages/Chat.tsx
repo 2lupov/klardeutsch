@@ -1463,6 +1463,7 @@ const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void
         userId={user?.id || ""}
         replyTo={replyTo}
         onCancelReply={() => setReplyTo(null)}
+        scrollToBottom={() => endRef.current?.scrollIntoView({ behavior: "smooth" })}
       />
 
       <UserProfileDialog
