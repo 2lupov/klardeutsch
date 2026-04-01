@@ -8,6 +8,9 @@ const MobileBottomNav = () => {
   const location = useLocation();
   const unread = useUnreadDMs();
 
+  // Hide bottom nav on chat page to avoid keyboard conflicts
+  if (location.pathname === "/chat") return null;
+
   const items = [
     { to: "/", icon: Home, label: t("navHome"), badge: 0 },
     { to: "/academy", icon: GraduationCap, label: lang === "uk" ? "Академія" : "Академия", badge: 0 },

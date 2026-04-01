@@ -55,6 +55,8 @@ const AppLayout = () => {
     return <NicknameGate onComplete={() => setHasNickname(true)} />;
   }
 
+  const isChat = location.pathname === "/chat";
+
   if (isMobile) {
     return (
       <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
@@ -62,7 +64,7 @@ const AppLayout = () => {
         <LofiFloatingPlayer />
         <ListeningFloatingPlayer />
         <DailyBonusDialog />
-        <div className="flex-1 overflow-y-auto overflow-x-hidden overscroll-none pb-14">
+        <div className={`flex-1 overflow-y-auto overflow-x-hidden overscroll-none ${isChat ? "" : "pb-14"}`}>
           <PageTransition><Outlet /></PageTransition>
         </div>
         <MobileBottomNav />
