@@ -11,6 +11,8 @@ import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import UserProfileDialog from "@/components/UserProfileDialog";
 import MediaEmbed, { hasMediaEmbed } from "@/components/chat/MediaEmbed";
+import StickerPicker, { isStickerMessage, getStickerSrc, STICKER_PREFIX } from "@/components/chat/StickerPicker";
+import { Smile } from "lucide-react";
 
 /* ───── Reply info type ───── */
 interface ReplyInfo {
