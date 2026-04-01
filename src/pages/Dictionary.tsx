@@ -76,6 +76,10 @@ const Dictionary = () => {
   const [adding, setAdding] = useState(false);
   const [wordTypeFilter, setWordTypeFilter] = useState<WordType | "all">("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [showLookup, setShowLookup] = useState(false);
+  const [lookupWord, setLookupWord] = useState("");
+  const [lookupResult, setLookupResult] = useState("");
+  const [lookupLoading, setLookupLoading] = useState(false);
 
   useEffect(() => {
     if (!user) return;
