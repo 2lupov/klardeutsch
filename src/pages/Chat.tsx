@@ -925,9 +925,9 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
       </AnimatePresence>
 
       <div
-        className="px-3 pt-2 pb-3 transition-[padding-bottom] duration-150"
+        className="px-3 pt-2 pb-3"
         style={{
-          paddingBottom: `calc(max(0.75rem, env(safe-area-inset-bottom, 0.75rem)) + ${keyboardInset}px)`,
+          paddingBottom: `max(0.75rem, env(safe-area-inset-bottom, 0.75rem))`,
         }}
       >
         <AnimatePresence mode="wait">
