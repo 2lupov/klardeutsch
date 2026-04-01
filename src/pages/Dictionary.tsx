@@ -83,7 +83,30 @@ const Dictionary = () => {
   const [suggestions, setSuggestions] = useState<{ german: string; article: string | null }[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
+  // Autocomplete: fetch suggestions from vocab_cards as user types
   useEffect(() => {
+    const q = lookupWord.trim().toLowerCase();
+    if (q.length < 2) { setSuggestions([]); setShowSuggestions(false); return; }
+    const timer = setTimeout(async () => {
+      const { data } = await supabase
+        .from("vocab_cards")
+        .select("german, article")
+        .ilike("german", `${q}%`)
+        .order("german")
+        .limit(8);
+      if (data && data.length > 0) {
+        // deduplicate
+        const unique = Array.from(new Map(data.map(d => [d.german.toLowerCase(), d])).values());
+        setSuggestions(unique);
+        setShowSuggestions(true);
+      } else {
+        setSuggestions([]);
+        setShowSuggestions(false);
+      }
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [lookupWord]);
+
     if (!user) return;
     fetchWords();
   }, [user]);
