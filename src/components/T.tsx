@@ -78,13 +78,14 @@ const T = ({ tKey, as: Tag = "span", className }: Props) => {
     );
   }
 
+  const DynTag = Tag as any;
   return (
-    <Tag
+    <DynTag
       className={`${className ?? ""} ${editMode ? "outline-dashed outline-1 outline-primary/30 cursor-pointer hover:outline-primary/60 hover:bg-primary/5 rounded px-0.5 transition-all" : ""}`}
       onClick={handleClick}
     >
       {text}
-    </Tag>
+    </DynTag>
   );
 };
 

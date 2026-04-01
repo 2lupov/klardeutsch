@@ -40,7 +40,7 @@ const NicknameGate = ({ onComplete }: Props) => {
     const { data: existing } = await supabase
       .from("profiles")
       .select("user_id")
-      .ilike("display_name", trimmed)
+      .ilike("nickname" as any, trimmed)
       .neq("user_id", user.id)
       .limit(1);
 
@@ -52,7 +52,7 @@ const NicknameGate = ({ onComplete }: Props) => {
 
     setSaving(true);
     setChecking(false);
-    await supabase.from("profiles").update({ display_name: trimmed, nickname_changed_at: new Date().toISOString() } as any).eq("user_id", user.id);
+    await supabase.from("profiles").update({ nickname: trimmed, display_name: trimmed, nickname_changed_at: new Date().toISOString() } as any).eq("user_id", user.id);
     // Award 50 coins for creating a nickname
     await supabase.rpc("award_coins", { p_user_id: user.id, p_amount: 50, p_reason: "nickname_created" });
     toast({ title: "Отлично! +50 монет 🎉🪙" });

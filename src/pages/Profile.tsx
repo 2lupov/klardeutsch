@@ -33,6 +33,7 @@ interface ProgressRow {
 
 interface ProfileData {
   display_name: string | null;
+  nickname: string | null;
   avatar_url: string | null;
   telegram_chat_id: number | null;
   nickname_changed_at: string | null;
@@ -55,9 +56,11 @@ const Profile = () => {
   const [customWordsCount, setCustomWordsCount] = useState(0);
   const [savedWordsCount, setSavedWordsCount] = useState(0);
   const [fetching, setFetching] = useState(true);
-  const [profile, setProfile] = useState<ProfileData>({ display_name: null, avatar_url: null, telegram_chat_id: null, nickname_changed_at: null });
+  const [profile, setProfile] = useState<ProfileData>({ display_name: null, nickname: null, avatar_url: null, telegram_chat_id: null, nickname_changed_at: null });
   const [editing, setEditing] = useState(false);
+  const [editingNickname, setEditingNickname] = useState(false);
   const [editName, setEditName] = useState("");
+  const [editNickname, setEditNickname] = useState("");
   const [uploading, setUploading] = useState(false);
   const [duelsWonCount, setDuelsWonCount] = useState(0);
   const [dialoguesCount, setDialoguesCount] = useState(0);
@@ -74,7 +77,7 @@ const Profile = () => {
       const [{ data: prog }, { count }, { data: prof }, { count: customCount }, { count: savedCount }] = await Promise.all([
         supabase.from("user_progress").select("*").eq("user_id", user.id),
         supabase.from("vocab_cards").select("*", { count: "exact", head: true }),
-        supabase.from("profiles").select("display_name, avatar_url, telegram_chat_id, nickname_changed_at").eq("user_id", user.id).single(),
+        supabase.from("profiles").select("display_name, nickname, avatar_url, telegram_chat_id, nickname_changed_at").eq("user_id", user.id).single(),
         supabase.from("custom_words").select("*", { count: "exact", head: true }).eq("user_id", user.id),
         supabase.from("saved_words").select("*", { count: "exact", head: true }).eq("user_id", user.id),
       ]);
@@ -82,7 +85,7 @@ const Profile = () => {
       setTotalCards(count ?? 0);
       setCustomWordsCount(customCount ?? 0);
       setSavedWordsCount(savedCount ?? 0);
-      if (prof) setProfile({ display_name: prof.display_name, avatar_url: prof.avatar_url, telegram_chat_id: (prof as any).telegram_chat_id ?? null, nickname_changed_at: (prof as any).nickname_changed_at ?? null });
+      if (prof) setProfile({ display_name: prof.display_name, nickname: (prof as any).nickname ?? null, avatar_url: prof.avatar_url, telegram_chat_id: (prof as any).telegram_chat_id ?? null, nickname_changed_at: (prof as any).nickname_changed_at ?? null });
 
       // Fetch extra achievement stats
       const [duelsRes, challengesSentRes, dailyBonusRes] = await Promise.all([
@@ -222,6 +225,19 @@ const Profile = () => {
   const handleSaveName = async () => {
     if (!user) return;
     const trimmed = editName.trim();
+    if (!trimmed) {
+      toast({ title: lang === "uk" ? "Ім'я не може бути порожнім" : "Имя не может быть пустым", variant: "destructive" });
+      return;
+    }
+    await supabase.from("profiles").update({ display_name: trimmed } as any).eq("user_id", user.id);
+    setProfile((p) => ({ ...p, display_name: trimmed }));
+    setEditing(false);
+    toast({ title: t("profileSaved") });
+  };
+
+  const handleSaveNickname = async () => {
+    if (!user) return;
+    const trimmed = editNickname.trim();
     if (!trimmed || !usernameRegex.test(trimmed)) {
       toast({ title: lang === "uk" ? "Нікнейм має починатися з букви, мін. 5 символів" : "Никнейм должен начинаться с буквы, мин. 5 символов", variant: "destructive" });
       return;
@@ -241,7 +257,7 @@ const Profile = () => {
     const { data: existing } = await supabase
       .from("profiles")
       .select("user_id")
-      .ilike("display_name", trimmed)
+      .ilike("nickname" as any, trimmed)
       .neq("user_id", user.id)
       .limit(1);
     if (existing && existing.length > 0) {
@@ -249,15 +265,20 @@ const Profile = () => {
       return;
     }
     const now = new Date().toISOString();
-    await supabase.from("profiles").update({ display_name: trimmed, nickname_changed_at: now } as any).eq("user_id", user.id);
-    setProfile((p) => ({ ...p, display_name: trimmed, nickname_changed_at: now }));
-    setEditing(false);
+    await supabase.from("profiles").update({ nickname: trimmed, nickname_changed_at: now } as any).eq("user_id", user.id);
+    setProfile((p) => ({ ...p, nickname: trimmed, nickname_changed_at: now }));
+    setEditingNickname(false);
     toast({ title: t("profileSaved") });
   };
 
   const startEdit = () => {
     setEditName(profile.display_name ?? "");
     setEditing(true);
+  };
+
+  const startEditNickname = () => {
+    setEditNickname(profile.nickname ?? "");
+    setEditingNickname(true);
   };
 
   if (!user || fetching) {
@@ -678,7 +699,30 @@ const Profile = () => {
               </button>
             </div>
           )}
-          <p className="text-xs text-muted-foreground truncate">@{profile.display_name || "nickname"}</p>
+          {editingNickname ? (
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs text-muted-foreground">@</span>
+              <input
+                value={editNickname}
+                onChange={(e) => setEditNickname(e.target.value.replace(/\s/g, "").slice(0, 20))}
+                className="min-w-0 bg-muted/50 border border-border rounded-md px-2 py-0.5 text-xs font-display font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                placeholder="nickname"
+                autoFocus
+                onKeyDown={(e) => e.key === "Enter" && handleSaveNickname()}
+              />
+              <button onClick={handleSaveNickname} className="p-0.5 rounded bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
+                <Check className="w-3 h-3" />
+              </button>
+              <button onClick={() => setEditingNickname(false)} className="p-0.5 rounded bg-muted text-muted-foreground hover:bg-muted/80 transition-colors">
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground truncate cursor-pointer hover:text-foreground transition-colors group/nick" onClick={startEditNickname}>
+              @{profile.nickname || "nickname"}
+              <Pencil className="w-2.5 h-2.5 inline-block ml-1 opacity-0 group-hover/nick:opacity-100 transition-opacity" />
+            </p>
+          )}
         </div>
 
         {/* Panda streak button */}
