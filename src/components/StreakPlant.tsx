@@ -195,7 +195,7 @@ const StreakPlant = ({ streak, canClaim, compact = false }: StreakPlantProps) =>
           onClick={() => setShowDialog(true)}
           className="relative flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-all overflow-hidden"
         >
-          <span className={`text-xl md:text-2xl ${stageIdx === 0 ? "opacity-60" : ""}`}>🐼</span>
+          <span className={`text-xl md:text-2xl ${night || stageIdx === 0 ? "opacity-60" : ""}`}>🐼</span>
         </button>
 
         <Dialog open={showDialog} onOpenChange={setShowDialog}>
