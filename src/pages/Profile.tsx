@@ -794,7 +794,7 @@ const Profile = () => {
 
       {/* Language choice */}
       {!languageLocked ? (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass-card p-4 mb-5 space-y-3 rounded-2xl">
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className={`glass-card p-4 ${isTelegram ? "mb-3" : "mb-5"} space-y-3 rounded-2xl`}>
           <div className="flex items-center gap-2">
             <Globe className="w-4 h-4 text-primary" />
             <p className="text-sm font-display font-semibold text-foreground">
