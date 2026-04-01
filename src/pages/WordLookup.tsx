@@ -1,11 +1,10 @@
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Search, Loader2, Sparkles, BookOpen, Languages, Lightbulb, Table2, Layers } from "lucide-react";
-import Panda3D from "@/components/Panda3D";
-import pandaStudying from "@/assets/mascot/panda-studying.png";
+import pandaWriting from "@/assets/mascot/panda-writing.png";
 
 interface WordData {
   word: string;
@@ -165,11 +164,14 @@ const WordLookup = () => {
             <motion.div key="idle" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9, y: -20 }} transition={{ duration: 0.4 }}
               className="flex flex-col items-center mb-4">
-              <div className="w-48 h-48 md:w-56 md:h-56">
-                <Suspense fallback={<div className="w-full h-full flex items-center justify-center text-6xl animate-bounce">🐼</div>}>
-                  <Panda3D stageImage={pandaStudying} className="rounded-2xl" />
-                </Suspense>
-              </div>
+              <motion.img
+                src={pandaWriting}
+                alt="Panda writing"
+                className="w-48 h-48 md:w-56 md:h-56 object-contain drop-shadow-2xl"
+                animate={{ y: [0, -8, 0] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                loading="lazy" width={1024} height={1024}
+              />
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
                 className="relative mt-2">
                 <div className="bg-card/80 backdrop-blur-sm border border-border rounded-2xl px-5 py-3 text-center max-w-xs">
