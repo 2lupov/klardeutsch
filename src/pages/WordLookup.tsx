@@ -437,7 +437,7 @@ const WordLookup = () => {
                   <div className="px-5 py-4 flex flex-wrap gap-2">
                     {wordData.synonyms.map((s, i) => (
                       <motion.button key={i} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                        onClick={() => { setWord(s); handleLookup(); }}
+                        onClick={() => handleLookup(s)}
                         className="px-4 py-2 rounded-xl bg-secondary border border-border text-sm font-medium text-foreground hover:bg-primary/10 hover:border-primary/30 transition-colors">
                         {s}
                       </motion.button>
