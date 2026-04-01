@@ -360,9 +360,8 @@ const Dictionary = () => {
         </div>
 
         {/* Stats mini-bar */}
-        <div className="space-y-2 pb-1">
-          {/* Row 1: Source filters + Article filters */}
-          <div className="flex items-center gap-2">
+        <div className="space-y-2 pb-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-2 min-w-0">
             {[
               { key: "all" as const, label: lang === "uk" ? "Усі" : "Все", count: stats.total, color: "bg-primary/10 text-primary border-primary/20" },
               { key: "difficult" as const, label: "★", count: stats.difficult, color: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
