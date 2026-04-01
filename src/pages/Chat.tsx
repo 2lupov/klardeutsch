@@ -804,6 +804,14 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
               </button>
               <motion.button
                 whileTap={{ scale: 0.9 }}
+                onClick={flipVideoCamera}
+                className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-foreground"
+                title={lang === "uk" ? "Перевернути камеру" : "Переключить камеру"}
+              >
+                <RefreshCw className="w-4 h-4" />
+              </motion.button>
+              <motion.button
+                whileTap={{ scale: 0.9 }}
                 onClick={stopVideoCircle}
                 className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/30"
               >
