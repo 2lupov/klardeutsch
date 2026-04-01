@@ -774,7 +774,7 @@ const Profile = () => {
       )}
 
       {/* Stat cards */}
-      <div className="grid grid-cols-4 gap-2 mb-4">
+      <div className={`grid gap-2 mb-4 ${isMobile ? "grid-cols-4" : "grid-cols-4"}`}>
         <StatCard icon={<Coins className="w-4 h-4" />} value={balance} label={t("coinsLabel")} />
         <StatCard icon={<BookOpen className="w-4 h-4" />} value={wordsLearned} label={t("wordsLearned")} />
         <StatCard icon={<Brain className="w-4 h-4" />} value={completedLessons} label={t("lessonsCompleted")} />
