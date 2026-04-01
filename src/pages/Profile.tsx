@@ -861,7 +861,7 @@ const Profile = () => {
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.18 }}
-        className={`gap-2.5 mb-5 ${isMobile ? "flex flex-col" : "grid grid-cols-2"}`}
+        className={`${isTelegram ? "gap-1.5 mb-3" : "gap-2.5 mb-5"} ${isMobile ? "flex flex-col" : "grid grid-cols-2"}`}
       >
         <NavButton icon={<Award className="w-4.5 h-4.5" />} label={t("leaderboardTitle")} subtitle={`${totalXP} XP`} onClick={() => setScreen("leaderboard")} iconBg="bg-primary/15 text-primary" />
         <NavButton icon={<Trophy className="w-4.5 h-4.5" />} label={t("achievementsTitle")} onClick={() => setScreen("achievements")} iconBg="bg-amber-500/15 text-amber-400" />
