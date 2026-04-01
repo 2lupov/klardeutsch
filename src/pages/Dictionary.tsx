@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePlatform } from "@/hooks/usePlatform";
 import { supabase } from "@/integrations/supabase/client";
-import { Star, StarOff, RotateCcw, Search, BookOpen, Plus, X, Trash2 } from "lucide-react";
+import { Star, StarOff, RotateCcw, Search, BookOpen, Plus, X, Trash2, ChevronLeft, ChevronRight, Sparkles, Filter } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 interface DictWord {
@@ -18,13 +19,24 @@ interface DictWord {
   is_difficult: boolean;
 }
 
+const ARTICLE_COLORS: Record<string, { bg: string; text: string; border: string; dot: string }> = {
+  der: { bg: "bg-blue-500/10", text: "text-blue-400", border: "border-blue-500/30", dot: "bg-blue-400" },
+  die: { bg: "bg-pink-500/10", text: "text-pink-400", border: "border-pink-500/30", dot: "bg-pink-400" },
+  das: { bg: "bg-emerald-500/10", text: "text-emerald-400", border: "border-emerald-500/30", dot: "bg-emerald-400" },
+};
+
+const getArticleStyle = (article: string | null) => {
+  if (!article) return null;
+  return ARTICLE_COLORS[article.toLowerCase()] ?? null;
+};
+
 const Dictionary = () => {
   const { user } = useAuth();
   const { t, lang } = useLanguage();
   const { isMobile } = usePlatform();
   const [words, setWords] = useState<DictWord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<"all" | "difficult">("all");
+  const [filter, setFilter] = useState<"all" | "difficult" | "custom">("all");
   const [articleFilter, setArticleFilter] = useState<"all" | "der" | "die" | "das">("all");
   const [search, setSearch] = useState("");
   const [reviewMode, setReviewMode] = useState(false);
@@ -36,6 +48,7 @@ const Dictionary = () => {
   const [newArticle, setNewArticle] = useState("");
   const [newExample, setNewExample] = useState("");
   const [adding, setAdding] = useState(false);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -140,17 +153,27 @@ const Dictionary = () => {
     setAdding(false);
   };
 
-  const filtered = words.filter((w) => {
+  const filtered = useMemo(() => words.filter((w) => {
     if (filter === "difficult" && !w.is_difficult) return false;
+    if (filter === "custom" && w.source !== "custom") return false;
     if (articleFilter !== "all" && w.article?.toLowerCase() !== articleFilter) return false;
     if (search) {
       const s = search.toLowerCase();
       return w.german.toLowerCase().includes(s) || w.russian.toLowerCase().includes(s);
     }
     return true;
-  });
+  }), [words, filter, articleFilter, search]);
 
-  const difficultWords = words.filter((w) => w.is_difficult);
+  const difficultWords = useMemo(() => words.filter((w) => w.is_difficult), [words]);
+
+  const stats = useMemo(() => ({
+    total: words.length,
+    difficult: difficultWords.length,
+    custom: words.filter(w => w.source === "custom").length,
+    der: words.filter(w => w.article?.toLowerCase() === "der").length,
+    die: words.filter(w => w.article?.toLowerCase() === "die").length,
+    das: words.filter(w => w.article?.toLowerCase() === "das").length,
+  }), [words, difficultWords]);
 
   const startReview = () => {
     if (difficultWords.length === 0) {
@@ -165,43 +188,81 @@ const Dictionary = () => {
   // Review mode
   if (reviewMode && difficultWords.length > 0) {
     const card = difficultWords[reviewIndex];
+    const progress = ((reviewIndex + 1) / difficultWords.length) * 100;
+
     return (
       <div className={`flex flex-col items-center justify-center h-full gap-6 px-4 ${isMobile ? "max-w-sm" : "max-w-lg"} mx-auto`}>
-        <div className="flex items-center justify-between w-full">
-          <span className="text-sm text-muted-foreground">
-            {reviewIndex + 1} / {difficultWords.length}
-          </span>
-          <button onClick={() => setReviewMode(false)} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-            ✕ {t("back")}
-          </button>
-        </div>
-
-        <div
-          className={`w-full cursor-pointer perspective-1000 ${isMobile ? "aspect-[3/4]" : "aspect-[4/3]"}`}
-          onClick={() => setFlipped(!flipped)}
-        >
-          <div
-            className={`relative w-full h-full transition-transform duration-500 ${flipped ? "[transform:rotateY(180deg)]" : ""}`}
-            style={{ transformStyle: "preserve-3d" }}
-          >
-            <div className="absolute inset-0 glass-card glow-yellow flex flex-col items-center justify-center p-8" style={{ backfaceVisibility: "hidden" }}>
-              {card?.article && <span className="text-sm font-medium text-primary mb-2">{card.article}</span>}
-              <h2 className="text-3xl font-display font-bold text-foreground">{card?.german}</h2>
-              <p className="text-sm text-muted-foreground mt-4">{t("tapToFlip")}</p>
-            </div>
-            <div className="absolute inset-0 glass-card flex flex-col items-center justify-center p-8 [transform:rotateY(180deg)]" style={{ backfaceVisibility: "hidden" }}>
-              <h2 className="text-2xl font-display font-bold text-primary">{lang === "uk" && card?.ukrainian ? card.ukrainian : card?.russian}</h2>
-              {card?.example && <p className="text-sm text-muted-foreground italic text-center mt-4">"{card.example}"</p>}
-            </div>
+        {/* Progress bar */}
+        <div className="w-full">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-display font-semibold text-foreground">
+              {reviewIndex + 1} / {difficultWords.length}
+            </span>
+            <button onClick={() => setReviewMode(false)} className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+              <X className="w-3.5 h-3.5" />
+              {t("back")}
+            </button>
+          </div>
+          <div className="w-full h-1.5 rounded-full bg-secondary overflow-hidden">
+            <motion.div
+              className="h-full rounded-full bg-primary"
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.3 }}
+            />
           </div>
         </div>
 
-        <div className="flex gap-3">
+        {/* Flashcard */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={reviewIndex}
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -40 }}
+            transition={{ duration: 0.25 }}
+            className={`w-full cursor-pointer ${isMobile ? "aspect-[3/4]" : "aspect-[4/3]"}`}
+            onClick={() => setFlipped(!flipped)}
+          >
+            <div
+              className={`relative w-full h-full transition-transform duration-500 ${flipped ? "[transform:rotateY(180deg)]" : ""}`}
+              style={{ transformStyle: "preserve-3d" }}
+            >
+              {/* Front */}
+              <div className="absolute inset-0 rounded-2xl border border-border bg-card shadow-xl flex flex-col items-center justify-center p-8" style={{ backfaceVisibility: "hidden" }}>
+                {card?.article && (
+                  <span className={`text-sm font-bold px-3 py-1 rounded-full mb-3 ${getArticleStyle(card.article)?.bg ?? "bg-secondary"} ${getArticleStyle(card.article)?.text ?? "text-muted-foreground"}`}>
+                    {card.article}
+                  </span>
+                )}
+                <h2 className="text-3xl font-display font-bold text-foreground text-center">{card?.german}</h2>
+                <p className="text-sm text-muted-foreground mt-6 flex items-center gap-1.5">
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  {t("tapToFlip")}
+                </p>
+              </div>
+              {/* Back */}
+              <div className="absolute inset-0 rounded-2xl border border-primary/30 bg-card shadow-xl flex flex-col items-center justify-center p-8 [transform:rotateY(180deg)]" style={{ backfaceVisibility: "hidden" }}>
+                <h2 className="text-2xl font-display font-bold text-primary text-center">
+                  {lang === "uk" && card?.ukrainian ? card.ukrainian : card?.russian}
+                </h2>
+                {card?.example && (
+                  <p className="text-sm text-muted-foreground italic text-center mt-4 px-4">„{card.example}"</p>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Controls */}
+        <div className="flex gap-3 items-center">
           <button
             onClick={() => { setFlipped(false); if (reviewIndex > 0) setTimeout(() => setReviewIndex(reviewIndex - 1), 150); }}
             disabled={reviewIndex === 0}
-            className="px-4 py-2 rounded-xl bg-secondary text-secondary-foreground disabled:opacity-30"
-          >←</button>
+            className="p-3 rounded-xl bg-secondary border border-border text-foreground disabled:opacity-30 hover:bg-muted transition-colors"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
           <button
             onClick={() => {
               toggleDifficult(difficultWords[reviewIndex]);
@@ -209,178 +270,327 @@ const Dictionary = () => {
               if (reviewIndex < difficultWords.length - 1) setTimeout(() => setReviewIndex(reviewIndex + 1), 150);
               else { setReviewMode(false); toast({ title: t("reviewComplete") }); }
             }}
-            className="px-6 py-2 rounded-xl bg-primary text-primary-foreground font-semibold glow-yellow"
-          >{t("iLearned")}</button>
+            className="px-6 py-3 rounded-xl bg-primary text-primary-foreground font-display font-semibold text-sm hover:opacity-90 transition-opacity flex items-center gap-2"
+          >
+            <Sparkles className="w-4 h-4" />
+            {t("iLearned")}
+          </button>
           <button
             onClick={() => { setFlipped(false); if (reviewIndex < difficultWords.length - 1) setTimeout(() => setReviewIndex(reviewIndex + 1), 150); }}
             disabled={reviewIndex >= difficultWords.length - 1}
-            className="px-4 py-2 rounded-xl bg-secondary text-secondary-foreground disabled:opacity-30"
-          >→</button>
+            className="p-3 rounded-xl bg-secondary border border-border text-foreground disabled:opacity-30 hover:bg-muted transition-colors"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`flex flex-col h-full ${isMobile ? "px-4 py-4" : "px-8 py-8 max-w-3xl mx-auto"}`}>
+    <div className={`flex flex-col h-full ${isMobile ? "px-4 py-4" : "px-8 py-6 max-w-3xl mx-auto"}`}>
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h1 className="text-xl font-display font-bold">{t("dictionaryTitle")}</h1>
-          <p className="text-sm text-muted-foreground">
-            {words.length} {t("wordsTotal")} · {difficultWords.length} {t("wordsDifficult")}
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setShowAdd(!showAdd)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-secondary border border-border text-sm font-medium text-foreground hover:bg-muted transition-colors"
-          >
-            {showAdd ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-          </button>
-          {difficultWords.length > 0 && (
-            <button
-              onClick={startReview}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground font-semibold text-sm glow-yellow"
+      <div className="mb-5">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-2xl font-display font-bold text-foreground">{t("dictionaryTitle")}</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              {stats.total} {t("wordsTotal")}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowAdd(!showAdd)}
+              className={`p-2.5 rounded-xl border transition-colors ${
+                showAdd
+                  ? "bg-primary/10 border-primary/30 text-primary"
+                  : "bg-secondary border-border text-muted-foreground hover:text-foreground"
+              }`}
             >
-              <RotateCcw className="w-4 h-4" />
-              {!isMobile && t("reviewDifficult")}
+              {showAdd ? <X className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+            </motion.button>
+            {stats.difficult > 0 && (
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={startReview}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground font-display font-semibold text-sm hover:opacity-90 transition-opacity"
+              >
+                <RotateCcw className="w-4 h-4" />
+                {!isMobile && t("reviewDifficult")}
+                <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary-foreground/20 text-[10px] font-bold">
+                  {stats.difficult}
+                </span>
+              </motion.button>
+            )}
+          </div>
+        </div>
+
+        {/* Stats mini-bar */}
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+          {[
+            { key: "all" as const, label: lang === "uk" ? "Усі" : "Все", count: stats.total, color: "bg-primary/10 text-primary border-primary/20" },
+            { key: "difficult" as const, label: "★", count: stats.difficult, color: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
+            { key: "custom" as const, label: "✎", count: stats.custom, color: "bg-violet-500/10 text-violet-400 border-violet-500/20" },
+          ].map((f) => (
+            <button
+              key={f.key}
+              onClick={() => setFilter(f.key)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all whitespace-nowrap ${
+                filter === f.key ? f.color : "bg-secondary border-border text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {f.label}
+              <span className="opacity-70">{f.count}</span>
             </button>
-          )}
+          ))}
+          <div className="w-px bg-border mx-1 self-stretch" />
+          {(["der", "die", "das"] as const).map((a) => {
+            const style = ARTICLE_COLORS[a];
+            return (
+              <button
+                key={a}
+                onClick={() => setArticleFilter(articleFilter === a ? "all" : a)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all whitespace-nowrap ${
+                  articleFilter === a
+                    ? `${style.bg} ${style.text} ${style.border}`
+                    : "bg-secondary border-border text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />
+                {a}
+                <span className="opacity-70">{stats[a]}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {/* Add word form */}
-      {showAdd && (
-        <div className="glass-card p-4 mb-4 flex flex-col gap-3 animate-slide-up">
-          <div className="grid grid-cols-2 gap-2">
-            <input
-              type="text"
-              placeholder={t("german")}
-              value={newGerman}
-              onChange={(e) => setNewGerman(e.target.value)}
-              maxLength={100}
-              className="px-3 py-2 rounded-lg bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-            />
-            <input
-              type="text"
-              placeholder={t("russian")}
-              value={newRussian}
-              onChange={(e) => setNewRussian(e.target.value)}
-              maxLength={100}
-              className="px-3 py-2 rounded-lg bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <input
-              type="text"
-              placeholder={`${t("article")} (${t("example")}: der)`}
-              value={newArticle}
-              onChange={(e) => setNewArticle(e.target.value)}
-              maxLength={10}
-              className="px-3 py-2 rounded-lg bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-            />
-            <input
-              type="text"
-              placeholder={t("example")}
-              value={newExample}
-              onChange={(e) => setNewExample(e.target.value)}
-              maxLength={200}
-              className="px-3 py-2 rounded-lg bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-            />
-          </div>
-          <button
-            onClick={addCustomWord}
-            disabled={!newGerman.trim() || !newRussian.trim() || adding}
-            className="px-4 py-2 rounded-xl bg-primary text-primary-foreground font-semibold text-sm disabled:opacity-40 transition-all hover:opacity-90"
+      <AnimatePresence>
+        {showAdd && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden mb-4"
           >
-            {t("addWord")}
-          </button>
-        </div>
-      )}
+            <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
+              <p className="text-sm font-display font-semibold text-foreground">
+                {lang === "uk" ? "Додати слово" : "Добавить слово"}
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  type="text"
+                  placeholder="Deutsch"
+                  value={newGerman}
+                  onChange={(e) => setNewGerman(e.target.value)}
+                  maxLength={100}
+                  autoFocus
+                  className="px-3 py-2.5 rounded-xl bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                />
+                <input
+                  type="text"
+                  placeholder={lang === "uk" ? "Переклад" : "Перевод"}
+                  value={newRussian}
+                  onChange={(e) => setNewRussian(e.target.value)}
+                  maxLength={100}
+                  className="px-3 py-2.5 rounded-xl bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="flex gap-1.5">
+                  {["der", "die", "das"].map((a) => {
+                    const style = ARTICLE_COLORS[a];
+                    return (
+                      <button
+                        key={a}
+                        type="button"
+                        onClick={() => setNewArticle(newArticle === a ? "" : a)}
+                        className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all ${
+                          newArticle === a
+                            ? `${style.bg} ${style.text} ${style.border}`
+                            : "bg-secondary border-border text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        {a}
+                      </button>
+                    );
+                  })}
+                </div>
+                <input
+                  type="text"
+                  placeholder={lang === "uk" ? "Приклад (необов'язково)" : "Пример (необязательно)"}
+                  value={newExample}
+                  onChange={(e) => setNewExample(e.target.value)}
+                  maxLength={200}
+                  className="px-3 py-2.5 rounded-xl bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                />
+              </div>
+              <button
+                onClick={addCustomWord}
+                disabled={!newGerman.trim() || !newRussian.trim() || adding}
+                className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground font-display font-semibold text-sm disabled:opacity-40 transition-all hover:opacity-90"
+              >
+                {adding ? "..." : lang === "uk" ? "Додати" : "Добавить"}
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* Search + Filter */}
-      <div className="flex gap-2 mb-4">
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder={t("searchWords")}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 rounded-xl bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-          />
-        </div>
-        <div className="flex gap-1.5">
-          {(["all", "der", "die", "das"] as const).map((a) => (
-            <button
-              key={a}
-              onClick={() => setArticleFilter(a)}
-              className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                articleFilter === a
-                  ? a === "der" ? "bg-blue-500/20 border border-blue-500/50 text-blue-400"
-                  : a === "die" ? "bg-pink-500/20 border border-pink-500/50 text-pink-400"
-                  : a === "das" ? "bg-emerald-500/20 border border-emerald-500/50 text-emerald-400"
-                  : "bg-primary/10 border border-primary/50 text-primary"
-                  : "bg-secondary border border-border text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {a === "all" ? "Alle" : a}
-            </button>
-          ))}
-        </div>
-        <button
-          onClick={() => setFilter(filter === "all" ? "difficult" : "all")}
-          className={`px-3 py-2 rounded-xl border text-sm font-medium transition-colors ${
-            filter === "difficult"
-              ? "bg-primary/10 border-primary/50 text-primary"
-              : "bg-secondary border-border text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <Star className="w-4 h-4" />
-        </button>
+      {/* Search */}
+      <div className="relative mb-4">
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <input
+          type="text"
+          placeholder={t("searchWords")}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow"
+        />
+        {search && (
+          <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+            <X className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
+      {/* Results count */}
+      {(search || filter !== "all" || articleFilter !== "all") && (
+        <p className="text-xs text-muted-foreground mb-2 px-1">
+          {lang === "uk" ? "Знайдено" : "Найдено"}: {filtered.length}
+        </p>
+      )}
+
       {/* Word list */}
-      <div className="flex-1 overflow-y-auto overscroll-none space-y-2">
+      <div className="flex-1 overflow-y-auto overscroll-none space-y-1.5 pb-2">
         {loading ? (
-          <p className="text-muted-foreground text-center py-8">{t("loading")}</p>
-        ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 gap-3 text-muted-foreground">
-            <BookOpen className="w-10 h-10 opacity-40" />
-            <p className="text-sm">{t("dictionaryEmpty")}</p>
+          <div className="flex flex-col items-center justify-center py-16 gap-3">
+            <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+            <p className="text-sm text-muted-foreground">{t("loading")}</p>
           </div>
-        ) : (
-          filtered.map((word) => (
-            <div key={word.id} className="glass-card p-3 flex items-center gap-3 group">
-              <button onClick={() => toggleDifficult(word)} className="shrink-0 transition-colors">
-                {word.is_difficult ? (
-                  <Star className="w-5 h-5 text-primary fill-primary" />
-                ) : (
-                  <StarOff className="w-5 h-5 text-muted-foreground hover:text-primary" />
-                )}
-              </button>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-baseline gap-2">
-                  {word.article && <span className="text-sm text-yellow-400 font-display font-semibold">{word.article}</span>}
-                  <span className="font-display font-semibold text-foreground truncate">{word.german.replace(/^(der|die|das)\s+/i, '')}</span>
-                </div>
-                <p className="text-sm text-muted-foreground truncate">{lang === "uk" && word.ukrainian ? word.ukrainian : word.russian}</p>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                {word.level && <span className="text-[10px] text-muted-foreground/60">{word.level}</span>}
-                {word.source === "custom" && (
-                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">✎</span>
-                )}
-                <button
-                  onClick={() => removeWord(word)}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
+        ) : filtered.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col items-center justify-center py-16 gap-4 text-muted-foreground"
+          >
+            <div className="w-16 h-16 rounded-2xl bg-secondary flex items-center justify-center">
+              <BookOpen className="w-8 h-8 opacity-40" />
             </div>
-          ))
+            <div className="text-center">
+              <p className="font-display font-semibold text-foreground mb-1">
+                {search ? (lang === "uk" ? "Нічого не знайдено" : "Ничего не найдено") : t("dictionaryEmpty")}
+              </p>
+              <p className="text-xs">
+                {search
+                  ? (lang === "uk" ? "Спробуй інший запит" : "Попробуй другой запрос")
+                  : (lang === "uk" ? "Вивчай слова в уроках — вони з'являться тут" : "Изучай слова в уроках — они появятся здесь")}
+              </p>
+            </div>
+          </motion.div>
+        ) : (
+          filtered.map((word, i) => {
+            const articleStyle = getArticleStyle(word.article);
+            const isExpanded = expandedId === word.id;
+
+            return (
+              <motion.div
+                key={word.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: Math.min(i * 0.02, 0.3) }}
+                layout
+                className={`rounded-xl border transition-colors cursor-pointer group ${
+                  isExpanded
+                    ? "bg-card border-primary/20 shadow-sm"
+                    : "bg-card/50 border-border hover:bg-card hover:border-border"
+                }`}
+                onClick={() => setExpandedId(isExpanded ? null : word.id)}
+              >
+                <div className="flex items-center gap-3 p-3">
+                  {/* Article dot */}
+                  <div className="shrink-0 w-8 flex justify-center">
+                    {articleStyle ? (
+                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${articleStyle.bg} ${articleStyle.text}`}>
+                        {word.article}
+                      </span>
+                    ) : (
+                      <span className="w-2 h-2 rounded-full bg-muted-foreground/20" />
+                    )}
+                  </div>
+
+                  {/* Word content */}
+                  <div className="flex-1 min-w-0">
+                    <span className="font-display font-semibold text-foreground text-sm">
+                      {word.german.replace(/^(der|die|das)\s+/i, "")}
+                    </span>
+                    <span className="text-muted-foreground text-sm ml-2">
+                      — {lang === "uk" && word.ukrainian ? word.ukrainian : word.russian}
+                    </span>
+                  </div>
+
+                  {/* Right side */}
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {word.level && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground font-medium">
+                        {word.level}
+                      </span>
+                    )}
+                    {word.source === "custom" && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-400 font-medium">✎</span>
+                    )}
+                    <button
+                      onClick={(e) => { e.stopPropagation(); toggleDifficult(word); }}
+                      className="p-1 rounded-lg transition-colors"
+                    >
+                      {word.is_difficult ? (
+                        <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
+                      ) : (
+                        <StarOff className="w-4 h-4 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Expanded content */}
+                <AnimatePresence>
+                  {isExpanded && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="px-3 pb-3 pt-0 border-t border-border/50 mt-0">
+                        <div className="pt-2.5 flex items-start justify-between">
+                          <div className="space-y-1.5">
+                            {word.example && (
+                              <p className="text-xs text-muted-foreground italic">„{word.example}"</p>
+                            )}
+                            {word.article && (
+                              <p className="text-xs text-muted-foreground">
+                                {lang === "uk" ? "Артикль" : "Артикль"}: <span className={`font-semibold ${articleStyle?.text ?? ""}`}>{word.article}</span>
+                              </p>
+                            )}
+                          </div>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); removeWord(word); }}
+                            className="p-1.5 rounded-lg text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10 transition-colors"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            );
+          })
         )}
       </div>
     </div>
