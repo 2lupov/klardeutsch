@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Outlet } from "react-router-dom";
+import { useNavigate, useLocation, Outlet } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePlatform } from "@/hooks/usePlatform";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,6 +16,7 @@ const AppLayout = () => {
   const { user, loading } = useAuth();
   const { isMobile } = usePlatform();
   const navigate = useNavigate();
+  const location = useLocation();
   const [nicknameChecked, setNicknameChecked] = useState(false);
   const [hasNickname, setHasNickname] = useState(true);
 
@@ -55,6 +56,8 @@ const AppLayout = () => {
     return <NicknameGate onComplete={() => setHasNickname(true)} />;
   }
 
+  const isChat = location.pathname === "/chat";
+
   if (isMobile) {
     return (
       <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
@@ -62,7 +65,7 @@ const AppLayout = () => {
         <LofiFloatingPlayer />
         <ListeningFloatingPlayer />
         <DailyBonusDialog />
-        <div className="flex-1 overflow-y-auto overflow-x-hidden overscroll-none pb-14">
+        <div className={`flex-1 overflow-y-auto overflow-x-hidden overscroll-none ${isChat ? "" : "pb-14"}`}>
           <PageTransition><Outlet /></PageTransition>
         </div>
         <MobileBottomNav />
