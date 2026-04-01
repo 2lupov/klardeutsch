@@ -360,10 +360,28 @@ const VideoCirclePlayer = ({ url }: { url: string }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
 
-  const toggle = () => {
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    // Force inline playback on iOS/Telegram WebView
+    v.setAttribute("playsinline", "");
+    v.setAttribute("webkit-playsinline", "");
+    v.setAttribute("x-webkit-airplay", "deny");
+    // Prevent fullscreen requests
+    const prevent = (e: Event) => e.preventDefault();
+    v.addEventListener("webkitbeginfullscreen", prevent);
+    v.addEventListener("fullscreenchange", prevent);
+    return () => {
+      v.removeEventListener("webkitbeginfullscreen", prevent);
+      v.removeEventListener("fullscreenchange", prevent);
+    };
+  }, []);
+
+  const toggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (!videoRef.current) return;
     if (playing) videoRef.current.pause();
-    else videoRef.current.play();
+    else videoRef.current.play().catch(() => {});
     setPlaying(!playing);
   };
 
@@ -379,7 +397,10 @@ const VideoCirclePlayer = ({ url }: { url: string }) => {
         className="w-full h-full object-cover"
         loop
         playsInline
+        muted={false}
+        preload="metadata"
         onEnded={() => setPlaying(false)}
+        style={{ objectFit: "cover" }}
       />
       {!playing && (
         <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
@@ -388,7 +409,7 @@ const VideoCirclePlayer = ({ url }: { url: string }) => {
       )}
       {playing && (
         <motion.div
-          className="absolute inset-0 rounded-full border-2 border-primary"
+          className="absolute inset-0 rounded-full border-2 border-primary pointer-events-none"
           animate={{ scale: [1, 1.05, 1] }}
           transition={{ duration: 2, repeat: Infinity }}
         />
@@ -406,6 +427,8 @@ const MessageBubble = ({ isMe, content, audioUrl, imageUrl, imageUrls, fileUrl, 
   onReply?: () => void; onAvatarClick?: (userId: string) => void; messageId?: string;
 }) => {
   const [galleryOpen, setGalleryOpen] = useState<number | null>(null);
+  const [swipeX, setSwipeX] = useState(0);
+  const swipeTriggered = useRef(false);
 
   // Combine legacy single image_url with new image_urls array
   const allImages: string[] = [];
@@ -417,84 +440,120 @@ const MessageBubble = ({ isMe, content, audioUrl, imageUrl, imageUrls, fileUrl, 
 
   const hasMedia = allImages.length > 0 || fileUrl;
 
+  const handleDrag = (_: any, info: { offset: { x: number } }) => {
+    // Swipe right for own messages, left for others
+    const dx = info.offset.x;
+    const threshold = 60;
+    if (isMe && dx < -threshold && !swipeTriggered.current) {
+      swipeTriggered.current = true;
+      onReply?.();
+    } else if (!isMe && dx > threshold && !swipeTriggered.current) {
+      swipeTriggered.current = true;
+      onReply?.();
+    }
+  };
+
   return (
     <>
-      <motion.div
-        initial={{ opacity: 0, y: 12, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.25, delay: Math.min(index * 0.02, 0.3) }}
-        className={`flex gap-2 group ${isMe ? "flex-row-reverse" : ""}`}
-      >
-        {!isMe && (
-          <button onClick={() => senderId && onAvatarClick?.(senderId)} className="shrink-0 mt-auto">
-            <Avatar className="w-7 h-7 hover:ring-2 hover:ring-primary/40 transition-all">
-              <AvatarImage src={avatarUrl || ""} className="object-cover" />
-              <AvatarFallback className="text-[10px] bg-primary/10 text-primary">
-                {(senderName || "?")[0]}
-              </AvatarFallback>
-            </Avatar>
-          </button>
-        )}
-        <div className={`max-w-[75%] ${isMe ? "items-end" : "items-start"}`}>
-          {!isMe && senderName && (
-            <button onClick={() => senderId && onAvatarClick?.(senderId)} className="text-[10px] mb-0.5 text-muted-foreground font-medium px-1 hover:text-primary transition-colors">
-              {senderName}
+      <div className="relative overflow-hidden">
+        {/* Reply icon hint behind message */}
+        <AnimatePresence>
+          {Math.abs(swipeX) > 20 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 0.6, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.5 }}
+              className={`absolute top-1/2 -translate-y-1/2 ${isMe ? "left-3" : "right-3"}`}
+            >
+              <Reply className="w-4 h-4 text-primary" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <motion.div
+          initial={{ opacity: 0, y: 12, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1, x: 0 }}
+          transition={{ duration: 0.25, delay: Math.min(index * 0.02, 0.3) }}
+          drag="x"
+          dragConstraints={{ left: isMe ? -80 : 0, right: isMe ? 0 : 80 }}
+          dragElastic={0.3}
+          onDrag={handleDrag}
+          onDragEnd={() => { swipeTriggered.current = false; setSwipeX(0); }}
+          onUpdate={(latest: any) => { if (latest.x !== undefined) setSwipeX(latest.x as number); }}
+          className={`flex gap-2 group ${isMe ? "flex-row-reverse" : ""}`}
+          style={{ touchAction: "pan-y" }}
+        >
+          {!isMe && (
+            <button onClick={() => senderId && onAvatarClick?.(senderId)} className="shrink-0 mt-auto">
+              <Avatar className="w-7 h-7 hover:ring-2 hover:ring-primary/40 transition-all">
+                <AvatarImage src={avatarUrl || ""} className="object-cover" />
+                <AvatarFallback className="text-[10px] bg-primary/10 text-primary">
+                  {(senderName || "?")[0]}
+                </AvatarFallback>
+              </Avatar>
             </button>
           )}
-
-          {/* Reply preview */}
-          {replyToContent && (
-            <div className={`text-[10px] mb-1 px-2.5 py-1 rounded-lg border-l-2 border-primary/40 ${isMe ? "bg-primary/10 ml-auto" : "bg-muted/60"} max-w-full truncate`}>
-              <span className="font-semibold text-primary/70">{replyToSender || "?"}</span>
-              <span className="text-muted-foreground ml-1">{replyToContent.slice(0, 60)}</span>
-            </div>
-          )}
-
-          <div className={`rounded-2xl overflow-hidden text-sm leading-relaxed backdrop-blur-sm ${
-            isMe
-              ? "bg-primary text-primary-foreground rounded-br-md shadow-lg shadow-primary/20"
-              : "bg-card border border-border rounded-bl-md shadow-sm"
-          } ${isStickerMessage(content) ? "p-1 bg-transparent border-0 shadow-none !bg-transparent" : content.startsWith("🎮:") ? "p-2" : content === "🎥" && audioUrl ? "p-1" : allImages.length > 0 && !audioUrl ? "p-1.5" : hasMediaEmbed(content) ? "p-1.5" : "px-3.5 py-2.5"}`}>
-            {isStickerMessage(content) ? (
-              <img src={getStickerSrc(content) || ""} alt="sticker" className="w-28 h-28 object-contain" loading="lazy" />
-            ) : content.startsWith("🎮:") ? (
-              <GameInviteBubble content={content} isMe={isMe} />
-            ) : content === "🎥" && audioUrl ? (
-              <VideoCirclePlayer url={audioUrl} />
-            ) : allImages.length > 0 ? (
-              <div>
-                <ImageGallery urls={allImages} onOpen={(idx) => setGalleryOpen(idx)} />
-                {content && content !== "📷" && content !== "📷📎" && (
-                  <p className="px-2 py-1.5 text-sm">{content}</p>
-                )}
-              </div>
-            ) : audioUrl ? (
-              <VoicePlayer url={audioUrl} />
-            ) : fileUrl && fileName ? (
-              <div>
-                <FileAttachment url={fileUrl} name={fileName} isMe={isMe} />
-                {content && content !== "📎" && (
-                  <p className="px-1 pt-1.5 text-sm">{content}</p>
-                )}
-              </div>
-            ) : hasMediaEmbed(content) ? (
-              <div>
-                <MediaEmbed url={content} isMe={isMe} />
-              </div>
-            ) : (
-              content
-            )}
-          </div>
-          <div className={`flex items-center gap-1.5 mt-0.5 px-1 ${isMe ? "flex-row-reverse" : ""}`}>
-            <p className="text-[9px] text-muted-foreground/50">{time}</p>
-            {onReply && (
-              <button onClick={onReply} className="opacity-60 md:opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground/60 hover:text-primary active:text-primary p-1">
-                <Reply className="w-3.5 h-3.5" />
+          <div className={`max-w-[75%] ${isMe ? "items-end" : "items-start"}`}>
+            {!isMe && senderName && (
+              <button onClick={() => senderId && onAvatarClick?.(senderId)} className="text-[10px] mb-0.5 text-muted-foreground font-medium px-1 hover:text-primary transition-colors">
+                {senderName}
               </button>
             )}
+
+            {/* Reply preview */}
+            {replyToContent && (
+              <div className={`text-[10px] mb-1 px-2.5 py-1 rounded-lg border-l-2 border-primary/40 ${isMe ? "bg-primary/10 ml-auto" : "bg-muted/60"} max-w-full truncate`}>
+                <span className="font-semibold text-primary/70">{replyToSender || "?"}</span>
+                <span className="text-muted-foreground ml-1">{replyToContent.slice(0, 60)}</span>
+              </div>
+            )}
+
+            <div className={`rounded-2xl overflow-hidden text-sm leading-relaxed backdrop-blur-sm ${
+              isMe
+                ? "bg-primary text-primary-foreground rounded-br-md shadow-lg shadow-primary/20"
+                : "bg-card border border-border rounded-bl-md shadow-sm"
+            } ${isStickerMessage(content) ? "p-1 bg-transparent border-0 shadow-none !bg-transparent" : content.startsWith("🎮:") ? "p-2" : content === "🎥" && audioUrl ? "p-1" : allImages.length > 0 && !audioUrl ? "p-1.5" : hasMediaEmbed(content) ? "p-1.5" : "px-3.5 py-2.5"}`}>
+              {isStickerMessage(content) ? (
+                <img src={getStickerSrc(content) || ""} alt="sticker" className="w-28 h-28 object-contain" loading="lazy" />
+              ) : content.startsWith("🎮:") ? (
+                <GameInviteBubble content={content} isMe={isMe} />
+              ) : content === "🎥" && audioUrl ? (
+                <VideoCirclePlayer url={audioUrl} />
+              ) : allImages.length > 0 ? (
+                <div>
+                  <ImageGallery urls={allImages} onOpen={(idx) => setGalleryOpen(idx)} />
+                  {content && content !== "📷" && content !== "📷📎" && (
+                    <p className="px-2 py-1.5 text-sm">{content}</p>
+                  )}
+                </div>
+              ) : audioUrl ? (
+                <VoicePlayer url={audioUrl} />
+              ) : fileUrl && fileName ? (
+                <div>
+                  <FileAttachment url={fileUrl} name={fileName} isMe={isMe} />
+                  {content && content !== "📎" && (
+                    <p className="px-1 pt-1.5 text-sm">{content}</p>
+                  )}
+                </div>
+              ) : hasMediaEmbed(content) ? (
+                <div>
+                  <MediaEmbed url={content} isMe={isMe} />
+                </div>
+              ) : (
+                content
+              )}
+            </div>
+            <div className={`flex items-center gap-1.5 mt-0.5 px-1 ${isMe ? "flex-row-reverse" : ""}`}>
+              <p className="text-[9px] text-muted-foreground/50">{time}</p>
+              {onReply && (
+                <button onClick={onReply} className="opacity-60 md:opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground/60 hover:text-primary active:text-primary p-1">
+                  <Reply className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
           </div>
-        </div>
-      </motion.div>
+        </motion.div>
+      </div>
 
       {/* Fullscreen gallery viewer */}
       <AnimatePresence>
