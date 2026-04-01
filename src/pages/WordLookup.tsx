@@ -137,8 +137,10 @@ const WordLookup = () => {
     return () => clearTimeout(timer);
   }, [word]);
 
-  const handleLookup = async () => {
-    if (!word.trim()) return;
+  const handleLookup = async (overrideWord?: string) => {
+    const searchWord = (overrideWord || word).trim();
+    if (!searchWord) return;
+    if (overrideWord) setWord(overrideWord);
     setLoading(true);
     setWordData(null);
     setFallbackResult("");
@@ -147,7 +149,7 @@ const WordLookup = () => {
     setSaved(false);
     try {
       const { data, error } = await supabase.functions.invoke("lookup-word", {
-        body: { word: word.trim(), lang },
+        body: { word: searchWord, lang },
       });
       if (error) throw error;
       if (data?.structured) {
