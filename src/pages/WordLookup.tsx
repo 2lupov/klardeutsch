@@ -268,7 +268,7 @@ const WordLookup = () => {
                 </AnimatePresence>
               </div>
               <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-                onClick={handleLookup} disabled={!word.trim() || loading}
+                onClick={() => handleLookup()} disabled={!word.trim() || loading}
                 className="px-6 py-4 rounded-2xl bg-primary text-primary-foreground font-display font-bold text-sm disabled:opacity-40 transition-all hover:shadow-lg hover:shadow-primary/20 flex items-center gap-2">
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <BookOpen className="w-5 h-5" />}
                 <span className="hidden sm:inline">{lang === "uk" ? "Знайти" : "Найти"}</span>
