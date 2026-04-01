@@ -49,6 +49,11 @@ const MOTIVATIONS_UK = [
   "Панда — справжній майстер! 🌟",
 ];
 
+function isNightTime(): boolean {
+  const hour = new Date().getHours();
+  return hour >= 23 || hour < 6;
+}
+
 function getStageIndex(streak: number, canClaim: boolean): number {
   if (canClaim && streak <= 1) return 0;
   if (streak <= 0) return 0;
@@ -158,14 +163,21 @@ const MountainScene = () => (
   </div>
 );
 
+const NIGHT_STAGE = { img: pandaSleeping, nameRu: "Спит 🌙", nameUk: "Спить 🌙", color: "text-muted-foreground" };
+const NIGHT_MOTIVATION_RU = "Уже ночь — панда легла спать. И тебе пора! 💤";
+const NIGHT_MOTIVATION_UK = "Вже ніч — панда лягла спати. І тобі час! 💤";
+
 const StreakPlant = ({ streak, canClaim, compact = false }: StreakPlantProps) => {
   const { lang } = useLanguage();
   const isRu = lang === "ru";
   const [showDialog, setShowDialog] = useState(false);
+  const night = isNightTime();
 
   const stageIdx = useMemo(() => getStageIndex(streak, canClaim), [streak, canClaim]);
-  const stage = STAGES[stageIdx];
-  const motivation = isRu ? MOTIVATIONS_RU[stageIdx] : MOTIVATIONS_UK[stageIdx];
+  const stage = night ? NIGHT_STAGE : STAGES[stageIdx];
+  const motivation = night
+    ? (isRu ? NIGHT_MOTIVATION_RU : NIGHT_MOTIVATION_UK)
+    : (isRu ? MOTIVATIONS_RU[stageIdx] : MOTIVATIONS_UK[stageIdx]);
 
   const progressToNext = useMemo(() => {
     if (stageIdx >= 6) return 100;
@@ -183,18 +195,19 @@ const StreakPlant = ({ streak, canClaim, compact = false }: StreakPlantProps) =>
           onClick={() => setShowDialog(true)}
           className="relative flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-all overflow-hidden"
         >
-          <span className={`text-xl md:text-2xl ${stageIdx === 0 ? "opacity-60" : ""}`}>🐼</span>
+          <span className={`text-xl md:text-2xl ${night || stageIdx === 0 ? "opacity-60" : ""}`}>🐼</span>
         </button>
 
         <Dialog open={showDialog} onOpenChange={setShowDialog}>
           <DialogContent className="p-0 border-0 bg-transparent shadow-none max-w-sm md:max-w-md overflow-hidden rounded-2xl [&>button.absolute]:hidden">
             <PandaSceneCard
               stage={stage}
-              stageIdx={stageIdx}
+              stageIdx={night ? 0 : stageIdx}
               streak={streak}
               motivation={motivation}
               progressToNext={progressToNext}
               isRu={isRu}
+              isNight={night}
               onClose={() => setShowDialog(false)}
             />
           </DialogContent>
@@ -227,11 +240,12 @@ const StreakPlant = ({ streak, canClaim, compact = false }: StreakPlantProps) =>
         <DialogContent className="p-0 border-0 bg-transparent shadow-none max-w-sm md:max-w-md overflow-hidden rounded-2xl [&>button.absolute]:hidden">
           <PandaSceneCard
             stage={stage}
-            stageIdx={stageIdx}
+            stageIdx={night ? 0 : stageIdx}
             streak={streak}
             motivation={motivation}
             progressToNext={progressToNext}
             isRu={isRu}
+            isNight={night}
             onClose={() => setShowDialog(false)}
           />
         </DialogContent>
@@ -248,10 +262,11 @@ interface PandaSceneCardProps {
   motivation: string;
   progressToNext: number;
   isRu: boolean;
+  isNight?: boolean;
   onClose?: () => void;
 }
 
-const PandaSceneCard = ({ stage, stageIdx, streak, motivation, progressToNext, isRu, onClose }: PandaSceneCardProps) => (
+const PandaSceneCard = ({ stage, stageIdx, streak, motivation, progressToNext, isRu, isNight, onClose }: PandaSceneCardProps) => (
   <motion.div
     className="relative w-full overflow-hidden rounded-2xl"
     style={{ aspectRatio: "3/4" }}
@@ -307,7 +322,7 @@ const PandaSceneCard = ({ stage, stageIdx, streak, motivation, progressToNext, i
             />
           }
         >
-          <Panda3D isSleeping={stageIdx === 0} stageImage={stage.img} className="w-full h-[300px]" />
+          <Panda3D isSleeping={isNight || stageIdx === 0} stageImage={stage.img} className="w-full h-[300px]" />
         </Suspense>
       </motion.div>
 
