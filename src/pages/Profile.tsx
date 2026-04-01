@@ -643,12 +643,12 @@ const Profile = () => {
 
   // Main profile screen
   return (
-    <div className={`w-full mx-auto px-4 py-4 pb-8 ${isMobile ? "max-w-md" : "max-w-3xl"}`}>
+    <div className={`w-full mx-auto px-4 ${isTelegram ? "py-2 pb-4" : "py-4 pb-8"} ${isMobile ? "max-w-md" : "max-w-3xl"}`}>
       {/* Top bar */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between mb-5"
+        className={`flex items-center justify-between ${isTelegram ? "mb-2" : "mb-5"}`}
       >
         <button
           onClick={signOut}
