@@ -14,6 +14,26 @@ import MediaEmbed, { hasMediaEmbed } from "@/components/chat/MediaEmbed";
 import StickerPicker, { isStickerMessage, getStickerSrc, STICKER_PREFIX } from "@/components/chat/StickerPicker";
 import { Smile } from "lucide-react";
 
+/* ───── Visual Viewport height (keyboard-aware) ───── */
+const useKeyboardHeight = () => {
+  const [height, setHeight] = useState<string>("100dvh");
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const update = () => {
+      setHeight(`${vv.height}px`);
+    };
+    update();
+    vv.addEventListener("resize", update);
+    vv.addEventListener("scroll", update);
+    return () => {
+      vv.removeEventListener("resize", update);
+      vv.removeEventListener("scroll", update);
+    };
+  }, []);
+  return height;
+};
+
 /* ───── Reply info type ───── */
 interface ReplyInfo {
   id: string;
