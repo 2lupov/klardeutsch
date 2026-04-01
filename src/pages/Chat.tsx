@@ -17,17 +17,22 @@ import chatBgImage from "@/assets/chat-bg.png";
 
 /* ───── Visual-viewport height for iOS keyboard handling ───── */
 const useViewportHeight = () => {
-  const [vh, setVh] = useState("100%");
+  const [vh, setVh] = useState(() => {
+    if (typeof window !== "undefined" && window.visualViewport) {
+      return `${window.visualViewport.height}px`;
+    }
+    return "100dvh";
+  });
 
   useEffect(() => {
     const vv = window.visualViewport;
     if (!vv) return;
 
     const update = () => {
-      // On iOS PWA, when keyboard opens visualViewport shrinks.
-      // We set the container to exactly that height so the input
-      // bar stays just above the keyboard.
-      setVh(`${vv.height}px`);
+      const h = vv.height;
+      if (h && h > 50) {
+        setVh(`${h}px`);
+      }
     };
 
     update();
@@ -1611,6 +1616,7 @@ const DMList = ({ onSelectPeer }: { onSelectPeer: (uid: string) => void }) => {
 const Chat = () => {
   const navigate = useNavigate();
   const { lang } = useLanguage();
+  const viewportH = useViewportHeight();
   const [tab, setTab] = useState<"community" | "dm" | "find">("community");
   const [selectedPeer, setSelectedPeer] = useState<string | null>(null);
 
@@ -1625,7 +1631,7 @@ const Chat = () => {
         animate={{ x: 0 }}
         exit={{ x: "100%" }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="flex flex-col h-full"
+        className="flex flex-col" style={{ height: viewportH }}
       >
         <DMConversation peerId={selectedPeer} onBack={() => setSelectedPeer(null)} />
       </motion.div>
@@ -1633,7 +1639,7 @@ const Chat = () => {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col" style={{ height: viewportH }}>
       {/* Header */}
       <motion.div
         initial={{ y: -20, opacity: 0 }}
