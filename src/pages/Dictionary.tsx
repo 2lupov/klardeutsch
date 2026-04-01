@@ -179,18 +179,21 @@ const Dictionary = () => {
     setAdding(false);
   };
 
-  const filtered = useMemo(() => words.filter((w) => {
+  const wordsWithType = useMemo(() => words.map(w => ({ ...w, wordType: detectWordType(w) })), [words]);
+
+  const filtered = useMemo(() => wordsWithType.filter((w) => {
     if (filter === "difficult" && !w.is_difficult) return false;
     if (filter === "custom" && w.source !== "custom") return false;
     if (articleFilter !== "all" && w.article?.toLowerCase() !== articleFilter) return false;
+    if (wordTypeFilter !== "all" && w.wordType !== wordTypeFilter) return false;
     if (search) {
       const s = search.toLowerCase();
       return w.german.toLowerCase().includes(s) || w.russian.toLowerCase().includes(s);
     }
     return true;
-  }), [words, filter, articleFilter, search]);
+  }), [wordsWithType, filter, articleFilter, wordTypeFilter, search]);
 
-  const difficultWords = useMemo(() => words.filter((w) => w.is_difficult), [words]);
+  const difficultWords = useMemo(() => wordsWithType.filter((w) => w.is_difficult), [wordsWithType]);
 
   const stats = useMemo(() => ({
     total: words.length,
@@ -199,7 +202,11 @@ const Dictionary = () => {
     der: words.filter(w => w.article?.toLowerCase() === "der").length,
     die: words.filter(w => w.article?.toLowerCase() === "die").length,
     das: words.filter(w => w.article?.toLowerCase() === "das").length,
-  }), [words, difficultWords]);
+    nomen: wordsWithType.filter(w => w.wordType === "nomen").length,
+    verb: wordsWithType.filter(w => w.wordType === "verb").length,
+    adjektiv: wordsWithType.filter(w => w.wordType === "adjektiv").length,
+    andere: wordsWithType.filter(w => w.wordType === "andere").length,
+  }), [words, wordsWithType, difficultWords]);
 
   const startReview = () => {
     if (difficultWords.length === 0) {
