@@ -473,6 +473,10 @@ const MessageBubble = ({ isMe, content, audioUrl, imageUrl, imageUrls, fileUrl, 
                   <p className="px-1 pt-1.5 text-sm">{content}</p>
                 )}
               </div>
+            ) : hasMediaEmbed(content) ? (
+              <div>
+                <MediaEmbed url={content} isMe={isMe} />
+              </div>
             ) : (
               content
             )}
