@@ -6,7 +6,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send, Search, MessageCircle, Users, Mail, ArrowLeft, Mic, Square, Play, Pause, ImagePlus, X, Paperclip, FileText, Download, Gamepad2, Video, Circle, Reply, CornerUpRight } from "lucide-react";
+import { Send, Search, MessageCircle, Users, Mail, ArrowLeft, Mic, Square, Play, Pause, ImagePlus, X, Paperclip, FileText, Download, Gamepad2, Video, Circle, Reply, CornerUpRight, RefreshCw } from "lucide-react";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import UserProfileDialog from "@/components/UserProfileDialog";
@@ -563,8 +563,9 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
   const [uploading, setUploading] = useState(false);
   const [pendingImages, setPendingImages] = useState<{ file: File; preview: string }[]>([]);
   const [showGamePicker, setShowGamePicker] = useState(false);
-  const [recordingVideo, setRecordingVideo] = useState(false);
-  const [videoElapsed, setVideoElapsed] = useState(0);
+   const [recordingVideo, setRecordingVideo] = useState(false);
+   const [videoElapsed, setVideoElapsed] = useState(0);
+   const [videoFacingMode, setVideoFacingMode] = useState<"user" | "environment">("user");
   const imageInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -643,9 +644,9 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
   };
 
   // Video circle recording
-  const startVideoCircle = async () => {
+   const startVideoCircle = async (facing: "user" | "environment" = videoFacingMode) => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: 480, height: 480 }, audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: 480, height: 480 }, audio: true });
       videoStreamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
@@ -659,6 +660,29 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
       setRecordingVideo(true);
       setVideoElapsed(0);
       videoTimerRef.current = setInterval(() => setVideoElapsed(p => p + 1), 1000);
+    } catch { /* camera not available */ }
+  };
+
+  const flipVideoCamera = async () => {
+    const newFacing = videoFacingMode === "user" ? "environment" : "user";
+    setVideoFacingMode(newFacing);
+    // Stop current stream & recorder without sending
+    const mr = videoRecorderRef.current;
+    if (mr && mr.state !== "inactive") mr.stop();
+    videoStreamRef.current?.getTracks().forEach(t => t.stop());
+    if (videoRef.current) videoRef.current.srcObject = null;
+    // Restart with new facing, keep accumulated chunks
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: newFacing, width: 480, height: 480 }, audio: true });
+      videoStreamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play();
+      }
+      const newMr = new MediaRecorder(stream, { mimeType: "video/webm" });
+      newMr.ondataavailable = (e) => { if (e.data.size > 0) videoChunksRef.current.push(e.data); };
+      newMr.start(500);
+      videoRecorderRef.current = newMr;
     } catch { /* camera not available */ }
   };
 
@@ -762,7 +786,7 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
             className="absolute bottom-full left-0 right-0 flex flex-col items-center justify-center p-6 bg-background/95 backdrop-blur-xl border-t border-border"
           >
             <div className="relative w-36 h-36 rounded-full overflow-hidden ring-4 ring-destructive/50 shadow-2xl">
-              <video ref={(el) => { videoRef.current = el; if (el && videoStreamRef.current && !el.srcObject) { el.srcObject = videoStreamRef.current; el.play(); } }} className="w-full h-full object-cover" playsInline muted />
+              <video ref={(el) => { videoRef.current = el; if (el && videoStreamRef.current && !el.srcObject) { el.srcObject = videoStreamRef.current; el.play(); } }} className="w-full h-full object-cover" style={{ transform: "none" }} playsInline muted />
               <motion.div
                 className="absolute inset-0 rounded-full border-2 border-destructive"
                 animate={{ scale: [1, 1.08, 1] }}
@@ -779,6 +803,14 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
               <button onClick={cancelVideoCircle} className="text-xs text-destructive font-medium hover:underline">
                 {lang === "uk" ? "Скасувати" : "Отменить"}
               </button>
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={flipVideoCamera}
+                className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-foreground"
+                title={lang === "uk" ? "Перевернути камеру" : "Переключить камеру"}
+              >
+                <RefreshCw className="w-4 h-4" />
+              </motion.button>
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={stopVideoCircle}
@@ -870,7 +902,7 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
                 </motion.button>
               ) : (
                 <div className="flex items-center gap-1">
-                  <motion.button initial={{ scale: 0 }} animate={{ scale: 1 }} whileTap={{ scale: 0.85 }} onClick={startVideoCircle} disabled={uploading}
+                  <motion.button initial={{ scale: 0 }} animate={{ scale: 1 }} whileTap={{ scale: 0.85 }} onClick={() => startVideoCircle()} disabled={uploading}
                     className="w-10 h-10 rounded-full bg-muted hover:bg-primary/10 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors">
                     <Circle className="w-4 h-4" />
                   </motion.button>
