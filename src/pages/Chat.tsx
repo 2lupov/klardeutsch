@@ -19,7 +19,8 @@ import chatBgImage from "@/assets/chat-bg.png";
 const useViewportHeight = () => {
   const [vh, setVh] = useState(() => {
     if (typeof window !== "undefined" && window.visualViewport) {
-      return `${window.visualViewport.height}px`;
+      const initial = window.visualViewport.height;
+      if (initial && initial > 50) return `${initial}px`;
     }
     return "100dvh";
   });
@@ -1172,10 +1173,8 @@ const CommunityChat = () => {
     );
   }
 
-  const viewportH = useViewportHeight();
-
   return (
-    <div className="flex flex-col" style={{ height: viewportH }}>
+    <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto p-4 space-y-3" style={{ backgroundImage: `url(${chatBgImage})`, backgroundSize: '35%', backgroundPosition: 'center 45%', backgroundRepeat: 'no-repeat', backgroundAttachment: 'local' }}>
         {messages.length === 0 && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16">
@@ -1420,10 +1419,8 @@ const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void
     fetchEdgeFunction("notify-dm", { json: { receiver_id: peerId, message_preview: "🎥 Видеокружок" } }).catch(() => {});
   };
 
-  const viewportH = useViewportHeight();
-
   return (
-    <div className="flex flex-col" style={{ height: viewportH }}>
+    <div className="flex flex-col h-full">
       <motion.div
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
