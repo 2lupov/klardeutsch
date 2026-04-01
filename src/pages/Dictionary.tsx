@@ -4,8 +4,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePlatform } from "@/hooks/usePlatform";
 import { supabase } from "@/integrations/supabase/client";
-import { Star, StarOff, RotateCcw, Search, BookOpen, Plus, X, Trash2, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { Star, StarOff, RotateCcw, Search, BookOpen, Plus, X, Trash2, ChevronLeft, ChevronRight, Sparkles, BookMarked, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import ReactMarkdown from "react-markdown";
 
 interface DictWord {
   id: string;
@@ -75,6 +76,10 @@ const Dictionary = () => {
   const [adding, setAdding] = useState(false);
   const [wordTypeFilter, setWordTypeFilter] = useState<WordType | "all">("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [showLookup, setShowLookup] = useState(false);
+  const [lookupWord, setLookupWord] = useState("");
+  const [lookupResult, setLookupResult] = useState("");
+  const [lookupLoading, setLookupLoading] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -177,6 +182,23 @@ const Dictionary = () => {
       toast({ title: t("wordAdded") });
     }
     setAdding(false);
+  };
+
+  const handleLookup = async () => {
+    if (!lookupWord.trim()) return;
+    setLookupLoading(true);
+    setLookupResult("");
+    try {
+      const { data, error } = await supabase.functions.invoke("lookup-word", {
+        body: { word: lookupWord.trim(), lang },
+      });
+      if (error) throw error;
+      setLookupResult(data?.result || (lang === "uk" ? "Нічого не знайдено" : "Ничего не найдено"));
+    } catch (e: any) {
+      toast({ title: lang === "uk" ? "Помилка пошуку" : "Ошибка поиска", variant: "destructive" });
+    } finally {
+      setLookupLoading(false);
+    }
   };
 
   const wordsWithType = useMemo(() => words.map(w => ({ ...w, wordType: detectWordType(w) })), [words]);
@@ -343,6 +365,17 @@ const Dictionary = () => {
             >
               {showAdd ? <X className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
             </motion.button>
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => { setShowLookup(!showLookup); setLookupResult(""); setLookupWord(""); }}
+              className={`p-2.5 rounded-xl border transition-colors ${
+                showLookup
+                  ? "bg-primary/10 border-primary/30 text-primary"
+                  : "bg-secondary border-border text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <BookMarked className="w-5 h-5" />
+            </motion.button>
             {stats.difficult > 0 && (
               <motion.button
                 whileTap={{ scale: 0.95 }}
@@ -494,7 +527,64 @@ const Dictionary = () => {
         )}
       </AnimatePresence>
 
-      {/* Search */}
+      {/* Lookup panel */}
+      <AnimatePresence>
+        {showLookup && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden mb-4"
+          >
+            <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
+              <p className="text-sm font-display font-semibold text-foreground">
+                {lang === "uk" ? "🔍 Знайти слово" : "🔍 Найти слово"}
+              </p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder={lang === "uk" ? "Введіть слово німецькою..." : "Введите слово на немецком..."}
+                  value={lookupWord}
+                  onChange={(e) => setLookupWord(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleLookup()}
+                  maxLength={60}
+                  autoFocus
+                  className="flex-1 px-3 py-2.5 rounded-xl bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                />
+                <button
+                  onClick={handleLookup}
+                  disabled={!lookupWord.trim() || lookupLoading}
+                  className="px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-display font-semibold text-sm disabled:opacity-40 transition-all hover:opacity-90 flex items-center gap-2"
+                >
+                  {lookupLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      {lang === "uk" ? "Шукаю..." : "Ищу..."}
+                    </>
+                  ) : (
+                    lang === "uk" ? "Знайти" : "Найти"
+                  )}
+                </button>
+              </div>
+
+              {/* Result */}
+              {lookupResult && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="rounded-xl bg-secondary/50 border border-border p-4 max-h-[50vh] overflow-y-auto"
+                >
+                  <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:font-display prose-headings:text-foreground prose-p:text-foreground/90 prose-strong:text-foreground prose-li:text-foreground/90">
+                    <ReactMarkdown>{lookupResult}</ReactMarkdown>
+                  </div>
+                </motion.div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="relative mb-4">
         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <input
