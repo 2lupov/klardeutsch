@@ -10,6 +10,7 @@ import { Send, Search, MessageCircle, Users, Mail, ArrowLeft, Mic, Square, Play,
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import UserProfileDialog from "@/components/UserProfileDialog";
+import MediaEmbed, { hasMediaEmbed } from "@/components/chat/MediaEmbed";
 
 /* ───── Reply info type ───── */
 interface ReplyInfo {
