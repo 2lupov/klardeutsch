@@ -11,6 +11,8 @@ import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import UserProfileDialog from "@/components/UserProfileDialog";
 import MediaEmbed, { hasMediaEmbed } from "@/components/chat/MediaEmbed";
+import StickerPicker, { isStickerMessage, getStickerSrc, STICKER_PREFIX } from "@/components/chat/StickerPicker";
+import { Smile } from "lucide-react";
 
 /* ───── Reply info type ───── */
 interface ReplyInfo {
@@ -452,8 +454,10 @@ const MessageBubble = ({ isMe, content, audioUrl, imageUrl, imageUrls, fileUrl, 
             isMe
               ? "bg-primary text-primary-foreground rounded-br-md shadow-lg shadow-primary/20"
               : "bg-card border border-border rounded-bl-md shadow-sm"
-          } ${content.startsWith("🎮:") ? "p-2" : content === "🎥" && audioUrl ? "p-1" : allImages.length > 0 && !audioUrl ? "p-1.5" : hasMediaEmbed(content) ? "p-1.5" : "px-3.5 py-2.5"}`}>
-            {content.startsWith("🎮:") ? (
+          } ${isStickerMessage(content) ? "p-1 bg-transparent border-0 shadow-none !bg-transparent" : content.startsWith("🎮:") ? "p-2" : content === "🎥" && audioUrl ? "p-1" : allImages.length > 0 && !audioUrl ? "p-1.5" : hasMediaEmbed(content) ? "p-1.5" : "px-3.5 py-2.5"}`}>
+            {isStickerMessage(content) ? (
+              <img src={getStickerSrc(content) || ""} alt="sticker" className="w-28 h-28 object-contain" loading="lazy" />
+            ) : content.startsWith("🎮:") ? (
               <GameInviteBubble content={content} isMe={isMe} />
             ) : content === "🎥" && audioUrl ? (
               <VideoCirclePlayer url={audioUrl} />
@@ -562,7 +566,8 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
   const { recording, elapsed, start, stop, cancel } = useVoiceRecorder();
   const [uploading, setUploading] = useState(false);
   const [pendingImages, setPendingImages] = useState<{ file: File; preview: string }[]>([]);
-  const [showGamePicker, setShowGamePicker] = useState(false);
+   const [showGamePicker, setShowGamePicker] = useState(false);
+   const [showStickerPicker, setShowStickerPicker] = useState(false);
    const [recordingVideo, setRecordingVideo] = useState(false);
    const [videoElapsed, setVideoElapsed] = useState(0);
    const [videoFacingMode, setVideoFacingMode] = useState<"user" | "environment">("user");
@@ -776,7 +781,14 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
         )}
       </AnimatePresence>
 
-      {/* Video circle recording overlay */}
+      {/* Sticker picker */}
+      <StickerPicker
+        open={showStickerPicker}
+        onClose={() => setShowStickerPicker(false)}
+        onSelect={(stickerId) => { onSendText(`${STICKER_PREFIX}${stickerId}]`); setShowStickerPicker(false); }}
+      />
+
+
       <AnimatePresence>
         {recordingVideo && (
           <motion.div
@@ -884,6 +896,10 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
               <motion.button whileTap={{ scale: 0.9 }} onClick={() => setShowGamePicker(!showGamePicker)}
                 className={`w-8 h-8 rounded-full hover:bg-muted/80 flex items-center justify-center transition-colors shrink-0 ${showGamePicker ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-primary"}`}>
                 <Gamepad2 className="w-4 h-4" />
+              </motion.button>
+              <motion.button whileTap={{ scale: 0.9 }} onClick={() => { setShowStickerPicker(!showStickerPicker); setShowGamePicker(false); }}
+                className={`w-8 h-8 rounded-full hover:bg-muted/80 flex items-center justify-center transition-colors shrink-0 ${showStickerPicker ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-primary"}`}>
+                <Smile className="w-4 h-4" />
               </motion.button>
               <input ref={imageInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleImagePick} />
               <input ref={fileInputRef} type="file" className="hidden" onChange={handleFilePick} />
