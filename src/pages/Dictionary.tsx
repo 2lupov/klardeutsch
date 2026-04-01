@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePlatform } from "@/hooks/usePlatform";
 import { supabase } from "@/integrations/supabase/client";
-import { Star, StarOff, RotateCcw, Search, BookOpen, Plus, X, Trash2, ChevronLeft, ChevronRight, Sparkles, Filter } from "lucide-react";
+import { Star, StarOff, RotateCcw, Search, BookOpen, Plus, X, Trash2, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 interface DictWord {
