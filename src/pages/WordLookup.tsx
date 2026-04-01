@@ -2,8 +2,10 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Search, Loader2, Sparkles, BookOpen, Languages, Lightbulb, Table2, Layers } from "lucide-react";
+import { ArrowLeft, Search, Loader2, Sparkles, BookOpen, Languages, Lightbulb, Table2, Layers, Plus, Check } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 import pandaWriting from "@/assets/mascot/panda-writing.png";
 
 interface WordData {
@@ -76,6 +78,7 @@ const ConjugationTable = ({ title, data, icon }: { title: string; data: Record<s
 
 const WordLookup = () => {
   const { lang } = useLanguage();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [word, setWord] = useState("");
   const [wordData, setWordData] = useState<WordData | null>(null);
@@ -84,7 +87,40 @@ const WordLookup = () => {
   const [suggestions, setSuggestions] = useState<{ german: string; article: string | null }[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [searched, setSearched] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
 
+  const handleSaveWord = async () => {
+    if (!user || !wordData || saving) return;
+    setSaving(true);
+    try {
+      // Check if word already exists in custom_words
+      const { data: existing } = await supabase
+        .from("custom_words")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("german", wordData.word)
+        .maybeSingle();
+      if (existing) {
+        setSaved(true);
+        toast({ title: lang === "uk" ? "Вже у словнику ✅" : "Уже в словаре ✅" });
+        return;
+      }
+      await supabase.from("custom_words").insert({
+        user_id: user.id,
+        german: wordData.word,
+        russian: wordData.translation,
+        article: wordData.article || null,
+        example: wordData.meanings?.[0]?.example_de || null,
+      });
+      setSaved(true);
+      toast({ title: lang === "uk" ? "Додано у словник! 🐼" : "Добавлено в словарь! 🐼" });
+    } catch {
+      toast({ title: lang === "uk" ? "Помилка збереження" : "Ошибка сохранения", variant: "destructive" });
+    } finally {
+      setSaving(false);
+    }
+  };
   useEffect(() => {
     const q = word.trim().toLowerCase();
     if (q.length < 2) { setSuggestions([]); setShowSuggestions(false); return; }
@@ -108,6 +144,7 @@ const WordLookup = () => {
     setFallbackResult("");
     setSearched(true);
     setShowSuggestions(false);
+    setSaved(false);
     try {
       const { data, error } = await supabase.functions.invoke("lookup-word", {
         body: { word: word.trim(), lang },
@@ -287,9 +324,17 @@ const WordLookup = () => {
                       </span>
                     </div>
                   </div>
-                  <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity }} className="text-2xl shrink-0">
-                    🐼
-                  </motion.div>
+                  {user && (
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleSaveWord}
+                      disabled={saved || saving}
+                      className={`shrink-0 p-3 rounded-xl border transition-all ${saved ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400" : "bg-primary/10 border-primary/30 text-primary hover:bg-primary/20"}`}
+                    >
+                      {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : saved ? <Check className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+                    </motion.button>
+                  )}
                 </div>
               </motion.div>
 
