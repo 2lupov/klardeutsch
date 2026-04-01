@@ -73,7 +73,7 @@ const Dictionary = () => {
   const [newArticle, setNewArticle] = useState("");
   const [newExample, setNewExample] = useState("");
   const [adding, setAdding] = useState(false);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [wordTypeFilter, setWordTypeFilter] = useState<WordType | "all">("all");
 
   useEffect(() => {
     if (!user) return;
