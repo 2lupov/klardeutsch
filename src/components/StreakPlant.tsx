@@ -302,7 +302,7 @@ const PandaSceneCard = ({ stage, stageIdx, streak, motivation, progressToNext, i
     transition={{ type: "spring", stiffness: 200, damping: 20 }}
   >
     {/* Mountain background */}
-    <MountainScene />
+    <MountainScene isNight={!!isNight} />
 
     {/* Close button */}
     {onClose && (
