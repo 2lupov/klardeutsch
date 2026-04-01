@@ -897,6 +897,10 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
                 className={`w-8 h-8 rounded-full hover:bg-muted/80 flex items-center justify-center transition-colors shrink-0 ${showGamePicker ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-primary"}`}>
                 <Gamepad2 className="w-4 h-4" />
               </motion.button>
+              <motion.button whileTap={{ scale: 0.9 }} onClick={() => { setShowStickerPicker(!showStickerPicker); setShowGamePicker(false); }}
+                className={`w-8 h-8 rounded-full hover:bg-muted/80 flex items-center justify-center transition-colors shrink-0 ${showStickerPicker ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-primary"}`}>
+                <Smile className="w-4 h-4" />
+              </motion.button>
               <input ref={imageInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleImagePick} />
               <input ref={fileInputRef} type="file" className="hidden" onChange={handleFilePick} />
               <Input
