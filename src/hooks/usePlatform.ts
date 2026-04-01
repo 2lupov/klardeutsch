@@ -28,11 +28,8 @@ export function usePlatform() {
     const tgApp = (window as any).Telegram?.WebApp;
     if (!tgApp) return;
 
-    // Expand to full screen
+    // Expand to standard TMA height (not fullscreen)
     if (tgApp.expand) tgApp.expand();
-    if (tgApp.requestFullscreen) {
-      try { tgApp.requestFullscreen(); } catch {}
-    }
 
     const update = () => {
       const h = tgApp.viewportStableHeight || tgApp.viewportHeight;
