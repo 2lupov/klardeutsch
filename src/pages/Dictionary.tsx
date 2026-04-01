@@ -107,6 +107,7 @@ const Dictionary = () => {
     return () => clearTimeout(timer);
   }, [lookupWord]);
 
+  useEffect(() => {
     if (!user) return;
     fetchWords();
   }, [user]);
