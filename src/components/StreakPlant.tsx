@@ -51,7 +51,7 @@ const MOTIVATIONS_UK = [
 
 function isNightTime(): boolean {
   const hour = new Date().getHours();
-  return hour >= 23 || hour < 6;
+  return hour >= 20 || hour < 6;
 }
 
 function getStageIndex(streak: number, canClaim: boolean): number {
