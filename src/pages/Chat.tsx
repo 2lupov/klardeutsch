@@ -825,6 +825,8 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
               </button>
               <motion.button
                 whileTap={{ scale: 0.9 }}
+                animate={{ rotate: videoFlipping ? 180 : 0 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 onClick={flipVideoCamera}
                 className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-foreground"
                 title={lang === "uk" ? "Перевернути камеру" : "Переключить камеру"}
