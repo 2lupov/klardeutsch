@@ -621,7 +621,7 @@ const Profile = () => {
 
   // Main profile screen
   return (
-    <div className={`w-full mx-auto px-4 py-4 pb-8 ${isMobile ? "max-w-md" : "max-w-2xl"}`}>
+    <div className={`w-full mx-auto px-4 py-4 pb-8 ${isMobile ? "max-w-md" : "max-w-3xl"}`}>
       <div className="flex items-center justify-between mb-3">
         <button
           onClick={signOut}
@@ -636,13 +636,13 @@ const Profile = () => {
       </div>
 
       {/* Profile header */}
-      <div className="flex items-center gap-4 mb-4">
+      <div className={`flex items-center gap-4 mb-4 ${!isMobile ? "gap-6" : ""}`}>
         <div className="relative group">
-          <Avatar className="w-14 h-14 border-2 border-primary/20">
+          <Avatar className={`border-2 border-primary/20 ${isMobile ? "w-14 h-14" : "w-20 h-20"}`}>
             {profile.avatar_url ? (
               <AvatarImage src={profile.avatar_url} alt={displayName} />
             ) : null}
-            <AvatarFallback className="text-lg font-display font-bold bg-primary/10 text-primary">
+            <AvatarFallback className={`font-display font-bold bg-primary/10 text-primary ${isMobile ? "text-lg" : "text-2xl"}`}>
               {initials}
             </AvatarFallback>
           </Avatar>
@@ -676,7 +676,7 @@ const Profile = () => {
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <h1 className="font-display text-xl font-bold text-foreground truncate">{displayName}</h1>
+              <h1 className={`font-display font-bold text-foreground truncate ${isMobile ? "text-xl" : "text-2xl"}`}>{displayName}</h1>
               <button onClick={startEdit} className="p-1 rounded-md text-muted-foreground hover:text-foreground transition-colors">
                 <Pencil className="w-3.5 h-3.5" />
               </button>
@@ -774,7 +774,7 @@ const Profile = () => {
       )}
 
       {/* Stat cards */}
-      <div className="grid grid-cols-4 gap-2 mb-4">
+      <div className={`grid gap-2 mb-4 ${isMobile ? "grid-cols-4" : "grid-cols-4"}`}>
         <StatCard icon={<Coins className="w-4 h-4" />} value={balance} label={t("coinsLabel")} />
         <StatCard icon={<BookOpen className="w-4 h-4" />} value={wordsLearned} label={t("wordsLearned")} />
         <StatCard icon={<Brain className="w-4 h-4" />} value={completedLessons} label={t("lessonsCompleted")} />
@@ -792,7 +792,7 @@ const Profile = () => {
       )}
 
       {/* Navigation buttons */}
-      <div className="flex flex-col gap-2 mb-4">
+      <div className={`gap-2 mb-4 ${isMobile ? "flex flex-col" : "grid grid-cols-2"}`}>
         <NavButton
           icon={<Award className="w-4 h-4 text-primary" />}
           label={t("leaderboardTitle")}

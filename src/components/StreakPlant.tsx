@@ -181,12 +181,12 @@ const StreakPlant = ({ streak, canClaim, compact = false }: StreakPlantProps) =>
       <>
         <button
           onClick={() => setShowDialog(true)}
-          className="relative flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-all overflow-hidden"
+          className="relative flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-all overflow-hidden"
         >
           <img
             src={stageIdx === 0 ? pandaSleeping : pandaWaving}
             alt="Panda"
-            className={`w-8 h-8 object-contain ${stageIdx === 0 ? "opacity-60" : ""}`}
+            className={`w-8 h-8 md:w-10 md:h-10 object-contain ${stageIdx === 0 ? "opacity-60" : ""}`}
             loading="lazy"
             width={512}
             height={512}
@@ -202,7 +202,7 @@ const StreakPlant = ({ streak, canClaim, compact = false }: StreakPlantProps) =>
         </button>
 
         <Dialog open={showDialog} onOpenChange={setShowDialog}>
-          <DialogContent className="p-0 border-0 bg-transparent shadow-none max-w-sm overflow-hidden rounded-2xl">
+          <DialogContent className="p-0 border-0 bg-transparent shadow-none max-w-sm md:max-w-md overflow-hidden rounded-2xl">
             <PandaSceneCard
               stage={stage}
               stageIdx={stageIdx}
@@ -238,7 +238,7 @@ const StreakPlant = ({ streak, canClaim, compact = false }: StreakPlantProps) =>
       </motion.button>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="p-0 border-0 bg-transparent shadow-none max-w-sm overflow-hidden rounded-2xl">
+        <DialogContent className="p-0 border-0 bg-transparent shadow-none max-w-sm md:max-w-md overflow-hidden rounded-2xl">
           <PandaSceneCard
             stage={stage}
             stageIdx={stageIdx}
