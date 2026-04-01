@@ -3,7 +3,7 @@ import { Level, CategoryData } from "@/data/lessons";
 import { fetchLevelData, fetchTopics } from "@/hooks/useLessons";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
-import TheoryRenderer from "@/components/course/TheoryRenderer";
+
 import { useProgress } from "@/hooks/useProgress";
 import { usePlatform } from "@/hooks/usePlatform";
 import { useDailySummary } from "@/hooks/useDailySummary";
@@ -194,15 +194,8 @@ const Index = () => {
         if (data.vocabulary.length === 0) return emptyState;
         return <Flashcard cards={data.vocabulary} onComplete={handleVocabComplete} />;
       case "grammar":
-        if (!data.grammar.theory && data.grammar.questions.length === 0) return emptyState;
-        return (
-          <div className="flex flex-col gap-6 animate-slide-up">
-            <div className="glass-card p-6">
-              <TheoryRenderer theory={data.grammar.theory} lang={lang} />
-            </div>
-            <Quiz questions={data.grammar.questions} onComplete={handleQuizComplete} level={level} category="grammar" />
-          </div>
-        );
+        if (data.grammar.questions.length === 0) return emptyState;
+        return <Quiz questions={data.grammar.questions} onComplete={handleQuizComplete} level={level} category="grammar" />;
       case "reading":
         if (data.reading.length === 0) return emptyState;
         return <ReadingExercise readings={data.reading} onComplete={handleReadingComplete} level={level} />;

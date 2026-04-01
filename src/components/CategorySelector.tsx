@@ -1,7 +1,9 @@
 import { Level } from "@/data/lessons";
 import { BookOpen, Languages, FileText, Headphones, PenLine, ArrowLeft, ChevronRight } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import pandaGraduate from "@/assets/mascot/panda-graduate.png";
 
 type Category = "vocabulary" | "grammar" | "reading" | "listening" | "writing";
 
@@ -20,7 +22,8 @@ const CATEGORY_CONFIG: Record<Category, { gradient: string; iconBg: string; acce
 };
 
 const CategorySelector = ({ level, onSelect, onBack }: CategorySelectorProps) => {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const navigate = useNavigate();
 
   const categories: { key: Category; label: string; sublabel: string; icon: React.ReactNode; emoji: string }[] = [
     { key: "vocabulary", label: "Wortschatz", sublabel: t("vocabSublabel"), icon: <Languages className="w-5 h-5" />, emoji: "📚" },
@@ -86,6 +89,36 @@ const CategorySelector = ({ level, onSelect, onBack }: CategorySelectorProps) =>
           );
         })}
       </div>
+
+      {/* Academy link */}
+      <motion.button
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        onClick={() => navigate("/academy")}
+        className="relative p-4 flex items-center gap-4 rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/8 via-primary/4 to-amber-500/8 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10 transition-all group overflow-hidden"
+      >
+        <motion.img
+          src={pandaGraduate}
+          alt="Academy"
+          className="w-12 h-12 object-contain"
+          animate={{ y: [0, -3, 0] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          loading="lazy" width={512} height={512}
+        />
+        <div className="flex-1 text-left">
+          <h3 className="font-display font-bold text-sm text-foreground group-hover:text-primary transition-colors">
+            KLAR Academy
+          </h3>
+          <p className="text-xs text-muted-foreground">
+            {lang === "uk" ? "Повні курси з теорією та сертифікатом" : "Полные курсы с теорией и сертификатом"}
+          </p>
+        </div>
+        <ChevronRight className="w-4 h-4 text-primary/50 group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0" />
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/3 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+      </motion.button>
     </div>
   );
 };
