@@ -841,19 +841,14 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
             exit={{ opacity: 0, scale: 0.8 }}
             className="absolute bottom-full left-0 right-0 flex flex-col items-center justify-center p-6 bg-background/95 backdrop-blur-xl border-t border-border"
           >
-            <motion.div
-              className="relative w-36 h-36 rounded-full overflow-hidden ring-4 ring-destructive/50 shadow-2xl"
-              animate={{ rotateY: videoFlipping ? 180 : 0, scale: videoFlipping ? 0.85 : 1 }}
-              transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              style={{ perspective: 600 }}
-            >
-              <video ref={(el) => { videoRef.current = el; if (el && videoStreamRef.current && !el.srcObject) { el.srcObject = videoStreamRef.current; el.play(); } }} className="w-full h-full object-cover" style={{ transform: videoFlipping ? "scaleX(-1)" : "none" }} playsInline muted />
+            <div className="relative w-36 h-36 rounded-full overflow-hidden ring-4 ring-destructive/50 shadow-2xl">
+              <video ref={(el) => { videoRef.current = el; if (el && videoStreamRef.current && !el.srcObject) { el.srcObject = videoStreamRef.current; el.play(); } }} className="w-full h-full object-cover" playsInline muted />
               <motion.div
                 className="absolute inset-0 rounded-full border-2 border-destructive"
                 animate={{ scale: [1, 1.08, 1] }}
                 transition={{ duration: 1.2, repeat: Infinity }}
               />
-            </motion.div>
+            </div>
             <div className="flex items-center gap-2 mt-3">
               <motion.div animate={{ scale: [1, 1.4, 1] }} transition={{ duration: 1, repeat: Infinity }} className="w-2 h-2 rounded-full bg-destructive" />
               <span className="text-sm font-mono text-muted-foreground">
@@ -864,16 +859,6 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
               <button onClick={cancelVideoCircle} className="text-xs text-destructive font-medium hover:underline">
                 {lang === "uk" ? "Скасувати" : "Отменить"}
               </button>
-              <motion.button
-                whileTap={{ scale: 0.9 }}
-                animate={{ rotate: videoFlipping ? 180 : 0 }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                onClick={flipVideoCamera}
-                className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-foreground"
-                title={lang === "uk" ? "Перевернути камеру" : "Переключить камеру"}
-              >
-                <RefreshCw className="w-4 h-4" />
-              </motion.button>
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={stopVideoCircle}
