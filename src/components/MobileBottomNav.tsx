@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, User, BookOpen, Gamepad2, MessageSquare, GraduationCap } from "lucide-react";
+import { Home, User, BookOpen, Gamepad2, MessageSquare, GraduationCap, Sparkles } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUnreadDMs } from "@/hooks/useUnreadDMs";
 
@@ -14,8 +14,8 @@ const MobileBottomNav = () => {
   const items = [
     { to: "/", icon: Home, label: t("navHome"), badge: 0 },
     { to: "/academy", icon: GraduationCap, label: lang === "uk" ? "Академія" : "Академия", badge: 0 },
+    { to: "/assistant", icon: Sparkles, label: lang === "uk" ? "Асистент" : "Ассистент", badge: 0 },
     { to: "/games", icon: Gamepad2, label: lang === "uk" ? "Ігри" : "Игры", badge: 0 },
-    { to: "/dictionary", icon: BookOpen, label: t("navDictionary"), badge: 0 },
     { to: "/chat", icon: MessageSquare, label: "Чат", badge: unread },
   ];
 

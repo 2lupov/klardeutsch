@@ -38,6 +38,7 @@ import Review from "./pages/Review";
 import Certificate from "./pages/Certificate";
 import Chat from "./pages/Chat";
 import WordLookup from "./pages/WordLookup";
+import Assistant from "./pages/Assistant";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -70,6 +71,7 @@ const AppRoutes = () => {
         <Route path="/games" element={<Games />} />
         <Route path="/chat" element={<Chat />} />
         <Route path="/word-lookup" element={<WordLookup />} />
+        <Route path="/assistant" element={<Assistant />} />
         <Route path="/course/:id" element={<Course />} />
         <Route path="/academy" element={<Academy />} />
         <Route path="/academy/:courseId" element={<AcademyCourse />} />
