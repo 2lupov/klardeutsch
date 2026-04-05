@@ -683,6 +683,36 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_usage: {
+        Row: {
+          ai_requests_used: number
+          created_at: string
+          games_used: number
+          id: string
+          lessons_used: number
+          usage_date: string
+          user_id: string
+        }
+        Insert: {
+          ai_requests_used?: number
+          created_at?: string
+          games_used?: number
+          id?: string
+          lessons_used?: number
+          usage_date?: string
+          user_id: string
+        }
+        Update: {
+          ai_requests_used?: number
+          created_at?: string
+          games_used?: number
+          id?: string
+          lessons_used?: number
+          usage_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       demo_leaderboard: {
         Row: {
           avatar_url: string | null
@@ -1454,6 +1484,48 @@ export type Database = {
         }
         Relationships: []
       }
+      subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean | null
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          plan: string
+          status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cancel_at_period_end?: boolean | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          plan?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cancel_at_period_end?: boolean | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          plan?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       teacher_chat_messages: {
         Row: {
           audio_url: string | null
@@ -1849,6 +1921,11 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_daily_usage: {
+        Args: { p_type: string; p_user_id: string }
+        Returns: Json
+      }
+      is_premium: { Args: { p_user_id: string }; Returns: boolean }
       issue_certificate: {
         Args: { p_course_id: string; p_score: number; p_user_id: string }
         Returns: string
