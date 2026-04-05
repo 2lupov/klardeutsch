@@ -77,6 +77,17 @@ const Profile = () => {
   const { isPremium, plan, subscriptionEnd, cancelAtPeriodEnd, loading: subLoading, checkSubscription } = useSubscription();
   const [showPaywall, setShowPaywall] = useState(false);
   const { streak: pandaStreak, canClaim: pandaCanClaim, loading: pandaLoading } = useDailyBonus();
+
+  // Handle Stripe redirect
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("subscription") === "success") {
+      toast({ title: lang === "uk" ? "🎉 Premium активовано!" : "🎉 Premium активирован!" });
+      checkSubscription();
+      window.history.replaceState({}, "", "/profile");
+    }
+  }, []);
+
   useEffect(() => {
     if (!user) return;
     const load = async () => {
