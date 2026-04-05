@@ -901,14 +901,14 @@ const Profile = () => {
         )}
       </motion.div>
 
-      {/* Info links (mobile) */}
-      {isMobile && !isTelegram && (
+      {/* Info links */}
+      {!isTelegram && (
         <div className="flex items-center justify-center gap-3 text-[10px] text-muted-foreground mt-2 mb-2">
-          <Link to="/method" className="hover:text-foreground transition-colors">О методе</Link>
+          <Link to="/method" className="hover:text-foreground transition-colors">{lang === "uk" ? "Про метод KLAR" : "О методе KLAR"}</Link>
           <span>·</span>
-          <Link to="/privacy" className="hover:text-foreground transition-colors">Конфиденциальность</Link>
+          <Link to="/privacy" className="hover:text-foreground transition-colors">{lang === "uk" ? "Конфіденційність" : "Конфиденциальность"}</Link>
           <span>·</span>
-          <Link to="/terms" className="hover:text-foreground transition-colors">Оферта</Link>
+          <Link to="/terms" className="hover:text-foreground transition-colors">{lang === "uk" ? "Оферта" : "Оферта"}</Link>
         </div>
       )}
     </div>
