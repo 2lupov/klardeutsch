@@ -46,7 +46,7 @@ interface ProfileData {
 type ProfileScreen = "main" | "achievements" | "activity" | "mistakes" | "leaderboard" | "notifications" | "referrals" | "offline" | "friends";
 
 const Profile = () => {
-  const { user, signOut } = useAuth();
+  const { user, session, signOut } = useAuth();
   const { t, lang, languageLocked, lockLanguage, unlockLanguage } = useLanguage();
   const { isMobile, isTelegram } = usePlatform();
   const { balance } = useCoins();
