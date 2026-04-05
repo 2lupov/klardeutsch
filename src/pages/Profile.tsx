@@ -74,6 +74,8 @@ const Profile = () => {
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [settingAvatar, setSettingAvatar] = useState(false);
   const [cropFile, setCropFile] = useState<File | null>(null);
+  const { isPremium, plan, subscriptionEnd, cancelAtPeriodEnd, loading: subLoading, checkSubscription } = useSubscription();
+  const [showPaywall, setShowPaywall] = useState(false);
   const { streak: pandaStreak, canClaim: pandaCanClaim, loading: pandaLoading } = useDailyBonus();
   useEffect(() => {
     if (!user) return;
