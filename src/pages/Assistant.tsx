@@ -809,7 +809,7 @@ const Assistant = () => {
   const tabTitle = tab === "chat" ? t("ИИ Тьютор", "ІІ Тьютор") : tab === "dictionary" ? t("Словарь", "Словник") : tab === "reading" ? t("Читання", "Читання") : tab === "files" ? t("Документы", "Документи") : "";
 
   return (
-    <div className="min-h-[100dvh] bg-background flex flex-col relative">
+    <div className="h-[100dvh] bg-background flex flex-col relative overflow-hidden">
       <AmbientBg />
 
       {/* Header — only when not on menu */}
