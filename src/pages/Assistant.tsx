@@ -253,9 +253,23 @@ const Assistant = () => {
     } finally { setChatLoading(false); }
   };
 
+  /* ── Keyboard-tracking for mobile input ── */
+  const [kbOffset, setKbOffset] = useState(0);
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const update = () => {
+      const diff = window.innerHeight - vv.height;
+      setKbOffset(diff > 50 ? diff : 0);
+    };
+    vv.addEventListener("resize", update);
+    vv.addEventListener("scroll", update);
+    return () => { vv.removeEventListener("resize", update); vv.removeEventListener("scroll", update); };
+  }, []);
+
   const renderChat = () => (
-    <div className="flex flex-col h-full">
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+    <div className="flex flex-col h-full relative">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3" style={{ paddingBottom: 80 }}>
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center gap-4 py-12">
             <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
@@ -315,17 +329,18 @@ const Assistant = () => {
         )}
       </div>
 
-      <div className="p-3 border-t border-border bg-card/50 backdrop-blur-xl">
-        <div className="flex items-end gap-2">
+      <div className="absolute bottom-0 left-0 right-0 z-20 px-3 pb-3 pt-2 transition-transform duration-150"
+        style={{ transform: kbOffset > 0 ? `translateY(-${kbOffset}px)` : "none" }}>
+        <div className="flex items-end gap-2 bg-card/90 backdrop-blur-2xl border border-border rounded-[1.25rem] px-3 py-2 shadow-lg shadow-black/10">
           <textarea ref={inputRef} value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
             placeholder={t("Задай вопрос тьютору...", "Постав питання тьютору...")}
             rows={1}
-            className="flex-1 bg-muted/50 border border-border rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/30 max-h-32"
-            style={{ minHeight: 42 }} />
+            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground resize-none focus:outline-none max-h-32"
+            style={{ minHeight: 38 }} />
           <button onClick={sendMessage} disabled={!input.trim() || chatLoading}
-            className="shrink-0 w-10 h-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center disabled:opacity-40 transition-opacity">
+            className="shrink-0 w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center disabled:opacity-40 transition-all hover:scale-105 active:scale-95">
             <Send className="w-4 h-4" />
           </button>
         </div>
