@@ -7,9 +7,19 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const PRICES = {
-  monthly: "price_1TIyEbHSiV3Tig2qIK3dLECt",
-  yearly: "price_1TIyFTHSiV3Tig2qJHh8Muwj",
+const PRICES: Record<string, Record<string, string>> = {
+  school: {
+    monthly: "price_1TIyEbHSiV3Tig2qIK3dLECt",
+    yearly: "price_1TIyFTHSiV3Tig2qJHh8Muwj",
+  },
+  assistant: {
+    monthly: "price_1TIyVRHSiV3Tig2qlug27N1i",
+    yearly: "price_1TIyViHSiV3Tig2qKCAMTK4F",
+  },
+  allinone: {
+    monthly: "price_1TIyVxHSiV3Tig2qzRDMW1dY",
+    yearly: "price_1TIyWBHSiV3Tig2qtcD7NwVd",
+  },
 };
 
 serve(async (req) => {
@@ -29,8 +39,10 @@ serve(async (req) => {
     const user = data.user;
     if (!user?.email) throw new Error("User not authenticated");
 
-    const { interval = "monthly" } = await req.json().catch(() => ({}));
-    const priceId = interval === "yearly" ? PRICES.yearly : PRICES.monthly;
+    const { interval = "monthly", plan = "school" } = await req.json().catch(() => ({}));
+    
+    const planPrices = PRICES[plan] || PRICES.school;
+    const priceId = interval === "yearly" ? planPrices.yearly : planPrices.monthly;
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
@@ -51,7 +63,7 @@ serve(async (req) => {
       mode: "subscription",
       success_url: `${origin}/profile?subscription=success`,
       cancel_url: `${origin}/profile?subscription=cancelled`,
-      metadata: { user_id: user.id },
+      metadata: { user_id: user.id, plan },
     });
 
     return new Response(JSON.stringify({ url: session.url }), {
