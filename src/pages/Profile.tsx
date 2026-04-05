@@ -74,7 +74,7 @@ const Profile = () => {
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [settingAvatar, setSettingAvatar] = useState(false);
   const [cropFile, setCropFile] = useState<File | null>(null);
-  const { isPremium, plan, subscriptionEnd, cancelAtPeriodEnd, loading: subLoading, checkSubscription } = useSubscription();
+  const { isPremium, hasSchool, hasAssistant, plan, subscriptionEnd, cancelAtPeriodEnd, loading: subLoading, checkSubscription } = useSubscription();
   const [showPaywall, setShowPaywall] = useState(false);
   const { streak: pandaStreak, canClaim: pandaCanClaim, loading: pandaLoading } = useDailyBonus();
 
@@ -866,7 +866,7 @@ const Profile = () => {
                   </div>
                   <div>
                     <p className="text-sm font-display font-bold text-foreground flex items-center gap-2">
-                      KLAR Premium <PremiumBadge />
+                      KLAR {plan === "allinone" ? "All-in-One" : plan === "assistant" ? (lang === "uk" ? "Асистент" : "Ассистент") : (lang === "uk" ? "Школа" : "Школа")} <PremiumBadge />
                     </p>
                     <p className="text-[10px] text-muted-foreground">
                       {subscriptionEnd
