@@ -166,28 +166,6 @@ const DesktopSidebar = () => {
               {socialLinks.map(renderLink)}
             </nav>
 
-            {/* Footer links — web only */}
-            {!isTelegram && (
-              <div className="px-3 py-2 border-t border-border space-y-0.5 flex-shrink-0">
-                {[
-                  { to: "/method", label: lang === "uk" ? "Про метод KLAR" : "О методе KLAR" },
-                  { to: "/privacy", label: lang === "uk" ? "Конфіденційність" : "Конфиденциальность" },
-                  { to: "/terms", label: lang === "uk" ? "Оферта" : "Оферта" },
-                ].map((item) => (
-                  <NavLink
-                    key={item.to}
-                    to={item.to}
-                    className={`block px-3 py-1 text-[10px] rounded-md transition-colors ${
-                      location.pathname === item.to
-                        ? "text-foreground"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    {item.label}
-                  </NavLink>
-                ))}
-              </div>
-            )}
 
             {/* Profile widget at bottom */}
             <NavLink
