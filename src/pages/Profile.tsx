@@ -1,4 +1,7 @@
 import { useEffect, useState, useMemo, useRef } from "react";
+import { useSubscription } from "@/hooks/useSubscription";
+import PremiumPaywall from "@/components/PremiumPaywall";
+import PremiumBadge from "@/components/PremiumBadge";
 import { motion } from "framer-motion";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -6,7 +9,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { usePlatform } from "@/hooks/usePlatform";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { BookOpen, Brain, Flame, RotateCcw, TrendingUp, Calendar, LogOut, Camera, Pencil, Check, X, Coins, Trophy, ArrowLeft, ChevronRight, Award, Bell, Send, Unlink2, Users, WifiOff, Trash2, HardDrive, Globe, Lock, ShoppingBag, ExternalLink, Gift } from "lucide-react";
+import { BookOpen, Brain, Flame, RotateCcw, TrendingUp, Calendar, LogOut, Camera, Pencil, Check, X, Coins, Trophy, ArrowLeft, ChevronRight, Award, Bell, Send, Unlink2, Users, WifiOff, Trash2, HardDrive, Globe, Lock, ShoppingBag, ExternalLink, Gift, Crown, Settings } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useCoins } from "@/hooks/useCoins";
 import Achievements, { type AchievementStats } from "@/components/Achievements";
@@ -43,7 +46,7 @@ interface ProfileData {
 type ProfileScreen = "main" | "achievements" | "activity" | "mistakes" | "leaderboard" | "notifications" | "referrals" | "offline" | "friends";
 
 const Profile = () => {
-  const { user, signOut } = useAuth();
+  const { user, session, signOut } = useAuth();
   const { t, lang, languageLocked, lockLanguage, unlockLanguage } = useLanguage();
   const { isMobile, isTelegram } = usePlatform();
   const { balance } = useCoins();
@@ -71,7 +74,20 @@ const Profile = () => {
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [settingAvatar, setSettingAvatar] = useState(false);
   const [cropFile, setCropFile] = useState<File | null>(null);
+  const { isPremium, plan, subscriptionEnd, cancelAtPeriodEnd, loading: subLoading, checkSubscription } = useSubscription();
+  const [showPaywall, setShowPaywall] = useState(false);
   const { streak: pandaStreak, canClaim: pandaCanClaim, loading: pandaLoading } = useDailyBonus();
+
+  // Handle Stripe redirect
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("subscription") === "success") {
+      toast({ title: lang === "uk" ? "🎉 Premium активовано!" : "🎉 Premium активирован!" });
+      checkSubscription();
+      window.history.replaceState({}, "", "/profile");
+    }
+  }, []);
+
   useEffect(() => {
     if (!user) return;
     const load = async () => {
@@ -832,6 +848,75 @@ const Profile = () => {
           </button>
         </div>
       )}
+
+      {/* ─── Premium Banner ─── */}
+      {!subLoading && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.11 }}
+          className={`${isTelegram ? "mb-3" : "mb-5"}`}
+        >
+          {isPremium ? (
+            <div className="glass-card p-4 rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/10 to-transparent">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+                    <Crown className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-display font-bold text-foreground flex items-center gap-2">
+                      KLAR Premium <PremiumBadge />
+                    </p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {subscriptionEnd
+                        ? `${lang === "uk" ? "до" : "до"} ${new Date(subscriptionEnd).toLocaleDateString(lang === "uk" ? "uk-UA" : "ru-RU", { day: "numeric", month: "long", year: "numeric" })}`
+                        : ""}
+                      {cancelAtPeriodEnd ? ` · ${lang === "uk" ? "скасовано" : "отменена"}` : ""}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={async () => {
+                    const { data } = await supabase.functions.invoke("customer-portal", {
+                      headers: { Authorization: `Bearer ${session?.access_token}` },
+                    });
+                    if (data?.url) window.open(data.url, "_blank");
+                  }}
+                  className="p-2 rounded-xl bg-muted hover:bg-muted/80 text-muted-foreground transition-colors"
+                >
+                  <Settings className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          ) : (
+            <motion.button
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowPaywall(true)}
+              className="w-full glass-card p-4 rounded-2xl border border-primary/30 text-left"
+              style={{ background: "linear-gradient(135deg, hsl(var(--primary) / 0.12), hsl(var(--card)))" }}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
+                  <Crown className="w-5 h-5 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-display font-bold text-foreground">
+                    {lang === "uk" ? "Перейди на Premium" : "Перейди на Premium"}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">
+                    {lang === "uk" ? "Безліміт уроків, ігор та AI · від €3.33/міс" : "Безлимит уроков, игр и AI · от €3.33/мес"}
+                  </p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-primary" />
+              </div>
+            </motion.button>
+          )}
+        </motion.div>
+      )}
+
+      <PremiumPaywall open={showPaywall} onClose={() => { setShowPaywall(false); checkSubscription(); }} />
 
       {/* ─── Stat Cards ─── */}
       <motion.div
