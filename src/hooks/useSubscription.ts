@@ -2,9 +2,13 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
+export type SubscriptionPlan = "free" | "school" | "assistant" | "allinone";
+
 interface SubscriptionState {
   isPremium: boolean;
-  plan: "free" | "premium";
+  hasSchool: boolean;
+  hasAssistant: boolean;
+  plan: SubscriptionPlan;
   subscriptionEnd: string | null;
   cancelAtPeriodEnd: boolean;
   loading: boolean;
@@ -22,8 +26,9 @@ interface UsageState {
 
 export const useSubscription = (): SubscriptionState & { usage: UsageState; checkUsage: (type: "lesson" | "game" | "ai") => Promise<boolean> } => {
   const { user, session } = useAuth();
-  const [isPremium, setIsPremium] = useState(false);
-  const [plan, setPlan] = useState<"free" | "premium">("free");
+  const [plan, setPlan] = useState<SubscriptionPlan>("free");
+  const [hasSchool, setHasSchool] = useState(false);
+  const [hasAssistant, setHasAssistant] = useState(false);
   const [subscriptionEnd, setSubscriptionEnd] = useState<string | null>(null);
   const [cancelAtPeriodEnd, setCancelAtPeriodEnd] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -31,6 +36,8 @@ export const useSubscription = (): SubscriptionState & { usage: UsageState; chec
     lessonsUsed: 0, gamesUsed: 0, aiUsed: 0,
     limitLessons: 3, limitGames: 1, limitAi: 3,
   });
+
+  const isPremium = plan !== "free";
 
   const checkSubscription = useCallback(async () => {
     if (!session?.access_token) {
@@ -42,8 +49,9 @@ export const useSubscription = (): SubscriptionState & { usage: UsageState; chec
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
       if (error) throw error;
-      setIsPremium(data?.subscribed ?? false);
-      setPlan(data?.plan ?? "free");
+      setPlan((data?.plan as SubscriptionPlan) ?? "free");
+      setHasSchool(data?.has_school ?? false);
+      setHasAssistant(data?.has_assistant ?? false);
       setSubscriptionEnd(data?.subscription_end ?? null);
       setCancelAtPeriodEnd(data?.cancel_at_period_end ?? false);
     } catch (e) {
@@ -53,7 +61,6 @@ export const useSubscription = (): SubscriptionState & { usage: UsageState; chec
     }
   }, [session?.access_token]);
 
-  // Check on mount and periodically
   useEffect(() => {
     if (user && session) {
       checkSubscription();
@@ -117,7 +124,7 @@ export const useSubscription = (): SubscriptionState & { usage: UsageState; chec
   }, [user, isPremium]);
 
   return {
-    isPremium, plan, subscriptionEnd, cancelAtPeriodEnd, loading,
+    isPremium, hasSchool, hasAssistant, plan, subscriptionEnd, cancelAtPeriodEnd, loading,
     checkSubscription, usage, checkUsage,
   };
 };
