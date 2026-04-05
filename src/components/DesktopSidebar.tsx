@@ -3,7 +3,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import {
   Home, BookOpen, Gamepad2, GraduationCap,
   MessageSquare, Flame, Coins, Star,
-  Swords, Menu, X, Sparkles
+  Swords, Menu, X, Sparkles, Bug
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -167,8 +167,20 @@ const DesktopSidebar = () => {
               {socialLinks.map(renderLink)}
             </nav>
 
+            {/* Report error link */}
+            <button
+              onClick={() => {
+                setOpen(false);
+                const evt = new CustomEvent("open-report-error");
+                window.dispatchEvent(evt);
+              }}
+              className="mx-2 mb-1 flex items-center gap-3 px-3 py-2.5 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors text-sm font-display font-medium"
+            >
+              <Bug className="w-[18px] h-[18px]" />
+              <span>{lang === "uk" ? "Повідомити про помилку" : "Сообщить об ошибке"}</span>
+            </button>
 
-            {/* Profile widget at bottom */}
+
             <NavLink
               to="/profile"
               className="mx-2 mb-2 p-3 rounded-xl border border-border bg-muted/30 hover:bg-muted/60 transition-colors"
