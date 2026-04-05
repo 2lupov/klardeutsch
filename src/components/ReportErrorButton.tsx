@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Bug, Send, X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { fetchEdgeFunction } from "@/lib/auth-fetch";
@@ -11,6 +11,13 @@ const ReportErrorButton = () => {
   const [open, setOpen] = useState(false);
   const [description, setDescription] = useState("");
   const [sending, setSending] = useState(false);
+
+  // Listen for desktop sidebar trigger
+  useEffect(() => {
+    const handler = () => setOpen(true);
+    window.addEventListener("open-report-error", handler);
+    return () => window.removeEventListener("open-report-error", handler);
+  }, []);
 
   // Hide on chat page
   if (location.pathname === "/chat") return null;
@@ -35,9 +42,10 @@ const ReportErrorButton = () => {
 
   return (
     <>
+      {/* Floating button — mobile only */}
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-20 right-4 z-40 w-10 h-10 rounded-full bg-destructive/10 text-destructive flex items-center justify-center hover:bg-destructive/20 transition-colors md:bottom-6"
+        className="fixed bottom-20 right-4 z-40 w-10 h-10 rounded-full bg-destructive/10 text-destructive flex items-center justify-center hover:bg-destructive/20 transition-colors lg:hidden"
         title={t("reportError")}
       >
         <Bug className="w-4 h-4" />
