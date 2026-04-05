@@ -1,4 +1,7 @@
 import { useEffect, useState, useMemo, useRef } from "react";
+import { useSubscription } from "@/hooks/useSubscription";
+import PremiumPaywall from "@/components/PremiumPaywall";
+import PremiumBadge from "@/components/PremiumBadge";
 import { motion } from "framer-motion";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
