@@ -1333,6 +1333,17 @@ const Tutoring = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* ===== TEACHER: AI assistant per student ===== */}
+      {aiAssistantStudent && (
+        <TeacherAIAssistant
+          open={!!aiAssistantStudent}
+          onOpenChange={(o) => { if (!o) setAiAssistantStudent(null); }}
+          studentId={aiAssistantStudent.id}
+          studentName={aiAssistantStudent.name}
+          isKid={aiAssistantStudent.isKid}
+        />
+      )}
     </div>
   );
 };
