@@ -793,6 +793,17 @@ const Tutoring = () => {
                     <p className="font-bold truncate">{r.profile?.display_name || r.profile?.nickname || "User"}</p>
                     <p className="text-xs text-green-600">{t("Активний", "Активный")}</p>
                   </div>
+                  {mode === "teacher" && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => assignPlacementTest(r.student_id)}
+                      title={t("Призначити тест на рівень", "Назначить тест на уровень")}
+                    >
+                      <ClipboardCheck className="w-4 h-4 mr-1" />
+                      {t("Тест", "Тест")}
+                    </Button>
+                  )}
                 </div>
               ))
             )}
