@@ -506,10 +506,21 @@ const Tutoring = () => {
           </div>
 
           {mode === "teacher" ? (
-            <Button onClick={() => { resetCreateForm(); setCreateOpen(true); }} size="lg" className="gap-2 shadow-lg">
-              <Sparkles className="w-4 h-4" />
-              {t("Створити урок з AI", "Создать урок с AI")}
-            </Button>
+            <div className="flex gap-2 flex-wrap">
+              <Button
+                onClick={() => { setCreatedCredentials(null); setCreateStudentOpen(true); }}
+                size="lg"
+                variant="outline"
+                className="gap-2"
+              >
+                <UserPlus className="w-4 h-4" />
+                {t("Створити учня", "Создать ученика")}
+              </Button>
+              <Button onClick={() => { resetCreateForm(); setCreateOpen(true); }} size="lg" className="gap-2 shadow-lg">
+                <Sparkles className="w-4 h-4" />
+                {t("Створити урок з AI", "Создать урок с AI")}
+              </Button>
+            </div>
           ) : (
             <Button onClick={() => setFindOpen(true)} size="lg" className="gap-2 shadow-lg">
               <UserPlus className="w-4 h-4" />
