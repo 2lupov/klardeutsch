@@ -402,25 +402,29 @@ const Tutoring = () => {
       toast.error(t("Оберіть учня", "Выберите ученика"));
       return;
     }
-    if (!lessonTopic && !freePrompt) {
-      toast.error(t("Вкажіть тему або опишіть заняття", "Укажите тему или опишите занятие"));
+    if (!freePrompt && attachedFiles.length === 0) {
+      toast.error(t("Опишіть урок або додайте файл", "Опишите урок или добавьте файл"));
       return;
     }
     setGenerating(true);
     try {
-      const vocab = vocabularyText.split(/[,\n;]+/).map(s => s.trim()).filter(Boolean);
+      // Pull student level hint from latest placement test (if any)
+      const { data: lastTest } = await supabase
+        .from("tutoring_placement_assignments")
+        .select("recommended_level")
+        .eq("student_id", selectedStudent)
+        .eq("status", "completed")
+        .order("completed_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
       const res = await fetchEdgeFunction("generate-tutoring-lesson", {
         json: {
-          topic: lessonTopic || "Allgemein",
-          level: lessonLevel,
-          focus: lessonFocus,
           freePrompt,
-          wordsCount,
-          exercisesCount,
-          exerciseTypes,
-          vocabulary: vocab,
-          theoryTemplate,
+          autoMode: true,
+          studentLevelHint: lastTest?.recommended_level || null,
           imageUrls: attachedFiles.filter(f => f.type.startsWith("image/")).map(f => f.url),
+          fileNames: attachedFiles.map(f => f.name),
         },
       });
       const data = await res.json();
@@ -432,15 +436,15 @@ const Tutoring = () => {
         .insert({
           teacher_id: user!.id,
           student_id: selectedStudent,
-          title: ai.title || lessonTopic || "Lektion",
-          topic: lessonTopic || null,
-          level: lessonLevel,
+          title: ai.title || "Lektion",
+          topic: ai.topic || null,
+          level: ai.level || lastTest?.recommended_level || "A1",
           theory: ai.theory || "",
           meeting_link: meetingLink || null,
           scheduled_at: scheduledAt || null,
-          duration_minutes: durationMinutes,
+          duration_minutes: ai.duration_minutes || 60,
           status: scheduledAt ? "scheduled" : "draft",
-          ai_prompt: freePrompt || lessonFocus || null,
+          ai_prompt: freePrompt || null,
         })
         .select()
         .single();
@@ -478,17 +482,6 @@ const Tutoring = () => {
             description: h.description,
           }))
         );
-      }
-
-      // Increment template use count
-      if (activeTemplateId) {
-        const tpl = templates.find(x => x.id === activeTemplateId);
-        if (tpl) {
-          await supabase
-            .from("tutoring_lesson_templates")
-            .update({ use_count: tpl.use_count + 1 })
-            .eq("id", activeTemplateId);
-        }
       }
 
       toast.success(t("Урок створено!", "Урок создан!"));
