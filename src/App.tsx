@@ -45,6 +45,7 @@ import PlacementTest from "./pages/PlacementTest";
 import StudentAssignments from "./pages/StudentAssignments";
 import StudentHomework from "./pages/StudentHomework";
 import StudentView from "./pages/StudentView";
+import TeacherStudentDashboard from "./pages/TeacherStudentDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
