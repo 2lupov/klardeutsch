@@ -27,7 +27,7 @@ interface Relationship {
   status: string;
   note: string | null;
   created_at: string;
-  profile?: { display_name: string | null; avatar_url: string | null; nickname: string | null };
+  profile?: { display_name: string | null; avatar_url: string | null; nickname: string | null; is_kid?: boolean };
 }
 
 interface Lesson {
