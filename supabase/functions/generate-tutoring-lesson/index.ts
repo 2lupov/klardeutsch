@@ -33,7 +33,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Verify teacher role
     const { data: roles } = await supabase
       .from("user_roles")
       .select("role")
@@ -46,9 +45,21 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { topic, level, focus, studentNotes } = await req.json();
-    if (!topic || !level) {
-      return new Response(JSON.stringify({ error: "topic and level required" }), {
+    const {
+      topic,
+      level,
+      focus,
+      studentNotes,
+      freePrompt,
+      wordsCount = 10,
+      exercisesCount = 8,
+      exerciseTypes = ["quiz", "cloze", "translation"],
+      vocabulary = [],
+      theoryTemplate,
+    } = await req.json();
+
+    if (!topic && !freePrompt) {
+      return new Response(JSON.stringify({ error: "topic or freePrompt required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -57,32 +68,60 @@ Deno.serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
-    const systemPrompt = `Du bist ein erfahrener Deutschlehrer. Erstelle eine vollständige Online-Unterrichtsstunde auf Deutsch (CEFR-Niveau ${level}) zum Thema "${topic}".
+    const finalLevel = level || "A1";
+    const finalTopic = topic || "Allgemein";
+
+    const vocabHint = vocabulary.length
+      ? `\n- ОБЯЗАТЕЛЬНО включи и активно используй эти слова: ${vocabulary.map((v: any) => typeof v === "string" ? v : v.german).join(", ")}`
+      : "";
+
+    const exTypesAllowed = Array.isArray(exerciseTypes) && exerciseTypes.length
+      ? exerciseTypes
+      : ["quiz", "cloze", "translation"];
+
+    const systemPrompt = `Du bist ein erfahrener Deutschlehrer. Erstelle eine vollständige, strukturierte Online-Unterrichtsstunde auf Deutsch (CEFR-Niveau ${finalLevel}).
+
+Thema: "${finalTopic}"
+${freePrompt ? `\nЧТО НУЖНО СЕГОДНЯ (от учителя):\n${freePrompt}\n` : ""}
 
 Antworte NUR mit gültigem JSON ohne Markdown:
 {
-  "title": "Kurzer Titel (3-6 Wörter)",
-  "theory": "Strukturierte Theorie auf Russisch mit Markdown (заголовки, списки, **bold**, примеры на немецком). 300-600 слов. Включи: введение, правила, примеры, типичные ошибки.",
+  "title": "Короткий точний заголовок (3-6 слів)",
+  "presentation": [
+    {"slide": 1, "heading": "Введение", "content": "Що сьогодні вчимо, навіщо це потрібно (2-3 речення)."},
+    {"slide": 2, "heading": "Тема дня", "content": "..."},
+    {"slide": 3, "heading": "Ключові слова", "content": "..."},
+    {"slide": 4, "heading": "Граматика / правила", "content": "..."},
+    {"slide": 5, "heading": "Приклади", "content": "..."},
+    {"slide": 6, "heading": "Підсумок", "content": "..."}
+  ],
+  "theory": "Структурована теорія російською з Markdown (## заголовки, списки, **bold**, > цитати, приклади на німецькій). 400-700 слів. Включи: вступ, правила, приклади, типові помилки, підказки.",
   "words": [
-    {"german": "...", "article": "der|die|das|null", "russian": "перевод", "example": "Полное немецкое предложение с этим словом."}
+    {"german": "...", "article": "der|die|das|null", "russian": "перевод", "example": "Полное немецкое предложение."}
   ],
   "exercises": [
-    {"type": "quiz", "question": "Question text", "options": ["A","B","C","D"], "correct_answer": "A", "explanation": "Why"},
+    {"type": "quiz", "question": "...", "options": ["A","B","C","D"], "correct_answer": "A", "explanation": "..."},
     {"type": "cloze", "question": "Ich ___ nach Berlin.", "correct_answer": "fahre", "explanation": "..."},
     {"type": "translation", "question": "Переведи: Я иду домой.", "correct_answer": "Ich gehe nach Hause.", "explanation": "..."}
   ],
   "homework": [
-    {"description": "Конкретное задание для самостоятельной работы (на русском с примерами на немецком)."}
+    {"description": "Конкретне завдання для самостійної роботи (рос. + приклади на німецькій)."}
   ]
 }
 
 Требования:
-- 8-12 слов в словнике
-- 6-10 упражнений разных типов
-- 2-3 домашних задания
-- Уровень строго ${level}
-${focus ? `- Особый фокус: ${focus}` : ""}
-${studentNotes ? `- Учитывай заметки об ученике: ${studentNotes}` : ""}`;
+- Ровно ${wordsCount} слов в словарі (±2)
+- Ровно ${exercisesCount} вправ (±1) ТІЛЬКИ цих типів: ${exTypesAllowed.join(", ")}
+- 2-3 домашніх завдання
+- 6 слайдів презентації
+- Уровень строго ${finalLevel}${vocabHint}
+${focus ? `- Особливий фокус: ${focus}` : ""}
+${theoryTemplate ? `- Шаблон теорії (адаптуй під тему): ${theoryTemplate}` : ""}
+${studentNotes ? `- Враховуй замітки про учня: ${studentNotes}` : ""}`;
+
+    const userMsg = freePrompt
+      ? `Підготуй заняття згідно інструкції: "${freePrompt}". Тема: ${finalTopic}, рівень ${finalLevel}.`
+      : `Створи урок: тема "${finalTopic}", рівень ${finalLevel}.`;
 
     const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -94,7 +133,7 @@ ${studentNotes ? `- Учитывай заметки об ученике: ${stude
         model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: `Создай урок: тема "${topic}", уровень ${level}.` },
+          { role: "user", content: userMsg },
         ],
         response_format: { type: "json_object" },
       }),
