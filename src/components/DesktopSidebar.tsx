@@ -61,6 +61,7 @@ const DesktopSidebar = () => {
     { to: "/academy", icon: GraduationCap, label: lang === "uk" ? "Академія" : "Академия" },
     { to: "/assistant", icon: Sparkles, label: lang === "uk" ? "Асистент" : "Ассистент" },
     { to: "/tutoring", icon: Presentation, label: lang === "uk" ? "Уроки з вчителем" : "Уроки с преподавателем" },
+    { to: "/assignments", icon: ClipboardList, label: lang === "uk" ? "Завдання" : "Задания" },
     { to: "/dictionary", icon: BookOpen, label: t("navDictionary") },
     { to: "/games", icon: Gamepad2, label: lang === "uk" ? "Ігри" : "Игры" },
   ];
