@@ -376,6 +376,7 @@ const Tutoring = () => {
           exerciseTypes,
           vocabulary: vocab,
           theoryTemplate,
+          imageUrls: attachedFiles.filter(f => f.type.startsWith("image/")).map(f => f.url),
         },
       });
       const data = await res.json();
