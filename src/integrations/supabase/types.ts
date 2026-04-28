@@ -940,6 +940,42 @@ export type Database = {
         }
         Relationships: []
       }
+      kids_placement_questions: {
+        Row: {
+          correct: number
+          created_at: string
+          emoji: string
+          hint_ru: string | null
+          id: string
+          level: string
+          options: Json
+          question_de: string
+          sort_order: number | null
+        }
+        Insert: {
+          correct: number
+          created_at?: string
+          emoji?: string
+          hint_ru?: string | null
+          id?: string
+          level: string
+          options: Json
+          question_de: string
+          sort_order?: number | null
+        }
+        Update: {
+          correct?: number
+          created_at?: string
+          emoji?: string
+          hint_ru?: string | null
+          id?: string
+          level?: string
+          options?: Json
+          question_de?: string
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
       listening_dictations: {
         Row: {
           created_at: string
@@ -1087,6 +1123,7 @@ export type Database = {
           daily_goal_minutes: number | null
           display_name: string | null
           id: string
+          is_kid: boolean
           language_locked: boolean
           last_active: string | null
           last_reminder_sent_at: string | null
@@ -1108,6 +1145,7 @@ export type Database = {
           daily_goal_minutes?: number | null
           display_name?: string | null
           id?: string
+          is_kid?: boolean
           language_locked?: boolean
           last_active?: string | null
           last_reminder_sent_at?: string | null
@@ -1129,6 +1167,7 @@ export type Database = {
           daily_goal_minutes?: number | null
           display_name?: string | null
           id?: string
+          is_kid?: boolean
           language_locked?: boolean
           last_active?: string | null
           last_reminder_sent_at?: string | null

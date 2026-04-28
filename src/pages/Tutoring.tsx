@@ -27,7 +27,7 @@ interface Relationship {
   status: string;
   note: string | null;
   created_at: string;
-  profile?: { display_name: string | null; avatar_url: string | null; nickname: string | null };
+  profile?: { display_name: string | null; avatar_url: string | null; nickname: string | null; is_kid?: boolean };
 }
 
 interface Lesson {
@@ -169,7 +169,7 @@ const Tutoring = () => {
       const otherIds = [...new Set(rels.map((r: any) => r[otherCol]))];
       const { data: profs } = await supabase
         .from("profiles")
-        .select("user_id, display_name, avatar_url, nickname")
+        .select("user_id, display_name, avatar_url, nickname, is_kid")
         .in("user_id", otherIds);
       const profMap = new Map((profs || []).map((p: any) => [p.user_id, p]));
       setRelationships(
@@ -454,11 +454,19 @@ const Tutoring = () => {
         .limit(1)
         .maybeSingle();
 
+      // 🧒 Check if student is a kid (9–12) → AI uses kid-friendly prompt
+      const { data: studentProfile } = await supabase
+        .from("profiles")
+        .select("is_kid")
+        .eq("user_id", selectedStudent)
+        .maybeSingle();
+
       const res = await fetchEdgeFunction("generate-tutoring-lesson", {
         json: {
           freePrompt,
           autoMode: true,
           studentLevelHint: lastTest?.recommended_level || null,
+          isKid: !!studentProfile?.is_kid,
           imageUrls: attachedFiles.filter(f => f.type.startsWith("image/")).map(f => f.url),
           fileNames: attachedFiles.map(f => f.name),
           attachedFiles: attachedFiles
@@ -826,15 +834,47 @@ const Tutoring = () => {
                     <p className="text-xs text-green-600">{t("Активний", "Активный")}</p>
                   </div>
                   {mode === "teacher" && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => openPlacementDialog(r.student_id)}
-                      title={t("Призначити тест на рівень", "Назначить тест на уровень")}
-                    >
-                      <ClipboardCheck className="w-4 h-4 mr-1" />
-                      {t("Тест", "Тест")}
-                    </Button>
+                    <>
+                      <button
+                        onClick={async () => {
+                          const next = !r.profile?.is_kid;
+                          const { error } = await supabase
+                            .from("profiles")
+                            .update({ is_kid: next })
+                            .eq("user_id", r.student_id);
+                          if (error) return toast.error(error.message);
+                          setRelationships((prev) =>
+                            prev.map((x) =>
+                              x.id === r.id
+                                ? { ...x, profile: { ...(x.profile as any), is_kid: next } }
+                                : x
+                            )
+                          );
+                          toast.success(
+                            next
+                              ? t("Дитячий режим увімкнено 🧒", "Детский режим включён 🧒")
+                              : t("Дитячий режим вимкнено", "Детский режим выключен")
+                          );
+                        }}
+                        title={t("Учень 9–12 років (простіші завдання, AI адаптується)", "Ученик 9–12 лет (проще задания, AI адаптируется)")}
+                        className={`text-xs font-bold px-2.5 py-1.5 rounded-lg border transition ${
+                          r.profile?.is_kid
+                            ? "bg-pink-500/15 text-pink-700 dark:text-pink-300 border-pink-500/40"
+                            : "bg-card text-muted-foreground border-border hover:border-primary/40"
+                        }`}
+                      >
+                        🧒 {r.profile?.is_kid ? t("Дитина", "Ребёнок") : t("Дорослий", "Взрослый")}
+                      </button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => openPlacementDialog(r.student_id)}
+                        title={t("Призначити тест на рівень", "Назначить тест на уровень")}
+                      >
+                        <ClipboardCheck className="w-4 h-4 mr-1" />
+                        {t("Тест", "Тест")}
+                      </Button>
+                    </>
                   )}
                 </div>
               ))
