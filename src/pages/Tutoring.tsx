@@ -17,6 +17,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { fetchEdgeFunction } from "@/lib/auth-fetch";
 import LessonGenerationProgress from "@/components/tutoring/LessonGenerationProgress";
+import TeacherAIAssistant from "@/components/tutoring/TeacherAIAssistant";
 
 type Mode = "teacher" | "student" | null;
 
@@ -119,6 +120,7 @@ const Tutoring = () => {
   const [newStudentPassword, setNewStudentPassword] = useState("");
   const [newStudentNote, setNewStudentNote] = useState("");
   const [newStudentAge, setNewStudentAge] = useState<string>("");
+  const [aiAssistantStudent, setAiAssistantStudent] = useState<{ id: string; name: string; isKid: boolean } | null>(null);
   const [creatingStudent, setCreatingStudent] = useState(false);
   const [createdCredentials, setCreatedCredentials] = useState<{ email: string; password: string } | null>(null);
   const [showPwd, setShowPwd] = useState(false);
@@ -873,6 +875,19 @@ const Tutoring = () => {
                       </button>
                       <Button
                         size="sm"
+                        onClick={() => setAiAssistantStudent({
+                          id: r.student_id,
+                          name: r.profile?.display_name || "Учень",
+                          isKid: !!r.profile?.is_kid,
+                        })}
+                        title={t("AI-помічник по цьому учню", "AI-помощник по этому ученику")}
+                        className="bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 gap-1"
+                      >
+                        <Sparkles className="w-4 h-4" />
+                        AI
+                      </Button>
+                      <Button
+                        size="sm"
                         variant="outline"
                         onClick={() => openPlacementDialog(r.student_id)}
                         title={t("Призначити тест на рівень", "Назначить тест на уровень")}
@@ -1318,6 +1333,17 @@ const Tutoring = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* ===== TEACHER: AI assistant per student ===== */}
+      {aiAssistantStudent && (
+        <TeacherAIAssistant
+          open={!!aiAssistantStudent}
+          onOpenChange={(o) => { if (!o) setAiAssistantStudent(null); }}
+          studentId={aiAssistantStudent.id}
+          studentName={aiAssistantStudent.name}
+          isKid={aiAssistantStudent.isKid}
+        />
+      )}
     </div>
   );
 };

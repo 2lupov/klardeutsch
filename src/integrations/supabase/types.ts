@@ -1574,6 +1574,65 @@ export type Database = {
         }
         Relationships: []
       }
+      teacher_ai_chats: {
+        Row: {
+          created_at: string
+          id: string
+          student_id: string
+          teacher_id: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          student_id: string
+          teacher_id: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          student_id?: string
+          teacher_id?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      teacher_ai_messages: {
+        Row: {
+          chat_id: string
+          content: string
+          created_at: string
+          id: string
+          role: string
+        }
+        Insert: {
+          chat_id: string
+          content: string
+          created_at?: string
+          id?: string
+          role: string
+        }
+        Update: {
+          chat_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_ai_messages_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_ai_chats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       teacher_chat_messages: {
         Row: {
           audio_url: string | null
