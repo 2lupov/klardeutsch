@@ -176,7 +176,7 @@ ${studentLevelHint ? `Рівень дитини: **${studentLevelHint}** (тіл
     {"german": "der Hund 🐶", "article": "der", "russian": "собака", "example": "Ich habe einen Hund. 🐶 Er heißt Bello."}
   ],
   "exercises": [
-    {"type": "quiz", "question": "🐶 Was ist das? (Выбери правильный артикль и слово)", "options": ["der Hund","die Katze","das Pferd","der Vogel"], "correct_answer": "der Hund", "explanation": "🐶 — это собака, по-немецки **der Hund**. Молодец! 🌟"},
+    {"type": "quiz", "question": "🐶 Was ist das? (Выбери правильный артикль и слово)", "options": ["die Katze","das Pferd","der Hund","der Vogel"], "correct_answer": "der Hund", "explanation": "🐶 — это собака, по-немецки **der Hund**. Молодец! 🌟"},
     {"type": "cloze", "question": "Ich spiele mit ___ Ball. ⚽", "correct_answer": "dem", "explanation": "После 'mit' — Dativ. Просто запомни: 'mit dem Ball' = 'с мячом' ⚽."},
     {"type": "translation", "question": "Переведи на немецкий: Я люблю мороженое. 🍦", "correct_answer": "Ich liebe Eis.", "explanation": "Ich = я, liebe = люблю, Eis = мороженое 🍦"}
   ],
