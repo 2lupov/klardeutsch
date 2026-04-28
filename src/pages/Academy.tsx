@@ -5,7 +5,9 @@ import { supabase } from "@/integrations/supabase/client";
 import CourseHero from "@/components/academy/CourseHero";
 import CourseFilters from "@/components/academy/CourseFilters";
 import CourseCard from "@/components/academy/CourseCard";
-import { Construction } from "lucide-react";
+import { Construction, Presentation, ChevronRight, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 interface CourseRow {
   id: string;
@@ -33,6 +35,7 @@ const ALLOWED_NICKNAMES = ["2lupov7"];
 const Academy = () => {
   const { lang } = useLanguage();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [courses, setCourses] = useState<CourseRow[]>([]);
   const [purchasedIds, setPurchasedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
@@ -87,20 +90,59 @@ const Academy = () => {
     );
   }
 
-  // Show "under development" for everyone except allowed users
+  // Tutoring banner — shown to all (students access via teacher invite)
+  const TutoringBanner = () => (
+    <motion.button
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      whileHover={{ scale: 1.01 }}
+      whileTap={{ scale: 0.99 }}
+      onClick={() => navigate("/tutoring")}
+      className="w-full text-left relative overflow-hidden rounded-2xl p-5 md:p-6 mb-6 bg-gradient-to-br from-primary via-primary to-accent shadow-lg group"
+    >
+      <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_right,_white,_transparent_60%)]" />
+      <div className="relative flex items-center gap-4">
+        <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center flex-shrink-0">
+          <Presentation className="w-6 h-6 md:w-7 md:h-7 text-white" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="font-display font-bold text-white text-base md:text-lg leading-tight">
+              {lang === "uk" ? "Уроки з вчителем" : "Уроки с преподавателем"}
+            </h3>
+            <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider bg-white/20 text-white px-2 py-0.5 rounded-full">
+              <Sparkles className="w-3 h-3" /> AI
+            </span>
+          </div>
+          <p className="text-white/85 text-xs md:text-sm leading-snug line-clamp-2">
+            {lang === "uk"
+              ? "Живі заняття, домашні завдання та аналіз прогресу з персональним викладачем"
+              : "Живые занятия, домашние задания и анализ прогресса с личным преподавателем"}
+          </p>
+        </div>
+        <ChevronRight className="w-5 h-5 text-white/80 group-hover:translate-x-1 transition-transform flex-shrink-0" />
+      </div>
+    </motion.button>
+  );
+
+  // Show "under development" for everyone except allowed users — but still expose Tutoring
   if (!hasAccess) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[100dvh] px-6 text-center">
-        <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
+      <div className="flex flex-col items-center justify-center min-h-[100dvh] px-6 py-10 text-center">
+        <div className="w-full max-w-md">
+          <TutoringBanner />
+        </div>
+        <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 mt-4">
           <Construction className="w-10 h-10 text-primary" />
         </div>
         <h1 className="text-2xl font-display font-bold text-foreground mb-3">
-          {lang === "uk" ? "Академія в розробці" : "Академия в разработке"}
+          {lang === "uk" ? "Курси в розробці" : "Курсы в разработке"}
         </h1>
         <p className="text-muted-foreground text-sm max-w-md leading-relaxed">
           {lang === "uk"
-            ? "Ми працюємо над курсами для вас. Скоро тут з'являться структуровані курси з відео, квізами та сертифікатами. Слідкуйте за оновленнями! 🚀"
-            : "Мы работаем над курсами для вас. Скоро здесь появятся структурированные курсы с видео, квизами и сертификатами. Следите за обновлениями! 🚀"}
+            ? "Ми працюємо над курсами для вас. А поки можете записатися на уроки з персональним викладачем вище! 🚀"
+            : "Мы работаем над курсами для вас. А пока можете записаться на уроки с персональным преподавателем выше! 🚀"}
         </p>
       </div>
     );
@@ -119,7 +161,8 @@ const Academy = () => {
     <div className="w-full mx-auto animate-slide-up">
       <CourseHero lang={lang} />
 
-      <div className="max-w-6xl mx-auto px-4 pb-8">
+      <div className="max-w-6xl mx-auto px-4 pb-8 pt-4">
+        <TutoringBanner />
         <CourseFilters
           lang={lang}
           levels={levels}
