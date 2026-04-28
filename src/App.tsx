@@ -81,6 +81,7 @@ const AppRoutes = () => {
         <Route path="/word-lookup" element={<WordLookup />} />
         <Route path="/assistant" element={<Assistant />} />
         <Route path="/tutoring" element={<Tutoring />} />
+        <Route path="/tutoring/student/:studentId" element={<TeacherStudentDashboard />} />
         <Route path="/tutoring/lesson/:id" element={<TutoringLesson />} />
         <Route path="/tutoring/placement/:id" element={<PlacementTest />} />
         <Route path="/assignments" element={<StudentAssignments />} />
