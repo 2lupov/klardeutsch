@@ -172,6 +172,43 @@ function extractText(node: any): string {
   return "";
 }
 
+/**
+ * Detect a "labeled example" paragraph like:
+ *   **Личное письмо:** Liebe Sara, danke für ... (Дорогая Сара, спасибо ...)
+ * Returns label + German part + translation in parentheses.
+ */
+function detectExample(children: any): { label: string; de: string; translation: string } | null {
+  const text = extractText(children).trim();
+  if (!text) return null;
+  // Must start with a bold label ending in ":" and have at least ~25 chars after
+  const m = text.match(/^([^:\n]{2,40}):\s+(.+)$/s);
+  if (!m) return null;
+  const label = m[1].trim();
+  let rest = m[2].trim();
+  // Heuristic: skip if too short, or label looks like a sentence
+  if (rest.length < 25 || label.split(/\s+/).length > 5) return null;
+  // Extract trailing translation in parentheses
+  let translation = "";
+  let de = rest;
+  const lastOpen = rest.lastIndexOf("(");
+  const lastClose = rest.lastIndexOf(")");
+  if (lastOpen > 10 && lastClose === rest.length - 1) {
+    translation = rest.slice(lastOpen + 1, lastClose).trim();
+    de = rest.slice(0, lastOpen).trim();
+  }
+  // Require the example to actually look like a sentence (has a space)
+  if (!de.includes(" ")) return null;
+  return { label, de, translation };
+}
+
+// (legacy duplicate removed below)
+function _legacyExtract(node: any): string {
+  if (typeof node === "string") return node;
+  if (Array.isArray(node)) return node.map(extractText).join("");
+  if (node?.props?.children) return extractText(node.props.children);
+  return "";
+}
+
 function detectCallout(text: string) {
   const lower = text.trim().toLowerCase();
   if (lower.startsWith("💡") || lower.startsWith("tipp") || lower.startsWith("совет") || lower.startsWith("порада")) {
