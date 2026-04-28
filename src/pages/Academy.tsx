@@ -161,7 +161,8 @@ const Academy = () => {
     <div className="w-full mx-auto animate-slide-up">
       <CourseHero lang={lang} />
 
-      <div className="max-w-6xl mx-auto px-4 pb-8">
+      <div className="max-w-6xl mx-auto px-4 pb-8 pt-4">
+        <TutoringBanner />
         <CourseFilters
           lang={lang}
           levels={levels}
