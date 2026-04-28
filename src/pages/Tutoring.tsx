@@ -17,6 +17,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { fetchEdgeFunction } from "@/lib/auth-fetch";
 import LessonGenerationProgress from "@/components/tutoring/LessonGenerationProgress";
+import TeacherAIAssistant from "@/components/tutoring/TeacherAIAssistant";
 
 type Mode = "teacher" | "student" | null;
 
