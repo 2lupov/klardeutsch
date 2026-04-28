@@ -201,13 +201,6 @@ function detectExample(children: any): { label: string; de: string; translation:
   return { label, de, translation };
 }
 
-// (legacy duplicate removed below)
-function _legacyExtract(node: any): string {
-  if (typeof node === "string") return node;
-  if (Array.isArray(node)) return node.map(extractText).join("");
-  if (node?.props?.children) return extractText(node.props.children);
-  return "";
-}
 
 function detectCallout(text: string) {
   const lower = text.trim().toLowerCase();
