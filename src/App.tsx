@@ -41,6 +41,7 @@ import WordLookup from "./pages/WordLookup";
 import Assistant from "./pages/Assistant";
 import Tutoring from "./pages/Tutoring";
 import TutoringLesson from "./pages/TutoringLesson";
+import PlacementTest from "./pages/PlacementTest";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
