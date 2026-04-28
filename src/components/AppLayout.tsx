@@ -21,6 +21,8 @@ const AppLayout = () => {
   const [nicknameChecked, setNicknameChecked] = useState(false);
   const [hasNickname, setHasNickname] = useState(true);
 
+  useTeacherLink(user?.id);
+
   useEffect(() => {
     if (!loading && !user) navigate("/auth");
   }, [user, loading, navigate]);
