@@ -430,6 +430,18 @@ const TutoringLesson = () => {
           </TabsContent>
         </Tabs>
       </div>
+      <AnimatePresence>
+        {presenterOpen && isTeacher && (
+          <PresenterMode
+            lesson={lesson}
+            words={words}
+            exercises={exercises}
+            studentName={studentProfile?.display_name || t("Учень", "Ученик")}
+            studentProfile={studentProfile}
+            onClose={() => setPresenterOpen(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };
