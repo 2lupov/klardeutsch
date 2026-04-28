@@ -219,9 +219,7 @@ const TutoringLesson = () => {
                   </div>
                 </div>
               ) : (
-                <div className="prose prose-sm max-w-none dark:prose-invert whitespace-pre-wrap">
-                  {lesson.theory || <span className="text-muted-foreground">{t("Теорія не додана", "Теория не добавлена")}</span>}
-                </div>
+                <LessonTheoryRenderer content={lesson.theory || ""} />
               )}
             </div>
           </TabsContent>
