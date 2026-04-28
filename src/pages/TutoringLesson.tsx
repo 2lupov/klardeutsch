@@ -49,6 +49,8 @@ const TutoringLesson = () => {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
   const [hwSubmissions, setHwSubmissions] = useState<Record<string, string>>({});
+  const [presenterOpen, setPresenterOpen] = useState(false);
+  const [studentProfile, setStudentProfile] = useState<any>(null);
 
   const load = async () => {
     if (!id || !user) return;
@@ -70,6 +72,15 @@ const TutoringLesson = () => {
     setHwSubmissions(
       (h.data || []).reduce((acc: any, hw: any) => ({ ...acc, [hw.id]: hw.submission || "" }), {})
     );
+    // Load student profile (for presenter mode)
+    if (l.teacher_id === user.id && l.student_id) {
+      const { data: sp } = await supabase
+        .from("profiles")
+        .select("display_name,avatar_url,is_kid,age,recommended_level")
+        .eq("user_id", l.student_id)
+        .maybeSingle();
+      setStudentProfile(sp);
+    }
     setLoading(false);
   };
 
