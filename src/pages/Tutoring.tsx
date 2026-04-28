@@ -170,7 +170,7 @@ const Tutoring = () => {
       const otherIds = [...new Set(rels.map((r: any) => r[otherCol]))];
       const { data: profs } = await supabase
         .from("profiles")
-        .select("user_id, display_name, avatar_url, nickname, is_kid")
+        .select("user_id, display_name, avatar_url, nickname, is_kid, age")
         .in("user_id", otherIds);
       const profMap = new Map((profs || []).map((p: any) => [p.user_id, p]));
       setRelationships(
