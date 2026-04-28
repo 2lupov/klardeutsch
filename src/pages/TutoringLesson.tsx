@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import LessonVideoRoom from "@/components/tutoring/LessonVideoRoom";
+import LessonTheoryRenderer from "@/components/tutoring/LessonTheoryRenderer";
 
 const articleColor = (a: string | null) => {
   if (a === "der") return "bg-blue-500/10 text-blue-600 border-blue-500/20";
@@ -218,9 +219,7 @@ const TutoringLesson = () => {
                   </div>
                 </div>
               ) : (
-                <div className="prose prose-sm max-w-none dark:prose-invert whitespace-pre-wrap">
-                  {lesson.theory || <span className="text-muted-foreground">{t("Теорія не додана", "Теория не добавлена")}</span>}
-                </div>
+                <LessonTheoryRenderer content={lesson.theory || ""} />
               )}
             </div>
           </TabsContent>
