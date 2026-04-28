@@ -39,6 +39,8 @@ import Certificate from "./pages/Certificate";
 import Chat from "./pages/Chat";
 import WordLookup from "./pages/WordLookup";
 import Assistant from "./pages/Assistant";
+import Tutoring from "./pages/Tutoring";
+import TutoringLesson from "./pages/TutoringLesson";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -72,6 +74,8 @@ const AppRoutes = () => {
         <Route path="/chat" element={<Chat />} />
         <Route path="/word-lookup" element={<WordLookup />} />
         <Route path="/assistant" element={<Assistant />} />
+        <Route path="/tutoring" element={<Tutoring />} />
+        <Route path="/tutoring/lesson/:id" element={<TutoringLesson />} />
         <Route path="/course/:id" element={<Course />} />
         <Route path="/academy" element={<Academy />} />
         <Route path="/academy/:courseId" element={<AcademyCourse />} />

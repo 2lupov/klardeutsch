@@ -1621,6 +1621,225 @@ export type Database = {
         }
         Relationships: []
       }
+      tutoring_homework: {
+        Row: {
+          created_at: string
+          description: string
+          due_at: string | null
+          feedback: string | null
+          grade: number | null
+          id: string
+          lesson_id: string
+          status: string
+          submission: string | null
+          submitted_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          due_at?: string | null
+          feedback?: string | null
+          grade?: number | null
+          id?: string
+          lesson_id: string
+          status?: string
+          submission?: string | null
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          due_at?: string | null
+          feedback?: string | null
+          grade?: number | null
+          id?: string
+          lesson_id?: string
+          status?: string
+          submission?: string | null
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tutoring_homework_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "tutoring_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tutoring_lesson_exercises: {
+        Row: {
+          correct_answer: string | null
+          created_at: string
+          exercise_type: string
+          explanation: string | null
+          id: string
+          lesson_id: string
+          options: Json | null
+          question: string
+          sort_order: number | null
+        }
+        Insert: {
+          correct_answer?: string | null
+          created_at?: string
+          exercise_type?: string
+          explanation?: string | null
+          id?: string
+          lesson_id: string
+          options?: Json | null
+          question: string
+          sort_order?: number | null
+        }
+        Update: {
+          correct_answer?: string | null
+          created_at?: string
+          exercise_type?: string
+          explanation?: string | null
+          id?: string
+          lesson_id?: string
+          options?: Json | null
+          question?: string
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tutoring_lesson_exercises_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "tutoring_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tutoring_lesson_words: {
+        Row: {
+          article: string | null
+          created_at: string
+          example: string | null
+          german: string
+          id: string
+          lesson_id: string
+          russian: string
+          sort_order: number | null
+        }
+        Insert: {
+          article?: string | null
+          created_at?: string
+          example?: string | null
+          german: string
+          id?: string
+          lesson_id: string
+          russian: string
+          sort_order?: number | null
+        }
+        Update: {
+          article?: string | null
+          created_at?: string
+          example?: string | null
+          german?: string
+          id?: string
+          lesson_id?: string
+          russian?: string
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tutoring_lesson_words_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "tutoring_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tutoring_lessons: {
+        Row: {
+          ai_prompt: string | null
+          created_at: string
+          duration_minutes: number | null
+          id: string
+          level: string
+          meeting_link: string | null
+          notes: string | null
+          scheduled_at: string | null
+          status: string
+          student_id: string
+          teacher_id: string
+          theory: string | null
+          title: string
+          topic: string | null
+          updated_at: string
+        }
+        Insert: {
+          ai_prompt?: string | null
+          created_at?: string
+          duration_minutes?: number | null
+          id?: string
+          level?: string
+          meeting_link?: string | null
+          notes?: string | null
+          scheduled_at?: string | null
+          status?: string
+          student_id: string
+          teacher_id: string
+          theory?: string | null
+          title: string
+          topic?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ai_prompt?: string | null
+          created_at?: string
+          duration_minutes?: number | null
+          id?: string
+          level?: string
+          meeting_link?: string | null
+          notes?: string | null
+          scheduled_at?: string | null
+          status?: string
+          student_id?: string
+          teacher_id?: string
+          theory?: string | null
+          title?: string
+          topic?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      tutoring_relationships: {
+        Row: {
+          created_at: string
+          id: string
+          note: string | null
+          status: string
+          student_id: string
+          teacher_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          status?: string
+          student_id: string
+          teacher_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          status?: string
+          student_id?: string
+          teacher_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_coins: {
         Row: {
           balance: number
@@ -1942,6 +2161,15 @@ export type Database = {
         Args: { p_card_id: string; p_quality: number; p_user_id: string }
         Returns: undefined
       }
+      search_teachers: {
+        Args: { p_query: string }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          nickname: string
+          user_id: string
+        }[]
+      }
       send_gift: {
         Args: {
           p_gift_id: string
@@ -1953,7 +2181,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "moderator" | "user"
+      app_role: "admin" | "moderator" | "user" | "teacher"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2081,7 +2309,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "moderator", "user"],
+      app_role: ["admin", "moderator", "user", "teacher"],
     },
   },
 } as const
