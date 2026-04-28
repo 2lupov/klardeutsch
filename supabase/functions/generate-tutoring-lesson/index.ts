@@ -54,6 +54,7 @@ Deno.serve(async (req) => {
       isKid = false, // 🧒 student is 9–12 years old
       fileNames = [],
       attachedFiles = [], // [{name, url, type}] non-image files (PDF/TXT/etc)
+      lang: rawLang = "ru",
       // Legacy / advanced fields
       topic,
       level,
@@ -67,6 +68,11 @@ Deno.serve(async (req) => {
       imageUrls = [],
       attachedText = "",
     } = body;
+    const lang: "uk" | "ru" = rawLang === "uk" ? "uk" : "ru";
+    const langName = lang === "uk" ? "українською" : "російською";
+    const langStrict = lang === "uk"
+      ? "🌍 КРИТИЧНО: ВСІ пояснення, theory, explanation, опис ДЗ, переклади слів — ВИКЛЮЧНО УКРАЇНСЬКОЮ МОВОЮ. Російську не використовуй взагалі. Німецькі слова та приклади — німецькою."
+      : "🌍 КРИТИЧНО: ВСІ пояснення, theory, explanation, опис ДЗ, переклади слів — ИСКЛЮЧИТЕЛЬНО НА РУССКОМ ЯЗЫКЕ. Немецкие слова и примеры — на немецком.";
 
     if (!autoMode && !topic && !freePrompt) {
       return new Response(JSON.stringify({ error: "topic or freePrompt required" }), {
