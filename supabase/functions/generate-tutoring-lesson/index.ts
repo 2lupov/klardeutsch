@@ -176,7 +176,7 @@ ${studentLevelHint ? `Рівень дитини: **${studentLevelHint}** (тіл
     {"german": "der Hund 🐶", "article": "der", "russian": "собака", "example": "Ich habe einen Hund. 🐶 Er heißt Bello."}
   ],
   "exercises": [
-    {"type": "quiz", "question": "🐶 Was ist das? (Выбери правильный артикль и слово)", "options": ["der Hund","die Katze","das Pferd","der Vogel"], "correct_answer": "der Hund", "explanation": "🐶 — это собака, по-немецки **der Hund**. Молодец! 🌟"},
+    {"type": "quiz", "question": "🐶 Was ist das? (Выбери правильный артикль и слово)", "options": ["die Katze","das Pferd","der Hund","der Vogel"], "correct_answer": "der Hund", "explanation": "🐶 — это собака, по-немецки **der Hund**. Молодец! 🌟"},
     {"type": "cloze", "question": "Ich spiele mit ___ Ball. ⚽", "correct_answer": "dem", "explanation": "После 'mit' — Dativ. Просто запомни: 'mit dem Ball' = 'с мячом' ⚽."},
     {"type": "translation", "question": "Переведи на немецкий: Я люблю мороженое. 🍦", "correct_answer": "Ich liebe Eis.", "explanation": "Ich = я, liebe = люблю, Eis = мороженое 🍦"}
   ],
@@ -192,6 +192,12 @@ ${studentLevelHint ? `Рівень дитини: **${studentLevelHint}** (тіл
 - 8 вправ (3 quiz + 3 cloze + 2 translation) — короткі!
 - 3 ДЗ — творчі, ігрові, не "напиши есе"
 - 5 слайдів презентації
+
+🚨 КРИТИЧНО ВАЖЛИВО ПРО QUIZ:
+- Правильна відповідь має бути на **ВИПАДКОВІЙ позиції** (1, 2, 3 або 4) — НЕ завжди перша!
+- Розподіляй: приблизно 25% питань — правильна 1-ша, 25% — 2-га, 25% — 3-тя, 25% — 4-та.
+- Перед написанням кожного quiz **подумай і вибери випадкову позицію** для правильної відповіді.
+- Інші варіанти — правдоподібні дитячі помилки, не очевидно неправильні.
 
 ЗАБОРОНЕНО:
 - ❌ Складна граматика (Konjunktiv, Passiv, Genitiv, Partizip II у складних формах)
@@ -240,7 +246,7 @@ ${levelHint}${fileHint}
     {"german": "...", "article": "der|die|das|null", "russian": "переклад", "example": "Повне реальне нім. речення з контекстом."}
   ],
   "exercises": [
-    {"type": "quiz", "question": "Чітке питання нім.", "options": ["A","B","C","D"], "correct_answer": "A", "explanation": "Чому саме A — рос."},
+    {"type": "quiz", "question": "Чітке питання нім.", "options": ["A","B","C","D"], "correct_answer": "C", "explanation": "Чому саме C — рос."},
     {"type": "cloze", "question": "Ich ___ gestern ins Kino gegangen.", "correct_answer": "bin", "explanation": "gehen — Perfekt з sein."},
     {"type": "translation", "question": "Переведи на німецьку: Я вчора ходив у магазин.", "correct_answer": "Ich bin gestern in den Laden gegangen.", "explanation": "..."}
   ],
@@ -263,6 +269,13 @@ ${levelHint}${fileHint}
 - options для quiz — усі правдоподібні (типові помилки), не очевидні.
 - cloze — речення довжиною 6-12 слів з природним контекстом.
 - translation — речення з реального життя, що активують лексику уроку.
+
+🚨 КРИТИЧНО ВАЖЛИВО ПРО QUIZ (РОЗПОДІЛ ПРАВИЛЬНИХ ВІДПОВІДЕЙ):
+- Правильна відповідь у quiz має бути на **ВИПАДКОВІЙ позиції** (1-ша, 2-га, 3-тя або 4-та) — НІКОЛИ не завжди перша!
+- Розподіляй рівномірно: приблизно по 25% питань на кожну позицію.
+- Перед кожним quiz **свідомо обери випадкову позицію** для правильного варіанта і постав його туди.
+- Якщо в уроці 4 quiz — кожен має мати правильну відповідь на іншій позиції (1, 2, 3, 4 у різному порядку).
+- Дистрактори (неправильні варіанти) — типові помилки рівня учня, реалістичні, не "сміттєві".
 
 ${imageUrls.length ? "ВАЖЛИВО: у вкладених зображеннях — матеріал від учителя. Витягни з них словник, побудуй вправи на їх основі." : ""}
 ${pdfParts.length ? "ВАЖЛИВО: до запиту прикріплено PDF — це основний навчальний матеріал. Витягни з нього тему, лексику, граматичні структури. Будуй урок саме навколо цього PDF." : ""}
@@ -291,7 +304,7 @@ Antworte NUR mit gültigem JSON:
   "presentation": [{"slide":1,"heading":"...","content":"..."}],
   "theory": "Markdown теория 600-900 слов с разделами ## Что изучаем / ## Правила (с Markdown-таблицей |...|...|) / ## Примеры / ## Типичные ошибки / ## Запомни. Используй callout-блоки: > 📌 Regel: ... > 💡 Tipp: ... > ⚠️ Achtung: ... > 📖 Beispiel: ... — они рендерятся красивыми цветными карточками.",
   "words": [{"german":"...","article":"der|die|das|null","russian":"...","example":"..."}],
-  "exercises": [{"type":"quiz","question":"...","options":["A","B","C","D"],"correct_answer":"A","explanation":"..."}],
+  "exercises": [{"type":"quiz","question":"...","options":["A","B","C","D"],"correct_answer":"B","explanation":"..."}],
   "homework": [{"description":"..."}]
 }
 
@@ -299,6 +312,9 @@ Antworte NUR mit gültigem JSON:
 - Ровно ${exercisesCount} вправ типів: ${exTypesAllowed.join(", ")}
 - 2-3 ДЗ, 6 слайдів
 - Уровень строго ${finalLevel}${vocabHint}
+
+🚨 КРИТИЧНО ВАЖЛИВО ПРО QUIZ: правильна відповідь має бути на ВИПАДКОВІЙ позиції (1, 2, 3 або 4). Розподіляй рівномірно по 25% на кожну позицію — НЕ роби правильним завжди перший варіант! Усі дистрактори — реалістичні помилки рівня учня.
+
 ${focus ? `- Фокус: ${focus}` : ""}
 ${theoryTemplate ? `- Шаблон теорії: ${theoryTemplate}` : ""}
 ${studentNotes ? `- Замітки: ${studentNotes}` : ""}
@@ -369,6 +385,27 @@ ${attachedText ? `\nМАТЕРІАЛ:\n${attachedText.slice(0, 8000)}` : ""}`;
     } catch {
       const m = content.match(/\{[\s\S]*\}/);
       parsed = m ? JSON.parse(m[0]) : {};
+    }
+
+    // Гарантований shuffle варіантів у quiz, щоб правильна відповідь не завжди була першою
+    if (parsed && Array.isArray(parsed.exercises)) {
+      parsed.exercises = parsed.exercises.map((ex: any) => {
+        if (ex?.type === "quiz" && Array.isArray(ex.options) && ex.options.length > 1 && ex.correct_answer != null) {
+          const correct = ex.correct_answer;
+          // Fisher-Yates shuffle
+          const arr = [...ex.options];
+          for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+          }
+          // Переконуємось, що правильна відповідь усе ще присутня
+          if (!arr.includes(correct) && ex.options.includes(correct)) {
+            arr[0] = correct;
+          }
+          ex.options = arr;
+        }
+        return ex;
+      });
     }
 
     return new Response(JSON.stringify({ success: true, lesson: parsed }), {
