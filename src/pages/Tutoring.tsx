@@ -1167,6 +1167,24 @@ const Tutoring = () => {
                 />
               </div>
               <div>
+                <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
+                  {t("Вік (необов'язково)", "Возраст (необязательно)")}
+                </label>
+                <Input
+                  type="number"
+                  min={5}
+                  max={120}
+                  value={newStudentAge}
+                  onChange={(e) => setNewStudentAge(e.target.value)}
+                  placeholder={t("Напр. 10", "Напр. 10")}
+                />
+                {newStudentAge && parseInt(newStudentAge, 10) >= 5 && parseInt(newStudentAge, 10) <= 12 && (
+                  <p className="text-[10px] text-primary mt-1 font-semibold">
+                    🧒 {t("Дитячий режим увімкнеться автоматично", "Детский режим включится автоматически")}
+                  </p>
+                )}
+              </div>
+              <div>
                 <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block flex items-center gap-1">
                   <Mail className="w-3 h-3" /> Email *
                 </label>
