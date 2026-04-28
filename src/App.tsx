@@ -43,6 +43,7 @@ import Tutoring from "./pages/Tutoring";
 import TutoringLesson from "./pages/TutoringLesson";
 import PlacementTest from "./pages/PlacementTest";
 import StudentAssignments from "./pages/StudentAssignments";
+import StudentHomework from "./pages/StudentHomework";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -80,6 +81,7 @@ const AppRoutes = () => {
         <Route path="/tutoring/lesson/:id" element={<TutoringLesson />} />
         <Route path="/tutoring/placement/:id" element={<PlacementTest />} />
         <Route path="/assignments" element={<StudentAssignments />} />
+        <Route path="/tutoring/homework/:id" element={<StudentHomework />} />
         <Route path="/course/:id" element={<Course />} />
         <Route path="/academy" element={<Academy />} />
         <Route path="/academy/:courseId" element={<AcademyCourse />} />

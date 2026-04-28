@@ -1638,6 +1638,7 @@ export type Database = {
           lesson_id: string
           status: string
           submission: string | null
+          submission_files: Json
           submitted_at: string | null
           updated_at: string
         }
@@ -1651,6 +1652,7 @@ export type Database = {
           lesson_id: string
           status?: string
           submission?: string | null
+          submission_files?: Json
           submitted_at?: string | null
           updated_at?: string
         }
@@ -1664,6 +1666,7 @@ export type Database = {
           lesson_id?: string
           status?: string
           submission?: string | null
+          submission_files?: Json
           submitted_at?: string | null
           updated_at?: string
         }

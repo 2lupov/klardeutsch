@@ -143,7 +143,7 @@ const StudentAssignments = () => {
               : h.status === "submitted"
               ? t("На перевірці", "На проверке")
               : t("Виконати", "Выполнить"),
-          route: `/tutoring/lesson/${h.lesson_id}`,
+          route: `/tutoring/homework/${h.id}`,
           lessonTitle: lessonTitleMap.get(h.lesson_id),
           due_at: h.due_at,
           grade: h.grade,
