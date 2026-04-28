@@ -16,6 +16,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import LessonVideoRoom from "@/components/tutoring/LessonVideoRoom";
 import LessonTheoryRenderer from "@/components/tutoring/LessonTheoryRenderer";
+import LessonNotebook from "@/components/tutoring/LessonNotebook";
 
 const articleColor = (a: string | null) => {
   if (a === "der") return "bg-blue-500/10 text-blue-600 border-blue-500/20";
