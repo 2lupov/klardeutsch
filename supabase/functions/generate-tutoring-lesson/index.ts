@@ -119,11 +119,25 @@ Antworte NUR mit gültigem JSON ohne Markdown:
 - Уровень строго ${finalLevel}${vocabHint}
 ${focus ? `- Особливий фокус: ${focus}` : ""}
 ${theoryTemplate ? `- Шаблон теорії (адаптуй під тему): ${theoryTemplate}` : ""}
-${studentNotes ? `- Враховуй замітки про учня: ${studentNotes}` : ""}`;
+${studentNotes ? `- Враховуй замітки про учня: ${studentNotes}` : ""}
+${attachedText ? `\nДОДАТКОВИЙ МАТЕРІАЛ ВІД УЧИТЕЛЯ (використай для вправ та словника):\n${attachedText.slice(0, 8000)}` : ""}
+${imageUrls.length ? `\nВРАХУЙ ВКЛАДЕНІ ЗОБРАЖЕННЯ (фото/скани) — побудуй вправи та словник на основі їх змісту.` : ""}`;
 
     const userMsg = freePrompt
       ? `Підготуй заняття згідно інструкції: "${freePrompt}". Тема: ${finalTopic}, рівень ${finalLevel}.`
       : `Створи урок: тема "${finalTopic}", рівень ${finalLevel}.`;
+
+    const userContent: any = imageUrls.length
+      ? [
+          { type: "text", text: userMsg },
+          ...imageUrls.slice(0, 4).map((url: string) => ({
+            type: "image_url",
+            image_url: { url },
+          })),
+        ]
+      : userMsg;
+
+    const model = imageUrls.length ? "google/gemini-2.5-pro" : "google/gemini-2.5-flash";
 
     const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -132,10 +146,10 @@ ${studentNotes ? `- Враховуй замітки про учня: ${studentNo
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model,
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: userMsg },
+          { role: "user", content: userContent },
         ],
         response_format: { type: "json_object" },
       }),
