@@ -221,7 +221,83 @@ const Tutoring = () => {
     setVocabularyText(""); setTheoryTemplate("");
     setDurationMinutes(60);
     setActiveTemplateId(null);
+    setAttachedFiles([]);
   };
+
+  // ===== Upload materials (images / PDF / docs) =====
+  const handleUpload = async (files: FileList | null) => {
+    if (!files || !files.length || !user) return;
+    setUploading(true);
+    try {
+      const uploaded: typeof attachedFiles = [];
+      for (const file of Array.from(files)) {
+        if (file.size > 10 * 1024 * 1024) {
+          toast.error(t(`Файл "${file.name}" >10MB`, `Файл "${file.name}" >10MB`));
+          continue;
+        }
+        const ext = file.name.split(".").pop() || "bin";
+        const path = `${user.id}/draft/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+        const { error: upErr } = await supabase.storage
+          .from("tutoring-materials")
+          .upload(path, file, { contentType: file.type, upsert: false });
+        if (upErr) { toast.error(upErr.message); continue; }
+        const { data: signed } = await supabase.storage
+          .from("tutoring-materials")
+          .createSignedUrl(path, 60 * 60 * 2); // 2h
+        uploaded.push({
+          name: file.name,
+          url: signed?.signedUrl || "",
+          type: file.type,
+          size: file.size,
+        });
+      }
+      setAttachedFiles(prev => [...prev, ...uploaded]);
+      if (uploaded.length) toast.success(t(`Завантажено: ${uploaded.length}`, `Загружено: ${uploaded.length}`));
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removeAttachment = (idx: number) => {
+    setAttachedFiles(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  // ===== Create student account =====
+  const createStudent = async () => {
+    if (!newStudentEmail || !newStudentName) {
+      toast.error(t("Заповніть email та ім'я", "Заполните email и имя"));
+      return;
+    }
+    setCreatingStudent(true);
+    try {
+      const res = await fetchEdgeFunction("teacher-create-student", {
+        json: {
+          email: newStudentEmail,
+          display_name: newStudentName,
+          password: newStudentPassword || undefined,
+          note: newStudentNote,
+        },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "create failed");
+      setCreatedCredentials({ email: data.email, password: data.password });
+      setNewStudentEmail(""); setNewStudentName(""); setNewStudentPassword(""); setNewStudentNote("");
+      loadData();
+      toast.success(t("Акаунт створено", "Аккаунт создан"));
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setCreatingStudent(false);
+    }
+  };
+
+  const copyCredentials = () => {
+    if (!createdCredentials) return;
+    const text = `Email: ${createdCredentials.email}\nПароль: ${createdCredentials.password}\nВхід: https://klardeutsch.org`;
+    navigator.clipboard.writeText(text);
+    toast.success(t("Скопійовано", "Скопировано"));
+  };
+
 
   const applyTemplate = (tpl: Template) => {
     setActiveTemplateId(tpl.id);
