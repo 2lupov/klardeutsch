@@ -232,15 +232,21 @@ const Tutoring = () => {
   };
 
   // ===== Placement test =====
-  const assignPlacementTest = async (studentId: string) => {
-    if (!user) return;
+  const assignPlacementTest = async () => {
+    if (!user || !placementStudent) return;
+    if (!placementLevels.length) {
+      toast.error(t("Оберіть хоча б один рівень", "Выберите хотя бы один уровень"));
+      return;
+    }
+    setPlacementSubmitting(true);
     try {
-      // pick 8 random questions per level (40 total)
       const { data: allQs } = await supabase
         .from("tutoring_placement_questions")
-        .select("id, level");
+        .select("id, level")
+        .in("level", placementLevels);
       if (!allQs || !allQs.length) {
-        toast.error(t("Банк питань порожній", "Банк вопросов пуст"));
+        toast.error(t("Банк питань порожній для цих рівнів", "Банк вопросов пуст для этих уровней"));
+        setPlacementSubmitting(false);
         return;
       }
       const byLevel: Record<string, string[]> = {};
@@ -249,29 +255,39 @@ const Tutoring = () => {
         byLevel[q.level].push(q.id);
       });
       const picked: string[] = [];
-      for (const lvl of ["A1", "A2", "B1", "B2", "C1"]) {
-        const ids = (byLevel[lvl] || []).sort(() => Math.random() - 0.5).slice(0, 8);
+      for (const lvl of placementLevels) {
+        const ids = (byLevel[lvl] || []).sort(() => Math.random() - 0.5).slice(0, placementPerLevel);
         picked.push(...ids);
+      }
+      if (!picked.length) {
+        toast.error(t("Немає питань для обраних рівнів", "Нет вопросов для выбранных уровней"));
+        setPlacementSubmitting(false);
+        return;
       }
       const { data: created, error } = await supabase
         .from("tutoring_placement_assignments")
         .insert({
           teacher_id: user.id,
-          student_id: studentId,
+          student_id: placementStudent,
           status: "pending",
           question_ids: picked,
           total_questions: picked.length,
+          selected_levels: placementLevels,
         })
         .select()
         .single();
-      if (error) { toast.error(error.message); return; }
+      if (error) { toast.error(error.message); setPlacementSubmitting(false); return; }
       toast.success(t("Тест призначено", "Тест назначен"));
-      // copy link
       const url = `${window.location.origin}/tutoring/placement/${created.id}`;
-      navigator.clipboard?.writeText(url).catch(() => {});
-      toast.info(t("Посилання скопійовано", "Ссылка скопирована"));
+      try {
+        await navigator.clipboard?.writeText(url);
+        toast.info(t("Посилання скопійовано", "Ссылка скопирована"));
+      } catch {}
+      setPlacementOpen(false);
     } catch (e: any) {
       toast.error(e.message || "Error");
+    } finally {
+      setPlacementSubmitting(false);
     }
   };
 
