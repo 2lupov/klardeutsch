@@ -11,6 +11,7 @@ import ListeningFloatingPlayer from "@/components/ListeningFloatingPlayer";
 import NicknameGate from "@/components/NicknameGate";
 import EditModeToolbar from "@/components/EditModeToolbar";
 import DailyBonusDialog from "@/components/DailyBonusDialog";
+import { useTeacherLink } from "@/hooks/useTeacherLink";
 
 const AppLayout = () => {
   const { user, loading } = useAuth();
@@ -19,6 +20,8 @@ const AppLayout = () => {
   const location = useLocation();
   const [nicknameChecked, setNicknameChecked] = useState(false);
   const [hasNickname, setHasNickname] = useState(true);
+
+  useTeacherLink(user?.id);
 
   useEffect(() => {
     if (!loading && !user) navigate("/auth");

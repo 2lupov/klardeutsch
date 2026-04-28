@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import {
   ArrowLeft, Sparkles, BookOpen, Trophy, Coins, Flame, Clock,
   ClipboardCheck, Plus, Pin, PinOff, Trash2, Save, Loader2,
-  GraduationCap, Calendar, MessageCircle, Star,
+  GraduationCap, Calendar, MessageCircle, Star, Radio, Send, Eye,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -85,6 +85,84 @@ const TeacherStudentDashboard = () => {
   const [qaDescription, setQaDescription] = useState("");
   const [qaDueDate, setQaDueDate] = useState("");
   const [qaSaving, setQaSaving] = useState(false);
+
+  // Live presence + control
+  const [livePresence, setLivePresence] = useState<{ route: string; label: string; last_seen: string } | null>(null);
+  const [isOnline, setIsOnline] = useState(false);
+  const [pushMessage, setPushMessage] = useState("");
+  const [sendingPush, setSendingPush] = useState(false);
+
+  // Subscribe to student presence
+  useEffect(() => {
+    if (!studentId) return;
+    const ch = supabase.channel(`student-presence:${studentId}`, {
+      config: { presence: { key: studentId } },
+    });
+
+    const refreshState = () => {
+      const state = ch.presenceState() as Record<string, any[]>;
+      const entries = Object.values(state).flat();
+      if (entries.length > 0) {
+        const latest = entries[entries.length - 1];
+        setLivePresence({
+          route: latest.route,
+          label: latest.label,
+          last_seen: latest.last_seen,
+        });
+        setIsOnline(true);
+      } else {
+        setIsOnline(false);
+      }
+    };
+
+    ch.on("presence", { event: "sync" }, refreshState);
+    ch.on("presence", { event: "join" }, refreshState);
+    ch.on("presence", { event: "leave" }, refreshState);
+    ch.subscribe();
+
+    return () => {
+      supabase.removeChannel(ch);
+    };
+  }, [studentId]);
+
+  const sendCommand = async (event: "navigate" | "message", payload: any) => {
+    if (!studentId) return;
+    setSendingPush(true);
+    try {
+      const ch = supabase.channel(`teacher-cmd:${studentId}`);
+      await new Promise<void>((resolve) => {
+        ch.subscribe((status) => {
+          if (status === "SUBSCRIBED") resolve();
+        });
+      });
+      await ch.send({ type: "broadcast", event, payload });
+      supabase.removeChannel(ch);
+      toast.success(t("Надіслано учню ✅", "Отправлено ученику ✅"));
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setSendingPush(false);
+    }
+  };
+
+  const pushNavigate = (path: string, message?: string) => {
+    if (!isOnline) {
+      toast.error(t("Учень зараз офлайн", "Ученик сейчас офлайн"));
+      return;
+    }
+    void sendCommand("navigate", { path, message });
+  };
+
+  const pushMessageNow = () => {
+    if (!pushMessage.trim()) return;
+    if (!isOnline) {
+      toast.error(t("Учень зараз офлайн", "Ученик сейчас офлайн"));
+      return;
+    }
+    void sendCommand("message", { text: pushMessage.trim() });
+    setPushMessage("");
+  };
+
 
   useEffect(() => {
     if (!user || !studentId) return;
@@ -301,7 +379,125 @@ const TeacherStudentDashboard = () => {
           <StatCard icon={<Clock className="w-5 h-5" />} label={t("Хв/день", "Мин/день")} value={stats.dailyMinutes} color="from-purple-400 to-violet-500" />
         </div>
 
-        {/* Homework alert */}
+        {/* ===== LIVE PRESENCE & CONTROL ===== */}
+        <motion.div
+          layout
+          className={`rounded-3xl border-2 overflow-hidden ${
+            isOnline
+              ? "border-green-500/40 bg-gradient-to-br from-green-500/5 via-card to-card"
+              : "border-border bg-card"
+          }`}
+        >
+          <div className="p-5 space-y-4">
+            <div className="flex items-center gap-3 flex-wrap">
+              <div className="relative">
+                <Radio className={`w-6 h-6 ${isOnline ? "text-green-500" : "text-muted-foreground"}`} />
+                {isOnline && (
+                  <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-500 animate-ping" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-display font-black text-lg leading-tight">
+                  {isOnline ? t("Зараз онлайн", "Сейчас онлайн") : t("Офлайн", "Офлайн")}
+                </p>
+                <p className="text-sm text-muted-foreground truncate">
+                  {isOnline && livePresence
+                    ? <>👀 {t("Зараз тут:", "Сейчас здесь:")} <span className="font-bold text-foreground">{livePresence.label}</span></>
+                    : t("Підключиться побачимо що робить", "Когда подключится, увидим что делает")}
+                </p>
+              </div>
+            </div>
+
+            {/* Quick push controls */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={!isOnline || sendingPush}
+                onClick={() => pushNavigate("/", t("Привіт! Загляньмо в урок", "Привет! Загляни в урок"))}
+                className="justify-start gap-2"
+              >
+                <Eye className="w-4 h-4" /> {t("На головну", "На главную")}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={!isOnline || sendingPush}
+                onClick={() => pushNavigate("/assignments", t("Відкрий завдання", "Открой задания"))}
+                className="justify-start gap-2"
+              >
+                <ClipboardCheck className="w-4 h-4" /> {t("До завдань", "К заданиям")}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={!isOnline || sendingPush}
+                onClick={() => pushNavigate("/dictionary", t("Повтори слова", "Повтори слова"))}
+                className="justify-start gap-2"
+              >
+                <BookOpen className="w-4 h-4" /> {t("До словника", "К словарю")}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={!isOnline || sendingPush}
+                onClick={() => pushNavigate("/review", t("Час повторення!", "Время повторения!"))}
+                className="justify-start gap-2"
+              >
+                <Sparkles className="w-4 h-4" /> {t("Повторення", "Повторение")}
+              </Button>
+            </div>
+
+            {/* Push specific lesson/homework */}
+            {(lessons.length > 0 || homework.length > 0) && (
+              <div className="space-y-2">
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                  {t("Відкрити учню урок або ДЗ", "Открыть ученику урок или ДЗ")}
+                </p>
+                <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+                  {lessons.slice(0, 5).map((l) => (
+                    <button
+                      key={l.id}
+                      disabled={!isOnline || sendingPush}
+                      onClick={() => pushNavigate(`/tutoring/lesson/${l.id}`, `Откроем урок: ${l.title}`)}
+                      className="shrink-0 px-3 py-2 rounded-xl border border-border bg-background hover:border-primary/40 disabled:opacity-50 text-left text-xs"
+                    >
+                      <div className="font-bold truncate max-w-[180px]">📘 {l.title}</div>
+                      <div className="text-muted-foreground">{l.level}</div>
+                    </button>
+                  ))}
+                  {homework.filter((h) => h.status !== "graded").slice(0, 5).map((h) => (
+                    <button
+                      key={h.id}
+                      disabled={!isOnline || sendingPush}
+                      onClick={() => pushNavigate(`/tutoring/homework/${h.id}`, "Открой это домашнее задание")}
+                      className="shrink-0 px-3 py-2 rounded-xl border border-amber-500/30 bg-amber-500/5 hover:border-amber-500/60 disabled:opacity-50 text-left text-xs"
+                    >
+                      <div className="font-bold truncate max-w-[180px]">📝 {h.description.slice(0, 30)}…</div>
+                      <div className="text-muted-foreground">{t("ДЗ", "ДЗ")}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Send custom message */}
+            <div className="flex gap-2">
+              <Input
+                value={pushMessage}
+                onChange={(e) => setPushMessage(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && pushMessageNow()}
+                placeholder={t("Написати миттєве повідомлення учню…", "Написать мгновенное сообщение ученику…")}
+                disabled={!isOnline}
+              />
+              <Button onClick={pushMessageNow} disabled={!isOnline || !pushMessage.trim() || sendingPush} size="icon">
+                <Send className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        </motion.div>
+
+
         {(submittedCount > 0 || overdueCount > 0) && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
