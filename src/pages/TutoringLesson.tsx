@@ -190,9 +190,14 @@ const TutoringLesson = () => {
               <Clock className="w-4 h-4" /> {lesson.duration_minutes} {t("хв", "мин")}
             </span>
             {isTeacher && lesson.status !== "completed" && (
-              <Button size="sm" variant="outline" onClick={completeLesson} className="gap-2">
-                <Check className="w-4 h-4" /> {t("Завершити", "Завершить")}
-              </Button>
+              <>
+                <Button size="sm" onClick={() => setPresenterOpen(true)} className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg">
+                  <Monitor className="w-4 h-4" /> {t("Провести урок", "Провести урок")}
+                </Button>
+                <Button size="sm" variant="outline" onClick={completeLesson} className="gap-2">
+                  <Check className="w-4 h-4" /> {t("Завершити", "Завершить")}
+                </Button>
+              </>
             )}
           </div>
         </motion.div>
