@@ -51,6 +51,7 @@ Deno.serve(async (req) => {
       autoMode = false,
       freePrompt = "",
       studentLevelHint = null,
+      isKid = false, // 🧒 student is 9–12 years old
       fileNames = [],
       attachedFiles = [], // [{name, url, type}] non-image files (PDF/TXT/etc)
       // Legacy / advanced fields
