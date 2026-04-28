@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import CourseHero from "@/components/academy/CourseHero";
 import CourseFilters from "@/components/academy/CourseFilters";
 import CourseCard from "@/components/academy/CourseCard";
-import { Construction, Presentation, ChevronRight, Sparkles } from "lucide-react";
+import { Construction, Presentation, ChevronRight, Sparkles, ClipboardList } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
