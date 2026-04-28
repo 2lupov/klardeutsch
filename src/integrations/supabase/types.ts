@@ -1721,6 +1721,74 @@ export type Database = {
           },
         ]
       }
+      tutoring_lesson_recordings: {
+        Row: {
+          ai_errors: Json | null
+          ai_new_words: Json | null
+          ai_processed_at: string | null
+          ai_summary: string | null
+          audio_url: string | null
+          created_at: string
+          duration_seconds: number | null
+          file_size_bytes: number | null
+          id: string
+          lesson_id: string
+          status: string
+          student_id: string
+          teacher_id: string
+          transcript: string | null
+          updated_at: string
+          video_url: string | null
+          visibility: string
+        }
+        Insert: {
+          ai_errors?: Json | null
+          ai_new_words?: Json | null
+          ai_processed_at?: string | null
+          ai_summary?: string | null
+          audio_url?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          file_size_bytes?: number | null
+          id?: string
+          lesson_id: string
+          status?: string
+          student_id: string
+          teacher_id: string
+          transcript?: string | null
+          updated_at?: string
+          video_url?: string | null
+          visibility?: string
+        }
+        Update: {
+          ai_errors?: Json | null
+          ai_new_words?: Json | null
+          ai_processed_at?: string | null
+          ai_summary?: string | null
+          audio_url?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          file_size_bytes?: number | null
+          id?: string
+          lesson_id?: string
+          status?: string
+          student_id?: string
+          teacher_id?: string
+          transcript?: string | null
+          updated_at?: string
+          video_url?: string | null
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tutoring_lesson_recordings_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "tutoring_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tutoring_lesson_templates: {
         Row: {
           created_at: string
