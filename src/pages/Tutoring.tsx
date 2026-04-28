@@ -107,6 +107,20 @@ const Tutoring = () => {
   const [tplName, setTplName] = useState("");
   const [tplDescription, setTplDescription] = useState("");
 
+  // Attached materials for AI generation
+  const [attachedFiles, setAttachedFiles] = useState<{ name: string; url: string; type: string; size: number }[]>([]);
+  const [uploading, setUploading] = useState(false);
+
+  // Create student dialog
+  const [createStudentOpen, setCreateStudentOpen] = useState(false);
+  const [newStudentEmail, setNewStudentEmail] = useState("");
+  const [newStudentName, setNewStudentName] = useState("");
+  const [newStudentPassword, setNewStudentPassword] = useState("");
+  const [newStudentNote, setNewStudentNote] = useState("");
+  const [creatingStudent, setCreatingStudent] = useState(false);
+  const [createdCredentials, setCreatedCredentials] = useState<{ email: string; password: string } | null>(null);
+  const [showPwd, setShowPwd] = useState(false);
+
   useEffect(() => {
     if (!user) return;
     (async () => {
