@@ -875,6 +875,19 @@ const Tutoring = () => {
                       </button>
                       <Button
                         size="sm"
+                        onClick={() => setAiAssistantStudent({
+                          id: r.student_id,
+                          name: r.profile?.display_name || "Учень",
+                          isKid: !!r.profile?.is_kid,
+                        })}
+                        title={t("AI-помічник по цьому учню", "AI-помощник по этому ученику")}
+                        className="bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 gap-1"
+                      >
+                        <Sparkles className="w-4 h-4" />
+                        AI
+                      </Button>
+                      <Button
+                        size="sm"
                         variant="outline"
                         onClick={() => openPlacementDialog(r.student_id)}
                         title={t("Призначити тест на рівень", "Назначить тест на уровень")}
