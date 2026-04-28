@@ -217,7 +217,8 @@ const TutoringLesson = () => {
             <LessonNotebook lessonId={lesson.id} isTeacher={isTeacher} lang={lang as "uk" | "ru"} />
           </TabsContent>
 
-          {/* THEORY */}
+          {/* THEORY — teacher only */}
+          {isTeacher && (
           <TabsContent value="theory">
             <div className="rounded-2xl border border-border bg-card p-6">
               {isTeacher && !editingTheory && (
