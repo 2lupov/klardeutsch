@@ -1004,13 +1004,18 @@ const Tutoring = () => {
               </span>
             </div>
 
-            <Button onClick={generateAndCreate} disabled={generating || !selectedStudent} className="w-full" size="lg">
-              {generating ? (
-                <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t("AI створює урок…", "AI создаёт урок…")}</>
-              ) : (
-                <><Sparkles className="w-4 h-4 mr-2" />{t("Створити урок", "Создать урок")}</>
-              )}
-            </Button>
+            {generating ? (
+              <LessonGenerationProgress
+                active={generating}
+                hasFiles={attachedFiles.length > 0}
+                lang={lang as "ru" | "uk"}
+                estimatedSeconds={50}
+              />
+            ) : (
+              <Button onClick={generateAndCreate} disabled={!selectedStudent} className="w-full" size="lg">
+                <Sparkles className="w-4 h-4 mr-2" />{t("Створити урок", "Создать урок")}
+              </Button>
+            )}
           </div>
         </DialogContent>
       </Dialog>
