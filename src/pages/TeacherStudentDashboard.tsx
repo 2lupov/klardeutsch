@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import {
   ArrowLeft, Sparkles, BookOpen, Trophy, Coins, Flame, Clock,
   ClipboardCheck, Plus, Pin, PinOff, Trash2, Save, Loader2,
-  GraduationCap, Calendar, MessageCircle, Star,
+  GraduationCap, Calendar, MessageCircle, Star, Radio, Send, Eye,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
