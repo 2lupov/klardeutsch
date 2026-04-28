@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  ArrowLeft, Video, Calendar, Clock, BookOpen, Sparkles,
+  ArrowLeft, Calendar, Clock, BookOpen, Sparkles,
   Plus, Trash2, Check, Edit3, Save, Loader2, FileText, ListChecks,
   GraduationCap, Send
 } from "lucide-react";
