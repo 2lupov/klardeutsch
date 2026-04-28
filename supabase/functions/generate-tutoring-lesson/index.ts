@@ -54,6 +54,7 @@ Deno.serve(async (req) => {
       isKid = false, // 🧒 student is 9–12 years old
       fileNames = [],
       attachedFiles = [], // [{name, url, type}] non-image files (PDF/TXT/etc)
+      lang: rawLang = "ru",
       // Legacy / advanced fields
       topic,
       level,
@@ -67,6 +68,11 @@ Deno.serve(async (req) => {
       imageUrls = [],
       attachedText = "",
     } = body;
+    const lang: "uk" | "ru" = rawLang === "uk" ? "uk" : "ru";
+    const langName = lang === "uk" ? "українською" : "російською";
+    const langStrict = lang === "uk"
+      ? "🌍 КРИТИЧНО: ВСІ пояснення, theory, explanation, опис ДЗ, переклади слів — ВИКЛЮЧНО УКРАЇНСЬКОЮ МОВОЮ. Російську не використовуй взагалі. Німецькі слова та приклади — німецькою."
+      : "🌍 КРИТИЧНО: ВСІ пояснення, theory, explanation, опис ДЗ, переклади слів — ИСКЛЮЧИТЕЛЬНО НА РУССКОМ ЯЗЫКЕ. Немецкие слова и примеры — на немецком.";
 
     if (!autoMode && !topic && !freePrompt) {
       return new Response(JSON.stringify({ error: "topic or freePrompt required" }), {
@@ -142,7 +148,9 @@ Deno.serve(async (req) => {
 
       if (isKid) {
         // ===== KID MODE (9–12 years) =====
-        systemPrompt = `Du bist ein freundlicher, erfahrener Deutschlehrer für **Kinder im Alter von 9–12 Jahren**.
+        systemPrompt = `${langStrict}
+
+Du bist ein freundlicher, erfahrener Deutschlehrer für **Kinder im Alter von 9–12 Jahren**.
 
 Твоя ціль — створити **ВЕСЕЛИЙ, ПРОСТИЙ, ВІЗУАЛЬНИЙ** урок німецької для дитини (45 хвилин).
 
@@ -213,7 +221,9 @@ ${extractedText ? "ВАЖЛИВО: нижче в повідомленні є в�
         userMsg = `Учитель готує урок для **дитини 9-12 років**:\n\n"${freePrompt || "Підготуй простий веселий урок"}"\n\n${fileNames.length ? `Файли: ${fileNames.join(", ")}` : ""}${extractedText ? `\n\n=== ТЕКСТ ІЗ ФАЙЛІВ ===\n${extractedText.slice(0, 15000)}` : ""}\n\nЗроби урок **дуже простим, з емодзі, ігровим**. Дитина має посміхнутись від теми! 🌟`;
       } else {
 
-      systemPrompt = `Du bist ein erfahrener, methodisch versierter Deutschlehrer mit 15+ Jahren Erfahrung in Online-Einzelunterricht.
+      systemPrompt = `${langStrict}
+
+Du bist ein erfahrener, methodisch versierter Deutschlehrer mit 15+ Jahren Erfahrung in Online-Einzelunterricht.
 
 Твоя ціль — створити **МАКСИМАЛЬНО ЯКІСНИЙ, ЗАХОПЛИВИЙ, СТРУКТУРОВАНИЙ** урок німецької для одного учня (60 хвилин).
 
@@ -293,7 +303,9 @@ ${extractedText ? "ВАЖЛИВО: нижче в повідомленні кор
       const exTypesAllowed = Array.isArray(exerciseTypes) && exerciseTypes.length
         ? exerciseTypes : ["quiz", "cloze", "translation"];
 
-      systemPrompt = `Du bist ein erfahrener Deutschlehrer. Erstelle eine vollständige, strukturierte Online-Unterrichtsstunde auf Deutsch (CEFR-Niveau ${finalLevel}).
+      systemPrompt = `${langStrict}
+
+Du bist ein erfahrener Deutschlehrer. Erstelle eine vollständige, strukturierte Online-Unterrichtsstunde auf Deutsch (CEFR-Niveau ${finalLevel}).
 
 Thema: "${finalTopic}"
 ${freePrompt ? `\nЧТО НУЖНО СЕГОДНЯ:\n${freePrompt}\n` : ""}
