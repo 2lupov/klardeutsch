@@ -304,7 +304,7 @@ Antworte NUR mit gültigem JSON:
   "presentation": [{"slide":1,"heading":"...","content":"..."}],
   "theory": "Markdown теория 600-900 слов с разделами ## Что изучаем / ## Правила (с Markdown-таблицей |...|...|) / ## Примеры / ## Типичные ошибки / ## Запомни. Используй callout-блоки: > 📌 Regel: ... > 💡 Tipp: ... > ⚠️ Achtung: ... > 📖 Beispiel: ... — они рендерятся красивыми цветными карточками.",
   "words": [{"german":"...","article":"der|die|das|null","russian":"...","example":"..."}],
-  "exercises": [{"type":"quiz","question":"...","options":["A","B","C","D"],"correct_answer":"A","explanation":"..."}],
+  "exercises": [{"type":"quiz","question":"...","options":["A","B","C","D"],"correct_answer":"B","explanation":"..."}],
   "homework": [{"description":"..."}]
 }
 
@@ -312,6 +312,9 @@ Antworte NUR mit gültigem JSON:
 - Ровно ${exercisesCount} вправ типів: ${exTypesAllowed.join(", ")}
 - 2-3 ДЗ, 6 слайдів
 - Уровень строго ${finalLevel}${vocabHint}
+
+🚨 КРИТИЧНО ВАЖЛИВО ПРО QUIZ: правильна відповідь має бути на ВИПАДКОВІЙ позиції (1, 2, 3 або 4). Розподіляй рівномірно по 25% на кожну позицію — НЕ роби правильним завжди перший варіант! Усі дистрактори — реалістичні помилки рівня учня.
+
 ${focus ? `- Фокус: ${focus}` : ""}
 ${theoryTemplate ? `- Шаблон теорії: ${theoryTemplate}` : ""}
 ${studentNotes ? `- Замітки: ${studentNotes}` : ""}
