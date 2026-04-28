@@ -1083,6 +1083,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          created_by_teacher_id: string | null
           daily_goal_minutes: number | null
           display_name: string | null
           id: string
@@ -1090,6 +1091,7 @@ export type Database = {
           last_active: string | null
           last_reminder_sent_at: string | null
           learning_goal: string | null
+          must_change_password: boolean
           nickname: string | null
           nickname_changed_at: string | null
           onboarding_completed: boolean | null
@@ -1102,6 +1104,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          created_by_teacher_id?: string | null
           daily_goal_minutes?: number | null
           display_name?: string | null
           id?: string
@@ -1109,6 +1112,7 @@ export type Database = {
           last_active?: string | null
           last_reminder_sent_at?: string | null
           learning_goal?: string | null
+          must_change_password?: boolean
           nickname?: string | null
           nickname_changed_at?: string | null
           onboarding_completed?: boolean | null
@@ -1121,6 +1125,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           created_at?: string
+          created_by_teacher_id?: string | null
           daily_goal_minutes?: number | null
           display_name?: string | null
           id?: string
@@ -1128,6 +1133,7 @@ export type Database = {
           last_active?: string | null
           last_reminder_sent_at?: string | null
           learning_goal?: string | null
+          must_change_password?: boolean
           nickname?: string | null
           nickname_changed_at?: string | null
           onboarding_completed?: boolean | null
