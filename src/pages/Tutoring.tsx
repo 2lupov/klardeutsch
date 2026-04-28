@@ -828,7 +828,7 @@ const Tutoring = () => {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => assignPlacementTest(r.student_id)}
+                      onClick={() => openPlacementDialog(r.student_id)}
                       title={t("Призначити тест на рівень", "Назначить тест на уровень")}
                     >
                       <ClipboardCheck className="w-4 h-4 mr-1" />
