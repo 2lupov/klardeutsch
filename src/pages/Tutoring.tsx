@@ -118,6 +118,7 @@ const Tutoring = () => {
   const [newStudentName, setNewStudentName] = useState("");
   const [newStudentPassword, setNewStudentPassword] = useState("");
   const [newStudentNote, setNewStudentNote] = useState("");
+  const [newStudentAge, setNewStudentAge] = useState<string>("");
   const [creatingStudent, setCreatingStudent] = useState(false);
   const [createdCredentials, setCreatedCredentials] = useState<{ email: string; password: string } | null>(null);
   const [showPwd, setShowPwd] = useState(false);
