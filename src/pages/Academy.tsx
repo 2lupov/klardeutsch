@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import CourseHero from "@/components/academy/CourseHero";
 import CourseFilters from "@/components/academy/CourseFilters";
 import CourseCard from "@/components/academy/CourseCard";
-import { Construction, Presentation, ChevronRight, Sparkles } from "lucide-react";
+import { Construction, Presentation, ChevronRight, Sparkles, ClipboardList } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
@@ -90,41 +90,68 @@ const Academy = () => {
     );
   }
 
-  // Tutoring banner — shown to all (students access via teacher invite)
-  const TutoringBanner = () => (
-    <motion.button
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      whileHover={{ scale: 1.01 }}
-      whileTap={{ scale: 0.99 }}
-      onClick={() => navigate("/tutoring")}
-      className="w-full text-left relative overflow-hidden rounded-2xl p-5 md:p-6 mb-6 bg-gradient-to-br from-primary via-primary to-accent shadow-lg group"
-    >
-      <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_right,_white,_transparent_60%)]" />
-      <div className="relative flex items-center gap-4">
-        <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center flex-shrink-0">
-          <Presentation className="w-6 h-6 md:w-7 md:h-7 text-white" />
+  // Top entries — visible to all (students access via teacher invite)
+  const TopBanners = () => (
+    <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3 mb-6">
+      <motion.button
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        whileHover={{ scale: 1.01 }}
+        whileTap={{ scale: 0.99 }}
+        onClick={() => navigate("/tutoring")}
+        className="w-full text-left relative overflow-hidden rounded-2xl p-5 md:p-6 bg-gradient-to-br from-primary via-primary to-accent shadow-lg group"
+      >
+        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_right,_white,_transparent_60%)]" />
+        <div className="relative flex items-center gap-4">
+          <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center flex-shrink-0">
+            <Presentation className="w-6 h-6 md:w-7 md:h-7 text-white" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="font-display font-bold text-white text-base md:text-lg leading-tight">
+                {lang === "uk" ? "Уроки з вчителем" : "Уроки с преподавателем"}
+              </h3>
+              <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider bg-white/20 text-white px-2 py-0.5 rounded-full">
+                <Sparkles className="w-3 h-3" /> AI
+              </span>
+            </div>
+            <p className="text-white/85 text-xs md:text-sm leading-snug line-clamp-2">
+              {lang === "uk"
+                ? "Живі заняття, домашні завдання та аналіз прогресу з персональним викладачем"
+                : "Живые занятия, домашние задания и анализ прогресса с личным преподавателем"}
+            </p>
+          </div>
+          <ChevronRight className="w-5 h-5 text-white/80 group-hover:translate-x-1 transition-transform flex-shrink-0" />
+        </div>
+      </motion.button>
+
+      <motion.button
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.05 }}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        onClick={() => navigate("/assignments")}
+        className="relative overflow-hidden rounded-2xl p-4 md:p-5 bg-card border border-border hover:border-primary/40 hover:shadow-md transition group flex md:flex-col items-center md:items-start gap-3 md:min-w-[180px]"
+      >
+        <div className="w-11 h-11 rounded-2xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+          <ClipboardList className="w-5 h-5" />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className="font-display font-bold text-white text-base md:text-lg leading-tight">
-              {lang === "uk" ? "Уроки з вчителем" : "Уроки с преподавателем"}
-            </h3>
-            <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider bg-white/20 text-white px-2 py-0.5 rounded-full">
-              <Sparkles className="w-3 h-3" /> AI
-            </span>
-          </div>
-          <p className="text-white/85 text-xs md:text-sm leading-snug line-clamp-2">
-            {lang === "uk"
-              ? "Живі заняття, домашні завдання та аналіз прогресу з персональним викладачем"
-              : "Живые занятия, домашние задания и анализ прогресса с личным преподавателем"}
+          <h3 className="font-display font-bold text-sm md:text-base leading-tight mb-0.5">
+            {lang === "uk" ? "Мої завдання" : "Мои задания"}
+          </h3>
+          <p className="text-xs text-muted-foreground leading-snug">
+            {lang === "uk" ? "Тести, ДЗ, вправи" : "Тесты, ДЗ, упражнения"}
           </p>
         </div>
-        <ChevronRight className="w-5 h-5 text-white/80 group-hover:translate-x-1 transition-transform flex-shrink-0" />
-      </div>
-    </motion.button>
+        <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition" />
+      </motion.button>
+    </div>
   );
+
+  const TutoringBanner = TopBanners;
 
   // Show "under development" for everyone except allowed users — but still expose Tutoring
   if (!hasAccess) {

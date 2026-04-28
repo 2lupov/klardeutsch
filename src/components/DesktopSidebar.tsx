@@ -3,7 +3,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import {
   Home, BookOpen, Gamepad2, GraduationCap,
   MessageSquare, Flame, Coins, Star,
-  Swords, Menu, X, Sparkles, Bug, Presentation
+  Swords, Menu, X, Sparkles, Bug, Presentation, ClipboardList
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -61,6 +61,7 @@ const DesktopSidebar = () => {
     { to: "/academy", icon: GraduationCap, label: lang === "uk" ? "Академія" : "Академия" },
     { to: "/assistant", icon: Sparkles, label: lang === "uk" ? "Асистент" : "Ассистент" },
     { to: "/tutoring", icon: Presentation, label: lang === "uk" ? "Уроки з вчителем" : "Уроки с преподавателем" },
+    { to: "/assignments", icon: ClipboardList, label: lang === "uk" ? "Завдання" : "Задания" },
     { to: "/dictionary", icon: BookOpen, label: t("navDictionary") },
     { to: "/games", icon: Gamepad2, label: lang === "uk" ? "Ігри" : "Игры" },
   ];
