@@ -281,8 +281,10 @@ const TutoringLesson = () => {
             )}
           </TabsContent>
 
-          {/* EXERCISES */}
-          <TabsContent value="exercises" className="space-y-3">
+          {/* EXERCISES — split layout: exercises on the left, sticky shared notebook on the right */}
+          <TabsContent value="exercises">
+            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] gap-4">
+              <div className="space-y-3 min-w-0">
             {exercises.map((ex, idx) => {
               const userAns = answers[ex.id] || "";
               const isRevealed = revealed[ex.id];
