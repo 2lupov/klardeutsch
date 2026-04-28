@@ -121,6 +121,25 @@ const Tutoring = () => {
   const [createdCredentials, setCreatedCredentials] = useState<{ email: string; password: string } | null>(null);
   const [showPwd, setShowPwd] = useState(false);
 
+  // ===== Placement test dialog =====
+  const [placementOpen, setPlacementOpen] = useState(false);
+  const [placementStudent, setPlacementStudent] = useState<string>("");
+  const [placementLevels, setPlacementLevels] = useState<string[]>(["A1", "A2"]);
+  const [placementPerLevel, setPlacementPerLevel] = useState(8);
+  const [placementSubmitting, setPlacementSubmitting] = useState(false);
+
+  const openPlacementDialog = (studentId: string) => {
+    setPlacementStudent(studentId);
+    setPlacementLevels(["A1", "A2"]);
+    setPlacementPerLevel(8);
+    setPlacementOpen(true);
+  };
+  const togglePlacementLevel = (lvl: string) => {
+    setPlacementLevels((prev) =>
+      prev.includes(lvl) ? prev.filter((l) => l !== lvl) : [...prev, lvl].sort((a, b) => ["A1","A2","B1","B2","C1"].indexOf(a) - ["A1","A2","B1","B2","C1"].indexOf(b))
+    );
+  };
+
   useEffect(() => {
     if (!user) return;
     (async () => {
@@ -213,15 +232,21 @@ const Tutoring = () => {
   };
 
   // ===== Placement test =====
-  const assignPlacementTest = async (studentId: string) => {
-    if (!user) return;
+  const assignPlacementTest = async () => {
+    if (!user || !placementStudent) return;
+    if (!placementLevels.length) {
+      toast.error(t("Оберіть хоча б один рівень", "Выберите хотя бы один уровень"));
+      return;
+    }
+    setPlacementSubmitting(true);
     try {
-      // pick 8 random questions per level (40 total)
       const { data: allQs } = await supabase
         .from("tutoring_placement_questions")
-        .select("id, level");
+        .select("id, level")
+        .in("level", placementLevels);
       if (!allQs || !allQs.length) {
-        toast.error(t("Банк питань порожній", "Банк вопросов пуст"));
+        toast.error(t("Банк питань порожній для цих рівнів", "Банк вопросов пуст для этих уровней"));
+        setPlacementSubmitting(false);
         return;
       }
       const byLevel: Record<string, string[]> = {};
@@ -230,29 +255,39 @@ const Tutoring = () => {
         byLevel[q.level].push(q.id);
       });
       const picked: string[] = [];
-      for (const lvl of ["A1", "A2", "B1", "B2", "C1"]) {
-        const ids = (byLevel[lvl] || []).sort(() => Math.random() - 0.5).slice(0, 8);
+      for (const lvl of placementLevels) {
+        const ids = (byLevel[lvl] || []).sort(() => Math.random() - 0.5).slice(0, placementPerLevel);
         picked.push(...ids);
+      }
+      if (!picked.length) {
+        toast.error(t("Немає питань для обраних рівнів", "Нет вопросов для выбранных уровней"));
+        setPlacementSubmitting(false);
+        return;
       }
       const { data: created, error } = await supabase
         .from("tutoring_placement_assignments")
         .insert({
           teacher_id: user.id,
-          student_id: studentId,
+          student_id: placementStudent,
           status: "pending",
           question_ids: picked,
           total_questions: picked.length,
+          selected_levels: placementLevels,
         })
         .select()
         .single();
-      if (error) { toast.error(error.message); return; }
+      if (error) { toast.error(error.message); setPlacementSubmitting(false); return; }
       toast.success(t("Тест призначено", "Тест назначен"));
-      // copy link
       const url = `${window.location.origin}/tutoring/placement/${created.id}`;
-      navigator.clipboard?.writeText(url).catch(() => {});
-      toast.info(t("Посилання скопійовано", "Ссылка скопирована"));
+      try {
+        await navigator.clipboard?.writeText(url);
+        toast.info(t("Посилання скопійовано", "Ссылка скопирована"));
+      } catch {}
+      setPlacementOpen(false);
     } catch (e: any) {
       toast.error(e.message || "Error");
+    } finally {
+      setPlacementSubmitting(false);
     }
   };
 
@@ -793,7 +828,7 @@ const Tutoring = () => {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => assignPlacementTest(r.student_id)}
+                      onClick={() => openPlacementDialog(r.student_id)}
                       title={t("Призначити тест на рівень", "Назначить тест на уровень")}
                     >
                       <ClipboardCheck className="w-4 h-4 mr-1" />
@@ -1126,6 +1161,91 @@ const Tutoring = () => {
               </p>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* ===== Placement test dialog ===== */}
+      <Dialog open={placementOpen} onOpenChange={setPlacementOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ClipboardCheck className="w-5 h-5 text-primary" />
+              {t("Налаштувати тест", "Настроить тест")}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-5 py-2">
+            <div>
+              <label className="text-xs font-bold uppercase text-muted-foreground mb-2 block">
+                {t("Які рівні включити?", "Какие уровни включить?")}
+              </label>
+              <div className="grid grid-cols-5 gap-2">
+                {(["A1", "A2", "B1", "B2", "C1"] as const).map((lvl) => {
+                  const active = placementLevels.includes(lvl);
+                  return (
+                    <button
+                      key={lvl}
+                      type="button"
+                      onClick={() => togglePlacementLevel(lvl)}
+                      className={`py-3 rounded-xl font-bold border-2 transition-all ${
+                        active
+                          ? "border-primary bg-primary text-primary-foreground shadow-md"
+                          : "border-border bg-card hover:border-primary/50"
+                      }`}
+                    >
+                      {lvl}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-2">
+                {t(
+                  "Підказка: якщо думаєте що в учня A2 — оберіть A1+A2 (підтвердить рівень) або A1+A2+B1 (перевірить запас).",
+                  "Подсказка: если думаете что у ученика A2 — выберите A1+A2 (подтвердит уровень) или A1+A2+B1 (проверит запас)."
+                )}
+              </p>
+            </div>
+
+            <div>
+              <label className="text-xs font-bold uppercase text-muted-foreground mb-2 block">
+                {t("Питань на рівень", "Вопросов на уровень")}: <span className="text-primary">{placementPerLevel}</span>
+              </label>
+              <input
+                type="range"
+                min={5}
+                max={15}
+                value={placementPerLevel}
+                onChange={(e) => setPlacementPerLevel(Number(e.target.value))}
+                className="w-full accent-primary"
+              />
+              <p className="text-[11px] text-muted-foreground mt-1">
+                {t("Загалом", "Всего")}: <strong>{placementLevels.length * placementPerLevel}</strong>{" "}
+                {t("питань", "вопросов")} · ≈ {Math.ceil(placementLevels.length * placementPerLevel * 0.5)} {t("хв", "мин")}
+              </p>
+            </div>
+
+            <div className="rounded-xl bg-primary/5 border border-primary/20 p-3 text-xs leading-relaxed">
+              <p className="font-bold mb-1">🤖 {t("Після тесту ви отримаєте:", "После теста вы получите:")}</p>
+              <ul className="space-y-0.5 text-muted-foreground">
+                <li>• {t("AI-аналіз сильних і слабких місць", "AI-анализ сильных и слабых мест")}</li>
+                <li>• {t("Рекомендовані теми для занять", "Рекомендуемые темы для занятий")}</li>
+                <li>• {t("Готовий план перших 3 уроків", "Готовый план первых 3 уроков")}</li>
+                <li>• {t("Повідомлення в Telegram", "Уведомление в Telegram")}</li>
+              </ul>
+            </div>
+
+            <Button
+              onClick={assignPlacementTest}
+              disabled={placementSubmitting || !placementLevels.length}
+              className="w-full gap-2"
+              size="lg"
+            >
+              {placementSubmitting ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> {t("Створюємо…", "Создаём…")}</>
+              ) : (
+                <><ClipboardCheck className="w-4 h-4" /> {t("Призначити тест", "Назначить тест")}</>
+              )}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
