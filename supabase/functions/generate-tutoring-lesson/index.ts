@@ -56,6 +56,8 @@ Deno.serve(async (req) => {
       exerciseTypes = ["quiz", "cloze", "translation"],
       vocabulary = [],
       theoryTemplate,
+      imageUrls = [], // public URLs (signed) of attached images
+      attachedText = "", // already-extracted text from PDF/DOCX (optional)
     } = await req.json();
 
     if (!topic && !freePrompt) {
