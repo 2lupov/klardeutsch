@@ -173,19 +173,24 @@ const TutoringLesson = () => {
             <span className="flex items-center gap-1.5 text-muted-foreground">
               <Clock className="w-4 h-4" /> {lesson.duration_minutes} {t("хв", "мин")}
             </span>
-            {lesson.meeting_link && (
-              <a href={lesson.meeting_link} target="_blank" rel="noopener noreferrer">
-                <Button size="sm" className="gap-2 shadow-md">
-                  <Video className="w-4 h-4" /> {t("Приєднатися", "Присоединиться")}
-                </Button>
-              </a>
-            )}
             {isTeacher && lesson.status !== "completed" && (
               <Button size="sm" variant="outline" onClick={completeLesson} className="gap-2">
                 <Check className="w-4 h-4" /> {t("Завершити", "Завершить")}
               </Button>
             )}
           </div>
+        </motion.div>
+
+        {/* Video room with recording */}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="mb-6">
+          <LessonVideoRoom
+            lessonId={lesson.id}
+            teacherId={lesson.teacher_id}
+            studentId={lesson.student_id}
+            isTeacher={isTeacher}
+            userName={user?.email?.split("@")[0] || "User"}
+            lang={lang as "uk" | "ru"}
+          />
         </motion.div>
 
         <Tabs defaultValue="theory" className="w-full">
