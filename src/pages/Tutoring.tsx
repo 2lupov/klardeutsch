@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { fetchEdgeFunction } from "@/lib/auth-fetch";
+import LessonGenerationProgress from "@/components/tutoring/LessonGenerationProgress";
 
 type Mode = "teacher" | "student" | null;
 
