@@ -425,6 +425,9 @@ const Tutoring = () => {
           studentLevelHint: lastTest?.recommended_level || null,
           imageUrls: attachedFiles.filter(f => f.type.startsWith("image/")).map(f => f.url),
           fileNames: attachedFiles.map(f => f.name),
+          attachedFiles: attachedFiles
+            .filter(f => !f.type.startsWith("image/"))
+            .map(f => ({ name: f.name, url: f.url, type: f.type })),
         },
       });
       const data = await res.json();
