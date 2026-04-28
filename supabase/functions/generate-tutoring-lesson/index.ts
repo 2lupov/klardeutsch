@@ -387,6 +387,27 @@ ${attachedText ? `\nМАТЕРІАЛ:\n${attachedText.slice(0, 8000)}` : ""}`;
       parsed = m ? JSON.parse(m[0]) : {};
     }
 
+    // Гарантований shuffle варіантів у quiz, щоб правильна відповідь не завжди була першою
+    if (parsed && Array.isArray(parsed.exercises)) {
+      parsed.exercises = parsed.exercises.map((ex: any) => {
+        if (ex?.type === "quiz" && Array.isArray(ex.options) && ex.options.length > 1 && ex.correct_answer != null) {
+          const correct = ex.correct_answer;
+          // Fisher-Yates shuffle
+          const arr = [...ex.options];
+          for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+          }
+          // Переконуємось, що правильна відповідь усе ще присутня
+          if (!arr.includes(correct) && ex.options.includes(correct)) {
+            arr[0] = correct;
+          }
+          ex.options = arr;
+        }
+        return ex;
+      });
+    }
+
     return new Response(JSON.stringify({ success: true, lesson: parsed }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
