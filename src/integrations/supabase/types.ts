@@ -1721,6 +1721,38 @@ export type Database = {
           },
         ]
       }
+      tutoring_lesson_notes: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          lesson_id: string
+          updated_at: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          id?: string
+          lesson_id: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          lesson_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tutoring_lesson_notes_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: true
+            referencedRelation: "tutoring_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tutoring_lesson_recordings: {
         Row: {
           ai_errors: Json | null
