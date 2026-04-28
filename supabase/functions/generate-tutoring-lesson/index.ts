@@ -220,7 +220,7 @@ Antworte NUR mit gültigem JSON:
 {
   "title": "...", "level": "${finalLevel}", "topic": "${finalTopic}", "duration_minutes": 60,
   "presentation": [{"slide":1,"heading":"...","content":"..."}],
-  "theory": "Markdown теория 400-700 слов",
+  "theory": "Markdown теория 600-900 слов с разделами ## Что изучаем / ## Правила (с Markdown-таблицей |...|...|) / ## Примеры / ## Типичные ошибки / ## Запомни. Используй callout-блоки: > 📌 Regel: ... > 💡 Tipp: ... > ⚠️ Achtung: ... > 📖 Beispiel: ... — они рендерятся красивыми цветными карточками.",
   "words": [{"german":"...","article":"der|die|das|null","russian":"...","example":"..."}],
   "exercises": [{"type":"quiz","question":"...","options":["A","B","C","D"],"correct_answer":"A","explanation":"..."}],
   "homework": [{"description":"..."}]
