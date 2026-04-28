@@ -27,7 +27,7 @@ interface Relationship {
   status: string;
   note: string | null;
   created_at: string;
-  profile?: { display_name: string | null; avatar_url: string | null; nickname: string | null; is_kid?: boolean };
+  profile?: { display_name: string | null; avatar_url: string | null; nickname: string | null; is_kid?: boolean; age?: number | null };
 }
 
 interface Lesson {
@@ -118,6 +118,7 @@ const Tutoring = () => {
   const [newStudentName, setNewStudentName] = useState("");
   const [newStudentPassword, setNewStudentPassword] = useState("");
   const [newStudentNote, setNewStudentNote] = useState("");
+  const [newStudentAge, setNewStudentAge] = useState<string>("");
   const [creatingStudent, setCreatingStudent] = useState(false);
   const [createdCredentials, setCreatedCredentials] = useState<{ email: string; password: string } | null>(null);
   const [showPwd, setShowPwd] = useState(false);
@@ -169,7 +170,7 @@ const Tutoring = () => {
       const otherIds = [...new Set(rels.map((r: any) => r[otherCol]))];
       const { data: profs } = await supabase
         .from("profiles")
-        .select("user_id, display_name, avatar_url, nickname, is_kid")
+        .select("user_id, display_name, avatar_url, nickname, is_kid, age")
         .in("user_id", otherIds);
       const profMap = new Map((profs || []).map((p: any) => [p.user_id, p]));
       setRelationships(
@@ -350,18 +351,20 @@ const Tutoring = () => {
     }
     setCreatingStudent(true);
     try {
+      const ageNum = newStudentAge ? parseInt(newStudentAge, 10) : null;
       const res = await fetchEdgeFunction("teacher-create-student", {
         json: {
           email: newStudentEmail,
           display_name: newStudentName,
           password: newStudentPassword || undefined,
           note: newStudentNote,
+          age: ageNum && !isNaN(ageNum) ? ageNum : undefined,
         },
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "create failed");
       setCreatedCredentials({ email: data.email, password: data.password });
-      setNewStudentEmail(""); setNewStudentName(""); setNewStudentPassword(""); setNewStudentNote("");
+      setNewStudentEmail(""); setNewStudentName(""); setNewStudentPassword(""); setNewStudentNote(""); setNewStudentAge("");
       loadData();
       toast.success(t("Акаунт створено", "Аккаунт создан"));
     } catch (e: any) {
@@ -831,7 +834,10 @@ const Tutoring = () => {
                   )}
                   <div className="flex-1 min-w-0">
                     <p className="font-bold truncate">{r.profile?.display_name || r.profile?.nickname || "User"}</p>
-                    <p className="text-xs text-green-600">{t("Активний", "Активный")}</p>
+                    <p className="text-xs text-green-600">
+                      {t("Активний", "Активный")}
+                      {r.profile?.age ? ` • ${r.profile.age} ${t("р.", "л.")}` : ""}
+                    </p>
                   </div>
                   {mode === "teacher" && (
                     <>
@@ -1162,6 +1168,24 @@ const Tutoring = () => {
                   placeholder={t("Напр. Анна Шмідт", "Напр. Анна Шмидт")}
                   autoFocus
                 />
+              </div>
+              <div>
+                <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
+                  {t("Вік (необов'язково)", "Возраст (необязательно)")}
+                </label>
+                <Input
+                  type="number"
+                  min={5}
+                  max={120}
+                  value={newStudentAge}
+                  onChange={(e) => setNewStudentAge(e.target.value)}
+                  placeholder={t("Напр. 10", "Напр. 10")}
+                />
+                {newStudentAge && parseInt(newStudentAge, 10) >= 5 && parseInt(newStudentAge, 10) <= 12 && (
+                  <p className="text-[10px] text-primary mt-1 font-semibold">
+                    🧒 {t("Дитячий режим увімкнеться автоматично", "Детский режим включится автоматически")}
+                  </p>
+                )}
               </div>
               <div>
                 <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block flex items-center gap-1">

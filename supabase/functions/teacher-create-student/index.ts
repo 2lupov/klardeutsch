@@ -55,6 +55,9 @@ Deno.serve(async (req) => {
     const displayName = (body.display_name || "").trim();
     const note = (body.note || "").trim();
     const customPassword = (body.password || "").trim();
+    const ageRaw = body.age;
+    const age = (typeof ageRaw === "number" && ageRaw >= 5 && ageRaw <= 120) ? ageRaw : null;
+    const isKid = age !== null ? (age <= 12) : !!body.is_kid;
 
     if (!email || !email.includes("@")) {
       return new Response(JSON.stringify({ error: "Invalid email" }), {
@@ -90,6 +93,8 @@ Deno.serve(async (req) => {
       display_name: displayName,
       created_by_teacher_id: user.id,
       must_change_password: !customPassword,
+      age,
+      is_kid: isKid,
     }).eq("user_id", studentId);
 
     // Create active relationship
