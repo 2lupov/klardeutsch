@@ -121,6 +121,25 @@ const Tutoring = () => {
   const [createdCredentials, setCreatedCredentials] = useState<{ email: string; password: string } | null>(null);
   const [showPwd, setShowPwd] = useState(false);
 
+  // ===== Placement test dialog =====
+  const [placementOpen, setPlacementOpen] = useState(false);
+  const [placementStudent, setPlacementStudent] = useState<string>("");
+  const [placementLevels, setPlacementLevels] = useState<string[]>(["A1", "A2"]);
+  const [placementPerLevel, setPlacementPerLevel] = useState(8);
+  const [placementSubmitting, setPlacementSubmitting] = useState(false);
+
+  const openPlacementDialog = (studentId: string) => {
+    setPlacementStudent(studentId);
+    setPlacementLevels(["A1", "A2"]);
+    setPlacementPerLevel(8);
+    setPlacementOpen(true);
+  };
+  const togglePlacementLevel = (lvl: string) => {
+    setPlacementLevels((prev) =>
+      prev.includes(lvl) ? prev.filter((l) => l !== lvl) : [...prev, lvl].sort((a, b) => ["A1","A2","B1","B2","C1"].indexOf(a) - ["A1","A2","B1","B2","C1"].indexOf(b))
+    );
+  };
+
   useEffect(() => {
     if (!user) return;
     (async () => {
