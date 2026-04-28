@@ -52,6 +52,7 @@ Deno.serve(async (req) => {
       freePrompt = "",
       studentLevelHint = null,
       fileNames = [],
+      attachedFiles = [], // [{name, url, type}] non-image files (PDF/TXT/etc)
       // Legacy / advanced fields
       topic,
       level,
@@ -72,12 +73,55 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    if (autoMode && !freePrompt && imageUrls.length === 0 && fileNames.length === 0) {
+    if (autoMode && !freePrompt && imageUrls.length === 0 && fileNames.length === 0 && attachedFiles.length === 0) {
       return new Response(JSON.stringify({ error: "freePrompt or attached file required in autoMode" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // ===== Fetch & process attached non-image files =====
+    let extractedText = attachedText || "";
+    const pdfParts: Array<{ inline_data: { mime_type: string; data: string } }> = [];
+
+    for (const f of attachedFiles) {
+      try {
+        const r = await fetch(f.url);
+        if (!r.ok) {
+          console.warn("file fetch failed:", f.name, r.status);
+          continue;
+        }
+        const mime = (f.type || "").toLowerCase();
+        const isText =
+          mime.startsWith("text/") ||
+          mime.includes("json") ||
+          mime.includes("csv") ||
+          mime.includes("xml") ||
+          /\.(txt|md|csv|json|xml|srt|vtt)$/i.test(f.name);
+
+        if (isText) {
+          const txt = await r.text();
+          extractedText += `\n\n===== Файл: ${f.name} =====\n${txt.slice(0, 12000)}`;
+        } else if (mime === "application/pdf" || /\.pdf$/i.test(f.name)) {
+          // Send PDF as inline_data to Gemini (supports PDFs natively)
+          const buf = new Uint8Array(await r.arrayBuffer());
+          // Limit to ~8MB
+          if (buf.byteLength > 8 * 1024 * 1024) {
+            extractedText += `\n\n[Файл "${f.name}" завеликий для аналізу — пропущено]`;
+            continue;
+          }
+          let bin = "";
+          for (let i = 0; i < buf.length; i++) bin += String.fromCharCode(buf[i]);
+          const b64 = btoa(bin);
+          pdfParts.push({ inline_data: { mime_type: "application/pdf", data: b64 } });
+        } else {
+          extractedText += `\n\n[Файл "${f.name}" (${mime || "?"}) — формат не підтримується для авточитання, врахуй назву як підказку теми]`;
+        }
+      } catch (err) {
+        console.error("file process error:", f.name, err);
+      }
+    }
+
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
