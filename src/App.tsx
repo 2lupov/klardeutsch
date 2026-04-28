@@ -44,6 +44,7 @@ import TutoringLesson from "./pages/TutoringLesson";
 import PlacementTest from "./pages/PlacementTest";
 import StudentAssignments from "./pages/StudentAssignments";
 import StudentHomework from "./pages/StudentHomework";
+import StudentView from "./pages/StudentView";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -58,6 +59,7 @@ const AppRoutes = () => {
       <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/review" element={<Review />} />
       <Route path="/certificate/:code" element={<Certificate />} />
+      <Route path="/student-view/:sessionId" element={<StudentView />} />
       {/* Web-only routes — redirect to home in Telegram */}
       <Route path="/admin" element={isTelegram ? <Navigate to="/" replace /> : <Admin />} />
       <Route path="/method" element={isTelegram ? <Navigate to="/" replace /> : <Method />} />
