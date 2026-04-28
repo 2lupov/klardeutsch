@@ -834,7 +834,10 @@ const Tutoring = () => {
                   )}
                   <div className="flex-1 min-w-0">
                     <p className="font-bold truncate">{r.profile?.display_name || r.profile?.nickname || "User"}</p>
-                    <p className="text-xs text-green-600">{t("Активний", "Активный")}</p>
+                    <p className="text-xs text-green-600">
+                      {t("Активний", "Активный")}
+                      {r.profile?.age ? ` • ${r.profile.age} ${t("р.", "л.")}` : ""}
+                    </p>
                   </div>
                   {mode === "teacher" && (
                     <>
