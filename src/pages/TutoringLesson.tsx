@@ -17,6 +17,9 @@ import { toast } from "sonner";
 import LessonVideoRoom from "@/components/tutoring/LessonVideoRoom";
 import LessonTheoryRenderer from "@/components/tutoring/LessonTheoryRenderer";
 import LessonNotebook from "@/components/tutoring/LessonNotebook";
+import PresenterMode from "@/components/tutoring/PresenterMode";
+import { Monitor } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
 
 const articleColor = (a: string | null) => {
   if (a === "der") return "bg-blue-500/10 text-blue-600 border-blue-500/20";
@@ -46,6 +49,8 @@ const TutoringLesson = () => {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
   const [hwSubmissions, setHwSubmissions] = useState<Record<string, string>>({});
+  const [presenterOpen, setPresenterOpen] = useState(false);
+  const [studentProfile, setStudentProfile] = useState<any>(null);
 
   const load = async () => {
     if (!id || !user) return;
@@ -67,6 +72,15 @@ const TutoringLesson = () => {
     setHwSubmissions(
       (h.data || []).reduce((acc: any, hw: any) => ({ ...acc, [hw.id]: hw.submission || "" }), {})
     );
+    // Load student profile (for presenter mode)
+    if (l.teacher_id === user.id && l.student_id) {
+      const { data: sp } = await supabase
+        .from("profiles")
+        .select("display_name,avatar_url,is_kid,age,recommended_level")
+        .eq("user_id", l.student_id)
+        .maybeSingle();
+      setStudentProfile(sp);
+    }
     setLoading(false);
   };
 
@@ -176,9 +190,14 @@ const TutoringLesson = () => {
               <Clock className="w-4 h-4" /> {lesson.duration_minutes} {t("хв", "мин")}
             </span>
             {isTeacher && lesson.status !== "completed" && (
-              <Button size="sm" variant="outline" onClick={completeLesson} className="gap-2">
-                <Check className="w-4 h-4" /> {t("Завершити", "Завершить")}
-              </Button>
+              <>
+                <Button size="sm" onClick={() => setPresenterOpen(true)} className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg">
+                  <Monitor className="w-4 h-4" /> {t("Провести урок", "Провести урок")}
+                </Button>
+                <Button size="sm" variant="outline" onClick={completeLesson} className="gap-2">
+                  <Check className="w-4 h-4" /> {t("Завершити", "Завершить")}
+                </Button>
+              </>
             )}
           </div>
         </motion.div>
@@ -411,6 +430,18 @@ const TutoringLesson = () => {
           </TabsContent>
         </Tabs>
       </div>
+      <AnimatePresence>
+        {presenterOpen && isTeacher && (
+          <PresenterMode
+            lesson={lesson}
+            words={words}
+            exercises={exercises}
+            studentName={studentProfile?.display_name || t("Учень", "Ученик")}
+            studentProfile={studentProfile}
+            onClose={() => setPresenterOpen(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };

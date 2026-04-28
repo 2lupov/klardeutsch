@@ -2083,6 +2083,48 @@ export type Database = {
         }
         Relationships: []
       }
+      tutoring_live_sessions: {
+        Row: {
+          created_at: string
+          current_view: Json
+          ended_at: string | null
+          highlight: Json | null
+          id: string
+          lesson_id: string
+          status: string
+          student_id: string
+          teacher_id: string
+          updated_at: string
+          whiteboard: Json
+        }
+        Insert: {
+          created_at?: string
+          current_view?: Json
+          ended_at?: string | null
+          highlight?: Json | null
+          id?: string
+          lesson_id: string
+          status?: string
+          student_id: string
+          teacher_id: string
+          updated_at?: string
+          whiteboard?: Json
+        }
+        Update: {
+          created_at?: string
+          current_view?: Json
+          ended_at?: string | null
+          highlight?: Json | null
+          id?: string
+          lesson_id?: string
+          status?: string
+          student_id?: string
+          teacher_id?: string
+          updated_at?: string
+          whiteboard?: Json
+        }
+        Relationships: []
+      }
       tutoring_placement_assignments: {
         Row: {
           ai_analysis: Json | null
