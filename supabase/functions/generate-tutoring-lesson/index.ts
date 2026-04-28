@@ -246,7 +246,7 @@ ${levelHint}${fileHint}
     {"german": "...", "article": "der|die|das|null", "russian": "переклад", "example": "Повне реальне нім. речення з контекстом."}
   ],
   "exercises": [
-    {"type": "quiz", "question": "Чітке питання нім.", "options": ["A","B","C","D"], "correct_answer": "A", "explanation": "Чому саме A — рос."},
+    {"type": "quiz", "question": "Чітке питання нім.", "options": ["A","B","C","D"], "correct_answer": "C", "explanation": "Чому саме C — рос."},
     {"type": "cloze", "question": "Ich ___ gestern ins Kino gegangen.", "correct_answer": "bin", "explanation": "gehen — Perfekt з sein."},
     {"type": "translation", "question": "Переведи на німецьку: Я вчора ходив у магазин.", "correct_answer": "Ich bin gestern in den Laden gegangen.", "explanation": "..."}
   ],
