@@ -86,6 +86,84 @@ const TeacherStudentDashboard = () => {
   const [qaDueDate, setQaDueDate] = useState("");
   const [qaSaving, setQaSaving] = useState(false);
 
+  // Live presence + control
+  const [livePresence, setLivePresence] = useState<{ route: string; label: string; last_seen: string } | null>(null);
+  const [isOnline, setIsOnline] = useState(false);
+  const [pushMessage, setPushMessage] = useState("");
+  const [sendingPush, setSendingPush] = useState(false);
+
+  // Subscribe to student presence
+  useEffect(() => {
+    if (!studentId) return;
+    const ch = supabase.channel(`student-presence:${studentId}`, {
+      config: { presence: { key: studentId } },
+    });
+
+    const refreshState = () => {
+      const state = ch.presenceState() as Record<string, any[]>;
+      const entries = Object.values(state).flat();
+      if (entries.length > 0) {
+        const latest = entries[entries.length - 1];
+        setLivePresence({
+          route: latest.route,
+          label: latest.label,
+          last_seen: latest.last_seen,
+        });
+        setIsOnline(true);
+      } else {
+        setIsOnline(false);
+      }
+    };
+
+    ch.on("presence", { event: "sync" }, refreshState);
+    ch.on("presence", { event: "join" }, refreshState);
+    ch.on("presence", { event: "leave" }, refreshState);
+    ch.subscribe();
+
+    return () => {
+      supabase.removeChannel(ch);
+    };
+  }, [studentId]);
+
+  const sendCommand = async (event: "navigate" | "message", payload: any) => {
+    if (!studentId) return;
+    setSendingPush(true);
+    try {
+      const ch = supabase.channel(`teacher-cmd:${studentId}`);
+      await new Promise<void>((resolve) => {
+        ch.subscribe((status) => {
+          if (status === "SUBSCRIBED") resolve();
+        });
+      });
+      await ch.send({ type: "broadcast", event, payload });
+      supabase.removeChannel(ch);
+      toast.success(t("Надіслано учню ✅", "Отправлено ученику ✅"));
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setSendingPush(false);
+    }
+  };
+
+  const pushNavigate = (path: string, message?: string) => {
+    if (!isOnline) {
+      toast.error(t("Учень зараз офлайн", "Ученик сейчас офлайн"));
+      return;
+    }
+    void sendCommand("navigate", { path, message });
+  };
+
+  const pushMessageNow = () => {
+    if (!pushMessage.trim()) return;
+    if (!isOnline) {
+      toast.error(t("Учень зараз офлайн", "Ученик сейчас офлайн"));
+      return;
+    }
+    void sendCommand("message", { text: pushMessage.trim() });
+    setPushMessage("");
+  };
+
+
   useEffect(() => {
     if (!user || !studentId) return;
     void loadAll();
