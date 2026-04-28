@@ -43,6 +43,7 @@ import Tutoring from "./pages/Tutoring";
 import TutoringLesson from "./pages/TutoringLesson";
 import PlacementTest from "./pages/PlacementTest";
 import StudentAssignments from "./pages/StudentAssignments";
+import StudentHomework from "./pages/StudentHomework";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
