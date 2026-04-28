@@ -239,6 +239,7 @@ const TutoringLesson = () => {
               )}
             </div>
           </TabsContent>
+          )}
 
           {/* WORDS */}
           <TabsContent value="words" className="space-y-3">
