@@ -185,8 +185,10 @@ export default function PlacementTest() {
         completed_at: new Date().toISOString(),
       })
       .eq("id", assignment.id);
-    setSubmitting(false);
-    if (error) return toast.error(error.message);
+    if (error) {
+      setSubmitting(false);
+      return toast.error(error.message);
+    }
     setAssignment({
       ...assignment,
       status: "completed",
@@ -197,7 +199,25 @@ export default function PlacementTest() {
       total_questions: questions.length,
       duration_seconds: duration,
     });
-    toast.success(t("Тест завершено!", "Тест завершён!"));
+    toast.success(t("Тест завершено! AI аналізує…", "Тест завершён! AI анализирует…"));
+
+    // Trigger AI analysis (async)
+    try {
+      const res = await fetchEdgeFunction("analyze-placement-test", {
+        json: { assignmentId: assignment.id },
+      });
+      const data = await res.json();
+      if (res.ok && data.analysis) {
+        setAssignment((prev) => prev ? { ...prev, ai_analysis: data.analysis } : prev);
+        toast.success(t("AI-аналіз готовий", "AI-анализ готов"));
+      } else {
+        console.error("AI analysis failed:", data);
+      }
+    } catch (e) {
+      console.error("AI analysis error:", e);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // Auto-submit on time-up
