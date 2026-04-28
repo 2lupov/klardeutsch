@@ -1715,6 +1715,69 @@ export type Database = {
           },
         ]
       }
+      tutoring_lesson_templates: {
+        Row: {
+          created_at: string
+          default_duration_minutes: number
+          default_meeting_link: string | null
+          description: string | null
+          exercise_types: Json
+          exercises_count: number
+          focus: string | null
+          id: string
+          level: string
+          name: string
+          structure: Json
+          teacher_id: string
+          theory_template: string | null
+          topic: string | null
+          updated_at: string
+          use_count: number
+          vocabulary: Json
+          words_count: number
+        }
+        Insert: {
+          created_at?: string
+          default_duration_minutes?: number
+          default_meeting_link?: string | null
+          description?: string | null
+          exercise_types?: Json
+          exercises_count?: number
+          focus?: string | null
+          id?: string
+          level?: string
+          name: string
+          structure?: Json
+          teacher_id: string
+          theory_template?: string | null
+          topic?: string | null
+          updated_at?: string
+          use_count?: number
+          vocabulary?: Json
+          words_count?: number
+        }
+        Update: {
+          created_at?: string
+          default_duration_minutes?: number
+          default_meeting_link?: string | null
+          description?: string | null
+          exercise_types?: Json
+          exercises_count?: number
+          focus?: string | null
+          id?: string
+          level?: string
+          name?: string
+          structure?: Json
+          teacher_id?: string
+          theory_template?: string | null
+          topic?: string | null
+          updated_at?: string
+          use_count?: number
+          vocabulary?: Json
+          words_count?: number
+        }
+        Relationships: []
+      }
       tutoring_lesson_words: {
         Row: {
           article: string | null

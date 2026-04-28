@@ -2,8 +2,9 @@ import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  GraduationCap, Users, Plus, Search, Sparkles, Calendar,
-  BookOpen, Clock, Video, ChevronRight, Check, X, Loader2, UserPlus
+  GraduationCap, Users, Sparkles, Calendar, FileStack,
+  BookOpen, Clock, Video, ChevronRight, Check, X, Loader2, UserPlus, Search,
+  Wand2, Save, Trash2, Copy, Plus
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -41,6 +42,30 @@ interface Lesson {
   duration_minutes: number;
 }
 
+interface Template {
+  id: string;
+  name: string;
+  description: string | null;
+  level: string;
+  topic: string | null;
+  focus: string | null;
+  default_meeting_link: string | null;
+  default_duration_minutes: number;
+  words_count: number;
+  exercises_count: number;
+  exercise_types: string[];
+  vocabulary: any[];
+  theory_template: string | null;
+  use_count: number;
+  created_at: string;
+}
+
+const EX_TYPES = [
+  { id: "quiz", uk: "Тест (4 варіанти)", ru: "Тест (4 варианта)" },
+  { id: "cloze", uk: "Заповнити пропуск", ru: "Заполнить пропуск" },
+  { id: "translation", uk: "Переклад", ru: "Перевод" },
+];
+
 const Tutoring = () => {
   const { user } = useAuth();
   const { lang } = useLanguage();
@@ -51,6 +76,7 @@ const Tutoring = () => {
   const [loading, setLoading] = useState(true);
   const [relationships, setRelationships] = useState<Relationship[]>([]);
   const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [templates, setTemplates] = useState<Template[]>([]);
 
   // Find teacher dialog (student)
   const [findOpen, setFindOpen] = useState(false);
@@ -64,9 +90,22 @@ const Tutoring = () => {
   const [lessonTopic, setLessonTopic] = useState("");
   const [lessonLevel, setLessonLevel] = useState("A1");
   const [lessonFocus, setLessonFocus] = useState("");
+  const [freePrompt, setFreePrompt] = useState("");
+  const [wordsCount, setWordsCount] = useState(10);
+  const [exercisesCount, setExercisesCount] = useState(8);
+  const [exerciseTypes, setExerciseTypes] = useState<string[]>(["quiz", "cloze", "translation"]);
+  const [vocabularyText, setVocabularyText] = useState("");
+  const [theoryTemplate, setTheoryTemplate] = useState("");
   const [meetingLink, setMeetingLink] = useState("");
   const [scheduledAt, setScheduledAt] = useState("");
+  const [durationMinutes, setDurationMinutes] = useState(60);
   const [generating, setGenerating] = useState(false);
+  const [activeTemplateId, setActiveTemplateId] = useState<string | null>(null);
+
+  // Save template dialog
+  const [saveTplOpen, setSaveTplOpen] = useState(false);
+  const [tplName, setTplName] = useState("");
+  const [tplDescription, setTplDescription] = useState("");
 
   useEffect(() => {
     if (!user) return;
@@ -112,6 +151,16 @@ const Tutoring = () => {
       .eq(col, user.id)
       .order("created_at", { ascending: false });
     setLessons(ls || []);
+
+    if (mode === "teacher") {
+      const { data: tpls } = await supabase
+        .from("tutoring_lesson_templates")
+        .select("*")
+        .eq("teacher_id", user.id)
+        .order("updated_at", { ascending: false });
+      setTemplates((tpls as any) || []);
+    }
+
     setLoading(false);
   };
 
@@ -132,17 +181,13 @@ const Tutoring = () => {
       note: requestNote || null,
       status: "pending",
     });
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
+    if (error) { toast.error(error.message); return; }
     toast.success(t("Запит надіслано", "Запрос отправлен"));
     setFindOpen(false);
     setRequestNote("");
     loadData();
   };
 
-  // ===== Teacher: accept/decline =====
   const updateRelStatus = async (id: string, status: string) => {
     const { error } = await supabase
       .from("tutoring_relationships")
@@ -153,16 +198,95 @@ const Tutoring = () => {
     loadData();
   };
 
-  // ===== Teacher: create lesson with AI =====
+  // ===== Templates =====
+  const resetCreateForm = () => {
+    setLessonTopic(""); setLessonFocus(""); setFreePrompt("");
+    setMeetingLink(""); setScheduledAt(""); setLessonLevel("A1");
+    setWordsCount(10); setExercisesCount(8);
+    setExerciseTypes(["quiz", "cloze", "translation"]);
+    setVocabularyText(""); setTheoryTemplate("");
+    setDurationMinutes(60);
+    setActiveTemplateId(null);
+  };
+
+  const applyTemplate = (tpl: Template) => {
+    setActiveTemplateId(tpl.id);
+    setLessonLevel(tpl.level);
+    setLessonTopic(tpl.topic || "");
+    setLessonFocus(tpl.focus || "");
+    setMeetingLink(tpl.default_meeting_link || "");
+    setDurationMinutes(tpl.default_duration_minutes);
+    setWordsCount(tpl.words_count);
+    setExercisesCount(tpl.exercises_count);
+    setExerciseTypes(tpl.exercise_types || ["quiz","cloze","translation"]);
+    setVocabularyText((tpl.vocabulary || []).map((v: any) => typeof v === "string" ? v : v.german).join(", "));
+    setTheoryTemplate(tpl.theory_template || "");
+    setCreateOpen(true);
+    toast.success(t(`Шаблон "${tpl.name}" застосовано`, `Шаблон "${tpl.name}" применён`));
+  };
+
+  const saveTemplate = async () => {
+    if (!user || !tplName.trim()) {
+      toast.error(t("Введіть назву шаблону", "Введите название шаблона"));
+      return;
+    }
+    const vocab = vocabularyText.split(/[,\n;]+/).map(s => s.trim()).filter(Boolean);
+    const payload = {
+      teacher_id: user.id,
+      name: tplName.trim(),
+      description: tplDescription.trim() || null,
+      level: lessonLevel,
+      topic: lessonTopic || null,
+      focus: lessonFocus || null,
+      default_meeting_link: meetingLink || null,
+      default_duration_minutes: durationMinutes,
+      words_count: wordsCount,
+      exercises_count: exercisesCount,
+      exercise_types: exerciseTypes,
+      vocabulary: vocab,
+      theory_template: theoryTemplate || null,
+    };
+    const { error } = await supabase.from("tutoring_lesson_templates").insert(payload);
+    if (error) return toast.error(error.message);
+    toast.success(t("Шаблон збережено", "Шаблон сохранён"));
+    setSaveTplOpen(false);
+    setTplName(""); setTplDescription("");
+    loadData();
+  };
+
+  const deleteTemplate = async (id: string) => {
+    if (!confirm(t("Видалити шаблон?", "Удалить шаблон?"))) return;
+    const { error } = await supabase.from("tutoring_lesson_templates").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success(t("Видалено", "Удалено"));
+    loadData();
+  };
+
+  // ===== Generate lesson =====
   const generateAndCreate = async () => {
-    if (!selectedStudent || !lessonTopic) {
-      toast.error(t("Оберіть учня та тему", "Выберите ученика и тему"));
+    if (!selectedStudent) {
+      toast.error(t("Оберіть учня", "Выберите ученика"));
+      return;
+    }
+    if (!lessonTopic && !freePrompt) {
+      toast.error(t("Вкажіть тему або опишіть заняття", "Укажите тему или опишите занятие"));
       return;
     }
     setGenerating(true);
     try {
+      const vocab = vocabularyText.split(/[,\n;]+/).map(s => s.trim()).filter(Boolean);
       const res = await fetchEdgeFunction("generate-tutoring-lesson", {
-        json: { topic: lessonTopic, level: lessonLevel, focus: lessonFocus },
+        json: {
+          topic: lessonTopic || "Allgemein",
+          level: lessonLevel,
+          focus: lessonFocus,
+          freePrompt,
+          wordsCount,
+          exercisesCount,
+          exerciseTypes,
+          vocabulary: vocab,
+          theoryTemplate,
+        },
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "AI error");
@@ -173,20 +297,20 @@ const Tutoring = () => {
         .insert({
           teacher_id: user!.id,
           student_id: selectedStudent,
-          title: ai.title || lessonTopic,
-          topic: lessonTopic,
+          title: ai.title || lessonTopic || "Lektion",
+          topic: lessonTopic || null,
           level: lessonLevel,
           theory: ai.theory || "",
           meeting_link: meetingLink || null,
           scheduled_at: scheduledAt || null,
+          duration_minutes: durationMinutes,
           status: scheduledAt ? "scheduled" : "draft",
-          ai_prompt: lessonFocus || null,
+          ai_prompt: freePrompt || lessonFocus || null,
         })
         .select()
         .single();
       if (createErr) throw createErr;
 
-      // Insert words
       if (ai.words?.length) {
         await supabase.from("tutoring_lesson_words").insert(
           ai.words.map((w: any, i: number) => ({
@@ -199,7 +323,6 @@ const Tutoring = () => {
           }))
         );
       }
-      // Insert exercises
       if (ai.exercises?.length) {
         await supabase.from("tutoring_lesson_exercises").insert(
           ai.exercises.map((e: any, i: number) => ({
@@ -213,7 +336,6 @@ const Tutoring = () => {
           }))
         );
       }
-      // Insert homework
       if (ai.homework?.length) {
         await supabase.from("tutoring_homework").insert(
           ai.homework.map((h: any) => ({
@@ -223,15 +345,32 @@ const Tutoring = () => {
         );
       }
 
+      // Increment template use count
+      if (activeTemplateId) {
+        const tpl = templates.find(x => x.id === activeTemplateId);
+        if (tpl) {
+          await supabase
+            .from("tutoring_lesson_templates")
+            .update({ use_count: tpl.use_count + 1 })
+            .eq("id", activeTemplateId);
+        }
+      }
+
       toast.success(t("Урок створено!", "Урок создан!"));
       setCreateOpen(false);
-      setLessonTopic(""); setLessonFocus(""); setMeetingLink(""); setScheduledAt("");
+      resetCreateForm();
       navigate(`/tutoring/lesson/${created.id}`);
     } catch (e: any) {
       toast.error(e.message);
     } finally {
       setGenerating(false);
     }
+  };
+
+  const toggleExType = (id: string) => {
+    setExerciseTypes(prev =>
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    );
   };
 
   const activeStudents = useMemo(
@@ -270,13 +409,13 @@ const Tutoring = () => {
             </h1>
             <p className="text-muted-foreground mt-2 max-w-xl">
               {mode === "teacher"
-                ? t("Готуйте уроки з AI, відстежуйте прогрес учнів", "Готовьте уроки с AI, отслеживайте прогресс учеников")
+                ? t("Готуйте уроки з AI, зберігайте як шаблони, відстежуйте учнів", "Готовьте уроки с AI, сохраняйте шаблоны, отслеживайте учеников")
                 : t("Особисті заняття з вашим викладачем", "Персональные занятия с вашим преподавателем")}
             </p>
           </div>
 
           {mode === "teacher" ? (
-            <Button onClick={() => setCreateOpen(true)} size="lg" className="gap-2 shadow-lg">
+            <Button onClick={() => { resetCreateForm(); setCreateOpen(true); }} size="lg" className="gap-2 shadow-lg">
               <Sparkles className="w-4 h-4" />
               {t("Створити урок з AI", "Создать урок с AI")}
             </Button>
@@ -294,6 +433,12 @@ const Tutoring = () => {
               <BookOpen className="w-4 h-4" />
               {t("Уроки", "Уроки")} ({lessons.length})
             </TabsTrigger>
+            {mode === "teacher" && (
+              <TabsTrigger value="templates" className="gap-2">
+                <FileStack className="w-4 h-4" />
+                {t("Шаблони", "Шаблоны")} ({templates.length})
+              </TabsTrigger>
+            )}
             <TabsTrigger value="people" className="gap-2">
               <Users className="w-4 h-4" />
               {mode === "teacher" ? t("Учні", "Ученики") : t("Викладачі", "Преподаватели")} ({activeStudents.length})
@@ -371,6 +516,80 @@ const Tutoring = () => {
               ))
             )}
           </TabsContent>
+
+          {/* TEMPLATES TAB */}
+          {mode === "teacher" && (
+            <TabsContent value="templates" className="space-y-3">
+              {templates.length === 0 ? (
+                <div className="text-center py-16 rounded-3xl border-2 border-dashed border-border">
+                  <FileStack className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
+                  <p className="text-muted-foreground mb-4">
+                    {t("Поки немає шаблонів", "Пока нет шаблонов")}
+                  </p>
+                  <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+                    {t(
+                      "Налаштуйте новий урок і натисніть 'Зберегти як шаблон' — і ви зможете повторно використовувати ту саму структуру.",
+                      "Настройте новый урок и нажмите 'Сохранить как шаблон' — и вы сможете повторно использовать ту же структуру."
+                    )}
+                  </p>
+                </div>
+              ) : (
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {templates.map((tpl) => (
+                    <motion.div
+                      key={tpl.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="p-5 rounded-2xl border border-border bg-card hover:border-primary/50 hover:shadow-lg transition-all"
+                    >
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className="px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-bold">
+                            {tpl.level}
+                          </span>
+                          {tpl.use_count > 0 && (
+                            <span className="text-[10px] text-muted-foreground">
+                              {t("викор.", "исп.")} {tpl.use_count}×
+                            </span>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => deleteTemplate(tpl.id)}
+                          className="text-muted-foreground hover:text-destructive transition"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <h3 className="font-display font-bold text-lg mb-1">{tpl.name}</h3>
+                      {tpl.topic && <p className="text-sm text-muted-foreground mb-1">{tpl.topic}</p>}
+                      {tpl.description && (
+                        <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{tpl.description}</p>
+                      )}
+                      <div className="flex flex-wrap gap-1.5 text-[10px] mb-4">
+                        <span className="px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                          {tpl.words_count} {t("слів", "слов")}
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                          {tpl.exercises_count} {t("вправ", "упр")}
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                          {tpl.default_duration_minutes} {t("хв", "мин")}
+                        </span>
+                      </div>
+                      <Button
+                        size="sm"
+                        className="w-full gap-2"
+                        onClick={() => applyTemplate(tpl)}
+                      >
+                        <Wand2 className="w-3.5 h-3.5" />
+                        {t("Створити урок", "Создать урок")}
+                      </Button>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+          )}
 
           {/* PEOPLE TAB */}
           <TabsContent value="people" className="space-y-3">
@@ -489,41 +708,84 @@ const Tutoring = () => {
 
       {/* ===== TEACHER: Create lesson dialog ===== */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-primary" />
               {t("Створити урок з AI", "Создать урок с AI")}
+              {activeTemplateId && (
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold">
+                  {t("із шаблону", "из шаблона")}
+                </span>
+              )}
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-3">
+
+          <div className="space-y-4">
+            {/* Templates quick-pick */}
+            {templates.length > 0 && (
+              <div>
+                <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
+                  {t("Швидкий шаблон", "Быстрый шаблон")}
+                </label>
+                <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
+                  {templates.slice(0, 8).map(tpl => (
+                    <button
+                      key={tpl.id}
+                      onClick={() => applyTemplate(tpl)}
+                      className={`shrink-0 px-3 py-2 rounded-xl border text-xs font-bold transition flex items-center gap-1.5 ${
+                        activeTemplateId === tpl.id
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border hover:border-primary/50"
+                      }`}
+                    >
+                      <Copy className="w-3 h-3" />
+                      {tpl.name}
+                      <span className="text-[10px] opacity-60">{tpl.level}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Free-form prompt */}
             <div>
-              <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
-                {t("Учень", "Ученик")}
+              <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block flex items-center gap-1.5">
+                <Wand2 className="w-3 h-3" />
+                {t("Опишіть, що робимо сьогодні", "Опишите, что делаем сегодня")}
               </label>
-              <select
-                value={selectedStudent}
-                onChange={(e) => setSelectedStudent(e.target.value)}
-                className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
-              >
-                <option value="">{t("Оберіть…", "Выберите…")}</option>
-                {activeStudents.map((r) => (
-                  <option key={r.id} value={r.student_id}>
-                    {r.profile?.display_name || r.profile?.nickname || "User"}
-                  </option>
-                ))}
-              </select>
+              <Textarea
+                value={freePrompt}
+                onChange={(e) => setFreePrompt(e.target.value)}
+                placeholder={t(
+                  "Напр.: Вивчаємо Perfekt з sein, тренуємо розповідь про вихідні, граємо в рольову гру 'У лікаря'…",
+                  "Напр.: Изучаем Perfekt с sein, тренируем рассказ о выходных, играем в ролевую игру 'У врача'…"
+                )}
+                rows={3}
+                className="resize-none"
+              />
+              <p className="text-[10px] text-muted-foreground mt-1">
+                {t("AI підготує презентацію, теорію, словник, вправи та ДЗ", "AI подготовит презентацию, теорию, словарь, упражнения и ДЗ")}
+              </p>
             </div>
+
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
-                  {t("Тема", "Тема")}
+                  {t("Учень", "Ученик")} *
                 </label>
-                <Input
-                  value={lessonTopic}
-                  onChange={(e) => setLessonTopic(e.target.value)}
-                  placeholder={t("Напр. Perfekt", "Напр. Perfekt")}
-                />
+                <select
+                  value={selectedStudent}
+                  onChange={(e) => setSelectedStudent(e.target.value)}
+                  className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+                >
+                  <option value="">{t("Оберіть…", "Выберите…")}</option>
+                  {activeStudents.map((r) => (
+                    <option key={r.id} value={r.student_id}>
+                      {r.profile?.display_name || r.profile?.nickname || "User"}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
@@ -538,17 +800,97 @@ const Tutoring = () => {
                 </select>
               </div>
             </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
+                  {t("Тема", "Тема")}
+                </label>
+                <Input
+                  value={lessonTopic}
+                  onChange={(e) => setLessonTopic(e.target.value)}
+                  placeholder={t("Напр. Perfekt", "Напр. Perfekt")}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
+                  {t("Фокус", "Фокус")}
+                </label>
+                <Input
+                  value={lessonFocus}
+                  onChange={(e) => setLessonFocus(e.target.value)}
+                  placeholder={t("розмова, граматика…", "разговор, грамматика…")}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
+                  {t("Слів", "Слов")}
+                </label>
+                <Input
+                  type="number" min={3} max={30}
+                  value={wordsCount}
+                  onChange={(e) => setWordsCount(parseInt(e.target.value) || 10)}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
+                  {t("Вправ", "Упр.")}
+                </label>
+                <Input
+                  type="number" min={3} max={20}
+                  value={exercisesCount}
+                  onChange={(e) => setExercisesCount(parseInt(e.target.value) || 8)}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
+                  {t("Тривалість, хв", "Длит., мин")}
+                </label>
+                <Input
+                  type="number" min={15} max={180}
+                  value={durationMinutes}
+                  onChange={(e) => setDurationMinutes(parseInt(e.target.value) || 60)}
+                />
+              </div>
+            </div>
+
             <div>
               <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
-                {t("Особливий фокус (необов'язково)", "Особый фокус (необязательно)")}
+                {t("Типи вправ", "Типы упражнений")}
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {EX_TYPES.map(et => (
+                  <button
+                    key={et.id}
+                    type="button"
+                    onClick={() => toggleExType(et.id)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-bold border transition ${
+                      exerciseTypes.includes(et.id)
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-background border-border text-muted-foreground"
+                    }`}
+                  >
+                    {lang === "uk" ? et.uk : et.ru}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
+                {t("Словник (через кому, необов'язково)", "Словарь (через запятую, необязательно)")}
               </label>
               <Textarea
-                value={lessonFocus}
-                onChange={(e) => setLessonFocus(e.target.value)}
-                placeholder={t("Напр. розмовна практика, граматика…", "Напр. разговорная практика, грамматика…")}
+                value={vocabularyText}
+                onChange={(e) => setVocabularyText(e.target.value)}
+                placeholder="Haus, gehen, schön, der Arzt…"
                 rows={2}
               />
             </div>
+
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
@@ -571,16 +913,69 @@ const Tutoring = () => {
                 />
               </div>
             </div>
-            <Button onClick={generateAndCreate} disabled={generating} className="w-full" size="lg">
-              {generating ? (
-                <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t("Генеруємо…", "Генерируем…")}</>
-              ) : (
-                <><Sparkles className="w-4 h-4 mr-2" />{t("Згенерувати урок", "Сгенерировать урок")}</>
-              )}
+
+            <div className="flex gap-2 pt-2 sticky bottom-0 bg-background pb-1">
+              <Button
+                variant="outline"
+                onClick={() => setSaveTplOpen(true)}
+                className="gap-2"
+                disabled={generating}
+              >
+                <Save className="w-4 h-4" />
+                {t("Як шаблон", "Как шаблон")}
+              </Button>
+              <Button onClick={generateAndCreate} disabled={generating} className="flex-1" size="lg">
+                {generating ? (
+                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t("Генеруємо…", "Генерируем…")}</>
+                ) : (
+                  <><Sparkles className="w-4 h-4 mr-2" />{t("Згенерувати урок", "Сгенерировать урок")}</>
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ===== Save Template Dialog ===== */}
+      <Dialog open={saveTplOpen} onOpenChange={setSaveTplOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Save className="w-5 h-5 text-primary" />
+              {t("Зберегти як шаблон", "Сохранить как шаблон")}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
+                {t("Назва шаблону", "Название шаблона")} *
+              </label>
+              <Input
+                value={tplName}
+                onChange={(e) => setTplName(e.target.value)}
+                placeholder={t("Напр. Perfekt B1 — стандарт", "Напр. Perfekt B1 — стандарт")}
+                autoFocus
+              />
+            </div>
+            <div>
+              <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
+                {t("Опис (необов'язково)", "Описание (необязательно)")}
+              </label>
+              <Textarea
+                value={tplDescription}
+                onChange={(e) => setTplDescription(e.target.value)}
+                rows={2}
+              />
+            </div>
+            <div className="p-3 rounded-xl bg-muted/50 text-xs space-y-1">
+              <p className="flex justify-between"><span className="text-muted-foreground">{t("Рівень", "Уровень")}</span><b>{lessonLevel}</b></p>
+              <p className="flex justify-between"><span className="text-muted-foreground">{t("Слів / Вправ", "Слов / Упр")}</span><b>{wordsCount} / {exercisesCount}</b></p>
+              <p className="flex justify-between"><span className="text-muted-foreground">{t("Типи", "Типы")}</span><b>{exerciseTypes.join(", ")}</b></p>
+            </div>
+            <Button onClick={saveTemplate} className="w-full gap-2">
+              <Save className="w-4 h-4" />
+              {t("Зберегти шаблон", "Сохранить шаблон")}
             </Button>
-            <p className="text-[11px] text-muted-foreground text-center">
-              {t("AI створить теорію, словник, вправи та ДЗ", "AI создаст теорию, словарь, упражнения и ДЗ")}
-            </p>
           </div>
         </DialogContent>
       </Dialog>
