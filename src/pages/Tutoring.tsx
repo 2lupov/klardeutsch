@@ -351,18 +351,20 @@ const Tutoring = () => {
     }
     setCreatingStudent(true);
     try {
+      const ageNum = newStudentAge ? parseInt(newStudentAge, 10) : null;
       const res = await fetchEdgeFunction("teacher-create-student", {
         json: {
           email: newStudentEmail,
           display_name: newStudentName,
           password: newStudentPassword || undefined,
           note: newStudentNote,
+          age: ageNum && !isNaN(ageNum) ? ageNum : undefined,
         },
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "create failed");
       setCreatedCredentials({ email: data.email, password: data.password });
-      setNewStudentEmail(""); setNewStudentName(""); setNewStudentPassword(""); setNewStudentNote("");
+      setNewStudentEmail(""); setNewStudentName(""); setNewStudentPassword(""); setNewStudentNote(""); setNewStudentAge("");
       loadData();
       toast.success(t("Акаунт створено", "Аккаунт создан"));
     } catch (e: any) {
