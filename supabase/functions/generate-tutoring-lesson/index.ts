@@ -148,7 +148,9 @@ Deno.serve(async (req) => {
 
       if (isKid) {
         // ===== KID MODE (9–12 years) =====
-        systemPrompt = `Du bist ein freundlicher, erfahrener Deutschlehrer für **Kinder im Alter von 9–12 Jahren**.
+        systemPrompt = `${langStrict}
+
+Du bist ein freundlicher, erfahrener Deutschlehrer für **Kinder im Alter von 9–12 Jahren**.
 
 Твоя ціль — створити **ВЕСЕЛИЙ, ПРОСТИЙ, ВІЗУАЛЬНИЙ** урок німецької для дитини (45 хвилин).
 
@@ -219,7 +221,9 @@ ${extractedText ? "ВАЖЛИВО: нижче в повідомленні є в�
         userMsg = `Учитель готує урок для **дитини 9-12 років**:\n\n"${freePrompt || "Підготуй простий веселий урок"}"\n\n${fileNames.length ? `Файли: ${fileNames.join(", ")}` : ""}${extractedText ? `\n\n=== ТЕКСТ ІЗ ФАЙЛІВ ===\n${extractedText.slice(0, 15000)}` : ""}\n\nЗроби урок **дуже простим, з емодзі, ігровим**. Дитина має посміхнутись від теми! 🌟`;
       } else {
 
-      systemPrompt = `Du bist ein erfahrener, methodisch versierter Deutschlehrer mit 15+ Jahren Erfahrung in Online-Einzelunterricht.
+      systemPrompt = `${langStrict}
+
+Du bist ein erfahrener, methodisch versierter Deutschlehrer mit 15+ Jahren Erfahrung in Online-Einzelunterricht.
 
 Твоя ціль — створити **МАКСИМАЛЬНО ЯКІСНИЙ, ЗАХОПЛИВИЙ, СТРУКТУРОВАНИЙ** урок німецької для одного учня (60 хвилин).
 
@@ -299,7 +303,9 @@ ${extractedText ? "ВАЖЛИВО: нижче в повідомленні кор
       const exTypesAllowed = Array.isArray(exerciseTypes) && exerciseTypes.length
         ? exerciseTypes : ["quiz", "cloze", "translation"];
 
-      systemPrompt = `Du bist ein erfahrener Deutschlehrer. Erstelle eine vollständige, strukturierte Online-Unterrichtsstunde auf Deutsch (CEFR-Niveau ${finalLevel}).
+      systemPrompt = `${langStrict}
+
+Du bist ein erfahrener Deutschlehrer. Erstelle eine vollständige, strukturierte Online-Unterrichtsstunde auf Deutsch (CEFR-Niveau ${finalLevel}).
 
 Thema: "${finalTopic}"
 ${freePrompt ? `\nЧТО НУЖНО СЕГОДНЯ:\n${freePrompt}\n` : ""}
