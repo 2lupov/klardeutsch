@@ -482,12 +482,13 @@ const TeacherStudentDashboard = () => {
         </Tabs>
       </div>
 
-      {aiOpen && (
-        <TeacherAIAssistant
-          student={{ id: profile.user_id, name: profile.display_name || "Ученик", isKid: profile.is_kid }}
-          onClose={() => setAiOpen(false)}
-        />
-      )}
+      <TeacherAIAssistant
+        open={aiOpen}
+        onOpenChange={setAiOpen}
+        studentId={profile.user_id}
+        studentName={profile.display_name || "Ученик"}
+        isKid={profile.is_kid}
+      />
     </div>
   );
 };
