@@ -472,6 +472,7 @@ const Tutoring = () => {
           autoMode: true,
           studentLevelHint: lastTest?.recommended_level || null,
           isKid: !!studentProfile?.is_kid,
+          lang,
           imageUrls: attachedFiles.filter(f => f.type.startsWith("image/")).map(f => f.url),
           fileNames: attachedFiles.map(f => f.name),
           attachedFiles: attachedFiles

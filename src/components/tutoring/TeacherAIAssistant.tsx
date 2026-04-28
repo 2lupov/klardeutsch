@@ -6,6 +6,7 @@ import { Sparkles, Send, Loader2, Trash2, Bot, User, Copy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -31,6 +32,7 @@ const QUICK_PROMPTS_KID = [
 ];
 
 export default function TeacherAIAssistant({ open, onOpenChange, studentId, studentName, isKid }: Props) {
+  const { lang } = useLanguage();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -91,7 +93,7 @@ export default function TeacherAIAssistant({ open, onOpenChange, studentId, stud
           "Content-Type": "application/json",
           Authorization: `Bearer ${session?.access_token || ""}`,
         },
-        body: JSON.stringify({ student_id: studentId, message: text.trim() }),
+        body: JSON.stringify({ student_id: studentId, message: text.trim(), lang }),
       });
 
       if (!resp.ok) {
