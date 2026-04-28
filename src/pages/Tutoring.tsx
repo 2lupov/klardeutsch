@@ -834,15 +834,47 @@ const Tutoring = () => {
                     <p className="text-xs text-green-600">{t("Активний", "Активный")}</p>
                   </div>
                   {mode === "teacher" && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => openPlacementDialog(r.student_id)}
-                      title={t("Призначити тест на рівень", "Назначить тест на уровень")}
-                    >
-                      <ClipboardCheck className="w-4 h-4 mr-1" />
-                      {t("Тест", "Тест")}
-                    </Button>
+                    <>
+                      <button
+                        onClick={async () => {
+                          const next = !r.profile?.is_kid;
+                          const { error } = await supabase
+                            .from("profiles")
+                            .update({ is_kid: next })
+                            .eq("user_id", r.student_id);
+                          if (error) return toast.error(error.message);
+                          setRelationships((prev) =>
+                            prev.map((x) =>
+                              x.id === r.id
+                                ? { ...x, profile: { ...(x.profile as any), is_kid: next } }
+                                : x
+                            )
+                          );
+                          toast.success(
+                            next
+                              ? t("Дитячий режим увімкнено 🧒", "Детский режим включён 🧒")
+                              : t("Дитячий режим вимкнено", "Детский режим выключен")
+                          );
+                        }}
+                        title={t("Учень 9–12 років (простіші завдання, AI адаптується)", "Ученик 9–12 лет (проще задания, AI адаптируется)")}
+                        className={`text-xs font-bold px-2.5 py-1.5 rounded-lg border transition ${
+                          r.profile?.is_kid
+                            ? "bg-pink-500/15 text-pink-700 dark:text-pink-300 border-pink-500/40"
+                            : "bg-card text-muted-foreground border-border hover:border-primary/40"
+                        }`}
+                      >
+                        🧒 {r.profile?.is_kid ? t("Дитина", "Ребёнок") : t("Дорослий", "Взрослый")}
+                      </button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => openPlacementDialog(r.student_id)}
+                        title={t("Призначити тест на рівень", "Назначить тест на уровень")}
+                      >
+                        <ClipboardCheck className="w-4 h-4 mr-1" />
+                        {t("Тест", "Тест")}
+                      </Button>
+                    </>
                   )}
                 </div>
               ))
