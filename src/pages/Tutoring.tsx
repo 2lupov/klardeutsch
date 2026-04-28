@@ -896,6 +896,15 @@ const Tutoring = () => {
                         <ClipboardCheck className="w-4 h-4 mr-1" />
                         {t("Тест", "Тест")}
                       </Button>
+                      <Button
+                        size="sm"
+                        variant="default"
+                        onClick={() => navigate(`/tutoring/student/${r.student_id}`)}
+                        title={t("Відкрити кабінет учня", "Открыть кабинет ученика")}
+                        className="bg-foreground text-background hover:opacity-90"
+                      >
+                        👁 {t("Кабінет", "Кабинет")}
+                      </Button>
                     </>
                   )}
                 </div>
