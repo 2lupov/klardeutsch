@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import {
   GraduationCap, Users, Sparkles, Calendar, FileStack,
   BookOpen, Clock, Video, ChevronRight, Check, X, Loader2, UserPlus, Search,
-  Wand2, Save, Trash2, Copy, Plus, Paperclip, Image as ImageIcon, Mail, Key, Eye, EyeOff
+  Wand2, Save, Trash2, Copy, Plus, Paperclip, Image as ImageIcon, Mail, Key, Eye, EyeOff, ClipboardCheck, Award
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -210,6 +210,50 @@ const Tutoring = () => {
     if (error) return toast.error(error.message);
     toast.success(t("Оновлено", "Обновлено"));
     loadData();
+  };
+
+  // ===== Placement test =====
+  const assignPlacementTest = async (studentId: string) => {
+    if (!user) return;
+    try {
+      // pick 8 random questions per level (40 total)
+      const { data: allQs } = await supabase
+        .from("tutoring_placement_questions")
+        .select("id, level");
+      if (!allQs || !allQs.length) {
+        toast.error(t("Банк питань порожній", "Банк вопросов пуст"));
+        return;
+      }
+      const byLevel: Record<string, string[]> = {};
+      allQs.forEach((q: any) => {
+        byLevel[q.level] = byLevel[q.level] || [];
+        byLevel[q.level].push(q.id);
+      });
+      const picked: string[] = [];
+      for (const lvl of ["A1", "A2", "B1", "B2", "C1"]) {
+        const ids = (byLevel[lvl] || []).sort(() => Math.random() - 0.5).slice(0, 8);
+        picked.push(...ids);
+      }
+      const { data: created, error } = await supabase
+        .from("tutoring_placement_assignments")
+        .insert({
+          teacher_id: user.id,
+          student_id: studentId,
+          status: "pending",
+          question_ids: picked,
+          total_questions: picked.length,
+        })
+        .select()
+        .single();
+      if (error) { toast.error(error.message); return; }
+      toast.success(t("Тест призначено", "Тест назначен"));
+      // copy link
+      const url = `${window.location.origin}/tutoring/placement/${created.id}`;
+      navigator.clipboard?.writeText(url).catch(() => {});
+      toast.info(t("Посилання скопійовано", "Ссылка скопирована"));
+    } catch (e: any) {
+      toast.error(e.message || "Error");
+    }
   };
 
   // ===== Templates =====
@@ -749,6 +793,17 @@ const Tutoring = () => {
                     <p className="font-bold truncate">{r.profile?.display_name || r.profile?.nickname || "User"}</p>
                     <p className="text-xs text-green-600">{t("Активний", "Активный")}</p>
                   </div>
+                  {mode === "teacher" && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => assignPlacementTest(r.student_id)}
+                      title={t("Призначити тест на рівень", "Назначить тест на уровень")}
+                    >
+                      <ClipboardCheck className="w-4 h-4 mr-1" />
+                      {t("Тест", "Тест")}
+                    </Button>
+                  )}
                 </div>
               ))
             )}

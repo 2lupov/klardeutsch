@@ -1879,6 +1879,102 @@ export type Database = {
         }
         Relationships: []
       }
+      tutoring_placement_assignments: {
+        Row: {
+          answers: Json
+          completed_at: string | null
+          created_at: string
+          duration_seconds: number | null
+          id: string
+          question_ids: Json
+          recommended_level: string | null
+          scores_by_level: Json | null
+          started_at: string | null
+          status: string
+          student_id: string
+          teacher_id: string
+          total_questions: number | null
+          total_score: number | null
+          updated_at: string
+        }
+        Insert: {
+          answers?: Json
+          completed_at?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          question_ids?: Json
+          recommended_level?: string | null
+          scores_by_level?: Json | null
+          started_at?: string | null
+          status?: string
+          student_id: string
+          teacher_id: string
+          total_questions?: number | null
+          total_score?: number | null
+          updated_at?: string
+        }
+        Update: {
+          answers?: Json
+          completed_at?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          question_ids?: Json
+          recommended_level?: string | null
+          scores_by_level?: Json | null
+          started_at?: string | null
+          status?: string
+          student_id?: string
+          teacher_id?: string
+          total_questions?: number | null
+          total_score?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      tutoring_placement_questions: {
+        Row: {
+          audio_url: string | null
+          context: string | null
+          correct_index: number
+          created_at: string
+          explanation: string | null
+          id: string
+          level: string
+          options: Json
+          question: string
+          question_type: string
+          sort_order: number | null
+        }
+        Insert: {
+          audio_url?: string | null
+          context?: string | null
+          correct_index: number
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          level: string
+          options?: Json
+          question: string
+          question_type: string
+          sort_order?: number | null
+        }
+        Update: {
+          audio_url?: string | null
+          context?: string | null
+          correct_index?: number
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          level?: string
+          options?: Json
+          question?: string
+          question_type?: string
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
       tutoring_relationships: {
         Row: {
           created_at: string
