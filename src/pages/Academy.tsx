@@ -35,6 +35,7 @@ const ALLOWED_NICKNAMES = ["2lupov7"];
 const Academy = () => {
   const { lang } = useLanguage();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [courses, setCourses] = useState<CourseRow[]>([]);
   const [purchasedIds, setPurchasedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
