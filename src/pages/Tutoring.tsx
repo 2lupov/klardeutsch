@@ -993,6 +993,46 @@ const Tutoring = () => {
               />
             </div>
 
+            {/* Attached materials (images / files) */}
+            <div>
+              <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block flex items-center gap-1.5">
+                <Paperclip className="w-3 h-3" />
+                {t("Матеріали для AI (фото, PDF, документи)", "Материалы для AI (фото, PDF, документы)")}
+              </label>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {attachedFiles.map((f, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold border border-primary/20"
+                  >
+                    {f.type.startsWith("image/") ? <ImageIcon className="w-3 h-3" /> : <Paperclip className="w-3 h-3" />}
+                    <span className="max-w-[140px] truncate">{f.name}</span>
+                    <button onClick={() => removeAttachment(i)} className="hover:opacity-70">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <label className="flex items-center justify-center gap-2 px-3 py-3 rounded-xl border-2 border-dashed border-border hover:border-primary/50 hover:bg-muted/50 transition cursor-pointer text-sm">
+                {uploading ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" />{t("Завантаження…", "Загрузка…")}</>
+                ) : (
+                  <><Plus className="w-4 h-4" />{t("Додати фото або файл (до 10MB)", "Добавить фото или файл (до 10MB)")}</>
+                )}
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*,application/pdf,.doc,.docx,.txt"
+                  className="hidden"
+                  onChange={(e) => { handleUpload(e.target.files); e.target.value = ""; }}
+                  disabled={uploading}
+                />
+              </label>
+              <p className="text-[10px] text-muted-foreground mt-1.5">
+                {t("AI використає вкладені фото та файли для побудови вправ і словника", "AI использует вложенные фото и файлы для построения упражнений и словаря")}
+              </p>
+            </div>
+
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
