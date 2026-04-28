@@ -20,6 +20,16 @@ interface Question {
   explanation: string | null;
 }
 
+interface AIAnalysis {
+  summary?: string;
+  strengths?: string[];
+  weaknesses?: string[];
+  skill_breakdown?: Record<string, string>;
+  recommended_topics?: { topic: string; why: string; priority: string }[];
+  first_3_lessons?: { focus: string; goals: string; exercises: string }[];
+  warning?: string | null;
+}
+
 interface Assignment {
   id: string;
   teacher_id: string;
@@ -34,6 +44,8 @@ interface Assignment {
   duration_seconds: number | null;
   started_at: string | null;
   completed_at: string | null;
+  ai_analysis: AIAnalysis | null;
+  selected_levels?: string[];
 }
 
 const LEVEL_COLORS: Record<string, string> = {
