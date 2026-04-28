@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import {
   GraduationCap, Users, Sparkles, Calendar, FileStack,
   BookOpen, Clock, Video, ChevronRight, Check, X, Loader2, UserPlus, Search,
-  Wand2, Save, Trash2, Copy, Plus
+  Wand2, Save, Trash2, Copy, Plus, Paperclip, Image as ImageIcon, Mail, Key, Eye, EyeOff
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -107,6 +107,20 @@ const Tutoring = () => {
   const [tplName, setTplName] = useState("");
   const [tplDescription, setTplDescription] = useState("");
 
+  // Attached materials for AI generation
+  const [attachedFiles, setAttachedFiles] = useState<{ name: string; url: string; type: string; size: number }[]>([]);
+  const [uploading, setUploading] = useState(false);
+
+  // Create student dialog
+  const [createStudentOpen, setCreateStudentOpen] = useState(false);
+  const [newStudentEmail, setNewStudentEmail] = useState("");
+  const [newStudentName, setNewStudentName] = useState("");
+  const [newStudentPassword, setNewStudentPassword] = useState("");
+  const [newStudentNote, setNewStudentNote] = useState("");
+  const [creatingStudent, setCreatingStudent] = useState(false);
+  const [createdCredentials, setCreatedCredentials] = useState<{ email: string; password: string } | null>(null);
+  const [showPwd, setShowPwd] = useState(false);
+
   useEffect(() => {
     if (!user) return;
     (async () => {
@@ -207,7 +221,83 @@ const Tutoring = () => {
     setVocabularyText(""); setTheoryTemplate("");
     setDurationMinutes(60);
     setActiveTemplateId(null);
+    setAttachedFiles([]);
   };
+
+  // ===== Upload materials (images / PDF / docs) =====
+  const handleUpload = async (files: FileList | null) => {
+    if (!files || !files.length || !user) return;
+    setUploading(true);
+    try {
+      const uploaded: typeof attachedFiles = [];
+      for (const file of Array.from(files)) {
+        if (file.size > 10 * 1024 * 1024) {
+          toast.error(t(`Файл "${file.name}" >10MB`, `Файл "${file.name}" >10MB`));
+          continue;
+        }
+        const ext = file.name.split(".").pop() || "bin";
+        const path = `${user.id}/draft/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+        const { error: upErr } = await supabase.storage
+          .from("tutoring-materials")
+          .upload(path, file, { contentType: file.type, upsert: false });
+        if (upErr) { toast.error(upErr.message); continue; }
+        const { data: signed } = await supabase.storage
+          .from("tutoring-materials")
+          .createSignedUrl(path, 60 * 60 * 2); // 2h
+        uploaded.push({
+          name: file.name,
+          url: signed?.signedUrl || "",
+          type: file.type,
+          size: file.size,
+        });
+      }
+      setAttachedFiles(prev => [...prev, ...uploaded]);
+      if (uploaded.length) toast.success(t(`Завантажено: ${uploaded.length}`, `Загружено: ${uploaded.length}`));
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removeAttachment = (idx: number) => {
+    setAttachedFiles(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  // ===== Create student account =====
+  const createStudent = async () => {
+    if (!newStudentEmail || !newStudentName) {
+      toast.error(t("Заповніть email та ім'я", "Заполните email и имя"));
+      return;
+    }
+    setCreatingStudent(true);
+    try {
+      const res = await fetchEdgeFunction("teacher-create-student", {
+        json: {
+          email: newStudentEmail,
+          display_name: newStudentName,
+          password: newStudentPassword || undefined,
+          note: newStudentNote,
+        },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "create failed");
+      setCreatedCredentials({ email: data.email, password: data.password });
+      setNewStudentEmail(""); setNewStudentName(""); setNewStudentPassword(""); setNewStudentNote("");
+      loadData();
+      toast.success(t("Акаунт створено", "Аккаунт создан"));
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setCreatingStudent(false);
+    }
+  };
+
+  const copyCredentials = () => {
+    if (!createdCredentials) return;
+    const text = `Email: ${createdCredentials.email}\nПароль: ${createdCredentials.password}\nВхід: https://klardeutsch.org`;
+    navigator.clipboard.writeText(text);
+    toast.success(t("Скопійовано", "Скопировано"));
+  };
+
 
   const applyTemplate = (tpl: Template) => {
     setActiveTemplateId(tpl.id);
@@ -286,6 +376,7 @@ const Tutoring = () => {
           exerciseTypes,
           vocabulary: vocab,
           theoryTemplate,
+          imageUrls: attachedFiles.filter(f => f.type.startsWith("image/")).map(f => f.url),
         },
       });
       const data = await res.json();
@@ -415,10 +506,21 @@ const Tutoring = () => {
           </div>
 
           {mode === "teacher" ? (
-            <Button onClick={() => { resetCreateForm(); setCreateOpen(true); }} size="lg" className="gap-2 shadow-lg">
-              <Sparkles className="w-4 h-4" />
-              {t("Створити урок з AI", "Создать урок с AI")}
-            </Button>
+            <div className="flex gap-2 flex-wrap">
+              <Button
+                onClick={() => { setCreatedCredentials(null); setCreateStudentOpen(true); }}
+                size="lg"
+                variant="outline"
+                className="gap-2"
+              >
+                <UserPlus className="w-4 h-4" />
+                {t("Створити учня", "Создать ученика")}
+              </Button>
+              <Button onClick={() => { resetCreateForm(); setCreateOpen(true); }} size="lg" className="gap-2 shadow-lg">
+                <Sparkles className="w-4 h-4" />
+                {t("Створити урок з AI", "Создать урок с AI")}
+              </Button>
+            </div>
           ) : (
             <Button onClick={() => setFindOpen(true)} size="lg" className="gap-2 shadow-lg">
               <UserPlus className="w-4 h-4" />
@@ -891,6 +993,46 @@ const Tutoring = () => {
               />
             </div>
 
+            {/* Attached materials (images / files) */}
+            <div>
+              <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block flex items-center gap-1.5">
+                <Paperclip className="w-3 h-3" />
+                {t("Матеріали для AI (фото, PDF, документи)", "Материалы для AI (фото, PDF, документы)")}
+              </label>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {attachedFiles.map((f, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold border border-primary/20"
+                  >
+                    {f.type.startsWith("image/") ? <ImageIcon className="w-3 h-3" /> : <Paperclip className="w-3 h-3" />}
+                    <span className="max-w-[140px] truncate">{f.name}</span>
+                    <button onClick={() => removeAttachment(i)} className="hover:opacity-70">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <label className="flex items-center justify-center gap-2 px-3 py-3 rounded-xl border-2 border-dashed border-border hover:border-primary/50 hover:bg-muted/50 transition cursor-pointer text-sm">
+                {uploading ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" />{t("Завантаження…", "Загрузка…")}</>
+                ) : (
+                  <><Plus className="w-4 h-4" />{t("Додати фото або файл (до 10MB)", "Добавить фото или файл (до 10MB)")}</>
+                )}
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*,application/pdf,.doc,.docx,.txt"
+                  className="hidden"
+                  onChange={(e) => { handleUpload(e.target.files); e.target.value = ""; }}
+                  disabled={uploading}
+                />
+              </label>
+              <p className="text-[10px] text-muted-foreground mt-1.5">
+                {t("AI використає вкладені фото та файли для побудови вправ і словника", "AI использует вложенные фото и файлы для построения упражнений и словаря")}
+              </p>
+            </div>
+
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
@@ -977,6 +1119,112 @@ const Tutoring = () => {
               {t("Зберегти шаблон", "Сохранить шаблон")}
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ===== Create Student Dialog ===== */}
+      <Dialog open={createStudentOpen} onOpenChange={(o) => { setCreateStudentOpen(o); if (!o) setCreatedCredentials(null); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus className="w-5 h-5 text-primary" />
+              {createdCredentials
+                ? t("Акаунт створено", "Аккаунт создан")
+                : t("Створити учня", "Создать ученика")}
+            </DialogTitle>
+          </DialogHeader>
+
+          {createdCredentials ? (
+            <div className="space-y-4">
+              <div className="p-4 rounded-2xl bg-primary/10 border border-primary/20 space-y-3">
+                <div>
+                  <p className="text-[10px] font-bold uppercase text-muted-foreground mb-1">Email</p>
+                  <p className="font-mono font-bold text-sm break-all">{createdCredentials.email}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase text-muted-foreground mb-1">{t("Пароль", "Пароль")}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-mono font-bold text-sm flex-1">
+                      {showPwd ? createdCredentials.password : "•".repeat(createdCredentials.password.length)}
+                    </p>
+                    <button onClick={() => setShowPwd(!showPwd)} className="text-muted-foreground hover:text-primary">
+                      {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {t(
+                  "Передайте ці дані учню. Він зможе увійти і змінити пароль у профілі.",
+                  "Передайте эти данные ученику. Он сможет войти и сменить пароль в профиле."
+                )}
+              </p>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={copyCredentials} className="flex-1 gap-2">
+                  <Copy className="w-4 h-4" />{t("Копіювати", "Копировать")}
+                </Button>
+                <Button onClick={() => { setCreatedCredentials(null); setCreateStudentOpen(false); }} className="flex-1">
+                  {t("Готово", "Готово")}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
+                  {t("Ім'я учня", "Имя ученика")} *
+                </label>
+                <Input
+                  value={newStudentName}
+                  onChange={(e) => setNewStudentName(e.target.value)}
+                  placeholder={t("Напр. Анна Шмідт", "Напр. Анна Шмидт")}
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block flex items-center gap-1">
+                  <Mail className="w-3 h-3" /> Email *
+                </label>
+                <Input
+                  type="email"
+                  value={newStudentEmail}
+                  onChange={(e) => setNewStudentEmail(e.target.value)}
+                  placeholder="anna@example.com"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block flex items-center gap-1">
+                  <Key className="w-3 h-3" /> {t("Пароль (необов'язково)", "Пароль (необязательно)")}
+                </label>
+                <Input
+                  value={newStudentPassword}
+                  onChange={(e) => setNewStudentPassword(e.target.value)}
+                  placeholder={t("Згенерую автоматично", "Сгенерирую автоматически")}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
+                  {t("Замітка (необов'язково)", "Заметка (необязательно)")}
+                </label>
+                <Textarea
+                  value={newStudentNote}
+                  onChange={(e) => setNewStudentNote(e.target.value)}
+                  rows={2}
+                  placeholder={t("Рівень, цілі, особливості…", "Уровень, цели, особенности…")}
+                />
+              </div>
+              <Button onClick={createStudent} disabled={creatingStudent} className="w-full gap-2" size="lg">
+                {creatingStudent ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" />{t("Створюємо…", "Создаём…")}</>
+                ) : (
+                  <><UserPlus className="w-4 h-4" />{t("Створити акаунт", "Создать аккаунт")}</>
+                )}
+              </Button>
+              <p className="text-[10px] text-muted-foreground text-center">
+                {t("Email буде автоматично підтверджено", "Email будет автоматически подтверждён")}
+              </p>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
