@@ -8,6 +8,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
+import { fetchEdgeFunction } from "@/lib/auth-fetch";
 
 interface Question {
   id: string;
