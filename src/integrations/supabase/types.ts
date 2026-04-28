@@ -1949,6 +1949,7 @@ export type Database = {
       }
       tutoring_placement_assignments: {
         Row: {
+          ai_analysis: Json | null
           answers: Json
           completed_at: string | null
           created_at: string
@@ -1957,6 +1958,7 @@ export type Database = {
           question_ids: Json
           recommended_level: string | null
           scores_by_level: Json | null
+          selected_levels: Json | null
           started_at: string | null
           status: string
           student_id: string
@@ -1966,6 +1968,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          ai_analysis?: Json | null
           answers?: Json
           completed_at?: string | null
           created_at?: string
@@ -1974,6 +1977,7 @@ export type Database = {
           question_ids?: Json
           recommended_level?: string | null
           scores_by_level?: Json | null
+          selected_levels?: Json | null
           started_at?: string | null
           status?: string
           student_id: string
@@ -1983,6 +1987,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          ai_analysis?: Json | null
           answers?: Json
           completed_at?: string | null
           created_at?: string
@@ -1991,6 +1996,7 @@ export type Database = {
           question_ids?: Json
           recommended_level?: string | null
           scores_by_level?: Json | null
+          selected_levels?: Json | null
           started_at?: string | null
           status?: string
           student_id?: string
