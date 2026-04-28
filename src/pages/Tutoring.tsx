@@ -1121,6 +1121,112 @@ const Tutoring = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* ===== Create Student Dialog ===== */}
+      <Dialog open={createStudentOpen} onOpenChange={(o) => { setCreateStudentOpen(o); if (!o) setCreatedCredentials(null); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus className="w-5 h-5 text-primary" />
+              {createdCredentials
+                ? t("Акаунт створено", "Аккаунт создан")
+                : t("Створити учня", "Создать ученика")}
+            </DialogTitle>
+          </DialogHeader>
+
+          {createdCredentials ? (
+            <div className="space-y-4">
+              <div className="p-4 rounded-2xl bg-primary/10 border border-primary/20 space-y-3">
+                <div>
+                  <p className="text-[10px] font-bold uppercase text-muted-foreground mb-1">Email</p>
+                  <p className="font-mono font-bold text-sm break-all">{createdCredentials.email}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase text-muted-foreground mb-1">{t("Пароль", "Пароль")}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-mono font-bold text-sm flex-1">
+                      {showPwd ? createdCredentials.password : "•".repeat(createdCredentials.password.length)}
+                    </p>
+                    <button onClick={() => setShowPwd(!showPwd)} className="text-muted-foreground hover:text-primary">
+                      {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {t(
+                  "Передайте ці дані учню. Він зможе увійти і змінити пароль у профілі.",
+                  "Передайте эти данные ученику. Он сможет войти и сменить пароль в профиле."
+                )}
+              </p>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={copyCredentials} className="flex-1 gap-2">
+                  <Copy className="w-4 h-4" />{t("Копіювати", "Копировать")}
+                </Button>
+                <Button onClick={() => { setCreatedCredentials(null); setCreateStudentOpen(false); }} className="flex-1">
+                  {t("Готово", "Готово")}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
+                  {t("Ім'я учня", "Имя ученика")} *
+                </label>
+                <Input
+                  value={newStudentName}
+                  onChange={(e) => setNewStudentName(e.target.value)}
+                  placeholder={t("Напр. Анна Шмідт", "Напр. Анна Шмидт")}
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block flex items-center gap-1">
+                  <Mail className="w-3 h-3" /> Email *
+                </label>
+                <Input
+                  type="email"
+                  value={newStudentEmail}
+                  onChange={(e) => setNewStudentEmail(e.target.value)}
+                  placeholder="anna@example.com"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block flex items-center gap-1">
+                  <Key className="w-3 h-3" /> {t("Пароль (необов'язково)", "Пароль (необязательно)")}
+                </label>
+                <Input
+                  value={newStudentPassword}
+                  onChange={(e) => setNewStudentPassword(e.target.value)}
+                  placeholder={t("Згенерую автоматично", "Сгенерирую автоматически")}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
+                  {t("Замітка (необов'язково)", "Заметка (необязательно)")}
+                </label>
+                <Textarea
+                  value={newStudentNote}
+                  onChange={(e) => setNewStudentNote(e.target.value)}
+                  rows={2}
+                  placeholder={t("Рівень, цілі, особливості…", "Уровень, цели, особенности…")}
+                />
+              </div>
+              <Button onClick={createStudent} disabled={creatingStudent} className="w-full gap-2" size="lg">
+                {creatingStudent ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" />{t("Створюємо…", "Создаём…")}</>
+                ) : (
+                  <><UserPlus className="w-4 h-4" />{t("Створити акаунт", "Создать аккаунт")}</>
+                )}
+              </Button>
+              <p className="text-[10px] text-muted-foreground text-center">
+                {t("Email буде автоматично підтверджено", "Email будет автоматически подтверждён")}
+              </p>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
