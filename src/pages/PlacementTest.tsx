@@ -302,6 +302,86 @@ export default function PlacementTest() {
               })}
             </div>
           </div>
+
+          {/* ===== AI Analysis ===== */}
+          {assignment.ai_analysis ? (
+            <div className="mt-6 rounded-2xl bg-gradient-to-br from-primary/5 to-primary/10 border-2 border-primary/30 p-6 space-y-5">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-primary" />
+                <h2 className="font-bold text-lg">{t("AI-аналіз", "AI-анализ")}</h2>
+                {!isStudent && <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-primary text-primary-foreground">{t("Для викладача", "Для преподавателя")}</span>}
+              </div>
+
+              {assignment.ai_analysis.warning && (
+                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-sm">
+                  ⚠️ {assignment.ai_analysis.warning}
+                </div>
+              )}
+
+              {assignment.ai_analysis.summary && (
+                <p className="text-sm leading-relaxed">{assignment.ai_analysis.summary}</p>
+              )}
+
+              {!!assignment.ai_analysis.strengths?.length && (
+                <div>
+                  <p className="text-xs font-bold uppercase text-muted-foreground mb-2">✅ {t("Сильні сторони", "Сильные стороны")}</p>
+                  <ul className="space-y-1 text-sm">
+                    {assignment.ai_analysis.strengths.map((s, i) => <li key={i}>• {s}</li>)}
+                  </ul>
+                </div>
+              )}
+
+              {!!assignment.ai_analysis.weaknesses?.length && (
+                <div>
+                  <p className="text-xs font-bold uppercase text-muted-foreground mb-2">🎯 {t("Слабкі місця", "Слабые места")}</p>
+                  <ul className="space-y-1 text-sm">
+                    {assignment.ai_analysis.weaknesses.map((s, i) => <li key={i}>• {s}</li>)}
+                  </ul>
+                </div>
+              )}
+
+              {!isStudent && !!assignment.ai_analysis.recommended_topics?.length && (
+                <div>
+                  <p className="text-xs font-bold uppercase text-muted-foreground mb-2">📚 {t("Рекомендовані теми", "Рекомендуемые темы")}</p>
+                  <div className="space-y-2">
+                    {assignment.ai_analysis.recommended_topics.map((rt, i) => (
+                      <div key={i} className="p-3 rounded-xl bg-card border border-border">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-bold text-sm">{rt.topic}</span>
+                          <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${
+                            rt.priority === "high" ? "bg-rose-500/20 text-rose-700 dark:text-rose-300" :
+                            rt.priority === "medium" ? "bg-amber-500/20 text-amber-700 dark:text-amber-300" :
+                            "bg-muted text-muted-foreground"
+                          }`}>{rt.priority}</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">{rt.why}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {!isStudent && !!assignment.ai_analysis.first_3_lessons?.length && (
+                <div>
+                  <p className="text-xs font-bold uppercase text-muted-foreground mb-2">🗓 {t("План перших 3 уроків", "План первых 3 уроков")}</p>
+                  <div className="space-y-2">
+                    {assignment.ai_analysis.first_3_lessons.map((l, i) => (
+                      <div key={i} className="p-3 rounded-xl bg-card border border-border">
+                        <p className="font-bold text-sm mb-1">{i + 1}. {l.focus}</p>
+                        <p className="text-xs text-muted-foreground"><strong>{t("Цілі", "Цели")}:</strong> {l.goals}</p>
+                        <p className="text-xs text-muted-foreground"><strong>{t("Вправи", "Упражнения")}:</strong> {l.exercises}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : submitting ? (
+            <div className="mt-6 rounded-2xl bg-card border border-border p-6 flex items-center gap-3">
+              <Loader2 className="w-5 h-5 animate-spin text-primary" />
+              <p className="text-sm text-muted-foreground">{t("AI аналізує результати…", "AI анализирует результаты…")}</p>
+            </div>
+          ) : null}
         </div>
       </div>
     );
