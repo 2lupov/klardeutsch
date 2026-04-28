@@ -856,216 +856,75 @@ const Tutoring = () => {
         </DialogContent>
       </Dialog>
 
-      {/* ===== TEACHER: Create lesson dialog ===== */}
+      {/* ===== TEACHER: Create lesson dialog (simple AI mode) ===== */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-primary" />
-              {t("Створити урок з AI", "Создать урок с AI")}
-              {activeTemplateId && (
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold">
-                  {t("із шаблону", "из шаблона")}
-                </span>
-              )}
+              {t("AI-урок за хвилину", "AI-урок за минуту")}
             </DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4">
-            {/* Templates quick-pick */}
-            {templates.length > 0 && (
-              <div>
-                <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
-                  {t("Швидкий шаблон", "Быстрый шаблон")}
-                </label>
-                <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
-                  {templates.slice(0, 8).map(tpl => (
-                    <button
-                      key={tpl.id}
-                      onClick={() => applyTemplate(tpl)}
-                      className={`shrink-0 px-3 py-2 rounded-xl border text-xs font-bold transition flex items-center gap-1.5 ${
-                        activeTemplateId === tpl.id
-                          ? "border-primary bg-primary/10 text-primary"
-                          : "border-border hover:border-primary/50"
-                      }`}
-                    >
-                      <Copy className="w-3 h-3" />
-                      {tpl.name}
-                      <span className="text-[10px] opacity-60">{tpl.level}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+            <div>
+              <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
+                {t("Учень", "Ученик")} *
+              </label>
+              <select
+                value={selectedStudent}
+                onChange={(e) => setSelectedStudent(e.target.value)}
+                className="w-full h-11 rounded-xl border border-input bg-background px-3 text-sm font-medium"
+              >
+                <option value="">{t("Оберіть…", "Выберите…")}</option>
+                {activeStudents.map((r) => (
+                  <option key={r.id} value={r.student_id}>
+                    {r.profile?.display_name || r.profile?.nickname || "User"}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-            {/* Free-form prompt */}
             <div>
               <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block flex items-center gap-1.5">
                 <Wand2 className="w-3 h-3" />
-                {t("Опишіть, що робимо сьогодні", "Опишите, что делаем сегодня")}
+                {t("Опишіть урок своїми словами", "Опишите урок своими словами")}
               </label>
               <Textarea
                 value={freePrompt}
                 onChange={(e) => setFreePrompt(e.target.value)}
                 placeholder={t(
-                  "Напр.: Вивчаємо Perfekt з sein, тренуємо розповідь про вихідні, граємо в рольову гру 'У лікаря'…",
-                  "Напр.: Изучаем Perfekt с sein, тренируем рассказ о выходных, играем в ролевую игру 'У врача'…"
+                  "Напр.: «Хочу пройти Perfekt з sein, тренуємо розповідь про вихідні» — або просто завантажте файл/фото",
+                  "Напр.: «Хочу пройти Perfekt с sein, тренируем рассказ о выходных» — или просто загрузите файл/фото"
                 )}
-                rows={3}
-                className="resize-none"
+                rows={4}
+                className="resize-none text-sm"
+                autoFocus
               />
-              <p className="text-[10px] text-muted-foreground mt-1">
-                {t("AI підготує презентацію, теорію, словник, вправи та ДЗ", "AI подготовит презентацию, теорию, словарь, упражнения и ДЗ")}
-              </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
-                  {t("Учень", "Ученик")} *
-                </label>
-                <select
-                  value={selectedStudent}
-                  onChange={(e) => setSelectedStudent(e.target.value)}
-                  className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
-                >
-                  <option value="">{t("Оберіть…", "Выберите…")}</option>
-                  {activeStudents.map((r) => (
-                    <option key={r.id} value={r.student_id}>
-                      {r.profile?.display_name || r.profile?.nickname || "User"}
-                    </option>
+            <div>
+              {attachedFiles.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {attachedFiles.map((f, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold border border-primary/20"
+                    >
+                      {f.type.startsWith("image/") ? <ImageIcon className="w-3 h-3" /> : <Paperclip className="w-3 h-3" />}
+                      <span className="max-w-[140px] truncate">{f.name}</span>
+                      <button onClick={() => removeAttachment(i)} className="hover:opacity-70">
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
                   ))}
-                </select>
-              </div>
-              <div>
-                <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
-                  {t("Рівень", "Уровень")}
-                </label>
-                <select
-                  value={lessonLevel}
-                  onChange={(e) => setLessonLevel(e.target.value)}
-                  className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
-                >
-                  {["A1","A2","B1","B2","C1"].map(l => <option key={l} value={l}>{l}</option>)}
-                </select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
-                  {t("Тема", "Тема")}
-                </label>
-                <Input
-                  value={lessonTopic}
-                  onChange={(e) => setLessonTopic(e.target.value)}
-                  placeholder={t("Напр. Perfekt", "Напр. Perfekt")}
-                />
-              </div>
-              <div>
-                <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
-                  {t("Фокус", "Фокус")}
-                </label>
-                <Input
-                  value={lessonFocus}
-                  onChange={(e) => setLessonFocus(e.target.value)}
-                  placeholder={t("розмова, граматика…", "разговор, грамматика…")}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-3">
-              <div>
-                <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
-                  {t("Слів", "Слов")}
-                </label>
-                <Input
-                  type="number" min={3} max={30}
-                  value={wordsCount}
-                  onChange={(e) => setWordsCount(parseInt(e.target.value) || 10)}
-                />
-              </div>
-              <div>
-                <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
-                  {t("Вправ", "Упр.")}
-                </label>
-                <Input
-                  type="number" min={3} max={20}
-                  value={exercisesCount}
-                  onChange={(e) => setExercisesCount(parseInt(e.target.value) || 8)}
-                />
-              </div>
-              <div>
-                <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
-                  {t("Тривалість, хв", "Длит., мин")}
-                </label>
-                <Input
-                  type="number" min={15} max={180}
-                  value={durationMinutes}
-                  onChange={(e) => setDurationMinutes(parseInt(e.target.value) || 60)}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
-                {t("Типи вправ", "Типы упражнений")}
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {EX_TYPES.map(et => (
-                  <button
-                    key={et.id}
-                    type="button"
-                    onClick={() => toggleExType(et.id)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-bold border transition ${
-                      exerciseTypes.includes(et.id)
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-background border-border text-muted-foreground"
-                    }`}
-                  >
-                    {lang === "uk" ? et.uk : et.ru}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
-                {t("Словник (через кому, необов'язково)", "Словарь (через запятую, необязательно)")}
-              </label>
-              <Textarea
-                value={vocabularyText}
-                onChange={(e) => setVocabularyText(e.target.value)}
-                placeholder="Haus, gehen, schön, der Arzt…"
-                rows={2}
-              />
-            </div>
-
-            {/* Attached materials (images / files) */}
-            <div>
-              <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block flex items-center gap-1.5">
-                <Paperclip className="w-3 h-3" />
-                {t("Матеріали для AI (фото, PDF, документи)", "Материалы для AI (фото, PDF, документы)")}
-              </label>
-              <div className="flex flex-wrap gap-2 mb-2">
-                {attachedFiles.map((f, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold border border-primary/20"
-                  >
-                    {f.type.startsWith("image/") ? <ImageIcon className="w-3 h-3" /> : <Paperclip className="w-3 h-3" />}
-                    <span className="max-w-[140px] truncate">{f.name}</span>
-                    <button onClick={() => removeAttachment(i)} className="hover:opacity-70">
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                ))}
-              </div>
+                </div>
+              )}
               <label className="flex items-center justify-center gap-2 px-3 py-3 rounded-xl border-2 border-dashed border-border hover:border-primary/50 hover:bg-muted/50 transition cursor-pointer text-sm">
                 {uploading ? (
                   <><Loader2 className="w-4 h-4 animate-spin" />{t("Завантаження…", "Загрузка…")}</>
                 ) : (
-                  <><Plus className="w-4 h-4" />{t("Додати фото або файл (до 10MB)", "Добавить фото или файл (до 10MB)")}</>
+                  <><Paperclip className="w-4 h-4" />{t("Додати фото, PDF або документ", "Добавить фото, PDF или документ")}</>
                 )}
                 <input
                   type="file"
@@ -1076,52 +935,43 @@ const Tutoring = () => {
                   disabled={uploading}
                 />
               </label>
-              <p className="text-[10px] text-muted-foreground mt-1.5">
-                {t("AI використає вкладені фото та файли для побудови вправ і словника", "AI использует вложенные фото и файлы для построения упражнений и словаря")}
-              </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
-                  Zoom/Meet link
-                </label>
+            <details className="text-sm">
+              <summary className="cursor-pointer text-xs font-bold uppercase text-muted-foreground hover:text-foreground">
+                {t("Додатково (Zoom, час)", "Дополнительно (Zoom, время)")}
+              </summary>
+              <div className="grid grid-cols-2 gap-3 mt-3">
                 <Input
                   value={meetingLink}
                   onChange={(e) => setMeetingLink(e.target.value)}
-                  placeholder="https://…"
+                  placeholder="Zoom/Meet link"
                 />
-              </div>
-              <div>
-                <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
-                  {t("Час", "Время")}
-                </label>
                 <Input
                   type="datetime-local"
                   value={scheduledAt}
                   onChange={(e) => setScheduledAt(e.target.value)}
                 />
               </div>
+            </details>
+
+            <div className="p-3 rounded-xl bg-primary/5 border border-primary/10 text-xs text-muted-foreground flex items-start gap-2">
+              <Sparkles className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
+              <span>
+                {t(
+                  "AI сам визначить рівень (за останнім тестом учня), тему, словник, теорію, вправи та домашнє завдання.",
+                  "AI сам определит уровень (по последнему тесту ученика), тему, словарь, теорию, упражнения и домашнее задание."
+                )}
+              </span>
             </div>
 
-            <div className="flex gap-2 pt-2 sticky bottom-0 bg-background pb-1">
-              <Button
-                variant="outline"
-                onClick={() => setSaveTplOpen(true)}
-                className="gap-2"
-                disabled={generating}
-              >
-                <Save className="w-4 h-4" />
-                {t("Як шаблон", "Как шаблон")}
-              </Button>
-              <Button onClick={generateAndCreate} disabled={generating} className="flex-1" size="lg">
-                {generating ? (
-                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t("Генеруємо…", "Генерируем…")}</>
-                ) : (
-                  <><Sparkles className="w-4 h-4 mr-2" />{t("Згенерувати урок", "Сгенерировать урок")}</>
-                )}
-              </Button>
-            </div>
+            <Button onClick={generateAndCreate} disabled={generating || !selectedStudent} className="w-full" size="lg">
+              {generating ? (
+                <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t("AI створює урок…", "AI создаёт урок…")}</>
+              ) : (
+                <><Sparkles className="w-4 h-4 mr-2" />{t("Створити урок", "Создать урок")}</>
+              )}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
