@@ -56,9 +56,38 @@ const LessonTheoryRenderer = ({ content }: Props) => {
               {children}
             </h4>
           ),
-          p: ({ children }) => (
-            <p className="leading-relaxed mb-4 text-foreground/90">{children}</p>
-          ),
+          p: ({ children }) => {
+            const example = detectExample(children);
+            if (example) {
+              return (
+                <motion.div
+                  initial={{ opacity: 0, y: 6 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.35 }}
+                  className="my-4 rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/[0.04] via-background to-accent/[0.04] p-4 md:p-5 shadow-sm"
+                >
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-primary/10 text-primary">
+                      <BookMarked className="w-4 h-4" />
+                    </span>
+                    <span className="font-display font-bold text-sm text-foreground">
+                      {example.label}
+                    </span>
+                  </div>
+                  <p className="text-foreground leading-relaxed font-medium text-[15px] mb-2">
+                    {example.de}
+                  </p>
+                  {example.translation && (
+                    <p className="text-muted-foreground italic text-sm leading-relaxed pl-3 border-l-2 border-primary/30">
+                      {example.translation}
+                    </p>
+                  )}
+                </motion.div>
+              );
+            }
+            return <p className="leading-relaxed mb-4 text-foreground/90">{children}</p>;
+          },
           strong: ({ children }) => (
             <strong className="font-bold text-foreground">{children}</strong>
           ),
