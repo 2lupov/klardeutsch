@@ -454,11 +454,19 @@ const Tutoring = () => {
         .limit(1)
         .maybeSingle();
 
+      // 🧒 Check if student is a kid (9–12) → AI uses kid-friendly prompt
+      const { data: studentProfile } = await supabase
+        .from("profiles")
+        .select("is_kid")
+        .eq("user_id", selectedStudent)
+        .maybeSingle();
+
       const res = await fetchEdgeFunction("generate-tutoring-lesson", {
         json: {
           freePrompt,
           autoMode: true,
           studentLevelHint: lastTest?.recommended_level || null,
+          isKid: !!studentProfile?.is_kid,
           imageUrls: attachedFiles.filter(f => f.type.startsWith("image/")).map(f => f.url),
           fileNames: attachedFiles.map(f => f.name),
           attachedFiles: attachedFiles
