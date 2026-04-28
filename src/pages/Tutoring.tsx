@@ -120,6 +120,7 @@ const Tutoring = () => {
   const [newStudentPassword, setNewStudentPassword] = useState("");
   const [newStudentNote, setNewStudentNote] = useState("");
   const [newStudentAge, setNewStudentAge] = useState<string>("");
+  const [aiAssistantStudent, setAiAssistantStudent] = useState<{ id: string; name: string; isKid: boolean } | null>(null);
   const [creatingStudent, setCreatingStudent] = useState(false);
   const [createdCredentials, setCreatedCredentials] = useState<{ email: string; password: string } | null>(null);
   const [showPwd, setShowPwd] = useState(false);
