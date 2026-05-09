@@ -103,6 +103,10 @@ const Tutoring = () => {
   const [durationMinutes, setDurationMinutes] = useState(60);
   const [generating, setGenerating] = useState(false);
   const [activeTemplateId, setActiveTemplateId] = useState<string | null>(null);
+  // Mode override: 'auto' = по профилю ученика, 'kid' = детский, 'adult' = взрослый
+  const [modeOverride, setModeOverride] = useState<"auto" | "kid" | "adult">("auto");
+  // Beautiful theory toggle
+  const [richTheory, setRichTheory] = useState(true);
 
   // Save template dialog
   const [saveTplOpen, setSaveTplOpen] = useState(false);
