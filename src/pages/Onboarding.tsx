@@ -27,7 +27,7 @@ const Onboarding = () => {
     const checkExisting = async () => {
       const { data: profile } = await supabase
         .from("profiles")
-        .select("created_at")
+        .select("created_at, created_by_teacher_id")
         .eq("user_id", user.id)
         .single();
 
@@ -39,8 +39,13 @@ const Onboarding = () => {
       const createdAt = profile?.created_at ? new Date(profile.created_at).getTime() : Date.now();
       const isOld = Date.now() - createdAt > 2 * 60 * 1000; // > 2 min old
       const hasProgress = (count ?? 0) > 0;
+      const createdByTeacher = !!(profile as any)?.created_by_teacher_id;
 
-      if (isOld || hasProgress) {
+      // Students created by a teacher should always go through the placement test
+      // as a fresh user — never show the "existing user" skip-intro screen.
+      if (createdByTeacher && !hasProgress) {
+        setStep(0);
+      } else if (isOld || hasProgress) {
         setIsExisting(true);
         setShowIntro(true);
       } else {
