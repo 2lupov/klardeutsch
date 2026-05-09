@@ -272,6 +272,111 @@ const StudentAssignments = () => {
           </div>
         </motion.div>
 
+        {/* Upcoming scheduled lessons */}
+        {upcoming.length > 0 && (
+          <div className="mb-5 space-y-3">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground px-1">
+              {t("Найближчі уроки", "Ближайшие уроки")}
+            </h2>
+            {upcoming.map((l, idx) => {
+              const date = new Date(l.scheduled_at);
+              const diffMs = date.getTime() - Date.now();
+              const isLive = diffMs < 15 * 60 * 1000 && diffMs > -90 * 60 * 1000;
+              const dateStr = date.toLocaleString(lang === "uk" ? "uk-UA" : "ru-RU", {
+                weekday: "short", day: "numeric", month: "short",
+                hour: "2-digit", minute: "2-digit",
+              });
+              const inDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+              const inHours = Math.round(diffMs / (1000 * 60 * 60));
+              const relStr =
+                diffMs < 0 ? t("Зараз триває", "Идёт сейчас")
+                : inHours < 1 ? t("Менше години", "Менее часа")
+                : inHours < 24 ? t(`Через ${inHours} год`, `Через ${inHours} ч`)
+                : t(`Через ${inDays} дн`, `Через ${inDays} дн`);
+
+              return (
+                <motion.div
+                  key={l.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.04 }}
+                  className={`rounded-2xl p-4 lg:p-5 border shadow-sm ${
+                    isLive
+                      ? "bg-gradient-to-br from-emerald-500/15 via-card to-card border-emerald-500/40"
+                      : "bg-gradient-to-br from-primary/10 via-card to-card border-border"
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className={`w-11 h-11 rounded-2xl shrink-0 flex items-center justify-center ${
+                      isLive ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300" : "bg-primary/15 text-primary"
+                    }`}>
+                      <Calendar className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 mb-1">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                          {l.level}
+                        </span>
+                        {isLive ? (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 inline-flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            LIVE
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                            {relStr}
+                          </span>
+                        )}
+                      </div>
+                      <h3 className="font-display font-bold text-foreground leading-tight">
+                        {l.title}
+                      </h3>
+                      <div className="flex flex-wrap items-center gap-3 mt-1.5 text-xs text-muted-foreground">
+                        <span className="inline-flex items-center gap-1">
+                          <Clock className="w-3 h-3" /> {dateStr}
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <GraduationCap className="w-3 h-3" /> {l.teacherName}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {l.meeting_link ? (
+                      <a
+                        href={l.meeting_link}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition ${
+                          isLive
+                            ? "bg-emerald-500 text-white hover:bg-emerald-600 shadow-md"
+                            : "bg-primary text-primary-foreground hover:bg-primary/90"
+                        }`}
+                      >
+                        <Video className="w-4 h-4" />
+                        {t("Приєднатися до Google Meet", "Подключиться к Google Meet")}
+                      </a>
+                    ) : (
+                      <span className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-muted-foreground bg-muted">
+                        <Video className="w-3.5 h-3.5" />
+                        {t("Посилання з'явиться пізніше", "Ссылка появится позже")}
+                      </span>
+                    )}
+                    <button
+                      onClick={() => navigate(`/tutoring/lesson/${l.id}`)}
+                      className="inline-flex items-center gap-1 px-3 py-2 rounded-xl text-sm font-bold bg-card border border-border hover:border-primary/40 transition"
+                    >
+                      {t("Відкрити урок", "Открыть урок")}
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
+
         {/* Filter chips */}
         <div className="flex gap-2 mb-4">
           {([
