@@ -95,7 +95,13 @@ export default function PlacementTest() {
         .select("*")
         .eq("id", id)
         .single();
-      if (error || !ass) { toast.error(t("Тест не знайдено", "Тест не найден")); navigate("/tutoring"); return; }
+      if (error || !ass) { toast.error(t("Тест не знайдено", "Тест не найден")); navigate("/assignments"); return; }
+      // Server-side guard: only the assigned student or the teacher may view.
+      if (ass.student_id !== user.id && ass.teacher_id !== user.id) {
+        toast.error(t("Немає доступу", "Нет доступа"));
+        navigate("/assignments");
+        return;
+      }
       setAssignment(ass as any);
       setAnswers((ass.answers as number[]) || []);
 
@@ -248,7 +254,7 @@ export default function PlacementTest() {
     return (
       <div className="min-h-screen bg-background p-4 md:p-8">
         <div className="max-w-3xl mx-auto">
-          <Button variant="ghost" onClick={() => navigate("/tutoring")} className="mb-4">
+          <Button variant="ghost" onClick={() => navigate("/assignments")} className="mb-4">
             <ArrowLeft className="w-4 h-4 mr-2" /> {t("Назад", "Назад")}
           </Button>
           <motion.div
