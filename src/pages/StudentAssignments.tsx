@@ -64,6 +64,46 @@ const StudentAssignments = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<Filter>("active");
 
+  // Auto-join live lesson when teacher starts it
+  useEffect(() => {
+    if (!user) return;
+
+    const checkAndJoin = async () => {
+      const { data } = await supabase
+        .from("tutoring_live_sessions")
+        .select("id")
+        .eq("student_id", user.id)
+        .eq("status", "active")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (data?.id) navigate(`/student-view/${data.id}`, { replace: true });
+    };
+    checkAndJoin();
+
+    const ch = supabase
+      .channel(`student-live-${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "tutoring_live_sessions", filter: `student_id=eq.${user.id}` },
+        (payload) => {
+          const s: any = payload.new;
+          if (s?.status === "active") navigate(`/student-view/${s.id}`, { replace: true });
+        },
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "tutoring_live_sessions", filter: `student_id=eq.${user.id}` },
+        (payload) => {
+          const s: any = payload.new;
+          if (s?.status === "active") navigate(`/student-view/${s.id}`, { replace: true });
+        },
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(ch); };
+  }, [user, navigate]);
+
   useEffect(() => {
     if (!user) return;
     const load = async () => {
