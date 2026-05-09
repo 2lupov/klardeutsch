@@ -55,6 +55,20 @@ const PresenterMode = ({ lesson, words, exercises, studentName, studentProfile, 
     if (saved) setNotes(saved);
   }, [lesson.id]);
 
+  // Realtime: live student response + reaction
+  useEffect(() => {
+    if (!session?.id) return;
+    const ch = supabase
+      .channel(`presenter-${session.id}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "tutoring_live_sessions", filter: `id=eq.${session.id}` },
+        (payload) => setSession((prev) => ({ ...(prev as any), ...(payload.new as any) })),
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [session?.id]);
+
   // Timer
   useEffect(() => {
     const t = setInterval(() => setElapsed(Math.floor((Date.now() - startedAt.current) / 1000)), 1000);
