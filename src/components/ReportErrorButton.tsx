@@ -4,10 +4,12 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { fetchEdgeFunction } from "@/lib/auth-fetch";
 import { toast } from "sonner";
 import { useLocation } from "react-router-dom";
+import { useIsManagedStudent } from "@/hooks/useIsManagedStudent";
 
 const ReportErrorButton = () => {
   const { t } = useLanguage();
   const location = useLocation();
+  const { isStudent } = useIsManagedStudent();
   const [open, setOpen] = useState(false);
   const [description, setDescription] = useState("");
   const [sending, setSending] = useState(false);
@@ -19,8 +21,8 @@ const ReportErrorButton = () => {
     return () => window.removeEventListener("open-report-error", handler);
   }, []);
 
-  // Hide on chat page
-  if (location.pathname === "/chat") return null;
+  // Hide on chat page or for managed students (locked-down UI)
+  if (location.pathname === "/chat" || isStudent) return null;
 
   const handleSubmit = async () => {
     if (!description.trim()) return;
