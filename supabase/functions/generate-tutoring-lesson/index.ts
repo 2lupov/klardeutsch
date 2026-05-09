@@ -52,17 +52,19 @@ Deno.serve(async (req) => {
       freePrompt = "",
       studentLevelHint = null,
       isKid = false, // 🧒 student is 9–12 years old
+      modeOverride = "auto", // "auto" | "kid" | "adult"
+      richTheory = true,
       fileNames = [],
       attachedFiles = [], // [{name, url, type}] non-image files (PDF/TXT/etc)
       lang: rawLang = "ru",
-      // Legacy / advanced fields
+      // Legacy / advanced fields (also honored in autoMode if provided)
       topic,
       level,
       focus,
       studentNotes,
-      wordsCount = 12,
-      exercisesCount = 10,
-      exerciseTypes = ["quiz", "cloze", "translation"],
+      wordsCount,
+      exercisesCount,
+      exerciseTypes,
       vocabulary = [],
       theoryTemplate,
       imageUrls = [],
@@ -146,6 +148,20 @@ Deno.serve(async (req) => {
         ? `\nПрикріплені файли (назви для контексту): ${fileNames.join(", ")}.`
         : "";
 
+      // === Учительские override-параметры (если переданы) ===
+      const exTypesList = Array.isArray(exerciseTypes) && exerciseTypes.length
+        ? exerciseTypes
+        : ["quiz", "cloze", "translation"];
+      const wordsTarget = Number.isFinite(wordsCount) && wordsCount > 0 ? wordsCount : (isKid ? 7 : 13);
+      const exercisesTarget = Number.isFinite(exercisesCount) && exercisesCount > 0 ? exercisesCount : (isKid ? 8 : 10);
+      const overrideHint = `\n\n🎯 ВЧИТЕЛЬ ВКАЗАВ ТОЧНО:
+- Слів у словнику: РІВНО ${wordsTarget} (±1).
+- Вправ: РІВНО ${exercisesTarget}, ТІЛЬКИ цих типів: ${exTypesList.join(", ")}. Інші типи НЕ створюй.
+- Розподіли вправи рівномірно між обраними типами.
+${richTheory ? "- Теорія МАЄ бути красиво відформатована: Markdown-таблиці, callout-блоки (> 📌 / 💡 / ⚠️ / 📖), bold/italic, приклади з життя." : "- Теорія може бути короткою і простою, без таблиць."}
+${modeOverride === "adult" ? "- Режим: ДОРОСЛИЙ — серйозний тон, без дитячих емодзі, реальні життєві приклади (робота, подорожі, побут)." : ""}
+${modeOverride === "kid" ? "- Режим: ДИТЯЧИЙ — багато емодзі, прості теми (тварини, школа, ігри), короткі речення." : ""}`;
+
       if (isKid) {
         // ===== KID MODE (9–12 years) =====
         systemPrompt = `${langStrict}
@@ -216,7 +232,8 @@ ${studentLevelHint ? `Рівень дитини: **${studentLevelHint}** (тіл
 
 ${imageUrls.length ? "ВАЖЛИВО: у вкладених зображеннях — матеріал. Витягни прості, зрозумілі дитині слова." : ""}
 ${pdfParts.length ? "ВАЖЛИВО: до запиту прикріплено PDF. Адаптуй матеріал під 9-12 років." : ""}
-${extractedText ? "ВАЖЛИВО: нижче в повідомленні є витягнутий текст із файлів — використовуй його, спрощуючи для дитини." : ""}`;
+${extractedText ? "ВАЖЛИВО: нижче в повідомленні є витягнутий текст із файлів — використовуй його, спрощуючи для дитини." : ""}
+${overrideHint}`;
 
         userMsg = `Учитель готує урок для **дитини 9-12 років**:\n\n"${freePrompt || "Підготуй простий веселий урок"}"\n\n${fileNames.length ? `Файли: ${fileNames.join(", ")}` : ""}${extractedText ? `\n\n=== ТЕКСТ ІЗ ФАЙЛІВ ===\n${extractedText.slice(0, 15000)}` : ""}\n\nЗроби урок **дуже простим, з емодзі, ігровим**. Дитина має посміхнутись від теми! 🌟`;
       } else {
@@ -289,7 +306,8 @@ ${levelHint}${fileHint}
 
 ${imageUrls.length ? "ВАЖЛИВО: у вкладених зображеннях — матеріал від учителя. Витягни з них словник, побудуй вправи на їх основі." : ""}
 ${pdfParts.length ? "ВАЖЛИВО: до запиту прикріплено PDF — це основний навчальний матеріал. Витягни з нього тему, лексику, граматичні структури. Будуй урок саме навколо цього PDF." : ""}
-${extractedText ? "ВАЖЛИВО: нижче в повідомленні користувача є витягнутий текст із прикріплених файлів — використовуй його як основу уроку." : ""}`;
+${extractedText ? "ВАЖЛИВО: нижче в повідомленні користувача є витягнутий текст із прикріплених файлів — використовуй його як основу уроку." : ""}
+${overrideHint}`;
 
       userMsg = `Учитель просить підготувати урок:\n\n"${freePrompt || "Підготуй урок на основі прикріплених матеріалів"}"\n\n${fileNames.length ? `Файли: ${fileNames.join(", ")}` : ""}${extractedText ? `\n\n=== ТЕКСТ ІЗ ФАЙЛІВ ===\n${extractedText.slice(0, 20000)}` : ""}\n\nСтвори повний, якісний, готовий до проведення урок.`;
       }

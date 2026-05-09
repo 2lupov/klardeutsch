@@ -103,6 +103,10 @@ const Tutoring = () => {
   const [durationMinutes, setDurationMinutes] = useState(60);
   const [generating, setGenerating] = useState(false);
   const [activeTemplateId, setActiveTemplateId] = useState<string | null>(null);
+  // Mode override: 'auto' = по профилю ученика, 'kid' = детский, 'adult' = взрослый
+  const [modeOverride, setModeOverride] = useState<"auto" | "kid" | "adult">("auto");
+  // Beautiful theory toggle
+  const [richTheory, setRichTheory] = useState(true);
 
   // Save template dialog
   const [saveTplOpen, setSaveTplOpen] = useState(false);
@@ -466,12 +470,20 @@ const Tutoring = () => {
         .eq("user_id", selectedStudent)
         .maybeSingle();
 
+      const effectiveIsKid =
+        modeOverride === "kid" ? true : modeOverride === "adult" ? false : !!studentProfile?.is_kid;
+
       const res = await fetchEdgeFunction("generate-tutoring-lesson", {
         json: {
           freePrompt,
           autoMode: true,
           studentLevelHint: lastTest?.recommended_level || null,
-          isKid: !!studentProfile?.is_kid,
+          isKid: effectiveIsKid,
+          modeOverride,
+          wordsCount,
+          exercisesCount,
+          exerciseTypes,
+          richTheory,
           lang,
           imageUrls: attachedFiles.filter(f => f.type.startsWith("image/")).map(f => f.url),
           fileNames: attachedFiles.map(f => f.name),
@@ -968,7 +980,7 @@ const Tutoring = () => {
 
       {/* ===== TEACHER: Create lesson dialog (simple AI mode) ===== */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="max-w-xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-primary" />
@@ -998,21 +1010,143 @@ const Tutoring = () => {
             <div>
               <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block flex items-center gap-1.5">
                 <Wand2 className="w-3 h-3" />
-                {t("Опишіть урок своїми словами", "Опишите урок своими словами")}
+                {t("Промпт для AI", "Промпт для AI")}
               </label>
               <Textarea
                 value={freePrompt}
                 onChange={(e) => setFreePrompt(e.target.value)}
                 placeholder={t(
-                  "Напр.: «Хочу пройти Perfekt з sein, тренуємо розповідь про вихідні» — або просто завантажте файл/фото",
-                  "Напр.: «Хочу пройти Perfekt с sein, тренируем рассказ о выходных» — или просто загрузите файл/фото"
+                  "Напр.: «Perfekt з sein, тренуємо розповідь про вихідні»",
+                  "Напр.: «Perfekt с sein, тренируем рассказ о выходных»"
                 )}
-                rows={4}
+                rows={3}
                 className="resize-none text-sm"
                 autoFocus
               />
             </div>
 
+            {/* === Время и ссылка на встречу === */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block flex items-center gap-1.5">
+                  <Calendar className="w-3 h-3" />
+                  {t("Дата і час", "Дата и время")}
+                </label>
+                <Input
+                  type="datetime-local"
+                  value={scheduledAt}
+                  onChange={(e) => setScheduledAt(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block flex items-center gap-1.5">
+                  <Video className="w-3 h-3" />
+                  {t("Посилання на урок", "Ссылка на урок")}
+                </label>
+                <Input
+                  value={meetingLink}
+                  onChange={(e) => setMeetingLink(e.target.value)}
+                  placeholder="https://meet.google.com/..."
+                />
+              </div>
+            </div>
+
+            {/* === Режим (детский / взрослый) === */}
+            <div>
+              <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
+                {t("Режим уроку", "Режим урока")}
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {([
+                  { id: "auto", label: t("Авто", "Авто"), emoji: "✨" },
+                  { id: "kid", label: t("Дитячий", "Детский"), emoji: "🧒" },
+                  { id: "adult", label: t("Дорослий", "Взрослый"), emoji: "🎓" },
+                ] as const).map((m) => (
+                  <button
+                    key={m.id}
+                    type="button"
+                    onClick={() => setModeOverride(m.id)}
+                    className={`px-3 py-2 rounded-xl text-sm font-bold border-2 transition ${
+                      modeOverride === m.id
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border bg-background hover:border-primary/40"
+                    }`}
+                  >
+                    <span className="mr-1">{m.emoji}</span>{m.label}
+                  </button>
+                ))}
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-1.5">
+                {modeOverride === "kid"
+                  ? t("Багато емодзі, прості слова, ігровий тон 🎨", "Много эмодзи, простые слова, игровой тон 🎨")
+                  : modeOverride === "adult"
+                  ? t("Структуровано, з таблицями і прикладами з життя", "Структурировано, с таблицами и примерами из жизни")
+                  : t("AI обере за профілем учня", "AI выберет по профилю ученика")}
+              </p>
+            </div>
+
+            {/* === Типы и количество заданий === */}
+            <div className="space-y-3 p-3 rounded-xl border border-border bg-muted/30">
+              <div className="text-xs font-bold uppercase text-muted-foreground">
+                {t("Завдання", "Задания")}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {EX_TYPES.map((ex) => {
+                  const active = exerciseTypes.includes(ex.id);
+                  return (
+                    <button
+                      key={ex.id}
+                      type="button"
+                      onClick={() => toggleExType(ex.id)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-bold border-2 transition ${
+                        active
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border bg-background text-muted-foreground hover:border-primary/40"
+                      }`}
+                    >
+                      {active ? "✓ " : ""}{lang === "uk" ? ex.uk : ex.ru}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[11px] font-bold uppercase text-muted-foreground mb-1 block">
+                    {t("К-сть слів", "Кол-во слов")}
+                  </label>
+                  <Input
+                    type="number"
+                    min={4}
+                    max={30}
+                    value={wordsCount}
+                    onChange={(e) => setWordsCount(Math.max(4, Math.min(30, parseInt(e.target.value) || 0)))}
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-bold uppercase text-muted-foreground mb-1 block">
+                    {t("К-сть вправ", "Кол-во упр.")}
+                  </label>
+                  <Input
+                    type="number"
+                    min={3}
+                    max={25}
+                    value={exercisesCount}
+                    onChange={(e) => setExercisesCount(Math.max(3, Math.min(25, parseInt(e.target.value) || 0)))}
+                  />
+                </div>
+              </div>
+              <label className="flex items-center gap-2 text-xs font-medium cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={richTheory}
+                  onChange={(e) => setRichTheory(e.target.checked)}
+                  className="w-4 h-4 accent-primary"
+                />
+                {t("Красива теорія (таблиці, картки, приклади)", "Красивая теория (таблицы, карточки, примеры)")}
+              </label>
+            </div>
+
+            {/* === Файлы === */}
             <div>
               {attachedFiles.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-2">
@@ -1046,24 +1180,6 @@ const Tutoring = () => {
                 />
               </label>
             </div>
-
-            <details className="text-sm">
-              <summary className="cursor-pointer text-xs font-bold uppercase text-muted-foreground hover:text-foreground">
-                {t("Додатково (Zoom, час)", "Дополнительно (Zoom, время)")}
-              </summary>
-              <div className="grid grid-cols-2 gap-3 mt-3">
-                <Input
-                  value={meetingLink}
-                  onChange={(e) => setMeetingLink(e.target.value)}
-                  placeholder="Zoom/Meet link"
-                />
-                <Input
-                  type="datetime-local"
-                  value={scheduledAt}
-                  onChange={(e) => setScheduledAt(e.target.value)}
-                />
-              </div>
-            </details>
 
             <div className="p-3 rounded-xl bg-primary/5 border border-primary/10 text-xs text-muted-foreground flex items-start gap-2">
               <Sparkles className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
