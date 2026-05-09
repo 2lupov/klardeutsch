@@ -88,9 +88,21 @@ Deno.serve(async (req) => {
 
     const studentId = created.user.id;
 
+    // Auto-generate a nickname from the display name so the student
+    // never sees the NicknameGate (teacher manages identity).
+    const slug = displayName
+      .toLowerCase()
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/^_+|_+$/g, "")
+      .slice(0, 16) || "student";
+    const nickname = `${slug}_${Math.random().toString(36).slice(2, 6)}`;
+
     // Update profile (created automatically via trigger handle_new_user)
     await admin.from("profiles").update({
       display_name: displayName,
+      nickname,
       created_by_teacher_id: user.id,
       must_change_password: !customPassword,
       age,
