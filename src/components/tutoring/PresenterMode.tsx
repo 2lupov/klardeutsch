@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Monitor, X, Copy, Crosshair, Pencil, Eraser, Eye, EyeOff,
   ChevronLeft, ChevronRight, Sparkles, Clock, FileText, BookOpen,
-  ListChecks, MessageSquare, ExternalLink, StickyNote, Trash2, Play
+  ListChecks, MessageSquare, ExternalLink, StickyNote, Trash2, Play,
+  Hand, ThumbsUp, HelpCircle, Flame, MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -53,6 +54,20 @@ const PresenterMode = ({ lesson, words, exercises, studentName, studentProfile, 
     const saved = localStorage.getItem(`presenter-notes-${lesson.id}`);
     if (saved) setNotes(saved);
   }, [lesson.id]);
+
+  // Realtime: live student response + reaction
+  useEffect(() => {
+    if (!session?.id) return;
+    const ch = supabase
+      .channel(`presenter-${session.id}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "tutoring_live_sessions", filter: `id=eq.${session.id}` },
+        (payload) => setSession((prev) => ({ ...(prev as any), ...(payload.new as any) })),
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [session?.id]);
 
   // Timer
   useEffect(() => {
@@ -287,6 +302,8 @@ const PresenterMode = ({ lesson, words, exercises, studentName, studentProfile, 
             </div>
           </PanelCard>
 
+          <LiveFeedbackPanel session={session} exercises={exercises} />
+
           <PanelCard title="Заметки (приватно)" icon={<StickyNote className="w-4 h-4" />} grow>
             <Textarea value={notes} onChange={(e) => setNotes(e.target.value)}
               placeholder="План урока, что спросить, домашка…"
@@ -375,6 +392,69 @@ const PreviewContent = ({ view, words, exercises, theory, strokes, onWBStart, on
     );
   }
   return null;
+};
+
+const REACTION_META: Record<string, { Icon: any; label: string; color: string }> = {
+  hand: { Icon: Hand, label: "Поднял руку", color: "bg-yellow-500/15 text-yellow-700 dark:text-yellow-300 border-yellow-500/40" },
+  thumbs_up: { Icon: ThumbsUp, label: "Всё понятно", color: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/40" },
+  confused: { Icon: HelpCircle, label: "Не понял", color: "bg-orange-500/15 text-orange-700 dark:text-orange-300 border-orange-500/40" },
+  fire: { Icon: Flame, label: "Огонь", color: "bg-pink-500/15 text-pink-700 dark:text-pink-300 border-pink-500/40" },
+};
+
+const LiveFeedbackPanel = ({ session, exercises }: { session: any; exercises: any[] }) => {
+  const reaction = session?.student_reaction as { type: string; at: string } | null;
+  const response = session?.student_response as { view?: any; answer?: string; at?: string } | null;
+  const exId = response?.view?.exerciseId;
+  const ex = exId ? exercises.find((e) => e.id === exId) : null;
+  const isCorrect =
+    ex && response?.answer && ex.correct_answer
+      ? String(response.answer).trim().toLowerCase() === String(ex.correct_answer).trim().toLowerCase()
+      : null;
+
+  const reactionFresh =
+    reaction?.at && Date.now() - new Date(reaction.at).getTime() < 30_000;
+  const meta = reaction && REACTION_META[reaction.type];
+
+  return (
+    <PanelCard title="Live ученика" icon={<MessageCircle className="w-4 h-4" />}>
+      <div className="space-y-2 text-xs">
+        {reactionFresh && meta ? (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className={`flex items-center gap-2 px-3 py-2 rounded-lg border ${meta.color}`}
+          >
+            <meta.Icon className="w-4 h-4" />
+            <span className="font-bold">{meta.label}</span>
+          </motion.div>
+        ) : (
+          <div className="text-muted-foreground italic">Ждём реакции…</div>
+        )}
+
+        {response?.answer ? (
+          <div className="rounded-lg border border-border bg-background p-2.5 space-y-1.5">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              Ответ ученика
+            </div>
+            <div className="text-sm font-medium break-words">{response.answer}</div>
+            {ex?.correct_answer && (
+              <div
+                className={`text-[10px] font-bold inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${
+                  isCorrect
+                    ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
+                    : "bg-red-500/15 text-red-700 dark:text-red-300"
+                }`}
+              >
+                {isCorrect ? "✓ Верно" : `✗ Должен быть: ${ex.correct_answer}`}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="text-muted-foreground italic">Ученик ещё не ответил</div>
+        )}
+      </div>
+    </PanelCard>
+  );
 };
 
 export default PresenterMode;

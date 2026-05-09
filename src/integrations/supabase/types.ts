@@ -2126,6 +2126,8 @@ export type Database = {
           lesson_id: string
           status: string
           student_id: string
+          student_reaction: Json | null
+          student_response: Json | null
           teacher_id: string
           updated_at: string
           whiteboard: Json
@@ -2139,6 +2141,8 @@ export type Database = {
           lesson_id: string
           status?: string
           student_id: string
+          student_reaction?: Json | null
+          student_response?: Json | null
           teacher_id: string
           updated_at?: string
           whiteboard?: Json
@@ -2152,6 +2156,8 @@ export type Database = {
           lesson_id?: string
           status?: string
           student_id?: string
+          student_reaction?: Json | null
+          student_response?: Json | null
           teacher_id?: string
           updated_at?: string
           whiteboard?: Json
