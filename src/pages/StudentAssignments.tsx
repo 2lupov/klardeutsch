@@ -57,6 +57,10 @@ const StudentAssignments = () => {
   const t = (uk: string, ru: string) => (lang === "uk" ? uk : ru);
 
   const [items, setItems] = useState<AssignmentItem[]>([]);
+  const [upcoming, setUpcoming] = useState<Array<{
+    id: string; title: string; topic: string | null; level: string;
+    scheduled_at: string; meeting_link: string | null; teacherName: string;
+  }>>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<Filter>("active");
 
@@ -75,7 +79,7 @@ const StudentAssignments = () => {
       // 2. Lessons (with exercises count) where student
       const { data: lessons } = await supabase
         .from("tutoring_lessons")
-        .select("id, title, topic, level, status, scheduled_at, created_at, teacher_id")
+        .select("id, title, topic, level, status, scheduled_at, meeting_link, created_at, teacher_id")
         .eq("student_id", user.id)
         .order("scheduled_at", { ascending: false, nullsFirst: false });
 
