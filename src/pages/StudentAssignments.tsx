@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   ClipboardList, GraduationCap, ListChecks, BookOpen, Sparkles, Clock,
-  CheckCircle2, AlertCircle, ChevronRight, Loader2, Award, FileText
+  CheckCircle2, AlertCircle, ChevronRight, Loader2, Award, FileText,
+  Calendar, Video,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
