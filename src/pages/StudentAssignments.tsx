@@ -169,6 +169,22 @@ const StudentAssignments = () => {
           })),
       ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
+      // Upcoming scheduled lessons (in the future, not completed)
+      const nowMs = Date.now();
+      const upcomingList = (lessons ?? [])
+        .filter((l) => l.scheduled_at && new Date(l.scheduled_at).getTime() > nowMs - 30 * 60 * 1000 && l.status !== "completed")
+        .sort((a, b) => new Date(a.scheduled_at!).getTime() - new Date(b.scheduled_at!).getTime())
+        .map((l) => ({
+          id: l.id,
+          title: l.title,
+          topic: l.topic,
+          level: l.level,
+          scheduled_at: l.scheduled_at!,
+          meeting_link: (l as any).meeting_link ?? null,
+          teacherName: teacherMap.get(l.teacher_id) ?? "—",
+        }));
+
+      setUpcoming(upcomingList);
       setItems(merged);
       setLoading(false);
     };
