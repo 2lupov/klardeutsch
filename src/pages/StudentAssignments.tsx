@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import {
   ClipboardList, GraduationCap, ListChecks, BookOpen, Sparkles, Clock,
   CheckCircle2, AlertCircle, ChevronRight, Loader2, Award, FileText,
-  Calendar, Video,
+  Calendar, Video, BookMarked, Play,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -248,253 +248,320 @@ const StudentAssignments = () => {
     return map[item.status] ?? { label: item.status, cls: "bg-muted text-muted-foreground", Icon: Clock };
   };
 
+  // --- Next lesson card ---
+  const nextLesson = upcoming[0];
+
   return (
     <div className="min-h-[100dvh] bg-gradient-to-br from-background via-background to-primary/5 pb-24 lg:pb-12">
-      <div className="max-w-4xl mx-auto px-4 lg:px-8 pt-6 lg:pt-10">
-        {/* Header */}
+      <div className="max-w-4xl mx-auto px-4 lg:px-8 pt-6 lg:pt-10 space-y-6">
+
+        {/* ===== BLOCK 1: Урок ===== */}
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-3xl p-6 lg:p-8 bg-gradient-to-br from-primary/10 via-card to-card border border-border shadow-sm mb-5"
+          className="rounded-3xl p-6 lg:p-8 bg-gradient-to-br from-primary/10 via-card to-card border border-border shadow-sm"
         >
-          <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-center gap-3 mb-4">
             <div className="w-11 h-11 rounded-2xl bg-primary/15 text-primary flex items-center justify-center">
-              <ClipboardList className="w-6 h-6" />
+              <Video className="w-6 h-6" />
             </div>
             <div>
               <h1 className="text-2xl lg:text-3xl font-display font-black leading-tight">
-                {t("Мої завдання", "Мои задания")}
+                {t("Урок", "Урок")}
               </h1>
               <p className="text-sm text-muted-foreground">
-                {t("Тести, вправи та домашні роботи в одному місці", "Тесты, упражнения и домашние работы в одном месте")}
+                {t("Найближчий запланований урок", "Ближайший запланированный урок")}
               </p>
             </div>
           </div>
+
+          {loading ? (
+            <div className="flex justify-center py-10">
+              <Loader2 className="w-7 h-7 animate-spin text-primary" />
+            </div>
+          ) : nextLesson ? (
+            <div className="space-y-3">
+              {( () => {
+                const date = new Date(nextLesson.scheduled_at);
+                const diffMs = date.getTime() - Date.now();
+                const isLive = diffMs < 15 * 60 * 1000 && diffMs > -90 * 60 * 1000;
+                const dateStr = date.toLocaleString(lang === "uk" ? "uk-UA" : "ru-RU", {
+                  weekday: "short", day: "numeric", month: "short",
+                  hour: "2-digit", minute: "2-digit",
+                });
+                const inDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+                const inHours = Math.round(diffMs / (1000 * 60 * 60));
+                const relStr =
+                  diffMs < 0 ? t("Зараз триває", "Идёт сейчас")
+                  : inHours < 1 ? t("Менше години", "Менее часа")
+                  : inHours < 24 ? t(`Через ${inHours} год`, `Через ${inHours} ч`)
+                  : t(`Через ${inDays} дн`, `Через ${inDays} дн`);
+
+                return (
+                  <motion.div
+                    key={nextLesson.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`rounded-2xl p-4 lg:p-5 border shadow-sm ${
+                      isLive
+                        ? "bg-gradient-to-br from-emerald-500/15 via-card to-card border-emerald-500/40"
+                        : "bg-gradient-to-br from-primary/5 via-card to-card border-border"
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className={`w-11 h-11 rounded-2xl shrink-0 flex items-center justify-center ${
+                        isLive ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300" : "bg-primary/15 text-primary"
+                      }`}>
+                        <Calendar className="w-5 h-5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-2 mb-1">
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                            {nextLesson.level}
+                          </span>
+                          {isLive ? (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 inline-flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                              LIVE
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                              {relStr}
+                            </span>
+                          )}
+                        </div>
+                        <h3 className="font-display font-bold text-foreground leading-tight">
+                          {nextLesson.title}
+                        </h3>
+                        <div className="flex flex-wrap items-center gap-3 mt-1.5 text-xs text-muted-foreground">
+                          <span className="inline-flex items-center gap-1">
+                            <Clock className="w-3 h-3" /> {dateStr}
+                          </span>
+                          <span className="inline-flex items-center gap-1">
+                            <GraduationCap className="w-3 h-3" /> {nextLesson.teacherName}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {nextLesson.meeting_link ? (
+                        <a
+                          href={nextLesson.meeting_link}
+                          target="_blank"
+                          rel="noreferrer"
+                          className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition ${
+                            isLive
+                              ? "bg-emerald-500 text-white hover:bg-emerald-600 shadow-md"
+                              : "bg-primary text-primary-foreground hover:bg-primary/90"
+                          }`}
+                        >
+                          <Video className="w-4 h-4" />
+                          {t("Приєднатися до Google Meet", "Подключиться к Google Meet")}
+                        </a>
+                      ) : (
+                        <span className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-muted-foreground bg-muted">
+                          <Video className="w-3.5 h-3.5" />
+                          {t("Посилання з'явиться пізніше", "Ссылка появится позже")}
+                        </span>
+                      )}
+                      <button
+                        onClick={() => navigate(`/tutoring/lesson/${nextLesson.id}`)}
+                        className="inline-flex items-center gap-1 px-3 py-2.5 rounded-xl text-sm font-bold bg-card border border-border hover:border-primary/40 transition"
+                      >
+                        {t("Відкрити урок", "Открыть урок")}
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </motion.div>
+                );
+              })()}
+
+              {/* Other upcoming lessons (if more than 1) */}
+              {upcoming.length > 1 && (
+                <div className="space-y-2">
+                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground px-1">
+                    {t("Наступні уроки", "Следующие уроки")}
+                  </p>
+                  {upcoming.slice(1).map((l) => {
+                    const date = new Date(l.scheduled_at);
+                    const dateStr = date.toLocaleString(lang === "uk" ? "uk-UA" : "ru-RU", {
+                      weekday: "short", day: "numeric", month: "short",
+                      hour: "2-digit", minute: "2-digit",
+                    });
+                    return (
+                      <button
+                        key={l.id}
+                        onClick={() => navigate(`/tutoring/lesson/${l.id}`)}
+                        className="w-full text-left rounded-xl border border-border bg-card/60 hover:bg-card hover:border-primary/30 transition px-4 py-3 flex items-center gap-3"
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                          <Calendar className="w-4 h-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-display font-bold text-sm truncate">{l.title}</p>
+                          <p className="text-xs text-muted-foreground">{dateStr} · {l.teacherName}</p>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-border bg-card/50 p-8 text-center">
+              <Calendar className="w-10 h-10 mx-auto text-muted-foreground/40 mb-2" />
+              <p className="font-display font-bold text-base">
+                {t("Немає запланованих уроків", "Нет запланированных уроков")}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {t("Ваш викладач додасть урок найближчим часом", "Ваш преподаватель добавит урок в ближайшее время")}
+              </p>
+            </div>
+          )}
         </motion.div>
 
-        {/* Upcoming scheduled lessons */}
-        {upcoming.length > 0 && (
-          <div className="mb-5 space-y-3">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground px-1">
-              {t("Найближчі уроки", "Ближайшие уроки")}
-            </h2>
-            {upcoming.map((l, idx) => {
-              const date = new Date(l.scheduled_at);
-              const diffMs = date.getTime() - Date.now();
-              const isLive = diffMs < 15 * 60 * 1000 && diffMs > -90 * 60 * 1000;
-              const dateStr = date.toLocaleString(lang === "uk" ? "uk-UA" : "ru-RU", {
-                weekday: "short", day: "numeric", month: "short",
-                hour: "2-digit", minute: "2-digit",
-              });
-              const inDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
-              const inHours = Math.round(diffMs / (1000 * 60 * 60));
-              const relStr =
-                diffMs < 0 ? t("Зараз триває", "Идёт сейчас")
-                : inHours < 1 ? t("Менше години", "Менее часа")
-                : inHours < 24 ? t(`Через ${inHours} год`, `Через ${inHours} ч`)
-                : t(`Через ${inDays} дн`, `Через ${inDays} дн`);
+        {/* ===== BLOCK 2: Мои задания ===== */}
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-2xl bg-primary/15 text-primary flex items-center justify-center">
+              <BookMarked className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-xl lg:text-2xl font-display font-black leading-tight">
+                {t("Мої завдання", "Мои задания")}
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {t("Тести, вправи та домашні роботи", "Тесты, упражнения и домашние работы")}
+              </p>
+            </div>
+          </div>
 
-              return (
-                <motion.div
-                  key={l.id}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.04 }}
-                  className={`rounded-2xl p-4 lg:p-5 border shadow-sm ${
-                    isLive
-                      ? "bg-gradient-to-br from-emerald-500/15 via-card to-card border-emerald-500/40"
-                      : "bg-gradient-to-br from-primary/10 via-card to-card border-border"
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className={`w-11 h-11 rounded-2xl shrink-0 flex items-center justify-center ${
-                      isLive ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300" : "bg-primary/15 text-primary"
-                    }`}>
-                      <Calendar className="w-5 h-5" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-wrap items-center gap-2 mb-1">
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-                          {l.level}
-                        </span>
-                        {isLive ? (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 inline-flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                            LIVE
-                          </span>
-                        ) : (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
-                            {relStr}
-                          </span>
-                        )}
+          {/* Filter chips */}
+          <div className="flex gap-2 mb-4">
+            {([
+              ["active", t("Активні", "Активные"), counts.active],
+              ["done", t("Виконані", "Выполненные"), counts.done],
+              ["all", t("Усі", "Все"), counts.all],
+            ] as const).map(([key, label, count]) => (
+              <button
+                key={key}
+                onClick={() => setFilter(key as Filter)}
+                className={`px-4 py-2 rounded-full text-sm font-bold transition flex items-center gap-2 ${
+                  filter === key
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "bg-card border border-border text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {label}
+                <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${filter === key ? "bg-primary-foreground/20" : "bg-muted"}`}>
+                  {count}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {/* List */}
+          {loading ? (
+            <div className="flex justify-center py-20">
+              <Loader2 className="w-7 h-7 animate-spin text-primary" />
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center">
+              <BookOpen className="w-12 h-12 mx-auto text-muted-foreground/40 mb-3" />
+              <p className="font-display font-bold text-lg mb-1">
+                {filter === "active"
+                  ? t("Усе виконано! 🎉", "Всё выполнено! 🎉")
+                  : t("Поки що порожньо", "Пока пусто")}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {t("Завдання з'являться, коли викладач їх призначить", "Задания появятся, когда преподаватель их назначит")}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {filtered.map((item, idx) => {
+                const m = meta(item);
+                const s = statusBadge(item);
+                const Icon = m.Icon;
+                const StatusIcon = s.Icon;
+                return (
+                  <motion.button
+                    key={`${item.kind}-${item.id}`}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: Math.min(idx * 0.03, 0.3) }}
+                    onClick={() => navigate(item.route)}
+                    className="w-full text-left rounded-2xl border border-border bg-card hover:border-primary/40 hover:shadow-md transition overflow-hidden group"
+                  >
+                    <div className={`bg-gradient-to-r ${m.accent} px-5 py-3 flex items-center gap-3`}>
+                      <div className="w-9 h-9 rounded-xl bg-background/70 backdrop-blur flex items-center justify-center">
+                        <Icon className="w-5 h-5" />
                       </div>
-                      <h3 className="font-display font-bold text-foreground leading-tight">
-                        {l.title}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${m.chip.bg}`}>
+                            {m.chip.label}
+                          </span>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1 ${s.cls}`}>
+                            <StatusIcon className="w-3 h-3" />
+                            {s.label}
+                          </span>
+                          {item.kind === "lesson" && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                              {item.level} · {item.exercisesCount} {t("вправ", "упр.")}
+                            </span>
+                          )}
+                          {item.kind === "homework" && item.grade != null && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-500/15 text-green-700 dark:text-green-300">
+                              {item.grade}/100
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-foreground/50 group-hover:translate-x-1 transition" />
+                    </div>
+                    <div className="px-5 py-4">
+                      <h3 className="font-display font-bold text-foreground leading-tight mb-1">
+                        {item.title}
                       </h3>
-                      <div className="flex flex-wrap items-center gap-3 mt-1.5 text-xs text-muted-foreground">
-                        <span className="inline-flex items-center gap-1">
-                          <Clock className="w-3 h-3" /> {dateStr}
-                        </span>
-                        <span className="inline-flex items-center gap-1">
-                          <GraduationCap className="w-3 h-3" /> {l.teacherName}
-                        </span>
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {item.subtitle}
+                      </p>
+                      <div className="flex items-center justify-between gap-3 mt-3 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-3 flex-wrap">
+                          {item.kind === "homework" && item.lessonTitle && (
+                            <span className="inline-flex items-center gap-1">
+                              <BookOpen className="w-3 h-3" /> {item.lessonTitle}
+                            </span>
+                          )}
+                          {item.kind === "homework" && item.due_at && (
+                            <span className="inline-flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              {t("До", "До")}: {new Date(item.due_at).toLocaleDateString(lang === "uk" ? "uk-UA" : "ru-RU")}
+                            </span>
+                          )}
+                          {item.kind === "placement" && item.teacherName && (
+                            <span className="inline-flex items-center gap-1">
+                              <GraduationCap className="w-3 h-3" /> {item.teacherName}
+                            </span>
+                          )}
+                        </div>
+                        <span className="font-bold text-primary">{item.action} →</span>
                       </div>
                     </div>
-                  </div>
+                  </motion.button>
+                );
+              })}
+            </div>
+          )}
+        </motion.div>
 
-                  <div className="flex flex-wrap gap-2 mt-3">
-                    {l.meeting_link ? (
-                      <a
-                        href={l.meeting_link}
-                        target="_blank"
-                        rel="noreferrer"
-                        className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition ${
-                          isLive
-                            ? "bg-emerald-500 text-white hover:bg-emerald-600 shadow-md"
-                            : "bg-primary text-primary-foreground hover:bg-primary/90"
-                        }`}
-                      >
-                        <Video className="w-4 h-4" />
-                        {t("Приєднатися до Google Meet", "Подключиться к Google Meet")}
-                      </a>
-                    ) : (
-                      <span className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-muted-foreground bg-muted">
-                        <Video className="w-3.5 h-3.5" />
-                        {t("Посилання з'явиться пізніше", "Ссылка появится позже")}
-                      </span>
-                    )}
-                    <button
-                      onClick={() => navigate(`/tutoring/lesson/${l.id}`)}
-                      className="inline-flex items-center gap-1 px-3 py-2 rounded-xl text-sm font-bold bg-card border border-border hover:border-primary/40 transition"
-                    >
-                      {t("Відкрити урок", "Открыть урок")}
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Filter chips */}
-        <div className="flex gap-2 mb-4">
-          {([
-            ["active", t("Активні", "Активные"), counts.active],
-            ["done", t("Виконані", "Выполненные"), counts.done],
-            ["all", t("Усі", "Все"), counts.all],
-          ] as const).map(([key, label, count]) => (
-            <button
-              key={key}
-              onClick={() => setFilter(key as Filter)}
-              className={`px-4 py-2 rounded-full text-sm font-bold transition flex items-center gap-2 ${
-                filter === key
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "bg-card border border-border text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {label}
-              <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${filter === key ? "bg-primary-foreground/20" : "bg-muted"}`}>
-                {count}
-              </span>
-            </button>
-          ))}
-        </div>
-
-        {/* List */}
-        {loading ? (
-          <div className="flex justify-center py-20">
-            <Loader2 className="w-7 h-7 animate-spin text-primary" />
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center">
-            <BookOpen className="w-12 h-12 mx-auto text-muted-foreground/40 mb-3" />
-            <p className="font-display font-bold text-lg mb-1">
-              {filter === "active"
-                ? t("Усе виконано! 🎉", "Всё выполнено! 🎉")
-                : t("Поки що порожньо", "Пока пусто")}
-            </p>
-            <p className="text-sm text-muted-foreground">
-              {t("Завдання з'являться, коли викладач їх призначить", "Задания появятся, когда преподаватель их назначит")}
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {filtered.map((item, idx) => {
-              const m = meta(item);
-              const s = statusBadge(item);
-              const Icon = m.Icon;
-              const StatusIcon = s.Icon;
-              return (
-                <motion.button
-                  key={`${item.kind}-${item.id}`}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: Math.min(idx * 0.03, 0.3) }}
-                  onClick={() => navigate(item.route)}
-                  className="w-full text-left rounded-2xl border border-border bg-card hover:border-primary/40 hover:shadow-md transition overflow-hidden group"
-                >
-                  <div className={`bg-gradient-to-r ${m.accent} px-5 py-3 flex items-center gap-3`}>
-                    <div className="w-9 h-9 rounded-xl bg-background/70 backdrop-blur flex items-center justify-center">
-                      <Icon className="w-5 h-5" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${m.chip.bg}`}>
-                          {m.chip.label}
-                        </span>
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1 ${s.cls}`}>
-                          <StatusIcon className="w-3 h-3" />
-                          {s.label}
-                        </span>
-                        {item.kind === "lesson" && (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-                            {item.level} · {item.exercisesCount} {t("вправ", "упр.")}
-                          </span>
-                        )}
-                        {item.kind === "homework" && item.grade != null && (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-500/15 text-green-700 dark:text-green-300">
-                            {item.grade}/100
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-foreground/50 group-hover:translate-x-1 transition" />
-                  </div>
-                  <div className="px-5 py-4">
-                    <h3 className="font-display font-bold text-foreground leading-tight mb-1">
-                      {item.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      {item.subtitle}
-                    </p>
-                    <div className="flex items-center justify-between gap-3 mt-3 text-xs text-muted-foreground">
-                      <div className="flex items-center gap-3 flex-wrap">
-                        {item.kind === "homework" && item.lessonTitle && (
-                          <span className="inline-flex items-center gap-1">
-                            <BookOpen className="w-3 h-3" /> {item.lessonTitle}
-                          </span>
-                        )}
-                        {item.kind === "homework" && item.due_at && (
-                          <span className="inline-flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            {t("До", "До")}: {new Date(item.due_at).toLocaleDateString(lang === "uk" ? "uk-UA" : "ru-RU")}
-                          </span>
-                        )}
-                        {item.kind === "placement" && item.teacherName && (
-                          <span className="inline-flex items-center gap-1">
-                            <GraduationCap className="w-3 h-3" /> {item.teacherName}
-                          </span>
-                        )}
-                      </div>
-                      <span className="font-bold text-primary">{item.action} →</span>
-                    </div>
-                  </div>
-                </motion.button>
-              );
-            })}
-          </div>
-        )}
       </div>
     </div>
   );
