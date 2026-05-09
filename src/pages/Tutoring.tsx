@@ -470,12 +470,20 @@ const Tutoring = () => {
         .eq("user_id", selectedStudent)
         .maybeSingle();
 
+      const effectiveIsKid =
+        modeOverride === "kid" ? true : modeOverride === "adult" ? false : !!studentProfile?.is_kid;
+
       const res = await fetchEdgeFunction("generate-tutoring-lesson", {
         json: {
           freePrompt,
           autoMode: true,
           studentLevelHint: lastTest?.recommended_level || null,
-          isKid: !!studentProfile?.is_kid,
+          isKid: effectiveIsKid,
+          modeOverride,
+          wordsCount,
+          exercisesCount,
+          exerciseTypes,
+          richTheory,
           lang,
           imageUrls: attachedFiles.filter(f => f.type.startsWith("image/")).map(f => f.url),
           fileNames: attachedFiles.map(f => f.name),
