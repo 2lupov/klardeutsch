@@ -56,7 +56,17 @@ const TutoringLesson = () => {
     if (!id || !user) return;
     setLoading(true);
     const { data: l } = await supabase.from("tutoring_lessons").select("*").eq("id", id).single();
-    if (!l) { setLoading(false); return; }
+    if (!l) {
+      toast.error(t("Урок не знайдено", "Урок не найден"));
+      navigate("/assignments");
+      return;
+    }
+    // Server-side guard: only the lesson's teacher or student may view.
+    if (l.teacher_id !== user.id && l.student_id !== user.id) {
+      toast.error(t("Немає доступу", "Нет доступа"));
+      navigate("/assignments");
+      return;
+    }
     setLesson(l);
     setIsTeacher(l.teacher_id === user.id);
     setTheoryDraft(l.theory || "");
