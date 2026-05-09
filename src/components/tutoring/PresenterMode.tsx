@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Monitor, X, Copy, Crosshair, Pencil, Eraser, Eye, EyeOff,
   ChevronLeft, ChevronRight, Sparkles, Clock, FileText, BookOpen,
-  ListChecks, MessageSquare, ExternalLink, StickyNote, Trash2, Play
+  ListChecks, MessageSquare, ExternalLink, StickyNote, Trash2, Play,
+  Hand, ThumbsUp, HelpCircle, Flame, MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
