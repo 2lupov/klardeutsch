@@ -302,7 +302,8 @@ const PresenterMode = ({ lesson, words, exercises, studentName, studentProfile, 
             </div>
           </PanelCard>
 
-          <PanelCard title="Заметки (приватно)" icon={<StickyNote className="w-4 h-4" />} grow>
+          <LiveFeedbackPanel session={session} exercises={exercises} />
+
             <Textarea value={notes} onChange={(e) => setNotes(e.target.value)}
               placeholder="План урока, что спросить, домашка…"
               className="resize-none h-full min-h-[120px] text-sm bg-background" />
