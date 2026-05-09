@@ -148,6 +148,20 @@ Deno.serve(async (req) => {
         ? `\nПрикріплені файли (назви для контексту): ${fileNames.join(", ")}.`
         : "";
 
+      // === Учительские override-параметры (если переданы) ===
+      const exTypesList = Array.isArray(exerciseTypes) && exerciseTypes.length
+        ? exerciseTypes
+        : ["quiz", "cloze", "translation"];
+      const wordsTarget = Number.isFinite(wordsCount) && wordsCount > 0 ? wordsCount : (isKid ? 7 : 13);
+      const exercisesTarget = Number.isFinite(exercisesCount) && exercisesCount > 0 ? exercisesCount : (isKid ? 8 : 10);
+      const overrideHint = `\n\n🎯 ВЧИТЕЛЬ ВКАЗАВ ТОЧНО:
+- Слів у словнику: РІВНО ${wordsTarget} (±1).
+- Вправ: РІВНО ${exercisesTarget}, ТІЛЬКИ цих типів: ${exTypesList.join(", ")}. Інші типи НЕ створюй.
+- Розподіли вправи рівномірно між обраними типами.
+${richTheory ? "- Теорія МАЄ бути красиво відформатована: Markdown-таблиці, callout-блоки (> 📌 / 💡 / ⚠️ / 📖), bold/italic, приклади з життя." : "- Теорія може бути короткою і простою, без таблиць."}
+${modeOverride === "adult" ? "- Режим: ДОРОСЛИЙ — серйозний тон, без дитячих емодзі, реальні життєві приклади (робота, подорожі, побут)." : ""}
+${modeOverride === "kid" ? "- Режим: ДИТЯЧИЙ — багато емодзі, прості теми (тварини, школа, ігри), короткі речення." : ""}`;
+
       if (isKid) {
         // ===== KID MODE (9–12 years) =====
         systemPrompt = `${langStrict}
