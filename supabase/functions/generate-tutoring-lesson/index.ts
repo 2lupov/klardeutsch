@@ -52,17 +52,19 @@ Deno.serve(async (req) => {
       freePrompt = "",
       studentLevelHint = null,
       isKid = false, // 🧒 student is 9–12 years old
+      modeOverride = "auto", // "auto" | "kid" | "adult"
+      richTheory = true,
       fileNames = [],
       attachedFiles = [], // [{name, url, type}] non-image files (PDF/TXT/etc)
       lang: rawLang = "ru",
-      // Legacy / advanced fields
+      // Legacy / advanced fields (also honored in autoMode if provided)
       topic,
       level,
       focus,
       studentNotes,
-      wordsCount = 12,
-      exercisesCount = 10,
-      exerciseTypes = ["quiz", "cloze", "translation"],
+      wordsCount,
+      exercisesCount,
+      exerciseTypes,
       vocabulary = [],
       theoryTemplate,
       imageUrls = [],
