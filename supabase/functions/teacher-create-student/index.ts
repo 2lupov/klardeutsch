@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const email = (body.email || "").trim().toLowerCase();
+    let email = (body.email || "").trim().toLowerCase();
     const displayName = (body.display_name || "").trim();
     const note = (body.note || "").trim();
     const customPassword = (body.password || "").trim();
@@ -59,13 +59,29 @@ Deno.serve(async (req) => {
     const age = (typeof ageRaw === "number" && ageRaw >= 5 && ageRaw <= 120) ? ageRaw : null;
     const isKid = age !== null ? (age <= 12) : !!body.is_kid;
 
-    if (!email || !email.includes("@")) {
-      return new Response(JSON.stringify({ error: "Invalid email" }), {
+    if (!displayName) {
+      return new Response(JSON.stringify({ error: "Name required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    if (!displayName) {
-      return new Response(JSON.stringify({ error: "Name required" }), {
+
+    // Generate nickname from display name
+    const slug = displayName
+      .toLowerCase()
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/^_+|_+$/g, "")
+      .slice(0, 16) || "student";
+    const nickname = `${slug}_${Math.random().toString(36).slice(2, 6)}`;
+
+    // Email is optional — auto-generate a stable internal one if not provided
+    let emailIsAuto = false;
+    if (!email) {
+      email = `${nickname}@students.klardeutsch.local`;
+      emailIsAuto = true;
+    } else if (!email.includes("@")) {
+      return new Response(JSON.stringify({ error: "Invalid email" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -77,7 +93,7 @@ Deno.serve(async (req) => {
       email,
       password,
       email_confirm: true,
-      user_metadata: { display_name: displayName, created_by_teacher: true },
+      user_metadata: { display_name: displayName, created_by_teacher: true, email_is_auto: emailIsAuto },
     });
 
     if (createErr || !created.user) {
@@ -87,17 +103,6 @@ Deno.serve(async (req) => {
     }
 
     const studentId = created.user.id;
-
-    // Auto-generate a nickname from the display name so the student
-    // never sees the NicknameGate (teacher manages identity).
-    const slug = displayName
-      .toLowerCase()
-      .normalize("NFKD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9]+/g, "_")
-      .replace(/^_+|_+$/g, "")
-      .slice(0, 16) || "student";
-    const nickname = `${slug}_${Math.random().toString(36).slice(2, 6)}`;
 
     // Update profile (created automatically via trigger handle_new_user)
     await admin.from("profiles").update({

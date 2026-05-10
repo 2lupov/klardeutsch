@@ -351,8 +351,8 @@ const Tutoring = () => {
 
   // ===== Create student account =====
   const createStudent = async () => {
-    if (!newStudentEmail || !newStudentName) {
-      toast.error(t("Заповніть email та ім'я", "Заполните email и имя"));
+    if (!newStudentName) {
+      toast.error(t("Введіть ім'я учня", "Введите имя ученика"));
       return;
     }
     setCreatingStudent(true);
@@ -1330,13 +1330,13 @@ const Tutoring = () => {
               </div>
               <div>
                 <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block flex items-center gap-1">
-                  <Mail className="w-3 h-3" /> Email *
+                  <Mail className="w-3 h-3" /> Email {t("(необов'язково)", "(необязательно)")}
                 </label>
                 <Input
                   type="email"
                   value={newStudentEmail}
                   onChange={(e) => setNewStudentEmail(e.target.value)}
-                  placeholder="anna@example.com"
+                  placeholder={t("Залиште пустим — створимо логін автоматично", "Оставьте пустым — создадим логин автоматически")}
                 />
               </div>
               <div>
