@@ -394,8 +394,68 @@ export default function PlacementTest() {
     );
   }
 
+  const isKid = !!assignment.is_kid_mode;
+
   // ============ INTRO VIEW ============
   if (assignment.status === "pending") {
+    if (isKid) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-amber-100 via-pink-100 to-sky-100 dark:from-amber-950/40 dark:via-pink-950/30 dark:to-sky-950/40 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.85, y: 30 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ type: "spring", stiffness: 180, damping: 18 }}
+            className="max-w-md w-full p-8 rounded-[2rem] bg-white/80 dark:bg-slate-900/70 backdrop-blur-xl border-4 border-amber-300/60 shadow-2xl text-center"
+          >
+            <motion.div
+              animate={{ rotate: [0, -8, 8, -6, 6, 0] }}
+              transition={{ duration: 2.4, repeat: Infinity, repeatDelay: 1 }}
+              className="text-7xl mb-3"
+            >
+              🐼
+            </motion.div>
+            <h1 className="text-3xl font-extrabold mb-2 bg-gradient-to-r from-amber-500 via-pink-500 to-sky-500 bg-clip-text text-transparent">
+              {t("Привіт, друже!", "Привет, друг!")}
+            </h1>
+            <p className="text-base text-foreground/80 mb-6 leading-relaxed">
+              {t(
+                `Зараз буде ${questions.length} цікавих питань. Не хвилюйся — це просто гра! 🎈`,
+                `Сейчас будет ${questions.length} интересных вопросов. Не волнуйся — это просто игра! 🎈`
+              )}
+            </p>
+            <div className="grid grid-cols-3 gap-3 mb-6">
+              {[
+                { e: "🎯", t: t("Вибирай", "Выбирай") },
+                { e: "⭐", t: t("Збирай", "Собирай") },
+                { e: "🏆", t: t("Перемагай", "Побеждай") },
+              ].map((it, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 + i * 0.1 }}
+                  className="rounded-2xl bg-white/70 dark:bg-slate-800/70 p-3 border-2 border-amber-200/50"
+                >
+                  <div className="text-3xl mb-1">{it.e}</div>
+                  <p className="text-[11px] font-bold text-foreground/70">{it.t}</p>
+                </motion.div>
+              ))}
+            </div>
+            {isStudent ? (
+              <Button
+                onClick={startTest}
+                size="lg"
+                className="w-full text-lg font-extrabold py-6 rounded-2xl bg-gradient-to-r from-amber-400 via-pink-500 to-sky-500 hover:opacity-95 text-white shadow-xl border-0"
+              >
+                🚀 {t("Поїхали!", "Поехали!")}
+              </Button>
+            ) : (
+              <p className="text-sm text-muted-foreground">{t("Очікує початку учнем", "Ожидает начала учеником")}</p>
+            )}
+          </motion.div>
+        </div>
+      );
+    }
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <motion.div
