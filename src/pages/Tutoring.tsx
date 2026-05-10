@@ -126,7 +126,7 @@ const Tutoring = () => {
   const [newStudentAge, setNewStudentAge] = useState<string>("");
   const [aiAssistantStudent, setAiAssistantStudent] = useState<{ id: string; name: string; isKid: boolean } | null>(null);
   const [creatingStudent, setCreatingStudent] = useState(false);
-  const [createdCredentials, setCreatedCredentials] = useState<{ email: string; password: string } | null>(null);
+  const [createdCredentials, setCreatedCredentials] = useState<{ nickname: string; password: string } | null>(null);
   const [showPwd, setShowPwd] = useState(false);
 
   // ===== Placement test dialog =====
