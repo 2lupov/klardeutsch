@@ -111,7 +111,7 @@ ONLY return the JSON array, nothing else.`;
       
       if (questions && questions.length > 0) {
         const maxSort = await getMaxSort(db, "grammar_questions", level, topic);
-        const rows = questions.map((q: any, i: number) => ({
+        const rows = questions.map(shuffleQuestion).map((q: any, i: number) => ({
           level,
           topic,
           question: q.question,
