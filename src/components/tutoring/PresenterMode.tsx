@@ -207,7 +207,38 @@ const PresenterMode = ({ lesson, words, exercises, studentName, studentProfile, 
               <NavBtn active={view.type === "whiteboard"} onClick={() => pushView({ type: "whiteboard" })}>
                 <Pencil className="w-3.5 h-3.5" /> Доска
               </NavBtn>
+              <NavBtn active={view.type === "text"} onClick={() => setLiveTextOpen((v) => !v)}>
+                <MessageSquare className="w-3.5 h-3.5" /> Свой текст
+              </NavBtn>
             </div>
+            {liveTextOpen && (
+              <div className="mt-2 space-y-2 border-t border-border pt-2">
+                <input
+                  value={liveTitle}
+                  onChange={(e) => setLiveTitle(e.target.value)}
+                  placeholder="Заголовок (опц.)"
+                  className="w-full text-xs px-2 py-1.5 rounded-md border border-input bg-background"
+                />
+                <Textarea
+                  value={liveBody}
+                  onChange={(e) => setLiveBody(e.target.value)}
+                  placeholder="Напишите текст, пример, объяснение… Ученик увидит сразу."
+                  className="text-sm min-h-[100px] resize-none bg-background"
+                />
+                <div className="flex gap-1.5">
+                  <Button size="sm" className="flex-1 h-7 text-xs gap-1" onClick={() => {
+                    if (!liveBody.trim()) { toast.error("Пусто"); return; }
+                    pushView({ type: "text", title: liveTitle.trim() || undefined, body: liveBody });
+                  }}>
+                    <Play className="w-3 h-3" /> Показать
+                  </Button>
+                  <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => { setLiveTitle(""); setLiveBody(""); }}>
+                    Очистить
+                  </Button>
+                </div>
+                <p className="text-[10px] text-muted-foreground">💡 Можно править на лету — каждое изменение шлите кнопкой «Показать».</p>
+              </div>
+            )}
           </PanelCard>
 
           <PanelCard title={`Слова (${words.length})`} icon={<BookOpen className="w-4 h-4" />} scroll>
