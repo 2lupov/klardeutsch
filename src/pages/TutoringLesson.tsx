@@ -14,11 +14,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import LessonVideoRoom from "@/components/tutoring/LessonVideoRoom";
-import LessonTheoryRenderer from "@/components/tutoring/LessonTheoryRenderer";
-import LessonNotebook from "@/components/tutoring/LessonNotebook";
 import PresenterMode from "@/components/tutoring/PresenterMode";
 import { Monitor } from "lucide-react";
+import LessonTheoryRenderer from "@/components/tutoring/LessonTheoryRenderer";
 import { AnimatePresence } from "framer-motion";
 
 const articleColor = (a: string | null) => {
@@ -212,39 +210,17 @@ const TutoringLesson = () => {
           </div>
         </motion.div>
 
-        {/* Video room with recording */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="mb-6">
-          <LessonVideoRoom
-            lessonId={lesson.id}
-            teacherId={lesson.teacher_id}
-            studentId={lesson.student_id}
-            isTeacher={isTeacher}
-            userName={user?.email?.split("@")[0] || "User"}
-            lang={lang as "uk" | "ru"}
-          />
-        </motion.div>
+        {/* Theory, words, exercises, homework tabs */}
 
-        <Tabs defaultValue={isTeacher ? "theory" : "notebook"} className="w-full">
-          <TabsList className={`mb-4 grid w-full ${isTeacher ? "grid-cols-5" : "grid-cols-4"}`}>
+        <Tabs defaultValue={isTeacher ? "theory" : "words"} className="w-full">
+          <TabsList className={`mb-4 grid w-full ${isTeacher ? "grid-cols-4" : "grid-cols-3"}`}>
             {isTeacher && (
               <TabsTrigger value="theory" className="gap-1.5"><FileText className="w-4 h-4" /><span className="hidden sm:inline">{t("Теорія", "Теория")}</span></TabsTrigger>
             )}
-            <TabsTrigger value="notebook" className="gap-1.5 relative">
-              <Edit3 className="w-4 h-4" />
-              <span className="hidden sm:inline">{t("Зошит", "Тетрадь")}</span>
-              {!isTeacher && (
-                <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-              )}
-            </TabsTrigger>
             <TabsTrigger value="words" className="gap-1.5"><BookOpen className="w-4 h-4" /><span className="hidden sm:inline">{t("Слова", "Слова")}</span> <span className="text-[10px] opacity-60">({words.length})</span></TabsTrigger>
             <TabsTrigger value="exercises" className="gap-1.5"><ListChecks className="w-4 h-4" /><span className="hidden sm:inline">{t("Вправи", "Упражнения")}</span> <span className="text-[10px] opacity-60">({exercises.length})</span></TabsTrigger>
             <TabsTrigger value="homework" className="gap-1.5"><Sparkles className="w-4 h-4" /><span className="hidden sm:inline">{t("ДЗ", "ДЗ")}</span> <span className="text-[10px] opacity-60">({homework.length})</span></TabsTrigger>
           </TabsList>
-
-          {/* NOTEBOOK — shared realtime canvas (first for student) */}
-          <TabsContent value="notebook">
-            <LessonNotebook lessonId={lesson.id} isTeacher={isTeacher} lang={lang as "uk" | "ru"} />
-          </TabsContent>
 
           {/* THEORY — teacher only */}
           {isTeacher && (
@@ -310,10 +286,9 @@ const TutoringLesson = () => {
             )}
           </TabsContent>
 
-          {/* EXERCISES — split layout: exercises on the left, sticky shared notebook on the right */}
+          {/* EXERCISES */}
           <TabsContent value="exercises">
-            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] gap-4">
-              <div className="space-y-3 min-w-0">
+            <div className="space-y-3">
             {exercises.map((ex, idx) => {
               const userAns = answers[ex.id] || "";
               const isRevealed = revealed[ex.id];
@@ -370,13 +345,6 @@ const TutoringLesson = () => {
             {exercises.length === 0 && (
               <div className="text-center py-12 text-muted-foreground">{t("Немає вправ", "Нет упражнений")}</div>
             )}
-              </div>
-              {/* Sticky shared notebook — visible while solving exercises (desktop only) */}
-              <aside className="hidden lg:block">
-                <div className="sticky top-4">
-                  <LessonNotebook lessonId={lesson.id} isTeacher={isTeacher} lang={lang as "uk" | "ru"} />
-                </div>
-              </aside>
             </div>
           </TabsContent>
 
