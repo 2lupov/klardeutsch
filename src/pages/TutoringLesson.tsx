@@ -62,6 +62,11 @@ const TutoringLesson = () => {
   const [showAddEx, setShowAddEx] = useState(false);
   const [newEx, setNewEx] = useState<{ exercise_type: string; question: string; options: string; correct_answer: string; explanation: string }>({ exercise_type: "quiz", question: "", options: "", correct_answer: "", explanation: "" });
   const [savingEx, setSavingEx] = useState(false);
+  const [showAiEx, setShowAiEx] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [aiCount, setAiCount] = useState(5);
+  const [aiTypes, setAiTypes] = useState<string[]>(["quiz", "cloze", "translation"]);
+  const [aiLoading, setAiLoading] = useState(false);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
   const [hwSubmissions, setHwSubmissions] = useState<Record<string, string>>({});
@@ -185,6 +190,33 @@ const TutoringLesson = () => {
     if (!confirm(t("Видалити вправу?", "Удалить упражнение?"))) return;
     await supabase.from("tutoring_lesson_exercises").delete().eq("id", exId);
     setExercises(exercises.filter(e => e.id !== exId));
+  };
+
+  const generateAiExercises = async () => {
+    if (aiTypes.length === 0) {
+      toast.error(t("Оберіть хоча б один тип", "Выберите хотя бы один тип"));
+      return;
+    }
+    setAiLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-lesson-extra-exercises", {
+        body: { lesson_id: id, prompt: aiPrompt.trim(), types: aiTypes, count: aiCount },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const added = data?.exercises || [];
+      setExercises([...exercises, ...added]);
+      toast.success(t(`Додано вправ: ${added.length}`, `Добавлено упражнений: ${added.length}`));
+      setAiPrompt("");
+      setShowAiEx(false);
+    } catch (e: any) {
+      const msg = String(e?.message || e);
+      if (msg.includes("402")) toast.error(t("Закінчились AI-кредити", "Закончились AI-кредиты"));
+      else if (msg.includes("429")) toast.error(t("Забагато запитів. Спробуйте пізніше", "Слишком много запросов. Попробуйте позже"));
+      else toast.error(msg);
+    } finally {
+      setAiLoading(false);
+    }
   };
 
 
@@ -353,10 +385,63 @@ const TutoringLesson = () => {
           <TabsContent value="exercises">
             <div className="space-y-3">
             {isTeacher && (
-              <div className="flex justify-end">
-                <Button size="sm" variant={showAddEx ? "outline" : "default"} onClick={() => setShowAddEx(!showAddEx)} className="gap-1.5">
-                  <Plus className="w-4 h-4" /> {showAddEx ? t("Сховати", "Скрыть") : t("Додати вправу", "Добавить упражнение")}
+              <div className="flex justify-end gap-2 flex-wrap">
+                <Button size="sm" variant={showAiEx ? "outline" : "default"} onClick={() => { setShowAiEx(!showAiEx); setShowAddEx(false); }} className="gap-1.5 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:opacity-90">
+                  <Sparkles className="w-4 h-4" /> {showAiEx ? t("Сховати ШІ", "Скрыть ИИ") : t("Згенерувати ШІ", "Сгенерировать ИИ")}
                 </Button>
+                <Button size="sm" variant={showAddEx ? "outline" : "secondary"} onClick={() => { setShowAddEx(!showAddEx); setShowAiEx(false); }} className="gap-1.5">
+                  <Plus className="w-4 h-4" /> {showAddEx ? t("Сховати", "Скрыть") : t("Додати вручну", "Добавить вручную")}
+                </Button>
+              </div>
+            )}
+            {isTeacher && showAiEx && (
+              <div className="p-4 rounded-2xl border-2 border-dashed border-primary/40 bg-gradient-to-br from-primary/5 via-primary/[0.02] to-transparent space-y-3">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-bold">{t("Згенерувати додаткові вправи через ШІ", "Сгенерировать доп. упражнения через ИИ")}</span>
+                </div>
+                <div>
+                  <label className="text-xs font-bold uppercase text-muted-foreground mb-1 block">{t("Що саме потренувати?", "Что именно потренировать?")}</label>
+                  <Textarea
+                    value={aiPrompt}
+                    onChange={(e) => setAiPrompt(e.target.value)}
+                    placeholder={t("Напр.: вправи на минулий час Perfekt зі словами уроку", "Напр.: упражнения на Perfekt со словами урока")}
+                    rows={2}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-bold uppercase text-muted-foreground mb-1 block">{t("Кількість", "Количество")}</label>
+                    <Input type="number" min={1} max={15} value={aiCount} onChange={(e) => setAiCount(Math.max(1, Math.min(15, Number(e.target.value) || 1)))} />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-bold uppercase text-muted-foreground mb-1 block">{t("Типи вправ", "Типы упражнений")}</label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {EX_TYPES.map(et => {
+                      const active = aiTypes.includes(et.id);
+                      return (
+                        <button
+                          key={et.id}
+                          type="button"
+                          onClick={() => setAiTypes(active ? aiTypes.filter(x => x !== et.id) : [...aiTypes, et.id])}
+                          className={`px-2.5 py-1 rounded-full text-xs font-medium border transition ${
+                            active ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border hover:border-primary/40"
+                          }`}
+                        >
+                          {lang === "uk" ? et.uk : et.ru}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button size="sm" onClick={generateAiExercises} disabled={aiLoading} className="gap-1.5">
+                    {aiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                    {aiLoading ? t("Генерую…", "Генерирую…") : t("Згенерувати", "Сгенерировать")}
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => setShowAiEx(false)} disabled={aiLoading}>{t("Скасувати", "Отмена")}</Button>
+                </div>
               </div>
             )}
             {isTeacher && showAddEx && (
