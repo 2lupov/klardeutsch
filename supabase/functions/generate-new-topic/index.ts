@@ -327,7 +327,7 @@ Generate 5 questions about the audio content.`;
             .single();
 
           if (!listeningError && newListening && listening.questions?.length > 0) {
-            const questionsData = listening.questions.map((q: any, i: number) => ({
+            const questionsData = listening.questions.map(shuffleQuestion).map((q: any, i: number) => ({
               listening_id: newListening.id,
               question: q.question,
               options: q.options,
