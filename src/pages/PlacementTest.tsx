@@ -272,16 +272,16 @@ export default function PlacementTest() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="p-6 rounded-2xl bg-card border border-border text-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+            <div className="p-5 sm:p-6 rounded-2xl bg-card border border-border text-center">
               <p className="text-sm text-muted-foreground mb-1">{t("Загальний бал", "Общий балл")}</p>
-              <p className="text-4xl font-bold">{assignment.total_score}/{assignment.total_questions}</p>
+              <p className="text-3xl sm:text-4xl font-bold">{assignment.total_score}/{assignment.total_questions}</p>
               <p className="text-sm text-muted-foreground mt-1">{percent}%</p>
             </div>
-            <div className="p-6 rounded-2xl bg-primary text-primary-foreground text-center">
+            <div className="p-5 sm:p-6 rounded-2xl bg-primary text-primary-foreground text-center">
               <p className="text-sm opacity-90 mb-1">{t("Рекомендований рівень", "Рекомендуемый уровень")}</p>
-              <p className="text-4xl font-bold flex items-center justify-center gap-2">
-                <Award className="w-8 h-8" /> {assignment.recommended_level}
+              <p className="text-3xl sm:text-4xl font-bold flex items-center justify-center gap-2">
+                <Award className="w-7 h-7 sm:w-8 sm:h-8" /> {assignment.recommended_level}
               </p>
             </div>
           </div>

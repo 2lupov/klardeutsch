@@ -703,7 +703,7 @@ const Tutoring = () => {
         </motion.div>
 
         <Tabs defaultValue="lessons" className="w-full">
-          <TabsList className="mb-6">
+          <TabsList className="mb-6 max-w-full overflow-x-auto flex w-full sm:w-auto justify-start">
             <TabsTrigger value="lessons" className="gap-2">
               <BookOpen className="w-4 h-4" />
               {t("Уроки", "Уроки")} ({lessons.length})
@@ -1051,7 +1051,7 @@ const Tutoring = () => {
 
       {/* ===== TEACHER: Create lesson dialog (simple AI mode) ===== */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl w-[calc(100%-1.5rem)] sm:w-full max-h-[90dvh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-primary" />
@@ -1097,7 +1097,7 @@ const Tutoring = () => {
             </div>
 
             {/* === Время и ссылка на встречу === */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block flex items-center gap-1.5">
                   <Calendar className="w-3 h-3" />
@@ -1180,7 +1180,7 @@ const Tutoring = () => {
                   );
                 })}
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-[11px] font-bold uppercase text-muted-foreground mb-1 block">
                     {t("К-сть слів", "Кол-во слов")}
@@ -1324,7 +1324,7 @@ const Tutoring = () => {
 
       {/* ===== Create Student Dialog ===== */}
       <Dialog open={createStudentOpen} onOpenChange={(o) => { setCreateStudentOpen(o); if (!o) setCreatedCredentials(null); }}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md w-[calc(100%-1.5rem)] sm:w-full max-h-[90dvh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <UserPlus className="w-5 h-5 text-primary" />
@@ -1476,7 +1476,7 @@ const Tutoring = () => {
 
       {/* ===== Placement test dialog ===== */}
       <Dialog open={placementOpen} onOpenChange={setPlacementOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md w-[calc(100%-1.5rem)] sm:w-full max-h-[90dvh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <ClipboardCheck className="w-5 h-5 text-primary" />
