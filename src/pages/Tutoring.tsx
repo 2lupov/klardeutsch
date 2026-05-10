@@ -1209,9 +1209,9 @@ const Tutoring = () => {
                   <Input
                     type="number"
                     min={3}
-                    max={25}
+                    max={80}
                     value={exercisesCount}
-                    onChange={(e) => setExercisesCount(Math.max(3, Math.min(25, parseInt(e.target.value) || 0)))}
+                    onChange={(e) => setExercisesCount(Math.max(3, Math.min(80, parseInt(e.target.value) || 0)))}
                   />
                 </div>
               </div>

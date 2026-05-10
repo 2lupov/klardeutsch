@@ -412,7 +412,7 @@ const TutoringLesson = () => {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs font-bold uppercase text-muted-foreground mb-1 block">{t("Кількість", "Количество")}</label>
-                    <Input type="number" min={1} max={15} value={aiCount} onChange={(e) => setAiCount(Math.max(1, Math.min(15, Number(e.target.value) || 1)))} />
+                    <Input type="number" min={1} max={40} value={aiCount} onChange={(e) => setAiCount(Math.max(1, Math.min(40, Number(e.target.value) || 1)))} />
                   </div>
                 </div>
                 <div>
