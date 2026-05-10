@@ -214,27 +214,15 @@ const TutoringLesson = () => {
 
         {/* Theory, words, exercises, homework tabs */}
 
-        <Tabs defaultValue={isTeacher ? "theory" : "notebook"} className="w-full">
-          <TabsList className={`mb-4 grid w-full ${isTeacher ? "grid-cols-5" : "grid-cols-4"}`}>
+        <Tabs defaultValue={isTeacher ? "theory" : "words"} className="w-full">
+          <TabsList className={`mb-4 grid w-full ${isTeacher ? "grid-cols-4" : "grid-cols-3"}`}>
             {isTeacher && (
               <TabsTrigger value="theory" className="gap-1.5"><FileText className="w-4 h-4" /><span className="hidden sm:inline">{t("Теорія", "Теория")}</span></TabsTrigger>
             )}
-            <TabsTrigger value="notebook" className="gap-1.5 relative">
-              <Edit3 className="w-4 h-4" />
-              <span className="hidden sm:inline">{t("Зошит", "Тетрадь")}</span>
-              {!isTeacher && (
-                <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-              )}
-            </TabsTrigger>
             <TabsTrigger value="words" className="gap-1.5"><BookOpen className="w-4 h-4" /><span className="hidden sm:inline">{t("Слова", "Слова")}</span> <span className="text-[10px] opacity-60">({words.length})</span></TabsTrigger>
             <TabsTrigger value="exercises" className="gap-1.5"><ListChecks className="w-4 h-4" /><span className="hidden sm:inline">{t("Вправи", "Упражнения")}</span> <span className="text-[10px] opacity-60">({exercises.length})</span></TabsTrigger>
             <TabsTrigger value="homework" className="gap-1.5"><Sparkles className="w-4 h-4" /><span className="hidden sm:inline">{t("ДЗ", "ДЗ")}</span> <span className="text-[10px] opacity-60">({homework.length})</span></TabsTrigger>
           </TabsList>
-
-          {/* NOTEBOOK — shared realtime canvas (first for student) */}
-          <TabsContent value="notebook">
-            <LessonNotebook lessonId={lesson.id} isTeacher={isTeacher} lang={lang as "uk" | "ru"} />
-          </TabsContent>
 
           {/* THEORY — teacher only */}
           {isTeacher && (
