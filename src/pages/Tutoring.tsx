@@ -1323,7 +1323,7 @@ const Tutoring = () => {
       </Dialog>
 
       {/* ===== Create Student Dialog ===== */}
-      <Dialog open={createStudentOpen} onOpenChange={(o) => { setCreateStudentOpen(o); if (!o) setCreatedCredentials(null); }}>
+      <Dialog open={createStudentOpen} onOpenChange={(o) => { setCreateStudentOpen(o); if (o) setAssignTestOnCreate(false); if (!o) setCreatedCredentials(null); }}>
         <DialogContent className="max-w-md w-[calc(100%-1.5rem)] sm:w-full max-h-[90dvh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
