@@ -410,6 +410,30 @@ const Tutoring = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "create failed");
       setCreatedCredentials({ nickname: data.nickname, password: data.password });
+
+      // Optionally auto-assign placement test (kid mode if age <= 12)
+      if (assignTestOnCreate && data.student_id) {
+        const isKid = ageNum !== null && !isNaN(ageNum as any) && (ageNum as number) <= 12;
+        const levels = ["A1", "A2"];
+        const perLevel = isKid ? Math.floor(KID_MAX_TOTAL / levels.length) : 8;
+        try {
+          const created = await createPlacementAssignmentInternal({
+            studentId: data.student_id,
+            levels,
+            perLevel,
+            isKid,
+            silent: true,
+          });
+          if (created) {
+            const url = `${window.location.origin}/tutoring/placement/${created.id}`;
+            try { await navigator.clipboard?.writeText(url); } catch {}
+            toast.success(t("Тест призначено · посилання скопійовано", "Тест назначен · ссылка скопирована"));
+          }
+        } catch (err) {
+          console.error("auto-placement failed", err);
+        }
+      }
+
       setNewStudentEmail(""); setNewStudentName(""); setNewStudentNickname(""); setNewStudentPassword(""); setNewStudentNote(""); setNewStudentAge("");
       loadData();
       toast.success(t("Акаунт створено", "Аккаунт создан"));
