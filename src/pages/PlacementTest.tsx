@@ -47,6 +47,7 @@ interface Assignment {
   completed_at: string | null;
   ai_analysis: AIAnalysis | null;
   selected_levels?: string[];
+  is_kid_mode?: boolean;
 }
 
 const LEVEL_COLORS: Record<string, string> = {
@@ -228,6 +229,7 @@ export default function PlacementTest() {
 
   // Auto-submit on time-up
   useEffect(() => {
+    if (assignment?.is_kid_mode) return; // no time limit for kids
     if (assignment?.status === "in_progress" && remaining === 0 && elapsed > 0) {
       submitTest();
     }
@@ -393,8 +395,68 @@ export default function PlacementTest() {
     );
   }
 
+  const isKid = !!assignment.is_kid_mode;
+
   // ============ INTRO VIEW ============
   if (assignment.status === "pending") {
+    if (isKid) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-amber-100 via-pink-100 to-sky-100 dark:from-amber-950/40 dark:via-pink-950/30 dark:to-sky-950/40 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.85, y: 30 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ type: "spring", stiffness: 180, damping: 18 }}
+            className="max-w-md w-full p-8 rounded-[2rem] bg-white/80 dark:bg-slate-900/70 backdrop-blur-xl border-4 border-amber-300/60 shadow-2xl text-center"
+          >
+            <motion.div
+              animate={{ rotate: [0, -8, 8, -6, 6, 0] }}
+              transition={{ duration: 2.4, repeat: Infinity, repeatDelay: 1 }}
+              className="text-7xl mb-3"
+            >
+              🐼
+            </motion.div>
+            <h1 className="text-3xl font-extrabold mb-2 bg-gradient-to-r from-amber-500 via-pink-500 to-sky-500 bg-clip-text text-transparent">
+              {t("Привіт, друже!", "Привет, друг!")}
+            </h1>
+            <p className="text-base text-foreground/80 mb-6 leading-relaxed">
+              {t(
+                `Зараз буде ${questions.length} цікавих питань. Не хвилюйся — це просто гра! 🎈`,
+                `Сейчас будет ${questions.length} интересных вопросов. Не волнуйся — это просто игра! 🎈`
+              )}
+            </p>
+            <div className="grid grid-cols-3 gap-3 mb-6">
+              {[
+                { e: "🎯", t: t("Вибирай", "Выбирай") },
+                { e: "⭐", t: t("Збирай", "Собирай") },
+                { e: "🏆", t: t("Перемагай", "Побеждай") },
+              ].map((it, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 + i * 0.1 }}
+                  className="rounded-2xl bg-white/70 dark:bg-slate-800/70 p-3 border-2 border-amber-200/50"
+                >
+                  <div className="text-3xl mb-1">{it.e}</div>
+                  <p className="text-[11px] font-bold text-foreground/70">{it.t}</p>
+                </motion.div>
+              ))}
+            </div>
+            {isStudent ? (
+              <Button
+                onClick={startTest}
+                size="lg"
+                className="w-full text-lg font-extrabold py-6 rounded-2xl bg-gradient-to-r from-amber-400 via-pink-500 to-sky-500 hover:opacity-95 text-white shadow-xl border-0"
+              >
+                🚀 {t("Поїхали!", "Поехали!")}
+              </Button>
+            ) : (
+              <p className="text-sm text-muted-foreground">{t("Очікує початку учнем", "Ожидает начала учеником")}</p>
+            )}
+          </motion.div>
+        </div>
+      );
+    }
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <motion.div
@@ -443,21 +505,40 @@ export default function PlacementTest() {
   const answered = answers[currentIdx] !== undefined;
   const allAnswered = answers.filter((a) => a !== undefined).length === questions.length;
 
+  const KID_OPT_COLORS = [
+    "from-amber-400 to-orange-400 border-amber-300",
+    "from-pink-400 to-rose-400 border-pink-300",
+    "from-sky-400 to-cyan-400 border-sky-300",
+    "from-emerald-400 to-teal-400 border-emerald-300",
+  ];
+  const KID_OPT_EMOJI = ["🍎", "🌸", "🐬", "🌿"];
+
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className={`min-h-screen flex flex-col ${
+      isKid
+        ? "bg-gradient-to-br from-amber-100 via-pink-100 to-sky-100 dark:from-amber-950/40 dark:via-pink-950/30 dark:to-sky-950/40"
+        : "bg-background"
+    }`}>
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border p-4">
+      <div className={`sticky top-0 z-10 backdrop-blur border-b p-4 ${
+        isKid ? "bg-white/60 dark:bg-slate-900/60 border-amber-200/50" : "bg-background/95 border-border"
+      }`}>
         <div className="max-w-3xl mx-auto flex items-center gap-4">
           <div className="flex-1">
-            <Progress value={((currentIdx + 1) / questions.length) * 100} className="h-2" />
-            <p className="text-xs text-muted-foreground mt-1">
-              {currentIdx + 1} / {questions.length}
+            <Progress
+              value={((currentIdx + 1) / questions.length) * 100}
+              className={isKid ? "h-3 [&>div]:bg-gradient-to-r [&>div]:from-amber-400 [&>div]:via-pink-500 [&>div]:to-sky-500" : "h-2"}
+            />
+            <p className={`mt-1 ${isKid ? "text-sm font-bold text-foreground/80" : "text-xs text-muted-foreground"}`}>
+              {isKid ? "🌟 " : ""}{currentIdx + 1} / {questions.length}
             </p>
           </div>
-          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-mono font-bold ${remaining < 60 ? "bg-destructive/20 text-destructive" : "bg-muted"}`}>
-            <Clock className="w-4 h-4" />
-            {String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}
-          </div>
+          {!isKid && (
+            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-mono font-bold ${remaining < 60 ? "bg-destructive/20 text-destructive" : "bg-muted"}`}>
+              <Clock className="w-4 h-4" />
+              {String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}
+            </div>
+          )}
         </div>
       </div>
 
@@ -469,63 +550,114 @@ export default function PlacementTest() {
             initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.2 }}
           >
-            <div className="flex items-center gap-2 mb-4">
-              <span className={`text-xs font-bold px-2 py-1 rounded-full text-white ${LEVEL_COLORS[q.level]}`}>
-                {q.level}
-              </span>
-              <span className="text-xs text-muted-foreground uppercase">{q.question_type}</span>
-            </div>
+            {!isKid && (
+              <div className="flex items-center gap-2 mb-4">
+                <span className={`text-xs font-bold px-2 py-1 rounded-full text-white ${LEVEL_COLORS[q.level]}`}>
+                  {q.level}
+                </span>
+                <span className="text-xs text-muted-foreground uppercase">{q.question_type}</span>
+              </div>
+            )}
             {q.context && (
-              <div className="p-4 mb-4 rounded-2xl bg-muted text-sm leading-relaxed">
+              <div className={`p-4 mb-4 rounded-2xl text-sm leading-relaxed ${
+                isKid ? "bg-white/70 dark:bg-slate-800/70 border-2 border-amber-200/50 text-base" : "bg-muted"
+              }`}>
                 {q.context}
               </div>
             )}
-            <h2 className="text-xl md:text-2xl font-bold mb-6">{q.question}</h2>
-            <div className="space-y-3">
-              {q.options.map((opt, i) => (
-                <motion.button
-                  key={i}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => selectAnswer(i)}
-                  className={`w-full text-left p-4 rounded-2xl border-2 transition-all ${
-                    answers[currentIdx] === i
-                      ? "border-primary bg-primary/10 font-bold"
-                      : "border-border bg-card hover:border-primary/50"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                      answers[currentIdx] === i ? "bg-primary text-primary-foreground" : "bg-muted"
-                    }`}>
-                      {String.fromCharCode(65 + i)}
+            <h2 className={`font-bold mb-6 ${isKid ? "text-2xl md:text-3xl text-center" : "text-xl md:text-2xl"}`}>
+              {q.question}
+            </h2>
+            <div className={isKid ? "grid gap-4" : "space-y-3"}>
+              {q.options.map((opt, i) => {
+                const selected = answers[currentIdx] === i;
+                if (isKid) {
+                  return (
+                    <motion.button
+                      key={i}
+                      whileTap={{ scale: 0.96 }}
+                      whileHover={{ scale: 1.02 }}
+                      onClick={() => selectAnswer(i)}
+                      className={`w-full text-left p-4 rounded-3xl border-4 shadow-md transition-all ${
+                        selected
+                          ? `bg-gradient-to-br ${KID_OPT_COLORS[i % 4]} text-white scale-[1.02] shadow-xl`
+                          : "bg-white/85 dark:bg-slate-800/85 border-white/60 hover:shadow-lg"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl font-extrabold shadow-md ${
+                          selected ? "bg-white/30" : `bg-gradient-to-br ${KID_OPT_COLORS[i % 4]} text-white`
+                        }`}>
+                          {KID_OPT_EMOJI[i % 4]}
+                        </div>
+                        <span className="flex-1 text-lg font-bold">{opt}</span>
+                        {selected && <CheckCircle2 className="w-7 h-7" />}
+                      </div>
+                    </motion.button>
+                  );
+                }
+                return (
+                  <motion.button
+                    key={i}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => selectAnswer(i)}
+                    className={`w-full text-left p-4 rounded-2xl border-2 transition-all ${
+                      selected
+                        ? "border-primary bg-primary/10 font-bold"
+                        : "border-border bg-card hover:border-primary/50"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                        selected ? "bg-primary text-primary-foreground" : "bg-muted"
+                      }`}>
+                        {String.fromCharCode(65 + i)}
+                      </div>
+                      <span className="flex-1">{opt}</span>
+                      {selected && <CheckCircle2 className="w-5 h-5 text-primary" />}
                     </div>
-                    <span className="flex-1">{opt}</span>
-                    {answers[currentIdx] === i && <CheckCircle2 className="w-5 h-5 text-primary" />}
-                  </div>
-                </motion.button>
-              ))}
+                  </motion.button>
+                );
+              })}
             </div>
           </motion.div>
         </AnimatePresence>
       </div>
 
       {/* Footer nav */}
-      <div className="sticky bottom-0 bg-background/95 backdrop-blur border-t border-border p-4">
+      <div className={`sticky bottom-0 backdrop-blur border-t p-4 ${
+        isKid ? "bg-white/60 dark:bg-slate-900/60 border-amber-200/50" : "bg-background/95 border-border"
+      }`}>
         <div className="max-w-3xl mx-auto flex items-center justify-between gap-3">
           <Button
             variant="outline"
             onClick={() => setCurrentIdx(Math.max(0, currentIdx - 1))}
             disabled={currentIdx === 0}
+            className={isKid ? "rounded-2xl font-bold" : ""}
           >
-            {t("Назад", "Назад")}
+            {isKid ? "⬅️ " : ""}{t("Назад", "Назад")}
           </Button>
           {currentIdx < questions.length - 1 ? (
-            <Button onClick={() => setCurrentIdx(currentIdx + 1)} disabled={!answered}>
-              {t("Далі", "Далее")}
+            <Button
+              onClick={() => setCurrentIdx(currentIdx + 1)}
+              disabled={!answered}
+              className={isKid
+                ? "rounded-2xl font-extrabold text-base px-6 bg-gradient-to-r from-amber-400 via-pink-500 to-sky-500 hover:opacity-95 text-white border-0 shadow-lg"
+                : ""}
+            >
+              {t("Далі", "Далее")} {isKid ? "➡️" : ""}
             </Button>
           ) : (
-            <Button onClick={submitTest} disabled={!allAnswered || submitting} className="bg-primary">
-              {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : t("Завершити тест", "Завершить тест")}
+            <Button
+              onClick={submitTest}
+              disabled={!allAnswered || submitting}
+              className={isKid
+                ? "rounded-2xl font-extrabold text-base px-6 bg-gradient-to-r from-emerald-400 to-teal-500 hover:opacity-95 text-white border-0 shadow-lg"
+                : "bg-primary"}
+            >
+              {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : (
+                <>{isKid ? "🏆 " : ""}{t("Завершити тест", "Завершить тест")}</>
+              )}
             </Button>
           )}
         </div>

@@ -133,14 +133,25 @@ const Tutoring = () => {
   // ===== Placement test dialog =====
   const [placementOpen, setPlacementOpen] = useState(false);
   const [placementStudent, setPlacementStudent] = useState<string>("");
+  const [placementStudentIsKid, setPlacementStudentIsKid] = useState(false);
   const [placementLevels, setPlacementLevels] = useState<string[]>(["A1", "A2"]);
   const [placementPerLevel, setPlacementPerLevel] = useState(8);
   const [placementSubmitting, setPlacementSubmitting] = useState(false);
 
+  // ===== Auto-assign test on student creation =====
+  const [assignTestOnCreate, setAssignTestOnCreate] = useState(true);
+
+  const KID_MAX_TOTAL = 30;
+
   const openPlacementDialog = (studentId: string) => {
     setPlacementStudent(studentId);
-    setPlacementLevels(["A1", "A2"]);
-    setPlacementPerLevel(8);
+    const rel = relationships.find((r) => r.student_id === studentId);
+    const ageVal = rel?.profile?.age ?? null;
+    const isKid = !!rel?.profile?.is_kid || (typeof ageVal === "number" && ageVal <= 12);
+    setPlacementStudentIsKid(isKid);
+    const levels = isKid ? ["A1", "A2"] : ["A1", "A2"];
+    setPlacementLevels(levels);
+    setPlacementPerLevel(isKid ? Math.floor(KID_MAX_TOTAL / levels.length) : 8);
     setPlacementOpen(true);
   };
   const togglePlacementLevel = (lvl: string) => {
@@ -148,6 +159,13 @@ const Tutoring = () => {
       prev.includes(lvl) ? prev.filter((l) => l !== lvl) : [...prev, lvl].sort((a, b) => ["A1","A2","B1","B2","C1"].indexOf(a) - ["A1","A2","B1","B2","C1"].indexOf(b))
     );
   };
+
+  // Clamp questions-per-level when in kid mode so total never exceeds 30
+  useEffect(() => {
+    if (!placementOpen || !placementStudentIsKid || placementLevels.length === 0) return;
+    const maxPer = Math.max(1, Math.floor(KID_MAX_TOTAL / placementLevels.length));
+    if (placementPerLevel > maxPer) setPlacementPerLevel(maxPer);
+  }, [placementLevels, placementStudentIsKid, placementOpen]);
 
   useEffect(() => {
     if (!user) return;
@@ -241,6 +259,60 @@ const Tutoring = () => {
   };
 
   // ===== Placement test =====
+  // Internal helper: build & insert a placement assignment for a student.
+  const createPlacementAssignmentInternal = async (opts: {
+    studentId: string;
+    levels: string[];
+    perLevel: number;
+    isKid: boolean;
+    silent?: boolean;
+  }): Promise<any | null> => {
+    if (!user) return null;
+    const { studentId, levels, isKid, silent } = opts;
+    let { perLevel } = opts;
+    if (isKid && levels.length > 0) {
+      perLevel = Math.max(1, Math.min(perLevel, Math.floor(KID_MAX_TOTAL / levels.length)));
+    }
+    const { data: allQs } = await supabase
+      .from("tutoring_placement_questions")
+      .select("id, level")
+      .in("level", levels);
+    if (!allQs || !allQs.length) {
+      if (!silent) toast.error(t("Банк питань порожній для цих рівнів", "Банк вопросов пуст для этих уровней"));
+      return null;
+    }
+    const byLevel: Record<string, string[]> = {};
+    allQs.forEach((q: any) => {
+      byLevel[q.level] = byLevel[q.level] || [];
+      byLevel[q.level].push(q.id);
+    });
+    let picked: string[] = [];
+    for (const lvl of levels) {
+      const ids = (byLevel[lvl] || []).sort(() => Math.random() - 0.5).slice(0, perLevel);
+      picked.push(...ids);
+    }
+    if (isKid && picked.length > KID_MAX_TOTAL) picked = picked.slice(0, KID_MAX_TOTAL);
+    if (!picked.length) {
+      if (!silent) toast.error(t("Немає питань для обраних рівнів", "Нет вопросов для выбранных уровней"));
+      return null;
+    }
+    const { data: created, error } = await supabase
+      .from("tutoring_placement_assignments")
+      .insert({
+        teacher_id: user.id,
+        student_id: studentId,
+        status: "pending",
+        question_ids: picked,
+        total_questions: picked.length,
+        selected_levels: levels,
+        is_kid_mode: isKid,
+      } as any)
+      .select()
+      .single();
+    if (error) { if (!silent) toast.error(error.message); return null; }
+    return created;
+  };
+
   const assignPlacementTest = async () => {
     if (!user || !placementStudent) return;
     if (!placementLevels.length) {
@@ -249,43 +321,13 @@ const Tutoring = () => {
     }
     setPlacementSubmitting(true);
     try {
-      const { data: allQs } = await supabase
-        .from("tutoring_placement_questions")
-        .select("id, level")
-        .in("level", placementLevels);
-      if (!allQs || !allQs.length) {
-        toast.error(t("Банк питань порожній для цих рівнів", "Банк вопросов пуст для этих уровней"));
-        setPlacementSubmitting(false);
-        return;
-      }
-      const byLevel: Record<string, string[]> = {};
-      allQs.forEach((q: any) => {
-        byLevel[q.level] = byLevel[q.level] || [];
-        byLevel[q.level].push(q.id);
+      const created = await createPlacementAssignmentInternal({
+        studentId: placementStudent,
+        levels: placementLevels,
+        perLevel: placementPerLevel,
+        isKid: placementStudentIsKid,
       });
-      const picked: string[] = [];
-      for (const lvl of placementLevels) {
-        const ids = (byLevel[lvl] || []).sort(() => Math.random() - 0.5).slice(0, placementPerLevel);
-        picked.push(...ids);
-      }
-      if (!picked.length) {
-        toast.error(t("Немає питань для обраних рівнів", "Нет вопросов для выбранных уровней"));
-        setPlacementSubmitting(false);
-        return;
-      }
-      const { data: created, error } = await supabase
-        .from("tutoring_placement_assignments")
-        .insert({
-          teacher_id: user.id,
-          student_id: placementStudent,
-          status: "pending",
-          question_ids: picked,
-          total_questions: picked.length,
-          selected_levels: placementLevels,
-        })
-        .select()
-        .single();
-      if (error) { toast.error(error.message); setPlacementSubmitting(false); return; }
+      if (!created) { setPlacementSubmitting(false); return; }
       toast.success(t("Тест призначено", "Тест назначен"));
       const url = `${window.location.origin}/tutoring/placement/${created.id}`;
       try {
@@ -375,6 +417,30 @@ const Tutoring = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "create failed");
       setCreatedCredentials({ nickname: data.nickname, password: data.password });
+
+      // Optionally auto-assign placement test (kid mode if age <= 12)
+      if (assignTestOnCreate && data.student_id) {
+        const isKid = ageNum !== null && !isNaN(ageNum as any) && (ageNum as number) <= 12;
+        const levels = ["A1", "A2"];
+        const perLevel = isKid ? Math.floor(KID_MAX_TOTAL / levels.length) : 8;
+        try {
+          const created = await createPlacementAssignmentInternal({
+            studentId: data.student_id,
+            levels,
+            perLevel,
+            isKid,
+            silent: true,
+          });
+          if (created) {
+            const url = `${window.location.origin}/tutoring/placement/${created.id}`;
+            try { await navigator.clipboard?.writeText(url); } catch {}
+            toast.success(t("Тест призначено · посилання скопійовано", "Тест назначен · ссылка скопирована"));
+          }
+        } catch (err) {
+          console.error("auto-placement failed", err);
+        }
+      }
+
       setNewStudentEmail(""); setNewStudentName(""); setNewStudentNickname(""); setNewStudentPassword(""); setNewStudentNote(""); setNewStudentAge("");
       loadData();
       toast.success(t("Акаунт створено", "Аккаунт создан"));
@@ -1374,6 +1440,25 @@ const Tutoring = () => {
                   placeholder={t("Рівень, цілі, особливості…", "Уровень, цели, особенности…")}
                 />
               </div>
+              <label className="flex items-start gap-2.5 p-3 rounded-xl border-2 border-border hover:border-primary/40 cursor-pointer transition-colors bg-card">
+                <input
+                  type="checkbox"
+                  checked={assignTestOnCreate}
+                  onChange={(e) => setAssignTestOnCreate(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 accent-primary cursor-pointer"
+                />
+                <div className="flex-1">
+                  <p className="text-sm font-bold flex items-center gap-1.5">
+                    <ClipboardCheck className="w-4 h-4 text-primary" />
+                    {t("Призначити вступний тест", "Назначить вступительный тест")}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    {newStudentAge && parseInt(newStudentAge, 10) <= 12
+                      ? t("Дитячий формат · 30 питань · A1+A2", "Детский формат · 30 вопросов · A1+A2")
+                      : t("16 питань · A1+A2 · посилання скопіюємо", "16 вопросов · A1+A2 · ссылку скопируем")}
+                  </p>
+                </div>
+              </label>
               <Button onClick={createStudent} disabled={creatingStudent} className="w-full gap-2" size="lg">
                 {creatingStudent ? (
                   <><Loader2 className="w-4 h-4 animate-spin" />{t("Створюємо…", "Создаём…")}</>
@@ -1399,6 +1484,11 @@ const Tutoring = () => {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-5 py-2">
+            {placementStudentIsKid && (
+              <div className="rounded-xl bg-gradient-to-br from-amber-400/15 to-pink-400/15 border-2 border-amber-400/40 p-3 text-xs leading-relaxed">
+                🧒 <strong>{t("Дитячий режим", "Детский режим")}</strong> — {t("максимум 30 питань, барвистий інтерфейс для дитини.", "максимум 30 вопросов, красочный интерфейс для ребёнка.")}
+              </div>
+            )}
             <div>
               <label className="text-xs font-bold uppercase text-muted-foreground mb-2 block">
                 {t("Які рівні включити?", "Какие уровни включить?")}
@@ -1437,14 +1527,16 @@ const Tutoring = () => {
               <input
                 type="range"
                 min={5}
-                max={15}
+                max={placementStudentIsKid && placementLevels.length > 0
+                  ? Math.max(5, Math.floor(KID_MAX_TOTAL / placementLevels.length))
+                  : 15}
                 value={placementPerLevel}
                 onChange={(e) => setPlacementPerLevel(Number(e.target.value))}
                 className="w-full accent-primary"
               />
               <p className="text-[11px] text-muted-foreground mt-1">
-                {t("Загалом", "Всего")}: <strong>{placementLevels.length * placementPerLevel}</strong>{" "}
-                {t("питань", "вопросов")} · ≈ {Math.ceil(placementLevels.length * placementPerLevel * 0.5)} {t("хв", "мин")}
+                {t("Загалом", "Всего")}: <strong>{Math.min(placementLevels.length * placementPerLevel, placementStudentIsKid ? KID_MAX_TOTAL : 9999)}</strong>{" "}
+                {t("питань", "вопросов")} · ≈ {Math.ceil(Math.min(placementLevels.length * placementPerLevel, placementStudentIsKid ? KID_MAX_TOTAL : 9999) * 0.5)} {t("хв", "мин")}
               </p>
             </div>
 
