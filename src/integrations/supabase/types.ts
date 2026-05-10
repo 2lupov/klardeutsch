@@ -2196,6 +2196,7 @@ export type Database = {
           created_at: string
           duration_seconds: number | null
           id: string
+          is_kid_mode: boolean
           question_ids: Json
           recommended_level: string | null
           scores_by_level: Json | null
@@ -2215,6 +2216,7 @@ export type Database = {
           created_at?: string
           duration_seconds?: number | null
           id?: string
+          is_kid_mode?: boolean
           question_ids?: Json
           recommended_level?: string | null
           scores_by_level?: Json | null
@@ -2234,6 +2236,7 @@ export type Database = {
           created_at?: string
           duration_seconds?: number | null
           id?: string
+          is_kid_mode?: boolean
           question_ids?: Json
           recommended_level?: string | null
           scores_by_level?: Json | null
