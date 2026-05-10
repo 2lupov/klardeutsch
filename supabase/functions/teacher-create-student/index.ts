@@ -86,7 +86,11 @@ Deno.serve(async (req) => {
       });
     }
 
-    const password = customPassword || genPassword();
+    // Allow very simple passwords: pad short ones up to Supabase's 6-char minimum
+    let password = customPassword || genPassword();
+    if (password.length > 0 && password.length < 6) {
+      password = password.padEnd(6, "0");
+    }
 
     // Create user (auto-confirm email so they can sign in immediately)
     const { data: created, error: createErr } = await admin.auth.admin.createUser({

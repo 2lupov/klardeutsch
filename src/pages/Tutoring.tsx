@@ -1348,6 +1348,9 @@ const Tutoring = () => {
                   onChange={(e) => setNewStudentPassword(e.target.value)}
                   placeholder={t("Згенерую автоматично", "Сгенерирую автоматически")}
                 />
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  {t("Можна простий — короткий доповнимо нулями до 6 символів", "Можно простой — короткий дополним нулями до 6 символов")}
+                </p>
               </div>
               <div>
                 <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
