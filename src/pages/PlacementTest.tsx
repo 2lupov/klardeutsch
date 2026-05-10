@@ -229,6 +229,7 @@ export default function PlacementTest() {
 
   // Auto-submit on time-up
   useEffect(() => {
+    if (assignment?.is_kid_mode) return; // no time limit for kids
     if (assignment?.status === "in_progress" && remaining === 0 && elapsed > 0) {
       submitTest();
     }
