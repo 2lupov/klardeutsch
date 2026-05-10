@@ -160,6 +160,13 @@ const Tutoring = () => {
     );
   };
 
+  // Clamp questions-per-level when in kid mode so total never exceeds 30
+  useEffect(() => {
+    if (!placementOpen || !placementStudentIsKid || placementLevels.length === 0) return;
+    const maxPer = Math.max(1, Math.floor(KID_MAX_TOTAL / placementLevels.length));
+    if (placementPerLevel > maxPer) setPlacementPerLevel(maxPer);
+  }, [placementLevels, placementStudentIsKid, placementOpen]);
+
   useEffect(() => {
     if (!user) return;
     (async () => {
