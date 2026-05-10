@@ -66,6 +66,15 @@ const EX_TYPES = [
   { id: "quiz", uk: "Тест (4 варіанти)", ru: "Тест (4 варианта)" },
   { id: "cloze", uk: "Заповнити пропуск", ru: "Заполнить пропуск" },
   { id: "translation", uk: "Переклад", ru: "Перевод" },
+  { id: "article", uk: "Артикль der/die/das", ru: "Артикль der/die/das" },
+  { id: "word_order", uk: "Скласти речення", ru: "Собрать предложение" },
+  { id: "conjugation", uk: "Відмінювання дієслова", ru: "Спряжение глагола" },
+  { id: "plural", uk: "Множина", ru: "Множественное число" },
+  { id: "error_correction", uk: "Знайти помилку", ru: "Найти ошибку" },
+  { id: "synonym", uk: "Синонім", ru: "Синоним" },
+  { id: "antonym", uk: "Антонім", ru: "Антоним" },
+  { id: "question_formation", uk: "Скласти питання", ru: "Составить вопрос" },
+  { id: "dictation", uk: "Диктант", ru: "Диктант" },
 ];
 
 const Tutoring = () => {
