@@ -167,7 +167,7 @@ export default function TeacherAIAssistant({ open, onOpenChange, studentId, stud
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl h-[85vh] p-0 flex flex-col gap-0">
+      <DialogContent className="max-w-2xl h-[85vh] p-0 flex flex-col gap-0 z-[100]">
         <DialogHeader className="p-4 border-b border-border">
           <div className="flex items-center justify-between gap-3">
             <DialogTitle className="flex items-center gap-2 text-base">
