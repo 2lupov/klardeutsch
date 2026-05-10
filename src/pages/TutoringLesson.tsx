@@ -345,14 +345,6 @@ const TutoringLesson = () => {
             {exercises.length === 0 && (
               <div className="text-center py-12 text-muted-foreground">{t("Немає вправ", "Нет упражнений")}</div>
             )}
-              </div>
-              {/* Sticky shared notebook — visible while solving exercises (desktop only) */}
-              <aside className="hidden lg:block">
-                <div className="sticky top-4">
-                  <LessonNotebook lessonId={lesson.id} isTeacher={isTeacher} lang={lang as "uk" | "ru"} />
-                </div>
-              </aside>
-            </div>
           </TabsContent>
 
           {/* HOMEWORK */}
