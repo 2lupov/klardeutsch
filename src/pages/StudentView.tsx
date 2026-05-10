@@ -112,19 +112,18 @@ const StudentView = () => {
       </div>
     );
   }
-  if (!session) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background text-muted-foreground p-6 text-center">
-        Сессия не найдена или завершена
-      </div>
-    );
-  }
-  if (session.status === "ended") {
+  if (!session || session.status === "ended") {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4 p-6 text-center">
         <Sparkles className="w-12 h-12 text-primary" />
         <h1 className="text-2xl font-display font-black">Урок завершён</h1>
         <p className="text-muted-foreground">Спасибо за работу!</p>
+        <button
+          onClick={() => (window.location.href = "/assignments")}
+          className="mt-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-bold"
+        >
+          К моим заданиям
+        </button>
       </div>
     );
   }
