@@ -258,7 +258,7 @@ Generate 5 comprehension questions.`;
             .single();
 
           if (!readingError && newReading && reading.questions?.length > 0) {
-            const questionsData = reading.questions.map((q: any, i: number) => ({
+            const questionsData = reading.questions.map(shuffleQuestion).map((q: any, i: number) => ({
               reading_id: newReading.id,
               question: q.question,
               options: q.options,
