@@ -12,6 +12,7 @@ import NicknameGate from "@/components/NicknameGate";
 import EditModeToolbar from "@/components/EditModeToolbar";
 import DailyBonusDialog from "@/components/DailyBonusDialog";
 import { useTeacherLink } from "@/hooks/useTeacherLink";
+import { useStudentLiveSync } from "@/hooks/useStudentLiveSync";
 import { LogOut } from "lucide-react";
 
 // Routes a managed student is allowed to visit. Anything else
@@ -37,6 +38,7 @@ const AppLayout = () => {
   const [isStudent, setIsStudent] = useState(false);
 
   useTeacherLink(user?.id);
+  useStudentLiveSync(user?.id);
 
   useEffect(() => {
     if (!loading && !user) navigate("/auth");
