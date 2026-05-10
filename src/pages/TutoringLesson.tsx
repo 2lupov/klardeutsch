@@ -16,6 +16,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import PresenterMode from "@/components/tutoring/PresenterMode";
 import { Monitor } from "lucide-react";
+import LessonTheoryRenderer from "@/components/tutoring/LessonTheoryRenderer";
 import { AnimatePresence } from "framer-motion";
 
 const articleColor = (a: string | null) => {
