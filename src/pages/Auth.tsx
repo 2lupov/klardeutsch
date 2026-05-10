@@ -81,6 +81,7 @@ const TelegramLoginButton = () => {
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [studentMode, setStudentMode] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [nickname, setNickname] = useState("");
