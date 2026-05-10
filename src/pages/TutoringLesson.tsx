@@ -34,6 +34,57 @@ const EX_TYPES = [
   { id: "dictation", uk: "Диктант", ru: "Диктант" },
 ];
 
+// Нормалізація відповіді: lowercase, ä→ae, ö→oe, ü→ue, ß→ss, забрати пунктуацію, схлопнути пробіли
+const normalizeAns = (s: string) =>
+  (s || "")
+    .toLowerCase()
+    .replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss")
+    .replace(/ё/g, "е").replace(/і/g, "и")
+    .replace(/[.,!?;:"'`«»„""''()\[\]{}\-—–_/\\]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+// Levenshtein
+const lev = (a: string, b: string): number => {
+  if (a === b) return 0;
+  if (!a.length) return b.length;
+  if (!b.length) return a.length;
+  const dp = Array.from({ length: a.length + 1 }, (_, i) => i);
+  for (let j = 1; j <= b.length; j++) {
+    let prev = dp[0]; dp[0] = j;
+    for (let i = 1; i <= a.length; i++) {
+      const tmp = dp[i];
+      dp[i] = a[i - 1] === b[j - 1] ? prev : 1 + Math.min(prev, dp[i], dp[i - 1]);
+      prev = tmp;
+    }
+  }
+  return dp[a.length];
+};
+
+// Перевірка з толерантністю до дрібних помилок (опечатки, артиклі, регістр, умляути)
+const checkAnswer = (user: string, correct: string, type: string): boolean => {
+  if (!correct) return false;
+  const u = normalizeAns(user);
+  const c = normalizeAns(correct);
+  if (!u) return false;
+  if (u === c) return true;
+  // Quiz/article — суворіше (вибір з варіантів)
+  if (type === "quiz" || type === "article") return u === c;
+  // Часто учень забуває або додає артикль (der/die/das/ein/eine)
+  const stripArt = (s: string) => s.replace(/^(der|die|das|den|dem|des|ein|eine|einen|einem|einer|eines)\s+/, "");
+  if (stripArt(u) === stripArt(c)) return true;
+  // Підрядок (наприклад відповідь з пунктуацією або без зайвого слова)
+  if (c.length >= 4 && (u.includes(c) || c.includes(u))) {
+    const ratio = Math.min(u.length, c.length) / Math.max(u.length, c.length);
+    if (ratio >= 0.6) return true;
+  }
+  // Levenshtein-толерантність: ~15% довжини або мінімум 1-2 опечатки
+  const dist = lev(u, c);
+  const maxLen = Math.max(u.length, c.length);
+  const tol = maxLen <= 4 ? 1 : maxLen <= 10 ? 2 : Math.ceil(maxLen * 0.18);
+  return dist <= tol;
+};
+
 const articleColor = (a: string | null) => {
   if (a === "der") return "bg-blue-500/10 text-blue-600 border-blue-500/20";
   if (a === "die") return "bg-pink-500/10 text-pink-600 border-pink-500/20";
