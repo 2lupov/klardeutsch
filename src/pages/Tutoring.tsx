@@ -139,7 +139,7 @@ const Tutoring = () => {
   const [placementSubmitting, setPlacementSubmitting] = useState(false);
 
   // ===== Auto-assign test on student creation =====
-  const [assignTestOnCreate, setAssignTestOnCreate] = useState(true);
+  const [assignTestOnCreate, setAssignTestOnCreate] = useState(false);
 
   const KID_MAX_TOTAL = 30;
 
