@@ -352,6 +352,73 @@ const TutoringLesson = () => {
           {/* EXERCISES */}
           <TabsContent value="exercises">
             <div className="space-y-3">
+            {isTeacher && (
+              <div className="flex justify-end">
+                <Button size="sm" variant={showAddEx ? "outline" : "default"} onClick={() => setShowAddEx(!showAddEx)} className="gap-1.5">
+                  <Plus className="w-4 h-4" /> {showAddEx ? t("Сховати", "Скрыть") : t("Додати вправу", "Добавить упражнение")}
+                </Button>
+              </div>
+            )}
+            {isTeacher && showAddEx && (
+              <div className="p-4 rounded-2xl border-2 border-dashed border-primary/30 bg-primary/5 space-y-3">
+                <div>
+                  <label className="text-xs font-bold uppercase text-muted-foreground mb-1 block">{t("Тип вправи", "Тип упражнения")}</label>
+                  <select
+                    value={newEx.exercise_type}
+                    onChange={(e) => setNewEx({ ...newEx, exercise_type: e.target.value })}
+                    className="w-full h-10 px-3 rounded-md border border-border bg-background text-sm"
+                  >
+                    {EX_TYPES.map(ex => (
+                      <option key={ex.id} value={ex.id}>{lang === "uk" ? ex.uk : ex.ru}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-bold uppercase text-muted-foreground mb-1 block">{t("Питання / Завдання", "Вопрос / Задание")}</label>
+                  <Textarea
+                    value={newEx.question}
+                    onChange={(e) => setNewEx({ ...newEx, question: e.target.value })}
+                    placeholder={t("Напр.: Ich ___ heute ins Kino. (gehen)", "Напр.: Ich ___ heute ins Kino. (gehen)")}
+                    rows={2}
+                  />
+                </div>
+                {newEx.exercise_type === "quiz" && (
+                  <div>
+                    <label className="text-xs font-bold uppercase text-muted-foreground mb-1 block">{t("Варіанти (по одному в рядку)", "Варианты (по одному в строке)")}</label>
+                    <Textarea
+                      value={newEx.options}
+                      onChange={(e) => setNewEx({ ...newEx, options: e.target.value })}
+                      placeholder={"gehe\ngehst\ngeht\ngehen"}
+                      rows={4}
+                    />
+                  </div>
+                )}
+                <div>
+                  <label className="text-xs font-bold uppercase text-muted-foreground mb-1 block">{t("Правильна відповідь", "Правильный ответ")}</label>
+                  <Input
+                    value={newEx.correct_answer}
+                    onChange={(e) => setNewEx({ ...newEx, correct_answer: e.target.value })}
+                    placeholder={t("Точна відповідь", "Точный ответ")}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold uppercase text-muted-foreground mb-1 block">{t("Пояснення (необов'язково)", "Пояснение (необязательно)")}</label>
+                  <Textarea
+                    value={newEx.explanation}
+                    onChange={(e) => setNewEx({ ...newEx, explanation: e.target.value })}
+                    placeholder={t("Чому саме така відповідь", "Почему именно такой ответ")}
+                    rows={2}
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button size="sm" onClick={addExercise} disabled={savingEx} className="gap-1.5">
+                    {savingEx ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                    {t("Зберегти", "Сохранить")}
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => setShowAddEx(false)}>{t("Скасувати", "Отмена")}</Button>
+                </div>
+              </div>
+            )}
             {exercises.map((ex, idx) => {
               const userAns = answers[ex.id] || "";
               const isRevealed = revealed[ex.id];
@@ -361,6 +428,11 @@ const TutoringLesson = () => {
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-xs font-bold text-muted-foreground">#{idx + 1}</span>
                     <span className="px-2 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold uppercase">{ex.exercise_type}</span>
+                    {isTeacher && (
+                      <button onClick={() => delExercise(ex.id)} className="ml-auto text-muted-foreground hover:text-destructive transition" aria-label="delete">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
                   <p className="font-medium mb-3 whitespace-pre-wrap">{ex.question}</p>
                   {ex.exercise_type === "quiz" && Array.isArray(ex.options) && ex.options.length > 0 ? (
@@ -405,7 +477,7 @@ const TutoringLesson = () => {
                 </div>
               );
             })}
-            {exercises.length === 0 && (
+            {exercises.length === 0 && !showAddEx && (
               <div className="text-center py-12 text-muted-foreground">{t("Немає вправ", "Нет упражнений")}</div>
             )}
             </div>
