@@ -1433,6 +1433,25 @@ const Tutoring = () => {
                   placeholder={t("Рівень, цілі, особливості…", "Уровень, цели, особенности…")}
                 />
               </div>
+              <label className="flex items-start gap-2.5 p-3 rounded-xl border-2 border-border hover:border-primary/40 cursor-pointer transition-colors bg-card">
+                <input
+                  type="checkbox"
+                  checked={assignTestOnCreate}
+                  onChange={(e) => setAssignTestOnCreate(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 accent-primary cursor-pointer"
+                />
+                <div className="flex-1">
+                  <p className="text-sm font-bold flex items-center gap-1.5">
+                    <ClipboardCheck className="w-4 h-4 text-primary" />
+                    {t("Призначити вступний тест", "Назначить вступительный тест")}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    {newStudentAge && parseInt(newStudentAge, 10) <= 12
+                      ? t("Дитячий формат · 30 питань · A1+A2", "Детский формат · 30 вопросов · A1+A2")
+                      : t("16 питань · A1+A2 · посилання скопіюємо", "16 вопросов · A1+A2 · ссылку скопируем")}
+                  </p>
+                </div>
+              </label>
               <Button onClick={createStudent} disabled={creatingStudent} className="w-full gap-2" size="lg">
                 {creatingStudent ? (
                   <><Loader2 className="w-4 h-4 animate-spin" />{t("Створюємо…", "Создаём…")}</>
