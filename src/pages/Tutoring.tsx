@@ -1317,6 +1317,22 @@ const Tutoring = () => {
               </div>
               <div>
                 <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
+                  {t("Нікнейм для входу", "Никнейм для входа")} *
+                </label>
+                <Input
+                  value={newStudentNickname}
+                  onChange={(e) => setNewStudentNickname(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
+                  placeholder="anna2014"
+                  maxLength={24}
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                />
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  {t("3–24 символів: латиниця, цифри, _", "3–24 символа: латиница, цифры, _")}
+                </p>
+              </div>
+              <div>
+                <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
                   {t("Вік (необов'язково)", "Возраст (необязательно)")}
                 </label>
                 <Input
