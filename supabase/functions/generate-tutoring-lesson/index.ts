@@ -154,13 +154,32 @@ Deno.serve(async (req) => {
         : ["quiz", "cloze", "translation"];
       const wordsTarget = Number.isFinite(wordsCount) && wordsCount > 0 ? wordsCount : (isKid ? 7 : 13);
       const exercisesTarget = Number.isFinite(exercisesCount) && exercisesCount > 0 ? exercisesCount : (isKid ? 8 : 10);
-      const overrideHint = `\n\n🎯 ВЧИТЕЛЬ ВКАЗАВ ТОЧНО:
+      const TYPE_GLOSSARY = `
+
+📚 ДОВІДНИК ТИПІВ ВПРАВ (використовуй ТОЧНО ці значення в полі "type"):
+- "quiz" — питання + 4 варіанти у options, 1 правильний у correct_answer.
+- "cloze" — речення з ___ , у correct_answer тільки слово/форма для пропуску.
+- "translation" — у question російське/українське речення "Переведи: ...", correct_answer — повне нім. речення.
+- "article" — quiz з 3 options ["der","die","das"] (або 4 з "die (Pl.)"), question = іменник без артикля, correct_answer = правильний артикль.
+- "word_order" — у question слова через " / " у випадковому порядку (напр. "ich / Kino / gestern / ins / bin / gegangen"), correct_answer — правильно складене речення.
+- "conjugation" — question формату "Спрягай: ich (gehen) heute ins Kino", correct_answer — правильна форма ("gehe").
+- "plural" — question = іменник в однині з артиклем ("der Hund"), correct_answer = форма множини з артиклем ("die Hunde").
+- "error_correction" — question містить нім. речення з 1 помилкою + інструкцію "Виправ помилку:", correct_answer — виправлене речення повністю.
+- "synonym" — question = "Синонім до: <слово>", correct_answer — нім. синонім.
+- "antonym" — question = "Антонім до: <слово>", correct_answer — нім. антонім.
+- "question_formation" — question = "Утвори питання до: <речення/слово>", correct_answer — повне нім. питання зі знаком "?".
+- "dictation" — question містить речення для прослуховування ("Запиши почуте: <нім. речення>"), correct_answer = саме це речення без помилок.
+
+Для всіх типів КРІМ "quiz" поле options НЕ ставити (або []). explanation — обов'язково російською (1-2 речення).
+
+🎯 ВЧИТЕЛЬ ВКАЗАВ ТОЧНО:
 - Слів у словнику: РІВНО ${wordsTarget} (±1).
 - Вправ: РІВНО ${exercisesTarget}, ТІЛЬКИ цих типів: ${exTypesList.join(", ")}. Інші типи НЕ створюй.
 - Розподіли вправи рівномірно між обраними типами.
 ${richTheory ? "- Теорія МАЄ бути красиво відформатована: Markdown-таблиці, callout-блоки (> 📌 / 💡 / ⚠️ / 📖), bold/italic, приклади з життя." : "- Теорія може бути короткою і простою, без таблиць."}
 ${modeOverride === "adult" ? "- Режим: ДОРОСЛИЙ — серйозний тон, без дитячих емодзі, реальні життєві приклади (робота, подорожі, побут)." : ""}
 ${modeOverride === "kid" ? "- Режим: ДИТЯЧИЙ — багато емодзі, прості теми (тварини, школа, ігри), короткі речення." : ""}`;
+      const overrideHint = TYPE_GLOSSARY;
 
       if (isKid) {
         // ===== KID MODE (9–12 years) =====
