@@ -431,14 +431,28 @@ const Auth = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="glass-card p-5 flex flex-col gap-3 animate-auth-scale-in" style={{ animationDelay: "0.5s" }}>
-          <input
-            type="email"
-            placeholder={t("email")}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="w-full px-4 py-3 rounded-xl bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:border-primary focus:outline-none transition-colors"
-          />
+          {studentMode && isLogin && !forgotMode ? (
+            <input
+              type="text"
+              placeholder="Никнейм ученика"
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
+              required
+              maxLength={32}
+              autoCapitalize="none"
+              autoCorrect="off"
+              className="w-full px-4 py-3 rounded-xl bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:border-primary focus:outline-none transition-colors"
+            />
+          ) : (
+            <input
+              type="email"
+              placeholder={t("email")}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full px-4 py-3 rounded-xl bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:border-primary focus:outline-none transition-colors"
+            />
+          )}
           {!isLogin && !forgotMode && (
             <input
               type="text"
