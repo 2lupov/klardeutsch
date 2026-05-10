@@ -1097,7 +1097,7 @@ const Tutoring = () => {
             </div>
 
             {/* === Время и ссылка на встречу === */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block flex items-center gap-1.5">
                   <Calendar className="w-3 h-3" />
