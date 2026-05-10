@@ -703,7 +703,7 @@ const Tutoring = () => {
         </motion.div>
 
         <Tabs defaultValue="lessons" className="w-full">
-          <TabsList className="mb-6">
+          <TabsList className="mb-6 max-w-full overflow-x-auto flex w-full sm:w-auto justify-start">
             <TabsTrigger value="lessons" className="gap-2">
               <BookOpen className="w-4 h-4" />
               {t("Уроки", "Уроки")} ({lessons.length})
