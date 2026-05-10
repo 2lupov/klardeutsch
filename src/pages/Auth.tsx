@@ -81,6 +81,7 @@ const TelegramLoginButton = () => {
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [studentMode, setStudentMode] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [nickname, setNickname] = useState("");
@@ -234,14 +235,31 @@ const Auth = () => {
     }
 
     if (isLogin) {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) {
-        setError(translateAuthError(error.message));
-        setFailedAttempts(prev => prev + 1);
-        setCaptchaVerified(false);
-      }
-      else {
-        setShowFireworks(true);
+      if (studentMode) {
+        const { data, error } = await supabase.functions.invoke("student-login", {
+          body: { nickname, password },
+        });
+        if (error || !data?.access_token) {
+          setError(data?.error || "Неверный никнейм или пароль");
+          setFailedAttempts(prev => prev + 1);
+          setCaptchaVerified(false);
+        } else {
+          await supabase.auth.setSession({
+            access_token: data.access_token,
+            refresh_token: data.refresh_token,
+          });
+          setShowFireworks(true);
+        }
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          setError(translateAuthError(error.message));
+          setFailedAttempts(prev => prev + 1);
+          setCaptchaVerified(false);
+        }
+        else {
+          setShowFireworks(true);
+        }
       }
     } else {
       const { data: signUpData, error } = await supabase.auth.signUp({
@@ -413,14 +431,28 @@ const Auth = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="glass-card p-5 flex flex-col gap-3 animate-auth-scale-in" style={{ animationDelay: "0.5s" }}>
-          <input
-            type="email"
-            placeholder={t("email")}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="w-full px-4 py-3 rounded-xl bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:border-primary focus:outline-none transition-colors"
-          />
+          {studentMode && isLogin && !forgotMode ? (
+            <input
+              type="text"
+              placeholder="Никнейм ученика"
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
+              required
+              maxLength={32}
+              autoCapitalize="none"
+              autoCorrect="off"
+              className="w-full px-4 py-3 rounded-xl bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:border-primary focus:outline-none transition-colors"
+            />
+          ) : (
+            <input
+              type="email"
+              placeholder={t("email")}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full px-4 py-3 rounded-xl bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:border-primary focus:outline-none transition-colors"
+            />
+          )}
           {!isLogin && !forgotMode && (
             <input
               type="text"
@@ -460,7 +492,7 @@ const Auth = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              minLength={6}
+              minLength={studentMode && isLogin ? 1 : 6}
               className="w-full px-4 py-3 rounded-xl bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:border-primary focus:outline-none transition-colors"
             />
           )}
@@ -490,6 +522,16 @@ const Auth = () => {
               className="text-xs text-muted-foreground hover:text-primary transition-colors"
             >
               {t("forgotPassword")}
+            </button>
+          )}
+
+          {isLogin && !forgotMode && (
+            <button
+              type="button"
+              onClick={() => { setStudentMode(!studentMode); setError(""); setMessage(""); }}
+              className="text-xs text-primary/80 hover:text-primary transition-colors"
+            >
+              {studentMode ? "← Войти по email" : "Я ученик — войти по никнейму"}
             </button>
           )}
 

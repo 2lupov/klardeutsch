@@ -49,3 +49,5 @@ project_id = "jqqsszwbbxvevebmebfm"
     verify_jwt = false
   [functions.generate-tutoring-lesson]
     verify_jwt = false
+  [functions.student-login]
+    verify_jwt = false
