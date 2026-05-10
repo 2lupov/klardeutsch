@@ -252,6 +252,60 @@ const Tutoring = () => {
   };
 
   // ===== Placement test =====
+  // Internal helper: build & insert a placement assignment for a student.
+  const createPlacementAssignmentInternal = async (opts: {
+    studentId: string;
+    levels: string[];
+    perLevel: number;
+    isKid: boolean;
+    silent?: boolean;
+  }): Promise<any | null> => {
+    if (!user) return null;
+    const { studentId, levels, isKid, silent } = opts;
+    let { perLevel } = opts;
+    if (isKid && levels.length > 0) {
+      perLevel = Math.max(1, Math.min(perLevel, Math.floor(KID_MAX_TOTAL / levels.length)));
+    }
+    const { data: allQs } = await supabase
+      .from("tutoring_placement_questions")
+      .select("id, level")
+      .in("level", levels);
+    if (!allQs || !allQs.length) {
+      if (!silent) toast.error(t("Банк питань порожній для цих рівнів", "Банк вопросов пуст для этих уровней"));
+      return null;
+    }
+    const byLevel: Record<string, string[]> = {};
+    allQs.forEach((q: any) => {
+      byLevel[q.level] = byLevel[q.level] || [];
+      byLevel[q.level].push(q.id);
+    });
+    let picked: string[] = [];
+    for (const lvl of levels) {
+      const ids = (byLevel[lvl] || []).sort(() => Math.random() - 0.5).slice(0, perLevel);
+      picked.push(...ids);
+    }
+    if (isKid && picked.length > KID_MAX_TOTAL) picked = picked.slice(0, KID_MAX_TOTAL);
+    if (!picked.length) {
+      if (!silent) toast.error(t("Немає питань для обраних рівнів", "Нет вопросов для выбранных уровней"));
+      return null;
+    }
+    const { data: created, error } = await supabase
+      .from("tutoring_placement_assignments")
+      .insert({
+        teacher_id: user.id,
+        student_id: studentId,
+        status: "pending",
+        question_ids: picked,
+        total_questions: picked.length,
+        selected_levels: levels,
+        is_kid_mode: isKid,
+      } as any)
+      .select()
+      .single();
+    if (error) { if (!silent) toast.error(error.message); return null; }
+    return created;
+  };
+
   const assignPlacementTest = async () => {
     if (!user || !placementStudent) return;
     if (!placementLevels.length) {
@@ -260,43 +314,13 @@ const Tutoring = () => {
     }
     setPlacementSubmitting(true);
     try {
-      const { data: allQs } = await supabase
-        .from("tutoring_placement_questions")
-        .select("id, level")
-        .in("level", placementLevels);
-      if (!allQs || !allQs.length) {
-        toast.error(t("Банк питань порожній для цих рівнів", "Банк вопросов пуст для этих уровней"));
-        setPlacementSubmitting(false);
-        return;
-      }
-      const byLevel: Record<string, string[]> = {};
-      allQs.forEach((q: any) => {
-        byLevel[q.level] = byLevel[q.level] || [];
-        byLevel[q.level].push(q.id);
+      const created = await createPlacementAssignmentInternal({
+        studentId: placementStudent,
+        levels: placementLevels,
+        perLevel: placementPerLevel,
+        isKid: placementStudentIsKid,
       });
-      const picked: string[] = [];
-      for (const lvl of placementLevels) {
-        const ids = (byLevel[lvl] || []).sort(() => Math.random() - 0.5).slice(0, placementPerLevel);
-        picked.push(...ids);
-      }
-      if (!picked.length) {
-        toast.error(t("Немає питань для обраних рівнів", "Нет вопросов для выбранных уровней"));
-        setPlacementSubmitting(false);
-        return;
-      }
-      const { data: created, error } = await supabase
-        .from("tutoring_placement_assignments")
-        .insert({
-          teacher_id: user.id,
-          student_id: placementStudent,
-          status: "pending",
-          question_ids: picked,
-          total_questions: picked.length,
-          selected_levels: placementLevels,
-        })
-        .select()
-        .single();
-      if (error) { toast.error(error.message); setPlacementSubmitting(false); return; }
+      if (!created) { setPlacementSubmitting(false); return; }
       toast.success(t("Тест призначено", "Тест назначен"));
       const url = `${window.location.origin}/tutoring/placement/${created.id}`;
       try {
