@@ -212,17 +212,7 @@ const TutoringLesson = () => {
           </div>
         </motion.div>
 
-        {/* Video room with recording */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="mb-6">
-          <LessonVideoRoom
-            lessonId={lesson.id}
-            teacherId={lesson.teacher_id}
-            studentId={lesson.student_id}
-            isTeacher={isTeacher}
-            userName={user?.email?.split("@")[0] || "User"}
-            lang={lang as "uk" | "ru"}
-          />
-        </motion.div>
+        {/* Theory, words, exercises, homework tabs */}
 
         <Tabs defaultValue={isTeacher ? "theory" : "notebook"} className="w-full">
           <TabsList className={`mb-4 grid w-full ${isTeacher ? "grid-cols-5" : "grid-cols-4"}`}>
