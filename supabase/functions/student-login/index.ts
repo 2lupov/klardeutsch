@@ -1,6 +1,6 @@
 // Student login by nickname + (possibly very short) password.
-// Looks up the email from the profile, pads short passwords to match
-// the stored padding done in teacher-create-student, then signs in.
+// Hardened: generic error messages (no enumeration), brute-force lockout,
+// only teacher-created accounts allowed.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
@@ -8,27 +8,69 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const GENERIC_ERROR = "Неверный никнейм или пароль";
+const MAX_FAILS = 8;
+const LOCK_MINUTES = 15;
+
+function jsonResp(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { nickname, password } = await req.json();
+    const { nickname, password } = await req.json().catch(() => ({}));
     const nick = String(nickname || "").trim().toLowerCase();
     let pwd = String(password || "");
 
-    if (!nick || !pwd) {
-      return new Response(JSON.stringify({ error: "Никнейм и пароль обязательны" }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (!nick || !pwd || nick.length > 64 || pwd.length > 200) {
+      return jsonResp({ error: GENERIC_ERROR }, 400);
     }
 
-    // Mirror teacher-create-student: short passwords are padded with "0" to 6
+    // Mirror teacher-create-student padding for short passwords
     if (pwd.length < 6) pwd = pwd.padEnd(6, "0");
 
     const admin = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
+
+    // --- Brute-force lockout check ---
+    const { data: attempt } = await admin
+      .from("student_login_attempts")
+      .select("failed_count, locked_until")
+      .eq("nickname", nick)
+      .maybeSingle();
+
+    if (attempt?.locked_until && new Date(attempt.locked_until) > new Date()) {
+      return jsonResp(
+        { error: "Слишком много попыток. Попробуйте позже." },
+        429
+      );
+    }
+
+    const recordFailure = async () => {
+      const newCount = (attempt?.failed_count || 0) + 1;
+      const locked =
+        newCount >= MAX_FAILS
+          ? new Date(Date.now() + LOCK_MINUTES * 60_000).toISOString()
+          : null;
+      await admin
+        .from("student_login_attempts")
+        .upsert(
+          {
+            nickname: nick,
+            failed_count: newCount,
+            locked_until: locked,
+            last_attempt_at: new Date().toISOString(),
+          },
+          { onConflict: "nickname" }
+        );
+    };
 
     // Find student profile by nickname (must be teacher-created)
     const { data: profile } = await admin
@@ -38,20 +80,16 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     if (!profile || !profile.created_by_teacher_id) {
-      return new Response(JSON.stringify({ error: "Ученик не найден" }), {
-        status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      await recordFailure();
+      return jsonResp({ error: GENERIC_ERROR }, 401);
     }
 
-    // Get the email from auth.users
-    const { data: userRes, error: userErr } = await admin.auth.admin.getUserById(profile.user_id);
-    if (userErr || !userRes?.user?.email) {
-      return new Response(JSON.stringify({ error: "Аккаунт повреждён" }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    const { data: userRes } = await admin.auth.admin.getUserById(profile.user_id);
+    if (!userRes?.user?.email) {
+      await recordFailure();
+      return jsonResp({ error: GENERIC_ERROR }, 401);
     }
 
-    // Sign in using anon client to obtain a real session
     const auth = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_ANON_KEY")!
@@ -62,18 +100,24 @@ Deno.serve(async (req) => {
     });
 
     if (signErr || !session?.session) {
-      return new Response(JSON.stringify({ error: "Неверный пароль" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      await recordFailure();
+      return jsonResp({ error: GENERIC_ERROR }, 401);
     }
 
-    return new Response(JSON.stringify({
+    // Success → reset counter
+    await admin
+      .from("student_login_attempts")
+      .upsert(
+        { nickname: nick, failed_count: 0, locked_until: null, last_attempt_at: new Date().toISOString() },
+        { onConflict: "nickname" }
+      );
+
+    return jsonResp({
       access_token: session.session.access_token,
       refresh_token: session.session.refresh_token,
-    }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
-  } catch (e: any) {
-    return new Response(JSON.stringify({ error: e.message || "unknown" }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
+  } catch (e: any) {
+    console.error("student-login error:", e?.message);
+    return jsonResp({ error: GENERIC_ERROR }, 500);
   }
 });
