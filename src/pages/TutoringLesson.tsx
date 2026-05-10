@@ -62,6 +62,11 @@ const TutoringLesson = () => {
   const [showAddEx, setShowAddEx] = useState(false);
   const [newEx, setNewEx] = useState<{ exercise_type: string; question: string; options: string; correct_answer: string; explanation: string }>({ exercise_type: "quiz", question: "", options: "", correct_answer: "", explanation: "" });
   const [savingEx, setSavingEx] = useState(false);
+  const [showAiEx, setShowAiEx] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [aiCount, setAiCount] = useState(5);
+  const [aiTypes, setAiTypes] = useState<string[]>(["quiz", "cloze", "translation"]);
+  const [aiLoading, setAiLoading] = useState(false);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
   const [hwSubmissions, setHwSubmissions] = useState<Record<string, string>>({});
