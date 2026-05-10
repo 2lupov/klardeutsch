@@ -525,6 +525,16 @@ const Auth = () => {
             </button>
           )}
 
+          {isLogin && !forgotMode && (
+            <button
+              type="button"
+              onClick={() => { setStudentMode(!studentMode); setError(""); setMessage(""); }}
+              className="text-xs text-primary/80 hover:text-primary transition-colors"
+            >
+              {studentMode ? "← Войти по email" : "Я ученик — войти по никнейму"}
+            </button>
+          )}
+
           <button
             type="button"
             onClick={() => { 
