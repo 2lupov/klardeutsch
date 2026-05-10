@@ -133,14 +133,25 @@ const Tutoring = () => {
   // ===== Placement test dialog =====
   const [placementOpen, setPlacementOpen] = useState(false);
   const [placementStudent, setPlacementStudent] = useState<string>("");
+  const [placementStudentIsKid, setPlacementStudentIsKid] = useState(false);
   const [placementLevels, setPlacementLevels] = useState<string[]>(["A1", "A2"]);
   const [placementPerLevel, setPlacementPerLevel] = useState(8);
   const [placementSubmitting, setPlacementSubmitting] = useState(false);
 
+  // ===== Auto-assign test on student creation =====
+  const [assignTestOnCreate, setAssignTestOnCreate] = useState(true);
+
+  const KID_MAX_TOTAL = 30;
+
   const openPlacementDialog = (studentId: string) => {
     setPlacementStudent(studentId);
-    setPlacementLevels(["A1", "A2"]);
-    setPlacementPerLevel(8);
+    const rel = relationships.find((r) => r.student_id === studentId);
+    const ageVal = rel?.profile?.age ?? null;
+    const isKid = !!rel?.profile?.is_kid || (typeof ageVal === "number" && ageVal <= 12);
+    setPlacementStudentIsKid(isKid);
+    const levels = isKid ? ["A1", "A2"] : ["A1", "A2"];
+    setPlacementLevels(levels);
+    setPlacementPerLevel(isKid ? Math.floor(KID_MAX_TOTAL / levels.length) : 8);
     setPlacementOpen(true);
   };
   const togglePlacementLevel = (lvl: string) => {
