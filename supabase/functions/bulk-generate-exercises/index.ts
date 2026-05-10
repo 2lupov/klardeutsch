@@ -224,7 +224,7 @@ ONLY return JSON, nothing else.`;
         if (ltErr) throw ltErr;
 
         if (listening.questions?.length > 0) {
-          const qRows = listening.questions.map((q: any, i: number) => ({
+          const qRows = listening.questions.map(shuffleQuestion).map((q: any, i: number) => ({
             listening_id: inserted.id,
             question: q.question,
             options: q.options,
