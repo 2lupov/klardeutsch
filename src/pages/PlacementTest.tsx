@@ -47,6 +47,7 @@ interface Assignment {
   completed_at: string | null;
   ai_analysis: AIAnalysis | null;
   selected_levels?: string[];
+  is_kid_mode?: boolean;
 }
 
 const LEVEL_COLORS: Record<string, string> = {
