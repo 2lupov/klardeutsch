@@ -188,7 +188,7 @@ ONLY return JSON, nothing else.`;
         if (rtErr) throw rtErr;
 
         if (reading.questions?.length > 0) {
-          const qRows = reading.questions.map((q: any, i: number) => ({
+          const qRows = reading.questions.map(shuffleQuestion).map((q: any, i: number) => ({
             reading_id: inserted.id,
             question: q.question,
             options: q.options,
