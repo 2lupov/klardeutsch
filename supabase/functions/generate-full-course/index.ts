@@ -222,6 +222,26 @@ ${batchTopics.map((t, i) => `${lessonNumbers[i]}. ${t}`).join("\n")}
         ex.cultural_notes = ex.cultural_notes || [];
       }
 
+      // Shuffle quiz options so the correct answer isn't always at the same position
+      const shuffleEx = (q: any) => {
+        if (!q || !Array.isArray(q.options) || q.options.length < 2) return q;
+        const idx = q.options.map((_: any, i: number) => i);
+        for (let i = idx.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [idx[i], idx[j]] = [idx[j], idx[i]];
+        }
+        const newOptions = idx.map((i: number) => q.options[i]);
+        const out: any = { ...q, options: newOptions };
+        if (typeof q.correct_index === "number") {
+          out.correct_index = idx.indexOf(q.correct_index);
+        }
+        // For cloze/mc with `correct` value — value stays correct, only position changes
+        return out;
+      };
+      ex.exercises = (ex.exercises || []).map(shuffleEx);
+      if (ex.reading?.questions) ex.reading.questions = ex.reading.questions.map(shuffleEx);
+      if (ex.listening?.questions) ex.listening.questions = ex.listening.questions.map(shuffleEx);
+
       return { ...lesson, exercises: ex };
     });
 

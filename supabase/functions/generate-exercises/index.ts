@@ -214,6 +214,31 @@ ${enabledTypes.includes("listening") ? "Generate 1 listening text with 3-5 quest
 
     const exercises = JSON.parse(toolCall.function.arguments);
 
+    // Shuffle options so correct answer isn't always first
+    const shuffleQ = (q: any) => {
+      if (!q || !Array.isArray(q.options) || q.options.length < 2) return q;
+      const ci = typeof q.correct_index === "number" ? q.correct_index : -1;
+      const idx = q.options.map((_: any, i: number) => i);
+      for (let i = idx.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [idx[i], idx[j]] = [idx[j], idx[i]];
+      }
+      return {
+        ...q,
+        options: idx.map((i: number) => q.options[i]),
+        correct_index: ci >= 0 ? idx.indexOf(ci) : ci,
+      };
+    };
+    if (Array.isArray(exercises?.grammar_questions)) {
+      exercises.grammar_questions = exercises.grammar_questions.map(shuffleQ);
+    }
+    if (exercises?.reading?.questions) {
+      exercises.reading.questions = exercises.reading.questions.map(shuffleQ);
+    }
+    if (exercises?.listening?.questions) {
+      exercises.listening.questions = exercises.listening.questions.map(shuffleQ);
+    }
+
     return new Response(JSON.stringify({ exercises }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

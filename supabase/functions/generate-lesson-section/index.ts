@@ -278,6 +278,27 @@ Deno.serve(async (req) => {
     }
 
     const result = JSON.parse(toolCall.function.arguments);
+
+    // Shuffle options so correct answer isn't always first
+    const shuffleQ = (q: any) => {
+      if (!q || !Array.isArray(q.options) || q.options.length < 2) return q;
+      const ci = typeof q.correct_index === "number" ? q.correct_index : -1;
+      const idx = q.options.map((_: any, i: number) => i);
+      for (let i = idx.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [idx[i], idx[j]] = [idx[j], idx[i]];
+      }
+      return {
+        ...q,
+        options: idx.map((i: number) => q.options[i]),
+        correct_index: ci >= 0 ? idx.indexOf(ci) : ci,
+      };
+    };
+    if (Array.isArray(result?.exercises)) result.exercises = result.exercises.map(shuffleQ);
+    if (Array.isArray(result?.grammar_questions)) result.grammar_questions = result.grammar_questions.map(shuffleQ);
+    if (result?.reading?.questions) result.reading.questions = result.reading.questions.map(shuffleQ);
+    if (result?.listening?.questions) result.listening.questions = result.listening.questions.map(shuffleQ);
+
     return new Response(JSON.stringify({ result }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

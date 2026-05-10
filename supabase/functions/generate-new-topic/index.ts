@@ -6,6 +6,21 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Shuffle options + remap correct_index so the right answer isn't always first
+function shuffleQuestion(q: any): any {
+  if (!q || !Array.isArray(q.options) || q.options.length < 2) return q;
+  const n = q.options.length;
+  const ci = typeof q.correct_index === "number" ? q.correct_index : -1;
+  const idx = q.options.map((_: any, i: number) => i);
+  for (let i = idx.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [idx[i], idx[j]] = [idx[j], idx[i]];
+  }
+  const newOptions = idx.map((i: number) => q.options[i]);
+  const newCorrect = ci >= 0 && ci < n ? idx.indexOf(ci) : ci;
+  return { ...q, options: newOptions, correct_index: newCorrect };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -173,7 +188,7 @@ Generate 10 questions. Make sure correct_index matches the position of the corre
 
           // Insert questions
           if (lesson.questions?.length > 0) {
-            const questionsData = lesson.questions.map((q: any, i: number) => ({
+            const questionsData = lesson.questions.map(shuffleQuestion).map((q: any, i: number) => ({
               level,
               topic: topicName,
               question: q.question,
@@ -243,7 +258,7 @@ Generate 5 comprehension questions.`;
             .single();
 
           if (!readingError && newReading && reading.questions?.length > 0) {
-            const questionsData = reading.questions.map((q: any, i: number) => ({
+            const questionsData = reading.questions.map(shuffleQuestion).map((q: any, i: number) => ({
               reading_id: newReading.id,
               question: q.question,
               options: q.options,
@@ -312,7 +327,7 @@ Generate 5 questions about the audio content.`;
             .single();
 
           if (!listeningError && newListening && listening.questions?.length > 0) {
-            const questionsData = listening.questions.map((q: any, i: number) => ({
+            const questionsData = listening.questions.map(shuffleQuestion).map((q: any, i: number) => ({
               listening_id: newListening.id,
               question: q.question,
               options: q.options,
