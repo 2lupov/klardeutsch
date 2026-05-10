@@ -188,7 +188,7 @@ Generate 10 questions. Make sure correct_index matches the position of the corre
 
           // Insert questions
           if (lesson.questions?.length > 0) {
-            const questionsData = lesson.questions.map((q: any, i: number) => ({
+            const questionsData = lesson.questions.map(shuffleQuestion).map((q: any, i: number) => ({
               level,
               topic: topicName,
               question: q.question,
