@@ -143,6 +143,51 @@ const TutoringLesson = () => {
     setWords(words.filter((w) => w.id !== wid));
   };
 
+  const addExercise = async () => {
+    if (!newEx.question.trim()) {
+      toast.error(t("Введіть питання", "Введите вопрос"));
+      return;
+    }
+    const opts = newEx.exercise_type === "quiz"
+      ? newEx.options.split("\n").map(s => s.trim()).filter(Boolean)
+      : [];
+    if (newEx.exercise_type === "quiz" && opts.length < 2) {
+      toast.error(t("Додайте хоча б 2 варіанти", "Добавьте хотя бы 2 варианта"));
+      return;
+    }
+    if (newEx.exercise_type === "quiz" && newEx.correct_answer && !opts.includes(newEx.correct_answer.trim())) {
+      toast.error(t("Правильна відповідь має співпадати з одним з варіантів", "Правильный ответ должен совпадать с одним из вариантов"));
+      return;
+    }
+    setSavingEx(true);
+    const { data, error } = await supabase
+      .from("tutoring_lesson_exercises")
+      .insert({
+        lesson_id: id,
+        exercise_type: newEx.exercise_type,
+        question: newEx.question.trim(),
+        options: opts,
+        correct_answer: newEx.correct_answer.trim() || null,
+        explanation: newEx.explanation.trim() || null,
+        sort_order: exercises.length,
+      })
+      .select()
+      .single();
+    setSavingEx(false);
+    if (error) return toast.error(error.message);
+    setExercises([...exercises, data]);
+    setNewEx({ exercise_type: "quiz", question: "", options: "", correct_answer: "", explanation: "" });
+    setShowAddEx(false);
+    toast.success(t("Вправу додано", "Упражнение добавлено"));
+  };
+
+  const delExercise = async (exId: string) => {
+    if (!confirm(t("Видалити вправу?", "Удалить упражнение?"))) return;
+    await supabase.from("tutoring_lesson_exercises").delete().eq("id", exId);
+    setExercises(exercises.filter(e => e.id !== exId));
+  };
+
+
   const completeLesson = async () => {
     await supabase.from("tutoring_lessons").update({ status: "completed" }).eq("id", id);
     setLesson({ ...lesson, status: "completed" });
