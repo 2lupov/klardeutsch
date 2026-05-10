@@ -360,7 +360,6 @@ const Tutoring = () => {
       const ageNum = newStudentAge ? parseInt(newStudentAge, 10) : null;
       const res = await fetchEdgeFunction("teacher-create-student", {
         json: {
-          email: newStudentEmail,
           display_name: newStudentName,
           password: newStudentPassword || undefined,
           note: newStudentNote,
@@ -369,7 +368,7 @@ const Tutoring = () => {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "create failed");
-      setCreatedCredentials({ email: data.email, password: data.password });
+      setCreatedCredentials({ nickname: data.nickname, password: data.password });
       setNewStudentEmail(""); setNewStudentName(""); setNewStudentPassword(""); setNewStudentNote(""); setNewStudentAge("");
       loadData();
       toast.success(t("Акаунт створено", "Аккаунт создан"));
@@ -382,7 +381,7 @@ const Tutoring = () => {
 
   const copyCredentials = () => {
     if (!createdCredentials) return;
-    const text = `Email: ${createdCredentials.email}\nПароль: ${createdCredentials.password}\nВхід: https://klardeutsch.org`;
+    const text = `Никнейм: ${createdCredentials.nickname}\nПароль: ${createdCredentials.password}\nВход: https://klardeutsch.org`;
     navigator.clipboard.writeText(text);
     toast.success(t("Скопійовано", "Скопировано"));
   };
