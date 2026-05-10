@@ -5,8 +5,10 @@ import { toast } from "sonner";
 
 /**
  * Глобальная синхронизация: как только учитель стартует live-сессию для этого ученика,
- * ученика автоматически перебрасывает на /student-view/:sessionId — независимо от того,
- * на какой странице он сейчас находится. Если сессия закрылась — возвращаем на /assignments.
+ * ученика автоматически перебрасывает на /student-view/:sessionId — независимо от страницы.
+ * Когда учитель завершает сессию — возвращаем ученика на /assignments.
+ *
+ * Учителей фильтр student_id не затрагивает (broadcast не сработает на их userId).
  */
 export function useStudentLiveSync(userId: string | undefined) {
   const navigate = useNavigate();
@@ -19,15 +21,11 @@ export function useStudentLiveSync(userId: string | undefined) {
     const goToSession = (id: string) => {
       const target = `/student-view/${id}`;
       if (location.pathname === target) return;
-      // не редиректим учителя из его пресентера
-      if (location.pathname.startsWith("/tutoring/lesson/")) {
-        // учитель тоже сюда заходит — но student_id фильтр уже отсекает
-      }
       toast.info("👨‍🏫 Преподаватель начал урок");
       navigate(target, { replace: true });
     };
 
-    // Initial check
+    // Initial check on mount
     (async () => {
       const { data } = await supabase
         .from("tutoring_live_sessions")
@@ -54,6 +52,7 @@ export function useStudentLiveSync(userId: string | undefined) {
         ({ new: s }: any) => {
           if (s?.status === "active") goToSession(s.id);
           if (s?.status === "ended" && location.pathname === `/student-view/${s.id}`) {
+            toast.success("Урок завершён");
             navigate("/assignments", { replace: true });
           }
         },
