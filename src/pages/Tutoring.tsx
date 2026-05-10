@@ -1477,6 +1477,11 @@ const Tutoring = () => {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-5 py-2">
+            {placementStudentIsKid && (
+              <div className="rounded-xl bg-gradient-to-br from-amber-400/15 to-pink-400/15 border-2 border-amber-400/40 p-3 text-xs leading-relaxed">
+                🧒 <strong>{t("Дитячий режим", "Детский режим")}</strong> — {t("максимум 30 питань, барвистий інтерфейс для дитини.", "максимум 30 вопросов, красочный интерфейс для ребёнка.")}
+              </div>
+            )}
             <div>
               <label className="text-xs font-bold uppercase text-muted-foreground mb-2 block">
                 {t("Які рівні включити?", "Какие уровни включить?")}
