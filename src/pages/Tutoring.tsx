@@ -1520,14 +1520,16 @@ const Tutoring = () => {
               <input
                 type="range"
                 min={5}
-                max={15}
+                max={placementStudentIsKid && placementLevels.length > 0
+                  ? Math.max(5, Math.floor(KID_MAX_TOTAL / placementLevels.length))
+                  : 15}
                 value={placementPerLevel}
                 onChange={(e) => setPlacementPerLevel(Number(e.target.value))}
                 className="w-full accent-primary"
               />
               <p className="text-[11px] text-muted-foreground mt-1">
-                {t("Загалом", "Всего")}: <strong>{placementLevels.length * placementPerLevel}</strong>{" "}
-                {t("питань", "вопросов")} · ≈ {Math.ceil(placementLevels.length * placementPerLevel * 0.5)} {t("хв", "мин")}
+                {t("Загалом", "Всего")}: <strong>{Math.min(placementLevels.length * placementPerLevel, placementStudentIsKid ? KID_MAX_TOTAL : 9999)}</strong>{" "}
+                {t("питань", "вопросов")} · ≈ {Math.ceil(Math.min(placementLevels.length * placementPerLevel, placementStudentIsKid ? KID_MAX_TOTAL : 9999) * 0.5)} {t("хв", "мин")}
               </p>
             </div>
 
