@@ -1180,7 +1180,7 @@ const Tutoring = () => {
                   );
                 })}
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-[11px] font-bold uppercase text-muted-foreground mb-1 block">
                     {t("К-сть слів", "Кол-во слов")}
