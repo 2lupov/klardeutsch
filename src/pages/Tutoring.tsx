@@ -1266,8 +1266,8 @@ const Tutoring = () => {
             <div className="space-y-4">
               <div className="p-4 rounded-2xl bg-primary/10 border border-primary/20 space-y-3">
                 <div>
-                  <p className="text-[10px] font-bold uppercase text-muted-foreground mb-1">Email</p>
-                  <p className="font-mono font-bold text-sm break-all">{createdCredentials.email}</p>
+                  <p className="text-[10px] font-bold uppercase text-muted-foreground mb-1">{t("Нікнейм", "Никнейм")}</p>
+                  <p className="font-mono font-bold text-sm break-all">{createdCredentials.nickname}</p>
                 </div>
                 <div>
                   <p className="text-[10px] font-bold uppercase text-muted-foreground mb-1">{t("Пароль", "Пароль")}</p>
@@ -1327,17 +1327,7 @@ const Tutoring = () => {
                   </p>
                 )}
               </div>
-              <div>
-                <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block flex items-center gap-1">
-                  <Mail className="w-3 h-3" /> Email {t("(необов'язково)", "(необязательно)")}
-                </label>
-                <Input
-                  type="email"
-                  value={newStudentEmail}
-                  onChange={(e) => setNewStudentEmail(e.target.value)}
-                  placeholder={t("Залиште пустим — створимо логін автоматично", "Оставьте пустым — создадим логин автоматически")}
-                />
-              </div>
+              {/* Email больше не нужен — логин по никнейму */}
               <div>
                 <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block flex items-center gap-1">
                   <Key className="w-3 h-3" /> {t("Пароль (необов'язково)", "Пароль (необязательно)")}
@@ -1370,7 +1360,7 @@ const Tutoring = () => {
                 )}
               </Button>
               <p className="text-[10px] text-muted-foreground text-center">
-                {t("Email буде автоматично підтверджено", "Email будет автоматически подтверждён")}
+                {t("Учень увійде за нікнеймом і паролем", "Ученик войдёт по никнейму и паролю")}
               </p>
             </div>
           )}
