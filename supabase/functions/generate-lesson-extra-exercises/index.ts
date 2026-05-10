@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
     const requestedTypes: string[] = Array.isArray(body.types) && body.types.length
       ? body.types.filter((t: string) => ALLOWED_TYPES.includes(t))
       : ["quiz", "cloze", "translation"];
-    const count: number = Math.max(1, Math.min(15, Number(body.count) || 5));
+    const count: number = Math.max(1, Math.min(40, Number(body.count) || 5));
 
     if (!lessonId) {
       return new Response(JSON.stringify({ error: "lesson_id required" }), {
