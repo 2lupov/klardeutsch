@@ -192,6 +192,33 @@ const TutoringLesson = () => {
     setExercises(exercises.filter(e => e.id !== exId));
   };
 
+  const generateAiExercises = async () => {
+    if (aiTypes.length === 0) {
+      toast.error(t("Оберіть хоча б один тип", "Выберите хотя бы один тип"));
+      return;
+    }
+    setAiLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-lesson-extra-exercises", {
+        body: { lesson_id: id, prompt: aiPrompt.trim(), types: aiTypes, count: aiCount },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const added = data?.exercises || [];
+      setExercises([...exercises, ...added]);
+      toast.success(t(`Додано вправ: ${added.length}`, `Добавлено упражнений: ${added.length}`));
+      setAiPrompt("");
+      setShowAiEx(false);
+    } catch (e: any) {
+      const msg = String(e?.message || e);
+      if (msg.includes("402")) toast.error(t("Закінчились AI-кредити", "Закончились AI-кредиты"));
+      else if (msg.includes("429")) toast.error(t("Забагато запитів. Спробуйте пізніше", "Слишком много запросов. Попробуйте позже"));
+      else toast.error(msg);
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
 
   const completeLesson = async () => {
     await supabase.from("tutoring_lessons").update({ status: "completed" }).eq("id", id);
