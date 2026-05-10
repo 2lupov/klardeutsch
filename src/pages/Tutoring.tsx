@@ -126,7 +126,7 @@ const Tutoring = () => {
   const [newStudentAge, setNewStudentAge] = useState<string>("");
   const [aiAssistantStudent, setAiAssistantStudent] = useState<{ id: string; name: string; isKid: boolean } | null>(null);
   const [creatingStudent, setCreatingStudent] = useState(false);
-  const [createdCredentials, setCreatedCredentials] = useState<{ email: string; password: string } | null>(null);
+  const [createdCredentials, setCreatedCredentials] = useState<{ nickname: string; password: string } | null>(null);
   const [showPwd, setShowPwd] = useState(false);
 
   // ===== Placement test dialog =====
@@ -360,7 +360,6 @@ const Tutoring = () => {
       const ageNum = newStudentAge ? parseInt(newStudentAge, 10) : null;
       const res = await fetchEdgeFunction("teacher-create-student", {
         json: {
-          email: newStudentEmail,
           display_name: newStudentName,
           password: newStudentPassword || undefined,
           note: newStudentNote,
@@ -369,7 +368,7 @@ const Tutoring = () => {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "create failed");
-      setCreatedCredentials({ email: data.email, password: data.password });
+      setCreatedCredentials({ nickname: data.nickname, password: data.password });
       setNewStudentEmail(""); setNewStudentName(""); setNewStudentPassword(""); setNewStudentNote(""); setNewStudentAge("");
       loadData();
       toast.success(t("Акаунт створено", "Аккаунт создан"));
@@ -382,7 +381,7 @@ const Tutoring = () => {
 
   const copyCredentials = () => {
     if (!createdCredentials) return;
-    const text = `Email: ${createdCredentials.email}\nПароль: ${createdCredentials.password}\nВхід: https://klardeutsch.org`;
+    const text = `Никнейм: ${createdCredentials.nickname}\nПароль: ${createdCredentials.password}\nВход: https://klardeutsch.org`;
     navigator.clipboard.writeText(text);
     toast.success(t("Скопійовано", "Скопировано"));
   };
@@ -1267,8 +1266,8 @@ const Tutoring = () => {
             <div className="space-y-4">
               <div className="p-4 rounded-2xl bg-primary/10 border border-primary/20 space-y-3">
                 <div>
-                  <p className="text-[10px] font-bold uppercase text-muted-foreground mb-1">Email</p>
-                  <p className="font-mono font-bold text-sm break-all">{createdCredentials.email}</p>
+                  <p className="text-[10px] font-bold uppercase text-muted-foreground mb-1">{t("Нікнейм", "Никнейм")}</p>
+                  <p className="font-mono font-bold text-sm break-all">{createdCredentials.nickname}</p>
                 </div>
                 <div>
                   <p className="text-[10px] font-bold uppercase text-muted-foreground mb-1">{t("Пароль", "Пароль")}</p>
@@ -1328,17 +1327,7 @@ const Tutoring = () => {
                   </p>
                 )}
               </div>
-              <div>
-                <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block flex items-center gap-1">
-                  <Mail className="w-3 h-3" /> Email {t("(необов'язково)", "(необязательно)")}
-                </label>
-                <Input
-                  type="email"
-                  value={newStudentEmail}
-                  onChange={(e) => setNewStudentEmail(e.target.value)}
-                  placeholder={t("Залиште пустим — створимо логін автоматично", "Оставьте пустым — создадим логин автоматически")}
-                />
-              </div>
+              {/* Email больше не нужен — логин по никнейму */}
               <div>
                 <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block flex items-center gap-1">
                   <Key className="w-3 h-3" /> {t("Пароль (необов'язково)", "Пароль (необязательно)")}
@@ -1371,7 +1360,7 @@ const Tutoring = () => {
                 )}
               </Button>
               <p className="text-[10px] text-muted-foreground text-center">
-                {t("Email буде автоматично підтверджено", "Email будет автоматически подтверждён")}
+                {t("Учень увійде за нікнеймом і паролем", "Ученик войдёт по никнейму и паролю")}
               </p>
             </div>
           )}

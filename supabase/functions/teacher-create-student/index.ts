@@ -130,6 +130,7 @@ Deno.serve(async (req) => {
       success: true,
       student_id: studentId,
       email,
+      nickname,
       password,
       must_change_password: !customPassword,
     }), {
