@@ -1532,6 +1532,30 @@ export type Database = {
         }
         Relationships: []
       }
+      student_login_attempts: {
+        Row: {
+          failed_count: number
+          id: string
+          last_attempt_at: string
+          locked_until: string | null
+          nickname: string
+        }
+        Insert: {
+          failed_count?: number
+          id?: string
+          last_attempt_at?: string
+          locked_until?: string | null
+          nickname: string
+        }
+        Update: {
+          failed_count?: number
+          id?: string
+          last_attempt_at?: string
+          locked_until?: string | null
+          nickname?: string
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           cancel_at_period_end: boolean | null
