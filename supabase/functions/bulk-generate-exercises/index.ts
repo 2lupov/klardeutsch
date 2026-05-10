@@ -6,6 +6,21 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Shuffle options + remap correct_index so the right answer isn't always first
+function shuffleQuestion(q: any): any {
+  if (!q || !Array.isArray(q.options) || q.options.length < 2) return q;
+  const n = q.options.length;
+  const ci = typeof q.correct_index === "number" ? q.correct_index : -1;
+  const idx = q.options.map((_: any, i: number) => i);
+  for (let i = idx.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [idx[i], idx[j]] = [idx[j], idx[i]];
+  }
+  const newOptions = idx.map((i: number) => q.options[i]);
+  const newCorrect = ci >= 0 && ci < n ? idx.indexOf(ci) : ci;
+  return { ...q, options: newOptions, correct_index: newCorrect };
+}
+
 /**
  * Bulk generate +10 exercises for a given level + topic + type.
  * Body: { level, topic, type: "grammar" | "vocab" | "reading_questions" | "listening_questions" }
