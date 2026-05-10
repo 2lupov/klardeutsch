@@ -65,15 +65,33 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Generate nickname from display name
-    const slug = displayName
-      .toLowerCase()
-      .normalize("NFKD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9]+/g, "_")
-      .replace(/^_+|_+$/g, "")
-      .slice(0, 16) || "student";
-    const nickname = `${slug}_${Math.random().toString(36).slice(2, 6)}`;
+    // Nickname: use teacher-provided one if valid, otherwise derive from name
+    const rawNickname = String(body.nickname || "").trim().toLowerCase();
+    let nickname = "";
+    if (rawNickname) {
+      if (!/^[a-z0-9_]{3,24}$/.test(rawNickname)) {
+        return new Response(JSON.stringify({ error: "Никнейм: 3–24 символа, латиница/цифры/_" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const { data: taken } = await admin
+        .from("profiles").select("user_id").ilike("nickname", rawNickname).maybeSingle();
+      if (taken) {
+        return new Response(JSON.stringify({ error: "Этот никнейм уже занят" }), {
+          status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      nickname = rawNickname;
+    } else {
+      const slug = displayName
+        .toLowerCase()
+        .normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, "_")
+        .replace(/^_+|_+$/g, "")
+        .slice(0, 16) || "student";
+      nickname = `${slug}_${Math.random().toString(36).slice(2, 6)}`;
+    }
 
     // Email is optional — auto-generate a stable internal one if not provided
     let emailIsAuto = false;

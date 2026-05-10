@@ -121,6 +121,7 @@ const Tutoring = () => {
   const [createStudentOpen, setCreateStudentOpen] = useState(false);
   const [newStudentEmail, setNewStudentEmail] = useState("");
   const [newStudentName, setNewStudentName] = useState("");
+  const [newStudentNickname, setNewStudentNickname] = useState("");
   const [newStudentPassword, setNewStudentPassword] = useState("");
   const [newStudentNote, setNewStudentNote] = useState("");
   const [newStudentAge, setNewStudentAge] = useState<string>("");
@@ -355,12 +356,17 @@ const Tutoring = () => {
       toast.error(t("Введіть ім'я учня", "Введите имя ученика"));
       return;
     }
+    if (!newStudentNickname || !/^[a-z0-9_]{3,24}$/.test(newStudentNickname)) {
+      toast.error(t("Нікнейм: 3–24 символів, латиниця/цифри/_", "Никнейм: 3–24 символа, латиница/цифры/_"));
+      return;
+    }
     setCreatingStudent(true);
     try {
       const ageNum = newStudentAge ? parseInt(newStudentAge, 10) : null;
       const res = await fetchEdgeFunction("teacher-create-student", {
         json: {
           display_name: newStudentName,
+          nickname: newStudentNickname,
           password: newStudentPassword || undefined,
           note: newStudentNote,
           age: ageNum && !isNaN(ageNum) ? ageNum : undefined,
@@ -369,7 +375,7 @@ const Tutoring = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "create failed");
       setCreatedCredentials({ nickname: data.nickname, password: data.password });
-      setNewStudentEmail(""); setNewStudentName(""); setNewStudentPassword(""); setNewStudentNote(""); setNewStudentAge("");
+      setNewStudentEmail(""); setNewStudentName(""); setNewStudentNickname(""); setNewStudentPassword(""); setNewStudentNote(""); setNewStudentAge("");
       loadData();
       toast.success(t("Акаунт створено", "Аккаунт создан"));
     } catch (e: any) {
@@ -1308,6 +1314,22 @@ const Tutoring = () => {
                   placeholder={t("Напр. Анна Шмідт", "Напр. Анна Шмидт")}
                   autoFocus
                 />
+              </div>
+              <div>
+                <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
+                  {t("Нікнейм для входу", "Никнейм для входа")} *
+                </label>
+                <Input
+                  value={newStudentNickname}
+                  onChange={(e) => setNewStudentNickname(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
+                  placeholder="anna2014"
+                  maxLength={24}
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                />
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  {t("3–24 символів: латиниця, цифри, _", "3–24 символа: латиница, цифры, _")}
+                </p>
               </div>
               <div>
                 <label className="text-xs font-bold uppercase text-muted-foreground mb-1.5 block">
