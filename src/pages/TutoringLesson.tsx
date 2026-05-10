@@ -19,6 +19,21 @@ import { Monitor } from "lucide-react";
 import LessonTheoryRenderer from "@/components/tutoring/LessonTheoryRenderer";
 import { AnimatePresence } from "framer-motion";
 
+const EX_TYPES = [
+  { id: "quiz", uk: "Тест (4 варіанти)", ru: "Тест (4 варианта)" },
+  { id: "cloze", uk: "Заповнити пропуск", ru: "Заполнить пропуск" },
+  { id: "translation", uk: "Переклад", ru: "Перевод" },
+  { id: "article", uk: "Артикль der/die/das", ru: "Артикль der/die/das" },
+  { id: "word_order", uk: "Скласти речення", ru: "Собрать предложение" },
+  { id: "conjugation", uk: "Відмінювання дієслова", ru: "Спряжение глагола" },
+  { id: "plural", uk: "Множина", ru: "Множественное число" },
+  { id: "error_correction", uk: "Знайти помилку", ru: "Найти ошибку" },
+  { id: "synonym", uk: "Синонім", ru: "Синоним" },
+  { id: "antonym", uk: "Антонім", ru: "Антоним" },
+  { id: "question_formation", uk: "Скласти питання", ru: "Составить вопрос" },
+  { id: "dictation", uk: "Диктант", ru: "Диктант" },
+];
+
 const articleColor = (a: string | null) => {
   if (a === "der") return "bg-blue-500/10 text-blue-600 border-blue-500/20";
   if (a === "die") return "bg-pink-500/10 text-pink-600 border-pink-500/20";
