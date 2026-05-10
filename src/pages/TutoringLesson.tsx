@@ -507,7 +507,7 @@ const TutoringLesson = () => {
             {exercises.map((ex, idx) => {
               const userAns = answers[ex.id] || "";
               const isRevealed = revealed[ex.id];
-              const correct = userAns.trim().toLowerCase() === (ex.correct_answer || "").trim().toLowerCase();
+              const correct = checkAnswer(userAns, ex.correct_answer || "", ex.exercise_type);
               return (
                 <div key={ex.id} className="p-5 rounded-2xl border border-border bg-card">
                   <div className="flex items-center gap-2 mb-3">
