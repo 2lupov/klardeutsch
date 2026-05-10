@@ -235,14 +235,31 @@ const Auth = () => {
     }
 
     if (isLogin) {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) {
-        setError(translateAuthError(error.message));
-        setFailedAttempts(prev => prev + 1);
-        setCaptchaVerified(false);
-      }
-      else {
-        setShowFireworks(true);
+      if (studentMode) {
+        const { data, error } = await supabase.functions.invoke("student-login", {
+          body: { nickname, password },
+        });
+        if (error || !data?.access_token) {
+          setError(data?.error || "Неверный никнейм или пароль");
+          setFailedAttempts(prev => prev + 1);
+          setCaptchaVerified(false);
+        } else {
+          await supabase.auth.setSession({
+            access_token: data.access_token,
+            refresh_token: data.refresh_token,
+          });
+          setShowFireworks(true);
+        }
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          setError(translateAuthError(error.message));
+          setFailedAttempts(prev => prev + 1);
+          setCaptchaVerified(false);
+        }
+        else {
+          setShowFireworks(true);
+        }
       }
     } else {
       const { data: signUpData, error } = await supabase.auth.signUp({
