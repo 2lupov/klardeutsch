@@ -35,7 +35,7 @@ const DesktopSidebar = () => {
   const { totalXP } = useXP();
   const { streak } = useDailyBonus();
   const { user } = useAuth();
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [profile, setProfile] = useState<{ display_name?: string; avatar_url?: string } | null>(null);
 
   const a1 = useLevelProgress("A1");
