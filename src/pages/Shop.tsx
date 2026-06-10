@@ -296,7 +296,7 @@ const Shop = () => {
                     )}
                   </div>
                   <div className="font-display font-bold text-sm text-primary shrink-0">
-                    €{Number(item.price_eur).toFixed(2)}
+                    ₴{Number(item.price_eur).toFixed(0)}
                   </div>
                 </div>
                 <div className="mt-3">
