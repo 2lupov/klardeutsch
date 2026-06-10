@@ -147,9 +147,13 @@ const Auth = () => {
     return Math.min(emailPart + nickPart + passPart + refPart, 1);
   };
 
-  // If user is already logged in, redirect
+  // If user is already logged in, redirect (honour ?next=)
   useEffect(() => {
-    if (user && !showFireworks) navigate("/");
+    if (user && !showFireworks) {
+      const params = new URLSearchParams(window.location.search);
+      const next = params.get("next");
+      navigate(next && next.startsWith("/") ? next : "/");
+    }
   }, [user, navigate, showFireworks]);
 
   // Telegram Login Widget callback
