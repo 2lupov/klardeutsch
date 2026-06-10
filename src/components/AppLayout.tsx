@@ -45,7 +45,10 @@ const AppLayout = () => {
   }, [user, loading, navigate, location.pathname]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      setProfileChecked(true);
+      return;
+    }
     const check = async () => {
       const { data } = await supabase
         .from("profiles")
