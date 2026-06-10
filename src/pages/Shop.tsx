@@ -307,7 +307,7 @@ const Shop = () => {
                     className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl text-sm font-semibold bg-primary text-primary-foreground hover:opacity-90 hover:scale-[1.02] transition-all active:scale-95"
                   >
                     <ExternalLink className="w-3.5 h-3.5 shrink-0" />
-                    {lang === "uk" ? "Купити" : "Купить"} €{Number(item.price_eur).toFixed(2)}
+                    {lang === "uk" ? "Купити" : "Купить"} ₴{Number(item.price_eur).toFixed(0)}
                   </a>
                 </div>
               </div>
