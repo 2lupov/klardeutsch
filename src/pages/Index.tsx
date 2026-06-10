@@ -19,6 +19,7 @@ import DailyChallenge from "@/components/DailyChallenge";
 import SRSWidget from "@/components/SRSWidget";
 import DailySummaryModal from "@/components/daily/DailySummaryModal";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import GuestHero from "@/components/landing/GuestHero";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft } from "lucide-react";
@@ -244,11 +245,16 @@ const Index = () => {
 
         {screen === "levels" && (
           <>
-            <LevelSelector onSelect={handleLevelSelect} />
-            <div className={`w-full mt-3 ${isMobile ? "max-w-md" : "max-w-2xl"} mx-auto space-y-3`}>
-              <SRSWidget />
-              <DailyChallenge />
+            {!user && <GuestHero />}
+            <div id="levels-section" className="w-full">
+              <LevelSelector onSelect={handleLevelSelect} />
             </div>
+            {user && (
+              <div className={`w-full mt-3 ${isMobile ? "max-w-md" : "max-w-2xl"} mx-auto space-y-3`}>
+                <SRSWidget />
+                <DailyChallenge />
+              </div>
+            )}
           </>
         )}
         {screen === "categories" && (

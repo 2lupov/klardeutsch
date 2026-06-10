@@ -13,6 +13,8 @@ import OfflineBanner from "@/components/OfflineBanner";
 import ListeningFloatingPlayer from "@/components/ListeningFloatingPlayer";
 import ReportErrorButton from "@/components/ReportErrorButton";
 import CookieBanner from "@/components/CookieBanner";
+import RequireAuth from "@/components/guards/RequireAuth";
+import RequirePremium from "@/components/guards/RequirePremium";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
@@ -70,26 +72,31 @@ const AppRoutes = () => {
       <Route path="/uk" element={isTelegram ? <Navigate to="/" replace /> : <LandingUk />} />
       {/* Authenticated routes with responsive layout */}
       <Route element={<AppLayout />}>
+        {/* PUBLIC — guests + everyone */}
         <Route path="/" element={<Index />} />
-        <Route path="/profile" element={<Profile />} />
         <Route path="/dictionary" element={<Dictionary />} />
-        <Route path="/stats" element={<Statistics />} />
-        <Route path="/shop" element={<Shop />} />
-        <Route path="/challenges" element={<Challenges />} />
-        <Route path="/games" element={<Games />} />
-        <Route path="/chat" element={<Chat />} />
         <Route path="/word-lookup" element={<WordLookup />} />
-        <Route path="/assistant" element={<Assistant />} />
-        <Route path="/tutoring" element={<Tutoring />} />
-        <Route path="/tutoring/student/:studentId" element={<TeacherStudentDashboard />} />
-        <Route path="/tutoring/lesson/:id" element={<TutoringLesson />} />
-        <Route path="/tutoring/placement/:id" element={<PlacementTest />} />
-        <Route path="/assignments" element={<StudentAssignments />} />
-        <Route path="/tutoring/homework/:id" element={<StudentHomework />} />
-        <Route path="/course/:id" element={<Course />} />
-        <Route path="/academy" element={<Academy />} />
-        <Route path="/academy/:courseId" element={<AcademyCourse />} />
-        <Route path="/academy/:courseId/learn" element={<AcademyLearn />} />
+        <Route path="/games" element={<Games />} />
+
+        {/* AUTH — registered free users */}
+        <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
+        <Route path="/stats" element={<RequireAuth><Statistics /></RequireAuth>} />
+        <Route path="/shop" element={<RequireAuth><Shop /></RequireAuth>} />
+        <Route path="/challenges" element={<RequireAuth><Challenges /></RequireAuth>} />
+        <Route path="/chat" element={<RequireAuth><Chat /></RequireAuth>} />
+        <Route path="/assignments" element={<RequireAuth><StudentAssignments /></RequireAuth>} />
+        <Route path="/course/:id" element={<RequireAuth><Course /></RequireAuth>} />
+
+        {/* PREMIUM — paid plans */}
+        <Route path="/assistant" element={<RequirePremium><Assistant /></RequirePremium>} />
+        <Route path="/tutoring" element={<RequirePremium><Tutoring /></RequirePremium>} />
+        <Route path="/tutoring/student/:studentId" element={<RequirePremium><TeacherStudentDashboard /></RequirePremium>} />
+        <Route path="/tutoring/lesson/:id" element={<RequirePremium><TutoringLesson /></RequirePremium>} />
+        <Route path="/tutoring/placement/:id" element={<RequirePremium><PlacementTest /></RequirePremium>} />
+        <Route path="/tutoring/homework/:id" element={<RequirePremium><StudentHomework /></RequirePremium>} />
+        <Route path="/academy" element={<RequirePremium><Academy /></RequirePremium>} />
+        <Route path="/academy/:courseId" element={<RequirePremium><AcademyCourse /></RequirePremium>} />
+        <Route path="/academy/:courseId/learn" element={<RequirePremium><AcademyLearn /></RequirePremium>} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
