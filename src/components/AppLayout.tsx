@@ -83,7 +83,7 @@ const AppLayout = () => {
     );
   }
 
-  if (!user) return null;
+  
 
   if (!hasNickname) {
     return <NicknameGate onComplete={() => setHasNickname(true)} />;
