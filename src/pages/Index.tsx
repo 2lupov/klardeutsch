@@ -97,7 +97,7 @@ const Index = () => {
     if (screen === "exercise") setClarity(0);
   }, [screen, category]);
 
-  if (!user) return null;
+  
 
   const handleLevelSelect = (l: Level) => {
     setLevel(l);
