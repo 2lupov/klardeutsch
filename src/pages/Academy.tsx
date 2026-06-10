@@ -57,7 +57,7 @@ const Academy = () => {
       });
   }, [user]);
 
-  const hasAccess = ALLOWED_NICKNAMES.includes(displayName ?? "");
+  const hasAccess = true;
 
   useEffect(() => {
     if (!hasAccess) { setLoading(false); return; }
