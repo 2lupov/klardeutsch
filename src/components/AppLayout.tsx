@@ -41,8 +41,8 @@ const AppLayout = () => {
   useStudentLiveSync(user?.id);
 
   useEffect(() => {
-    if (!loading && !user) navigate("/auth");
-  }, [user, loading, navigate]);
+    if (!loading && !user && location.pathname !== "/") navigate("/auth");
+  }, [user, loading, navigate, location.pathname]);
 
   useEffect(() => {
     if (!user) return;
