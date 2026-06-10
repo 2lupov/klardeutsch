@@ -97,7 +97,7 @@ const Index = () => {
     if (screen === "exercise") setClarity(0);
   }, [screen, category]);
 
-  if (!user) return null;
+  
 
   const handleLevelSelect = (l: Level) => {
     setLevel(l);
@@ -210,19 +210,21 @@ const Index = () => {
       {isMobile && screen === "levels" && (
         <div className="flex items-center justify-between px-4 pt-3">
           <div>{!languageLocked && <LanguageSwitcher />}</div>
-          <button
-            onClick={() => navigate("/profile")}
-            className="rounded-full overflow-hidden"
-          >
-            <Avatar className="w-9 h-9 border-2 border-primary/20">
-              {avatarUrl ? (
-                <AvatarImage src={avatarUrl} alt={displayName || "Profile"} className="object-cover" />
-              ) : null}
-              <AvatarFallback className="text-sm font-bold bg-primary/10 text-primary">
-                {displayName?.charAt(0)?.toUpperCase() || "?"}
-              </AvatarFallback>
-            </Avatar>
-          </button>
+          {user && (
+            <button
+              onClick={() => navigate("/profile")}
+              className="rounded-full overflow-hidden"
+            >
+              <Avatar className="w-9 h-9 border-2 border-primary/20">
+                {avatarUrl ? (
+                  <AvatarImage src={avatarUrl} alt={displayName || "Profile"} className="object-cover" />
+                ) : null}
+                <AvatarFallback className="text-sm font-bold bg-primary/10 text-primary">
+                  {displayName?.charAt(0)?.toUpperCase() || "?"}
+                </AvatarFallback>
+              </Avatar>
+            </button>
+          )}
         </div>
       )}
       {screen === "exercise" && (

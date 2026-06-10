@@ -41,11 +41,14 @@ const AppLayout = () => {
   useStudentLiveSync(user?.id);
 
   useEffect(() => {
-    if (!loading && !user) navigate("/auth");
-  }, [user, loading, navigate]);
+    if (!loading && !user && location.pathname !== "/") navigate("/auth");
+  }, [user, loading, navigate, location.pathname]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      setProfileChecked(true);
+      return;
+    }
     const check = async () => {
       const { data } = await supabase
         .from("profiles")
@@ -80,7 +83,7 @@ const AppLayout = () => {
     );
   }
 
-  if (!user) return null;
+  
 
   if (!hasNickname) {
     return <NicknameGate onComplete={() => setHasNickname(true)} />;
