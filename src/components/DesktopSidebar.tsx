@@ -183,42 +183,51 @@ const DesktopSidebar = () => {
             </button>
 
 
-            <NavLink
-              to="/profile"
-              className="mx-2 mb-2 p-3 rounded-xl border border-border bg-muted/30 hover:bg-muted/60 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <div className="relative shrink-0">
-                  {avatarUrl ? (
-                    <img
-                      src={avatarUrl}
-                      alt={displayName}
-                      className="w-9 h-9 rounded-full object-cover border-2 border-primary/20"
-                    />
-                  ) : (
-                    <div className="w-9 h-9 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center">
-                      <span className="text-sm font-bold text-primary">
-                        {displayName.charAt(0).toUpperCase()}
+            {user ? (
+              <NavLink
+                to="/profile"
+                className="mx-2 mb-2 p-3 rounded-xl border border-border bg-muted/30 hover:bg-muted/60 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="relative shrink-0">
+                    {avatarUrl ? (
+                      <img
+                        src={avatarUrl}
+                        alt={displayName}
+                        className="w-9 h-9 rounded-full object-cover border-2 border-primary/20"
+                      />
+                    ) : (
+                      <div className="w-9 h-9 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center">
+                        <span className="text-sm font-bold text-primary">
+                          {displayName.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-display font-bold text-foreground truncate">{displayName}</p>
+                    <div className="flex items-center gap-2.5 text-[10px] text-muted-foreground mt-0.5">
+                      <span className="flex items-center gap-0.5">
+                        <Star className="w-3 h-3 text-primary" /> {totalXP}
+                      </span>
+                      <span className="flex items-center gap-0.5">
+                        <Coins className="w-3 h-3 text-yellow-500" /> {balance}
+                      </span>
+                      <span className="flex items-center gap-0.5">
+                        <Flame className="w-3 h-3 text-orange-500" /> {streak}
                       </span>
                     </div>
-                  )}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-display font-bold text-foreground truncate">{displayName}</p>
-                  <div className="flex items-center gap-2.5 text-[10px] text-muted-foreground mt-0.5">
-                    <span className="flex items-center gap-0.5">
-                      <Star className="w-3 h-3 text-primary" /> {totalXP}
-                    </span>
-                    <span className="flex items-center gap-0.5">
-                      <Coins className="w-3 h-3 text-yellow-500" /> {balance}
-                    </span>
-                    <span className="flex items-center gap-0.5">
-                      <Flame className="w-3 h-3 text-orange-500" /> {streak}
-                    </span>
                   </div>
                 </div>
-              </div>
-            </NavLink>
+              </NavLink>
+            ) : (
+              <NavLink
+                to="/auth"
+                className="mx-2 mb-2 p-3 rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition text-center font-display font-bold text-sm"
+              >
+                {lang === "uk" ? "Увійти / Реєстрація" : "Войти / Регистрация"}
+              </NavLink>
+            )}
           </motion.aside>
         )}
       </AnimatePresence>
