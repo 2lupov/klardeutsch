@@ -236,14 +236,14 @@ const ShopEditor = () => {
             className="w-full px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none resize-y"
           />
 
-          {/* EUR pricing */}
+          {/* UAH pricing */}
           <div className="flex gap-2">
             <input
               type="number"
-              step="0.01"
+              step="1"
               defaultValue={item.price_eur ?? ""}
               onBlur={(e) => updateItem(item.id, "price_eur", e.target.value ? parseFloat(e.target.value) : null)}
-              placeholder="Цена в € (пусто = за монеты)"
+              placeholder="Цена в ₴ (пусто = за монеты)"
               className="w-36 px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none"
             />
             <input

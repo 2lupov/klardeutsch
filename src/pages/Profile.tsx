@@ -906,7 +906,7 @@ const Profile = () => {
                     {lang === "uk" ? "Перейди на Premium" : "Перейди на Premium"}
                   </p>
                   <p className="text-[10px] text-muted-foreground">
-                    {lang === "uk" ? "Безліміт уроків, ігор та AI · від €3.33/міс" : "Безлимит уроков, игр и AI · от €3.33/мес"}
+                    {lang === "uk" ? "Безліміт уроків, ігор та AI · від ₴149/міс" : "Безлимит уроков, игр и AI · от ₴149/мес"}
                   </p>
                 </div>
                 <ChevronRight className="w-4 h-4 text-primary" />

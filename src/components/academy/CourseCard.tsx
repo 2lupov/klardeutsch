@@ -155,7 +155,7 @@ const CourseCard = ({ course, lang, isPurchased, progress }: Props) => {
               )}
               {course.price > 0 && (
                 <span className="text-xs font-semibold text-foreground/80">
-                  {course.price}€
+                  ₴{course.price}
                 </span>
               )}
             </div>

@@ -80,7 +80,7 @@ const CourseCheckout = ({ course, isPurchased, purchasing, onPurchase, onStart, 
                   className="w-full font-display font-bold"
                   size="lg"
                 >
-                  {lang === "uk" ? "Купити за" : "Купить за"} {course.price}€
+                  {lang === "uk" ? "Купити за" : "Купить за"} ₴{course.price}
                 </Button>
               )}
             </div>
