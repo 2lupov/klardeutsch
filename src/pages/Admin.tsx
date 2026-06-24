@@ -160,6 +160,7 @@ const Admin = () => {
         {tab === "stuffonly" && <StuffOnlyTab />}
         {tab === "courses" && <CourseEditor level={level} />}
         {tab === "chats" && <AdminChats />}
+        {tab === "products" && <ProductsEditor />}
       </div>
     </div>
   );
