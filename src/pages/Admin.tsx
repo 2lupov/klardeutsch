@@ -3,9 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Plus, Trash2, Lock, Check, BookOpen, Languages, Headphones, BookText, ShoppingBag, Gamepad2, Users, Globe, Pencil, Sparkles, ScanSearch, FileText, Bot, GraduationCap, FolderOpen, BarChart3, MessageCircle } from "lucide-react";
+import { Plus, Trash2, Lock, Check, BookOpen, Languages, Headphones, BookText, ShoppingBag, Gamepad2, Users, Globe, Pencil, Sparkles, ScanSearch, FileText, Bot, GraduationCap, FolderOpen, BarChart3, MessageCircle, Package } from "lucide-react";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import ShopEditor from "@/components/admin/ShopEditor";
+import ProductsEditor from "@/components/admin/ProductsEditor";
 import ListeningEditor from "@/components/admin/ListeningEditor";
 import UsersEditor from "@/components/admin/UsersEditor";
 import CafeEditor from "@/components/admin/CafeEditor";
@@ -20,7 +21,7 @@ import TopicsEditor from "@/components/admin/TopicsEditor";
 import { toast } from "sonner";
 
 type Level = "A1" | "A2" | "B1" | "B2" | "C1";
-type Tab = "stats" | "topics" | "vocabulary" | "grammar" | "reading" | "listening" | "shop" | "games" | "users" | "translations" | "generator" | "checker" | "alltexts" | "stuffonly" | "courses" | "chats";
+type Tab = "stats" | "topics" | "vocabulary" | "grammar" | "reading" | "listening" | "shop" | "products" | "games" | "users" | "translations" | "generator" | "checker" | "alltexts" | "stuffonly" | "courses" | "chats";
 
 /** Preserves scroll position of admin container across async reload */
 const withScroll = async (fn: () => Promise<void>) => {
@@ -51,6 +52,7 @@ const TAB_CONFIG: { key: Tab; icon: React.ElementType; label: string }[] = [
   { key: "stuffonly", icon: Bot, label: "stuffonly" },
   { key: "courses", icon: GraduationCap, label: "courses" },
   { key: "chats", icon: MessageCircle, label: "chats" },
+  { key: "products", icon: Package, label: "products" },
 ];
 
 const Admin = () => {
@@ -136,7 +138,7 @@ const Admin = () => {
               }`}
             >
               <Icon className="w-3.5 h-3.5" />
-              {key === "stats" ? "📊 Стата" : key === "topics" ? "Темы" : key === "games" ? "Игры" : key === "users" ? "Юзеры" : key === "translations" ? "Языки" : key === "generator" ? "ИИ-генератор" : key === "checker" ? "ИИ-проверка" : key === "alltexts" ? "Все тексты" : key === "stuffonly" ? "Stuff Only" : key === "courses" ? "Курсы" : key === "chats" ? "Чаты" : t(label as any)}
+              {key === "stats" ? "📊 Стата" : key === "topics" ? "Темы" : key === "games" ? "Игры" : key === "users" ? "Юзеры" : key === "translations" ? "Языки" : key === "generator" ? "ИИ-генератор" : key === "checker" ? "ИИ-проверка" : key === "alltexts" ? "Все тексты" : key === "stuffonly" ? "Stuff Only" : key === "courses" ? "Курсы" : key === "chats" ? "Чаты" : key === "products" ? "📦 Склад" : t(label as any)}
             </button>
           ))}
         </div>
@@ -158,6 +160,7 @@ const Admin = () => {
         {tab === "stuffonly" && <StuffOnlyTab />}
         {tab === "courses" && <CourseEditor level={level} />}
         {tab === "chats" && <AdminChats />}
+        {tab === "products" && <ProductsEditor />}
       </div>
     </div>
   );
