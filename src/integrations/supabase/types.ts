@@ -1115,6 +1115,69 @@ export type Database = {
         }
         Relationships: []
       }
+      products: {
+        Row: {
+          barcode: string | null
+          brand: string | null
+          category: string | null
+          cost_uah: number | null
+          created_at: string
+          description: string | null
+          expires_at: string | null
+          id: string
+          image_url: string | null
+          internal_id: number | null
+          margin_pct: number | null
+          name: string
+          price_uah: number | null
+          received_at: string | null
+          stock: number | null
+          supplier: string | null
+          updated_at: string
+          weight_kg: number | null
+        }
+        Insert: {
+          barcode?: string | null
+          brand?: string | null
+          category?: string | null
+          cost_uah?: number | null
+          created_at?: string
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          image_url?: string | null
+          internal_id?: number | null
+          margin_pct?: number | null
+          name: string
+          price_uah?: number | null
+          received_at?: string | null
+          stock?: number | null
+          supplier?: string | null
+          updated_at?: string
+          weight_kg?: number | null
+        }
+        Update: {
+          barcode?: string | null
+          brand?: string | null
+          category?: string | null
+          cost_uah?: number | null
+          created_at?: string
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          image_url?: string | null
+          internal_id?: number | null
+          margin_pct?: number | null
+          name?: string
+          price_uah?: number | null
+          received_at?: string | null
+          stock?: number | null
+          supplier?: string | null
+          updated_at?: string
+          weight_kg?: number | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           age: number | null
