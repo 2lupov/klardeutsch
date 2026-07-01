@@ -233,7 +233,7 @@ const GuestHero = () => {
                   <motion.img
                     src={pandaExplorer}
                     alt={`Panda Explorer — гід у світі ${copy.nameAcc}`}
-                    className="relative h-full w-auto max-h-[60%] object-contain drop-shadow-[0_20px_40px_rgba(109,93,251,0.5)]"
+                    className="relative h-full w-auto max-h-[45%] object-contain drop-shadow-[0_20px_40px_rgba(109,93,251,0.5)]"
                     animate={{ y: [0, -10, 0] }}
                     transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
                   />
