@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { GraduationCap, Sparkles, Play } from "lucide-react";
 import type { Lang } from "@/i18n/translations";
-import pandaExplorer from "@/assets/panda-explorer.png";
+import pandaExplorer from "@/assets/panda-director.png";
 
 const CourseHero = ({ lang }: { lang: Lang }) => (
   <section className="relative overflow-hidden mb-6">
