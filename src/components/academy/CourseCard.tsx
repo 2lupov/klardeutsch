@@ -142,10 +142,10 @@ const CourseCard = ({ course, lang, isPurchased, progress }: Props) => {
             </div>
           </div>
         ) : (
-          <div className="flex items-center justify-between pt-1 border-t border-border/20">
+          <div className="flex items-center justify-between pt-2 border-t border-border/30">
             <div className="flex items-center gap-2">
               {course.price_coins != null && (
-                <span className="flex items-center gap-1 text-sm font-bold text-primary">
+                <span className="flex items-center gap-1 text-sm font-bold text-accent">
                   <Coins className="w-4 h-4" />
                   {course.price_coins}
                 </span>
@@ -159,7 +159,7 @@ const CourseCard = ({ course, lang, isPurchased, progress }: Props) => {
                 </span>
               )}
             </div>
-            <span className="text-xs font-semibold text-primary flex items-center gap-1 group-hover:gap-2 transition-all">
+            <span className="text-xs font-semibold text-accent flex items-center gap-1 group-hover:gap-2 transition-all">
               {lang === "uk" ? "Детальніше" : "Подробнее"}
               <ChevronRight className="w-3.5 h-3.5" />
             </span>
