@@ -521,7 +521,17 @@ const GuestHero = () => {
                     >
                       Обрати курс — 5 днів безкоштовно
                     </button>
+                    <button
+                      onClick={() => {
+                        setTrialConfirm(false);
+                        navigate("/auth?mode=signup");
+                      }}
+                      className="w-full text-[#F5F3EE]/60 hover:text-[#F5F3EE] text-xs md:text-sm font-semibold uppercase tracking-widest py-2 transition-colors"
+                    >
+                      Продовжити без курсу
+                    </button>
                   </div>
+
                 </>
               ) : (
                 <>
