@@ -191,19 +191,20 @@ const GuestHero = () => {
                     </button>
                   );
                 })}
-              </div>
 
-              <div className="flex justify-center pt-4">
                 <button
                   onClick={goNext}
-                  className="bg-[#6D5DFB] hover:bg-[#5a4ae0] text-white px-10 py-4 rounded-2xl font-bold text-base md:text-lg transition-all shadow-[0_10px_40px_-8px_rgba(109,93,251,0.6)] flex items-center gap-3 group active:scale-95"
+                  className="rounded-2xl p-3 flex flex-col items-center justify-center gap-1.5 bg-[#6D5DFB] hover:bg-[#5a4ae0] text-white transition-all shadow-[0_10px_30px_-8px_rgba(109,93,251,0.6)] active:scale-95 group"
                 >
-                  Далі
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
+                  <span className="font-bold text-xs" style={{ fontFamily: "Sora, sans-serif" }}>
+                    Далі
+                  </span>
                 </button>
               </div>
             </motion.section>
           )}
+
 
           {step === 2 && (
             <motion.section
