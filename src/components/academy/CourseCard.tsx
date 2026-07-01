@@ -30,26 +30,26 @@ interface Props {
 }
 
 const levelColors: Record<string, string> = {
-  A1: "bg-emerald-500/20 text-emerald-400",
-  A2: "bg-sky-500/20 text-sky-400",
-  B1: "bg-amber-500/20 text-amber-400",
-  B2: "bg-orange-500/20 text-orange-400",
-  C1: "bg-rose-500/20 text-rose-400",
+  A1: "bg-primary/20 text-primary border border-primary/30",
+  A2: "bg-primary/20 text-primary border border-primary/30",
+  B1: "bg-accent/20 text-accent border border-accent/30",
+  B2: "bg-accent/20 text-accent border border-accent/30",
+  C1: "bg-accent/25 text-accent border border-accent/40",
 };
 
 const CourseCard = ({ course, lang, isPurchased, progress }: Props) => {
   const navigate = useNavigate();
   const difficulty = course.difficulty ?? course.level;
-  const colorClass = levelColors[difficulty] ?? "bg-primary/20 text-primary";
+  const colorClass = levelColors[difficulty] ?? "bg-primary/20 text-primary border border-primary/30";
 
   return (
     <motion.button
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -4 }}
+      whileHover={{ y: -6 }}
       transition={{ duration: 0.3 }}
       onClick={() => navigate(`/academy/${course.id}`)}
-      className="group relative flex flex-col rounded-2xl border border-border/30 bg-card/60 backdrop-blur-sm overflow-hidden text-left hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all"
+      className="group relative flex flex-col rounded-2xl border border-border/40 bg-card/70 backdrop-blur-sm overflow-hidden text-left hover:border-accent/50 hover:shadow-[0_20px_60px_-20px_hsl(var(--accent)/0.35)] transition-all"
     >
       {/* Thumbnail */}
       <div className="relative aspect-video bg-muted/30 overflow-hidden">
@@ -66,20 +66,20 @@ const CourseCard = ({ course, lang, isPurchased, progress }: Props) => {
         )}
 
         {/* Play icon overlay */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-          <div className="w-12 h-12 rounded-full bg-primary/90 flex items-center justify-center shadow-xl">
-            <Play className="w-5 h-5 text-primary-foreground ml-0.5" />
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-background/40 backdrop-blur-[2px]">
+          <div className="w-14 h-14 rounded-full bg-accent flex items-center justify-center shadow-[0_10px_30px_-5px_hsl(var(--accent)/0.6)]">
+            <Play className="w-5 h-5 text-accent-foreground ml-0.5" fill="currentColor" />
           </div>
         </div>
 
         {/* Level badge */}
-        <div className={`absolute top-3 left-3 px-2.5 py-1 rounded-lg text-[11px] font-bold ${colorClass}`}>
+        <div className={`absolute top-3 left-3 px-2.5 py-1 rounded-lg text-[11px] font-bold backdrop-blur ${colorClass}`}>
           {difficulty}
         </div>
 
         {/* Featured badge */}
         {course.is_featured && (
-          <div className="absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-primary/90 text-primary-foreground text-[11px] font-bold">
+          <div className="absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-accent text-accent-foreground text-[11px] font-bold shadow-lg">
             ⭐ {lang === "uk" ? "Топ" : "Топ"}
           </div>
         )}
@@ -142,10 +142,10 @@ const CourseCard = ({ course, lang, isPurchased, progress }: Props) => {
             </div>
           </div>
         ) : (
-          <div className="flex items-center justify-between pt-1 border-t border-border/20">
+          <div className="flex items-center justify-between pt-2 border-t border-border/30">
             <div className="flex items-center gap-2">
               {course.price_coins != null && (
-                <span className="flex items-center gap-1 text-sm font-bold text-primary">
+                <span className="flex items-center gap-1 text-sm font-bold text-accent">
                   <Coins className="w-4 h-4" />
                   {course.price_coins}
                 </span>
@@ -159,7 +159,7 @@ const CourseCard = ({ course, lang, isPurchased, progress }: Props) => {
                 </span>
               )}
             </div>
-            <span className="text-xs font-semibold text-primary flex items-center gap-1 group-hover:gap-2 transition-all">
+            <span className="text-xs font-semibold text-accent flex items-center gap-1 group-hover:gap-2 transition-all">
               {lang === "uk" ? "Детальніше" : "Подробнее"}
               <ChevronRight className="w-3.5 h-3.5" />
             </span>

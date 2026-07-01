@@ -1,52 +1,76 @@
 import { motion } from "framer-motion";
-import { GraduationCap, Sparkles } from "lucide-react";
+import { GraduationCap, Sparkles, Play } from "lucide-react";
 import type { Lang } from "@/i18n/translations";
+import pandaExplorer from "@/assets/panda-explorer.png";
 
 const CourseHero = ({ lang }: { lang: Lang }) => (
-  <section className="relative overflow-hidden py-16 px-4 mb-6">
-    {/* Ambient glow */}
+  <section className="relative overflow-hidden mb-6">
+    {/* Cinematic backdrop */}
+    <div className="absolute inset-0 bg-gradient-to-br from-primary/25 via-background to-accent/15" />
     <div className="absolute inset-0 pointer-events-none">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-primary/8 rounded-full blur-[120px]" />
-      <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-primary/5 rounded-full blur-[100px]" />
+      <div className="absolute top-0 -left-24 w-[520px] h-[520px] rounded-full blur-[140px] bg-primary/40" />
+      <div className="absolute bottom-0 -right-24 w-[480px] h-[480px] rounded-full blur-[140px] bg-accent/30" />
     </div>
 
-    <div className="relative max-w-3xl mx-auto text-center">
+    <div className="relative max-w-6xl mx-auto px-6 py-14 md:py-20 grid grid-cols-1 md:grid-cols-[1.4fr_1fr] gap-8 items-center">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="flex flex-col items-center gap-4"
+        className="flex flex-col gap-5 text-left"
       >
-        <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20">
-          <Sparkles className="w-4 h-4 text-primary" />
-          <span className="text-xs font-semibold text-primary uppercase tracking-wider">
+        <div className="inline-flex items-center gap-2 self-start px-3 py-1.5 rounded-full bg-accent/15 border border-accent/30 backdrop-blur">
+          <Sparkles className="w-3.5 h-3.5 text-accent" />
+          <span className="text-[11px] font-bold text-accent uppercase tracking-[0.18em]">
             KLAR Academy
           </span>
         </div>
 
-        <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight">
-          {lang === "uk" ? "Навчайся з " : "Учись с "}
-          <span className="text-primary">
-            {lang === "uk" ? "викладачем" : "преподавателем"}
+        <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.02] tracking-tight text-foreground">
+          {lang === "uk" ? "Мови " : "Языки "}
+          <span className="italic text-accent">
+            {lang === "uk" ? "як кіно." : "как кино."}
+          </span>
+          <br />
+          <span className="text-foreground/70">
+            {lang === "uk" ? "Курс за курсом." : "Курс за курсом."}
           </span>
         </h1>
 
-        <p className="text-muted-foreground text-sm sm:text-base max-w-lg">
+        <p className="text-muted-foreground text-base sm:text-lg max-w-xl leading-relaxed">
           {lang === "uk"
-            ? "Структуровані відеокурси з живим чатом, AI-практикою та сертифікатом"
-            : "Структурированные видеокурсы с живым чатом, AI-практикой и сертификатом"}
+            ? "Структуровані відеокурси, живе спільнотне навчання, AI-практика та сертифікат після завершення."
+            : "Структурированные видеокурсы, живое сообщество, AI-практика и сертификат по окончании."}
         </p>
 
-        <div className="flex items-center gap-6 mt-2 text-xs text-muted-foreground">
-          <div className="flex items-center gap-1.5">
-            <GraduationCap className="w-4 h-4 text-primary/70" />
-            <span>{lang === "uk" ? "Відеолекції" : "Видеолекции"}</span>
+        <div className="flex flex-wrap items-center gap-4 pt-2 text-xs text-muted-foreground">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-card/60 border border-border/40 backdrop-blur">
+            <Play className="w-3.5 h-3.5 text-primary" />
+            <span className="font-medium">{lang === "uk" ? "Відеолекції" : "Видеолекции"}</span>
           </div>
-          <span>•</span>
-          <span>AI-{lang === "uk" ? "практика" : "практика"}</span>
-          <span>•</span>
-          <span>{lang === "uk" ? "Сертифікат" : "Сертификат"}</span>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-card/60 border border-border/40 backdrop-blur">
+            <Sparkles className="w-3.5 h-3.5 text-accent" />
+            <span className="font-medium">AI-{lang === "uk" ? "тренер" : "тренер"}</span>
+          </div>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-card/60 border border-border/40 backdrop-blur">
+            <GraduationCap className="w-3.5 h-3.5 text-primary" />
+            <span className="font-medium">{lang === "uk" ? "Сертифікат" : "Сертификат"}</span>
+          </div>
         </div>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9, rotate: -6 }}
+        animate={{ opacity: 1, scale: 1, rotate: 0 }}
+        transition={{ duration: 0.7, delay: 0.15 }}
+        className="relative hidden md:flex items-center justify-center"
+      >
+        <div className="absolute inset-0 bg-accent/25 blur-[80px] rounded-full" />
+        <img
+          src={pandaExplorer}
+          alt=""
+          className="relative w-64 lg:w-80 drop-shadow-[0_20px_50px_rgba(245,166,35,0.35)]"
+        />
       </motion.div>
     </div>
   </section>
