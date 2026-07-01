@@ -5,6 +5,39 @@ import { useNavigate } from "react-router-dom";
 import pandaExplorer from "@/assets/panda-explorer.png";
 import { useTargetLanguage } from "@/contexts/TargetLanguageContext";
 
+// Typewriter effect — the panda "speaks" the quote character by character
+function Typewriter({ text, className, delay = 300, speed = 32 }: { text: string; className?: string; delay?: number; speed?: number }) {
+  const [shown, setShown] = useState("");
+  useEffect(() => {
+    setShown("");
+    let i = 0;
+    const start = setTimeout(() => {
+      const id = setInterval(() => {
+        i++;
+        setShown(text.slice(0, i));
+        if (i >= text.length) clearInterval(id);
+      }, speed);
+      // cleanup interval on unmount
+      (start as any)._id = id;
+    }, delay);
+    return () => {
+      clearTimeout(start);
+      if ((start as any)._id) clearInterval((start as any)._id);
+    };
+  }, [text, delay, speed]);
+  const done = shown.length >= text.length;
+  return (
+    <span className={className}>
+      "{shown}"
+      <span
+        className="inline-block w-[2px] ml-0.5 align-baseline bg-current"
+        style={{ height: "0.9em", opacity: done ? 0 : 1, animation: "klar-caret 0.8s steps(1) infinite" }}
+      />
+      <style>{`@keyframes klar-caret { 50% { opacity: 0 } }`}</style>
+    </span>
+  );
+}
+
 // ============================================================
 // Klar.academy — Step-by-step guest landing
 // Palette: #0F0F23 / #1A1A3E / #6D5DFB / #F5A623
