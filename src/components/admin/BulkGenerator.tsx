@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useTargetLanguage } from "@/contexts/TargetLanguageContext";
 import { Loader2, Zap, Check, X, Wand2, Plus, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
@@ -30,6 +31,7 @@ const CONTENT_TYPES: { key: ContentType; label: string; emoji: string }[] = [
 const SUGGESTED_EMOJIS = ["📚", "🏠", "🍎", "✈️", "💼", "🎯", "🎨", "🏥", "🛒", "🎉", "📱", "🌍", "🚗", "👨‍👩‍👧", "💰"];
 
 const BulkGenerator = () => {
+  const { targetLang } = useTargetLanguage();
   const [topics, setTopics] = useState<TopicInfo[]>([]);
   const [selectedTypes, setSelectedTypes] = useState<ContentType[]>(["grammar", "vocab"]);
   const [selectedLevels, setSelectedLevels] = useState<Level[]>(["A1"]);
