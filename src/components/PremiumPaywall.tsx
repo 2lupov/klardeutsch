@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "@/hooks/use-toast";
 import type { SubscriptionPlan } from "@/hooks/useSubscription";
+import pandaExplorer from "@/assets/panda-explorer.png";
 
 interface Props {
   open: boolean;
@@ -141,23 +142,26 @@ const PremiumPaywall = ({ open, onClose, type, highlightPlan }: Props) => {
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="relative p-6 pb-4 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent">
-            <button onClick={onClose} className="absolute top-3 right-3 text-muted-foreground hover:text-foreground">
-              <X className="w-5 h-5" />
+          <div className="relative p-6 pb-5 overflow-hidden bg-gradient-to-br from-primary/25 via-card to-accent/20">
+            <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-accent/30 blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-14 -left-10 w-40 h-40 rounded-full bg-primary/30 blur-3xl pointer-events-none" />
+            <button onClick={onClose} className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-background/40 backdrop-blur flex items-center justify-center text-muted-foreground hover:text-foreground transition">
+              <X className="w-4 h-4" />
             </button>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
-                <Crown className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <h2 className="text-xl font-display font-bold text-foreground">KLAR Premium</h2>
-                <p className="text-xs text-muted-foreground">
+            <div className="relative flex items-center gap-4">
+              <img src={pandaExplorer} alt="" className="w-20 h-20 object-contain drop-shadow-[0_10px_30px_hsl(var(--accent)/0.4)] animate-float shrink-0" />
+              <div className="min-w-0">
+                <span className="inline-block text-[10px] font-bold uppercase tracking-[0.2em] text-accent mb-1">
+                  {lang === "uk" ? "Преміум" : "Премиум"}
+                </span>
+                <h2 className="text-2xl font-display font-bold text-foreground leading-tight">KLAR Premium</h2>
+                <p className="text-xs text-muted-foreground mt-1">
                   {lang === "uk" ? "Обери план, який підходить тобі" : "Выбери план, который подходит тебе"}
                 </p>
               </div>
             </div>
             {type && (
-              <p className="text-sm text-primary font-medium">
+              <p className="relative mt-3 text-sm text-accent font-medium">
                 {limitMessages[type]?.[lang] ?? ""}
               </p>
             )}
@@ -199,21 +203,21 @@ const PremiumPaywall = ({ open, onClose, type, highlightPlan }: Props) => {
               return (
                 <div
                   key={p.id}
-                  className={`relative rounded-xl border p-4 flex flex-col transition-all ${
+                  className={`relative rounded-2xl border p-4 flex flex-col transition-all ${
                     isHighlighted
-                      ? "border-primary bg-primary/5 shadow-lg shadow-primary/10"
-                      : "border-border/30 bg-card"
+                      ? "border-accent/60 bg-accent/5 shadow-xl shadow-accent/20 scale-[1.02]"
+                      : "border-border/40 bg-card/60 hover:border-border"
                   }`}
                 >
                   {p.popular && (
-                    <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] px-3 py-0.5 rounded-full font-bold whitespace-nowrap">
+                    <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-accent text-accent-foreground text-[10px] px-3 py-0.5 rounded-full font-bold whitespace-nowrap shadow-lg shadow-accent/30">
                       {lang === "uk" ? "Найвигідніше" : "Лучшая цена"}
                     </span>
                   )}
 
                   <div className="flex items-center gap-2 mb-3">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isHighlighted ? "bg-primary/20" : "bg-muted/50"}`}>
-                      <p.icon className={`w-4 h-4 ${isHighlighted ? "text-primary" : "text-muted-foreground"}`} />
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isHighlighted ? "bg-accent/20" : "bg-muted/50"}`}>
+                      <p.icon className={`w-4 h-4 ${isHighlighted ? "text-accent" : "text-muted-foreground"}`} />
                     </div>
                     <h3 className="font-display font-bold text-sm text-foreground">{p.name}</h3>
                   </div>
@@ -233,7 +237,7 @@ const PremiumPaywall = ({ open, onClose, type, highlightPlan }: Props) => {
                   <div className="space-y-2 mb-4 flex-1">
                     {p.features.map((f, i) => (
                       <div key={i} className="flex items-center gap-2">
-                        <Check className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+                        <Check className={`w-3.5 h-3.5 flex-shrink-0 ${isHighlighted ? "text-accent" : "text-primary"}`} />
                         <span className="text-xs text-foreground/80">{f.text}</span>
                       </div>
                     ))}
@@ -245,7 +249,7 @@ const PremiumPaywall = ({ open, onClose, type, highlightPlan }: Props) => {
                     size="sm"
                     className={`w-full text-xs font-display font-bold ${
                       isHighlighted
-                        ? "bg-primary hover:bg-primary/90"
+                        ? "bg-accent text-accent-foreground hover:bg-accent/90 shadow-lg shadow-accent/25"
                         : "bg-foreground/10 hover:bg-foreground/20 text-foreground"
                     }`}
                   >

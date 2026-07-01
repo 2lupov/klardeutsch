@@ -925,10 +925,10 @@ const Profile = () => {
         transition={{ delay: 0.12 }}
         className={`grid gap-2 ${isTelegram ? "grid-cols-4 mb-3" : "grid-cols-4 gap-2.5 mb-5"}`}
       >
-        <StatCard icon={<Coins className="w-4 h-4" />} value={balance} label={t("coinsLabel")} color="from-yellow-500/20 to-amber-600/10" />
-        <StatCard icon={<BookOpen className="w-4 h-4" />} value={wordsLearned} label={t("wordsLearned")} color="from-blue-500/20 to-cyan-500/10" />
-        <StatCard icon={<Brain className="w-4 h-4" />} value={completedLessons} label={t("lessonsCompleted")} color="from-purple-500/20 to-violet-500/10" />
-        <StatCard icon={<Flame className="w-4 h-4" />} value={streak} label={t("streakDays")} color="from-orange-500/20 to-red-500/10" />
+        <StatCard icon={<Coins className="w-4 h-4" />} value={balance} label={t("coinsLabel")} color="from-accent/25 to-accent/5" />
+        <StatCard icon={<BookOpen className="w-4 h-4" />} value={wordsLearned} label={t("wordsLearned")} color="from-primary/25 to-primary/5" />
+        <StatCard icon={<Brain className="w-4 h-4" />} value={completedLessons} label={t("lessonsCompleted")} color="from-primary/20 to-accent/10" />
+        <StatCard icon={<Flame className="w-4 h-4" />} value={streak} label={t("streakDays")} color="from-accent/30 to-accent/5" />
       </motion.div>
 
       {/* Gift unboxing on profile entry */}

@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Coins, ShoppingBag, Check, Lock, Sparkles, GraduationCap, BookOpen, ChevronRight, ExternalLink, Euro } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import pandaExplorer from "@/assets/panda-explorer.png";
 
 interface ShopItem {
   id: string;
@@ -176,20 +177,33 @@ const Shop = () => {
 
   return (
     <div className={`w-full mx-auto px-4 py-6 overflow-x-hidden ${isMobile ? "max-w-md" : "max-w-2xl"}`}>
-      {/* Header with balance */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="font-display text-xl font-bold text-foreground">{t("shopTitle")}</h1>
-          <p className="text-xs text-muted-foreground mt-0.5">{t("shopSubtitle")}</p>
-        </div>
-        <div
-          ref={balanceRef}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 transition-all ${
-            balanceBounce ? "animate-balance-bounce" : ""
-          }`}
-        >
-          <Coins className="w-4 h-4 text-primary" />
-          <span className="font-display font-bold text-primary">{balance}</span>
+      {/* Editorial hero */}
+      <div className="relative overflow-hidden rounded-3xl mb-6 border border-border/40 bg-gradient-to-br from-card via-secondary/50 to-card">
+        <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-accent/20 blur-3xl" />
+        <div className="absolute -bottom-20 -left-10 w-48 h-48 rounded-full bg-primary/20 blur-3xl" />
+        <div className="relative flex items-center gap-4 p-5">
+          <img
+            src={pandaExplorer}
+            alt=""
+            className="w-20 h-20 object-contain drop-shadow-[0_10px_30px_hsl(var(--accent)/0.35)] animate-float shrink-0"
+            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+          />
+          <div className="flex-1 min-w-0">
+            <span className="inline-block text-[10px] font-bold uppercase tracking-[0.2em] text-accent mb-1">
+              {lang === "uk" ? "Магазин" : "Магазин"}
+            </span>
+            <h1 className="font-display text-2xl font-bold text-foreground leading-tight">{t("shopTitle")}</h1>
+            <p className="text-xs text-muted-foreground mt-1">{t("shopSubtitle")}</p>
+          </div>
+          <div
+            ref={balanceRef}
+            className={`flex flex-col items-center gap-0.5 px-3 py-2 rounded-2xl bg-accent/15 border border-accent/30 shrink-0 transition-all ${
+              balanceBounce ? "animate-balance-bounce" : ""
+            }`}
+          >
+            <Coins className="w-4 h-4 text-accent" />
+            <span className="font-display font-bold text-accent text-sm leading-none">{balance}</span>
+          </div>
         </div>
       </div>
 
