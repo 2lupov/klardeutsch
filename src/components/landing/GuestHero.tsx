@@ -216,7 +216,7 @@ const GuestHero = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.35 }}
-              className="lg:grid lg:grid-cols-2 lg:gap-12 lg:items-center flex flex-col h-full md:min-h-[calc(100dvh-180px)]"
+              className="lg:grid lg:grid-cols-2 lg:gap-12 lg:items-center flex flex-col flex-1 min-h-0 md:min-h-[calc(100dvh-180px)]"
             >
               {/* MOBILE layout */}
               <div className="lg:hidden flex flex-col h-full min-h-0">
