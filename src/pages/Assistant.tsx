@@ -159,17 +159,47 @@ const Assistant = () => {
   ];
 
   const renderMenu = () => (
-    <div className="flex flex-col gap-4 w-full max-w-2xl mx-auto h-full justify-center px-4 py-8">
-      <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.4 }}
-        className="text-center mb-2">
-        <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
-          <Sparkles className="w-8 h-8 text-primary" />
+    <div className="flex flex-col gap-6 w-full max-w-3xl mx-auto h-full justify-center px-5 py-8">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="relative rounded-3xl overflow-hidden border border-border/40 bg-gradient-to-br from-primary/20 via-card/60 to-accent/15 backdrop-blur-sm"
+      >
+        <div className="absolute -top-16 -right-10 w-64 h-64 rounded-full blur-[90px] bg-accent/25 pointer-events-none" />
+        <div className="absolute -bottom-20 -left-10 w-72 h-72 rounded-full blur-[100px] bg-primary/25 pointer-events-none" />
+
+        <div className="relative flex items-center gap-5 p-6 md:p-8">
+          <motion.img
+            src={pandaExplorer}
+            alt=""
+            initial={{ opacity: 0, scale: 0.8, rotate: -8 }}
+            animate={{ opacity: 1, scale: 1, rotate: 0 }}
+            transition={{ duration: 0.7, delay: 0.1 }}
+            className="w-24 md:w-32 shrink-0 drop-shadow-[0_15px_40px_rgba(245,166,35,0.4)]"
+          />
+          <div className="flex-1 min-w-0">
+            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-accent/15 border border-accent/30 mb-2">
+              <Sparkles className="w-3 h-3 text-accent" />
+              <span className="text-[10px] font-bold text-accent uppercase tracking-[0.18em]">
+                KLAR Assistant
+              </span>
+            </div>
+            <h1 className="font-display text-2xl md:text-3xl font-bold text-foreground leading-[1.05] tracking-tight">
+              {t("Твій ", "Твой ")}
+              <span className="italic text-accent">{t("персональний", "персональный")}</span>
+              <br />
+              <span className="text-foreground/70">{t("мовний тренер", "языковой тренер")}</span>
+            </h1>
+            <p className="text-xs md:text-sm text-muted-foreground mt-2 leading-relaxed">
+              {t("Граматика, словник, розбір текстів і документів — все в одному місці",
+                 "Грамматика, словарь, разбор текстов и документов — всё в одном месте")}
+            </p>
+          </div>
         </div>
-        <h1 className="text-2xl font-display font-bold text-foreground">KLAR Assistant</h1>
-        <p className="text-sm text-muted-foreground mt-1">{t("Персональный ИИ-помощник для немецкого", "Персональний ІІ-помічник для німецької")}</p>
       </motion.div>
 
-      <div className="grid grid-cols-2 gap-3 mt-2">
+      <div className="grid grid-cols-2 gap-3">
         {menuItems.map((item, i) => {
           const theme = MENU_THEMES[item.id as keyof typeof MENU_THEMES];
           return (
@@ -177,11 +207,11 @@ const Assistant = () => {
               key={item.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.08, duration: 0.35 }}
-              whileHover={{ scale: 1.04, y: -4 }}
+              transition={{ delay: 0.15 + i * 0.07, duration: 0.35 }}
+              whileHover={{ scale: 1.03, y: -4 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => setTab(item.id)}
-              className={`relative p-5 flex flex-col items-center gap-2.5 rounded-2xl border border-border bg-gradient-to-b ${theme.gradient} backdrop-blur-sm overflow-hidden transition-all hover:shadow-xl ${theme.glow} ${theme.border} group`}
+              className={`relative p-5 flex flex-col items-center gap-2.5 rounded-2xl border border-border/40 bg-gradient-to-b ${theme.gradient} backdrop-blur-sm overflow-hidden transition-all hover:shadow-[0_20px_50px_-15px] ${theme.glow} ${theme.border} group`}
             >
               <motion.span className="text-3xl"
                 animate={{ y: [0, -6, 0] }}
@@ -192,7 +222,7 @@ const Assistant = () => {
                 <h3 className={`text-base font-display font-bold ${theme.accent} transition-colors`}>{item.label}</h3>
                 <p className="text-[11px] text-muted-foreground mt-1 leading-tight">{item.desc}</p>
               </div>
-              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-foreground/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
             </motion.button>
           );
         })}
