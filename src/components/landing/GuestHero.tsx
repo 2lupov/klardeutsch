@@ -37,10 +37,18 @@ function useCountdown() {
 const COURSES = [
   { level: "A1", title: "Початковий", desc: "База для тих, хто починає з абсолютного нуля.", price: "4 200 ₴", accent: false },
   { level: "A2", title: "Базовий", desc: "Для простих розмов на побутові теми.", price: "4 500 ₴", accent: false },
-  { level: "B1", title: "Середній", desc: "Ключ до життя та роботи в Німеччині.", price: "5 100 ₴", accent: true },
+  { level: "B1", title: "Середній", desc: "Ключ до життя та роботи за кордоном.", price: "5 100 ₴", accent: true },
   { level: "B2", title: "Вище середнього", desc: "Складні теми та професійна лексика.", price: "5 800 ₴", accent: false },
   { level: "C1", title: "Просунутий", desc: "Вільне володіння на рівні носія.", price: "6 500 ₴", accent: false },
 ];
+
+const LANG_COPY: Record<string, { name: string; nameAcc: string; heroKicker: string; mascotQuote: string }> = {
+  de: { name: "Німецька", nameAcc: "німецьку", heroKicker: "Твій шлях до Німеччини", mascotQuote: "Hallo! Я твій гід світом німецької. Разом ми пройдемо шлях від А1 до С1!" },
+  en: { name: "Англійська", nameAcc: "англійську", heroKicker: "Твій ключ до світу", mascotQuote: "Hello! Я твій гід світом англійської. Разом ми дійдемо від A1 до C1!" },
+  pl: { name: "Польська", nameAcc: "польську", heroKicker: "Твій шлях до Польщі", mascotQuote: "Cześć! Я твій гід світом польської. Разом ми дійдемо від A1 до C1!" },
+  es: { name: "Іспанська", nameAcc: "іспанську", heroKicker: "Твій шлях до Іспанії", mascotQuote: "¡Hola! Я твій гід світом іспанської. Разом ми дійдемо від A1 до C1!" },
+  fr: { name: "Французька", nameAcc: "французьку", heroKicker: "Твій шлях до Франції", mascotQuote: "Bonjour! Я твій гід світом французької. Разом ми дійдемо від A1 до C1!" },
+};
 
 const TOTAL_STEPS = 3;
 
@@ -48,6 +56,7 @@ const GuestHero = () => {
   const navigate = useNavigate();
   const { days, hours, mins } = useCountdown();
   const { targetLang, setTargetLang, languages } = useTargetLanguage();
+  const copy = LANG_COPY[targetLang] ?? LANG_COPY.de;
   const [step, setStep] = useState(1);
 
   const goNext = () => setStep((s) => Math.min(TOTAL_STEPS, s + 1));
@@ -207,10 +216,10 @@ const GuestHero = () => {
                 <div>
                   <div className="flex items-center gap-3 text-[#F5A623] mb-5">
                     <div className="h-px w-10 bg-[#F5A623]" />
-                    <span className="uppercase tracking-[0.25em] font-bold text-[11px] md:text-xs">Твій шлях до Німеччини</span>
+                    <span className="uppercase tracking-[0.25em] font-bold text-[11px] md:text-xs">{copy.heroKicker}</span>
                   </div>
                   <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold leading-[1.02] tracking-tight" style={{ fontFamily: "Sora, sans-serif" }}>
-                    Німецька мова <br className="hidden sm:block" />
+                    {copy.name} мова <br className="hidden sm:block" />
                     <span className="text-[#6D5DFB]">без кордонів.</span>
                   </h1>
                 </div>
@@ -232,14 +241,14 @@ const GuestHero = () => {
                   <div className="absolute inset-0 bg-gradient-to-br from-[#1A1A3E] to-[#0F0F23] rounded-3xl border border-white/5 overflow-hidden shadow-2xl">
                     <motion.img
                       src={pandaExplorer}
-                      alt="Panda Explorer — ваш гід у світі німецької"
+                      alt={`Panda Explorer — гід у світі ${copy.nameAcc}`}
                       className="absolute inset-0 w-full h-full object-contain p-4"
                       animate={{ y: [0, -12, 0] }}
                       transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
                     />
                     <div className="absolute bottom-5 left-5 right-5 bg-black/50 backdrop-blur-xl p-4 md:p-5 rounded-2xl border border-white/10">
                       <p className="text-[#F5A623] font-bold italic text-sm md:text-base leading-snug" style={{ fontFamily: "Sora, sans-serif" }}>
-                        "Hallo! Я твій гід світом німецької. Разом ми пройдемо шлях від А1 до С1!"
+                        "{copy.mascotQuote}"
                       </p>
                     </div>
                   </div>
