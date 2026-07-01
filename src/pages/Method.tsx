@@ -65,7 +65,7 @@ const featuresData = {
 const ui = {
   ru: {
     heroTitle: "Метод",
-    heroSub1: "Немецкий язык — ясно и просто.",
+    heroSub1: "Языки мира — ясно и просто.",
     heroSub2: "От A1 до C1 с AI-поддержкой.",
     audioLabel: "🎧 Послушай мотивацию KLAR",
     audioLoading: "Загрузка...",
@@ -78,11 +78,11 @@ const ui = {
     cta: "Начать бесплатно",
     footerPrivacy: "Политика конфиденциальности",
     footerTerms: "Оферта",
-    footerCopy: "KLAR — Немецкий язык ясно и просто",
+    footerCopy: "KLAR — Языки мира ясно и просто",
   },
   uk: {
     heroTitle: "Метод",
-    heroSub1: "Німецька мова — ясно і просто.",
+    heroSub1: "Мови світу — ясно і просто.",
     heroSub2: "Від A1 до C1 з AI-підтримкою.",
     audioLabel: "🎧 Послухай мотивацію KLAR",
     audioLoading: "Завантаження...",
@@ -95,7 +95,7 @@ const ui = {
     cta: "Почати безкоштовно",
     footerPrivacy: "Політика конфіденційності",
     footerTerms: "Оферта",
-    footerCopy: "KLAR — Німецька мова ясно і просто",
+    footerCopy: "KLAR — Мови світу ясно і просто",
   },
 };
 
