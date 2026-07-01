@@ -21,6 +21,7 @@ import SRSWidget from "@/components/SRSWidget";
 import DailySummaryModal from "@/components/daily/DailySummaryModal";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import GuestHero from "@/components/landing/GuestHero";
+import HomeDashboard from "@/components/home/HomeDashboard";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft } from "lucide-react";
