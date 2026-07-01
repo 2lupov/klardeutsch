@@ -41,6 +41,7 @@ const Index = () => {
   const { user } = useAuth();
   const { saveProgress } = useProgress();
   const { t, lang, languageLocked } = useLanguage();
+  const { targetLang } = useTargetLanguage();
   const { isMobile } = usePlatform();
   const { showSummary, triggerSummary, closeSummary } = useDailySummary();
   const navigate = useNavigate();
@@ -67,12 +68,12 @@ const Index = () => {
   useEffect(() => {
     if (screen === "exercise") {
       setDataLoading(true);
-      fetchLevelData(level, topic).then((d) => {
+      fetchLevelData(level, topic, targetLang).then((d) => {
         setData(d);
         setDataLoading(false);
       });
     }
-  }, [level, screen, topic]);
+  }, [level, screen, topic, targetLang]);
 
   const [singleTopic, setSingleTopic] = useState(false);
 
@@ -80,7 +81,7 @@ const Index = () => {
   useEffect(() => {
     if (screen === "topics" && category !== "writing") {
       setDataLoading(true);
-      fetchTopics(level, category as "vocabulary" | "grammar" | "reading" | "listening").then((t) => {
+      fetchTopics(level, category as "vocabulary" | "grammar" | "reading" | "listening", targetLang).then((t) => {
         if (t.length === 1) {
           // Only one topic — skip selection
           setSingleTopic(true);
@@ -93,7 +94,7 @@ const Index = () => {
         }
       });
     }
-  }, [screen, level, category]);
+  }, [screen, level, category, targetLang]);
 
   useEffect(() => {
     if (screen === "exercise") setClarity(0);
