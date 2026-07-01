@@ -183,7 +183,7 @@ const Shop = () => {
         <div className="absolute -bottom-20 -left-10 w-48 h-48 rounded-full bg-primary/20 blur-3xl" />
         <div className="relative flex items-center gap-4 p-5">
           <img
-            src="/src/assets/panda-explorer.png"
+            src={pandaExplorer}
             alt=""
             className="w-20 h-20 object-contain drop-shadow-[0_10px_30px_hsl(var(--accent)/0.35)] animate-float shrink-0"
             onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
