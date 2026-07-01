@@ -106,7 +106,7 @@ const GuestHero = () => {
 
 
       {/* Stepper header */}
-      <div className="max-w-3xl mx-auto px-4 md:px-6 pt-4 md:pt-12">
+      <div className="max-w-3xl mx-auto px-4 md:px-6 pt-6 md:pt-12">
         <div className="flex items-center justify-between mb-2">
           <button
             onClick={goBack}
@@ -233,7 +233,7 @@ const GuestHero = () => {
                   <motion.img
                     src={pandaExplorer}
                     alt={`Panda Explorer — гід у світі ${copy.nameAcc}`}
-                    className="relative h-full w-auto max-h-[60%] object-contain drop-shadow-[0_20px_40px_rgba(109,93,251,0.5)]"
+                    className="relative h-full w-auto max-h-[45%] object-contain drop-shadow-[0_20px_40px_rgba(109,93,251,0.5)]"
                     animate={{ y: [0, -10, 0] }}
                     transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
                   />
