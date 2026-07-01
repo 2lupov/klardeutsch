@@ -296,7 +296,8 @@ const GuestHero = () => {
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: i * 0.08 }}
-                    onClick={() => navigate("/auth")}
+                    onClick={() => navigate(`/trial?level=${c.level}`)}
+
                     className={`group cursor-pointer rounded-[2rem] p-7 md:p-8 space-y-6 transition-all hover:-translate-y-2 relative overflow-hidden ${
                       c.accent
                         ? "bg-[#6D5DFB] shadow-[0_20px_50px_-12px_rgba(109,93,251,0.5)]"
