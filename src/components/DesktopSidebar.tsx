@@ -117,7 +117,11 @@ const DesktopSidebar = () => {
   const displayName = profile?.display_name || "User";
   const avatarUrl = profile?.avatar_url;
 
+  // Hide sidebar entirely on guest landing page
+  if (!user && location.pathname === "/") return null;
+
   return (
+
     <>
       {/* Toggle button — always visible top-left */}
       <button
