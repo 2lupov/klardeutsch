@@ -32,13 +32,13 @@ const HomeDashboard = ({ displayName, onSelectLevel }: Props) => {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from("daily_bonus")
         .select("streak")
         .eq("user_id", user.id)
         .maybeSingle();
-      if (data && typeof (data as any).streak === "number") {
-        setStreak((data as any).streak);
+      if (data && typeof data.streak === "number") {
+        setStreak(data.streak);
       }
     })();
   }, [user]);
