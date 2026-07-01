@@ -44,15 +44,6 @@ const ReportErrorButton = () => {
 
   return (
     <>
-      {/* Floating button — mobile only */}
-      <button
-        onClick={() => setOpen(true)}
-        className="fixed bottom-20 right-4 z-40 w-10 h-10 rounded-full bg-destructive/10 text-destructive flex items-center justify-center hover:bg-destructive/20 transition-colors lg:hidden"
-        title={t("reportError")}
-      >
-        <Bug className="w-4 h-4" />
-      </button>
-
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setOpen(false)}>
           <div
