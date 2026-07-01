@@ -31,14 +31,16 @@ const HomeDashboard = ({ displayName, onSelectLevel }: Props) => {
 
   useEffect(() => {
     if (!user) return;
-    supabase
-      .from("user_streaks")
-      .select("current_streak")
-      .eq("user_id", user.id)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (data) setStreak(data.current_streak ?? 0);
-      });
+    (async () => {
+      const { data } = await supabase
+        .from("daily_bonus")
+        .select("streak")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (data && typeof (data as any).streak === "number") {
+        setStreak((data as any).streak);
+      }
+    })();
   }, [user]);
 
   const hour = new Date().getHours();
