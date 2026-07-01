@@ -3154,6 +3154,7 @@ export type Database = {
           read_ct: number
         }[]
       }
+      referral_code_exists: { Args: { p_code: string }; Returns: boolean }
       review_srs_card: {
         Args: { p_card_id: string; p_quality: number; p_user_id: string }
         Returns: undefined
