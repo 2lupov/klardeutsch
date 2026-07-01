@@ -218,7 +218,6 @@ const GuestHero = () => {
               <div className="space-y-7 md:space-y-8 relative z-10">
                 <div className="relative">
 
-                  </div>
                   <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold leading-[1.02] tracking-tight" style={{ fontFamily: "Sora, sans-serif" }}>
                     {copy.name} мова <br className="hidden sm:block" />
                     <span className="text-[#6D5DFB]">без кордонів.</span>
