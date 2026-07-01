@@ -20,7 +20,7 @@ const Trial = () => {
 
   return (
     <div
-      className="min-h-full w-full relative overflow-hidden"
+      className="h-[100dvh] w-full relative overflow-y-auto overflow-x-hidden"
       style={{
         backgroundColor: "#F4EEE1",
         backgroundImage:
