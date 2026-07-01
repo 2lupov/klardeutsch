@@ -43,8 +43,11 @@ function translateAuthError(msg: string): string {
 const TelegramLoginButton = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [widgetLoaded, setWidgetLoaded] = useState(false);
+  const host = window.location.hostname.replace(/^www\./, "");
+  const canUseTelegramWidget = host === "klar.academy" || host === "klardeutsch.org";
 
   useEffect(() => {
+    if (!canUseTelegramWidget) return;
     if (!containerRef.current || containerRef.current.hasChildNodes()) return;
     const script = document.createElement("script");
     script.src = "https://telegram.org/js/telegram-widget.js?22";
@@ -56,12 +59,12 @@ const TelegramLoginButton = () => {
     script.async = true;
     script.onload = () => setWidgetLoaded(true);
     containerRef.current.appendChild(script);
-  }, []);
+  }, [canUseTelegramWidget]);
 
   return (
     <div className="flex flex-col items-center gap-2">
       <div ref={containerRef} className="flex justify-center" />
-      {!widgetLoaded && (
+      {(!widgetLoaded || !canUseTelegramWidget) && (
         <a
           href="https://t.me/klar_deutsch_bot?start=login"
           target="_blank"
