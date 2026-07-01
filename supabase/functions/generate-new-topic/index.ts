@@ -113,7 +113,7 @@ Requirements:
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: "You are a ${langName} language expert. Return only valid JSON arrays." },
+          { role: "system", content: `You are a ${langName} language expert. Return only valid JSON arrays.` },
           { role: "user", content: vocabPrompt },
         ],
       }),
@@ -169,7 +169,7 @@ Generate 10 questions. Make sure correct_index matches the position of the corre
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: "You are a ${langName} grammar expert. Return only valid JSON." },
+          { role: "system", content: `You are a ${langName} grammar expert. Return only valid JSON.` },
           { role: "user", content: grammarPrompt },
         ],
       }),
@@ -236,7 +236,7 @@ Generate 5 comprehension questions.`;
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: "You are a ${langName} language teacher. Return only valid JSON." },
+          { role: "system", content: `You are a ${langName} language teacher. Return only valid JSON.` },
           { role: "user", content: readingPrompt },
         ],
       }),
@@ -305,7 +305,7 @@ Generate 5 questions about the audio content.`;
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: "You are a ${langName} language teacher. Return only valid JSON." },
+          { role: "system", content: `You are a ${langName} language teacher. Return only valid JSON.` },
           { role: "user", content: listeningPrompt },
         ],
       }),
