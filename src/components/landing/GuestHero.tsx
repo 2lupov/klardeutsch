@@ -135,7 +135,7 @@ const GuestHero = () => {
       </div>
 
       {/* Steps */}
-      <div className={`max-w-7xl mx-auto px-4 md:px-6 ${step === 2 ? "h-[calc(100dvh-118px)] py-2" : "py-5 md:py-16"}`}>
+      <div className={`max-w-7xl mx-auto px-4 md:px-6 ${step === 2 ? "h-[calc(100dvh-146px)] py-2" : "py-5 md:py-16"}`}>
         <AnimatePresence mode="wait">
           {step === 1 && (
             <motion.section
