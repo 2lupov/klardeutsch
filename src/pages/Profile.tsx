@@ -9,7 +9,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { usePlatform } from "@/hooks/usePlatform";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { BookOpen, Brain, Flame, RotateCcw, TrendingUp, Calendar, LogOut, Camera, Pencil, Check, X, Coins, Trophy, ArrowLeft, ChevronRight, Award, Bell, Send, Unlink2, Users, WifiOff, Trash2, HardDrive, Globe, Lock, ShoppingBag, ExternalLink, Gift, Crown, Settings } from "lucide-react";
+import { BookOpen, Brain, Flame, RotateCcw, TrendingUp, Calendar, LogOut, Camera, Pencil, Check, X, Coins, Trophy, ArrowLeft, ChevronRight, Award, Bell, Send, Unlink2, Users, WifiOff, Trash2, HardDrive, Globe, Lock, ShoppingBag, ExternalLink, Gift, Crown, Settings, Link2, Mail } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useCoins } from "@/hooks/useCoins";
 import Achievements, { type AchievementStats } from "@/components/Achievements";
@@ -24,6 +24,7 @@ import { useDailyBonus } from "@/hooks/useDailyBonus";
 import GiftShelf from "@/components/gifts/GiftShelf";
 import GiftUnboxing from "@/components/gifts/GiftUnboxing";
 import FriendsList from "@/components/FriendsList";
+import AccountsScreen from "@/components/profile/AccountsScreen";
 
 interface ProgressRow {
   level: string;
@@ -43,7 +44,7 @@ interface ProfileData {
   nickname_changed_at: string | null;
 }
 
-type ProfileScreen = "main" | "achievements" | "activity" | "mistakes" | "leaderboard" | "notifications" | "referrals" | "offline" | "friends";
+type ProfileScreen = "main" | "achievements" | "activity" | "mistakes" | "leaderboard" | "notifications" | "referrals" | "offline" | "friends" | "accounts";
 
 const Profile = () => {
   const { user, session, signOut } = useAuth();
@@ -460,6 +461,19 @@ const Profile = () => {
         </div>
       </div>
     );
+  }
+
+  // Sub-screen: Connected accounts (Telegram / Google linking)
+  if (screen === "accounts") {
+    return <AccountsScreen
+      user={user}
+      session={session}
+      profile={profile}
+      onBack={() => setScreen("main")}
+      onProfileChange={(patch) => setProfile((p) => ({ ...p, ...patch }))}
+      lang={lang}
+      isMobile={isMobile}
+    />;
   }
 
   // Sub-screen: Notifications
@@ -955,6 +969,7 @@ const Profile = () => {
         <NavButton icon={<Bell className="w-4.5 h-4.5" />} label={t("notificationsTitle")} subtitle={profile.telegram_chat_id ? "Telegram ✅" : undefined} onClick={() => setScreen("notifications")} iconBg="bg-sky-500/15 text-sky-400" />
         <NavButton icon={<Users className="w-4.5 h-4.5" />} label={lang === "uk" ? "Друзі" : "Друзья"} badge={pendingFriendRequests > 0 ? pendingFriendRequests : undefined} onClick={() => setScreen("friends")} iconBg="bg-green-500/15 text-green-400" />
         <NavButton icon={<Send className="w-4.5 h-4.5" />} label={t("referralsTitle")} onClick={() => setScreen("referrals")} iconBg="bg-violet-500/15 text-violet-400" />
+        <NavButton icon={<Link2 className="w-4.5 h-4.5" />} label={lang === "uk" ? "Прив'язані акаунти" : "Привязанные аккаунты"} onClick={() => setScreen("accounts")} iconBg="bg-indigo-500/15 text-indigo-400" />
         <NavButton icon={<WifiOff className="w-4.5 h-4.5" />} label="Офлайн-режим" onClick={() => setScreen("offline")} iconBg="bg-muted text-muted-foreground" />
 
         {/* Shop banner for mobile */}
