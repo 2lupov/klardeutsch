@@ -201,7 +201,7 @@ const GuestHero = () => {
                       key={l.code}
                       disabled={disabled}
                       onClick={() => setTargetLang(l.code)}
-                      className={`relative rounded-2xl p-5 md:p-6 flex flex-col items-center gap-2 md:gap-3 transition-all border ${
+                      className={`relative rounded-2xl p-3 md:p-6 flex flex-col items-center gap-1.5 md:gap-3 transition-all border ${
                         disabled
                           ? "bg-[#1A1A3E]/40 border-white/5 opacity-50 cursor-not-allowed"
                           : active
