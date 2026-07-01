@@ -220,7 +220,7 @@ const ContentGenerator = ({ level }: { level: Level }) => {
           target_language: targetLang,
           sort_order: i,
         }));
-        const { error } = await supabase.from(\"vocab_cards\").insert(cards);
+        const { error } = await supabase.from("vocab_cards").insert(cards);
         if (error) throw error;
         saved += cards.length;
       }
@@ -236,7 +236,7 @@ const ContentGenerator = ({ level }: { level: Level }) => {
           target_language: targetLang,
           sort_order: i,
         }));
-        const { error } = await supabase.from(\"grammar_questions\").insert(qs);
+        const { error } = await supabase.from("grammar_questions").insert(qs);
         if (error) throw error;
         saved += qs.length;
       }
