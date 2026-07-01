@@ -43,7 +43,7 @@ interface ProfileData {
   nickname_changed_at: string | null;
 }
 
-type ProfileScreen = "main" | "achievements" | "activity" | "mistakes" | "leaderboard" | "notifications" | "referrals" | "offline" | "friends";
+type ProfileScreen = "main" | "achievements" | "activity" | "mistakes" | "leaderboard" | "notifications" | "referrals" | "offline" | "friends" | "accounts";
 
 const Profile = () => {
   const { user, session, signOut } = useAuth();
