@@ -168,7 +168,7 @@ const GuestHero = () => {
       </div>
 
       {/* Steps */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6 w-full flex-1 min-h-0 py-2 md:py-4 flex flex-col overflow-hidden">
+      <div className={`max-w-7xl mx-auto px-4 md:px-6 w-full flex-1 min-h-0 py-2 md:py-4 flex flex-col ${step === 3 ? "" : "overflow-hidden"}`}>
         <AnimatePresence mode="wait">
           {step === 1 && (
             <motion.section
