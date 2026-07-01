@@ -241,14 +241,14 @@ const GuestHero = () => {
                   <div className="absolute inset-0 bg-gradient-to-br from-[#1A1A3E] to-[#0F0F23] rounded-3xl border border-white/5 overflow-hidden shadow-2xl">
                     <motion.img
                       src={pandaExplorer}
-                      alt="Panda Explorer — ваш гід у світі німецької"
+                      alt={`Panda Explorer — гід у світі ${copy.nameAcc}`}
                       className="absolute inset-0 w-full h-full object-contain p-4"
                       animate={{ y: [0, -12, 0] }}
                       transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
                     />
                     <div className="absolute bottom-5 left-5 right-5 bg-black/50 backdrop-blur-xl p-4 md:p-5 rounded-2xl border border-white/10">
                       <p className="text-[#F5A623] font-bold italic text-sm md:text-base leading-snug" style={{ fontFamily: "Sora, sans-serif" }}>
-                        "Hallo! Я твій гід світом німецької. Разом ми пройдемо шлях від А1 до С1!"
+                        "{copy.mascotQuote}"
                       </p>
                     </div>
                   </div>
