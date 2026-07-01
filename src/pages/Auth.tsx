@@ -593,14 +593,6 @@ const Auth = () => {
           </div>
         )}
 
-        <button
-          onClick={() => setDemoMode(true)}
-          className="w-full mt-3 px-5 py-2.5 rounded-xl border border-primary/30 bg-primary/5 text-primary font-semibold text-sm transition-all hover:bg-primary/10 hover:border-primary/50 flex items-center justify-center gap-2 animate-auth-fade-up"
-          style={{ animationDelay: "0.8s" }}
-        >
-          <Sparkles className="w-4 h-4" />
-          {t("tryDemo")}
-        </button>
       </div>
     </div>
     </>
