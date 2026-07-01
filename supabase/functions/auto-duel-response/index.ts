@@ -60,15 +60,7 @@ Deno.serve(async (req) => {
       });
     }
 
-      .select("*")
-      .eq("id", challenge_id)
-      .single();
 
-    if (chErr || !challenge) {
-      return new Response(JSON.stringify({ error: "challenge not found" }), {
-        status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
 
     // Check if opponent is a demo user
     const { data: demo } = await supabase
