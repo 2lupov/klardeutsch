@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Coins, ShoppingBag, Check, Lock, Sparkles, GraduationCap, BookOpen, ChevronRight, ExternalLink, Euro } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import pandaExplorer from "@/assets/panda-explorer.png";
 
 interface ShopItem {
   id: string;
