@@ -66,20 +66,20 @@ const CourseCard = ({ course, lang, isPurchased, progress }: Props) => {
         )}
 
         {/* Play icon overlay */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-          <div className="w-12 h-12 rounded-full bg-primary/90 flex items-center justify-center shadow-xl">
-            <Play className="w-5 h-5 text-primary-foreground ml-0.5" />
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-background/40 backdrop-blur-[2px]">
+          <div className="w-14 h-14 rounded-full bg-accent flex items-center justify-center shadow-[0_10px_30px_-5px_hsl(var(--accent)/0.6)]">
+            <Play className="w-5 h-5 text-accent-foreground ml-0.5" fill="currentColor" />
           </div>
         </div>
 
         {/* Level badge */}
-        <div className={`absolute top-3 left-3 px-2.5 py-1 rounded-lg text-[11px] font-bold ${colorClass}`}>
+        <div className={`absolute top-3 left-3 px-2.5 py-1 rounded-lg text-[11px] font-bold backdrop-blur ${colorClass}`}>
           {difficulty}
         </div>
 
         {/* Featured badge */}
         {course.is_featured && (
-          <div className="absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-primary/90 text-primary-foreground text-[11px] font-bold">
+          <div className="absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-accent text-accent-foreground text-[11px] font-bold shadow-lg">
             ⭐ {lang === "uk" ? "Топ" : "Топ"}
           </div>
         )}
