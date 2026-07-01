@@ -13,16 +13,17 @@ import {
 import ReactMarkdown from "react-markdown";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "@/hooks/use-toast";
+import pandaExplorer from "@/assets/panda-explorer.png";
 
-/* ── Ambient Background ── */
+/* ── Cinematic Ambient Background ── */
 const AmbientBg = () => (
   <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
-    <div className="absolute w-[600px] h-[600px] rounded-full opacity-[0.07] blur-[120px]"
-      style={{ background: "hsl(var(--primary))", top: "-10%", right: "-10%", animation: "ambient-drift-1 20s ease-in-out infinite" }} />
-    <div className="absolute w-[500px] h-[500px] rounded-full opacity-[0.05] blur-[100px]"
-      style={{ background: "hsl(var(--primary))", bottom: "5%", left: "-8%", animation: "ambient-drift-2 25s ease-in-out infinite" }} />
-    <div className="absolute w-[300px] h-[300px] rounded-full opacity-[0.04] blur-[80px]"
-      style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(142 76% 36%))", top: "40%", left: "50%", animation: "ambient-drift-3 18s ease-in-out infinite" }} />
+    <div className="absolute w-[600px] h-[600px] rounded-full opacity-30 blur-[140px]"
+      style={{ background: "hsl(var(--primary))", top: "-15%", right: "-10%", animation: "ambient-drift-1 20s ease-in-out infinite" }} />
+    <div className="absolute w-[500px] h-[500px] rounded-full opacity-20 blur-[120px]"
+      style={{ background: "hsl(var(--accent))", bottom: "0%", left: "-8%", animation: "ambient-drift-2 25s ease-in-out infinite" }} />
+    <div className="absolute w-[320px] h-[320px] rounded-full opacity-15 blur-[100px]"
+      style={{ background: "hsl(var(--primary))", top: "45%", left: "50%", animation: "ambient-drift-3 18s ease-in-out infinite" }} />
   </div>
 );
 
