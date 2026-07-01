@@ -22,8 +22,10 @@ interface Props {
 function TelegramLinkWidget({ onAuth, disabled }: { onAuth: (u: any) => void; disabled?: boolean }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [loaded, setLoaded] = useState(false);
+  const canonicalTelegramDomain = "klar.academy";
   const host = window.location.hostname.replace(/^www\./, "");
-  const canUseWidget = host === "klar.academy" || host === "klardeutsch.org";
+  const canUseWidget = host === canonicalTelegramDomain;
+  const canonicalProfileUrl = `https://${canonicalTelegramDomain}/profile`;
 
   useEffect(() => {
     (window as any).onTelegramLinkAuth = (u: any) => onAuth(u);
@@ -45,9 +47,14 @@ function TelegramLinkWidget({ onAuth, disabled }: { onAuth: (u: any) => void; di
 
   if (!canUseWidget) {
     return (
-      <p className="text-[11px] text-muted-foreground text-center">
-        Прив'язати Telegram можна лише на klar.academy / klardeutsch.org
-      </p>
+      <a
+        href={canonicalProfileUrl}
+        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-90"
+        style={{ backgroundColor: "#54a9eb", color: "#fff" }}
+      >
+        <Send className="w-4 h-4" />
+        Відкрити на klar.academy
+      </a>
     );
   }
 
