@@ -416,7 +416,7 @@ const Assistant = () => {
       {/* Search */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="relative mb-6">
         <div className="relative group">
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/30 via-emerald-500/20 to-primary/30 rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/30 via-accent/25 to-primary/30 rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
           <div className="relative flex gap-2">
             <div className="flex-1 relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -468,7 +468,7 @@ const Assistant = () => {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3 pb-8">
           {/* Word Header */}
           <motion.div {...cardAnim(0)} className="rounded-2xl border border-border bg-card/90 backdrop-blur-sm overflow-hidden">
-            <div className="h-1 bg-gradient-to-r from-primary/60 via-emerald-500/40 to-primary/60" />
+            <div className="h-1 bg-gradient-to-r from-primary/60 via-accent/50 to-primary/60" />
             <div className="p-5 flex items-start gap-4">
               <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
                 <span className="text-2xl">📖</span>
