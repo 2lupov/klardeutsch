@@ -1,6 +1,7 @@
 import { useState } from "react";
 import BulkGenerator from "./BulkGenerator";
 import { supabase } from "@/integrations/supabase/client";
+import { useTargetLanguage } from "@/contexts/TargetLanguageContext";
 import { 
   Sparkles, Loader2, BookOpen, Languages, BookText, Headphones, 
   Save, X, Copy, Check, Upload, FileJson, Wand2, ArrowRight, Zap
@@ -123,6 +124,7 @@ const TOPIC_SUGGESTIONS: Record<Level, string[]> = {
 };
 
 const ContentGenerator = ({ level }: { level: Level }) => {
+  const { targetLang } = useTargetLanguage();
   const [mode, setMode] = useState<Mode>("prompt");
   const [topic, setTopic] = useState("");
   const [types, setTypes] = useState<ExerciseType[]>(["vocab", "grammar", "reading", "listening"]);
