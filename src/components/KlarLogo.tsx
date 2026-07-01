@@ -47,7 +47,7 @@ const KlarLogo = ({ progress, completed = false, size = "lg" }: KlarLogoProps) =
     { char: "R", width: 44 },
   ];
 
-  const totalWidth = letters.reduce((sum, l) => sum + l.width, 0) - 16; // tighter spacing
+  const totalWidth = letters.reduce((sum, l) => sum + l.width, 0) + 12; // relaxed spacing
   const height = 64;
 
   return (
