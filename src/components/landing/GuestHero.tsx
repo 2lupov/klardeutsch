@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, MoveRight, Check, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import pandaExplorer from "@/assets/panda-explorer.png";
+import pandaSad from "@/assets/panda-sad.png";
+
 import { useTargetLanguage } from "@/contexts/TargetLanguageContext";
 
 // Typewriter effect — the panda "speaks" the quote character by character
@@ -90,6 +92,7 @@ const GuestHero = () => {
   const { targetLang, setTargetLang, languages } = useTargetLanguage();
   const copy = LANG_COPY[targetLang] ?? LANG_COPY.de;
   const [step, setStep] = useState(1);
+  const [trialConfirm, setTrialConfirm] = useState(false);
 
   const goNext = () => setStep((s) => Math.min(TOTAL_STEPS, s + 1));
   const goBack = () => setStep((s) => Math.max(1, s - 1));
@@ -429,7 +432,7 @@ const GuestHero = () => {
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: COURSES.length * 0.08 }}
-                  onClick={() => navigate("/auth")}
+                  onClick={() => setTrialConfirm(true)}
                   className="flex lg:hidden group cursor-pointer rounded-2xl sm:rounded-[2rem] p-3 sm:p-7 md:p-8 flex-col items-center justify-center text-center gap-2 sm:gap-3 bg-[#1A1A3E] border border-dashed border-[#F5A623]/40 hover:border-[#F5A623] hover:bg-[#252554] transition-all hover:-translate-y-2"
                 >
                   <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-[#F5A623]/15 text-[#F5A623] flex items-center justify-center">
@@ -444,7 +447,7 @@ const GuestHero = () => {
               <div className="text-center pt-4 hidden lg:block">
 
                 <button
-                  onClick={() => navigate("/auth")}
+                  onClick={() => setTrialConfirm(true)}
                   className="text-[#F5F3EE]/60 hover:text-[#F5A623] text-sm font-semibold uppercase tracking-widest transition-colors"
                 >
                   ↓ Або спробуй платформу безкоштовно
@@ -455,7 +458,79 @@ const GuestHero = () => {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Trial confirmation modal — sad panda */}
+      <AnimatePresence>
+        {trialConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-[#0F0F23]/80 backdrop-blur-md"
+            onClick={() => setTrialConfirm(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.85, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 10 }}
+              transition={{ type: "spring", stiffness: 260, damping: 22 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-md bg-gradient-to-br from-[#1A1A3E] to-[#0F0F23] rounded-3xl border border-white/10 shadow-2xl shadow-[#6D5DFB]/30 p-6 md:p-8 text-center"
+              style={{ fontFamily: "Manrope, system-ui, sans-serif" }}
+            >
+              <motion.img
+                src={pandaSad}
+                alt="Sad panda"
+                width={200}
+                height={200}
+                loading="lazy"
+                initial={{ y: -8 }}
+                animate={{ y: [-8, 4, -8] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                className="w-40 h-40 md:w-48 md:h-48 mx-auto -mt-16 md:-mt-20 drop-shadow-2xl"
+              />
+
+              <h3
+                className="text-2xl md:text-3xl font-extrabold mt-2 text-white leading-tight"
+                style={{ fontFamily: "Sora, sans-serif" }}
+              >
+                Ти впевнений, що не хочеш{" "}
+                <span className="text-[#F5A623]">обрати курс</span>?
+              </h3>
+
+              <p className="text-[#F5F3EE]/70 text-sm md:text-base mt-3 leading-relaxed">
+                Перші <span className="text-[#6D5DFB] font-bold">5 днів</span> ти отримаєш його{" "}
+                <span className="text-[#F5A623] font-bold">безкоштовно</span>.
+                <br />
+                Оплачуєш тільки якщо сподобається.
+              </p>
+
+              <div className="flex flex-col gap-2.5 mt-6">
+                <button
+                  onClick={() => {
+                    setTrialConfirm(false);
+                    setStep(3);
+                  }}
+                  className="w-full bg-gradient-to-r from-[#6D5DFB] to-[#F5A623] text-white font-bold py-3.5 rounded-2xl text-sm md:text-base uppercase tracking-wider hover:scale-[1.02] active:scale-95 transition-transform shadow-lg shadow-[#6D5DFB]/40"
+                >
+                  Обрати курс — 5 днів безкоштовно
+                </button>
+                <button
+                  onClick={() => {
+                    setTrialConfirm(false);
+                    navigate("/auth");
+                  }}
+                  className="w-full text-[#F5F3EE]/50 hover:text-[#F5F3EE]/80 text-xs md:text-sm font-semibold uppercase tracking-widest py-2 transition-colors"
+                >
+                  Ні, дякую, просто платформа
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
+
   );
 };
 
