@@ -8,10 +8,39 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
+    // Require authentication
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const authedClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+    const { data: authData, error: authErr } = await authedClient.auth.getUser();
+    if (authErr || !authData?.user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const callerId = authData.user.id;
+
     const { lessonId, courseId, message, userId } = await req.json();
-    if (!lessonId || !message || !userId) {
+    if (!lessonId || !message) {
       return new Response(JSON.stringify({ error: "Missing fields" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
+
+    // Only the owner may query their own chat history
+    if (userId && userId !== callerId) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const effectiveUserId = callerId;
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -25,11 +54,11 @@ Deno.serve(async (req) => {
       .eq("id", lessonId)
       .single();
 
-    // Get recent chat history
+    // Get recent chat history for the authenticated caller only
     const { data: history } = await supabase
       .from("teacher_chat_messages")
       .select("sender, content")
-      .eq("user_id", userId)
+      .eq("user_id", effectiveUserId)
       .eq("lesson_id", lessonId)
       .order("created_at", { ascending: false })
       .limit(10);
