@@ -19,7 +19,27 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { challenger_id, opponent_name, challenger_score, opponent_score, challenge_type, level } = await req.json();
+    // Require authentication
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const authed = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+    const { data: userData, error: userErr } = await authed.auth.getUser();
+    if (userErr || !userData?.user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const callerId = userData.user.id;
+
+    const { challenger_id, challenger_score, opponent_score, challenge_type, level } = await req.json();
     if (!challenger_id) {
       return new Response(JSON.stringify({ error: "challenger_id required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -31,7 +51,31 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Check real user first, then demo user
+    // Verify a real challenge exists where caller is the opponent
+    const { data: challenge } = await supabase
+      .from("challenges")
+      .select("id")
+      .eq("challenger_id", challenger_id)
+      .eq("opponent_id", callerId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (!challenge) {
+      return new Response(JSON.stringify({ error: "No challenge found between users" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Look up caller's real display name (opponent from the challenger's perspective)
+    const { data: opponentProfile } = await supabase
+      .from("profiles")
+      .select("display_name")
+      .eq("user_id", callerId)
+      .maybeSingle();
+    const name = opponentProfile?.display_name || "Соперник";
+
+    // Look up challenger's Telegram chat
     let chatId: number | null = null;
 
     const { data: profile } = await supabase
@@ -61,7 +105,6 @@ Deno.serve(async (req) => {
     }
 
     const typeLabel = challenge_type === "vocab" ? "Словарный запас" : "Грамматика";
-    const name = opponent_name || "Соперник";
     const won = challenger_score > opponent_score;
     const draw = challenger_score === opponent_score;
     const resultEmoji = won ? "🏆" : draw ? "🤝" : "😔";
@@ -85,7 +128,7 @@ Deno.serve(async (req) => {
     });
   } catch (e) {
     console.error("notify-duel-result error:", e);
-    return new Response(JSON.stringify({ error: e.message }), {
+    return new Response(JSON.stringify({ error: (e as Error).message }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
