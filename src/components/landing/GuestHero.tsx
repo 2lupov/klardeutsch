@@ -11,18 +11,17 @@ function Typewriter({ text, className, delay = 300, speed = 32 }: { text: string
   useEffect(() => {
     setShown("");
     let i = 0;
-    const start = setTimeout(() => {
-      const id = setInterval(() => {
+    let intervalId: ReturnType<typeof setInterval> | null = null;
+    const timeoutId = setTimeout(() => {
+      intervalId = setInterval(() => {
         i++;
         setShown(text.slice(0, i));
-        if (i >= text.length) clearInterval(id);
+        if (i >= text.length && intervalId) clearInterval(intervalId);
       }, speed);
-      // cleanup interval on unmount
-      (start as any)._id = id;
     }, delay);
     return () => {
-      clearTimeout(start);
-      if ((start as any)._id) clearInterval((start as any)._id);
+      clearTimeout(timeoutId);
+      if (intervalId) clearInterval(intervalId);
     };
   }, [text, delay, speed]);
   const done = shown.length >= text.length;
