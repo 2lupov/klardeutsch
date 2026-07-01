@@ -175,7 +175,7 @@ const GuestHero = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.35 }}
-              className="space-y-5 md:space-y-8"
+              className="flex flex-col justify-center gap-3 md:gap-6 h-full"
             >
               <div className="text-center space-y-2 md:space-y-3">
                 <div className="inline-flex items-center gap-3 text-[#F5A623]">
