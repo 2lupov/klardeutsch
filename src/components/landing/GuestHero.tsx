@@ -5,6 +5,39 @@ import { useNavigate } from "react-router-dom";
 import pandaExplorer from "@/assets/panda-explorer.png";
 import { useTargetLanguage } from "@/contexts/TargetLanguageContext";
 
+// Typewriter effect — the panda "speaks" the quote character by character
+function Typewriter({ text, className, delay = 300, speed = 32 }: { text: string; className?: string; delay?: number; speed?: number }) {
+  const [shown, setShown] = useState("");
+  useEffect(() => {
+    setShown("");
+    let i = 0;
+    const start = setTimeout(() => {
+      const id = setInterval(() => {
+        i++;
+        setShown(text.slice(0, i));
+        if (i >= text.length) clearInterval(id);
+      }, speed);
+      // cleanup interval on unmount
+      (start as any)._id = id;
+    }, delay);
+    return () => {
+      clearTimeout(start);
+      if ((start as any)._id) clearInterval((start as any)._id);
+    };
+  }, [text, delay, speed]);
+  const done = shown.length >= text.length;
+  return (
+    <span className={className}>
+      "{shown}"
+      <span
+        className="inline-block w-[2px] ml-0.5 align-baseline bg-current"
+        style={{ height: "0.9em", opacity: done ? 0 : 1, animation: "klar-caret 0.8s steps(1) infinite" }}
+      />
+      <style>{`@keyframes klar-caret { 50% { opacity: 0 } }`}</style>
+    </span>
+  );
+}
+
 // ============================================================
 // Klar.academy — Step-by-step guest landing
 // Palette: #0F0F23 / #1A1A3E / #6D5DFB / #F5A623
@@ -243,14 +276,22 @@ const GuestHero = () => {
                   {/* Speech bubble from panda */}
                   <motion.div
                     key={copy.mascotQuote}
-                    initial={{ opacity: 0, scale: 0.7, y: 8 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    transition={{ delay: 0.25, type: "spring", stiffness: 260, damping: 20 }}
-                    className="absolute top-2 right-1 max-w-[62%] bg-white text-[#0F0F23] px-3 py-2 rounded-2xl rounded-br-sm shadow-[0_10px_30px_-8px_rgba(0,0,0,0.5)] border border-[#F5A623]/40"
+                    initial={{ opacity: 0, scale: 0.6, y: 10, rotate: -4 }}
+                    animate={{
+                      opacity: 1,
+                      scale: [0.6, 1.08, 0.98, 1.02, 1],
+                      y: 0,
+                      rotate: [-4, 2, -1, 0],
+                    }}
+                    transition={{ delay: 0.2, duration: 0.65, times: [0, 0.35, 0.6, 0.85, 1], ease: "easeOut" }}
+                    className="absolute top-2 right-1 max-w-[62%] bg-white text-[#0F0F23] px-3 py-2 rounded-2xl rounded-br-sm shadow-[0_10px_30px_-8px_rgba(0,0,0,0.5)] border border-[#F5A623]/40 origin-bottom-right"
                   >
-                    <p className="font-bold italic text-[11px] leading-snug" style={{ fontFamily: "Sora, sans-serif" }}>
-                      "{copy.mascotQuote}"
-                    </p>
+                    <Typewriter
+                      text={copy.mascotQuote}
+                      delay={450}
+                      speed={28}
+                      className="font-bold italic text-[11px] leading-snug block"
+                    />
                     {/* Bubble tail pointing to panda */}
                     <div className="absolute -bottom-1.5 right-6 w-3 h-3 bg-white border-b border-r border-[#F5A623]/40 rotate-45" />
                   </motion.div>
@@ -300,14 +341,23 @@ const GuestHero = () => {
                       transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
                     />
                     <motion.div
-                      initial={{ opacity: 0, scale: 0.8, y: 10 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      transition={{ delay: 0.3, type: "spring", stiffness: 240, damping: 20 }}
-                      className="absolute top-6 right-6 max-w-[55%] bg-white text-[#0F0F23] p-4 rounded-2xl rounded-br-sm shadow-2xl border border-[#F5A623]/40"
+                      key={copy.mascotQuote}
+                      initial={{ opacity: 0, scale: 0.6, y: 12, rotate: -5 }}
+                      animate={{
+                        opacity: 1,
+                        scale: [0.6, 1.08, 0.97, 1.02, 1],
+                        y: 0,
+                        rotate: [-5, 3, -1, 0],
+                      }}
+                      transition={{ delay: 0.3, duration: 0.7, times: [0, 0.35, 0.6, 0.85, 1], ease: "easeOut" }}
+                      className="absolute top-6 right-6 max-w-[55%] bg-white text-[#0F0F23] p-4 rounded-2xl rounded-br-sm shadow-2xl border border-[#F5A623]/40 origin-bottom-right"
                     >
-                      <p className="text-[#0F0F23] font-bold italic text-base leading-snug" style={{ fontFamily: "Sora, sans-serif" }}>
-                        "{copy.mascotQuote}"
-                      </p>
+                      <Typewriter
+                        text={copy.mascotQuote}
+                        delay={550}
+                        speed={32}
+                        className="text-[#0F0F23] font-bold italic text-base leading-snug block"
+                      />
                       <div className="absolute -bottom-2 right-8 w-4 h-4 bg-white border-b border-r border-[#F5A623]/40 rotate-45" />
                     </motion.div>
 
