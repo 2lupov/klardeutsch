@@ -213,7 +213,7 @@ const GuestHero = () => {
               className="grid lg:grid-cols-2 gap-10 lg:gap-12 items-center"
             >
               <div className="space-y-7 md:space-y-8 relative z-10">
-                <div>
+                <div className="relative">
                   <div className="flex items-center gap-3 text-[#F5A623] mb-5">
                     <div className="h-px w-10 bg-[#F5A623]" />
                     <span className="uppercase tracking-[0.25em] font-bold text-[11px] md:text-xs">{copy.heroKicker}</span>
@@ -222,18 +222,27 @@ const GuestHero = () => {
                     {copy.name} мова <br className="hidden sm:block" />
                     <span className="text-[#6D5DFB]">без кордонів.</span>
                   </h1>
+                  {/* Floating CTA in the whitespace between the wrapped headline lines */}
+                  <button
+                    onClick={goNext}
+                    className="hidden lg:flex absolute right-0 top-[38%] bg-[#6D5DFB] hover:bg-[#5a4ae0] text-white px-7 py-4 rounded-2xl font-bold text-base transition-all shadow-[0_10px_40px_-8px_rgba(109,93,251,0.6)] items-center gap-3 group active:scale-95"
+                  >
+                    Показати курси
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  </button>
                 </div>
                 <p className="text-lg md:text-xl text-[#F5F3EE]/60 max-w-lg leading-relaxed">
                   Від початківця до вільного спілкування. Авторська методика, що знімає мовний бар'єр за 3 місяці.
                 </p>
                 <button
                   onClick={goNext}
-                  className="bg-[#6D5DFB] hover:bg-[#5a4ae0] text-white px-8 md:px-10 py-4 md:py-5 rounded-2xl font-bold text-base md:text-lg transition-all shadow-[0_10px_40px_-8px_rgba(109,93,251,0.6)] flex items-center gap-3 group active:scale-95"
+                  className="lg:hidden bg-[#6D5DFB] hover:bg-[#5a4ae0] text-white px-8 py-4 rounded-2xl font-bold text-base transition-all shadow-[0_10px_40px_-8px_rgba(109,93,251,0.6)] flex items-center gap-3 group active:scale-95"
                 >
                   Показати курси
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
+
 
               <div className="relative flex justify-center items-center">
                 <div className="absolute w-[110%] h-[110%] bg-[#6D5DFB]/15 rounded-full blur-3xl" />
