@@ -142,23 +142,26 @@ const PremiumPaywall = ({ open, onClose, type, highlightPlan }: Props) => {
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="relative p-6 pb-4 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent">
-            <button onClick={onClose} className="absolute top-3 right-3 text-muted-foreground hover:text-foreground">
-              <X className="w-5 h-5" />
+          <div className="relative p-6 pb-5 overflow-hidden bg-gradient-to-br from-primary/25 via-card to-accent/20">
+            <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-accent/30 blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-14 -left-10 w-40 h-40 rounded-full bg-primary/30 blur-3xl pointer-events-none" />
+            <button onClick={onClose} className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-background/40 backdrop-blur flex items-center justify-center text-muted-foreground hover:text-foreground transition">
+              <X className="w-4 h-4" />
             </button>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
-                <Crown className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <h2 className="text-xl font-display font-bold text-foreground">KLAR Premium</h2>
-                <p className="text-xs text-muted-foreground">
+            <div className="relative flex items-center gap-4">
+              <img src={pandaExplorer} alt="" className="w-20 h-20 object-contain drop-shadow-[0_10px_30px_hsl(var(--accent)/0.4)] animate-float shrink-0" />
+              <div className="min-w-0">
+                <span className="inline-block text-[10px] font-bold uppercase tracking-[0.2em] text-accent mb-1">
+                  {lang === "uk" ? "Преміум" : "Премиум"}
+                </span>
+                <h2 className="text-2xl font-display font-bold text-foreground leading-tight">KLAR Premium</h2>
+                <p className="text-xs text-muted-foreground mt-1">
                   {lang === "uk" ? "Обери план, який підходить тобі" : "Выбери план, который подходит тебе"}
                 </p>
               </div>
             </div>
             {type && (
-              <p className="text-sm text-primary font-medium">
+              <p className="relative mt-3 text-sm text-accent font-medium">
                 {limitMessages[type]?.[lang] ?? ""}
               </p>
             )}
