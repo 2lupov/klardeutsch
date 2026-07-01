@@ -462,6 +462,19 @@ const Profile = () => {
     );
   }
 
+  // Sub-screen: Connected accounts (Telegram / Google linking)
+  if (screen === "accounts") {
+    return <AccountsScreen
+      user={user}
+      session={session}
+      profile={profile}
+      onBack={() => setScreen("main")}
+      onProfileChange={(patch) => setProfile((p) => ({ ...p, ...patch }))}
+      lang={lang}
+      isMobile={isMobile}
+    />;
+  }
+
   // Sub-screen: Notifications
   if (screen === "notifications") {
     const botUsername = "klar_deutsch_bot";
