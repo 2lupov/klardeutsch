@@ -448,7 +448,7 @@ const GuestHero = () => {
               <div className="text-center pt-4 hidden lg:block">
 
                 <button
-                  onClick={() => setTrialConfirm(true)}
+                  onClick={() => { setTrialStage("ask"); setTrialConfirm(true); }}
                   className="text-[#F5F3EE]/60 hover:text-[#F5A623] text-sm font-semibold uppercase tracking-widest transition-colors"
                 >
                   ↓ Або спробуй платформу безкоштовно
