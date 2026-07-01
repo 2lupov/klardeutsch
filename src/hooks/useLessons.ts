@@ -3,7 +3,11 @@ import type { VocabCard, GrammarQuestion, ReadingText, ListeningText, CategoryDa
 
 type Category = "vocabulary" | "grammar" | "reading" | "listening";
 
-export async function fetchTopics(level: Level, category: Category): Promise<string[]> {
+export async function fetchTopics(
+  level: Level,
+  category: Category,
+  targetLanguage: string = "de"
+): Promise<string[]> {
   let topics: string[] = [];
 
   switch (category) {
@@ -11,7 +15,8 @@ export async function fetchTopics(level: Level, category: Category): Promise<str
       const { data } = await supabase
         .from("vocab_cards")
         .select("topic")
-        .eq("level", level);
+        .eq("level", level)
+        .eq("target_language", targetLanguage);
       topics = [...new Set((data ?? []).map((d: any) => d.topic as string))];
       break;
     }
@@ -19,11 +24,13 @@ export async function fetchTopics(level: Level, category: Category): Promise<str
       const { data } = await supabase
         .from("grammar_lessons")
         .select("topic")
-        .eq("level", level);
+        .eq("level", level)
+        .eq("target_language", targetLanguage);
       const { data: qData } = await supabase
         .from("grammar_questions")
         .select("topic")
-        .eq("level", level);
+        .eq("level", level)
+        .eq("target_language", targetLanguage);
       const all = [...(data ?? []), ...(qData ?? [])].map((d: any) => d.topic as string);
       topics = [...new Set(all)];
       break;
@@ -32,7 +39,8 @@ export async function fetchTopics(level: Level, category: Category): Promise<str
       const { data } = await supabase
         .from("reading_texts")
         .select("topic")
-        .eq("level", level);
+        .eq("level", level)
+        .eq("target_language", targetLanguage);
       topics = [...new Set((data ?? []).map((d: any) => d.topic as string))];
       break;
     }
@@ -40,7 +48,8 @@ export async function fetchTopics(level: Level, category: Category): Promise<str
       const { data } = await supabase
         .from("listening_texts")
         .select("topic")
-        .eq("level", level);
+        .eq("level", level)
+        .eq("target_language", targetLanguage);
       topics = [...new Set((data ?? []).map((d: any) => d.topic as string))];
       break;
     }
@@ -49,12 +58,17 @@ export async function fetchTopics(level: Level, category: Category): Promise<str
   return topics.length > 0 ? topics : ["Allgemein"];
 }
 
-export async function fetchLevelData(level: Level, topic?: string): Promise<CategoryData> {
-  let vocabQuery = supabase.from("vocab_cards").select("*").eq("level", level);
-  let grammarQuery = supabase.from("grammar_lessons").select("*").eq("level", level);
-  let questionsQuery = supabase.from("grammar_questions").select("*").eq("level", level);
-  let readingQuery = supabase.from("reading_texts").select("*, reading_questions(*)").eq("level", level);
-  let listeningQuery = supabase.from("listening_texts").select("*, listening_questions(*), listening_dictations(*)").eq("level", level);
+
+export async function fetchLevelData(
+  level: Level,
+  topic?: string,
+  targetLanguage: string = "de"
+): Promise<CategoryData> {
+  let vocabQuery = supabase.from("vocab_cards").select("*").eq("level", level).eq("target_language", targetLanguage);
+  let grammarQuery = supabase.from("grammar_lessons").select("*").eq("level", level).eq("target_language", targetLanguage);
+  let questionsQuery = supabase.from("grammar_questions").select("*").eq("level", level).eq("target_language", targetLanguage);
+  let readingQuery = supabase.from("reading_texts").select("*, reading_questions(*)").eq("level", level).eq("target_language", targetLanguage);
+  let listeningQuery = supabase.from("listening_texts").select("*, listening_questions(*), listening_dictations(*)").eq("level", level).eq("target_language", targetLanguage);
 
   if (topic) {
     vocabQuery = vocabQuery.eq("topic", topic);
