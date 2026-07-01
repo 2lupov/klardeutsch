@@ -100,7 +100,9 @@ const GuestHero = () => {
 
   return (
     <div
-      className="w-full bg-[#0F0F23] text-[#F5F3EE] font-[Manrope,sans-serif] h-[100dvh] overflow-hidden flex flex-col"
+      className={`w-full bg-[#0F0F23] text-[#F5F3EE] font-[Manrope,sans-serif] flex flex-col ${
+        step === 3 ? "min-h-[100dvh]" : "h-[100dvh] overflow-hidden"
+      }`}
       style={{ fontFamily: "Manrope, system-ui, sans-serif" }}
     >
 
@@ -166,7 +168,7 @@ const GuestHero = () => {
       </div>
 
       {/* Steps */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6 w-full flex-1 min-h-0 py-2 md:py-4 flex flex-col overflow-hidden">
+      <div className={`max-w-7xl mx-auto px-4 md:px-6 w-full flex-1 min-h-0 py-2 md:py-4 flex flex-col ${step === 3 ? "" : "overflow-hidden"}`}>
         <AnimatePresence mode="wait">
           {step === 1 && (
             <motion.section
