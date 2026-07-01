@@ -87,7 +87,7 @@ serve(async (req) => {
     };
 
     // Generate vocabulary (15 words)
-    const vocabPrompt = `Generate 15 German vocabulary words for level ${level} on topic "${topicName}".
+    const vocabPrompt = `Generate 15 ${langName} vocabulary words for level ${level} on topic "${topicName}".
 Return ONLY a valid JSON array, no other text:
 [
   {
@@ -113,7 +113,7 @@ Requirements:
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: "You are a German language expert. Return only valid JSON arrays." },
+          { role: "system", content: "You are a ${langName} language expert. Return only valid JSON arrays." },
           { role: "user", content: vocabPrompt },
         ],
       }),
@@ -145,7 +145,7 @@ Requirements:
     }
 
     // Generate grammar lesson with exercises
-    const grammarPrompt = `Create a grammar lesson for German level ${level} related to topic "${topicName}".
+    const grammarPrompt = `Create a grammar lesson for ${langName} level ${level} related to topic "${topicName}".
 Return ONLY valid JSON:
 {
   "theory": "Markdown formatted theory explaining one grammar concept relevant to this topic. Include tables, examples, and rules.",
@@ -169,7 +169,7 @@ Generate 10 questions. Make sure correct_index matches the position of the corre
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: "You are a German grammar expert. Return only valid JSON." },
+          { role: "system", content: "You are a ${langName} grammar expert. Return only valid JSON." },
           { role: "user", content: grammarPrompt },
         ],
       }),
@@ -211,14 +211,14 @@ Generate 10 questions. Make sure correct_index matches the position of the corre
     }
 
     // Generate reading text with questions
-    const readingPrompt = `Create a reading text for German level ${level} about "${topicName}".
+    const readingPrompt = `Create a reading text for ${langName} level ${level} about "${topicName}".
 Return ONLY valid JSON:
 {
-  "title": "Title in German",
-  "text": "German text (150-300 words for ${level})",
+  "title": "Title in ${langName}",
+  "text": "${langName} text (150-300 words for ${level})",
   "questions": [
     {
-      "question": "Question about the text in German",
+      "question": "Question about the text in ${langName}",
       "options": ["Option A", "Option B", "Option C", "Option D"],
       "correct_index": 0,
       "explanation": "Explanation why this is correct"
@@ -236,7 +236,7 @@ Generate 5 comprehension questions.`;
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: "You are a German language teacher. Return only valid JSON." },
+          { role: "system", content: "You are a ${langName} language teacher. Return only valid JSON." },
           { role: "user", content: readingPrompt },
         ],
       }),
@@ -280,14 +280,14 @@ Generate 5 comprehension questions.`;
     }
 
     // Generate listening text with questions
-    const listeningPrompt = `Create a listening exercise for German level ${level} about "${topicName}".
+    const listeningPrompt = `Create a listening exercise for ${langName} level ${level} about "${topicName}".
 Return ONLY valid JSON:
 {
-  "title": "Title in German",
-  "text": "German text suitable for listening (100-200 words for ${level}). This will be converted to audio.",
+  "title": "Title in ${langName}",
+  "text": "${langName} text suitable for listening (100-200 words for ${level}). This will be converted to audio.",
   "questions": [
     {
-      "question": "Comprehension question in German",
+      "question": "Comprehension question in ${langName}",
       "options": ["Option A", "Option B", "Option C", "Option D"],
       "correct_index": 0,
       "explanation": "Why this answer is correct"
@@ -305,7 +305,7 @@ Generate 5 questions about the audio content.`;
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: "You are a German language teacher. Return only valid JSON." },
+          { role: "system", content: "You are a ${langName} language teacher. Return only valid JSON." },
           { role: "user", content: listeningPrompt },
         ],
       }),
