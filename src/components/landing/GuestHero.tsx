@@ -69,12 +69,13 @@ const GuestHero = () => {
   return (
     <div
       className={`w-full bg-[#0F0F23] text-[#F5F3EE] font-[Manrope,sans-serif] -mt-4 ${
-        step === 2 ? "h-[100dvh] overflow-hidden" : "min-h-[100dvh]"
+        step === 2 ? "h-[100dvh] overflow-hidden flex flex-col" : "min-h-[100dvh]"
       }`}
       style={{ fontFamily: "Manrope, system-ui, sans-serif" }}
     >
+
       {/* Promo banner */}
-      <div className="sticky top-0 z-20 w-full bg-gradient-to-r from-[#6D5DFB] via-[#4F46E5] to-[#F5A623] py-1.5 md:py-2.5 pl-16 pr-16 md:pl-4 md:pr-4 shadow-2xl shadow-[#6D5DFB]/20">
+      <div className="sticky top-0 z-20 shrink-0 w-full bg-gradient-to-r from-[#6D5DFB] via-[#4F46E5] to-[#F5A623] py-1.5 md:py-2.5 pl-16 pr-16 md:pl-4 md:pr-4 shadow-2xl shadow-[#6D5DFB]/20">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-center md:justify-between gap-1 md:gap-3 text-center md:text-left">
           <div className="flex items-center justify-center gap-1.5 md:gap-3 min-w-0 flex-wrap">
             <span className="bg-white/20 backdrop-blur-md px-2.5 md:px-3 py-0.5 md:py-1 rounded-full text-[9px] md:text-[10px] font-bold uppercase tracking-widest whitespace-nowrap">
@@ -108,7 +109,7 @@ const GuestHero = () => {
 
 
       {/* Stepper header */}
-      <div className={`max-w-3xl mx-auto px-4 md:px-6 ${step === 2 ? "pt-4" : "pt-6 md:pt-12"}`}>
+      <div className={`max-w-3xl mx-auto px-4 md:px-6 shrink-0 w-full ${step === 2 ? "pt-4" : "pt-6 md:pt-12"}`}>
         <div className="flex items-center justify-between mb-1.5 md:mb-2">
           <button
             onClick={goBack}
@@ -135,7 +136,7 @@ const GuestHero = () => {
       </div>
 
       {/* Steps */}
-      <div className={`max-w-7xl mx-auto px-4 md:px-6 ${step === 2 ? "h-[calc(100dvh-146px)] py-2" : "py-5 md:py-16"}`}>
+      <div className={`max-w-7xl mx-auto px-4 md:px-6 w-full ${step === 2 ? "flex-1 min-h-0 py-2 flex flex-col" : "py-5 md:py-16"}`}>
         <AnimatePresence mode="wait">
           {step === 1 && (
             <motion.section
@@ -215,7 +216,7 @@ const GuestHero = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.35 }}
-              className="lg:grid lg:grid-cols-2 lg:gap-12 lg:items-center flex flex-col h-full md:min-h-[calc(100dvh-180px)]"
+              className="lg:grid lg:grid-cols-2 lg:gap-12 lg:items-center flex flex-col flex-1 min-h-0 md:min-h-[calc(100dvh-180px)]"
             >
               {/* MOBILE layout */}
               <div className="lg:hidden flex flex-col h-full min-h-0">
