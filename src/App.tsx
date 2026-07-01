@@ -49,6 +49,7 @@ import StudentHomework from "./pages/StudentHomework";
 import StudentView from "./pages/StudentView";
 import TeacherStudentDashboard from "./pages/TeacherStudentDashboard";
 import NotFound from "./pages/NotFound";
+import PaymentResult from "./pages/PaymentResult";
 
 const queryClient = new QueryClient();
 
