@@ -21,19 +21,40 @@ const PremiumPaywall = ({ open, onClose, type, highlightPlan }: Props) => {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [selectedInterval, setSelectedInterval] = useState<"monthly" | "yearly">("monthly");
 
+  const PRICES_UAH: Record<string, { monthly: number; yearly: number }> = {
+    school: { monthly: 219, yearly: 1749 },
+    assistant: { monthly: 269, yearly: 2199 },
+    allinone: { monthly: 449, yearly: 3749 },
+  };
+  const PLAN_NAMES: Record<string, string> = {
+    school: "KLAR Школа",
+    assistant: "KLAR Асистент",
+    allinone: "KLAR All-in-One",
+  };
+
   const handleCheckout = async (plan: string) => {
-    if (!session?.access_token) return;
     setLoadingPlan(plan);
     try {
-      const { data, error } = await supabase.functions.invoke("create-checkout", {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-        body: { interval: selectedInterval, plan },
+      const uah = PRICES_UAH[plan]?.[selectedInterval] ?? 0;
+      const amount = Math.round(uah * 100); // копійки
+      const periodLabel = selectedInterval === "monthly" ? (lang === "uk" ? "місяць" : "месяц") : (lang === "uk" ? "рік" : "год");
+      const description = `${PLAN_NAMES[plan]} — ${periodLabel}`;
+
+      const { data, error } = await supabase.functions.invoke("mono-create-invoice", {
+        headers: session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {},
+        body: {
+          amount,
+          ccy: 980,
+          paymentType: "debit",
+          description,
+          reference: `sub_${plan}_${selectedInterval}_${Date.now()}`,
+        },
       });
       if (error) throw error;
-      if (data?.url) {
-        window.location.href = data.url;
+      if (data?.pageUrl) {
+        window.location.href = data.pageUrl;
       } else {
-        throw new Error("No checkout URL returned");
+        throw new Error(data?.error || "No payment URL returned");
       }
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
@@ -241,8 +262,8 @@ const PremiumPaywall = ({ open, onClose, type, highlightPlan }: Props) => {
 
           <p className="text-[10px] text-center text-muted-foreground pb-4 px-6">
             {lang === "uk"
-              ? "Скасувати можна будь-коли. Оплата через Stripe."
-              : "Отменить можно в любое время. Оплата через Stripe."}
+              ? "Оплата через Monobank. Скасувати можна будь-коли."
+              : "Оплата через Monobank. Отменить можно в любое время."}
           </p>
         </motion.div>
       </motion.div>
