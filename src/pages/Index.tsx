@@ -267,15 +267,12 @@ const Index = () => {
         )}
 
         {screen === "levels" && user && (
-          <>
-            <div id="levels-section" className="w-full">
-              <LevelSelector onSelect={handleLevelSelect} />
-            </div>
-            <div className={`w-full mt-3 ${isMobile ? "max-w-md" : "max-w-2xl"} mx-auto space-y-3`}>
-              <SRSWidget />
-              <DailyChallenge />
-            </div>
-          </>
+          <div className="w-full">
+            <HomeDashboard
+              displayName={displayName}
+              onSelectLevel={handleLevelSelect}
+            />
+          </div>
         )}
         {screen === "categories" && (
           <CategorySelector level={level} onSelect={handleCategorySelect} onBack={() => setScreen("levels")} />
