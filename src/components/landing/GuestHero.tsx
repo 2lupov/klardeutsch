@@ -214,8 +214,8 @@ const GuestHero = () => {
                           <Check className="w-3.5 h-3.5" strokeWidth={3} />
                         </div>
                       )}
-                      <span className="text-4xl md:text-5xl leading-none">{l.flag_emoji}</span>
-                      <span className={`font-bold text-sm md:text-base ${active ? "text-white" : ""}`} style={{ fontFamily: "Sora, sans-serif" }}>
+                      <span className="text-3xl md:text-5xl leading-none">{l.flag_emoji}</span>
+                      <span className={`font-bold text-xs md:text-base ${active ? "text-white" : ""}`} style={{ fontFamily: "Sora, sans-serif" }}>
                         {l.name_uk}
                       </span>
                       {disabled && (
