@@ -52,11 +52,11 @@ interface WordData {
 }
 
 const LEVEL_COLORS: Record<string, string> = {
-  A1: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
-  A2: "bg-green-500/15 text-green-400 border-green-500/30",
-  B1: "bg-blue-500/15 text-blue-400 border-blue-500/30",
-  B2: "bg-indigo-500/15 text-indigo-400 border-indigo-500/30",
-  C1: "bg-purple-500/15 text-purple-400 border-purple-500/30",
+  A1: "bg-primary/15 text-primary border-primary/30",
+  A2: "bg-primary/20 text-primary border-primary/40",
+  B1: "bg-accent/15 text-accent border-accent/30",
+  B2: "bg-accent/20 text-accent border-accent/40",
+  C1: "bg-accent/25 text-accent border-accent/50",
 };
 
 const ARTICLE_COLORS: Record<string, string> = {
