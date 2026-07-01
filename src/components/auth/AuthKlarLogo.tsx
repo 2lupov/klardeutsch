@@ -1,4 +1,5 @@
-import { useMemo } from "react";
+import pandaReading from "@/assets/panda-reading.png";
+
 
 interface AuthKlarLogoProps {
   /** 0–1 fill progress */
@@ -18,7 +19,16 @@ const AuthKlarLogo = ({ progress }: AuthKlarLogoProps) => {
 
         return (
           <span key={letter} className="relative" style={{ lineHeight: 1 }}>
-            {/* Ghost / outline */}
+            {/* Panda perched on top of the L */}
+            {letter === "L" && (
+              <img
+                src={pandaReading}
+                alt=""
+                aria-hidden="true"
+                className="absolute left-1/2 -translate-x-1/2 pointer-events-none select-none z-30 drop-shadow-[0_4px_10px_rgba(0,0,0,0.35)]"
+                style={{ top: "-1.9rem", width: "2.2rem", height: "2.2rem", objectFit: "contain" }}
+              />
+            )}
             <span
               className="relative z-10 transition-all duration-500"
               style={{

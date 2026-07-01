@@ -127,7 +127,8 @@ const Auth = () => {
   const navigate = useNavigate();
   const logoRef = useRef<HTMLDivElement>(null);
   const { user, loading: authLoading } = useAuth();
-  const { t } = useLanguage();
+  const { t, setLang } = useLanguage();
+  useEffect(() => { setLang("uk"); }, [setLang]);
   const { isTelegram } = usePlatform();
 
   // Calculate logo fill progress based on form completion
@@ -423,10 +424,7 @@ const Auth = () => {
       >
       <div className="w-full max-w-sm">
         <div className="text-center mb-5 animate-auth-fade-up" style={{ animationDelay: "0.1s" }}>
-          <div className="flex justify-end mb-1">
-            <LanguageSwitcher />
-          </div>
-          <div ref={logoRef} className={showFireworks ? "animate-klar-explode" : ""}>
+          <div ref={logoRef} className={`pt-8 ${showFireworks ? "animate-klar-explode" : ""}`}>
             <AuthKlarLogo progress={showFireworks ? 1 : getProgress()} />
           </div>
           <p className="text-muted-foreground text-sm mt-1 animate-auth-fade-up" style={{ animationDelay: "0.7s" }}>
@@ -529,15 +527,8 @@ const Auth = () => {
             </button>
           )}
 
-          {isLogin && !forgotMode && (
-            <button
-              type="button"
-              onClick={() => { setStudentMode(!studentMode); setError(""); setMessage(""); }}
-              className="text-xs text-primary/80 hover:text-primary transition-colors"
-            >
-              {studentMode ? "← Войти по email" : "Я ученик — войти по никнейму"}
-            </button>
-          )}
+
+
 
           <button
             type="button"
