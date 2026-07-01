@@ -71,12 +71,15 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { level, topic, type } = await req.json();
+    const { level, topic, type, targetLanguage: rawTL } = await req.json();
+    const targetLanguage = (rawTL || "de").toString().toLowerCase();
     if (!level || !topic || !type) {
       return new Response(JSON.stringify({ error: "level, topic, type required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    const LANG_NAME: Record<string, string> = { de: "German", en: "English", pl: "Polish", es: "Spanish", fr: "French" };
+    const langName = LANG_NAME[targetLanguage] || "German";
 
     let prompt = "";
     let insertCount = 0;
