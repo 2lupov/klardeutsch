@@ -1,99 +1,92 @@
-## Цель
 
-Переработать структуру доступа: гость → free-аккаунт → premium. Сайт открывается без логина, а доступ к функциям закрывается по уровням.
+# KLAR → мультимовна школа
 
-## 3 уровня доступа
+Ціль першої ітерації: підняти **англійську** як другу мову end-to-end (лендінг → онбординг → словник → уроки → ігри), не ламаючи існуючу німецьку. Одночасно закласти таку структуру БД і роутінгу, щоб додати польську/іспанську/французьку було чистою data-роботою, а не рефакторингом.
 
-**🌐 Гость (без аккаунта)**
-- Главная (`/`) с hero + сразу под ним уровни A1–C1 (просмотр)
-- Просмотр категорий и тем
-- 1–2 пробных упражнения в каждой категории (карточки, чтение, аудирование) — без сохранения
-- 1 мини-игра в день (по IP/localStorage)
-- Словарь (поиск/просмотр) — без сохранения слов
-- CTA "Войти, чтобы сохранить прогресс" после прохождения пробного
+## Архітектурні рішення
 
-**👤 Free (с аккаунтом)**
-- Всё из гостя + сохранение прогресса, XP, монеты, стрик
-- Сохранённые слова + SRS повторение
-- Чат, друзья, дуэли, лидерборд, профиль
-- Дневные лимиты: 3 урока / 1 игра / 3 AI запроса (как сейчас)
-- Достижения, daily challenge
+- **Один бренд KLAR**, розділи за URL-префіксом: `/de/*`, `/en/*`, `/pl/*`, `/es/*`, `/fr/*`. Німецький контент лишається доступним без префікса для зворотної сумісності + канонічно доступний як `/de/*`.
+- Нова таблиця **`languages`** (код, назва, прапор, порядок, is_active) — єдине джерело правди про підтримувані мови.
+- У всі контентні таблиці (`vocab_cards`, `topics`, `reading_texts`, `listening_texts`, `grammar_lessons`, `grammar_questions`, `courses`, `course_modules`, `course_lessons`, `cafe_scenarios`, `placement_questions`, `dictations` і т.д.) додається колонка `target_language TEXT NOT NULL DEFAULT 'de'`. Індекс по `(target_language)`.
+- У `profiles` — `active_target_language TEXT DEFAULT 'de'`. Юзер обирає мову вивчення у профілі/онбордингу; всі списки, статистика, XP, коіни фільтруються по цій мові.
+- **XP/коіни/streak** лишаються глобальними на юзера (одна економіка на школу). Прогрес по контенту — вже per language.
+- Ліміти підписок (School/Assistant/All-in-One) працюють однаково для всіх мов.
 
-**👑 Premium (подписка)**
-- Безлимитные уроки, игры, AI запросы
-- AI Ассистент (Tutor, Texts, Docs, Dialogues)
-- Academy курсы и Tutoring (репетитор)
-- Продвинутая статистика, сертификаты, премиум-аудио
+## Що робимо в цьому кроці (MVP English)
 
-## Изменения
+### 1. База
+- Таблиця `languages` з сідом (de, en, pl, es, fr; активні: de, en).
+- Колонка `target_language` в усіх контентних таблицях, backfill = 'de', індекси, GRANT.
+- `profiles.active_target_language` + міграція існуючих юзерів → 'de'.
 
-### 1. Главная страница (`src/pages/Index.tsx`)
-Превратить в гибрид-лендинг:
-- **Hero сверху** для гостя: заголовок, sub, кнопки "Попробовать бесплатно" / "Войти". Для авторизованного — компактный приветственный блок.
-- **Под hero — интерактив** (уровни A1–C1), доступен всем сразу.
-- Для гостя: бейдж "Попробовать" на категориях вместо замка.
-- Секции "Что внутри" / "Тарифы" / FAQ внизу — только для гостей.
+### 2. Роутінг і мовний контекст
+- Провайдер `TargetLanguageProvider` (context + hook `useTargetLanguage()`). Джерело: URL-префікс > profiles.active_target_language > 'de'.
+- `App.tsx`: групи маршрутів `/de/*`, `/en/*` рендерять ті самі сторінки, але провайдер підставляє мову. Старі маршрути без префікса → 'de' (не ламаємо посилання).
+- `LanguageSelector` (перемикач мови вивчення) — у сайдбарі та в профілі, окремо від UI-мови (RU/UK/DE).
 
-### 2. Роутинг и доступ (`src/App.tsx`, `src/components/AppLayout.tsx`)
+### 3. Онбординг
+- Крок «Що вивчаєш?» — вибір мови з прапорцями. Записується в `profiles.active_target_language` й одразу редіректить на `/en/...`.
+- Гостям на лендінзі — hero-блок з чотирма мовами (EN активна, PL/ES/FR — «Soon»).
 
-Ввести три типа защиты роутов:
-- **PUBLIC** (гость+): `/`, `/dictionary` (просмотр), `/word-lookup`, `/games` (1/день), `/method`, `/auth`, демо упражнения
-- **AUTH** (free+): `/profile`, `/chat`, `/stats`, `/shop`, `/challenges`, `/review`, `/onboarding`, `/assignments`
-- **PREMIUM**: `/assistant`, `/academy`, `/academy/*`, `/tutoring`, `/tutoring/*`, `/certificate/*`
+### 4. Контент англійської (MVP-обʼєм)
+- **Словник**: 300 базових слів A1 (тематики: greetings, family, food, travel, work, home, numbers, time). Генерація AI batch → адмінка → БД.
+- **Читання**: 10 текстів A1-A2 з питаннями.
+- **Аудіювання**: 10 текстів TTS + питання.
+- **Граматика**: 5 базових уроків (to be, articles, present simple, plurals, questions).
+- **Ігри**: усі 7 наявних ігор автоматично працюють з `target_language='en'` (беруть слова з словника поточної мови). Артикль-гра ховається для EN, бо артиклів немає.
+- **Курс Академії** A1 English — 1 модуль, 5 уроків як демо.
 
-Создать обёртку `<RequireAuth>` и `<RequirePremium>` (использует `useSubscription`). При попытке гостя зайти на AUTH-роут — редирект на `/auth` с сохранением `?next=`. При попытке free-юзера на PREMIUM — редирект на `/profile?upgrade=1` (или показ Paywall).
+### 5. Адмінка
+- Селектор мови у топбарі адмінки. Все, що редагуємо (топіки, слова, тексти, курси), тегається поточною target_language.
+- Кнопка «AI-згенерувати X слів/текстів/уроків для {мови} рівня {A1..C1}» — існуючі edge functions отримують параметр `targetLanguage`.
 
-### 3. Контент-компоненты с soft-gate
-- **CategorySelector / LevelSelector** — для гостя показывать "пробное" (первые 1–2 упражнения), остальные с замком и CTA "Создай аккаунт".
-- **Flashcard / ReadingExercise / ListeningExercise** — после N=2 показывать модал "Сохрани прогресс — войди".
-- **DailyChallenge / Achievements / Streak** — скрыть для гостей.
+### 6. Що НЕ входить у цей крок
+- Локалізація UI німецьких артикул-специфічних фіч на англійську (там де їх нема — просто ховаємо).
+- PL/ES/FR — тільки скелет БД, контент не наповнюємо.
+- TMA (Telegram) — лишається німецькою, мультимовність тільки на веб.
 
-### 4. Навигация (`MobileBottomNav.tsx`, `DesktopSidebar.tsx`)
-- **Гость**: Главная, Словарь, Игры, Войти
-- **Free**: Главная, Чат, Профиль, Словарь, Игры
-- **Premium**: + Assistant, Academy, Tutoring (с короной)
-- Использовать `PremiumBadge` рядом с пунктами для free-юзеров (визуальная мотивация апгрейда).
+## Технічні деталі
 
-### 5. Paywall и апселл
-- Единый компонент `PremiumPaywall` (уже есть) — переиспользовать на гейтированных страницах.
-- На главной (для авторизованных free) — карточка "Открой Premium" с тремя бенефитами.
-- При исчерпании дневного лимита (3 урока и т.д.) — модал апгрейда вместо текущего тоста.
+**Міграція БД (одним запитом)**
+```
+CREATE TABLE public.languages (code text PK, name_en, name_ru, name_uk, name_native, flag_emoji, sort_order int, is_active bool);
+INSERT ... ('de','German','Немецкий',...,'🇩🇪',1,true), ('en',...,'🇬🇧',2,true), ('pl',..,false), ('es',..,false), ('fr',..,false);
+ALTER TABLE vocab_cards, topics, reading_texts, reading_questions, listening_texts, listening_questions, listening_dictations, grammar_lessons, grammar_questions, courses, course_modules, course_lessons, cafe_scenarios, placement_questions, kids_placement_questions, tutoring_lesson_templates
+  ADD COLUMN target_language text NOT NULL DEFAULT 'de' REFERENCES languages(code);
+CREATE INDEX ... ON each (target_language);
+ALTER TABLE profiles ADD COLUMN active_target_language text NOT NULL DEFAULT 'de' REFERENCES languages(code);
+GRANT SELECT ON public.languages TO anon, authenticated;
+```
 
-### 6. Технические детали
+**Роутінг**
+```
+<Route path="/:lang(de|en|pl|es|fr)/*" element={<TargetLanguageProvider><AppLayout/></TargetLanguageProvider>}>
+  <Route index element={<Index/>} />
+  <Route path="dictionary" element={<Dictionary/>} />
+  ...
+</Route>
+<Route path="/*" element={<TargetLanguageProvider defaultLang="de"><AppLayout/></TargetLanguageProvider>}>...</Route>
+```
 
-**Гостевой "1 урок/игра в день"**: localStorage с датой (`guest_usage_2026-06-10`). При попытке второй — модал на регистрацию.
+**Хук**
+```ts
+const lang = useTargetLanguage(); // 'de' | 'en' | ...
+supabase.from('vocab_cards').select('*').eq('target_language', lang);
+```
 
-**Гостевой словарь / поиск слов**: edge functions `lookup-word`, чтение `dictionary` — снять JWT verify, разрешить anon. Сохранение слова — требует auth.
+**Sitemap / SEO**
+- Оновити `public/sitemap.xml`: додати `/en`, `/en/dictionary`, `/en/games`, `/en/academy`.
+- `<link rel="alternate" hreflang="en" href="https://klar.academy/en/">` в `index.html`.
+- Гостьовий лендінг — окремі `<title>` / meta для `/en/` через react-helmet-async.
 
-**Pre-fetch уровней для гостя**: запросы на топики/уроки уже публичны через RLS — проверить grants `SELECT TO anon` на `topics`, `cafe_scenarios`, `reading_texts`, `listening_texts`, `grammar_lessons`. Если нет — миграция с грантами.
+## Порядок виконання
 
-**SEO**: главная теперь индексируема, обновить `<title>`, meta description, OG-теги на hero-описание продукта.
+1. Міграція БД (`languages` + `target_language` всюди + backfill).
+2. `TargetLanguageProvider` + хук + перемикач мови у сайдбарі.
+3. Новий роутінг `/en/*` + всі сторінки читають `useTargetLanguage()`.
+4. Селектор мови в адмінці + оновлені edge functions генерації.
+5. Наповнення MVP-контенту англійської через адмінку (300 слів + тексти + уроки).
+6. Оновлення онбордингу + гостьового hero.
+7. SEO (sitemap, hreflang, meta).
 
-### 7. Файлы
-
-Новые:
-- `src/components/guards/RequireAuth.tsx`
-- `src/components/guards/RequirePremium.tsx`
-- `src/components/landing/Hero.tsx`
-- `src/components/landing/PricingSection.tsx`
-- `src/components/landing/FeaturesSection.tsx`
-- `src/hooks/useGuestUsage.ts` (localStorage daily limit)
-
-Изменяемые:
-- `src/App.tsx` — обернуть роуты в guards
-- `src/components/AppLayout.tsx` — убрать жёсткий redirect, разрешить рендер для гостей
-- `src/pages/Index.tsx` — добавить hero + лендинг-секции для гостей
-- `src/pages/Dictionary.tsx`, `src/pages/Games.tsx`, `src/pages/WordLookup.tsx` — soft-gate
-- `src/components/MobileBottomNav.tsx`, `DesktopSidebar.tsx` — динамические пункты
-- `src/components/CategorySelector.tsx` — гостевые "пробные" бейджи
-- `src/components/Flashcard.tsx` (+ Reading/Listening) — модал "сохрани прогресс" после 2-го
-- `index.html` — SEO мета (title/description/OG)
-- Edge functions `lookup-word`, etc. — снять `verify_jwt` для гостевого режима (или поддержать anon путь)
-
-Миграция: при необходимости `GRANT SELECT TO anon` на контент-таблицы для гостевого просмотра.
-
-## Что НЕ трогаем
-
-- Существующую логику Stripe и `useSubscription` — она готова.
-- Tutoring/Academy/Admin — только закрываем как PREMIUM на уровне роутинга.
-- Telegram Mini App — оставляем как есть (TMA всегда auth-режим).
+Після твого «ок» починаю з кроку 1 — міграції БД.
