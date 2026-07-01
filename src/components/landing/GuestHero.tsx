@@ -276,14 +276,22 @@ const GuestHero = () => {
                   {/* Speech bubble from panda */}
                   <motion.div
                     key={copy.mascotQuote}
-                    initial={{ opacity: 0, scale: 0.7, y: 8 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    transition={{ delay: 0.25, type: "spring", stiffness: 260, damping: 20 }}
-                    className="absolute top-2 right-1 max-w-[62%] bg-white text-[#0F0F23] px-3 py-2 rounded-2xl rounded-br-sm shadow-[0_10px_30px_-8px_rgba(0,0,0,0.5)] border border-[#F5A623]/40"
+                    initial={{ opacity: 0, scale: 0.6, y: 10, rotate: -4 }}
+                    animate={{
+                      opacity: 1,
+                      scale: [0.6, 1.08, 0.98, 1.02, 1],
+                      y: 0,
+                      rotate: [-4, 2, -1, 0],
+                    }}
+                    transition={{ delay: 0.2, duration: 0.65, times: [0, 0.35, 0.6, 0.85, 1], ease: "easeOut" }}
+                    className="absolute top-2 right-1 max-w-[62%] bg-white text-[#0F0F23] px-3 py-2 rounded-2xl rounded-br-sm shadow-[0_10px_30px_-8px_rgba(0,0,0,0.5)] border border-[#F5A623]/40 origin-bottom-right"
                   >
-                    <p className="font-bold italic text-[11px] leading-snug" style={{ fontFamily: "Sora, sans-serif" }}>
-                      "{copy.mascotQuote}"
-                    </p>
+                    <Typewriter
+                      text={copy.mascotQuote}
+                      delay={450}
+                      speed={28}
+                      className="font-bold italic text-[11px] leading-snug block"
+                    />
                     {/* Bubble tail pointing to panda */}
                     <div className="absolute -bottom-1.5 right-6 w-3 h-3 bg-white border-b border-r border-[#F5A623]/40 rotate-45" />
                   </motion.div>
