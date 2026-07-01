@@ -100,9 +100,7 @@ const GuestHero = () => {
 
   return (
     <div
-      className={`w-full bg-[#0F0F23] text-[#F5F3EE] font-[Manrope,sans-serif] ${
-        step === 2 ? "h-[100dvh] overflow-hidden flex flex-col" : "min-h-[100dvh] -mt-4"
-      }`}
+      className="w-full bg-[#0F0F23] text-[#F5F3EE] font-[Manrope,sans-serif] h-[100dvh] overflow-hidden flex flex-col"
       style={{ fontFamily: "Manrope, system-ui, sans-serif" }}
     >
 
@@ -141,7 +139,7 @@ const GuestHero = () => {
 
 
       {/* Stepper header */}
-      <div className={`max-w-3xl mx-auto px-4 md:px-6 shrink-0 w-full ${step === 2 ? "pt-4" : "pt-6 md:pt-12"}`}>
+      <div className="max-w-3xl mx-auto px-4 md:px-6 shrink-0 w-full pt-3 md:pt-6">
         <div className="flex items-center justify-between mb-1.5 md:mb-2">
           <button
             onClick={goBack}
@@ -168,7 +166,7 @@ const GuestHero = () => {
       </div>
 
       {/* Steps */}
-      <div className={`max-w-7xl mx-auto px-4 md:px-6 w-full ${step === 2 ? "flex-1 min-h-0 py-2 flex flex-col" : "py-5 md:py-16"}`}>
+      <div className="max-w-7xl mx-auto px-4 md:px-6 w-full flex-1 min-h-0 py-2 md:py-4 flex flex-col overflow-hidden">
         <AnimatePresence mode="wait">
           {step === 1 && (
             <motion.section
@@ -177,24 +175,24 @@ const GuestHero = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.35 }}
-              className="space-y-5 md:space-y-8"
+              className="flex flex-col justify-center gap-3 md:gap-6 h-full"
             >
-              <div className="text-center space-y-2 md:space-y-3">
+              <div className="text-center space-y-1.5 md:space-y-3">
                 <div className="inline-flex items-center gap-3 text-[#F5A623]">
                   <div className="h-px w-8 bg-[#F5A623]" />
                   <span className="uppercase tracking-[0.25em] font-bold text-[10px] md:text-xs">Обери мову</span>
                   <div className="h-px w-8 bg-[#F5A623]" />
                 </div>
-                <h2 className="text-2xl md:text-5xl font-extrabold tracking-tight leading-tight" style={{ fontFamily: "Sora, sans-serif" }}>
+                <h2 className="text-xl md:text-5xl font-extrabold tracking-tight leading-tight" style={{ fontFamily: "Sora, sans-serif" }}>
                   Яку мову ти хочеш <span className="text-[#6D5DFB]">вивчати?</span>
                 </h2>
-                <p className="text-[#F5F3EE]/60 text-xs md:text-base max-w-md mx-auto">
+                <p className="text-[#F5F3EE]/60 text-[11px] md:text-base max-w-md mx-auto leading-snug">
                   Обери мову — і ми покажемо курси та демо саме для неї.
                 </p>
               </div>
 
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4 max-w-4xl mx-auto">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 md:gap-4 max-w-4xl mx-auto w-full">
                 {languages.map((l) => {
                   const active = l.code === targetLang;
                   const disabled = !l.is_active;
@@ -203,7 +201,7 @@ const GuestHero = () => {
                       key={l.code}
                       disabled={disabled}
                       onClick={() => setTargetLang(l.code)}
-                      className={`relative rounded-2xl p-5 md:p-6 flex flex-col items-center gap-2 md:gap-3 transition-all border ${
+                      className={`relative rounded-2xl p-3 md:p-6 flex flex-col items-center gap-1.5 md:gap-3 transition-all border ${
                         disabled
                           ? "bg-[#1A1A3E]/40 border-white/5 opacity-50 cursor-not-allowed"
                           : active
@@ -216,8 +214,8 @@ const GuestHero = () => {
                           <Check className="w-3.5 h-3.5" strokeWidth={3} />
                         </div>
                       )}
-                      <span className="text-4xl md:text-5xl leading-none">{l.flag_emoji}</span>
-                      <span className={`font-bold text-sm md:text-base ${active ? "text-white" : ""}`} style={{ fontFamily: "Sora, sans-serif" }}>
+                      <span className="text-3xl md:text-5xl leading-none">{l.flag_emoji}</span>
+                      <span className={`font-bold text-xs md:text-base ${active ? "text-white" : ""}`} style={{ fontFamily: "Sora, sans-serif" }}>
                         {l.name_uk}
                       </span>
                       {disabled && (
