@@ -139,7 +139,7 @@ const GuestHero = () => {
 
 
       {/* Stepper header */}
-      <div className={`max-w-3xl mx-auto px-4 md:px-6 shrink-0 w-full ${step === 2 ? "pt-4" : "pt-6 md:pt-12"}`}>
+      <div className="max-w-3xl mx-auto px-4 md:px-6 shrink-0 w-full pt-3 md:pt-6">
         <div className="flex items-center justify-between mb-1.5 md:mb-2">
           <button
             onClick={goBack}
