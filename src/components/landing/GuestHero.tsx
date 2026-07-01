@@ -56,6 +56,7 @@ const GuestHero = () => {
   const navigate = useNavigate();
   const { days, hours, mins } = useCountdown();
   const { targetLang, setTargetLang, languages } = useTargetLanguage();
+  const copy = LANG_COPY[targetLang] ?? LANG_COPY.de;
   const [step, setStep] = useState(1);
 
   const goNext = () => setStep((s) => Math.min(TOTAL_STEPS, s + 1));
