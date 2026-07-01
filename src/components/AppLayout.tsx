@@ -111,6 +111,7 @@ const AppLayout = () => {
   }
 
   const isChat = location.pathname === "/chat";
+  const isGuestLanding = !user && location.pathname === "/";
 
   if (isMobile) {
     return (
@@ -119,13 +120,14 @@ const AppLayout = () => {
         <LofiFloatingPlayer />
         <ListeningFloatingPlayer />
         <DailyBonusDialog />
-        <div className={`flex-1 overflow-y-auto overflow-x-hidden overscroll-none ${isChat ? "" : "pb-14"}`}>
+        <div className={`flex-1 overflow-y-auto overflow-x-hidden overscroll-none ${isChat || isGuestLanding ? "" : "pb-14"}`}>
           <PageTransition><Outlet /></PageTransition>
         </div>
-        <MobileBottomNav />
+        {!isGuestLanding && <MobileBottomNav />}
       </div>
     );
   }
+
 
   return (
     <div className="h-[100dvh] bg-background flex overflow-hidden">
