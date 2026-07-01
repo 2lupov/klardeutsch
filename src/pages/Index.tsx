@@ -239,13 +239,8 @@ const Index = () => {
       {screen === "levels" && !user && (
         <div className="w-full">
           <GuestHero />
-          <div className="max-w-4xl mx-auto px-4 py-12">
-            <div id="levels-section" className="w-full">
-              <LevelSelector onSelect={handleLevelSelect} />
-            </div>
-
-          </div>
         </div>
+
       )}
 
       {screen === "levels" && user && (
