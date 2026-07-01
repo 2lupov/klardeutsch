@@ -68,35 +68,37 @@ const GuestHero = () => {
 
   return (
     <div
-      className="w-full min-h-[100dvh] bg-[#0F0F23] text-[#F5F3EE] font-[Manrope,sans-serif] -mt-4"
+      className={`w-full bg-[#0F0F23] text-[#F5F3EE] font-[Manrope,sans-serif] -mt-4 ${
+        step === 2 ? "h-[100dvh] overflow-hidden" : "min-h-[100dvh]"
+      }`}
       style={{ fontFamily: "Manrope, system-ui, sans-serif" }}
     >
       {/* Promo banner */}
-      <div className="sticky top-0 z-20 w-full bg-gradient-to-r from-[#6D5DFB] via-[#4F46E5] to-[#F5A623] py-2.5 pl-16 pr-16 md:pl-4 md:pr-4 shadow-2xl shadow-[#6D5DFB]/20">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-center md:justify-between gap-2 md:gap-3 text-center md:text-left">
-          <div className="flex items-center justify-center gap-2 md:gap-3 min-w-0 flex-wrap">
-            <span className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest whitespace-nowrap">
+      <div className="sticky top-0 z-20 w-full bg-gradient-to-r from-[#6D5DFB] via-[#4F46E5] to-[#F5A623] py-1.5 md:py-2.5 pl-16 pr-16 md:pl-4 md:pr-4 shadow-2xl shadow-[#6D5DFB]/20">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-center md:justify-between gap-1 md:gap-3 text-center md:text-left">
+          <div className="flex items-center justify-center gap-1.5 md:gap-3 min-w-0 flex-wrap">
+            <span className="bg-white/20 backdrop-blur-md px-2.5 md:px-3 py-0.5 md:py-1 rounded-full text-[9px] md:text-[10px] font-bold uppercase tracking-widest whitespace-nowrap">
               Акція
             </span>
-            <p className="font-semibold text-xs md:text-sm md:truncate">
+            <p className="font-semibold text-[11px] md:text-sm md:truncate leading-tight">
               День народження Klar — знижка -30%!
             </p>
           </div>
-          <div className="flex items-center justify-center gap-3 md:gap-6">
-            <div className="flex gap-2 text-center">
+          <div className="flex items-center justify-center gap-2 md:gap-6">
+            <div className="flex gap-1.5 md:gap-2 text-center">
               {[{ v: days, l: "дні" }, { v: hours, l: "год" }, { v: mins, l: "хв" }].map((seg, i) => (
-                <div key={seg.l} className="flex items-center gap-2">
+                <div key={seg.l} className="flex items-center gap-1.5 md:gap-2">
                   <div className="flex flex-col leading-none">
-                    <span className="text-base md:text-lg font-extrabold tabular-nums" style={{ fontFamily: "Sora, sans-serif" }}>{seg.v}</span>
+                    <span className="text-sm md:text-lg font-extrabold tabular-nums" style={{ fontFamily: "Sora, sans-serif" }}>{seg.v}</span>
                     <span className="text-[9px] uppercase opacity-80 mt-0.5">{seg.l}</span>
                   </div>
-                  {i < 2 && <span className="text-base font-bold opacity-70">:</span>}
+                  {i < 2 && <span className="text-sm md:text-base font-bold opacity-70">:</span>}
                 </div>
               ))}
             </div>
             <button
               onClick={() => navigate("/auth")}
-              className="bg-white text-[#0F0F23] px-4 md:px-6 py-1.5 md:py-2 rounded-full font-bold text-xs md:text-sm hover:scale-105 active:scale-95 transition-transform shadow-lg whitespace-nowrap"
+              className="bg-white text-[#0F0F23] px-3 md:px-6 py-1 md:py-2 rounded-full font-bold text-[11px] md:text-sm hover:scale-105 active:scale-95 transition-transform shadow-lg whitespace-nowrap"
             >
               Забрати
             </button>
@@ -106,8 +108,8 @@ const GuestHero = () => {
 
 
       {/* Stepper header */}
-      <div className="max-w-3xl mx-auto px-4 md:px-6 pt-6 md:pt-12">
-        <div className="flex items-center justify-between mb-2">
+      <div className={`max-w-3xl mx-auto px-4 md:px-6 ${step === 2 ? "pt-4" : "pt-6 md:pt-12"}`}>
+        <div className="flex items-center justify-between mb-1.5 md:mb-2">
           <button
             onClick={goBack}
             disabled={step === 1}
@@ -133,7 +135,7 @@ const GuestHero = () => {
       </div>
 
       {/* Steps */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-5 md:py-16">
+      <div className={`max-w-7xl mx-auto px-4 md:px-6 ${step === 2 ? "h-[calc(100dvh-146px)] py-2" : "py-5 md:py-16"}`}>
         <AnimatePresence mode="wait">
           {step === 1 && (
             <motion.section
@@ -213,41 +215,41 @@ const GuestHero = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.35 }}
-              className="lg:grid lg:grid-cols-2 lg:gap-12 lg:items-center flex flex-col min-h-[calc(100dvh-180px)]"
+              className="lg:grid lg:grid-cols-2 lg:gap-12 lg:items-center flex flex-col h-full md:min-h-[calc(100dvh-180px)]"
             >
               {/* MOBILE layout */}
-              <div className="lg:hidden flex flex-col flex-1 min-h-0">
+              <div className="lg:hidden flex flex-col h-full min-h-0">
                 <div>
-                  <h1 className="text-3xl sm:text-5xl font-extrabold leading-[1.05] tracking-tight" style={{ fontFamily: "Sora, sans-serif" }}>
+                  <h1 className="text-[26px] sm:text-5xl font-extrabold leading-[1.03] tracking-tight" style={{ fontFamily: "Sora, sans-serif" }}>
                     {copy.name} мова <br />
                     <span className="text-[#6D5DFB]">без кордонів.</span>
                   </h1>
-                  <p className="mt-3 text-sm text-[#F5F3EE]/60 leading-relaxed">
+                  <p className="mt-2 text-xs text-[#F5F3EE]/60 leading-snug">
                     Від початківця до вільного спілкування — за 3 місяці.
                   </p>
                 </div>
 
                 {/* Panda fills remaining vertical space */}
-                <div className="relative flex-1 min-h-0 my-4 flex items-center justify-center">
+                <div className="relative flex-1 min-h-0 my-1.5 flex items-center justify-center">
                   <div className="absolute inset-0 bg-[#6D5DFB]/15 rounded-full blur-3xl" />
                   <motion.img
                     src={pandaExplorer}
                     alt={`Panda Explorer — гід у світі ${copy.nameAcc}`}
-                    className="relative h-full w-auto max-h-[30%] object-contain drop-shadow-[0_20px_40px_rgba(109,93,251,0.5)]"
+                    className="relative h-full w-auto max-h-[72%] object-contain drop-shadow-[0_20px_40px_rgba(109,93,251,0.5)]"
                     animate={{ y: [0, -10, 0] }}
                     transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
                   />
                 </div>
 
-                <div className="space-y-3">
-                  <div className="bg-black/40 backdrop-blur-xl p-3 rounded-xl border border-white/10">
-                    <p className="text-[#F5A623] font-bold italic text-xs leading-snug" style={{ fontFamily: "Sora, sans-serif" }}>
+                <div className="space-y-2 shrink-0 pb-1">
+                  <div className="bg-black/40 backdrop-blur-xl p-2.5 rounded-xl border border-white/10">
+                    <p className="text-[#F5A623] font-bold italic text-[11px] leading-snug" style={{ fontFamily: "Sora, sans-serif" }}>
                       "{copy.mascotQuote}"
                     </p>
                   </div>
                   <button
                     onClick={goNext}
-                    className="w-full bg-[#6D5DFB] hover:bg-[#5a4ae0] text-white px-6 py-3.5 rounded-2xl font-bold text-sm transition-all shadow-[0_10px_40px_-8px_rgba(109,93,251,0.6)] flex items-center justify-center gap-2 group active:scale-95"
+                    className="w-full bg-[#6D5DFB] hover:bg-[#5a4ae0] text-white px-6 py-3 rounded-2xl font-bold text-sm transition-all shadow-[0_10px_40px_-8px_rgba(109,93,251,0.6)] flex items-center justify-center gap-2 group active:scale-95"
                   >
                     Показати курси
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
