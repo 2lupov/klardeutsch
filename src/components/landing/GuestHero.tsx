@@ -101,8 +101,8 @@ const GuestHero = () => {
 
   return (
     <div
-      className={`w-full bg-[#0F0F23] text-[#F5F3EE] font-[Manrope,sans-serif] -mt-4 ${
-        step === 2 ? "h-[100dvh] overflow-hidden flex flex-col" : "min-h-[100dvh]"
+      className={`w-full bg-[#0F0F23] text-[#F5F3EE] font-[Manrope,sans-serif] ${
+        step === 2 ? "h-[100dvh] overflow-hidden flex flex-col" : "min-h-[100dvh] -mt-4"
       }`}
       style={{ fontFamily: "Manrope, system-ui, sans-serif" }}
     >
