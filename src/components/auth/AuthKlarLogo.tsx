@@ -19,14 +19,14 @@ const AuthKlarLogo = ({ progress }: AuthKlarLogoProps) => {
 
         return (
           <span key={letter} className="relative" style={{ lineHeight: 1 }}>
-            {/* Panda perched on top of the L */}
+            {/* Panda sitting on the bottom horizontal bar of the L */}
             {letter === "L" && (
               <img
                 src={pandaReading}
                 alt=""
                 aria-hidden="true"
-                className="absolute left-1/2 -translate-x-1/2 pointer-events-none select-none z-30 drop-shadow-[0_4px_10px_rgba(0,0,0,0.35)]"
-                style={{ top: "-1.9rem", width: "2.2rem", height: "2.2rem", objectFit: "contain" }}
+                className="absolute pointer-events-none select-none z-30 drop-shadow-[0_4px_10px_rgba(0,0,0,0.35)]"
+                style={{ bottom: "0.05rem", left: "0.15rem", width: "1.9rem", height: "1.9rem", objectFit: "contain" }}
               />
             )}
             <span
