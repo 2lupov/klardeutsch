@@ -240,17 +240,10 @@ const Index = () => {
         <div className="w-full">
           <GuestHero />
           <div className="max-w-4xl mx-auto px-4 py-12">
-            <div className="text-center mb-6">
-              <p className="text-xs uppercase tracking-[0.25em] text-[#F5A623] font-bold mb-2">
-                Free preview
-              </p>
-              <h3 className="text-2xl md:text-3xl font-extrabold" style={{ fontFamily: "Sora, sans-serif" }}>
-                Спробуй платформу без реєстрації
-              </h3>
-            </div>
             <div id="levels-section" className="w-full">
               <LevelSelector onSelect={handleLevelSelect} />
             </div>
+
           </div>
         </div>
       )}
