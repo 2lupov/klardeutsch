@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePlatform } from "@/hooks/usePlatform";
 import KlarLogo from "@/components/KlarLogo";
+import TargetLanguageSwitcher from "@/components/TargetLanguageSwitcher";
 import { useLevelProgress } from "@/hooks/useLevelProgress";
 import { useUnreadDMs } from "@/hooks/useUnreadDMs";
 import { useCoins } from "@/hooks/useCoins";
@@ -154,9 +155,11 @@ const DesktopSidebar = () => {
             style={{ width: SIDEBAR_W }}
           >
             {/* Logo header */}
-            <div className="flex items-center justify-center px-5 pt-5 pb-4 border-b border-border">
+            <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-border gap-2">
               <KlarLogo progress={totalProgress} completed={allCompleted} size="md" />
+              <TargetLanguageSwitcher variant="compact" />
             </div>
+
 
             {/* Navigation */}
             <nav className="flex-1 px-2 flex flex-col gap-0.5 overflow-y-auto mt-1">
