@@ -388,7 +388,7 @@ const GuestHero = () => {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 md:gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-5 md:gap-6">
                 {COURSES.map((c, i) => (
                   <motion.div
                     key={c.level}
@@ -397,39 +397,40 @@ const GuestHero = () => {
                     transition={{ duration: 0.4, delay: i * 0.08 }}
                     onClick={() => navigate(`/trial?level=${c.level}`)}
 
-                    className={`group cursor-pointer rounded-[2rem] p-7 md:p-8 space-y-6 transition-all hover:-translate-y-2 relative overflow-hidden ${
+                    className={`group cursor-pointer rounded-2xl sm:rounded-[2rem] p-3 sm:p-7 md:p-8 space-y-3 sm:space-y-6 transition-all hover:-translate-y-2 relative overflow-hidden ${
                       c.accent
                         ? "bg-[#6D5DFB] shadow-[0_20px_50px_-12px_rgba(109,93,251,0.5)]"
                         : "bg-[#1A1A3E] border border-white/5 hover:bg-[#252554]"
                     }`}
                   >
                     {c.accent && (
-                      <div className="absolute -right-6 top-4 bg-white/15 backdrop-blur-md px-6 py-1 rotate-12 text-[10px] font-bold uppercase tracking-widest text-white">
+                      <div className="absolute -right-5 top-2 sm:top-4 bg-white/15 backdrop-blur-md px-5 sm:px-6 py-0.5 sm:py-1 rotate-12 text-[8px] sm:text-[10px] font-bold uppercase tracking-widest text-white">
                         Популярно
                       </div>
                     )}
                     <div
-                      className={`w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center font-extrabold text-xl md:text-2xl transition-colors ${
+                      className={`w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center font-extrabold text-sm sm:text-xl md:text-2xl transition-colors ${
                         c.accent ? "bg-white text-[#6D5DFB]" : "bg-[#6D5DFB]/20 text-[#6D5DFB] group-hover:bg-[#6D5DFB] group-hover:text-white"
                       }`}
                       style={{ fontFamily: "Sora, sans-serif" }}
                     >
                       {c.level}
                     </div>
-                    <div className="space-y-2">
-                      <h3 className={`text-lg md:text-xl font-bold ${c.accent ? "text-white" : ""}`}>{c.title}</h3>
-                      <p className={`text-sm leading-relaxed ${c.accent ? "text-white/80" : "text-[#F5F3EE]/50"}`}>{c.desc}</p>
+                    <div className="space-y-1 sm:space-y-2">
+                      <h3 className={`text-sm sm:text-lg md:text-xl font-bold ${c.accent ? "text-white" : ""}`}>{c.title}</h3>
+                      <p className={`text-[11px] sm:text-sm leading-snug sm:leading-relaxed line-clamp-2 sm:line-clamp-none ${c.accent ? "text-white/80" : "text-[#F5F3EE]/50"}`}>{c.desc}</p>
                     </div>
-                    <div className={`pt-4 border-t flex items-center justify-between ${c.accent ? "border-white/20" : "border-white/5"}`}>
-                      <span className={`font-bold ${c.accent ? "text-white" : "text-[#F5A623]"}`}>{c.price}</span>
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+                    <div className={`pt-2 sm:pt-4 border-t flex items-center justify-between ${c.accent ? "border-white/20" : "border-white/5"}`}>
+                      <span className={`text-xs sm:text-base font-bold ${c.accent ? "text-white" : "text-[#F5A623]"}`}>{c.price}</span>
+                      <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-colors ${
                         c.accent ? "bg-white text-[#6D5DFB]" : "border border-white/10 group-hover:border-[#F5A623] text-[#F5F3EE]"
                       }`}>
-                        <MoveRight className="w-4 h-4" />
+                        <MoveRight className="w-3 h-3 sm:w-4 sm:h-4" />
                       </div>
                     </div>
                   </motion.div>
                 ))}
+
 
                 {/* Tablet-only: trial CTA next to C1 */}
                 <motion.button
