@@ -489,7 +489,7 @@ const Assistant = () => {
               {user && (
                 <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                   onClick={handleSaveWord} disabled={saved || saving}
-                  className={`shrink-0 p-3 rounded-xl border transition-all ${saved ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400" : "bg-primary/10 border-primary/30 text-primary hover:bg-primary/20"}`}>
+                  className={`shrink-0 p-3 rounded-xl border transition-all ${saved ? "bg-primary/15 border-primary/30 text-primary" : "bg-primary/10 border-primary/30 text-primary hover:bg-primary/20"}`}>
                   {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : saved ? <Check className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
                 </motion.button>
               )}
@@ -524,9 +524,9 @@ const Assistant = () => {
           {wordData.conjugation && (
             <motion.div {...cardAnim(2)} className="rounded-2xl border border-border bg-card/90 backdrop-blur-sm overflow-hidden">
               <div className="px-5 py-3.5 border-b border-border/50 flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center"><Table2 className="w-4 h-4 text-blue-400" /></div>
+                <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center"><Table2 className="w-4 h-4 text-primary" /></div>
                 <h3 className="font-display font-semibold text-foreground">{t("Спряжение", "Відмінювання")}</h3>
-                {wordData.conjugation.governing && <span className="ml-auto text-xs px-2 py-1 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">{wordData.conjugation.governing}</span>}
+                {wordData.conjugation.governing && <span className="ml-auto text-xs px-2 py-1 rounded-lg bg-primary/10 text-primary border border-primary/20">{wordData.conjugation.governing}</span>}
               </div>
               <div className="p-4 space-y-3">
                 <ConjugationTable title="Präsens" data={wordData.conjugation.präsens} icon="🟢" />
@@ -544,7 +544,7 @@ const Assistant = () => {
           {wordData.noun_forms && (
             <motion.div {...cardAnim(2)} className="rounded-2xl border border-border bg-card/90 backdrop-blur-sm overflow-hidden">
               <div className="px-5 py-3.5 border-b border-border/50 flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-pink-500/10 flex items-center justify-center"><Layers className="w-4 h-4 text-pink-400" /></div>
+                <div className="w-8 h-8 rounded-xl bg-accent/10 flex items-center justify-center"><Layers className="w-4 h-4 text-accent" /></div>
                 <h3 className="font-display font-semibold text-foreground">{t("Формы", "Форми")}</h3>
               </div>
               <div className="p-4 grid grid-cols-3 gap-3">
@@ -562,7 +562,7 @@ const Assistant = () => {
           {wordData.synonyms && wordData.synonyms.length > 0 && (
             <motion.div {...cardAnim(3)} className="rounded-2xl border border-border bg-card/90 backdrop-blur-sm overflow-hidden">
               <div className="px-5 py-3.5 border-b border-border/50 flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center"><Languages className="w-4 h-4 text-emerald-400" /></div>
+                <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center"><Languages className="w-4 h-4 text-primary" /></div>
                 <h3 className="font-display font-semibold text-foreground">{t("Синонимы", "Синоніми")}</h3>
               </div>
               <div className="px-5 py-4 flex flex-wrap gap-2">
@@ -599,8 +599,8 @@ const Assistant = () => {
       {!dictSearched && !dictLoading && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
           className="text-center py-8">
-          <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-3">
-            <Languages className="w-7 h-7 text-emerald-400" />
+          <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
+            <Languages className="w-7 h-7 text-primary" />
           </div>
           <h3 className="font-display font-bold text-lg text-foreground">{t("Умный словарь", "Розумний словник")}</h3>
           <p className="text-xs text-muted-foreground mt-1 max-w-xs mx-auto">{t("Введи слово — получи перевод, спряжение, примеры и синонимы", "Введи слово — отримай переклад, відмінювання, приклади та синоніми")}</p>
@@ -657,8 +657,8 @@ const Assistant = () => {
       {!readingResult ? (
         <>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-4">
-            <div className="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center mx-auto mb-3">
-              <BookMarked className="w-7 h-7 text-blue-400" />
+            <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
+              <BookMarked className="w-7 h-7 text-primary" />
             </div>
             <h3 className="font-display font-bold text-lg">{t("Анализ текста", "Аналіз тексту")}</h3>
             <p className="text-xs text-muted-foreground mt-1 max-w-xs mx-auto">
@@ -675,7 +675,7 @@ const Assistant = () => {
 
           <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
             onClick={analyzeText} disabled={!readingText.trim() || readingLoading}
-            className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-display font-bold text-sm disabled:opacity-40 flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-blue-500/20 transition-all">
+            className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-primary to-primary text-white font-display font-bold text-sm disabled:opacity-40 flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-primary/30 transition-all">
             {readingLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
             {t("Анализировать текст", "Аналізувати текст")}
           </motion.button>
@@ -703,14 +703,14 @@ const Assistant = () => {
   /* ══════════════════════ FILES ══════════════════════ */
 
   const fileTemplates: { emoji: string; icon: React.ElementType; label: string; desc: string; color: string }[] = [
-    { emoji: "🏛️", icon: Landmark, label: "Jobcenter", desc: t("Bescheide, Anträge, Widersprüche", "Рішення, заявки, заперечення"), color: "from-blue-500/15 to-blue-600/5" },
-    { emoji: "💼", icon: Briefcase, label: "Arbeitsagentur", desc: t("Arbeitslosengeld, Maßnahmen", "Допомога по безробіттю, заходи"), color: "from-amber-500/15 to-amber-600/5" },
-    { emoji: "🏢", icon: Building2, label: t("Работодатель", "Роботодавець"), desc: t("Arbeitsvertrag, Kündigung, Zeugnis", "Трудовий договір, звільнення, характеристика"), color: "from-emerald-500/15 to-emerald-600/5" },
-    { emoji: "🏠", icon: HomeIcon, label: t("Арендодатель", "Орендодавець"), desc: t("Mietvertrag, Nebenkostenabrechnung", "Договір оренди, комунальні"), color: "from-purple-500/15 to-purple-600/5" },
-    { emoji: "🏥", icon: Heart, label: t("Страховка", "Страхування"), desc: t("Krankenkasse, Versicherung", "Лікарняна каса, страхування"), color: "from-pink-500/15 to-pink-600/5" },
-    { emoji: "🚗", icon: Car, label: t("Штрафы / Транспорт", "Штрафи / Транспорт"), desc: t("Bußgeld, Führerschein, KFZ", "Штрафи, водійські права, авто"), color: "from-red-500/15 to-red-600/5" },
-    { emoji: "🏫", icon: GraduationCap, label: t("Учёба / Курсы", "Навчання / Курси"), desc: t("Integrationskurs, Studium, Anerkennung", "Інтеграційний курс, навчання, визнання"), color: "from-indigo-500/15 to-indigo-600/5" },
-    { emoji: "💳", icon: CreditCard, label: t("Финансы", "Фінанси"), desc: t("Bank, Steuererklärung, Schufa", "Банк, податкова декларація, Schufa"), color: "from-teal-500/15 to-teal-600/5" },
+    { emoji: "🏛️", icon: Landmark, label: "Jobcenter", desc: t("Bescheide, Anträge, Widersprüche", "Рішення, заявки, заперечення"), color: "from-primary/15 to-primary/5" },
+    { emoji: "💼", icon: Briefcase, label: "Arbeitsagentur", desc: t("Arbeitslosengeld, Maßnahmen", "Допомога по безробіттю, заходи"), color: "from-accent/15 to-accent/5" },
+    { emoji: "🏢", icon: Building2, label: t("Работодатель", "Роботодавець"), desc: t("Arbeitsvertrag, Kündigung, Zeugnis", "Трудовий договір, звільнення, характеристика"), color: "from-primary/20 to-accent/5" },
+    { emoji: "🏠", icon: HomeIcon, label: t("Арендодатель", "Орендодавець"), desc: t("Mietvertrag, Nebenkostenabrechnung", "Договір оренди, комунальні"), color: "from-accent/20 to-primary/5" },
+    { emoji: "🏥", icon: Heart, label: t("Страховка", "Страхування"), desc: t("Krankenkasse, Versicherung", "Лікарняна каса, страхування"), color: "from-accent/15 to-primary/10" },
+    { emoji: "🚗", icon: Car, label: t("Штрафы / Транспорт", "Штрафи / Транспорт"), desc: t("Bußgeld, Führerschein, KFZ", "Штрафи, водійські права, авто"), color: "from-accent/20 to-accent/5" },
+    { emoji: "🏫", icon: GraduationCap, label: t("Учёба / Курсы", "Навчання / Курси"), desc: t("Integrationskurs, Studium, Anerkennung", "Інтеграційний курс, навчання, визнання"), color: "from-primary/20 to-primary/5" },
+    { emoji: "💳", icon: CreditCard, label: t("Финансы", "Фінанси"), desc: t("Bank, Steuererklärung, Schufa", "Банк, податкова декларація, Schufa"), color: "from-primary/15 to-accent/10" },
   ];
 
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
@@ -764,8 +764,8 @@ const Assistant = () => {
       {!selectedTemplate ? (
         <>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-2">
-            <div className="w-14 h-14 rounded-2xl bg-purple-500/10 flex items-center justify-center mx-auto mb-3">
-              <FileText className="w-7 h-7 text-purple-400" />
+            <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-3">
+              <FileText className="w-7 h-7 text-accent" />
             </div>
             <h3 className="font-display font-bold text-lg">{t("Помощь с документами", "Допомога з документами")}</h3>
             <p className="text-xs text-muted-foreground mt-1 max-w-xs mx-auto">
@@ -809,7 +809,7 @@ const Assistant = () => {
             </button>
             <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
               onClick={() => analyzeFile(selectedTemplate)} disabled={!fileText.trim() || fileLoading}
-              className="flex-1 py-3.5 rounded-2xl bg-gradient-to-r from-purple-500 to-purple-600 text-white font-display font-bold text-sm disabled:opacity-40 flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-purple-500/20 transition-all">
+              className="flex-1 py-3.5 rounded-2xl bg-gradient-to-r from-accent to-accent text-accent-foreground font-display font-bold text-sm disabled:opacity-40 flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-accent/30 transition-all">
               {fileLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <FileCheck className="w-5 h-5" />}
               {t("Разобрать документ", "Розібрати документ")}
             </motion.button>
