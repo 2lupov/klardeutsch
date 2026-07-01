@@ -51,12 +51,13 @@ const BulkGenerator = () => {
 
   useEffect(() => {
     loadTopics();
-  }, []);
+  }, [targetLang]);
 
   const loadTopics = async () => {
     const { data } = await supabase
       .from("topics")
       .select("level, name, emoji")
+      .eq("target_language", targetLang)
       .order("level")
       .order("sort_order");
     if (data) {
@@ -67,6 +68,7 @@ const BulkGenerator = () => {
       );
     }
   };
+
 
   const toggleType = (t: ContentType) => {
     setSelectedTypes((prev) =>
@@ -95,6 +97,7 @@ const BulkGenerator = () => {
           level: newTopicLevel,
           topicName: newTopicName.trim(),
           topicEmoji: newTopicEmoji,
+          targetLanguage: targetLang,
         },
       });
 
@@ -151,7 +154,7 @@ const BulkGenerator = () => {
 
       try {
         const { data, error } = await supabase.functions.invoke("bulk-generate-exercises", {
-          body: { level: jobLevel, topic: jobTopic, type: jobType },
+          body: { level: jobLevel, topic: jobTopic, type: jobType, targetLanguage: targetLang },
         });
 
         if (error) throw error;
