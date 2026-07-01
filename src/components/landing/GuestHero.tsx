@@ -78,6 +78,8 @@ const COURSES = [
 const GuestHero = () => {
   const navigate = useNavigate();
   const { days, hours, mins } = useCountdown();
+  const { targetLang, setTargetLang, languages } = useTargetLanguage();
+
 
   return (
     <div
