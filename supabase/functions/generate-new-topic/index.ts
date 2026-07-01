@@ -129,6 +129,7 @@ Requirements:
           const insertData = words.map((w: any, i: number) => ({
             level,
             topic: topicName,
+            target_language: targetLanguage,
             german: w.german,
             russian: w.russian,
             ukrainian: w.ukrainian || w.russian,
@@ -187,6 +188,7 @@ Generate 10 questions. Make sure correct_index matches the position of the corre
           await supabase.from("grammar_lessons").insert({
             level,
             topic: topicName,
+            target_language: targetLanguage,
             theory: lesson.theory || `# ${topicName}\n\nГрамматика для темы ${topicName}.`,
           });
 
@@ -195,6 +197,7 @@ Generate 10 questions. Make sure correct_index matches the position of the corre
             const questionsData = lesson.questions.map(shuffleQuestion).map((q: any, i: number) => ({
               level,
               topic: topicName,
+            target_language: targetLanguage,
               question: q.question,
               options: q.options,
               correct_index: q.correct_index,
@@ -255,6 +258,7 @@ Generate 5 comprehension questions.`;
             .insert({
               level,
               topic: topicName,
+            target_language: targetLanguage,
               title: reading.title,
               text: reading.text,
             })
@@ -264,6 +268,7 @@ Generate 5 comprehension questions.`;
           if (!readingError && newReading && reading.questions?.length > 0) {
             const questionsData = reading.questions.map(shuffleQuestion).map((q: any, i: number) => ({
               reading_id: newReading.id,
+              target_language: targetLanguage,
               question: q.question,
               options: q.options,
               correct_index: q.correct_index,
@@ -324,6 +329,7 @@ Generate 5 questions about the audio content.`;
             .insert({
               level,
               topic: topicName,
+            target_language: targetLanguage,
               title: listening.title,
               text: listening.text,
             })
@@ -333,6 +339,7 @@ Generate 5 questions about the audio content.`;
           if (!listeningError && newListening && listening.questions?.length > 0) {
             const questionsData = listening.questions.map(shuffleQuestion).map((q: any, i: number) => ({
               listening_id: newListening.id,
+              target_language: targetLanguage,
               question: q.question,
               options: q.options,
               correct_index: q.correct_index,
