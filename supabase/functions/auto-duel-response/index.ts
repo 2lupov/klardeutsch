@@ -12,6 +12,22 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Require authentication
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    const authClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+    const { data: userData } = await authClient.auth.getUser();
+    if (!userData?.user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    const callerId = userData.user.id;
+
     const { challenge_id } = await req.json();
     if (!challenge_id) {
       return new Response(JSON.stringify({ error: "challenge_id required" }), {
@@ -27,6 +43,23 @@ Deno.serve(async (req) => {
     // Get the challenge
     const { data: challenge, error: chErr } = await supabase
       .from("challenges")
+      .select("*")
+      .eq("id", challenge_id)
+      .single();
+
+    if (chErr || !challenge) {
+      return new Response(JSON.stringify({ error: "challenge not found" }), {
+        status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Caller must be the challenger of this duel
+    if (challenge.challenger_id !== callerId) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
       .select("*")
       .eq("id", challenge_id)
       .single();
