@@ -479,17 +479,20 @@ const GuestHero = () => {
               className="relative w-full max-w-md bg-gradient-to-br from-[#1A1A3E] to-[#0F0F23] rounded-3xl border border-white/10 shadow-2xl shadow-[#6D5DFB]/30 p-6 md:p-8 text-center"
               style={{ fontFamily: "Manrope, system-ui, sans-serif" }}
             >
-              <motion.img
-                src={pandaSad}
-                alt="Sad panda"
-                width={200}
-                height={200}
-                loading="lazy"
-                initial={{ y: -8 }}
-                animate={{ y: [-8, 4, -8] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                className="w-40 h-40 md:w-48 md:h-48 mx-auto -mt-16 md:-mt-20 drop-shadow-2xl"
-              />
+              {trialStage === "ask" && (
+                <motion.img
+                  src={pandaSad}
+                  alt="Sad panda"
+                  width={200}
+                  height={200}
+                  loading="lazy"
+                  initial={{ y: -8 }}
+                  animate={{ y: [-8, 4, -8] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                  className="w-40 h-40 md:w-48 md:h-48 mx-auto -mt-16 md:-mt-20 drop-shadow-2xl"
+                />
+              )}
+
 
               {trialStage === "ask" ? (
                 <>
