@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useTargetLanguage } from "@/contexts/TargetLanguageContext";
 import { Loader2, Zap, Check, X, Wand2, Plus, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
@@ -30,6 +31,7 @@ const CONTENT_TYPES: { key: ContentType; label: string; emoji: string }[] = [
 const SUGGESTED_EMOJIS = ["📚", "🏠", "🍎", "✈️", "💼", "🎯", "🎨", "🏥", "🛒", "🎉", "📱", "🌍", "🚗", "👨‍👩‍👧", "💰"];
 
 const BulkGenerator = () => {
+  const { targetLang } = useTargetLanguage();
   const [topics, setTopics] = useState<TopicInfo[]>([]);
   const [selectedTypes, setSelectedTypes] = useState<ContentType[]>(["grammar", "vocab"]);
   const [selectedLevels, setSelectedLevels] = useState<Level[]>(["A1"]);
@@ -49,12 +51,13 @@ const BulkGenerator = () => {
 
   useEffect(() => {
     loadTopics();
-  }, []);
+  }, [targetLang]);
 
   const loadTopics = async () => {
     const { data } = await supabase
       .from("topics")
       .select("level, name, emoji")
+      .eq("target_language", targetLang)
       .order("level")
       .order("sort_order");
     if (data) {
@@ -65,6 +68,7 @@ const BulkGenerator = () => {
       );
     }
   };
+
 
   const toggleType = (t: ContentType) => {
     setSelectedTypes((prev) =>
@@ -93,6 +97,7 @@ const BulkGenerator = () => {
           level: newTopicLevel,
           topicName: newTopicName.trim(),
           topicEmoji: newTopicEmoji,
+          targetLanguage: targetLang,
         },
       });
 
@@ -149,7 +154,7 @@ const BulkGenerator = () => {
 
       try {
         const { data, error } = await supabase.functions.invoke("bulk-generate-exercises", {
-          body: { level: jobLevel, topic: jobTopic, type: jobType },
+          body: { level: jobLevel, topic: jobTopic, type: jobType, targetLanguage: targetLang },
         });
 
         if (error) throw error;

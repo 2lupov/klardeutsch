@@ -71,12 +71,15 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { level, topic, type } = await req.json();
+    const { level, topic, type, targetLanguage: rawTL } = await req.json();
+    const targetLanguage = (rawTL || "de").toString().toLowerCase();
     if (!level || !topic || !type) {
       return new Response(JSON.stringify({ error: "level, topic, type required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    const LANG_NAME: Record<string, string> = { de: "German", en: "English", pl: "Polish", es: "Spanish", fr: "French" };
+    const langName = LANG_NAME[targetLanguage] || "German";
 
     let prompt = "";
     let insertCount = 0;
@@ -87,14 +90,15 @@ Deno.serve(async (req) => {
         .from("grammar_questions")
         .select("question")
         .eq("level", level)
-        .eq("topic", topic);
+        .eq("topic", topic)
+        .eq("target_language", targetLanguage);
       
       const existingQs = (existing || []).map((q: any) => q.question).join("\n- ");
 
-      prompt = `You are an expert German language teacher. Generate exactly 10 NEW multiple-choice grammar questions for level ${level}, topic "${topic}".
+      prompt = `You are an expert ${langName} language teacher. Generate exactly 10 NEW multiple-choice grammar questions for level ${level}, topic "${topic}".
 
 Each question must have exactly 4 options, one correct answer, and a brief explanation in Russian.
-Questions and options should be in German. Explanations in Russian.
+Questions and options should be in ${langName}. Explanations in Russian.
 Level ${level} means: ${levelDescription(level)}.
 Topic "${topic}" — questions must be relevant to this topic.
 
@@ -110,10 +114,11 @@ ONLY return the JSON array, nothing else.`;
       const questions = parseJSON(result);
       
       if (questions && questions.length > 0) {
-        const maxSort = await getMaxSort(db, "grammar_questions", level, topic);
+        const maxSort = await getMaxSort(db, "grammar_questions", level, topic, targetLanguage);
         const rows = questions.map(shuffleQuestion).map((q: any, i: number) => ({
           level,
           topic,
+          target_language: targetLanguage,
           question: q.question,
           options: q.options,
           correct_index: q.correct_index,
@@ -129,13 +134,14 @@ ONLY return the JSON array, nothing else.`;
         .from("vocab_cards")
         .select("german")
         .eq("level", level)
-        .eq("topic", topic);
+        .eq("topic", topic)
+        .eq("target_language", targetLanguage);
       
       const existingWords = (existing || []).map((w: any) => w.german).join(", ");
 
-      prompt = `You are an expert German language teacher. Generate exactly 10 NEW vocabulary cards for level ${level}, topic "${topic}".
+      prompt = `You are an expert ${langName} language teacher. Generate exactly 10 NEW vocabulary cards for level ${level}, topic "${topic}".
 
-Each card needs: german word, russian translation, ukrainian translation, article (der/die/das or null for non-nouns), example sentence in German.
+Each card needs: word in ${langName} (field "german"), russian translation, ukrainian translation, article (der/die/das for German nouns, null for other languages or non-nouns), example sentence in ${langName}.
 Level ${level} means: ${levelDescription(level)}.
 
 EXISTING words (DO NOT duplicate): ${existingWords || "none"}
@@ -149,10 +155,11 @@ ONLY return the JSON array, nothing else.`;
       const cards = parseJSON(result);
 
       if (cards && cards.length > 0) {
-        const maxSort = await getMaxSort(db, "vocab_cards", level, topic);
+        const maxSort = await getMaxSort(db, "vocab_cards", level, topic, targetLanguage);
         const rows = cards.map((c: any, i: number) => ({
           level,
           topic,
+          target_language: targetLanguage,
           german: c.german,
           russian: c.russian,
           ukrainian: c.ukrainian || "",
@@ -166,10 +173,10 @@ ONLY return the JSON array, nothing else.`;
       }
     } else if (type === "reading") {
       // Generate a new reading text + 10 questions
-      prompt = `You are an expert German language teacher. Create 1 reading text for level ${level}, topic "${topic}" with exactly 10 comprehension questions.
+      prompt = `You are an expert ${langName} language teacher. Create 1 reading text in ${langName} for level ${level}, topic "${topic}" with exactly 10 comprehension questions.
 
 The text should be ${level === "A1" ? "50-80" : level === "A2" ? "80-120" : level === "B1" ? "120-180" : level === "B2" ? "180-250" : "250-350"} words long.
-Each question: 4 options, 1 correct, explanation in Russian. Questions in German.
+Each question: 4 options, 1 correct, explanation in Russian. Questions in ${langName}.
 Level ${level} means: ${levelDescription(level)}.
 
 Respond as JSON:
@@ -181,15 +188,16 @@ ONLY return JSON, nothing else.`;
       const reading = parseJSON(result);
 
       if (reading && reading.title) {
-        const maxSort = await getMaxSort(db, "reading_texts", level, topic);
+        const maxSort = await getMaxSort(db, "reading_texts", level, topic, targetLanguage);
         const { data: inserted, error: rtErr } = await db.from("reading_texts").insert({
-          level, topic, title: reading.title, text: reading.text, sort_order: maxSort + 1,
+          level, topic, target_language: targetLanguage, title: reading.title, text: reading.text, sort_order: maxSort + 1,
         }).select("id").single();
         if (rtErr) throw rtErr;
 
         if (reading.questions?.length > 0) {
           const qRows = reading.questions.map(shuffleQuestion).map((q: any, i: number) => ({
             reading_id: inserted.id,
+            target_language: targetLanguage,
             question: q.question,
             options: q.options,
             correct_index: q.correct_index,
@@ -202,9 +210,9 @@ ONLY return JSON, nothing else.`;
         }
       }
     } else if (type === "listening") {
-      prompt = `You are an expert German language teacher. Create 1 listening text for level ${level}, topic "${topic}" with exactly 10 comprehension questions.
+      prompt = `You are an expert ${langName} language teacher. Create 1 listening text in ${langName} for level ${level}, topic "${topic}" with exactly 10 comprehension questions.
 
-The text should be ${level === "A1" ? "40-70" : level === "A2" ? "70-100" : level === "B1" ? "100-150" : level === "B2" ? "150-200" : "200-300"} words, written as natural spoken German.
+The text should be ${level === "A1" ? "40-70" : level === "A2" ? "70-100" : level === "B1" ? "100-150" : level === "B2" ? "150-200" : "200-300"} words, written as natural spoken ${langName}.
 Each question: 4 options, 1 correct, explanation in Russian.
 Level ${level} means: ${levelDescription(level)}.
 
@@ -217,15 +225,16 @@ ONLY return JSON, nothing else.`;
       const listening = parseJSON(result);
 
       if (listening && listening.title) {
-        const maxSort = await getMaxSort(db, "listening_texts", level, topic);
+        const maxSort = await getMaxSort(db, "listening_texts", level, topic, targetLanguage);
         const { data: inserted, error: ltErr } = await db.from("listening_texts").insert({
-          level, topic, title: listening.title, text: listening.text, sort_order: maxSort + 1,
+          level, topic, target_language: targetLanguage, title: listening.title, text: listening.text, sort_order: maxSort + 1,
         }).select("id").single();
         if (ltErr) throw ltErr;
 
         if (listening.questions?.length > 0) {
           const qRows = listening.questions.map(shuffleQuestion).map((q: any, i: number) => ({
             listening_id: inserted.id,
+            target_language: targetLanguage,
             question: q.question,
             options: q.options,
             correct_index: q.correct_index,
@@ -238,6 +247,7 @@ ONLY return JSON, nothing else.`;
         }
       }
     }
+
 
     return new Response(JSON.stringify({ success: true, inserted: insertCount, level, topic, type }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -261,12 +271,13 @@ function levelDescription(level: string): string {
   return map[level] || level;
 }
 
-async function getMaxSort(db: any, table: string, level: string, topic: string): Promise<number> {
+async function getMaxSort(db: any, table: string, level: string, topic: string, targetLanguage: string = "de"): Promise<number> {
   const { data } = await db
     .from(table)
     .select("sort_order")
     .eq("level", level)
     .eq("topic", topic)
+    .eq("target_language", targetLanguage)
     .order("sort_order", { ascending: false })
     .limit(1);
   return data?.[0]?.sort_order ?? 0;

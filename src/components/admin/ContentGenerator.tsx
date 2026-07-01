@@ -1,6 +1,7 @@
 import { useState } from "react";
 import BulkGenerator from "./BulkGenerator";
 import { supabase } from "@/integrations/supabase/client";
+import { useTargetLanguage } from "@/contexts/TargetLanguageContext";
 import { 
   Sparkles, Loader2, BookOpen, Languages, BookText, Headphones, 
   Save, X, Copy, Check, Upload, FileJson, Wand2, ArrowRight, Zap
@@ -123,6 +124,7 @@ const TOPIC_SUGGESTIONS: Record<Level, string[]> = {
 };
 
 const ContentGenerator = ({ level }: { level: Level }) => {
+  const { targetLang } = useTargetLanguage();
   const [mode, setMode] = useState<Mode>("prompt");
   const [topic, setTopic] = useState("");
   const [types, setTypes] = useState<ExerciseType[]>(["vocab", "grammar", "reading", "listening"]);
@@ -215,9 +217,10 @@ const ContentGenerator = ({ level }: { level: Level }) => {
           example: c.example || null,
           topic: c.topic || topic || "Allgemein",
           level,
+          target_language: targetLang,
           sort_order: i,
         }));
-        const { error } = await supabase.from("vocab_cards").insert(cards);
+        const { error } = await supabase.from(\"vocab_cards\").insert(cards);
         if (error) throw error;
         saved += cards.length;
       }
@@ -230,9 +233,10 @@ const ContentGenerator = ({ level }: { level: Level }) => {
           explanation: q.explanation || null,
           topic: q.topic || topic || "Allgemein",
           level,
+          target_language: targetLang,
           sort_order: i,
         }));
-        const { error } = await supabase.from("grammar_questions").insert(qs);
+        const { error } = await supabase.from(\"grammar_questions\").insert(qs);
         if (error) throw error;
         saved += qs.length;
       }
@@ -244,6 +248,7 @@ const ContentGenerator = ({ level }: { level: Level }) => {
           text: rt.text,
           topic: rt.topic || topic || "Allgemein",
           level,
+          target_language: targetLang,
         }).select("id").single();
         if (textErr) throw textErr;
 
@@ -269,6 +274,7 @@ const ContentGenerator = ({ level }: { level: Level }) => {
           text: lt.text,
           topic: lt.topic || topic || "Allgemein",
           level,
+          target_language: targetLang,
         }).select("id").single();
         if (textErr) throw textErr;
 

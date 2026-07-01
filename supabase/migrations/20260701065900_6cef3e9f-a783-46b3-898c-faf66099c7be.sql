@@ -1,0 +1,2 @@
+ALTER TABLE public.topics ADD COLUMN IF NOT EXISTS target_language text NOT NULL DEFAULT 'de' REFERENCES public.languages(code);
+CREATE INDEX IF NOT EXISTS idx_topics_target_language ON public.topics(target_language);
