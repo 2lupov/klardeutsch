@@ -1,4 +1,5 @@
-import { useMemo } from "react";
+import pandaReading from "@/assets/panda-reading.png";
+
 
 interface AuthKlarLogoProps {
   /** 0–1 fill progress */
