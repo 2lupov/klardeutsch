@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, MoveRight, Check, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import pandaExplorer from "@/assets/panda-explorer.png";
+import pandaSad from "@/assets/panda-sad.png";
+
 import { useTargetLanguage } from "@/contexts/TargetLanguageContext";
 
 // Typewriter effect — the panda "speaks" the quote character by character
