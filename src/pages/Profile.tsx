@@ -24,6 +24,7 @@ import { useDailyBonus } from "@/hooks/useDailyBonus";
 import GiftShelf from "@/components/gifts/GiftShelf";
 import GiftUnboxing from "@/components/gifts/GiftUnboxing";
 import FriendsList from "@/components/FriendsList";
+import AccountsScreen from "@/components/profile/AccountsScreen";
 
 interface ProgressRow {
   level: string;
