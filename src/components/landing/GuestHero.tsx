@@ -377,16 +377,8 @@ const GuestHero = () => {
               transition={{ duration: 0.35 }}
               className="space-y-10 md:space-y-14"
             >
-              <div className="text-center space-y-3">
 
 
-                <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight" style={{ fontFamily: "Sora, sans-serif" }}>
-                  Наші <span className="text-[#6D5DFB]">курси</span>
-                </h2>
-                <p className="text-[#F5F3EE]/60 text-sm md:text-base max-w-md mx-auto">
-                  Оберіть свій рівень та розпочніть навчання вже сьогодні.
-                </p>
-              </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-5 md:gap-6">
                 {COURSES.map((c, i) => (
