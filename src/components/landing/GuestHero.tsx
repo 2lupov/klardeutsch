@@ -491,41 +491,75 @@ const GuestHero = () => {
                 className="w-40 h-40 md:w-48 md:h-48 mx-auto -mt-16 md:-mt-20 drop-shadow-2xl"
               />
 
-              <h3
-                className="text-2xl md:text-3xl font-extrabold mt-2 text-white leading-tight"
-                style={{ fontFamily: "Sora, sans-serif" }}
-              >
-                Ти впевнений, що не хочеш{" "}
-                <span className="text-[#F5A623]">обрати курс</span>?
-              </h3>
+              {trialStage === "ask" ? (
+                <>
+                  <h3
+                    className="text-2xl md:text-3xl font-extrabold mt-2 text-white leading-tight"
+                    style={{ fontFamily: "Sora, sans-serif" }}
+                  >
+                    Ти впевнений, що не хочеш{" "}
+                    <span className="text-[#F5A623]">обрати курс</span>?
+                  </h3>
 
-              <p className="text-[#F5F3EE]/70 text-sm md:text-base mt-3 leading-relaxed">
-                Перші <span className="text-[#6D5DFB] font-bold">5 днів</span> ти отримаєш його{" "}
-                <span className="text-[#F5A623] font-bold">безкоштовно</span>.
-                <br />
-                Оплачуєш тільки якщо сподобається.
-              </p>
+                  <p className="text-[#F5F3EE]/70 text-sm md:text-base mt-3 leading-relaxed">
+                    Перші <span className="text-[#6D5DFB] font-bold">5 днів</span> ти отримаєш його{" "}
+                    <span className="text-[#F5A623] font-bold">безкоштовно</span>.
+                    <br />
+                    Оплачуєш тільки якщо сподобається.
+                  </p>
 
-              <div className="flex flex-col gap-2.5 mt-6">
-                <button
-                  onClick={() => {
-                    setTrialConfirm(false);
-                    setStep(3);
-                  }}
-                  className="w-full bg-gradient-to-r from-[#6D5DFB] to-[#F5A623] text-white font-bold py-3.5 rounded-2xl text-sm md:text-base uppercase tracking-wider hover:scale-[1.02] active:scale-95 transition-transform shadow-lg shadow-[#6D5DFB]/40"
-                >
-                  Обрати курс — 5 днів безкоштовно
-                </button>
-                <button
-                  onClick={() => {
-                    setTrialConfirm(false);
-                    navigate("/auth");
-                  }}
-                  className="w-full text-[#F5F3EE]/50 hover:text-[#F5F3EE]/80 text-xs md:text-sm font-semibold uppercase tracking-widest py-2 transition-colors"
-                >
-                  Ні, дякую, просто платформа
-                </button>
-              </div>
+                  <div className="flex flex-col gap-2.5 mt-6">
+                    <button
+                      onClick={() => {
+                        setTrialConfirm(false);
+                        setStep(3);
+                      }}
+                      className="w-full bg-gradient-to-r from-[#6D5DFB] to-[#F5A623] text-white font-bold py-3.5 rounded-2xl text-sm md:text-base uppercase tracking-wider hover:scale-[1.02] active:scale-95 transition-transform shadow-lg shadow-[#6D5DFB]/40"
+                    >
+                      Обрати курс — 5 днів безкоштовно
+                    </button>
+                    <button
+                      onClick={() => setTrialStage("register")}
+                      className="w-full text-[#F5F3EE]/50 hover:text-[#F5F3EE]/80 text-xs md:text-sm font-semibold uppercase tracking-widest py-2 transition-colors"
+                    >
+                      Ні, дякую, просто платформа
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h3
+                    className="text-2xl md:text-3xl font-extrabold mt-2 text-white leading-tight"
+                    style={{ fontFamily: "Sora, sans-serif" }}
+                  >
+                    Вам треба{" "}
+                    <span className="text-[#6D5DFB]">зареєструватися</span>
+                  </h3>
+
+                  <p className="text-[#F5F3EE]/70 text-sm md:text-base mt-3 leading-relaxed">
+                    Щоб користуватися платформою, створіть безкоштовний акаунт — це займе менше хвилини.
+                  </p>
+
+                  <div className="flex flex-col gap-2.5 mt-6">
+                    <button
+                      onClick={() => {
+                        setTrialConfirm(false);
+                        navigate("/auth");
+                      }}
+                      className="w-full bg-gradient-to-r from-[#6D5DFB] to-[#F5A623] text-white font-bold py-3.5 rounded-2xl text-sm md:text-base uppercase tracking-wider hover:scale-[1.02] active:scale-95 transition-transform shadow-lg shadow-[#6D5DFB]/40"
+                    >
+                      Перейти до реєстрації
+                    </button>
+                    <button
+                      onClick={() => setTrialStage("ask")}
+                      className="w-full text-[#F5F3EE]/50 hover:text-[#F5F3EE]/80 text-xs md:text-sm font-semibold uppercase tracking-widest py-2 transition-colors"
+                    >
+                      ← Назад
+                    </button>
+                  </div>
+                </>
+              )}
+
             </motion.div>
           </motion.div>
         )}
