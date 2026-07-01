@@ -217,9 +217,10 @@ const ContentGenerator = ({ level }: { level: Level }) => {
           example: c.example || null,
           topic: c.topic || topic || "Allgemein",
           level,
+          target_language: targetLang,
           sort_order: i,
         }));
-        const { error } = await supabase.from("vocab_cards").insert(cards);
+        const { error } = await supabase.from(\"vocab_cards\").insert(cards);
         if (error) throw error;
         saved += cards.length;
       }
@@ -232,9 +233,10 @@ const ContentGenerator = ({ level }: { level: Level }) => {
           explanation: q.explanation || null,
           topic: q.topic || topic || "Allgemein",
           level,
+          target_language: targetLang,
           sort_order: i,
         }));
-        const { error } = await supabase.from("grammar_questions").insert(qs);
+        const { error } = await supabase.from(\"grammar_questions\").insert(qs);
         if (error) throw error;
         saved += qs.length;
       }
@@ -246,6 +248,7 @@ const ContentGenerator = ({ level }: { level: Level }) => {
           text: rt.text,
           topic: rt.topic || topic || "Allgemein",
           level,
+          target_language: targetLang,
         }).select("id").single();
         if (textErr) throw textErr;
 
@@ -271,6 +274,7 @@ const ContentGenerator = ({ level }: { level: Level }) => {
           text: lt.text,
           topic: lt.topic || topic || "Allgemein",
           level,
+          target_language: targetLang,
         }).select("id").single();
         if (textErr) throw textErr;
 
