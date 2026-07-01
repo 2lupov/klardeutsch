@@ -30,26 +30,26 @@ interface Props {
 }
 
 const levelColors: Record<string, string> = {
-  A1: "bg-emerald-500/20 text-emerald-400",
-  A2: "bg-sky-500/20 text-sky-400",
-  B1: "bg-amber-500/20 text-amber-400",
-  B2: "bg-orange-500/20 text-orange-400",
-  C1: "bg-rose-500/20 text-rose-400",
+  A1: "bg-primary/20 text-primary border border-primary/30",
+  A2: "bg-primary/20 text-primary border border-primary/30",
+  B1: "bg-accent/20 text-accent border border-accent/30",
+  B2: "bg-accent/20 text-accent border border-accent/30",
+  C1: "bg-accent/25 text-accent border border-accent/40",
 };
 
 const CourseCard = ({ course, lang, isPurchased, progress }: Props) => {
   const navigate = useNavigate();
   const difficulty = course.difficulty ?? course.level;
-  const colorClass = levelColors[difficulty] ?? "bg-primary/20 text-primary";
+  const colorClass = levelColors[difficulty] ?? "bg-primary/20 text-primary border border-primary/30";
 
   return (
     <motion.button
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -4 }}
+      whileHover={{ y: -6 }}
       transition={{ duration: 0.3 }}
       onClick={() => navigate(`/academy/${course.id}`)}
-      className="group relative flex flex-col rounded-2xl border border-border/30 bg-card/60 backdrop-blur-sm overflow-hidden text-left hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all"
+      className="group relative flex flex-col rounded-2xl border border-border/40 bg-card/70 backdrop-blur-sm overflow-hidden text-left hover:border-accent/50 hover:shadow-[0_20px_60px_-20px_hsl(var(--accent)/0.35)] transition-all"
     >
       {/* Thumbnail */}
       <div className="relative aspect-video bg-muted/30 overflow-hidden">
