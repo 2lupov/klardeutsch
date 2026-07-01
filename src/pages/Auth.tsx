@@ -127,7 +127,8 @@ const Auth = () => {
   const navigate = useNavigate();
   const logoRef = useRef<HTMLDivElement>(null);
   const { user, loading: authLoading } = useAuth();
-  const { t } = useLanguage();
+  const { t, setLang } = useLanguage();
+  useEffect(() => { setLang("uk"); }, [setLang]);
   const { isTelegram } = usePlatform();
 
   // Calculate logo fill progress based on form completion
