@@ -3,6 +3,7 @@ import { Level, CategoryData } from "@/data/lessons";
 import { fetchLevelData, fetchTopics } from "@/hooks/useLessons";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useTargetLanguage } from "@/contexts/TargetLanguageContext";
 
 import { useProgress } from "@/hooks/useProgress";
 import { usePlatform } from "@/hooks/usePlatform";
