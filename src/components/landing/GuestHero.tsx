@@ -69,10 +69,11 @@ const GuestHero = () => {
   return (
     <div
       className={`w-full bg-[#0F0F23] text-[#F5F3EE] font-[Manrope,sans-serif] -mt-4 ${
-        step === 2 ? "h-[100dvh] overflow-hidden" : "min-h-[100dvh]"
+        step === 2 ? "h-[100dvh] overflow-hidden flex flex-col" : "min-h-[100dvh]"
       }`}
       style={{ fontFamily: "Manrope, system-ui, sans-serif" }}
     >
+
       {/* Promo banner */}
       <div className="sticky top-0 z-20 w-full bg-gradient-to-r from-[#6D5DFB] via-[#4F46E5] to-[#F5A623] py-1.5 md:py-2.5 pl-16 pr-16 md:pl-4 md:pr-4 shadow-2xl shadow-[#6D5DFB]/20">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-center md:justify-between gap-1 md:gap-3 text-center md:text-left">
