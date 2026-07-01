@@ -37,10 +37,18 @@ function useCountdown() {
 const COURSES = [
   { level: "A1", title: "Початковий", desc: "База для тих, хто починає з абсолютного нуля.", price: "4 200 ₴", accent: false },
   { level: "A2", title: "Базовий", desc: "Для простих розмов на побутові теми.", price: "4 500 ₴", accent: false },
-  { level: "B1", title: "Середній", desc: "Ключ до життя та роботи в Німеччині.", price: "5 100 ₴", accent: true },
+  { level: "B1", title: "Середній", desc: "Ключ до життя та роботи за кордоном.", price: "5 100 ₴", accent: true },
   { level: "B2", title: "Вище середнього", desc: "Складні теми та професійна лексика.", price: "5 800 ₴", accent: false },
   { level: "C1", title: "Просунутий", desc: "Вільне володіння на рівні носія.", price: "6 500 ₴", accent: false },
 ];
+
+const LANG_COPY: Record<string, { name: string; nameAcc: string; heroKicker: string; mascotQuote: string }> = {
+  de: { name: "Німецька", nameAcc: "німецьку", heroKicker: "Твій шлях до Німеччини", mascotQuote: "Hallo! Я твій гід світом німецької. Разом ми пройдемо шлях від А1 до С1!" },
+  en: { name: "Англійська", nameAcc: "англійську", heroKicker: "Твій ключ до світу", mascotQuote: "Hello! Я твій гід світом англійської. Разом ми дійдемо від A1 до C1!" },
+  pl: { name: "Польська", nameAcc: "польську", heroKicker: "Твій шлях до Польщі", mascotQuote: "Cześć! Я твій гід світом польської. Разом ми дійдемо від A1 до C1!" },
+  es: { name: "Іспанська", nameAcc: "іспанську", heroKicker: "Твій шлях до Іспанії", mascotQuote: "¡Hola! Я твій гід світом іспанської. Разом ми дійдемо від A1 до C1!" },
+  fr: { name: "Французька", nameAcc: "французьку", heroKicker: "Твій шлях до Франції", mascotQuote: "Bonjour! Я твій гід світом французької. Разом ми дійдемо від A1 до C1!" },
+};
 
 const TOTAL_STEPS = 3;
 
