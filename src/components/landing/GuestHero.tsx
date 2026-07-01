@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, MoveRight } from "lucide-react";
+import { ArrowRight, MoveRight, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import pandaExplorer from "@/assets/panda-explorer.png";
+import { useTargetLanguage } from "@/contexts/TargetLanguageContext";
+
 
 // ============================================================
 // Klar.academy — Cinematic Editorial rebrand landing (guests)
@@ -76,6 +78,8 @@ const COURSES = [
 const GuestHero = () => {
   const navigate = useNavigate();
   const { days, hours, mins } = useCountdown();
+  const { targetLang, setTargetLang, languages } = useTargetLanguage();
+
 
   return (
     <div
@@ -128,9 +132,71 @@ const GuestHero = () => {
 
       {/* ══════════════ Main content ══════════════ */}
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-10 md:py-20 space-y-20 md:space-y-32">
+        {/* ───── LANGUAGE PICKER ───── */}
+        <section id="language-picker" className="space-y-6 md:space-y-8">
+          <div className="text-center space-y-3">
+            <div className="inline-flex items-center gap-3 text-[#F5A623]">
+              <div className="h-px w-8 bg-[#F5A623]" />
+              <span className="uppercase tracking-[0.25em] font-bold text-[11px] md:text-xs">
+                Крок 1 · Обери мову
+              </span>
+              <div className="h-px w-8 bg-[#F5A623]" />
+            </div>
+            <h2
+              className="text-3xl md:text-5xl font-extrabold tracking-tight"
+              style={{ fontFamily: "Sora, sans-serif" }}
+            >
+              Яку мову ти хочеш <span className="text-[#6D5DFB]">вивчати?</span>
+            </h2>
+            <p className="text-[#F5F3EE]/60 text-sm md:text-base max-w-md mx-auto">
+              Обери мову — і ми покажемо курси та безкоштовне демо саме для неї.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
+            {languages.map((l) => {
+              const active = l.code === targetLang;
+              const disabled = !l.is_active;
+              return (
+                <button
+                  key={l.code}
+                  disabled={disabled}
+                  onClick={() => setTargetLang(l.code)}
+                  className={`relative rounded-2xl p-5 md:p-6 flex flex-col items-center gap-2 md:gap-3 transition-all border ${
+                    disabled
+                      ? "bg-[#1A1A3E]/40 border-white/5 opacity-50 cursor-not-allowed"
+                      : active
+                      ? "bg-[#6D5DFB] border-[#6D5DFB] shadow-[0_15px_40px_-10px_rgba(109,93,251,0.6)] -translate-y-1"
+                      : "bg-[#1A1A3E] border-white/5 hover:border-[#6D5DFB]/40 hover:-translate-y-1"
+                  }`}
+                >
+                  {active && (
+                    <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white text-[#6D5DFB] flex items-center justify-center">
+                      <Check className="w-3.5 h-3.5" strokeWidth={3} />
+                    </div>
+                  )}
+                  <span className="text-4xl md:text-5xl leading-none">{l.flag_emoji}</span>
+                  <span
+                    className={`font-bold text-sm md:text-base ${active ? "text-white" : ""}`}
+                    style={{ fontFamily: "Sora, sans-serif" }}
+                  >
+                    {l.name_uk}
+                  </span>
+                  {disabled && (
+                    <span className="text-[9px] uppercase tracking-widest text-[#F5A623] font-bold">
+                      Скоро
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
         {/* ───── HERO ───── */}
         <section className="grid lg:grid-cols-2 gap-10 lg:gap-12 items-center">
           <motion.div
+
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
