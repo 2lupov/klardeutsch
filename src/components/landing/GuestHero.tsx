@@ -213,16 +213,25 @@ const GuestHero = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.35 }}
-              className="grid lg:grid-cols-2 gap-10 lg:gap-12 items-center"
+              className="grid lg:grid-cols-2 gap-6 lg:gap-12 items-center"
             >
-              <div className="space-y-7 md:space-y-8 relative z-10">
-                <div className="relative">
-
-                  <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold leading-[1.02] tracking-tight" style={{ fontFamily: "Sora, sans-serif" }}>
-                    {copy.name} мова <br className="hidden sm:block" />
-                    <span className="text-[#6D5DFB]">без кордонів.</span>
-                  </h1>
-                  {/* Floating CTA in the whitespace between the wrapped headline lines */}
+              <div className="space-y-4 md:space-y-8 relative z-10">
+                <div className="relative flex items-start gap-3 lg:block">
+                  <div className="flex-1 min-w-0">
+                    <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-extrabold leading-[1.05] tracking-tight" style={{ fontFamily: "Sora, sans-serif" }}>
+                      {copy.name} мова <br className="hidden sm:block" />
+                      <span className="text-[#6D5DFB]">без кордонів.</span>
+                    </h1>
+                  </div>
+                  {/* Small floating panda on mobile only */}
+                  <motion.img
+                    src={pandaExplorer}
+                    alt={`Panda Explorer — гід у світі ${copy.nameAcc}`}
+                    className="lg:hidden w-20 sm:w-28 flex-shrink-0 object-contain drop-shadow-[0_10px_20px_rgba(109,93,251,0.4)]"
+                    animate={{ y: [0, -6, 0] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                  />
+                  {/* Floating CTA (desktop) */}
                   <button
                     onClick={goNext}
                     className="hidden lg:flex absolute right-0 top-[38%] bg-[#6D5DFB] hover:bg-[#5a4ae0] text-white px-7 py-4 rounded-2xl font-bold text-base transition-all shadow-[0_10px_40px_-8px_rgba(109,93,251,0.6)] items-center gap-3 group active:scale-95"
@@ -231,20 +240,26 @@ const GuestHero = () => {
                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </button>
                 </div>
-                <p className="text-lg md:text-xl text-[#F5F3EE]/60 max-w-lg leading-relaxed">
-                  Від початківця до вільного спілкування. Авторська методика, що знімає мовний бар'єр за 3 місяці.
+                <p className="text-sm md:text-xl text-[#F5F3EE]/60 max-w-lg leading-relaxed">
+                  Від початківця до вільного спілкування — за 3 місяці.
                 </p>
                 <button
                   onClick={goNext}
-                  className="lg:hidden bg-[#6D5DFB] hover:bg-[#5a4ae0] text-white px-8 py-4 rounded-2xl font-bold text-base transition-all shadow-[0_10px_40px_-8px_rgba(109,93,251,0.6)] flex items-center gap-3 group active:scale-95"
+                  className="lg:hidden bg-[#6D5DFB] hover:bg-[#5a4ae0] text-white px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-[0_10px_40px_-8px_rgba(109,93,251,0.6)] flex items-center gap-2 group active:scale-95"
                 >
                   Показати курси
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </button>
+                {/* Compact quote card on mobile */}
+                <div className="lg:hidden bg-black/40 backdrop-blur-xl p-3 rounded-xl border border-white/10">
+                  <p className="text-[#F5A623] font-bold italic text-xs leading-snug" style={{ fontFamily: "Sora, sans-serif" }}>
+                    "{copy.mascotQuote}"
+                  </p>
+                </div>
               </div>
 
-
-              <div className="relative flex justify-center items-center">
+              {/* Big panda card (desktop only) */}
+              <div className="hidden lg:flex relative justify-center items-center">
                 <div className="absolute w-[110%] h-[110%] bg-[#6D5DFB]/15 rounded-full blur-3xl" />
                 <div className="relative w-full aspect-square max-w-lg">
                   <div className="absolute inset-0 bg-gradient-to-br from-[#1A1A3E] to-[#0F0F23] rounded-3xl border border-white/5 overflow-hidden shadow-2xl">
@@ -255,8 +270,8 @@ const GuestHero = () => {
                       animate={{ y: [0, -12, 0] }}
                       transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
                     />
-                    <div className="absolute bottom-5 left-5 right-5 bg-black/50 backdrop-blur-xl p-4 md:p-5 rounded-2xl border border-white/10">
-                      <p className="text-[#F5A623] font-bold italic text-sm md:text-base leading-snug" style={{ fontFamily: "Sora, sans-serif" }}>
+                    <div className="absolute bottom-5 left-5 right-5 bg-black/50 backdrop-blur-xl p-5 rounded-2xl border border-white/10">
+                      <p className="text-[#F5A623] font-bold italic text-base leading-snug" style={{ fontFamily: "Sora, sans-serif" }}>
                         "{copy.mascotQuote}"
                       </p>
                     </div>
@@ -265,6 +280,7 @@ const GuestHero = () => {
               </div>
             </motion.section>
           )}
+
 
           {step === 3 && (
             <motion.section
