@@ -56,9 +56,11 @@ serve(async (req) => {
   }
 
   try {
-
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
+
 
     // 1. Update existing fake users with small realistic increments
     const { data: fakes, error: fetchErr } = await supabase
