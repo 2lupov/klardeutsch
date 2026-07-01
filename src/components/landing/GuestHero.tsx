@@ -177,16 +177,16 @@ const GuestHero = () => {
               transition={{ duration: 0.35 }}
               className="flex flex-col justify-center gap-3 md:gap-6 h-full"
             >
-              <div className="text-center space-y-2 md:space-y-3">
+              <div className="text-center space-y-1.5 md:space-y-3">
                 <div className="inline-flex items-center gap-3 text-[#F5A623]">
                   <div className="h-px w-8 bg-[#F5A623]" />
                   <span className="uppercase tracking-[0.25em] font-bold text-[10px] md:text-xs">Обери мову</span>
                   <div className="h-px w-8 bg-[#F5A623]" />
                 </div>
-                <h2 className="text-2xl md:text-5xl font-extrabold tracking-tight leading-tight" style={{ fontFamily: "Sora, sans-serif" }}>
+                <h2 className="text-xl md:text-5xl font-extrabold tracking-tight leading-tight" style={{ fontFamily: "Sora, sans-serif" }}>
                   Яку мову ти хочеш <span className="text-[#6D5DFB]">вивчати?</span>
                 </h2>
-                <p className="text-[#F5F3EE]/60 text-xs md:text-base max-w-md mx-auto">
+                <p className="text-[#F5F3EE]/60 text-[11px] md:text-base max-w-md mx-auto leading-snug">
                   Обери мову — і ми покажемо курси та демо саме для неї.
                 </p>
               </div>
