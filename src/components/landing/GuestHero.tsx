@@ -115,7 +115,7 @@ const GuestHero = () => {
             <ArrowLeft className="w-4 h-4" /> Назад
           </button>
           <span className="text-[10px] md:text-xs uppercase tracking-[0.25em] font-bold text-[#F5F3EE]/50">
-            Крок {step} з {TOTAL_STEPS}
+            Крок {step}
           </span>
           <div className="w-[60px]" />
         </div>
