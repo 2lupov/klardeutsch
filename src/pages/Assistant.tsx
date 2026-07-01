@@ -92,10 +92,10 @@ const ConjugationTable = ({ title, data, icon }: { title: string; data: Record<s
 /* ═══════════════════════════════════════════════════════════ */
 
 const MENU_THEMES = {
-  chat: { gradient: "from-amber-500/15 to-amber-600/5", glow: "shadow-amber-500/10", border: "hover:border-amber-500/40", accent: "text-amber-400" },
-  dictionary: { gradient: "from-emerald-500/15 to-emerald-600/5", glow: "shadow-emerald-500/10", border: "hover:border-emerald-500/40", accent: "text-emerald-400" },
-  reading: { gradient: "from-blue-500/15 to-blue-600/5", glow: "shadow-blue-500/10", border: "hover:border-blue-500/40", accent: "text-blue-400" },
-  files: { gradient: "from-purple-500/15 to-purple-600/5", glow: "shadow-purple-500/10", border: "hover:border-purple-500/40", accent: "text-purple-400" },
+  chat:       { gradient: "from-accent/20 to-accent/5",   glow: "shadow-accent/20",  border: "hover:border-accent/50",  accent: "text-accent" },
+  dictionary: { gradient: "from-primary/20 to-primary/5", glow: "shadow-primary/20", border: "hover:border-primary/50", accent: "text-primary" },
+  reading:    { gradient: "from-primary/15 to-accent/10", glow: "shadow-primary/15", border: "hover:border-primary/40", accent: "text-primary" },
+  files:      { gradient: "from-accent/15 to-primary/10", glow: "shadow-accent/15",  border: "hover:border-accent/40",  accent: "text-accent" },
 };
 
 const Assistant = () => {
