@@ -423,10 +423,7 @@ const Auth = () => {
       >
       <div className="w-full max-w-sm">
         <div className="text-center mb-5 animate-auth-fade-up" style={{ animationDelay: "0.1s" }}>
-          <div className="flex justify-end mb-1">
-            <LanguageSwitcher />
-          </div>
-          <div ref={logoRef} className={showFireworks ? "animate-klar-explode" : ""}>
+          <div ref={logoRef} className={`pt-8 ${showFireworks ? "animate-klar-explode" : ""}`}>
             <AuthKlarLogo progress={showFireworks ? 1 : getProgress()} />
           </div>
           <p className="text-muted-foreground text-sm mt-1 animate-auth-fade-up" style={{ animationDelay: "0.7s" }}>
