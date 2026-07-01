@@ -955,6 +955,7 @@ const Profile = () => {
         <NavButton icon={<Bell className="w-4.5 h-4.5" />} label={t("notificationsTitle")} subtitle={profile.telegram_chat_id ? "Telegram ✅" : undefined} onClick={() => setScreen("notifications")} iconBg="bg-sky-500/15 text-sky-400" />
         <NavButton icon={<Users className="w-4.5 h-4.5" />} label={lang === "uk" ? "Друзі" : "Друзья"} badge={pendingFriendRequests > 0 ? pendingFriendRequests : undefined} onClick={() => setScreen("friends")} iconBg="bg-green-500/15 text-green-400" />
         <NavButton icon={<Send className="w-4.5 h-4.5" />} label={t("referralsTitle")} onClick={() => setScreen("referrals")} iconBg="bg-violet-500/15 text-violet-400" />
+        <NavButton icon={<Link2 className="w-4.5 h-4.5" />} label={lang === "uk" ? "Прив'язані акаунти" : "Привязанные аккаунты"} onClick={() => setScreen("accounts")} iconBg="bg-indigo-500/15 text-indigo-400" />
         <NavButton icon={<WifiOff className="w-4.5 h-4.5" />} label="Офлайн-режим" onClick={() => setScreen("offline")} iconBg="bg-muted text-muted-foreground" />
 
         {/* Shop banner for mobile */}
