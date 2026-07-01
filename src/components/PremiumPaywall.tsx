@@ -36,7 +36,8 @@ const PremiumPaywall = ({ open, onClose, type, highlightPlan }: Props) => {
         throw new Error("No checkout URL returned");
       }
     } catch (e) {
-      toast({ title: lang === "uk" ? "Помилка" : "Ошибка", variant: "destructive" });
+      const msg = e instanceof Error ? e.message : String(e);
+      toast({ title: lang === "uk" ? "Помилка оплати" : "Ошибка оплаты", description: msg, variant: "destructive" });
     } finally {
       setLoadingPlan(null);
     }
