@@ -378,11 +378,8 @@ const GuestHero = () => {
               className="space-y-10 md:space-y-14"
             >
               <div className="text-center space-y-3">
-                <div className="inline-flex items-center gap-3 text-[#F5A623]">
-                  <div className="h-px w-8 bg-[#F5A623]" />
-                  <span className="uppercase tracking-[0.25em] font-bold text-[11px] md:text-xs">Обери свій рівень</span>
-                  <div className="h-px w-8 bg-[#F5A623]" />
-                </div>
+
+
                 <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight" style={{ fontFamily: "Sora, sans-serif" }}>
                   Наші <span className="text-[#6D5DFB]">курси</span>
                 </h2>
