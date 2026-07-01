@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import { TargetLanguageProvider } from "@/contexts/TargetLanguageContext";
 import { LofiProvider } from "@/contexts/LofiContext";
 import { ListeningAudioProvider } from "@/contexts/ListeningAudioContext";
 import { usePlatform } from "@/hooks/usePlatform";
@@ -111,6 +112,7 @@ const App = () => (
       <LofiProvider>
       <ListeningAudioProvider>
       <AuthProvider>
+        <TargetLanguageProvider>
         <TooltipProvider>
           <Toaster />
           <Sonner />
@@ -122,6 +124,7 @@ const App = () => (
             <CookieBanner />
           </BrowserRouter>
         </TooltipProvider>
+        </TargetLanguageProvider>
       </AuthProvider>
       </ListeningAudioProvider>
       </LofiProvider>

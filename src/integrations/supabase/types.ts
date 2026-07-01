@@ -39,6 +39,7 @@ export type Database = {
           level: string
           options: Json
           sort_order: number | null
+          target_language: string
           timer_sec: number
         }
         Insert: {
@@ -50,6 +51,7 @@ export type Database = {
           level?: string
           options?: Json
           sort_order?: number | null
+          target_language?: string
           timer_sec?: number
         }
         Update: {
@@ -61,9 +63,18 @@ export type Database = {
           level?: string
           options?: Json
           sort_order?: number | null
+          target_language?: string
           timer_sec?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "cafe_scenarios_target_language_fkey"
+            columns: ["target_language"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+        ]
       }
       challenges: {
         Row: {
@@ -334,6 +345,7 @@ export type Database = {
           lesson_type: string | null
           module_id: string | null
           sort_order: number | null
+          target_language: string
           theory: string
           title: string
           video_duration_sec: number | null
@@ -354,6 +366,7 @@ export type Database = {
           lesson_type?: string | null
           module_id?: string | null
           sort_order?: number | null
+          target_language?: string
           theory?: string
           title: string
           video_duration_sec?: number | null
@@ -374,6 +387,7 @@ export type Database = {
           lesson_type?: string | null
           module_id?: string | null
           sort_order?: number | null
+          target_language?: string
           theory?: string
           title?: string
           video_duration_sec?: number | null
@@ -396,6 +410,13 @@ export type Database = {
             referencedRelation: "course_modules"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "course_lessons_target_language_fkey"
+            columns: ["target_language"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
         ]
       }
       course_modules: {
@@ -406,6 +427,7 @@ export type Database = {
           id: string
           is_free_preview: boolean | null
           sort_order: number
+          target_language: string
           title: string
         }
         Insert: {
@@ -415,6 +437,7 @@ export type Database = {
           id?: string
           is_free_preview?: boolean | null
           sort_order?: number
+          target_language?: string
           title: string
         }
         Update: {
@@ -424,6 +447,7 @@ export type Database = {
           id?: string
           is_free_preview?: boolean | null
           sort_order?: number
+          target_language?: string
           title?: string
         }
         Relationships: [
@@ -433,6 +457,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "courses"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_modules_target_language_fkey"
+            columns: ["target_language"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
           },
         ]
       }
@@ -563,6 +594,7 @@ export type Database = {
           price: number
           price_coins: number | null
           tags: string[] | null
+          target_language: string
           thumbnail_url: string | null
           title: string
           total_hours: number | null
@@ -587,6 +619,7 @@ export type Database = {
           price?: number
           price_coins?: number | null
           tags?: string[] | null
+          target_language?: string
           thumbnail_url?: string | null
           title: string
           total_hours?: number | null
@@ -611,6 +644,7 @@ export type Database = {
           price?: number
           price_coins?: number | null
           tags?: string[] | null
+          target_language?: string
           thumbnail_url?: string | null
           title?: string
           total_hours?: number | null
@@ -618,7 +652,15 @@ export type Database = {
           total_modules?: number | null
           trailer_url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "courses_target_language_fkey"
+            columns: ["target_language"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+        ]
       }
       custom_words: {
         Row: {
@@ -885,6 +927,7 @@ export type Database = {
           created_at: string
           id: string
           level: string
+          target_language: string
           theory: string
           topic: string
         }
@@ -892,6 +935,7 @@ export type Database = {
           created_at?: string
           id?: string
           level: string
+          target_language?: string
           theory: string
           topic?: string
         }
@@ -899,10 +943,19 @@ export type Database = {
           created_at?: string
           id?: string
           level?: string
+          target_language?: string
           theory?: string
           topic?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "grammar_lessons_target_language_fkey"
+            columns: ["target_language"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+        ]
       }
       grammar_questions: {
         Row: {
@@ -914,6 +967,7 @@ export type Database = {
           options: string[]
           question: string
           sort_order: number | null
+          target_language: string
           topic: string
         }
         Insert: {
@@ -925,6 +979,7 @@ export type Database = {
           options: string[]
           question: string
           sort_order?: number | null
+          target_language?: string
           topic?: string
         }
         Update: {
@@ -936,9 +991,18 @@ export type Database = {
           options?: string[]
           question?: string
           sort_order?: number | null
+          target_language?: string
           topic?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "grammar_questions_target_language_fkey"
+            columns: ["target_language"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+        ]
       }
       kids_placement_questions: {
         Row: {
@@ -951,6 +1015,7 @@ export type Database = {
           options: Json
           question_de: string
           sort_order: number | null
+          target_language: string
         }
         Insert: {
           correct: number
@@ -962,6 +1027,7 @@ export type Database = {
           options: Json
           question_de: string
           sort_order?: number | null
+          target_language?: string
         }
         Update: {
           correct?: number
@@ -973,6 +1039,51 @@ export type Database = {
           options?: Json
           question_de?: string
           sort_order?: number | null
+          target_language?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kids_placement_questions_target_language_fkey"
+            columns: ["target_language"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      languages: {
+        Row: {
+          code: string
+          created_at: string
+          flag_emoji: string
+          is_active: boolean
+          name_en: string
+          name_native: string
+          name_ru: string
+          name_uk: string
+          sort_order: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          flag_emoji: string
+          is_active?: boolean
+          name_en: string
+          name_native: string
+          name_ru: string
+          name_uk: string
+          sort_order?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          flag_emoji?: string
+          is_active?: boolean
+          name_en?: string
+          name_native?: string
+          name_ru?: string
+          name_uk?: string
+          sort_order?: number
         }
         Relationships: []
       }
@@ -983,6 +1094,7 @@ export type Database = {
           listening_id: string
           sentence: string
           sort_order: number | null
+          target_language: string
         }
         Insert: {
           created_at?: string
@@ -990,6 +1102,7 @@ export type Database = {
           listening_id: string
           sentence: string
           sort_order?: number | null
+          target_language?: string
         }
         Update: {
           created_at?: string
@@ -997,6 +1110,7 @@ export type Database = {
           listening_id?: string
           sentence?: string
           sort_order?: number | null
+          target_language?: string
         }
         Relationships: [
           {
@@ -1005,6 +1119,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "listening_texts"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listening_dictations_target_language_fkey"
+            columns: ["target_language"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
           },
         ]
       }
@@ -1018,6 +1139,7 @@ export type Database = {
           options: string[]
           question: string
           sort_order: number | null
+          target_language: string
         }
         Insert: {
           correct_index: number
@@ -1028,6 +1150,7 @@ export type Database = {
           options: string[]
           question: string
           sort_order?: number | null
+          target_language?: string
         }
         Update: {
           correct_index?: number
@@ -1038,6 +1161,7 @@ export type Database = {
           options?: string[]
           question?: string
           sort_order?: number | null
+          target_language?: string
         }
         Relationships: [
           {
@@ -1046,6 +1170,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "listening_texts"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listening_questions_target_language_fkey"
+            columns: ["target_language"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
           },
         ]
       }
@@ -1056,6 +1187,7 @@ export type Database = {
           id: string
           level: string
           sort_order: number | null
+          target_language: string
           text: string
           title: string
           topic: string
@@ -1067,6 +1199,7 @@ export type Database = {
           id?: string
           level: string
           sort_order?: number | null
+          target_language?: string
           text: string
           title: string
           topic?: string
@@ -1078,12 +1211,21 @@ export type Database = {
           id?: string
           level?: string
           sort_order?: number | null
+          target_language?: string
           text?: string
           title?: string
           topic?: string
           voice_config?: Json | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "listening_texts_target_language_fkey"
+            columns: ["target_language"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+        ]
       }
       mono_payments: {
         Row: {
@@ -1190,6 +1332,7 @@ export type Database = {
           options: Json
           question_de: string
           sort_order: number | null
+          target_language: string
         }
         Insert: {
           correct: number
@@ -1199,6 +1342,7 @@ export type Database = {
           options: Json
           question_de: string
           sort_order?: number | null
+          target_language?: string
         }
         Update: {
           correct?: number
@@ -1208,8 +1352,17 @@ export type Database = {
           options?: Json
           question_de?: string
           sort_order?: number | null
+          target_language?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "placement_questions_target_language_fkey"
+            columns: ["target_language"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+        ]
       }
       products: {
         Row: {
@@ -1276,6 +1429,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          active_target_language: string
           age: number | null
           avatar_url: string | null
           created_at: string
@@ -1299,6 +1453,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          active_target_language?: string
           age?: number | null
           avatar_url?: string | null
           created_at?: string
@@ -1322,6 +1477,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          active_target_language?: string
           age?: number | null
           avatar_url?: string | null
           created_at?: string
@@ -1344,7 +1500,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_active_target_language_fkey"
+            columns: ["active_target_language"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+        ]
       }
       purchases: {
         Row: {
@@ -1385,6 +1549,7 @@ export type Database = {
           question: string
           reading_id: string
           sort_order: number | null
+          target_language: string
         }
         Insert: {
           correct_index: number
@@ -1395,6 +1560,7 @@ export type Database = {
           question: string
           reading_id: string
           sort_order?: number | null
+          target_language?: string
         }
         Update: {
           correct_index?: number
@@ -1405,6 +1571,7 @@ export type Database = {
           question?: string
           reading_id?: string
           sort_order?: number | null
+          target_language?: string
         }
         Relationships: [
           {
@@ -1414,6 +1581,13 @@ export type Database = {
             referencedRelation: "reading_texts"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "reading_questions_target_language_fkey"
+            columns: ["target_language"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
         ]
       }
       reading_texts: {
@@ -1422,6 +1596,7 @@ export type Database = {
           id: string
           level: string
           sort_order: number | null
+          target_language: string
           text: string
           title: string
           topic: string
@@ -1431,6 +1606,7 @@ export type Database = {
           id?: string
           level: string
           sort_order?: number | null
+          target_language?: string
           text: string
           title: string
           topic?: string
@@ -1440,11 +1616,20 @@ export type Database = {
           id?: string
           level?: string
           sort_order?: number | null
+          target_language?: string
           text?: string
           title?: string
           topic?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "reading_texts_target_language_fkey"
+            columns: ["target_language"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+        ]
       }
       referral_challenges: {
         Row: {
@@ -1901,6 +2086,7 @@ export type Database = {
           level: string
           name: string
           sort_order: number | null
+          target_language: string
         }
         Insert: {
           created_at?: string
@@ -1909,6 +2095,7 @@ export type Database = {
           level?: string
           name: string
           sort_order?: number | null
+          target_language?: string
         }
         Update: {
           created_at?: string
@@ -1917,8 +2104,17 @@ export type Database = {
           level?: string
           name?: string
           sort_order?: number | null
+          target_language?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "topics_target_language_fkey"
+            columns: ["target_language"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+        ]
       }
       translation_overrides: {
         Row: {
@@ -2154,6 +2350,7 @@ export type Database = {
           level: string
           name: string
           structure: Json
+          target_language: string
           teacher_id: string
           theory_template: string | null
           topic: string | null
@@ -2174,6 +2371,7 @@ export type Database = {
           level?: string
           name: string
           structure?: Json
+          target_language?: string
           teacher_id: string
           theory_template?: string | null
           topic?: string | null
@@ -2194,6 +2392,7 @@ export type Database = {
           level?: string
           name?: string
           structure?: Json
+          target_language?: string
           teacher_id?: string
           theory_template?: string | null
           topic?: string | null
@@ -2202,7 +2401,15 @@ export type Database = {
           vocabulary?: Json
           words_count?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tutoring_lesson_templates_target_language_fkey"
+            columns: ["target_language"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+        ]
       }
       tutoring_lesson_words: {
         Row: {
@@ -2632,6 +2839,7 @@ export type Database = {
           level: string
           russian: string
           sort_order: number | null
+          target_language: string
           topic: string
           ukrainian: string
         }
@@ -2644,6 +2852,7 @@ export type Database = {
           level: string
           russian: string
           sort_order?: number | null
+          target_language?: string
           topic?: string
           ukrainian?: string
         }
@@ -2656,10 +2865,19 @@ export type Database = {
           level?: string
           russian?: string
           sort_order?: number | null
+          target_language?: string
           topic?: string
           ukrainian?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "vocab_cards_target_language_fkey"
+            columns: ["target_language"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+        ]
       }
       xp_transactions: {
         Row: {
