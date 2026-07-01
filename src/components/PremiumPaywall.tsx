@@ -203,21 +203,21 @@ const PremiumPaywall = ({ open, onClose, type, highlightPlan }: Props) => {
               return (
                 <div
                   key={p.id}
-                  className={`relative rounded-xl border p-4 flex flex-col transition-all ${
+                  className={`relative rounded-2xl border p-4 flex flex-col transition-all ${
                     isHighlighted
-                      ? "border-primary bg-primary/5 shadow-lg shadow-primary/10"
-                      : "border-border/30 bg-card"
+                      ? "border-accent/60 bg-accent/5 shadow-xl shadow-accent/20 scale-[1.02]"
+                      : "border-border/40 bg-card/60 hover:border-border"
                   }`}
                 >
                   {p.popular && (
-                    <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] px-3 py-0.5 rounded-full font-bold whitespace-nowrap">
+                    <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-accent text-accent-foreground text-[10px] px-3 py-0.5 rounded-full font-bold whitespace-nowrap shadow-lg shadow-accent/30">
                       {lang === "uk" ? "Найвигідніше" : "Лучшая цена"}
                     </span>
                   )}
 
                   <div className="flex items-center gap-2 mb-3">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isHighlighted ? "bg-primary/20" : "bg-muted/50"}`}>
-                      <p.icon className={`w-4 h-4 ${isHighlighted ? "text-primary" : "text-muted-foreground"}`} />
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isHighlighted ? "bg-accent/20" : "bg-muted/50"}`}>
+                      <p.icon className={`w-4 h-4 ${isHighlighted ? "text-accent" : "text-muted-foreground"}`} />
                     </div>
                     <h3 className="font-display font-bold text-sm text-foreground">{p.name}</h3>
                   </div>
@@ -237,7 +237,7 @@ const PremiumPaywall = ({ open, onClose, type, highlightPlan }: Props) => {
                   <div className="space-y-2 mb-4 flex-1">
                     {p.features.map((f, i) => (
                       <div key={i} className="flex items-center gap-2">
-                        <Check className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+                        <Check className={`w-3.5 h-3.5 flex-shrink-0 ${isHighlighted ? "text-accent" : "text-primary"}`} />
                         <span className="text-xs text-foreground/80">{f.text}</span>
                       </div>
                     ))}
@@ -249,7 +249,7 @@ const PremiumPaywall = ({ open, onClose, type, highlightPlan }: Props) => {
                     size="sm"
                     className={`w-full text-xs font-display font-bold ${
                       isHighlighted
-                        ? "bg-primary hover:bg-primary/90"
+                        ? "bg-accent text-accent-foreground hover:bg-accent/90 shadow-lg shadow-accent/25"
                         : "bg-foreground/10 hover:bg-foreground/20 text-foreground"
                     }`}
                   >
