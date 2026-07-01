@@ -262,8 +262,8 @@ const PremiumPaywall = ({ open, onClose, type, highlightPlan }: Props) => {
 
           <p className="text-[10px] text-center text-muted-foreground pb-4 px-6">
             {lang === "uk"
-              ? "Скасувати можна будь-коли. Оплата через Stripe."
-              : "Отменить можно в любое время. Оплата через Stripe."}
+              ? "Оплата через Monobank. Скасувати можна будь-коли."
+              : "Оплата через Monobank. Отменить можно в любое время."}
           </p>
         </motion.div>
       </motion.div>
