@@ -298,11 +298,18 @@ const GuestHero = () => {
                       animate={{ y: [0, -12, 0] }}
                       transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
                     />
-                    <div className="absolute bottom-5 left-5 right-5 bg-black/50 backdrop-blur-xl p-5 rounded-2xl border border-white/10">
-                      <p className="text-[#F5A623] font-bold italic text-base leading-snug" style={{ fontFamily: "Sora, sans-serif" }}>
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      transition={{ delay: 0.3, type: "spring", stiffness: 240, damping: 20 }}
+                      className="absolute top-6 right-6 max-w-[55%] bg-white text-[#0F0F23] p-4 rounded-2xl rounded-br-sm shadow-2xl border border-[#F5A623]/40"
+                    >
+                      <p className="text-[#0F0F23] font-bold italic text-base leading-snug" style={{ fontFamily: "Sora, sans-serif" }}>
                         "{copy.mascotQuote}"
                       </p>
-                    </div>
+                      <div className="absolute -bottom-2 right-8 w-4 h-4 bg-white border-b border-r border-[#F5A623]/40 rotate-45" />
+                    </motion.div>
+
                   </div>
                 </div>
               </div>
