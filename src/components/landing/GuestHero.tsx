@@ -521,12 +521,6 @@ const GuestHero = () => {
                     >
                       Обрати курс — 5 днів безкоштовно
                     </button>
-                    <button
-                      onClick={() => setTrialStage("register")}
-                      className="w-full text-[#F5F3EE]/50 hover:text-[#F5F3EE]/80 text-xs md:text-sm font-semibold uppercase tracking-widest py-2 transition-colors"
-                    >
-                      Ні, дякую, просто платформа
-                    </button>
                   </div>
                 </>
               ) : (
