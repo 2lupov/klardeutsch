@@ -234,6 +234,26 @@ const Index = () => {
         <div className="fog-overlay" style={{ "--clarity": clarity } as React.CSSProperties} />
       )}
 
+      {/* Guest landing: full-bleed, breaks out of the constrained container */}
+      {screen === "levels" && !user && (
+        <div className="w-full">
+          <GuestHero />
+          <div className="max-w-4xl mx-auto px-4 py-12">
+            <div className="text-center mb-6">
+              <p className="text-xs uppercase tracking-[0.25em] text-[#F5A623] font-bold mb-2">
+                Free preview
+              </p>
+              <h3 className="text-2xl md:text-3xl font-extrabold" style={{ fontFamily: "Sora, sans-serif" }}>
+                Спробуй платформу без реєстрації
+              </h3>
+            </div>
+            <div id="levels-section" className="w-full">
+              <LevelSelector onSelect={handleLevelSelect} />
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className={`flex-1 w-full mx-auto px-4 relative z-10 flex flex-col items-center justify-center ${isMobile ? "max-w-md py-4" : "max-w-4xl py-4"}`}>
         {screen === "exercise" && (
           <button
@@ -245,18 +265,15 @@ const Index = () => {
           </button>
         )}
 
-        {screen === "levels" && (
+        {screen === "levels" && user && (
           <>
-            {!user && <GuestHero />}
             <div id="levels-section" className="w-full">
               <LevelSelector onSelect={handleLevelSelect} />
             </div>
-            {user && (
-              <div className={`w-full mt-3 ${isMobile ? "max-w-md" : "max-w-2xl"} mx-auto space-y-3`}>
-                <SRSWidget />
-                <DailyChallenge />
-              </div>
-            )}
+            <div className={`w-full mt-3 ${isMobile ? "max-w-md" : "max-w-2xl"} mx-auto space-y-3`}>
+              <SRSWidget />
+              <DailyChallenge />
+            </div>
           </>
         )}
         {screen === "categories" && (
