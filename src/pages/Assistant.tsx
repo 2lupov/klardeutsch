@@ -13,16 +13,17 @@ import {
 import ReactMarkdown from "react-markdown";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "@/hooks/use-toast";
+import pandaExplorer from "@/assets/panda-explorer.png";
 
-/* ── Ambient Background ── */
+/* ── Cinematic Ambient Background ── */
 const AmbientBg = () => (
   <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
-    <div className="absolute w-[600px] h-[600px] rounded-full opacity-[0.07] blur-[120px]"
-      style={{ background: "hsl(var(--primary))", top: "-10%", right: "-10%", animation: "ambient-drift-1 20s ease-in-out infinite" }} />
-    <div className="absolute w-[500px] h-[500px] rounded-full opacity-[0.05] blur-[100px]"
-      style={{ background: "hsl(var(--primary))", bottom: "5%", left: "-8%", animation: "ambient-drift-2 25s ease-in-out infinite" }} />
-    <div className="absolute w-[300px] h-[300px] rounded-full opacity-[0.04] blur-[80px]"
-      style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(142 76% 36%))", top: "40%", left: "50%", animation: "ambient-drift-3 18s ease-in-out infinite" }} />
+    <div className="absolute w-[600px] h-[600px] rounded-full opacity-30 blur-[140px]"
+      style={{ background: "hsl(var(--primary))", top: "-15%", right: "-10%", animation: "ambient-drift-1 20s ease-in-out infinite" }} />
+    <div className="absolute w-[500px] h-[500px] rounded-full opacity-20 blur-[120px]"
+      style={{ background: "hsl(var(--accent))", bottom: "0%", left: "-8%", animation: "ambient-drift-2 25s ease-in-out infinite" }} />
+    <div className="absolute w-[320px] h-[320px] rounded-full opacity-15 blur-[100px]"
+      style={{ background: "hsl(var(--primary))", top: "45%", left: "50%", animation: "ambient-drift-3 18s ease-in-out infinite" }} />
   </div>
 );
 
@@ -51,11 +52,11 @@ interface WordData {
 }
 
 const LEVEL_COLORS: Record<string, string> = {
-  A1: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
-  A2: "bg-green-500/15 text-green-400 border-green-500/30",
-  B1: "bg-blue-500/15 text-blue-400 border-blue-500/30",
-  B2: "bg-indigo-500/15 text-indigo-400 border-indigo-500/30",
-  C1: "bg-purple-500/15 text-purple-400 border-purple-500/30",
+  A1: "bg-primary/15 text-primary border-primary/30",
+  A2: "bg-primary/20 text-primary border-primary/40",
+  B1: "bg-accent/15 text-accent border-accent/30",
+  B2: "bg-accent/20 text-accent border-accent/40",
+  C1: "bg-accent/25 text-accent border-accent/50",
 };
 
 const ARTICLE_COLORS: Record<string, string> = {
@@ -91,10 +92,10 @@ const ConjugationTable = ({ title, data, icon }: { title: string; data: Record<s
 /* ═══════════════════════════════════════════════════════════ */
 
 const MENU_THEMES = {
-  chat: { gradient: "from-amber-500/15 to-amber-600/5", glow: "shadow-amber-500/10", border: "hover:border-amber-500/40", accent: "text-amber-400" },
-  dictionary: { gradient: "from-emerald-500/15 to-emerald-600/5", glow: "shadow-emerald-500/10", border: "hover:border-emerald-500/40", accent: "text-emerald-400" },
-  reading: { gradient: "from-blue-500/15 to-blue-600/5", glow: "shadow-blue-500/10", border: "hover:border-blue-500/40", accent: "text-blue-400" },
-  files: { gradient: "from-purple-500/15 to-purple-600/5", glow: "shadow-purple-500/10", border: "hover:border-purple-500/40", accent: "text-purple-400" },
+  chat:       { gradient: "from-accent/20 to-accent/5",   glow: "shadow-accent/20",  border: "hover:border-accent/50",  accent: "text-accent" },
+  dictionary: { gradient: "from-primary/20 to-primary/5", glow: "shadow-primary/20", border: "hover:border-primary/50", accent: "text-primary" },
+  reading:    { gradient: "from-primary/15 to-accent/10", glow: "shadow-primary/15", border: "hover:border-primary/40", accent: "text-primary" },
+  files:      { gradient: "from-accent/15 to-primary/10", glow: "shadow-accent/15",  border: "hover:border-accent/40",  accent: "text-accent" },
 };
 
 const Assistant = () => {
@@ -158,17 +159,47 @@ const Assistant = () => {
   ];
 
   const renderMenu = () => (
-    <div className="flex flex-col gap-4 w-full max-w-2xl mx-auto h-full justify-center px-4 py-8">
-      <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.4 }}
-        className="text-center mb-2">
-        <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
-          <Sparkles className="w-8 h-8 text-primary" />
+    <div className="flex flex-col gap-6 w-full max-w-3xl mx-auto h-full justify-center px-5 py-8">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="relative rounded-3xl overflow-hidden border border-border/40 bg-gradient-to-br from-primary/20 via-card/60 to-accent/15 backdrop-blur-sm"
+      >
+        <div className="absolute -top-16 -right-10 w-64 h-64 rounded-full blur-[90px] bg-accent/25 pointer-events-none" />
+        <div className="absolute -bottom-20 -left-10 w-72 h-72 rounded-full blur-[100px] bg-primary/25 pointer-events-none" />
+
+        <div className="relative flex items-center gap-5 p-6 md:p-8">
+          <motion.img
+            src={pandaExplorer}
+            alt=""
+            initial={{ opacity: 0, scale: 0.8, rotate: -8 }}
+            animate={{ opacity: 1, scale: 1, rotate: 0 }}
+            transition={{ duration: 0.7, delay: 0.1 }}
+            className="w-24 md:w-32 shrink-0 drop-shadow-[0_15px_40px_rgba(245,166,35,0.4)]"
+          />
+          <div className="flex-1 min-w-0">
+            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-accent/15 border border-accent/30 mb-2">
+              <Sparkles className="w-3 h-3 text-accent" />
+              <span className="text-[10px] font-bold text-accent uppercase tracking-[0.18em]">
+                KLAR Assistant
+              </span>
+            </div>
+            <h1 className="font-display text-2xl md:text-3xl font-bold text-foreground leading-[1.05] tracking-tight">
+              {t("Твій ", "Твой ")}
+              <span className="italic text-accent">{t("персональний", "персональный")}</span>
+              <br />
+              <span className="text-foreground/70">{t("мовний тренер", "языковой тренер")}</span>
+            </h1>
+            <p className="text-xs md:text-sm text-muted-foreground mt-2 leading-relaxed">
+              {t("Граматика, словник, розбір текстів і документів — все в одному місці",
+                 "Грамматика, словарь, разбор текстов и документов — всё в одном месте")}
+            </p>
+          </div>
         </div>
-        <h1 className="text-2xl font-display font-bold text-foreground">KLAR Assistant</h1>
-        <p className="text-sm text-muted-foreground mt-1">{t("Персональный ИИ-помощник для немецкого", "Персональний ІІ-помічник для німецької")}</p>
       </motion.div>
 
-      <div className="grid grid-cols-2 gap-3 mt-2">
+      <div className="grid grid-cols-2 gap-3">
         {menuItems.map((item, i) => {
           const theme = MENU_THEMES[item.id as keyof typeof MENU_THEMES];
           return (
@@ -176,11 +207,11 @@ const Assistant = () => {
               key={item.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.08, duration: 0.35 }}
-              whileHover={{ scale: 1.04, y: -4 }}
+              transition={{ delay: 0.15 + i * 0.07, duration: 0.35 }}
+              whileHover={{ scale: 1.03, y: -4 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => setTab(item.id)}
-              className={`relative p-5 flex flex-col items-center gap-2.5 rounded-2xl border border-border bg-gradient-to-b ${theme.gradient} backdrop-blur-sm overflow-hidden transition-all hover:shadow-xl ${theme.glow} ${theme.border} group`}
+              className={`relative p-5 flex flex-col items-center gap-2.5 rounded-2xl border border-border/40 bg-gradient-to-b ${theme.gradient} backdrop-blur-sm overflow-hidden transition-all hover:shadow-[0_20px_50px_-15px] ${theme.glow} ${theme.border} group`}
             >
               <motion.span className="text-3xl"
                 animate={{ y: [0, -6, 0] }}
@@ -191,7 +222,7 @@ const Assistant = () => {
                 <h3 className={`text-base font-display font-bold ${theme.accent} transition-colors`}>{item.label}</h3>
                 <p className="text-[11px] text-muted-foreground mt-1 leading-tight">{item.desc}</p>
               </div>
-              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-foreground/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
             </motion.button>
           );
         })}
@@ -385,7 +416,7 @@ const Assistant = () => {
       {/* Search */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="relative mb-6">
         <div className="relative group">
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/30 via-emerald-500/20 to-primary/30 rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/30 via-accent/25 to-primary/30 rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
           <div className="relative flex gap-2">
             <div className="flex-1 relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -437,7 +468,7 @@ const Assistant = () => {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3 pb-8">
           {/* Word Header */}
           <motion.div {...cardAnim(0)} className="rounded-2xl border border-border bg-card/90 backdrop-blur-sm overflow-hidden">
-            <div className="h-1 bg-gradient-to-r from-primary/60 via-emerald-500/40 to-primary/60" />
+            <div className="h-1 bg-gradient-to-r from-primary/60 via-accent/50 to-primary/60" />
             <div className="p-5 flex items-start gap-4">
               <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
                 <span className="text-2xl">📖</span>
@@ -458,7 +489,7 @@ const Assistant = () => {
               {user && (
                 <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                   onClick={handleSaveWord} disabled={saved || saving}
-                  className={`shrink-0 p-3 rounded-xl border transition-all ${saved ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400" : "bg-primary/10 border-primary/30 text-primary hover:bg-primary/20"}`}>
+                  className={`shrink-0 p-3 rounded-xl border transition-all ${saved ? "bg-primary/15 border-primary/30 text-primary" : "bg-primary/10 border-primary/30 text-primary hover:bg-primary/20"}`}>
                   {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : saved ? <Check className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
                 </motion.button>
               )}
@@ -493,9 +524,9 @@ const Assistant = () => {
           {wordData.conjugation && (
             <motion.div {...cardAnim(2)} className="rounded-2xl border border-border bg-card/90 backdrop-blur-sm overflow-hidden">
               <div className="px-5 py-3.5 border-b border-border/50 flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center"><Table2 className="w-4 h-4 text-blue-400" /></div>
+                <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center"><Table2 className="w-4 h-4 text-primary" /></div>
                 <h3 className="font-display font-semibold text-foreground">{t("Спряжение", "Відмінювання")}</h3>
-                {wordData.conjugation.governing && <span className="ml-auto text-xs px-2 py-1 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">{wordData.conjugation.governing}</span>}
+                {wordData.conjugation.governing && <span className="ml-auto text-xs px-2 py-1 rounded-lg bg-primary/10 text-primary border border-primary/20">{wordData.conjugation.governing}</span>}
               </div>
               <div className="p-4 space-y-3">
                 <ConjugationTable title="Präsens" data={wordData.conjugation.präsens} icon="🟢" />
@@ -513,7 +544,7 @@ const Assistant = () => {
           {wordData.noun_forms && (
             <motion.div {...cardAnim(2)} className="rounded-2xl border border-border bg-card/90 backdrop-blur-sm overflow-hidden">
               <div className="px-5 py-3.5 border-b border-border/50 flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-pink-500/10 flex items-center justify-center"><Layers className="w-4 h-4 text-pink-400" /></div>
+                <div className="w-8 h-8 rounded-xl bg-accent/10 flex items-center justify-center"><Layers className="w-4 h-4 text-accent" /></div>
                 <h3 className="font-display font-semibold text-foreground">{t("Формы", "Форми")}</h3>
               </div>
               <div className="p-4 grid grid-cols-3 gap-3">
@@ -531,7 +562,7 @@ const Assistant = () => {
           {wordData.synonyms && wordData.synonyms.length > 0 && (
             <motion.div {...cardAnim(3)} className="rounded-2xl border border-border bg-card/90 backdrop-blur-sm overflow-hidden">
               <div className="px-5 py-3.5 border-b border-border/50 flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center"><Languages className="w-4 h-4 text-emerald-400" /></div>
+                <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center"><Languages className="w-4 h-4 text-primary" /></div>
                 <h3 className="font-display font-semibold text-foreground">{t("Синонимы", "Синоніми")}</h3>
               </div>
               <div className="px-5 py-4 flex flex-wrap gap-2">
@@ -568,8 +599,8 @@ const Assistant = () => {
       {!dictSearched && !dictLoading && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
           className="text-center py-8">
-          <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-3">
-            <Languages className="w-7 h-7 text-emerald-400" />
+          <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
+            <Languages className="w-7 h-7 text-primary" />
           </div>
           <h3 className="font-display font-bold text-lg text-foreground">{t("Умный словарь", "Розумний словник")}</h3>
           <p className="text-xs text-muted-foreground mt-1 max-w-xs mx-auto">{t("Введи слово — получи перевод, спряжение, примеры и синонимы", "Введи слово — отримай переклад, відмінювання, приклади та синоніми")}</p>
@@ -626,8 +657,8 @@ const Assistant = () => {
       {!readingResult ? (
         <>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-4">
-            <div className="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center mx-auto mb-3">
-              <BookMarked className="w-7 h-7 text-blue-400" />
+            <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
+              <BookMarked className="w-7 h-7 text-primary" />
             </div>
             <h3 className="font-display font-bold text-lg">{t("Анализ текста", "Аналіз тексту")}</h3>
             <p className="text-xs text-muted-foreground mt-1 max-w-xs mx-auto">
@@ -644,7 +675,7 @@ const Assistant = () => {
 
           <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
             onClick={analyzeText} disabled={!readingText.trim() || readingLoading}
-            className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-display font-bold text-sm disabled:opacity-40 flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-blue-500/20 transition-all">
+            className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-primary to-primary text-white font-display font-bold text-sm disabled:opacity-40 flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-primary/30 transition-all">
             {readingLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
             {t("Анализировать текст", "Аналізувати текст")}
           </motion.button>
@@ -672,14 +703,14 @@ const Assistant = () => {
   /* ══════════════════════ FILES ══════════════════════ */
 
   const fileTemplates: { emoji: string; icon: React.ElementType; label: string; desc: string; color: string }[] = [
-    { emoji: "🏛️", icon: Landmark, label: "Jobcenter", desc: t("Bescheide, Anträge, Widersprüche", "Рішення, заявки, заперечення"), color: "from-blue-500/15 to-blue-600/5" },
-    { emoji: "💼", icon: Briefcase, label: "Arbeitsagentur", desc: t("Arbeitslosengeld, Maßnahmen", "Допомога по безробіттю, заходи"), color: "from-amber-500/15 to-amber-600/5" },
-    { emoji: "🏢", icon: Building2, label: t("Работодатель", "Роботодавець"), desc: t("Arbeitsvertrag, Kündigung, Zeugnis", "Трудовий договір, звільнення, характеристика"), color: "from-emerald-500/15 to-emerald-600/5" },
-    { emoji: "🏠", icon: HomeIcon, label: t("Арендодатель", "Орендодавець"), desc: t("Mietvertrag, Nebenkostenabrechnung", "Договір оренди, комунальні"), color: "from-purple-500/15 to-purple-600/5" },
-    { emoji: "🏥", icon: Heart, label: t("Страховка", "Страхування"), desc: t("Krankenkasse, Versicherung", "Лікарняна каса, страхування"), color: "from-pink-500/15 to-pink-600/5" },
-    { emoji: "🚗", icon: Car, label: t("Штрафы / Транспорт", "Штрафи / Транспорт"), desc: t("Bußgeld, Führerschein, KFZ", "Штрафи, водійські права, авто"), color: "from-red-500/15 to-red-600/5" },
-    { emoji: "🏫", icon: GraduationCap, label: t("Учёба / Курсы", "Навчання / Курси"), desc: t("Integrationskurs, Studium, Anerkennung", "Інтеграційний курс, навчання, визнання"), color: "from-indigo-500/15 to-indigo-600/5" },
-    { emoji: "💳", icon: CreditCard, label: t("Финансы", "Фінанси"), desc: t("Bank, Steuererklärung, Schufa", "Банк, податкова декларація, Schufa"), color: "from-teal-500/15 to-teal-600/5" },
+    { emoji: "🏛️", icon: Landmark, label: "Jobcenter", desc: t("Bescheide, Anträge, Widersprüche", "Рішення, заявки, заперечення"), color: "from-primary/15 to-primary/5" },
+    { emoji: "💼", icon: Briefcase, label: "Arbeitsagentur", desc: t("Arbeitslosengeld, Maßnahmen", "Допомога по безробіттю, заходи"), color: "from-accent/15 to-accent/5" },
+    { emoji: "🏢", icon: Building2, label: t("Работодатель", "Роботодавець"), desc: t("Arbeitsvertrag, Kündigung, Zeugnis", "Трудовий договір, звільнення, характеристика"), color: "from-primary/20 to-accent/5" },
+    { emoji: "🏠", icon: HomeIcon, label: t("Арендодатель", "Орендодавець"), desc: t("Mietvertrag, Nebenkostenabrechnung", "Договір оренди, комунальні"), color: "from-accent/20 to-primary/5" },
+    { emoji: "🏥", icon: Heart, label: t("Страховка", "Страхування"), desc: t("Krankenkasse, Versicherung", "Лікарняна каса, страхування"), color: "from-accent/15 to-primary/10" },
+    { emoji: "🚗", icon: Car, label: t("Штрафы / Транспорт", "Штрафи / Транспорт"), desc: t("Bußgeld, Führerschein, KFZ", "Штрафи, водійські права, авто"), color: "from-accent/20 to-accent/5" },
+    { emoji: "🏫", icon: GraduationCap, label: t("Учёба / Курсы", "Навчання / Курси"), desc: t("Integrationskurs, Studium, Anerkennung", "Інтеграційний курс, навчання, визнання"), color: "from-primary/20 to-primary/5" },
+    { emoji: "💳", icon: CreditCard, label: t("Финансы", "Фінанси"), desc: t("Bank, Steuererklärung, Schufa", "Банк, податкова декларація, Schufa"), color: "from-primary/15 to-accent/10" },
   ];
 
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
@@ -733,8 +764,8 @@ const Assistant = () => {
       {!selectedTemplate ? (
         <>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-2">
-            <div className="w-14 h-14 rounded-2xl bg-purple-500/10 flex items-center justify-center mx-auto mb-3">
-              <FileText className="w-7 h-7 text-purple-400" />
+            <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-3">
+              <FileText className="w-7 h-7 text-accent" />
             </div>
             <h3 className="font-display font-bold text-lg">{t("Помощь с документами", "Допомога з документами")}</h3>
             <p className="text-xs text-muted-foreground mt-1 max-w-xs mx-auto">
@@ -778,7 +809,7 @@ const Assistant = () => {
             </button>
             <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
               onClick={() => analyzeFile(selectedTemplate)} disabled={!fileText.trim() || fileLoading}
-              className="flex-1 py-3.5 rounded-2xl bg-gradient-to-r from-purple-500 to-purple-600 text-white font-display font-bold text-sm disabled:opacity-40 flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-purple-500/20 transition-all">
+              className="flex-1 py-3.5 rounded-2xl bg-gradient-to-r from-accent to-accent text-accent-foreground font-display font-bold text-sm disabled:opacity-40 flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-accent/30 transition-all">
               {fileLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <FileCheck className="w-5 h-5" />}
               {t("Разобрать документ", "Розібрати документ")}
             </motion.button>
