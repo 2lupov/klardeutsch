@@ -1085,6 +1085,102 @@ export type Database = {
         }
         Relationships: []
       }
+      mono_payments: {
+        Row: {
+          amount: number
+          basket: Json | null
+          cancelled_at: string | null
+          ccy: number
+          created_at: string
+          destination: string | null
+          discounts: Json | null
+          finalized_at: string | null
+          id: string
+          invoice_id: string
+          modified_date: string | null
+          page_url: string | null
+          payment_type: string
+          reference: string | null
+          status: string
+          updated_at: string
+          user_id: string | null
+          webhook_data: Json | null
+        }
+        Insert: {
+          amount: number
+          basket?: Json | null
+          cancelled_at?: string | null
+          ccy?: number
+          created_at?: string
+          destination?: string | null
+          discounts?: Json | null
+          finalized_at?: string | null
+          id?: string
+          invoice_id: string
+          modified_date?: string | null
+          page_url?: string | null
+          payment_type?: string
+          reference?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          webhook_data?: Json | null
+        }
+        Update: {
+          amount?: number
+          basket?: Json | null
+          cancelled_at?: string | null
+          ccy?: number
+          created_at?: string
+          destination?: string | null
+          discounts?: Json | null
+          finalized_at?: string | null
+          id?: string
+          invoice_id?: string
+          modified_date?: string | null
+          page_url?: string | null
+          payment_type?: string
+          reference?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          webhook_data?: Json | null
+        }
+        Relationships: []
+      }
+      mono_webhook_logs: {
+        Row: {
+          created_at: string
+          error: string | null
+          headers: Json | null
+          id: string
+          invoice_id: string | null
+          raw_body: Json | null
+          signature_valid: boolean | null
+          status: string | null
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          headers?: Json | null
+          id?: string
+          invoice_id?: string | null
+          raw_body?: Json | null
+          signature_valid?: boolean | null
+          status?: string | null
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          headers?: Json | null
+          id?: string
+          invoice_id?: string | null
+          raw_body?: Json | null
+          signature_valid?: boolean | null
+          status?: string | null
+        }
+        Relationships: []
+      }
       placement_questions: {
         Row: {
           correct: number

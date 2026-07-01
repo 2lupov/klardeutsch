@@ -51,3 +51,9 @@ project_id = "jqqsszwbbxvevebmebfm"
     verify_jwt = false
   [functions.student-login]
     verify_jwt = false
+  [functions.mono-webhook]
+    verify_jwt = false
+  [functions.mono-create-invoice]
+    verify_jwt = false
+  [functions.mono-invoice-status]
+    verify_jwt = false
