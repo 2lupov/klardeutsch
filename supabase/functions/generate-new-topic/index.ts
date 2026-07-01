@@ -27,7 +27,10 @@ serve(async (req) => {
   }
 
   try {
-    const { level, topicName, topicEmoji } = await req.json();
+    const { level, topicName, topicEmoji, targetLanguage: rawTL } = await req.json();
+    const targetLanguage = (rawTL || "de").toString().toLowerCase();
+    const LANG_NAME: Record<string, string> = { de: "German", en: "English", pl: "Polish", es: "Spanish", fr: "French" };
+    const langName = LANG_NAME[targetLanguage] || "German";
     
     if (!level || !topicName) {
       return new Response(
@@ -54,7 +57,8 @@ serve(async (req) => {
       .select("id")
       .eq("level", level)
       .eq("name", topicName)
-      .single();
+      .eq("target_language", targetLanguage)
+      .maybeSingle();
 
     if (existingTopic) {
       return new Response(
@@ -66,7 +70,7 @@ serve(async (req) => {
     // Create the topic first
     const { data: newTopic, error: topicError } = await supabase
       .from("topics")
-      .insert({ level, name: topicName, emoji: topicEmoji || "📚" })
+      .insert({ level, name: topicName, emoji: topicEmoji || "📚", target_language: targetLanguage })
       .select()
       .single();
 
