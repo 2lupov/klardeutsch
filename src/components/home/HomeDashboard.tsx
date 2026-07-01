@@ -67,12 +67,6 @@ const HomeDashboard = ({ displayName, onSelectLevel }: Props) => {
 
           <div className="relative grid md:grid-cols-[1.4fr_1fr] gap-6 p-6 md:p-10 items-center">
             <div className="space-y-5 md:space-y-6 min-w-0">
-              <div className="flex items-center gap-3 text-accent">
-                <div className="h-px w-8 bg-accent" />
-                <span className="uppercase tracking-[0.25em] text-[10px] md:text-[11px] font-bold">
-                  {greet}
-                </span>
-              </div>
               <h1 className="font-display font-extrabold leading-[1.02] tracking-tight text-3xl sm:text-4xl md:text-5xl">
                 Привіт{displayName ? `, ${displayName.split(" ")[0]}` : ""}.{" "}
                 <span className="text-primary">Продовжимо?</span>
