@@ -341,14 +341,23 @@ const GuestHero = () => {
                       transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
                     />
                     <motion.div
-                      initial={{ opacity: 0, scale: 0.8, y: 10 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      transition={{ delay: 0.3, type: "spring", stiffness: 240, damping: 20 }}
-                      className="absolute top-6 right-6 max-w-[55%] bg-white text-[#0F0F23] p-4 rounded-2xl rounded-br-sm shadow-2xl border border-[#F5A623]/40"
+                      key={copy.mascotQuote}
+                      initial={{ opacity: 0, scale: 0.6, y: 12, rotate: -5 }}
+                      animate={{
+                        opacity: 1,
+                        scale: [0.6, 1.08, 0.97, 1.02, 1],
+                        y: 0,
+                        rotate: [-5, 3, -1, 0],
+                      }}
+                      transition={{ delay: 0.3, duration: 0.7, times: [0, 0.35, 0.6, 0.85, 1], ease: "easeOut" }}
+                      className="absolute top-6 right-6 max-w-[55%] bg-white text-[#0F0F23] p-4 rounded-2xl rounded-br-sm shadow-2xl border border-[#F5A623]/40 origin-bottom-right"
                     >
-                      <p className="text-[#0F0F23] font-bold italic text-base leading-snug" style={{ fontFamily: "Sora, sans-serif" }}>
-                        "{copy.mascotQuote}"
-                      </p>
+                      <Typewriter
+                        text={copy.mascotQuote}
+                        delay={550}
+                        speed={32}
+                        className="text-[#0F0F23] font-bold italic text-base leading-snug block"
+                      />
                       <div className="absolute -bottom-2 right-8 w-4 h-4 bg-white border-b border-r border-[#F5A623]/40 rotate-45" />
                     </motion.div>
 
