@@ -83,7 +83,7 @@ const GuestHero = () => {
       style={{ fontFamily: "Manrope, system-ui, sans-serif" }}
     >
       {/* ══════════════ Sticky Promo Banner ══════════════ */}
-      <div className="sticky top-0 z-40 w-full bg-gradient-to-r from-[#6D5DFB] via-[#4F46E5] to-[#F5A623] py-2.5 pl-16 md:pl-4 pr-4 shadow-2xl shadow-[#6D5DFB]/20">
+      <div className="sticky top-0 z-20 w-full bg-gradient-to-r from-[#6D5DFB] via-[#4F46E5] to-[#F5A623] py-2.5 pl-16 md:pl-4 pr-4 shadow-2xl shadow-[#6D5DFB]/20">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <span className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest whitespace-nowrap">
