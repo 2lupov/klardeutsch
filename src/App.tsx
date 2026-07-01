@@ -51,6 +51,8 @@ import StudentView from "./pages/StudentView";
 import TeacherStudentDashboard from "./pages/TeacherStudentDashboard";
 import NotFound from "./pages/NotFound";
 import PaymentResult from "./pages/PaymentResult";
+import Trial from "./pages/Trial";
+
 
 const queryClient = new QueryClient();
 
