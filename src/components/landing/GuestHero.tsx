@@ -106,7 +106,7 @@ const GuestHero = () => {
 
 
       {/* Stepper header */}
-      <div className="max-w-3xl mx-auto px-4 md:px-6 pt-8 md:pt-12">
+      <div className="max-w-3xl mx-auto px-4 md:px-6 pt-4 md:pt-12">
         <div className="flex items-center justify-between mb-2">
           <button
             onClick={goBack}
@@ -133,7 +133,7 @@ const GuestHero = () => {
       </div>
 
       {/* Steps */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-10 md:py-16">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-5 md:py-16">
         <AnimatePresence mode="wait">
           {step === 1 && (
             <motion.section
@@ -142,21 +142,22 @@ const GuestHero = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.35 }}
-              className="space-y-8"
+              className="space-y-5 md:space-y-8"
             >
-              <div className="text-center space-y-3">
+              <div className="text-center space-y-2 md:space-y-3">
                 <div className="inline-flex items-center gap-3 text-[#F5A623]">
                   <div className="h-px w-8 bg-[#F5A623]" />
-                  <span className="uppercase tracking-[0.25em] font-bold text-[11px] md:text-xs">Обери мову</span>
+                  <span className="uppercase tracking-[0.25em] font-bold text-[10px] md:text-xs">Обери мову</span>
                   <div className="h-px w-8 bg-[#F5A623]" />
                 </div>
-                <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight" style={{ fontFamily: "Sora, sans-serif" }}>
+                <h2 className="text-2xl md:text-5xl font-extrabold tracking-tight leading-tight" style={{ fontFamily: "Sora, sans-serif" }}>
                   Яку мову ти хочеш <span className="text-[#6D5DFB]">вивчати?</span>
                 </h2>
-                <p className="text-[#F5F3EE]/60 text-sm md:text-base max-w-md mx-auto">
-                  Обери мову — і ми покажемо курси та безкоштовне демо саме для неї.
+                <p className="text-[#F5F3EE]/60 text-xs md:text-base max-w-md mx-auto">
+                  Обери мову — і ми покажемо курси та демо саме для неї.
                 </p>
               </div>
+
 
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4 max-w-4xl mx-auto">
                 {languages.map((l) => {
