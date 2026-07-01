@@ -239,14 +239,23 @@ const GuestHero = () => {
                     animate={{ y: [0, -10, 0] }}
                     transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
                   />
+                  {/* Speech bubble from panda */}
+                  <motion.div
+                    key={copy.mascotQuote}
+                    initial={{ opacity: 0, scale: 0.7, y: 8 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    transition={{ delay: 0.25, type: "spring", stiffness: 260, damping: 20 }}
+                    className="absolute top-2 right-1 max-w-[62%] bg-white text-[#0F0F23] px-3 py-2 rounded-2xl rounded-br-sm shadow-[0_10px_30px_-8px_rgba(0,0,0,0.5)] border border-[#F5A623]/40"
+                  >
+                    <p className="font-bold italic text-[11px] leading-snug" style={{ fontFamily: "Sora, sans-serif" }}>
+                      "{copy.mascotQuote}"
+                    </p>
+                    {/* Bubble tail pointing to panda */}
+                    <div className="absolute -bottom-1.5 right-6 w-3 h-3 bg-white border-b border-r border-[#F5A623]/40 rotate-45" />
+                  </motion.div>
                 </div>
 
                 <div className="space-y-2 shrink-0 pb-1">
-                  <div className="bg-black/40 backdrop-blur-xl p-2.5 rounded-xl border border-white/10">
-                    <p className="text-[#F5A623] font-bold italic text-[11px] leading-snug" style={{ fontFamily: "Sora, sans-serif" }}>
-                      "{copy.mascotQuote}"
-                    </p>
-                  </div>
                   <button
                     onClick={goNext}
                     className="w-full bg-[#6D5DFB] hover:bg-[#5a4ae0] text-white px-6 py-3 rounded-2xl font-bold text-sm transition-all shadow-[0_10px_40px_-8px_rgba(109,93,251,0.6)] flex items-center justify-center gap-2 group active:scale-95"
@@ -255,6 +264,7 @@ const GuestHero = () => {
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </button>
                 </div>
+
               </div>
 
               {/* DESKTOP layout */}
@@ -288,11 +298,18 @@ const GuestHero = () => {
                       animate={{ y: [0, -12, 0] }}
                       transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
                     />
-                    <div className="absolute bottom-5 left-5 right-5 bg-black/50 backdrop-blur-xl p-5 rounded-2xl border border-white/10">
-                      <p className="text-[#F5A623] font-bold italic text-base leading-snug" style={{ fontFamily: "Sora, sans-serif" }}>
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      transition={{ delay: 0.3, type: "spring", stiffness: 240, damping: 20 }}
+                      className="absolute top-6 right-6 max-w-[55%] bg-white text-[#0F0F23] p-4 rounded-2xl rounded-br-sm shadow-2xl border border-[#F5A623]/40"
+                    >
+                      <p className="text-[#0F0F23] font-bold italic text-base leading-snug" style={{ fontFamily: "Sora, sans-serif" }}>
                         "{copy.mascotQuote}"
                       </p>
-                    </div>
+                      <div className="absolute -bottom-2 right-8 w-4 h-4 bg-white border-b border-r border-[#F5A623]/40 rotate-45" />
+                    </motion.div>
+
                   </div>
                 </div>
               </div>
