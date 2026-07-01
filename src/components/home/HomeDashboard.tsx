@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Flame, Coins, Sparkles, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import pandaExplorer from "@/assets/panda-explorer.png";
+import pandaScholar from "@/assets/panda-scholar.png";
 import { useXP } from "@/hooks/useXP";
 import { useCoins } from "@/hooks/useCoins";
 import { useAuth } from "@/contexts/AuthContext";
@@ -121,7 +121,7 @@ const HomeDashboard = ({ displayName, onSelectLevel }: Props) => {
             <div className="relative hidden md:flex justify-center items-center">
               <div className="absolute w-72 h-72 bg-primary/15 rounded-full blur-3xl" />
               <motion.img
-                src={pandaExplorer}
+                src={pandaScholar}
                 alt="Panda"
                 className="relative w-64 h-64 object-contain drop-shadow-[0_20px_40px_rgba(109,93,251,0.35)]"
                 animate={{ y: [0, -10, 0] }}
