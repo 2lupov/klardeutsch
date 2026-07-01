@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "@/hooks/use-toast";
 import type { SubscriptionPlan } from "@/hooks/useSubscription";
+import pandaExplorer from "@/assets/panda-explorer.png";
 
 interface Props {
   open: boolean;
