@@ -432,7 +432,7 @@ const GuestHero = () => {
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: COURSES.length * 0.08 }}
-                  onClick={() => navigate("/auth")}
+                  onClick={() => setTrialConfirm(true)}
                   className="flex lg:hidden group cursor-pointer rounded-2xl sm:rounded-[2rem] p-3 sm:p-7 md:p-8 flex-col items-center justify-center text-center gap-2 sm:gap-3 bg-[#1A1A3E] border border-dashed border-[#F5A623]/40 hover:border-[#F5A623] hover:bg-[#252554] transition-all hover:-translate-y-2"
                 >
                   <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-[#F5A623]/15 text-[#F5A623] flex items-center justify-center">
