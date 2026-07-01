@@ -92,6 +92,7 @@ const GuestHero = () => {
   const { targetLang, setTargetLang, languages } = useTargetLanguage();
   const copy = LANG_COPY[targetLang] ?? LANG_COPY.de;
   const [step, setStep] = useState(1);
+  const [trialConfirm, setTrialConfirm] = useState(false);
 
   const goNext = () => setStep((s) => Math.min(TOTAL_STEPS, s + 1));
   const goBack = () => setStep((s) => Math.max(1, s - 1));
