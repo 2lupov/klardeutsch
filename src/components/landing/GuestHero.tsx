@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, MoveRight } from "lucide-react";
+import { ArrowRight, MoveRight, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import pandaExplorer from "@/assets/panda-explorer.png";
+import { useTargetLanguage } from "@/contexts/TargetLanguageContext";
+
 
 // ============================================================
 // Klar.academy — Cinematic Editorial rebrand landing (guests)
