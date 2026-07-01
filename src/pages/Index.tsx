@@ -255,43 +255,46 @@ const Index = () => {
         </div>
       )}
 
-      <div className={`flex-1 w-full mx-auto px-4 relative z-10 flex flex-col items-center justify-center ${isMobile ? "max-w-md py-4" : "max-w-4xl py-4"}`}>
-        {screen === "exercise" && (
-          <button
-            onClick={handleBack}
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            {t("back")}
-          </button>
-        )}
+      {screen === "levels" && user && (
+        <div className="flex-1 w-full overflow-y-auto">
+          <HomeDashboard
+            displayName={displayName}
+            onSelectLevel={handleLevelSelect}
+          />
+        </div>
+      )}
 
-        {screen === "levels" && user && (
-          <div className="w-full">
-            <HomeDashboard
-              displayName={displayName}
-              onSelectLevel={handleLevelSelect}
-            />
-          </div>
-        )}
-        {screen === "categories" && (
-          <CategorySelector level={level} onSelect={handleCategorySelect} onBack={() => setScreen("levels")} />
-        )}
-        {screen === "topics" && (
-          dataLoading ? (
-            <p className="text-muted-foreground text-center">{t("loading")}</p>
-          ) : (
-            <TopicSelector
-              level={level}
-              category={category as "vocabulary" | "grammar" | "reading" | "listening"}
-              topics={topics}
-              onSelect={handleTopicSelect}
-              onBack={() => setScreen("categories")}
-            />
-          )
-        )}
-        {screen === "exercise" && renderExercise()}
-      </div>
+      {(screen !== "levels" || !user) && (
+        <div className={`flex-1 w-full mx-auto px-4 relative z-10 flex flex-col items-center justify-center ${isMobile ? "max-w-md py-4" : "max-w-4xl py-4"}`}>
+          {screen === "exercise" && (
+            <button
+              onClick={handleBack}
+              className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              {t("back")}
+            </button>
+          )}
+
+          {screen === "categories" && (
+            <CategorySelector level={level} onSelect={handleCategorySelect} onBack={() => setScreen("levels")} />
+          )}
+          {screen === "topics" && (
+            dataLoading ? (
+              <p className="text-muted-foreground text-center">{t("loading")}</p>
+            ) : (
+              <TopicSelector
+                level={level}
+                category={category as "vocabulary" | "grammar" | "reading" | "listening"}
+                topics={topics}
+                onSelect={handleTopicSelect}
+                onBack={() => setScreen("categories")}
+              />
+            )
+          )}
+          {screen === "exercise" && renderExercise()}
+        </div>
+      )}
       <DailySummaryModal open={showSummary} onClose={closeSummary} />
     </div>
   );
