@@ -14,8 +14,19 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
-        display: ['Space Grotesk', 'sans-serif'],
+        sans: ['Manrope', 'system-ui', 'sans-serif'],
+        display: ['Sora', 'system-ui', 'sans-serif'],
+        sora: ['Sora', 'system-ui', 'sans-serif'],
+      },
+      backgroundImage: {
+        'gradient-primary': 'var(--gradient-primary)',
+        'gradient-accent': 'var(--gradient-accent)',
+        'gradient-hero': 'var(--gradient-hero)',
+      },
+      boxShadow: {
+        'primary-glow': 'var(--shadow-primary)',
+        'accent-glow': 'var(--shadow-accent)',
+        'card-elevated': 'var(--shadow-card)',
       },
       colors: {
         border: "hsl(var(--border))",

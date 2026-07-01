@@ -21,6 +21,7 @@ import SRSWidget from "@/components/SRSWidget";
 import DailySummaryModal from "@/components/daily/DailySummaryModal";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import GuestHero from "@/components/landing/GuestHero";
+import HomeDashboard from "@/components/home/HomeDashboard";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft } from "lucide-react";
@@ -254,46 +255,46 @@ const Index = () => {
         </div>
       )}
 
-      <div className={`flex-1 w-full mx-auto px-4 relative z-10 flex flex-col items-center justify-center ${isMobile ? "max-w-md py-4" : "max-w-4xl py-4"}`}>
-        {screen === "exercise" && (
-          <button
-            onClick={handleBack}
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            {t("back")}
-          </button>
-        )}
+      {screen === "levels" && user && (
+        <div className="flex-1 w-full overflow-y-auto">
+          <HomeDashboard
+            displayName={displayName}
+            onSelectLevel={handleLevelSelect}
+          />
+        </div>
+      )}
 
-        {screen === "levels" && user && (
-          <>
-            <div id="levels-section" className="w-full">
-              <LevelSelector onSelect={handleLevelSelect} />
-            </div>
-            <div className={`w-full mt-3 ${isMobile ? "max-w-md" : "max-w-2xl"} mx-auto space-y-3`}>
-              <SRSWidget />
-              <DailyChallenge />
-            </div>
-          </>
-        )}
-        {screen === "categories" && (
-          <CategorySelector level={level} onSelect={handleCategorySelect} onBack={() => setScreen("levels")} />
-        )}
-        {screen === "topics" && (
-          dataLoading ? (
-            <p className="text-muted-foreground text-center">{t("loading")}</p>
-          ) : (
-            <TopicSelector
-              level={level}
-              category={category as "vocabulary" | "grammar" | "reading" | "listening"}
-              topics={topics}
-              onSelect={handleTopicSelect}
-              onBack={() => setScreen("categories")}
-            />
-          )
-        )}
-        {screen === "exercise" && renderExercise()}
-      </div>
+      {(screen !== "levels" || !user) && (
+        <div className={`flex-1 w-full mx-auto px-4 relative z-10 flex flex-col items-center justify-center ${isMobile ? "max-w-md py-4" : "max-w-4xl py-4"}`}>
+          {screen === "exercise" && (
+            <button
+              onClick={handleBack}
+              className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              {t("back")}
+            </button>
+          )}
+
+          {screen === "categories" && (
+            <CategorySelector level={level} onSelect={handleCategorySelect} onBack={() => setScreen("levels")} />
+          )}
+          {screen === "topics" && (
+            dataLoading ? (
+              <p className="text-muted-foreground text-center">{t("loading")}</p>
+            ) : (
+              <TopicSelector
+                level={level}
+                category={category as "vocabulary" | "grammar" | "reading" | "listening"}
+                topics={topics}
+                onSelect={handleTopicSelect}
+                onBack={() => setScreen("categories")}
+              />
+            )
+          )}
+          {screen === "exercise" && renderExercise()}
+        </div>
+      )}
       <DailySummaryModal open={showSummary} onClose={closeSummary} />
     </div>
   );
