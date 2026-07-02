@@ -1,8 +1,10 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCoins } from "@/hooks/useCoins";
 import { supabase } from "@/integrations/supabase/client";
-import { Sparkles, Check, X } from "lucide-react";
+import { toast } from "sonner";
+import { Sparkles, Check, X, Coins } from "lucide-react";
 
 interface WordOfDay {
   german: string;
@@ -18,33 +20,24 @@ interface MiniQuestion {
   explanation: string | null;
 }
 
-// Simple date-based seed for deterministic daily pick
-const dateSeed = () => {
-  const d = new Date();
-  return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
-};
-
 const DailyChallenge = () => {
   const { t, lang } = useLanguage();
   const { user } = useAuth();
+  const { awardCoins } = useCoins();
   const [word, setWord] = useState<WordOfDay | null>(null);
   const [question, setQuestion] = useState<MiniQuestion | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [wordFlipped, setWordFlipped] = useState(false);
   const [completed, setCompleted] = useState(false);
-
-  const todayKey = useMemo(() => `daily_${dateSeed()}`, []);
+  const [rewarded, setRewarded] = useState(false);
 
   useEffect(() => {
-    const done = localStorage.getItem(todayKey);
-    if (done) setCompleted(true);
     fetchDaily();
   }, []);
 
   const fetchDaily = async () => {
     setLoading(true);
-    const seed = dateSeed();
 
     // Get user's level
     let userLevel = "A1";
@@ -63,25 +56,34 @@ const DailyChallenge = () => {
     ]);
 
     if (words && words.length > 0) {
-      setWord(words[seed % words.length] as WordOfDay);
+      setWord(words[Math.floor(Math.random() * words.length)] as WordOfDay);
     }
     if (questions && questions.length > 0) {
-      setQuestion(questions[(seed + 7) % questions.length] as MiniQuestion);
+      setQuestion(questions[Math.floor(Math.random() * questions.length)] as MiniQuestion);
     }
     setLoading(false);
   };
 
-  const handleAnswer = (idx: number) => {
+  const handleAnswer = async (idx: number) => {
     if (selectedAnswer !== null) return;
     setSelectedAnswer(idx);
-    if (question && idx === question.correct_index) {
-      localStorage.setItem(todayKey, "1");
+    if (question && idx === question.correct_index && !rewarded) {
+      setRewarded(true);
+      if (user) {
+        try {
+          await awardCoins(5, "daily_challenge");
+          toast.success("+5 монеток! 🪙", { description: "Правильна відповідь" });
+        } catch (e) {
+          // silent
+        }
+      }
       setTimeout(() => setCompleted(true), 1500);
     }
   };
 
   if (loading) return null;
   if (completed && !word) return null;
+
 
   return (
     <div className="w-full animate-slide-up">
