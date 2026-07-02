@@ -14,6 +14,8 @@ import MediaEmbed, { hasMediaEmbed } from "@/components/chat/MediaEmbed";
 import StickerPicker, { isStickerMessage, getStickerSrc, STICKER_PREFIX } from "@/components/chat/StickerPicker";
 import { Smile } from "lucide-react";
 import chatBgImage from "@/assets/chat-bg.png";
+import KlarLogo from "@/components/KlarLogo";
+import { useLevelProgress } from "@/hooks/useLevelProgress";
 
 /* ───── iOS keyboard: track bottom offset so input sticks to keyboard ───── */
 const useKeyboardBottom = () => {
