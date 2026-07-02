@@ -6,7 +6,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Plus, Trash2, Lock, Check, BookOpen, Languages, Headphones, BookText, ShoppingBag, Gamepad2, Users, Globe, Pencil, Sparkles, ScanSearch, FileText, Bot, GraduationCap, FolderOpen, BarChart3, MessageCircle, Package } from "lucide-react";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import ShopEditor from "@/components/admin/ShopEditor";
-import ProductsEditor from "@/components/admin/ProductsEditor";
+
 import ListeningEditor from "@/components/admin/ListeningEditor";
 import UsersEditor from "@/components/admin/UsersEditor";
 import CafeEditor from "@/components/admin/CafeEditor";
@@ -52,7 +52,7 @@ const TAB_CONFIG: { key: Tab; icon: React.ElementType; label: string }[] = [
   { key: "stuffonly", icon: Bot, label: "stuffonly" },
   { key: "courses", icon: GraduationCap, label: "courses" },
   { key: "chats", icon: MessageCircle, label: "chats" },
-  { key: "products", icon: Package, label: "products" },
+  
 ];
 
 const Admin = () => {
@@ -160,7 +160,7 @@ const Admin = () => {
         {tab === "stuffonly" && <StuffOnlyTab />}
         {tab === "courses" && <CourseEditor level={level} />}
         {tab === "chats" && <AdminChats />}
-        {tab === "products" && <ProductsEditor />}
+        
       </div>
     </div>
   );
