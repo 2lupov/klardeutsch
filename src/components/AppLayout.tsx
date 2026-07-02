@@ -85,9 +85,7 @@ const AppLayout = () => {
 
   
 
-  if (!hasNickname) {
-    return <NicknameGate onComplete={() => setHasNickname(true)} />;
-  }
+  // Nickname gate removed — users can set a nickname later in profile.
 
   // ===== Managed-student layout: minimal shell, single screen =====
   if (isStudent) {
