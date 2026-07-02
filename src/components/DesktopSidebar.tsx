@@ -180,6 +180,14 @@ const DesktopSidebar = () => {
               <div className="h-px bg-border mx-2 mt-2" />
               {sectionLabel(lang === "uk" ? "Спільнота" : "Сообщество")}
               {socialLinks.map(renderLink)}
+
+              {isStaff && (
+                <>
+                  <div className="h-px bg-border mx-2 mt-2" />
+                  {sectionLabel(lang === "uk" ? "Для персоналу" : "Для персонала")}
+                  {renderLink({ to: "/teach", icon: TeachIcon, label: lang === "uk" ? "Teach Space" : "Teach Space" })}
+                </>
+              )}
             </nav>
 
             {/* Report error link */}
