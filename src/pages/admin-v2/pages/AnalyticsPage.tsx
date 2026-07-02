@@ -1,10 +1,119 @@
-import { ComingSoon } from "./_ui";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, StatCard, SectionHeader } from "./_ui";
 
 export default function AnalyticsPage() {
+  const [data, setData] = useState({
+    totalUsers: 0,
+    activeWeek: 0,
+    completedLessons: 0,
+    avgScore: 0,
+    topCourses: [] as { title: string; completions: number }[],
+    hardestLessons: [] as { title: string; avg: number }[],
+  });
+
+  useEffect(() => {
+    (async () => {
+      const weekAgo = new Date(Date.now() - 7 * 864e5).toISOString();
+
+      const [{ count: totalUsers }, { count: activeWeek }, { data: progress }, { data: courses }, { data: lessons }] =
+        await Promise.all([
+          supabase.from("profiles").select("*", { count: "exact", head: true }),
+          supabase.from("profiles").select("*", { count: "exact", head: true }).gte("last_active", weekAgo),
+          supabase.from("course_lesson_progress").select("course_id,lesson_id,score,status").eq("status", "completed"),
+          supabase.from("courses").select("id,title"),
+          supabase.from("course_lessons").select("id,title"),
+        ]);
+
+      const courseMap = new Map((courses as any[] || []).map((c) => [c.id, c.title]));
+      const lessonMap = new Map((lessons as any[] || []).map((l) => [l.id, l.title]));
+
+      const byCourse = new Map<string, number>();
+      const byLesson = new Map<string, { sum: number; n: number }>();
+      let scoreSum = 0, scoreN = 0;
+
+      (progress as any[] || []).forEach((p) => {
+        if (p.course_id) byCourse.set(p.course_id, (byCourse.get(p.course_id) || 0) + 1);
+        if (typeof p.score === "number") {
+          scoreSum += p.score; scoreN++;
+          const cur = byLesson.get(p.lesson_id) || { sum: 0, n: 0 };
+          cur.sum += p.score; cur.n++;
+          byLesson.set(p.lesson_id, cur);
+        }
+      });
+
+      const topCourses = Array.from(byCourse.entries())
+        .map(([id, n]) => ({ title: courseMap.get(id) || "—", completions: n }))
+        .sort((a, b) => b.completions - a.completions).slice(0, 5);
+
+      const hardestLessons = Array.from(byLesson.entries())
+        .filter(([, v]) => v.n >= 3)
+        .map(([id, v]) => ({ title: lessonMap.get(id) || "—", avg: Math.round(v.sum / v.n) }))
+        .sort((a, b) => a.avg - b.avg).slice(0, 5);
+
+      setData({
+        totalUsers: totalUsers || 0,
+        activeWeek: activeWeek || 0,
+        completedLessons: (progress as any[] || []).length,
+        avgScore: scoreN ? Math.round(scoreSum / scoreN) : 0,
+        topCourses,
+        hardestLessons,
+      });
+    })();
+  }, []);
+
   return (
-    <ComingSoon
-      phase="Phase 6"
-      description="Воронка проходження, найскладніші уроки, якість AI-контенту, когортна ретенція."
-    />
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard label="Всього юзерів" value={data.totalUsers} accent="#4F46E5" />
+        <StatCard label="Активні / тиждень" value={data.activeWeek} accent="#7C3AED" />
+        <StatCard label="Завершено уроків" value={data.completedLessons} accent="#10B981" />
+        <StatCard label="Середній бал" value={`${data.avgScore}%`} accent="#F59E0B" />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <Card className="p-5">
+          <SectionHeader title="Топ курсів" subtitle="За кількістю завершень уроків" />
+          {data.topCourses.length === 0 ? (
+            <p className="text-sm text-slate-400">Даних поки немає</p>
+          ) : (
+            <div className="space-y-2">
+              {data.topCourses.map((c, i) => {
+                const max = data.topCourses[0].completions || 1;
+                return (
+                  <div key={i}>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-slate-700 truncate">{c.title}</span>
+                      <span className="text-slate-500">{c.completions}</span>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-slate-100 mt-1 overflow-hidden">
+                      <div className="h-full" style={{ width: `${(c.completions / max) * 100}%`, background: "#4F46E5" }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </Card>
+
+        <Card className="p-5">
+          <SectionHeader title="Найскладніші уроки" subtitle="Найнижчий середній бал (≥3 спроби)" />
+          {data.hardestLessons.length === 0 ? (
+            <p className="text-sm text-slate-400">Даних поки немає</p>
+          ) : (
+            <div className="space-y-2">
+              {data.hardestLessons.map((l, i) => (
+                <div key={i} className="flex justify-between text-sm py-1.5 border-b border-slate-100 last:border-0">
+                  <span className="text-slate-700 truncate">{l.title}</span>
+                  <span className={`font-semibold ${l.avg < 50 ? "text-red-500" : l.avg < 70 ? "text-amber-500" : "text-emerald-500"}`}>
+                    {l.avg}%
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+      </div>
+    </div>
   );
 }
