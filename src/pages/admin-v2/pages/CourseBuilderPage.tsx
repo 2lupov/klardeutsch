@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, SectionHeader, EmptyState } from "./_ui";
 import { Sparkles, Play, CheckCircle2, XCircle, Loader2, BookOpen } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { useAdminLang } from "../LanguageContext";
 
 interface Course {
   id: string;
