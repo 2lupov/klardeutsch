@@ -788,6 +788,9 @@ const CourseEditor = ({ level }: { level: Level }) => {
       xp_reward: lesson.xp_reward || 20,
       coins_reward: lesson.coins_reward || 10,
       content: lesson.content || null,
+      video_url: lesson.video_url || null,
+      video_duration_sec: lesson.video_duration_sec || null,
+      video_subtitles_url: lesson.video_subtitles_url || null,
     } as any).eq("id", lesson.id);
     if (error) toast.error("Ошибка: " + error.message);
     else toast.success("Урок сохранён ✅");
