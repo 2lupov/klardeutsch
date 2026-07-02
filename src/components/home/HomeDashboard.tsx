@@ -140,21 +140,12 @@ const HomeDashboard = ({ displayName, onSelectLevel }: Props) => {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="space-y-5"
         >
-          <div className="flex items-end justify-between gap-4">
-            <div>
-              <h2 className="font-display text-2xl md:text-3xl font-extrabold tracking-tight">
-                Твої рівні
-              </h2>
-              <p className="text-foreground/50 text-sm mt-1">
-                Від A1 до C1 — обери, з чого продовжити.
-              </p>
-            </div>
-            <div className="hidden sm:flex gap-1.5">
-              <div className="h-2.5 w-10 bg-primary rounded-full" />
-              <div className="h-2.5 w-2.5 bg-white/10 rounded-full" />
-              <div className="h-2.5 w-2.5 bg-white/10 rounded-full" />
-            </div>
+          <div className="hidden sm:flex justify-end gap-1.5">
+            <div className="h-2.5 w-10 bg-primary rounded-full" />
+            <div className="h-2.5 w-2.5 bg-white/10 rounded-full" />
+            <div className="h-2.5 w-2.5 bg-white/10 rounded-full" />
           </div>
+
 
           <div className="rounded-[1.5rem] bg-card/60 border border-white/5 p-4 md:p-6">
             <LevelSelector onSelect={onSelectLevel} />
