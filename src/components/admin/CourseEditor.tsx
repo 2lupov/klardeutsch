@@ -645,6 +645,40 @@ const CourseEditor = ({ level }: { level: Level }) => {
   const genAbortRef = useRef(false);
   const [expandedLesson, setExpandedLesson] = useState<number | null>(null);
   const [creatingCourse, setCreatingCourse] = useState(false);
+  const [slidesFor, setSlidesFor] = useState<{ id: string; title: string; slides: Slide[] } | null>(null);
+  const [generatingSlidesId, setGeneratingSlidesId] = useState<string | null>(null);
+
+  const generateSlidesForLesson = async (lesson: any) => {
+    if (!lesson?.id) return;
+    setGeneratingSlidesId(lesson.id);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-lesson-slides", {
+        body: { lesson_id: lesson.id, count: 10 },
+      });
+      if (error || (data as any)?.error) throw new Error(error?.message || (data as any)?.error);
+      const slides = (data as any).slides as Slide[];
+      // update local state so the button opens right away
+      setEditLessons(prev => prev.map(l => l.id === lesson.id
+        ? { ...l, content: { ...(l.content && typeof l.content === "object" ? l.content : {}), slides } }
+        : l));
+      setSlidesFor({ id: lesson.id, title: lesson.title, slides });
+      toast.success(`Створено ${slides.length} слайдів`);
+    } catch (e: any) {
+      toast.error(e.message || "Помилка генерації");
+    } finally {
+      setGeneratingSlidesId(null);
+    }
+  };
+
+  const openExistingSlides = (lesson: any) => {
+    const slides = lesson?.content?.slides;
+    if (Array.isArray(slides) && slides.length) {
+      setSlidesFor({ id: lesson.id, title: lesson.title, slides });
+    } else {
+      generateSlidesForLesson(lesson);
+    }
+  };
+
 
   // Create course and auto-generate lessons
   const handleCreateAndGenerate = async () => {
