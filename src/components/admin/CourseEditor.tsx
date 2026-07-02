@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import TheoryRenderer, { type TheoryBlock } from "@/components/course/TheoryRenderer";
+import LessonSlidesViewer, { type Slide } from "@/components/admin/LessonSlidesViewer";
+import { Presentation } from "lucide-react";
 
 type Level = "A1" | "A2" | "B1" | "B2" | "C1";
 
