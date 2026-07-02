@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Flame, Coins, Sparkles, TrendingUp } from "lucide-react";
+import { Flame, Coins, Sparkles, TrendingUp, BookOpen, Gamepad2, GraduationCap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import pandaScholar from "@/assets/panda-scholar.png";
 import { useXP } from "@/hooks/useXP";
