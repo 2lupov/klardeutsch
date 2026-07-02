@@ -3,7 +3,7 @@ import { useNavigate, useLocation, Outlet } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePlatform } from "@/hooks/usePlatform";
 import { supabase } from "@/integrations/supabase/client";
-import MobileBottomNav from "@/components/MobileBottomNav";
+import MobileBurgerMenu from "@/components/MobileBurgerMenu";
 import DesktopSidebar from "@/components/DesktopSidebar";
 import PageTransition from "@/components/PageTransition";
 import LofiFloatingPlayer from "@/components/LofiFloatingPlayer";
@@ -118,10 +118,10 @@ const AppLayout = () => {
         <LofiFloatingPlayer />
         <ListeningFloatingPlayer />
         <DailyBonusDialog />
-        <div className={`flex-1 overflow-y-auto overflow-x-hidden overscroll-none ${isChat || isGuestLanding ? "" : "pb-14"}`}>
+        <div className="flex-1 overflow-y-auto overflow-x-hidden overscroll-none">
           <PageTransition><Outlet /></PageTransition>
         </div>
-        {!isGuestLanding && <MobileBottomNav />}
+        {!isGuestLanding && <MobileBurgerMenu />}
       </div>
     );
   }
