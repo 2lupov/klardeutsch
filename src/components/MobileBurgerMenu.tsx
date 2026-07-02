@@ -133,9 +133,8 @@ const MobileBurgerMenu = () => {
         className="w-[260px] p-0 flex flex-col border-r border-border bg-card/95 backdrop-blur-2xl"
       >
         {/* Logo header — matches desktop */}
-        <div className="flex items-center justify-between pl-16 pr-5 pt-5 pb-4 border-b border-border gap-2">
+        <div className="flex items-center pl-16 pr-5 pt-5 pb-4 border-b border-border">
           <KlarLogo progress={totalProgress} completed={allCompleted} size="md" />
-          <TargetLanguageSwitcher variant="compact" />
         </div>
 
         {/* Navigation */}
