@@ -141,7 +141,8 @@ const LevelSelector = ({ onSelect }: LevelSelectorProps) => {
       >
         <span className="text-lg">🕹️</span>
         <span className="font-display text-sm font-semibold text-muted-foreground group-hover:text-amber-400 transition-colors">
-          Мини-игры
+          Міні-ігри
+
         </span>
         <span className="text-lg">🕹️</span>
       </motion.button>
