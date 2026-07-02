@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Flame, Coins, Sparkles, TrendingUp } from "lucide-react";
+import { Flame, Coins, Sparkles, TrendingUp, BookOpen, Gamepad2, GraduationCap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import pandaScholar from "@/assets/panda-scholar.png";
 import { useXP } from "@/hooks/useXP";
@@ -168,8 +168,24 @@ const HomeDashboard = ({ displayName, onSelectLevel }: Props) => {
           transition={{ duration: 0.5, delay: 0.15 }}
           className="grid md:grid-cols-2 gap-4"
         >
-          <div className="rounded-[1.5rem] bg-card/60 border border-white/5 p-4 md:p-5">
+          <div className="rounded-[1.5rem] bg-card/60 border border-white/5 p-4 md:p-5 flex flex-col gap-3">
             <SRSWidget />
+            <div className="grid grid-cols-3 gap-2 mt-auto">
+              {[
+                { icon: BookOpen, label: "Словник", to: "/dictionary" },
+                { icon: Gamepad2, label: "Ігри", to: "/games" },
+                { icon: GraduationCap, label: "Академія", to: "/academy" },
+              ].map(({ icon: Icon, label, to }) => (
+                <button
+                  key={to}
+                  onClick={() => navigate(to)}
+                  className="group flex flex-col items-center justify-center gap-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-primary/30 transition p-3"
+                >
+                  <Icon className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
+                  <span className="text-xs font-medium text-foreground/80">{label}</span>
+                </button>
+              ))}
+            </div>
           </div>
           <div className="rounded-[1.5rem] bg-card/60 border border-white/5 p-4 md:p-5">
             <DailyChallenge />
