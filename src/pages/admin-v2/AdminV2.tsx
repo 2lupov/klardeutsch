@@ -1,0 +1,251 @@
+import { useState, useEffect, ReactNode } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  LayoutDashboard,
+  BookOpen,
+  Sparkles,
+  Dumbbell,
+  Users,
+  MessageSquare,
+  BarChart3,
+  Settings,
+  Lock,
+  ChevronLeft,
+  ExternalLink,
+} from "lucide-react";
+
+import DashboardPage from "./pages/DashboardPage";
+import CoursesPage from "./pages/CoursesPage";
+import CourseBuilderPage from "./pages/CourseBuilderPage";
+import ExerciseStudioPage from "./pages/ExerciseStudioPage";
+import StudentsPage from "./pages/StudentsPage";
+import TutorLogsPage from "./pages/TutorLogsPage";
+import AnalyticsPage from "./pages/AnalyticsPage";
+import SettingsPage from "./pages/SettingsPage";
+
+type NavKey =
+  | "dashboard"
+  | "courses"
+  | "builder"
+  | "studio"
+  | "students"
+  | "tutor"
+  | "analytics"
+  | "settings";
+
+const NAV: { key: NavKey; label: string; icon: any }[] = [
+  { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { key: "courses", label: "Courses", icon: BookOpen },
+  { key: "builder", label: "AI Course Builder", icon: Sparkles },
+  { key: "studio", label: "Exercise Studio", icon: Dumbbell },
+  { key: "students", label: "Students", icon: Users },
+  { key: "tutor", label: "AI Tutor Logs", icon: MessageSquare },
+  { key: "analytics", label: "Analytics", icon: BarChart3 },
+  { key: "settings", label: "Settings", icon: Settings },
+];
+
+export default function AdminV2() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [active, setActive] = useState<NavKey>("dashboard");
+  const [collapsed, setCollapsed] = useState(false);
+
+  useEffect(() => {
+    if (!user) {
+      setIsAdmin(false);
+      return;
+    }
+    (async () => {
+      const { data } = await supabase.rpc("has_role", {
+        _user_id: user.id,
+        _role: "admin",
+      });
+      setIsAdmin(!!data);
+    })();
+  }, [user]);
+
+  if (!user) {
+    return (
+      <GuardScreen
+        icon={<Lock className="w-10 h-10" style={{ color: "#4F46E5" }} />}
+        title="Потрібна авторизація"
+        subtitle="Увійдіть з обліковим записом адміністратора"
+        cta={{ label: "Увійти", onClick: () => navigate("/auth") }}
+      />
+    );
+  }
+  if (isAdmin === null) {
+    return (
+      <div className="h-[100dvh] flex items-center justify-center" style={{ background: "#F8FAFC" }}>
+        <p className="text-slate-500 animate-pulse font-sans">Завантаження…</p>
+      </div>
+    );
+  }
+  if (!isAdmin) {
+    return (
+      <GuardScreen
+        icon={<Lock className="w-10 h-10 text-red-500" />}
+        title="Доступ заборонено"
+        subtitle="Потрібна роль адміністратора"
+        cta={{ label: "На головну", onClick: () => navigate("/") }}
+      />
+    );
+  }
+
+  const activeItem = NAV.find((n) => n.key === active)!;
+
+  return (
+    <div
+      className="h-[100dvh] w-full flex overflow-hidden"
+      style={{ background: "#F8FAFC", fontFamily: "Inter, system-ui, sans-serif" }}
+    >
+      {/* Sidebar */}
+      <aside
+        className={`${collapsed ? "w-16" : "w-64"} shrink-0 h-full bg-white border-r border-slate-200 flex flex-col transition-all duration-200`}
+      >
+        <div className="h-16 flex items-center gap-2 px-4 border-b border-slate-100">
+          <div
+            className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold shrink-0"
+            style={{ background: "linear-gradient(135deg,#4F46E5,#7C3AED)" }}
+          >
+            K
+          </div>
+          {!collapsed && (
+            <div className="flex flex-col leading-tight">
+              <span className="font-semibold text-slate-900 text-sm">KLAR Academy</span>
+              <span className="text-[11px] text-slate-500">Admin Console</span>
+            </div>
+          )}
+        </div>
+
+        <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-1">
+          {NAV.map(({ key, label, icon: Icon }) => {
+            const isActive = key === active;
+            return (
+              <button
+                key={key}
+                onClick={() => setActive(key)}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                  isActive
+                    ? "text-white shadow-sm"
+                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                }`}
+                style={isActive ? { background: "#4F46E5" } : undefined}
+                title={collapsed ? label : undefined}
+              >
+                <Icon className="w-[18px] h-[18px] shrink-0" />
+                {!collapsed && <span className="truncate">{label}</span>}
+              </button>
+            );
+          })}
+        </nav>
+
+        <div className="p-2 border-t border-slate-100 space-y-1">
+          <Link
+            to="/admin/legacy"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-slate-500 hover:bg-slate-50"
+            title="Legacy admin"
+          >
+            <ExternalLink className="w-4 h-4 shrink-0" />
+            {!collapsed && <span>Legacy admin</span>}
+          </Link>
+          <button
+            onClick={() => setCollapsed((c) => !c)}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-slate-500 hover:bg-slate-50"
+          >
+            <ChevronLeft
+              className={`w-4 h-4 shrink-0 transition-transform ${collapsed ? "rotate-180" : ""}`}
+            />
+            {!collapsed && <span>Згорнути</span>}
+          </button>
+        </div>
+      </aside>
+
+      {/* Main */}
+      <main className="flex-1 h-full flex flex-col overflow-hidden">
+        <header className="h-16 shrink-0 border-b border-slate-200 bg-white flex items-center justify-between px-6">
+          <div className="flex items-center gap-3">
+            <activeItem.icon className="w-5 h-5" style={{ color: "#4F46E5" }} />
+            <h1 className="text-lg font-semibold text-slate-900">{activeItem.label}</h1>
+          </div>
+          <div className="flex items-center gap-3">
+            <span
+              className="text-xs px-2.5 py-1 rounded-full font-medium"
+              style={{ background: "#FEF3C7", color: "#92400E" }}
+            >
+              Admin
+            </span>
+            <Link
+              to="/"
+              className="text-sm text-slate-500 hover:text-slate-900 transition-colors"
+            >
+              До додатку →
+            </Link>
+          </div>
+        </header>
+
+        <div className="flex-1 overflow-y-auto p-6">
+          <PageRouter active={active} />
+        </div>
+      </main>
+    </div>
+  );
+}
+
+function PageRouter({ active }: { active: NavKey }) {
+  switch (active) {
+    case "dashboard":
+      return <DashboardPage />;
+    case "courses":
+      return <CoursesPage />;
+    case "builder":
+      return <CourseBuilderPage />;
+    case "studio":
+      return <ExerciseStudioPage />;
+    case "students":
+      return <StudentsPage />;
+    case "tutor":
+      return <TutorLogsPage />;
+    case "analytics":
+      return <AnalyticsPage />;
+    case "settings":
+      return <SettingsPage />;
+  }
+}
+
+function GuardScreen({
+  icon,
+  title,
+  subtitle,
+  cta,
+}: {
+  icon: ReactNode;
+  title: string;
+  subtitle: string;
+  cta: { label: string; onClick: () => void };
+}) {
+  return (
+    <div
+      className="h-[100dvh] flex items-center justify-center px-4"
+      style={{ background: "#F8FAFC", fontFamily: "Inter, system-ui, sans-serif" }}
+    >
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 max-w-sm w-full text-center">
+        <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center mx-auto mb-4">
+          {icon}
+        </div>
+        <h1 className="text-xl font-semibold text-slate-900">{title}</h1>
+        <p className="text-sm text-slate-500 mt-1">{subtitle}</p>
+        <button
+          onClick={cta.onClick}
+          className="mt-6 w-full py-2.5 rounded-xl text-white font-medium text-sm"
+          style={{ background: "#4F46E5" }}
+        >
+          {cta.label}
+        </button>
+      </div>
+    </div>
+  );
+}
