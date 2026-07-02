@@ -87,8 +87,7 @@ const CourseHero = ({ lang }: { lang: Lang }) => (
         </div>
       </motion.div>
 
-        </div>
-      </motion.div>
+
 
       <motion.div
         initial={{ opacity: 0, scale: 0.9, rotate: -6 }}
