@@ -254,12 +254,12 @@ const StreakPlant = ({ streak, canClaim, compact = false, hideBadges = false }: 
         whileTap={{ scale: 0.95 }}
       >
         <span className="text-2xl">🐼</span>
-        {streak > 0 && (
+        {!hideBadges && streak > 0 && (
           <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
             {streak}
           </span>
         )}
-        {canClaim && (
+        {!hideBadges && canClaim && (
           <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-500 border-2 border-background animate-pulse" />
         )}
       </motion.button>
