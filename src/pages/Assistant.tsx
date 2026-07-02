@@ -818,22 +818,58 @@ const Assistant = () => {
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-center py-2">
             <h3 className="font-display font-bold text-lg text-foreground">{selectedTemplate}</h3>
             <p className="text-xs text-muted-foreground mt-1">
-              {t("Вставьте текст документа для анализа", "Вставте текст документу для аналізу")}
+              {t("Вставьте текст, загрузите файл или сфотографируйте документ", "Встав текст, завантаж файл або сфотографуй документ")}
             </p>
           </motion.div>
 
           <textarea value={fileText} onChange={(e) => setFileText(e.target.value)}
             placeholder={t("Вставьте текст письма или документа...", "Вставте текст листа чи документу...")}
-            rows={10}
+            rows={6}
             className="w-full bg-card border border-border rounded-2xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/30" />
 
+          <input ref={fileUploadRef} type="file" accept="image/*,application/pdf" className="hidden"
+            onChange={(e) => { handleFilePick(e.target.files?.[0] ?? null); e.target.value = ""; }} />
+          <input ref={photoUploadRef} type="file" accept="image/*" capture="environment" className="hidden"
+            onChange={(e) => { handleFilePick(e.target.files?.[0] ?? null); e.target.value = ""; }} />
+
+          {attachedFile ? (
+            <div className="flex items-center gap-3 p-3 rounded-2xl border border-accent/30 bg-accent/5">
+              {attachedFile.mime.startsWith("image/") ? (
+                <img src={attachedFile.dataUrl} alt="" className="w-14 h-14 rounded-lg object-cover" />
+              ) : (
+                <div className="w-14 h-14 rounded-lg bg-accent/15 flex items-center justify-center">
+                  <FileText className="w-6 h-6 text-accent" />
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-medium text-foreground truncate">{attachedFile.name}</p>
+                <p className="text-[10px] text-muted-foreground">{attachedFile.mime}</p>
+              </div>
+              <button onClick={() => setAttachedFile(null)}
+                className="w-8 h-8 rounded-lg bg-secondary/70 flex items-center justify-center text-muted-foreground hover:text-foreground">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-2">
+              <button onClick={() => fileUploadRef.current?.click()}
+                className="flex items-center justify-center gap-2 py-3 rounded-xl border border-border bg-secondary/40 text-sm text-foreground hover:bg-secondary transition-colors">
+                <Upload className="w-4 h-4" /> {t("Загрузить файл", "Завантажити файл")}
+              </button>
+              <button onClick={() => photoUploadRef.current?.click()}
+                className="flex items-center justify-center gap-2 py-3 rounded-xl border border-border bg-secondary/40 text-sm text-foreground hover:bg-secondary transition-colors">
+                <Camera className="w-4 h-4" /> {t("Сфотографировать", "Сфотографувати")}
+              </button>
+            </div>
+          )}
+
           <div className="flex gap-2">
-            <button onClick={() => { setSelectedTemplate(null); setFileText(""); }}
+            <button onClick={() => { setSelectedTemplate(null); setFileText(""); setAttachedFile(null); }}
               className="px-4 py-3 rounded-xl border border-border bg-secondary/50 text-sm text-muted-foreground hover:text-foreground transition-colors">
               <ArrowLeft className="w-4 h-4" />
             </button>
             <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-              onClick={() => analyzeFile(selectedTemplate)} disabled={!fileText.trim() || fileLoading}
+              onClick={() => analyzeFile(selectedTemplate)} disabled={(!fileText.trim() && !attachedFile) || fileLoading}
               className="flex-1 py-3.5 rounded-2xl bg-gradient-to-r from-accent to-accent text-accent-foreground font-display font-bold text-sm disabled:opacity-40 flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-accent/30 transition-all">
               {fileLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <FileCheck className="w-5 h-5" />}
               {t("Разобрать документ", "Розібрати документ")}
