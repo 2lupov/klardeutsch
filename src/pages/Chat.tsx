@@ -14,6 +14,8 @@ import MediaEmbed, { hasMediaEmbed } from "@/components/chat/MediaEmbed";
 import StickerPicker, { isStickerMessage, getStickerSrc, STICKER_PREFIX } from "@/components/chat/StickerPicker";
 import { Smile } from "lucide-react";
 import chatBgImage from "@/assets/chat-bg.png";
+import KlarLogo from "@/components/KlarLogo";
+import { useLevelProgress } from "@/hooks/useLevelProgress";
 
 /* ───── iOS keyboard: track bottom offset so input sticks to keyboard ───── */
 const useKeyboardBottom = () => {
@@ -1064,6 +1066,23 @@ const TabButton = ({ active, icon: Icon, label, badge, onClick }: {
 );
 
 /* ───── Community Chat ───── */
+const ChatKlarWatermark = () => {
+  const a1 = useLevelProgress("A1");
+  const a2 = useLevelProgress("A2");
+  const b1 = useLevelProgress("B1");
+  const b2 = useLevelProgress("B2");
+  const c1 = useLevelProgress("C1");
+  const total = Math.round((a1.progress + a2.progress + b1.progress + b2.progress + c1.progress) / 5);
+  const done = a1.completed && a2.completed && b1.completed && b2.completed && c1.completed;
+  return (
+    <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-25">
+      <div className="scale-[2.5]">
+        <KlarLogo progress={total} completed={done} size="lg" />
+      </div>
+    </div>
+  );
+};
+
 const CommunityChat = () => {
   const { user } = useAuth();
   const { lang } = useLanguage();
@@ -1173,7 +1192,8 @@ const CommunityChat = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto p-4 pb-20 space-y-3" style={{ backgroundImage: `url(${chatBgImage})`, backgroundSize: '35%', backgroundPosition: 'center 45%', backgroundRepeat: 'no-repeat', backgroundAttachment: 'local' }}>
+      <div className="relative flex-1 overflow-y-auto p-4 pb-20 space-y-3">
+        <ChatKlarWatermark />
         {messages.length === 0 && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16">
             <p className="text-4xl mb-3">💬</p>
