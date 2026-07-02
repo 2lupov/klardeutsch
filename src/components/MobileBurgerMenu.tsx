@@ -62,7 +62,7 @@ const MobileBurgerMenu = () => {
       </SheetTrigger>
       <SheetContent side="left" className="w-72 p-0 flex flex-col">
         <SheetHeader className="px-5 pt-5 pb-3 border-b border-border">
-          <SheetTitle className="font-display text-2xl tracking-tight">KLAR</SheetTitle>
+          <SheetTitle className="font-display text-2xl tracking-tight pl-16">KLAR</SheetTitle>
         </SheetHeader>
         <nav className="flex-1 overflow-y-auto py-2">
           {items.map((item) => {
