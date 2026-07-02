@@ -103,8 +103,8 @@ export default function CoursesPage() {
   return (
     <div className="space-y-6">
       <SectionHeader
-        title="Курси"
-        subtitle="Керуй структурою всіх курсів школи"
+        title={`Курси · ${meta.flag} ${meta.label}`}
+        subtitle={isAll ? "Показані курси всіх мов школи" : `Фільтр: тільки ${meta.label.toLowerCase()}`}
         action={
           <button
             onClick={() => setShowNew(true)}
