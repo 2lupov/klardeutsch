@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import TheoryRenderer, { type TheoryBlock } from "@/components/course/TheoryRenderer";
+import LessonSlidesViewer, { type Slide } from "@/components/admin/LessonSlidesViewer";
+import { Presentation } from "lucide-react";
 
 type Level = "A1" | "A2" | "B1" | "B2" | "C1";
 
@@ -643,6 +645,40 @@ const CourseEditor = ({ level }: { level: Level }) => {
   const genAbortRef = useRef(false);
   const [expandedLesson, setExpandedLesson] = useState<number | null>(null);
   const [creatingCourse, setCreatingCourse] = useState(false);
+  const [slidesFor, setSlidesFor] = useState<{ id: string; title: string; slides: Slide[] } | null>(null);
+  const [generatingSlidesId, setGeneratingSlidesId] = useState<string | null>(null);
+
+  const generateSlidesForLesson = async (lesson: any) => {
+    if (!lesson?.id) return;
+    setGeneratingSlidesId(lesson.id);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-lesson-slides", {
+        body: { lesson_id: lesson.id, count: 10 },
+      });
+      if (error || (data as any)?.error) throw new Error(error?.message || (data as any)?.error);
+      const slides = (data as any).slides as Slide[];
+      // update local state so the button opens right away
+      setEditLessons(prev => prev.map(l => l.id === lesson.id
+        ? { ...l, content: { ...(l.content && typeof l.content === "object" ? l.content : {}), slides } }
+        : l));
+      setSlidesFor({ id: lesson.id, title: lesson.title, slides });
+      toast.success(`Створено ${slides.length} слайдів`);
+    } catch (e: any) {
+      toast.error(e.message || "Помилка генерації");
+    } finally {
+      setGeneratingSlidesId(null);
+    }
+  };
+
+  const openExistingSlides = (lesson: any) => {
+    const slides = lesson?.content?.slides;
+    if (Array.isArray(slides) && slides.length) {
+      setSlidesFor({ id: lesson.id, title: lesson.title, slides });
+    } else {
+      generateSlidesForLesson(lesson);
+    }
+  };
+
 
   // Create course and auto-generate lessons
   const handleCreateAndGenerate = async () => {
@@ -1097,6 +1133,44 @@ const CourseEditor = ({ level }: { level: Level }) => {
                     )}
                   </div>
 
+                  {/* 🎨 Slides presentation block */}
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-amber-500/5 to-rose-500/5 border border-amber-500/20 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Presentation className="w-4 h-4 text-amber-600" />
+                      <label className="text-[11px] font-semibold text-foreground">Презентація уроку (слайди)</label>
+                      {Array.isArray(lesson.content?.slides) && lesson.content.slides.length > 0 && (
+                        <span className="text-[10px] text-emerald-600 dark:text-emerald-400">✅ {lesson.content.slides.length} слайдів</span>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => generateSlidesForLesson(lesson)}
+                        disabled={generatingSlidesId === lesson.id}
+                        className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-rose-500 text-white text-xs font-medium flex items-center gap-1.5 disabled:opacity-50"
+                      >
+                        {generatingSlidesId === lesson.id
+                          ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          : <Sparkles className="w-3.5 h-3.5" />}
+                        {Array.isArray(lesson.content?.slides) && lesson.content.slides.length > 0
+                          ? "Перегенерувати з AI"
+                          : "Створити з AI"}
+                      </button>
+                      {Array.isArray(lesson.content?.slides) && lesson.content.slides.length > 0 && (
+                        <button
+                          onClick={() => openExistingSlides(lesson)}
+                          className="px-3 py-1.5 rounded-lg bg-secondary text-foreground text-xs font-medium flex items-center gap-1.5 hover:bg-secondary/80"
+                        >
+                          <Eye className="w-3.5 h-3.5" /> Відкрити
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-[10px] text-muted-foreground">
+                      AI бере теорію + вправи уроку і збирає ~10 лаконічних слайдів (обкладинка, тези, словник, приклади, quiz, підсумок).
+                    </p>
+                  </div>
+
+
+
 
                   {/* Content JSON editor for new types */}
                   {["article", "grammar", "reading", "dialogue_text", "word_list", "quiz", "video", "ai_tutor"].includes(lesson.lesson_type || "") && (
@@ -1195,6 +1269,13 @@ const CourseEditor = ({ level }: { level: Level }) => {
           </button>
         </div>
       )}
+
+      <LessonSlidesViewer
+        open={!!slidesFor}
+        onClose={() => setSlidesFor(null)}
+        slides={slidesFor?.slides || []}
+        lessonTitle={slidesFor?.title}
+      />
     </div>
   );
 };
