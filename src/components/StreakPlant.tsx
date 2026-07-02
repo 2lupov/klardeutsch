@@ -17,6 +17,7 @@ interface StreakPlantProps {
   streak: number;
   canClaim: boolean;
   compact?: boolean;
+  hideBadges?: boolean;
 }
 
 const STAGES = [
