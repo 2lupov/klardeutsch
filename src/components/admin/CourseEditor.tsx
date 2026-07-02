@@ -1269,6 +1269,13 @@ const CourseEditor = ({ level }: { level: Level }) => {
           </button>
         </div>
       )}
+
+      <LessonSlidesViewer
+        open={!!slidesFor}
+        onClose={() => setSlidesFor(null)}
+        slides={slidesFor?.slides || []}
+        lessonTitle={slidesFor?.title}
+      />
     </div>
   );
 };
