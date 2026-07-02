@@ -932,8 +932,9 @@ const ChatInputBar = ({ onSendText, onSendVoice, onSendImages, onSendFile, onSen
       </AnimatePresence>
 
       <div
-        className="px-2.5 pt-1.5 pb-2"
+        className="pl-14 pr-2.5 md:px-2.5 pt-1.5 pb-2"
       >
+
         <AnimatePresence mode="wait">
           {recording ? (
             <motion.div
