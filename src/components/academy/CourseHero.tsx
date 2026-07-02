@@ -2,6 +2,10 @@ import { motion } from "framer-motion";
 import { GraduationCap, Sparkles, Play } from "lucide-react";
 import type { Lang } from "@/i18n/translations";
 import pandaExplorer from "@/assets/panda-director.png";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import CertificatePreview from "./CertificatePreview";
+
 
 const CourseHero = ({ lang }: { lang: Lang }) => (
   <section className="relative overflow-hidden mb-6">
@@ -52,12 +56,38 @@ const CourseHero = ({ lang }: { lang: Lang }) => (
             <Sparkles className="w-3.5 h-3.5 text-accent" />
             <span className="font-medium">AI-{lang === "uk" ? "тренер" : "тренер"}</span>
           </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-card/60 border border-border/40 backdrop-blur">
-            <GraduationCap className="w-3.5 h-3.5 text-primary" />
-            <span className="font-medium">{lang === "uk" ? "Сертифікат" : "Сертификат"}</span>
-          </div>
+          <HoverCard openDelay={80} closeDelay={80}>
+            <HoverCardTrigger asChild>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-card/60 border border-border/40 backdrop-blur transition hover:border-accent/60 hover:bg-accent/10 hover:shadow-[0_0_0_3px_hsl(var(--accent)/0.15)] focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 cursor-pointer"
+                    aria-label={lang === "uk" ? "Показати приклад сертифіката" : "Показать пример сертификата"}
+                  >
+                    <GraduationCap className="w-3.5 h-3.5 text-primary" />
+                    <span className="font-medium">{lang === "uk" ? "Сертифікат" : "Сертификат"}</span>
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent side="top" align="center" className="w-[min(92vw,420px)] p-3 border-accent/30 bg-card/95 backdrop-blur md:hidden">
+                  <CertificatePreview lang={lang} />
+                  <p className="mt-2 text-[10px] text-center text-muted-foreground uppercase tracking-widest">
+                    {lang === "uk" ? "Приклад сертифіката" : "Пример сертификата"}
+                  </p>
+                </PopoverContent>
+              </Popover>
+            </HoverCardTrigger>
+            <HoverCardContent side="top" align="center" className="w-[420px] p-3 border-accent/30 bg-card/95 backdrop-blur hidden md:block">
+              <CertificatePreview lang={lang} />
+              <p className="mt-2 text-[10px] text-center text-muted-foreground uppercase tracking-widest">
+                {lang === "uk" ? "Приклад сертифіката" : "Пример сертификата"}
+              </p>
+            </HoverCardContent>
+          </HoverCard>
         </div>
       </motion.div>
+
+
 
       <motion.div
         initial={{ opacity: 0, scale: 0.9, rotate: -6 }}
