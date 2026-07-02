@@ -1465,7 +1465,8 @@ const DMConversation = ({ peerId, onBack }: { peerId: string; onBack: () => void
         </button>
       </motion.div>
 
-      <div className="flex-1 overflow-y-auto p-4 pb-20 space-y-2.5" style={{ backgroundImage: `url(${chatBgImage})`, backgroundSize: '35%', backgroundPosition: 'center 45%', backgroundRepeat: 'no-repeat', backgroundAttachment: 'local' }}>
+      <div className="relative flex-1 overflow-y-auto p-4 pb-20 space-y-2.5">
+        <ChatKlarWatermark>
         {messages.map((m, i) => {
           const isMe = m.sender_id === user?.id;
           const msg = m as any;
