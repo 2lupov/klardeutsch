@@ -184,6 +184,38 @@ export default function CourseBuilderPage() {
         </div>
       </Card>
 
+      <Card className="p-6">
+        <SectionHeader title="Що саме створюється" subtitle="Огляд AI-контенту та ручних елементів" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+          {[
+            { icon: "📖", title: "Теорія (8–15 блоків)", desc: "Gemini 2.5 Flash → generate-full-course. Markdown + правила, приклади, таблиці відмінків, підказки.", who: "AI" },
+            { icon: "📚", title: "Словник (10–15 слів)", desc: "DE + переклад RU/UA, артикль, приклад речення. Догенерація через generate-lesson-section.", who: "AI" },
+            { icon: "✏️", title: "Вправи (6–8 шт)", desc: "Fill-in-blank, вибір з варіантів, порядок слів, переклад. Fuzzy matching ~15%.", who: "AI" },
+            { icon: "📝", title: "Граматика (квіз)", desc: "Питання з 4 варіантами + пояснення. Прив'язана до теми уроку.", who: "AI" },
+            { icon: "📕", title: "Читання", desc: "Короткий текст рівня + питання на розуміння з поясненнями.", who: "AI" },
+            { icon: "💬", title: "Діалог для практики", desc: "A↔B репліки трьома мовами (DE/RU/UA) для говоріння та рольових ігор.", who: "AI" },
+            { icon: "🌍", title: "Культурні нотатки", desc: "Факти про німецькомовні країни, локалізовані RU/UA.", who: "AI" },
+            { icon: "🎬", title: "Відео-теорія", desc: "YouTube / Vimeo / MP4 + субтитри. Додаєш вручну в редакторі уроку.", who: "Ти" },
+            { icon: "🤖", title: "AI-тьютор в уроці", desc: "Окремий тип уроку 'ai_tutor' — учень веде діалог. Логи → analyze-lesson-dialogue.", who: "AI" },
+            { icon: "🏆", title: "Іспит + сертифікат", desc: "Тип 'exam'. При >70% видається сертифікат через issue_certificate.", who: "AI/Auto" },
+          ].map((r) => (
+            <div key={r.title} className="p-3 rounded-xl border border-slate-200 bg-slate-50/50 flex gap-3">
+              <div className="text-2xl leading-none">{r.icon}</div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-slate-900 text-sm">{r.title}</span>
+                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${r.who === "Ти" ? "bg-amber-100 text-amber-700" : "bg-indigo-100 text-indigo-700"}`}>{r.who}</span>
+                </div>
+                <p className="text-xs text-slate-500 mt-0.5">{r.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 p-3 rounded-xl bg-indigo-50 border border-indigo-100 text-xs text-indigo-900">
+          <b>Двигун:</b> Gemini 2.5 Flash через Lovable AI Gateway. <b>Мова уроку:</b> залежить від target_language курсу. <b>Батчі:</b> 5 уроків × 5 запитів = стабільний rate-limit.
+        </div>
+      </Card>
+
       {batches.length > 0 && (
         <Card className="p-6">
           <SectionHeader title="Прогрес" subtitle={`${doneCount} / ${batches.length} батчів`} />

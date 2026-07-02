@@ -631,7 +631,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
   const [existingCourses, setExistingCourses] = useState<ExistingCourse[]>([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
   const [editingCourseId, setEditingCourseId] = useState<string | null>(null);
-  const [editLessons, setEditLessons] = useState<Array<{ id: string; title: string; theory: string; exercises: any; sort_order: number; lesson_type?: string; description?: string | null; estimated_minutes?: number; xp_reward?: number; coins_reward?: number; content?: any }>>([]);
+  const [editLessons, setEditLessons] = useState<Array<{ id: string; title: string; theory: string; exercises: any; sort_order: number; lesson_type?: string; description?: string | null; estimated_minutes?: number; xp_reward?: number; coins_reward?: number; content?: any; video_url?: string | null; video_duration_sec?: number | null; video_subtitles_url?: string | null }>>([]);
   const [editCourse, setEditCourse] = useState<ExistingCourse | null>(null);
   const [loadingLessons, setLoadingLessons] = useState(false);
   const [savingEdit, setSavingEdit] = useState(false);
@@ -788,6 +788,9 @@ const CourseEditor = ({ level }: { level: Level }) => {
       xp_reward: lesson.xp_reward || 20,
       coins_reward: lesson.coins_reward || 10,
       content: lesson.content || null,
+      video_url: lesson.video_url || null,
+      video_duration_sec: lesson.video_duration_sec || null,
+      video_subtitles_url: lesson.video_subtitles_url || null,
     } as any).eq("id", lesson.id);
     if (error) toast.error("Ошибка: " + error.message);
     else toast.success("Урок сохранён ✅");
@@ -870,6 +873,9 @@ const CourseEditor = ({ level }: { level: Level }) => {
         xp_reward: lesson.xp_reward || 20,
         coins_reward: lesson.coins_reward || 10,
         content: lesson.content || null,
+        video_url: lesson.video_url || null,
+        video_duration_sec: lesson.video_duration_sec || null,
+        video_subtitles_url: lesson.video_subtitles_url || null,
       } as any).eq("id", lesson.id);
       if (!error) ok++;
     }
@@ -1050,6 +1056,47 @@ const CourseEditor = ({ level }: { level: Level }) => {
                       <input type="number" value={lesson.coins_reward || 10} onChange={e => { const n = [...editLessons]; n[i] = { ...n[i], coins_reward: parseInt(e.target.value) || 10 }; setEditLessons(n); }} className="w-20 px-2 py-1.5 rounded-lg bg-secondary text-foreground border border-border text-xs" />
                     </div>
                   </div>
+
+                  {/* 🎬 Video theory block */}
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-500/5 to-purple-500/5 border border-indigo-500/20 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm">🎬</span>
+                      <label className="text-[11px] font-semibold text-foreground">Відео-теорія (YouTube / Vimeo / MP4)</label>
+                    </div>
+                    <input
+                      type="url"
+                      value={lesson.video_url || ""}
+                      onChange={e => { const n = [...editLessons]; n[i] = { ...n[i], video_url: e.target.value }; setEditLessons(n); }}
+                      placeholder="https://youtu.be/... або https://.../lesson.mp4"
+                      className="w-full px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-xs focus:border-primary focus:outline-none"
+                    />
+                    <div className="flex gap-2">
+                      <div>
+                        <label className="text-[10px] text-muted-foreground block mb-1">Тривалість (сек)</label>
+                        <input
+                          type="number"
+                          value={lesson.video_duration_sec || ""}
+                          onChange={e => { const n = [...editLessons]; n[i] = { ...n[i], video_duration_sec: parseInt(e.target.value) || null }; setEditLessons(n); }}
+                          placeholder="180"
+                          className="w-28 px-2 py-1.5 rounded-lg bg-secondary text-foreground border border-border text-xs"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <label className="text-[10px] text-muted-foreground block mb-1">Субтитри (URL .vtt/.srt)</label>
+                        <input
+                          type="url"
+                          value={lesson.video_subtitles_url || ""}
+                          onChange={e => { const n = [...editLessons]; n[i] = { ...n[i], video_subtitles_url: e.target.value }; setEditLessons(n); }}
+                          placeholder="https://.../subs.vtt"
+                          className="w-full px-2 py-1.5 rounded-lg bg-secondary text-foreground border border-border text-xs"
+                        />
+                      </div>
+                    </div>
+                    {lesson.video_url && (
+                      <p className="text-[10px] text-emerald-600 dark:text-emerald-400">✅ Учень побачить плеєр перед теорією та вправами</p>
+                    )}
+                  </div>
+
 
                   {/* Content JSON editor for new types */}
                   {["article", "grammar", "reading", "dialogue_text", "word_list", "quiz", "video", "ai_tutor"].includes(lesson.lesson_type || "") && (
