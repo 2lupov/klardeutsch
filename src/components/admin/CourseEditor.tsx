@@ -1133,6 +1133,44 @@ const CourseEditor = ({ level }: { level: Level }) => {
                     )}
                   </div>
 
+                  {/* 🎨 Slides presentation block */}
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-amber-500/5 to-rose-500/5 border border-amber-500/20 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Presentation className="w-4 h-4 text-amber-600" />
+                      <label className="text-[11px] font-semibold text-foreground">Презентація уроку (слайди)</label>
+                      {Array.isArray(lesson.content?.slides) && lesson.content.slides.length > 0 && (
+                        <span className="text-[10px] text-emerald-600 dark:text-emerald-400">✅ {lesson.content.slides.length} слайдів</span>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => generateSlidesForLesson(lesson)}
+                        disabled={generatingSlidesId === lesson.id}
+                        className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-rose-500 text-white text-xs font-medium flex items-center gap-1.5 disabled:opacity-50"
+                      >
+                        {generatingSlidesId === lesson.id
+                          ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          : <Sparkles className="w-3.5 h-3.5" />}
+                        {Array.isArray(lesson.content?.slides) && lesson.content.slides.length > 0
+                          ? "Перегенерувати з AI"
+                          : "Створити з AI"}
+                      </button>
+                      {Array.isArray(lesson.content?.slides) && lesson.content.slides.length > 0 && (
+                        <button
+                          onClick={() => openExistingSlides(lesson)}
+                          className="px-3 py-1.5 rounded-lg bg-secondary text-foreground text-xs font-medium flex items-center gap-1.5 hover:bg-secondary/80"
+                        >
+                          <Eye className="w-3.5 h-3.5" /> Відкрити
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-[10px] text-muted-foreground">
+                      AI бере теорію + вправи уроку і збирає ~10 лаконічних слайдів (обкладинка, тези, словник, приклади, quiz, підсумок).
+                    </p>
+                  </div>
+
+
+
 
                   {/* Content JSON editor for new types */}
                   {["article", "grammar", "reading", "dialogue_text", "word_list", "quiz", "video", "ai_tutor"].includes(lesson.lesson_type || "") && (
