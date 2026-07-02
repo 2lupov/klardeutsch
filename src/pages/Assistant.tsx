@@ -716,18 +716,43 @@ const Assistant = () => {
   const [fileText, setFileText] = useState("");
   const [fileResult, setFileResult] = useState<string | null>(null);
   const [fileLoading, setFileLoading] = useState(false);
+  const [attachedFile, setAttachedFile] = useState<{ name: string; dataUrl: string; mime: string } | null>(null);
+  const fileUploadRef = useRef<HTMLInputElement>(null);
+  const photoUploadRef = useRef<HTMLInputElement>(null);
+
+  const handleFilePick = (file: File | null) => {
+    if (!file) return;
+    if (file.size > 15 * 1024 * 1024) {
+      setFileResult(t("Файл занадто великий (макс 15 МБ).", "Файл слишком большой (макс 15 МБ)."));
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setAttachedFile({ name: file.name, dataUrl: reader.result as string, mime: file.type || "application/octet-stream" });
+    };
+    reader.readAsDataURL(file);
+  };
 
   const analyzeFile = async (template: string) => {
     const text = fileText.trim();
-    if (!text || fileLoading) return;
+    if ((!text && !attachedFile) || fileLoading) return;
     setFileLoading(true); setFileResult(null);
     try {
-      const prompt = lang === "uk"
-        ? `Ти — експерт з німецьких документів (${template}). Проаналізуй цей текст документу і створи:\n\n## 📋 Тип документа\nЩо це за документ і від кого\n\n## 🔑 Головне\nОсновні пункти та що вони означають\n\n## ⚠️ Що важливо\nНа що звернути увагу, терміни, дедлайни\n\n## 📖 Словник документу\nКлючові терміни з перекладом\n\n## ✅ Що робити далі\nКонкретні кроки і рекомендації\n\nТекст:\n${text}`
-        : `Ты — эксперт по немецким документам (${template}). Проанализируй текст документа и создай:\n\n## 📋 Тип документа\nЧто это за документ и от кого\n\n## 🔑 Главное\nОсновные пункты и что они значат\n\n## ⚠️ Что важно\nНа что обратить внимание, сроки, дедлайны\n\n## 📖 Словарь документа\nКлючевые термины с переводом\n\n## ✅ Что делать дальше\nКонкретные шаги и рекомендации\n\nТекст:\n${text}`;
+      const instruction = lang === "uk"
+        ? `Ти — експерт з німецьких документів (${template}). Проаналізуй наданий документ (текст або зображення/PDF) і створи:\n\n## 📋 Тип документа\nЩо це за документ і від кого\n\n## 🔑 Головне\nОсновні пункти та що вони означають\n\n## ⚠️ Що важливо\nНа що звернути увагу, терміни, дедлайни\n\n## 📖 Словник документу\nКлючові терміни з перекладом\n\n## ✅ Що робити далі\nКонкретні кроки і рекомендації`
+        : `Ты — эксперт по немецким документам (${template}). Проанализируй предоставленный документ (текст или изображение/PDF) и создай:\n\n## 📋 Тип документа\nЧто это за документ и от кого\n\n## 🔑 Главное\nОсновные пункты и что они значат\n\n## ⚠️ Что важно\nНа что обратить внимание, сроки, дедлайны\n\n## 📖 Словарь документа\nКлючевые термины с переводом\n\n## ✅ Что делать дальше\nКонкретные шаги и рекомендации`;
+
+      const contentParts: any[] = [{ type: "text", text: instruction + (text ? `\n\nТекст:\n${text}` : "") }];
+      if (attachedFile) {
+        if (attachedFile.mime.startsWith("image/")) {
+          contentParts.push({ type: "image_url", image_url: { url: attachedFile.dataUrl } });
+        } else {
+          contentParts.push({ type: "file", file: { filename: attachedFile.name, file_data: attachedFile.dataUrl } });
+        }
+      }
 
       const resp = await fetchEdgeFunction("ai-dialogue", {
-        json: { messages: [{ role: "user", content: prompt }] },
+        json: { messages: [{ role: "user", content: contentParts }] },
       });
 
       if (!resp.ok || !resp.body) throw new Error("fail");
