@@ -3,7 +3,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import {
   Home, BookOpen, Gamepad2, GraduationCap,
   MessageSquare, Flame, Coins, Star,
-  Swords, Menu, X, Sparkles, Bug, Presentation, ClipboardList
+  Swords, Menu, X, Sparkles, Bug, Presentation, ClipboardList, Presentation as TeachIcon
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -38,6 +38,7 @@ const DesktopSidebar = () => {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [profile, setProfile] = useState<{ display_name?: string; avatar_url?: string } | null>(null);
+  const [isStaff, setIsStaff] = useState(false);
 
   const a1 = useLevelProgress("A1");
   const a2 = useLevelProgress("A2");
@@ -48,13 +49,20 @@ const DesktopSidebar = () => {
   const allCompleted = a1.completed && a2.completed && b1.completed && b2.completed && c1.completed;
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) { setIsStaff(false); return; }
     supabase
       .from("profiles")
       .select("display_name, avatar_url")
       .eq("user_id", user.id)
       .single()
       .then(({ data }) => { if (data) setProfile(data); });
+    supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .then(({ data }) => {
+        setIsStaff((data || []).some((r: any) => r.role === "teacher" || r.role === "admin"));
+      });
   }, [user]);
 
   const learnLinks: SidebarLink[] = [
@@ -172,6 +180,14 @@ const DesktopSidebar = () => {
               <div className="h-px bg-border mx-2 mt-2" />
               {sectionLabel(lang === "uk" ? "Спільнота" : "Сообщество")}
               {socialLinks.map(renderLink)}
+
+              {isStaff && (
+                <>
+                  <div className="h-px bg-border mx-2 mt-2" />
+                  {sectionLabel(lang === "uk" ? "Для персоналу" : "Для персонала")}
+                  {renderLink({ to: "/teach", icon: TeachIcon, label: lang === "uk" ? "Teach Space" : "Teach Space" })}
+                </>
+              )}
             </nav>
 
             {/* Report error link */}
