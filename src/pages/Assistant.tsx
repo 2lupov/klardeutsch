@@ -8,7 +8,8 @@ import {
   Sparkles, Loader2, Search, ArrowLeft, Plus, Check,
   Upload, FileCheck, Lightbulb, Table2, Layers, Quote,
   Building2, Home as HomeIcon, Briefcase, GraduationCap,
-  Heart, Car, Landmark, CreditCard, HelpCircle
+  Heart, Car, Landmark, CreditCard, HelpCircle, Camera, X, Image as ImageIcon
+
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { motion, AnimatePresence } from "framer-motion";
