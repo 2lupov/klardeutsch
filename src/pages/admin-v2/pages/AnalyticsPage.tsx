@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, StatCard, SectionHeader } from "./_ui";
+import { useAdminLang } from "../LanguageContext";
 
 export default function AnalyticsPage() {
   const [data, setData] = useState({
