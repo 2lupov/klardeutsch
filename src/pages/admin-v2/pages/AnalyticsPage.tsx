@@ -4,6 +4,7 @@ import { Card, StatCard, SectionHeader } from "./_ui";
 import { useAdminLang } from "../LanguageContext";
 
 export default function AnalyticsPage() {
+  const { lang, meta, isAll } = useAdminLang();
   const [data, setData] = useState({
     totalUsers: 0,
     activeWeek: 0,
@@ -17,13 +18,29 @@ export default function AnalyticsPage() {
     (async () => {
       const weekAgo = new Date(Date.now() - 7 * 864e5).toISOString();
 
-      const [{ count: totalUsers }, { count: activeWeek }, { data: progress }, { data: courses }, { data: lessons }] =
+      const coursesBase = supabase.from("courses").select("id,title");
+      const coursesRes =
+        lang !== "all"
+          ? await coursesBase.eq("target_language", lang)
+          : await coursesBase;
+      const courses = (coursesRes.data as any[]) || [];
+      const scopedCourseIds = courses.map((c) => c.id);
+
+      const lessonsBase = supabase.from("course_lessons").select("id,title,course_id");
+      const lessonsRes =
+        lang !== "all" && scopedCourseIds.length
+          ? await lessonsBase.in("course_id", scopedCourseIds)
+          : lang !== "all"
+          ? { data: [] as any[] }
+          : await lessonsBase;
+      const lessons = (lessonsRes.data as any[]) || [];
+      const scopedLessonIds = new Set(lessons.map((l) => l.id));
+
+      const [{ count: totalUsers }, { count: activeWeek }, { data: progress }] =
         await Promise.all([
           supabase.from("profiles").select("*", { count: "exact", head: true }),
           supabase.from("profiles").select("*", { count: "exact", head: true }).gte("last_active", weekAgo),
           supabase.from("course_lesson_progress").select("course_id,lesson_id,score,status").eq("status", "completed"),
-          supabase.from("courses").select("id,title"),
-          supabase.from("course_lessons").select("id,title"),
         ]);
 
       const courseMap = new Map((courses as any[] || []).map((c) => [c.id, c.title]));
