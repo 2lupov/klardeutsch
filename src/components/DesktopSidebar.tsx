@@ -159,9 +159,8 @@ const DesktopSidebar = () => {
             style={{ width: SIDEBAR_W }}
           >
             {/* Logo header */}
-            <div className="flex items-center justify-between pl-20 pr-5 pt-5 pb-4 border-b border-border gap-2">
+            <div className="flex items-center pl-20 pr-5 pt-5 pb-4 border-b border-border">
               <KlarLogo progress={totalProgress} completed={allCompleted} size="md" />
-              <TargetLanguageSwitcher variant="compact" />
             </div>
 
 
