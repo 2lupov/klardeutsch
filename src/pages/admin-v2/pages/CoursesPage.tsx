@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, SectionHeader, EmptyState } from "./_ui";
 import { BookOpen, Sparkles, Edit3, Trash2, Eye, EyeOff } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { useAdminLang, applyLangFilter, ADMIN_LANGS } from "../LanguageContext";
 
 interface Course {
   id: string;
