@@ -20,6 +20,7 @@ const BATCH_SIZE = 5;
 const TOTAL_TOPICS = 25;
 
 export default function CourseBuilderPage() {
+  const { lang, meta, isAll } = useAdminLang();
   const [courses, setCourses] = useState<Course[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [batches, setBatches] = useState<Batch[]>([]);
@@ -29,10 +30,13 @@ export default function CourseBuilderPage() {
   const selected = courses.find((c) => c.id === selectedId);
 
   const loadCourses = async () => {
-    const { data } = await supabase
+    const base = supabase
       .from("courses")
-      .select("id,title,level,target_language,total_lessons")
-      .order("created_at", { ascending: false });
+      .select("id,title,level,target_language,total_lessons");
+    const { data } =
+      lang && lang !== "all"
+        ? await base.eq("target_language", lang).order("created_at", { ascending: false })
+        : await base.order("created_at", { ascending: false });
     setCourses((data as any) || []);
   };
 
@@ -44,7 +48,7 @@ export default function CourseBuilderPage() {
     setExistingLessons(count || 0);
   };
 
-  useEffect(() => { loadCourses(); }, []);
+  useEffect(() => { loadCourses(); }, [lang]);
 
   useEffect(() => {
     const h = (e: any) => setSelectedId(e.detail?.courseId);
