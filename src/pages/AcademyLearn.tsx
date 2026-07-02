@@ -184,6 +184,15 @@ const AcademyLearn = () => {
           <ArrowLeft className="w-4 h-4" />
         </button>
         <span className="text-sm font-display font-bold text-foreground truncate flex-1">{courseTitle}</span>
+        {Array.isArray((activeLesson?.content as any)?.slides) && (activeLesson?.content as any).slides.length > 0 && (
+          <button
+            onClick={() => setSlidesOpen(true)}
+            className="text-muted-foreground hover:text-primary transition-colors"
+            title={lang === "uk" ? "Дивитись презентацію" : "Смотреть презентацию"}
+          >
+            <Presentation className="w-4.5 h-4.5" />
+          </button>
+        )}
         <button
           onClick={() => setCohortChatOpen(true)}
           className="text-muted-foreground hover:text-primary transition-colors"
