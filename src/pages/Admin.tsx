@@ -6,7 +6,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Plus, Trash2, Lock, Check, BookOpen, Languages, Headphones, BookText, ShoppingBag, Gamepad2, Users, Globe, Pencil, Sparkles, ScanSearch, FileText, Bot, GraduationCap, FolderOpen, BarChart3, MessageCircle, Package } from "lucide-react";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import ShopEditor from "@/components/admin/ShopEditor";
-import ProductsEditor from "@/components/admin/ProductsEditor";
+
 import ListeningEditor from "@/components/admin/ListeningEditor";
 import UsersEditor from "@/components/admin/UsersEditor";
 import CafeEditor from "@/components/admin/CafeEditor";
