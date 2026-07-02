@@ -24,6 +24,7 @@ import StudentsPage from "./pages/StudentsPage";
 import TutorLogsPage from "./pages/TutorLogsPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import SettingsPage from "./pages/SettingsPage";
+import { AdminLangProvider, useAdminLang, ADMIN_LANGS } from "./LanguageContext";
 
 type NavKey =
   | "dashboard"
