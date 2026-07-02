@@ -39,12 +39,13 @@ export default function CoursesPage() {
 
   const load = async () => {
     setLoading(true);
-    let q = supabase
+    const base = supabase
       .from("courses")
-      .select("id,title,description,level,available,target_language,total_lessons")
-      .order("created_at", { ascending: false });
-    q = applyLangFilter(q, lang);
-    const { data } = await q;
+      .select("id,title,description,level,available,target_language,total_lessons");
+    const { data } =
+      lang && lang !== "all"
+        ? await base.eq("target_language", lang).order("created_at", { ascending: false })
+        : await base.order("created_at", { ascending: false });
     setCourses((data as any) || []);
     setLoading(false);
   };
