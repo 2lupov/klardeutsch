@@ -312,6 +312,13 @@ const AcademyLearn = () => {
       {courseId && (
         <CohortChat courseId={courseId} lang={lang} open={cohortChatOpen} onClose={() => setCohortChatOpen(false)} />
       )}
+
+      <LessonSlidesViewer
+        open={slidesOpen}
+        onClose={() => setSlidesOpen(false)}
+        slides={((activeLesson?.content as any)?.slides) || []}
+        lessonTitle={activeLesson?.title}
+      />
     </div>
   );
 };
