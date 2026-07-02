@@ -186,14 +186,13 @@ const Assistant = () => {
               </span>
             </div>
             <h1 className="font-display text-2xl md:text-3xl font-bold text-foreground leading-[1.05] tracking-tight">
-              {t("Твій ", "Твой ")}
-              <span className="italic text-accent">{t("персональний", "персональный")}</span>
+              Твій{" "}
+              <span className="italic text-accent">персональний</span>
               <br />
-              <span className="text-foreground/70">{t("мовний тренер", "языковой тренер")}</span>
+              <span className="text-foreground/70">мовний тренер</span>
             </h1>
             <p className="text-xs md:text-sm text-muted-foreground mt-2 leading-relaxed">
-              {t("Граматика, словник, розбір текстів і документів — все в одному місці",
-                 "Грамматика, словарь, разбор текстов и документов — всё в одном месте")}
+              Граматика, словник, розбір текстів і документів — все в одному місці
             </p>
           </div>
         </div>
