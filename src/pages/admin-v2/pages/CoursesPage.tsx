@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, SectionHeader, EmptyState } from "./_ui";
 import { BookOpen, Sparkles, Edit3, Trash2, Eye, EyeOff } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { useAdminLang, applyLangFilter, ADMIN_LANGS } from "../LanguageContext";
 
 interface Course {
   id: string;
@@ -17,6 +18,7 @@ interface Course {
 const LEVELS = ["A1", "A2", "B1", "B2", "C1"];
 
 export default function CoursesPage() {
+  const { lang, createLang, isAll, meta } = useAdminLang();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [showNew, setShowNew] = useState(false);
@@ -26,21 +28,29 @@ export default function CoursesPage() {
     title: "",
     description: "",
     level: "A1",
-    target_language: "de",
+    target_language: createLang,
     price: 200,
   });
 
+  // keep form language in sync with header selector
+  useEffect(() => {
+    setForm((f) => ({ ...f, target_language: createLang }));
+  }, [createLang]);
+
   const load = async () => {
     setLoading(true);
-    const { data } = await supabase
+    const base = supabase
       .from("courses")
-      .select("id,title,description,level,available,target_language,total_lessons")
-      .order("created_at", { ascending: false });
+      .select("id,title,description,level,available,target_language,total_lessons");
+    const { data } =
+      lang && lang !== "all"
+        ? await base.eq("target_language", lang).order("created_at", { ascending: false })
+        : await base.order("created_at", { ascending: false });
     setCourses((data as any) || []);
     setLoading(false);
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [lang]);
 
   const openBuilder = (courseId: string) => {
     window.dispatchEvent(new CustomEvent("admin-v2:open-builder", { detail: { courseId } }));
@@ -59,7 +69,7 @@ export default function CoursesPage() {
     if (error) { toast({ title: "Помилка", description: error.message }); return; }
     toast({ title: "Курс створено" });
     setShowNew(false);
-    setForm({ title: "", description: "", level: "A1", target_language: "de", price: 200 });
+    setForm({ title: "", description: "", level: "A1", target_language: createLang, price: 200 });
     await load();
     if (data?.id) openBuilder(data.id);
   };
@@ -93,8 +103,8 @@ export default function CoursesPage() {
   return (
     <div className="space-y-6">
       <SectionHeader
-        title="Курси"
-        subtitle="Керуй структурою всіх курсів школи"
+        title={`Курси · ${meta.flag} ${meta.label}`}
+        subtitle={isAll ? "Показані курси всіх мов школи" : `Фільтр: тільки ${meta.label.toLowerCase()}`}
         action={
           <button
             onClick={() => setShowNew(true)}

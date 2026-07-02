@@ -24,6 +24,7 @@ import StudentsPage from "./pages/StudentsPage";
 import TutorLogsPage from "./pages/TutorLogsPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import SettingsPage from "./pages/SettingsPage";
+import { AdminLangProvider, useAdminLang, ADMIN_LANGS } from "./LanguageContext";
 
 type NavKey =
   | "dashboard"
@@ -166,31 +167,58 @@ export default function AdminV2() {
 
       {/* Main */}
       <main className="flex-1 h-full flex flex-col overflow-hidden">
-        <header className="h-16 shrink-0 border-b border-slate-200 bg-white flex items-center justify-between px-6">
-          <div className="flex items-center gap-3">
-            <activeItem.icon className="w-5 h-5" style={{ color: "#4F46E5" }} />
-            <h1 className="text-lg font-semibold text-slate-900">{activeItem.label}</h1>
-          </div>
-          <div className="flex items-center gap-3">
-            <span
-              className="text-xs px-2.5 py-1 rounded-full font-medium"
-              style={{ background: "#FEF3C7", color: "#92400E" }}
-            >
-              Admin
-            </span>
-            <Link
-              to="/"
-              className="text-sm text-slate-500 hover:text-slate-900 transition-colors"
-            >
-              До додатку →
-            </Link>
-          </div>
-        </header>
+        <AdminLangProvider>
+          <header className="h-16 shrink-0 border-b border-slate-200 bg-white flex items-center justify-between px-6 gap-4">
+            <div className="flex items-center gap-3 min-w-0">
+              <activeItem.icon className="w-5 h-5 shrink-0" style={{ color: "#4F46E5" }} />
+              <h1 className="text-lg font-semibold text-slate-900 truncate">{activeItem.label}</h1>
+            </div>
+            <div className="flex items-center gap-3">
+              <LangSelector />
+              <span
+                className="text-xs px-2.5 py-1 rounded-full font-medium hidden sm:inline"
+                style={{ background: "#FEF3C7", color: "#92400E" }}
+              >
+                Admin
+              </span>
+              <Link
+                to="/"
+                className="text-sm text-slate-500 hover:text-slate-900 transition-colors hidden md:inline"
+              >
+                До додатку →
+              </Link>
+            </div>
+          </header>
 
-        <div className="flex-1 overflow-y-auto p-6">
-          <PageRouter active={active} />
-        </div>
+          <div className="flex-1 overflow-y-auto p-6">
+            <PageRouter active={active} />
+          </div>
+        </AdminLangProvider>
       </main>
+    </div>
+  );
+}
+
+function LangSelector() {
+  const { lang, setLang, meta } = useAdminLang();
+  return (
+    <div className="relative">
+      <select
+        value={lang}
+        onChange={(e) => setLang(e.target.value)}
+        className="appearance-none pl-9 pr-8 py-1.5 rounded-xl border border-slate-200 bg-white text-sm font-medium text-slate-700 hover:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-200 cursor-pointer"
+        title="Мова курсів"
+      >
+        {ADMIN_LANGS.map((l) => (
+          <option key={l.code} value={l.code}>
+            {l.flag} {l.label}
+          </option>
+        ))}
+      </select>
+      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-base pointer-events-none">
+        {meta.flag}
+      </span>
+      <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs">▾</span>
     </div>
   );
 }

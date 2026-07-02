@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, StatCard, SectionHeader } from "./_ui";
+import { useAdminLang } from "../LanguageContext";
 
 export default function DashboardPage() {
+  const { lang, meta, isAll } = useAdminLang();
   const [stats, setStats] = useState({
     students: 0,
     courses: 0,
@@ -12,26 +14,57 @@ export default function DashboardPage() {
 
   useEffect(() => {
     (async () => {
-      const [s, c, l, m] = await Promise.all([
-        supabase.from("profiles").select("*", { count: "exact", head: true }),
-        supabase.from("courses").select("*", { count: "exact", head: true }),
-        supabase.from("course_lessons").select("*", { count: "exact", head: true }),
-        supabase.from("course_modules").select("*", { count: "exact", head: true }),
-      ]);
+      // students count is global (not tied to a target language)
+      const studentsQ = supabase.from("profiles").select("*", { count: "exact", head: true });
+
+      // courses filtered by language
+      const coursesBase = supabase.from("courses").select("id", { count: "exact" });
+      const coursesRes =
+        lang !== "all"
+          ? await coursesBase.eq("target_language", lang)
+          : await coursesBase;
+      const courseIds = ((coursesRes.data as any[]) || []).map((c) => c.id);
+      const coursesCount = coursesRes.count || 0;
+
+      let modulesCount = 0;
+      let lessonsCount = 0;
+
+      if (lang === "all") {
+        const [m, l] = await Promise.all([
+          supabase.from("course_modules").select("*", { count: "exact", head: true }),
+          supabase.from("course_lessons").select("*", { count: "exact", head: true }),
+        ]);
+        modulesCount = m.count || 0;
+        lessonsCount = l.count || 0;
+      } else if (courseIds.length) {
+        const [m, l] = await Promise.all([
+          supabase.from("course_modules").select("*", { count: "exact", head: true }).in("course_id", courseIds),
+          supabase.from("course_lessons").select("*", { count: "exact", head: true }).in("course_id", courseIds),
+        ]);
+        modulesCount = m.count || 0;
+        lessonsCount = l.count || 0;
+      }
+
+      const s = await studentsQ;
       setStats({
         students: s.count || 0,
-        courses: c.count || 0,
-        lessons: l.count || 0,
-        modules: m.count || 0,
+        courses: coursesCount,
+        modules: modulesCount,
+        lessons: lessonsCount,
       });
     })();
-  }, []);
+  }, [lang]);
 
   return (
     <div className="space-y-6">
+      <SectionHeader
+        title={`Огляд · ${meta.flag} ${meta.label}`}
+        subtitle={isAll ? "Статистика всіх мов школи" : `Показано лише курси мови: ${meta.label}`}
+      />
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard label="Всього студентів" value={stats.students} accent="#4F46E5" />
-        <StatCard label="Активні курси" value={stats.courses} accent="#7C3AED" />
+        <StatCard label={isAll ? "Активні курси" : `Курси (${meta.label})`} value={stats.courses} accent="#7C3AED" />
         <StatCard label="Модулі" value={stats.modules} accent="#F59E0B" />
         <StatCard label="Уроки" value={stats.lessons} accent="#10B981" />
       </div>

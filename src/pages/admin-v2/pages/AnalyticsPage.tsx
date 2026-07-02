@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, StatCard, SectionHeader } from "./_ui";
+import { useAdminLang } from "../LanguageContext";
 
 export default function AnalyticsPage() {
+  const { lang, meta, isAll } = useAdminLang();
   const [data, setData] = useState({
     totalUsers: 0,
     activeWeek: 0,
@@ -16,23 +18,48 @@ export default function AnalyticsPage() {
     (async () => {
       const weekAgo = new Date(Date.now() - 7 * 864e5).toISOString();
 
-      const [{ count: totalUsers }, { count: activeWeek }, { data: progress }, { data: courses }, { data: lessons }] =
+      const coursesBase = supabase.from("courses").select("id,title");
+      const coursesRes =
+        lang !== "all"
+          ? await coursesBase.eq("target_language", lang)
+          : await coursesBase;
+      const courses = (coursesRes.data as any[]) || [];
+      const scopedCourseIds = courses.map((c) => c.id);
+
+      const lessonsBase = supabase.from("course_lessons").select("id,title,course_id");
+      const lessonsRes =
+        lang !== "all" && scopedCourseIds.length
+          ? await lessonsBase.in("course_id", scopedCourseIds)
+          : lang !== "all"
+          ? { data: [] as any[] }
+          : await lessonsBase;
+      const lessons = (lessonsRes.data as any[]) || [];
+      const scopedLessonIds = new Set(lessons.map((l) => l.id));
+
+      const [{ count: totalUsers }, { count: activeWeek }, { data: progress }] =
         await Promise.all([
           supabase.from("profiles").select("*", { count: "exact", head: true }),
           supabase.from("profiles").select("*", { count: "exact", head: true }).gte("last_active", weekAgo),
           supabase.from("course_lesson_progress").select("course_id,lesson_id,score,status").eq("status", "completed"),
-          supabase.from("courses").select("id,title"),
-          supabase.from("course_lessons").select("id,title"),
         ]);
 
-      const courseMap = new Map((courses as any[] || []).map((c) => [c.id, c.title]));
-      const lessonMap = new Map((lessons as any[] || []).map((l) => [l.id, l.title]));
+      const courseMap = new Map(courses.map((c: any) => [c.id, c.title]));
+      const lessonMap = new Map(lessons.map((l: any) => [l.id, l.title]));
 
       const byCourse = new Map<string, number>();
       const byLesson = new Map<string, { sum: number; n: number }>();
       let scoreSum = 0, scoreN = 0;
+      let completedCount = 0;
 
-      (progress as any[] || []).forEach((p) => {
+      const filteredProgress = (progress as any[] || []).filter((p) => {
+        if (lang === "all") return true;
+        // keep only rows whose lesson OR course belongs to selected language
+        return (p.lesson_id && scopedLessonIds.has(p.lesson_id)) ||
+               (p.course_id && scopedCourseIds.includes(p.course_id));
+      });
+
+      filteredProgress.forEach((p) => {
+        completedCount++;
         if (p.course_id) byCourse.set(p.course_id, (byCourse.get(p.course_id) || 0) + 1);
         if (typeof p.score === "number") {
           scoreSum += p.score; scoreN++;
@@ -54,16 +81,20 @@ export default function AnalyticsPage() {
       setData({
         totalUsers: totalUsers || 0,
         activeWeek: activeWeek || 0,
-        completedLessons: (progress as any[] || []).length,
+        completedLessons: completedCount,
         avgScore: scoreN ? Math.round(scoreSum / scoreN) : 0,
         topCourses,
         hardestLessons,
       });
     })();
-  }, []);
+  }, [lang]);
 
   return (
     <div className="space-y-6">
+      <SectionHeader
+        title={`Аналітика · ${meta.flag} ${meta.label}`}
+        subtitle={isAll ? "Дані по всіх мовах" : `Фільтр: тільки ${meta.label}`}
+      />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard label="Всього юзерів" value={data.totalUsers} accent="#4F46E5" />
         <StatCard label="Активні / тиждень" value={data.activeWeek} accent="#7C3AED" />
