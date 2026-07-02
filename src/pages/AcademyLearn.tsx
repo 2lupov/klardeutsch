@@ -4,7 +4,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePlatform } from "@/hooks/usePlatform";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Menu, X, GraduationCap, Users } from "lucide-react";
+import { ArrowLeft, Menu, X, GraduationCap, Users, Presentation } from "lucide-react";
+import LessonSlidesViewer from "@/components/admin/LessonSlidesViewer";
 import LearnSidebar from "@/components/academy/LearnSidebar";
 import VideoLessonPlayer from "@/components/academy/lessons/VideoLessonPlayer";
 import VideoQuizLesson from "@/components/academy/lessons/VideoQuizLesson";
@@ -70,6 +71,7 @@ const AcademyLearn = () => {
   const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
   const [teacherPanelOpen, setTeacherPanelOpen] = useState(false);
   const [cohortChatOpen, setCohortChatOpen] = useState(false);
+  const [slidesOpen, setSlidesOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -182,6 +184,15 @@ const AcademyLearn = () => {
           <ArrowLeft className="w-4 h-4" />
         </button>
         <span className="text-sm font-display font-bold text-foreground truncate flex-1">{courseTitle}</span>
+        {Array.isArray((activeLesson?.content as any)?.slides) && (activeLesson?.content as any).slides.length > 0 && (
+          <button
+            onClick={() => setSlidesOpen(true)}
+            className="text-muted-foreground hover:text-primary transition-colors"
+            title={lang === "uk" ? "Дивитись презентацію" : "Смотреть презентацию"}
+          >
+            <Presentation className="w-4.5 h-4.5" />
+          </button>
+        )}
         <button
           onClick={() => setCohortChatOpen(true)}
           className="text-muted-foreground hover:text-primary transition-colors"
@@ -301,6 +312,13 @@ const AcademyLearn = () => {
       {courseId && (
         <CohortChat courseId={courseId} lang={lang} open={cohortChatOpen} onClose={() => setCohortChatOpen(false)} />
       )}
+
+      <LessonSlidesViewer
+        open={slidesOpen}
+        onClose={() => setSlidesOpen(false)}
+        slides={((activeLesson?.content as any)?.slides) || []}
+        lessonTitle={activeLesson?.title}
+      />
     </div>
   );
 };
