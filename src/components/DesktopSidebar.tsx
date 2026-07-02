@@ -38,6 +38,7 @@ const DesktopSidebar = () => {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [profile, setProfile] = useState<{ display_name?: string; avatar_url?: string } | null>(null);
+  const [isStaff, setIsStaff] = useState(false);
 
   const a1 = useLevelProgress("A1");
   const a2 = useLevelProgress("A2");
@@ -48,13 +49,20 @@ const DesktopSidebar = () => {
   const allCompleted = a1.completed && a2.completed && b1.completed && b2.completed && c1.completed;
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) { setIsStaff(false); return; }
     supabase
       .from("profiles")
       .select("display_name, avatar_url")
       .eq("user_id", user.id)
       .single()
       .then(({ data }) => { if (data) setProfile(data); });
+    supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .then(({ data }) => {
+        setIsStaff((data || []).some((r: any) => r.role === "teacher" || r.role === "admin"));
+      });
   }, [user]);
 
   const learnLinks: SidebarLink[] = [
