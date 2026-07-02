@@ -13,7 +13,7 @@ import {
 import ReactMarkdown from "react-markdown";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "@/hooks/use-toast";
-import pandaExplorer from "@/assets/panda-explorer.png";
+import pandaExplorer from "@/assets/panda-coach.png";
 
 /* ── Cinematic Ambient Background ── */
 const AmbientBg = () => (
