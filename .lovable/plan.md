@@ -1,92 +1,122 @@
+# KLAR × Edvibe: єдиний робочий простір для школи
 
-# KLAR → мультимовна школа
+Мета — зібрати чотири речі в одну систему навколо централізованого контенту школи (не приватні репетитори):
+**Віртуальний клас · Бібліотека матеріалів · Конструктор уроків · CRM школи.**
 
-Ціль першої ітерації: підняти **англійську** як другу мову end-to-end (лендінг → онбординг → словник → уроки → ігри), не ламаючи існуючу німецьку. Одночасно закласти таку структуру БД і роутінгу, щоб додати польську/іспанську/французьку було чистою data-роботою, а не рефакторингом.
+У нас вже є: `PresenterMode`, `tutoring_lessons`, `tutoring_lesson_exercises`, `course_lessons`, слайди, AI-генерація. Це не з нуля — це збірка того що є в один продукт з двома чіткими ролями: **Методист/Адмін** і **Вчитель**.
 
-## Архітектурні рішення
+---
 
-- **Один бренд KLAR**, розділи за URL-префіксом: `/de/*`, `/en/*`, `/pl/*`, `/es/*`, `/fr/*`. Німецький контент лишається доступним без префікса для зворотної сумісності + канонічно доступний як `/de/*`.
-- Нова таблиця **`languages`** (код, назва, прапор, порядок, is_active) — єдине джерело правди про підтримувані мови.
-- У всі контентні таблиці (`vocab_cards`, `topics`, `reading_texts`, `listening_texts`, `grammar_lessons`, `grammar_questions`, `courses`, `course_modules`, `course_lessons`, `cafe_scenarios`, `placement_questions`, `dictations` і т.д.) додається колонка `target_language TEXT NOT NULL DEFAULT 'de'`. Індекс по `(target_language)`.
-- У `profiles` — `active_target_language TEXT DEFAULT 'de'`. Юзер обирає мову вивчення у профілі/онбордингу; всі списки, статистика, XP, коіни фільтруються по цій мові.
-- **XP/коіни/streak** лишаються глобальними на юзера (одна економіка на школу). Прогрес по контенту — вже per language.
-- Ліміти підписок (School/Assistant/All-in-One) працюють однаково для всіх мов.
+## 1. Ролі та навігація
 
-## Що робимо в цьому кроці (MVP English)
-
-### 1. База
-- Таблиця `languages` з сідом (de, en, pl, es, fr; активні: de, en).
-- Колонка `target_language` в усіх контентних таблицях, backfill = 'de', індекси, GRANT.
-- `profiles.active_target_language` + міграція існуючих юзерів → 'de'.
-
-### 2. Роутінг і мовний контекст
-- Провайдер `TargetLanguageProvider` (context + hook `useTargetLanguage()`). Джерело: URL-префікс > profiles.active_target_language > 'de'.
-- `App.tsx`: групи маршрутів `/de/*`, `/en/*` рендерять ті самі сторінки, але провайдер підставляє мову. Старі маршрути без префікса → 'de' (не ламаємо посилання).
-- `LanguageSelector` (перемикач мови вивчення) — у сайдбарі та в профілі, окремо від UI-мови (RU/UK/DE).
-
-### 3. Онбординг
-- Крок «Що вивчаєш?» — вибір мови з прапорцями. Записується в `profiles.active_target_language` й одразу редіректить на `/en/...`.
-- Гостям на лендінзі — hero-блок з чотирма мовами (EN активна, PL/ES/FR — «Soon»).
-
-### 4. Контент англійської (MVP-обʼєм)
-- **Словник**: 300 базових слів A1 (тематики: greetings, family, food, travel, work, home, numbers, time). Генерація AI batch → адмінка → БД.
-- **Читання**: 10 текстів A1-A2 з питаннями.
-- **Аудіювання**: 10 текстів TTS + питання.
-- **Граматика**: 5 базових уроків (to be, articles, present simple, plurals, questions).
-- **Ігри**: усі 7 наявних ігор автоматично працюють з `target_language='en'` (беруть слова з словника поточної мови). Артикль-гра ховається для EN, бо артиклів немає.
-- **Курс Академії** A1 English — 1 модуль, 5 уроків як демо.
-
-### 5. Адмінка
-- Селектор мови у топбарі адмінки. Все, що редагуємо (топіки, слова, тексти, курси), тегається поточною target_language.
-- Кнопка «AI-згенерувати X слів/текстів/уроків для {мови} рівня {A1..C1}» — існуючі edge functions отримують параметр `targetLanguage`.
-
-### 6. Що НЕ входить у цей крок
-- Локалізація UI німецьких артикул-специфічних фіч на англійську (там де їх нема — просто ховаємо).
-- PL/ES/FR — тільки скелет БД, контент не наповнюємо.
-- TMA (Telegram) — лишається німецькою, мультимовність тільки на веб.
-
-## Технічні деталі
-
-**Міграція БД (одним запитом)**
-```
-CREATE TABLE public.languages (code text PK, name_en, name_ru, name_uk, name_native, flag_emoji, sort_order int, is_active bool);
-INSERT ... ('de','German','Немецкий',...,'🇩🇪',1,true), ('en',...,'🇬🇧',2,true), ('pl',..,false), ('es',..,false), ('fr',..,false);
-ALTER TABLE vocab_cards, topics, reading_texts, reading_questions, listening_texts, listening_questions, listening_dictations, grammar_lessons, grammar_questions, courses, course_modules, course_lessons, cafe_scenarios, placement_questions, kids_placement_questions, tutoring_lesson_templates
-  ADD COLUMN target_language text NOT NULL DEFAULT 'de' REFERENCES languages(code);
-CREATE INDEX ... ON each (target_language);
-ALTER TABLE profiles ADD COLUMN active_target_language text NOT NULL DEFAULT 'de' REFERENCES languages(code);
-GRANT SELECT ON public.languages TO anon, authenticated;
+```text
+Admin (методист школи)          Teacher (веде уроки)         Student
+├─ Курси/уроки школи            ├─ Мій розклад                ├─ Мої уроки
+├─ Бібліотека матеріалів  ◄──── ├─ Конструктор уроку  ◄────── ├─ Клас (live)
+├─ Учні та групи                ├─ Клас (live)                └─ ДЗ + прогрес
+├─ Вчителі                      ├─ Мої учні (CRM lite)
+└─ Аналітика школи              └─ ДЗ + перевірка
 ```
 
-**Роутінг**
+Нова роль `teacher` в `app_role` (є `admin`, `user`). Додаємо `teacher`. Вчитель бачить `/teach/*`, адмін — `/admin` (як зараз, розширений).
+
+---
+
+## 2. Бібліотека матеріалів (ядро, як в Edvibe)
+
+Єдина централізована бібліотека **школи** — все, що вчитель може перетягнути в урок.
+
+Нова таблиця `library_items`:
+- `type`: `slide_deck | exercise | video | audio | reading | dialogue | word_list | game`
+- `title`, `level` (A1-C1), `topic`, `target_language`, `tags[]`, `cover_url`
+- `payload` (jsonb — власне контент або посилання на існуючу сутність)
+- `source`: `ai | manual | imported`
+- `is_published`, `owner_id`
+
+Наповнюється трьома шляхами:
+- **Витягуємо все існуюче** — course_lessons, tutoring_lesson_templates, слайди, listening_texts, reading_texts, cafe_scenarios → одноразовий backfill у `library_items`.
+- **AI-генерація** — вже маємо `generate-lesson-slides`, `generate-exercises`, `generate-full-course`.
+- **Ручне додавання** методистом.
+
+UI: `/admin/library` — Pinterest-style сітка з фільтрами (рівень, тип, тема, мова). Кнопка **+ у урок**.
+
+---
+
+## 3. Конструктор уроку (drag-and-drop)
+
+`/teach/lesson/:id/build` — двоколонковий редактор:
+
+```text
+┌──────────────┬──────────────────────────────┐
+│  Бібліотека  │  Полотно уроку               │
+│  [пошук]     │  ├─ 1. Слайд-інтро           │
+│  [фільтри]   │  ├─ 2. Вправа cloze          │
+│              │  ├─ 3. Відео 2хв             │
+│  ▢ картки    │  ├─ 4. Діалог                │
+│  ▢ картки    │  └─ + додати блок / AI       │
+│  ▢ картки    │                              │
+└──────────────┴──────────────────────────────┘
 ```
-<Route path="/:lang(de|en|pl|es|fr)/*" element={<TargetLanguageProvider><AppLayout/></TargetLanguageProvider>}>
-  <Route index element={<Index/>} />
-  <Route path="dictionary" element={<Dictionary/>} />
-  ...
-</Route>
-<Route path="/*" element={<TargetLanguageProvider defaultLang="de"><AppLayout/></TargetLanguageProvider>}>...</Route>
-```
 
-**Хук**
-```ts
-const lang = useTargetLanguage(); // 'de' | 'en' | ...
-supabase.from('vocab_cards').select('*').eq('target_language', lang);
-```
+- Drag-and-drop через `@dnd-kit` (вже в проєкті — використовується в TopicsEditor).
+- Кожен блок = рядок у новій таблиці `lesson_blocks` (`lesson_id`, `library_item_id | inline_payload`, `sort_order`, `duration_min`, `settings jsonb`).
+- Кнопка **AI-блок** — генерує вправу під контекст попередніх блоків (розширення `generate-lesson-extra-exercises`).
+- Прев'ю "очима учня" одним кліком.
 
-**Sitemap / SEO**
-- Оновити `public/sitemap.xml`: додати `/en`, `/en/dictionary`, `/en/games`, `/en/academy`.
-- `<link rel="alternate" hreflang="en" href="https://klar.academy/en/">` в `index.html`.
-- Гостьовий лендінг — окремі `<title>` / meta для `/en/` через react-helmet-async.
+---
 
-## Порядок виконання
+## 4. Віртуальний клас (розширення PresenterMode)
 
-1. Міграція БД (`languages` + `target_language` всюди + backfill).
-2. `TargetLanguageProvider` + хук + перемикач мови у сайдбарі.
-3. Новий роутінг `/en/*` + всі сторінки читають `useTargetLanguage()`.
-4. Селектор мови в адмінці + оновлені edge functions генерації.
-5. Наповнення MVP-контенту англійської через адмінку (300 слів + тексти + уроки).
-6. Оновлення онбордингу + гостьового hero.
-7. SEO (sitemap, hreflang, meta).
+Те, що вже є у `PresenterMode` + `useStudentLiveSync`, доводимо до рівня "уроку в браузері":
 
-Після твого «ок» починаю з кроку 1 — міграції БД.
+- **Timeline уроку** зверху — вчитель клікає блок → відкривається у класі учня (auto-follow).
+- **Whiteboard** (нова панель): вільне малювання + текст. `tldraw` (lightweight, React-friendly) або власне на canvas. Синхронізація через Realtime.
+- **Спільний фокус** — коли вчитель виділяє слово/картинку, у учня підсвічується те саме.
+- **Reactions & raise hand** — вже є база в `tutoring_live_sessions`, доповнюємо.
+- **Chat уроку** — швидкий текстовий чат тільки на час сесії.
+- Аудіо/відео — залишаємо на зовнішньому Zoom/Google Meet (лінк у сесії), як у Edvibe MVP; повна WebRTC-кімната — окремим етапом.
+
+---
+
+## 5. CRM школи (централізована)
+
+`/admin/students` вже є. Розширюємо в напрямку Edvibe CRM:
+
+- **Групи** (`student_groups`, `student_group_members`) — курс/рівень/розклад.
+- **Розклад** (`class_schedule`): вчитель × група × час × урок з бібліотеки.
+- **Відвідуваність** (`attendance`) — авто з `tutoring_live_sessions`.
+- **Оплати** — прив'язуємо існуючі `mono_payments` / `subscriptions` до учня; історія у профілі учня.
+- **ДЗ** — вже є `tutoring_homework`, додаємо назначення на **групу**, не тільки учня.
+- **Картка учня**: прогрес по курсу, відвіданість, ДЗ, оплати, нотатки вчителя — все на одному екрані.
+
+Вчитель бачить те саме, але тільки по своїх групах.
+
+---
+
+## 6. Порядок роботи (щоб не тонути)
+
+Роблю по одному етапу, підтверджуєш кожен перед наступним:
+
+1. **Ролі + `/teach` каркас** — роль `teacher`, guard, порожні сторінки, пункт у сайдбарі для teacher/admin.
+2. **`library_items` + backfill** — таблиця, міграція, перенесення існуючого контенту, сторінка `/admin/library` з фільтрами.
+3. **Конструктор уроку** — `lesson_blocks`, drag-and-drop, AI-блок, прев'ю.
+4. **Клас v2** — timeline у PresenterMode, whiteboard, focus-highlight, chat сесії.
+5. **CRM: групи + розклад + відвідуваність.**
+6. **CRM: оплати + картка учня + ДЗ на групу.**
+
+Кожен етап = робочий, задеплоєний шматок. Стоп-точки — після 2, 4, 6.
+
+---
+
+## Технічне
+
+- **БД**: 6 нових таблиць (`library_items`, `lesson_blocks`, `student_groups`, `student_group_members`, `class_schedule`, `attendance`). Всі з RLS: admin — все; teacher — свої групи/уроки; student — тільки свої групи read-only.
+- **Роль teacher**: `INSERT INTO app_role` (enum) + політики через `has_role(auth.uid(),'teacher')`.
+- **Realtime**: додати `lesson_blocks`, `attendance`, whiteboard-канал у `supabase_realtime`.
+- **Drag-and-drop**: `@dnd-kit/core` + `@dnd-kit/sortable`.
+- **Whiteboard**: спробуємо `tldraw` (MIT, React); якщо занадто важкий — власний легкий canvas.
+- **Що НЕ роблю зараз**: WebRTC відео-кімната (лишаємо зовнішній лінк), маркетплейс контенту між школами, мобільний нативний додаток.
+
+---
+
+Стартую з **етапу 1 (ролі + `/teach` каркас)** щойно скажеш "ок".
