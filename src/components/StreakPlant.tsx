@@ -195,7 +195,7 @@ const NIGHT_STAGE = { img: pandaSleeping, nameRu: "Спит 🌙", nameUk: "Сп
 const NIGHT_MOTIVATION_RU = "Уже ночь — панда легла спать. И тебе пора! 💤";
 const NIGHT_MOTIVATION_UK = "Вже ніч — панда лягла спати. І тобі час! 💤";
 
-const StreakPlant = ({ streak, canClaim, compact = false }: StreakPlantProps) => {
+const StreakPlant = ({ streak, canClaim, compact = false, hideBadges = false }: StreakPlantProps) => {
   const { lang } = useLanguage();
   const isRu = lang === "ru";
   const [showDialog, setShowDialog] = useState(false);
