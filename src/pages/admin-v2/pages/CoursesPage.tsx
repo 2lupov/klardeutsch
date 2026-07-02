@@ -69,7 +69,7 @@ export default function CoursesPage() {
     if (error) { toast({ title: "Помилка", description: error.message }); return; }
     toast({ title: "Курс створено" });
     setShowNew(false);
-    setForm({ title: "", description: "", level: "A1", target_language: "de", price: 200 });
+    setForm({ title: "", description: "", level: "A1", target_language: createLang, price: 200 });
     await load();
     if (data?.id) openBuilder(data.id);
   };
