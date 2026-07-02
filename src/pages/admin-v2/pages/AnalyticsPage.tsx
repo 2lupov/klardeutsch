@@ -43,14 +43,23 @@ export default function AnalyticsPage() {
           supabase.from("course_lesson_progress").select("course_id,lesson_id,score,status").eq("status", "completed"),
         ]);
 
-      const courseMap = new Map((courses as any[] || []).map((c) => [c.id, c.title]));
-      const lessonMap = new Map((lessons as any[] || []).map((l) => [l.id, l.title]));
+      const courseMap = new Map(courses.map((c: any) => [c.id, c.title]));
+      const lessonMap = new Map(lessons.map((l: any) => [l.id, l.title]));
 
       const byCourse = new Map<string, number>();
       const byLesson = new Map<string, { sum: number; n: number }>();
       let scoreSum = 0, scoreN = 0;
+      let completedCount = 0;
 
-      (progress as any[] || []).forEach((p) => {
+      const filteredProgress = (progress as any[] || []).filter((p) => {
+        if (lang === "all") return true;
+        // keep only rows whose lesson OR course belongs to selected language
+        return (p.lesson_id && scopedLessonIds.has(p.lesson_id)) ||
+               (p.course_id && scopedCourseIds.includes(p.course_id));
+      });
+
+      filteredProgress.forEach((p) => {
+        completedCount++;
         if (p.course_id) byCourse.set(p.course_id, (byCourse.get(p.course_id) || 0) + 1);
         if (typeof p.score === "number") {
           scoreSum += p.score; scoreN++;
@@ -72,16 +81,20 @@ export default function AnalyticsPage() {
       setData({
         totalUsers: totalUsers || 0,
         activeWeek: activeWeek || 0,
-        completedLessons: (progress as any[] || []).length,
+        completedLessons: completedCount,
         avgScore: scoreN ? Math.round(scoreSum / scoreN) : 0,
         topCourses,
         hardestLessons,
       });
     })();
-  }, []);
+  }, [lang]);
 
   return (
     <div className="space-y-6">
+      <SectionHeader
+        title={`Аналітика · ${meta.flag} ${meta.label}`}
+        subtitle={isAll ? "Дані по всіх мовах" : `Фільтр: тільки ${meta.label}`}
+      />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard label="Всього юзерів" value={data.totalUsers} accent="#4F46E5" />
         <StatCard label="Активні / тиждень" value={data.activeWeek} accent="#7C3AED" />
