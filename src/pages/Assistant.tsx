@@ -886,7 +886,7 @@ const Assistant = () => {
           </div>
           {!fileLoading && (
             <motion.button initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-              onClick={() => { setSelectedTemplate(null); setFileText(""); setFileResult(null); }}
+              onClick={() => { setSelectedTemplate(null); setFileText(""); setFileResult(null); setAttachedFile(null); }}
               className="w-full py-3 rounded-xl border border-border bg-secondary/50 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors font-medium flex items-center justify-center gap-2">
               <ArrowLeft className="w-4 h-4" /> {t("Другой документ", "Інший документ")}
             </motion.button>
