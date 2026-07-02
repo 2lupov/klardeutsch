@@ -95,7 +95,7 @@ const DesktopSidebar = () => {
         {active && (
           <motion.div
             layoutId="sidebar-active"
-            className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-primary"
+            className="absolute left-0 inset-y-1.5 w-[3px] rounded-r-full bg-primary"
             transition={{ type: "spring", stiffness: 350, damping: 30 }}
           />
         )}
