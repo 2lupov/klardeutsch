@@ -18,6 +18,7 @@ interface Course {
 const LEVELS = ["A1", "A2", "B1", "B2", "C1"];
 
 export default function CoursesPage() {
+  const { lang, createLang, isAll, meta } = useAdminLang();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [showNew, setShowNew] = useState(false);
@@ -27,21 +28,28 @@ export default function CoursesPage() {
     title: "",
     description: "",
     level: "A1",
-    target_language: "de",
+    target_language: createLang,
     price: 200,
   });
 
+  // keep form language in sync with header selector
+  useEffect(() => {
+    setForm((f) => ({ ...f, target_language: createLang }));
+  }, [createLang]);
+
   const load = async () => {
     setLoading(true);
-    const { data } = await supabase
+    let q = supabase
       .from("courses")
       .select("id,title,description,level,available,target_language,total_lessons")
       .order("created_at", { ascending: false });
+    q = applyLangFilter(q, lang);
+    const { data } = await q;
     setCourses((data as any) || []);
     setLoading(false);
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [lang]);
 
   const openBuilder = (courseId: string) => {
     window.dispatchEvent(new CustomEvent("admin-v2:open-builder", { detail: { courseId } }));
