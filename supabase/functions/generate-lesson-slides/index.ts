@@ -142,11 +142,43 @@ ${extraPrompt ? `Додаткові побажання вчителя: ${extraPr
 
     const aiData = await aiRes.json();
     const content = aiData.choices?.[0]?.message?.content || "{}";
-    let parsed: any;
-    try { parsed = JSON.parse(content); }
-    catch {
-      const m = content.match(/\{[\s\S]*\}/);
-      parsed = m ? JSON.parse(m[0]) : {};
+
+    const tryParse = (s: string): any | null => {
+      try { return JSON.parse(s); } catch {}
+      const m = s.match(/\{[\s\S]*\}/);
+      if (m) { try { return JSON.parse(m[0]); } catch {} }
+      // Strip trailing commas
+      const cleaned = s.replace(/,(\s*[}\]])/g, "$1");
+      try { return JSON.parse(cleaned); } catch {}
+      const m2 = cleaned.match(/\{[\s\S]*\}/);
+      if (m2) { try { return JSON.parse(m2[0]); } catch {} }
+      return null;
+    };
+
+    let parsed: any = tryParse(content);
+
+    // Repair attempt: ask AI to return valid JSON only
+    if (!parsed || !Array.isArray(parsed.slides)) {
+      console.warn("First parse failed, attempting repair");
+      const repairRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: [
+            { role: "system", content: 'Виправ і поверни ТІЛЬКИ валідний JSON у форматі {"slides":[...]}. Без пояснень, без markdown.' },
+            { role: "user", content: content.slice(0, 12000) },
+          ],
+          response_format: { type: "json_object" },
+        }),
+      });
+      if (repairRes.ok) {
+        const rd = await repairRes.json();
+        parsed = tryParse(rd.choices?.[0]?.message?.content || "{}");
+      }
     }
 
     const slides = Array.isArray(parsed.slides) ? parsed.slides : [];
