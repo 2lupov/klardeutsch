@@ -339,7 +339,7 @@ const Dialogues = () => {
         {/* Chat container — full height, padded */}
         <div className="w-full flex flex-col flex-1 min-h-0 px-2">
           {/* Header */}
-          <div className="flex items-center gap-2 pb-3">
+          <div className="flex items-center gap-2 pb-3 pl-14 lg:pl-0 pr-12 lg:pr-0">
             <button
               onClick={resetChat}
               className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
