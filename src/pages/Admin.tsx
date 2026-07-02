@@ -52,7 +52,7 @@ const TAB_CONFIG: { key: Tab; icon: React.ElementType; label: string }[] = [
   { key: "stuffonly", icon: Bot, label: "stuffonly" },
   { key: "courses", icon: GraduationCap, label: "courses" },
   { key: "chats", icon: MessageCircle, label: "chats" },
-  { key: "products", icon: Package, label: "products" },
+  
 ];
 
 const Admin = () => {
