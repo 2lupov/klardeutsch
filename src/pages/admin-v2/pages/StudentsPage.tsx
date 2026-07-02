@@ -53,7 +53,7 @@ export default function StudentsPage() {
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {[0, 1, 2, 3].map((i) => (
-            <Card key={i} className="p-4 animate-pulse h-24" />
+            <Card key={i} className="p-4 animate-pulse h-24"><div /></Card>
           ))}
         </div>
       ) : filtered.length === 0 ? (

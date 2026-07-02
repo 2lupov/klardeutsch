@@ -33,7 +33,7 @@ export default function TutorLogsPage() {
         .order("updated_at", { ascending: false })
         .limit(100);
       const list = (chatsData as any) || [];
-      const ids = Array.from(new Set(list.flatMap((c: Chat) => [c.teacher_id, c.student_id])));
+      const ids = Array.from(new Set(list.flatMap((c: Chat) => [c.teacher_id, c.student_id]))) as string[];
       if (ids.length) {
         const { data: profiles } = await supabase
           .from("profiles").select("user_id,display_name").in("user_id", ids);
@@ -67,7 +67,7 @@ export default function TutorLogsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="space-y-2 lg:col-span-1">
           {loading ? (
-            [0, 1, 2, 3].map((i) => <Card key={i} className="h-16 animate-pulse" />)
+            [0, 1, 2, 3].map((i) => <Card key={i} className="h-16 animate-pulse"><div /></Card>)
           ) : chats.length === 0 ? (
             <EmptyState title="Логів немає" description="Тут з'являться діалоги AI-репетитора" />
           ) : (
