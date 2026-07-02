@@ -2,6 +2,10 @@ import { motion } from "framer-motion";
 import { GraduationCap, Sparkles, Play } from "lucide-react";
 import type { Lang } from "@/i18n/translations";
 import pandaExplorer from "@/assets/panda-director.png";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import CertificatePreview from "./CertificatePreview";
+
 
 const CourseHero = ({ lang }: { lang: Lang }) => (
   <section className="relative overflow-hidden mb-6">
