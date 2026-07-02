@@ -20,6 +20,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import Admin from "./pages/Admin";
+import AdminV2 from "./pages/admin-v2/AdminV2";
 import Profile from "./pages/Profile";
 import Dictionary from "./pages/Dictionary";
 import Statistics from "./pages/Statistics";
@@ -71,7 +72,8 @@ const AppRoutes = () => {
 
       <Route path="/student-view/:sessionId" element={<StudentView />} />
       {/* Web-only routes — redirect to home in Telegram */}
-      <Route path="/admin" element={isTelegram ? <Navigate to="/" replace /> : <Admin />} />
+      <Route path="/admin" element={isTelegram ? <Navigate to="/" replace /> : <AdminV2 />} />
+      <Route path="/admin/legacy" element={isTelegram ? <Navigate to="/" replace /> : <Admin />} />
       <Route path="/method" element={isTelegram ? <Navigate to="/" replace /> : <Method />} />
       <Route path="/privacy" element={isTelegram ? <Navigate to="/" replace /> : <Privacy />} />
       <Route path="/terms" element={isTelegram ? <Navigate to="/" replace /> : <Terms />} />
