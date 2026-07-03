@@ -97,6 +97,8 @@ const AppRoutes = () => {
         <Route path="class" element={<TeachPlaceholder title="Live-клас" description="Запустіть Presenter Mode з будь-якого уроку в розділі «Уроки»." />} />
         <Route path="groups" element={<TeachGroups />} />
         <Route path="students" element={<TeachStudents />} />
+        <Route path="attendance" element={<TeachAttendance />} />
+        <Route path="finance" element={<TeachFinance />} />
         <Route path="homework" element={<TeachPlaceholder title="Домашні завдання" description="Призначення на групу, автоперевірка, feedback. Розширення tutoring_homework." />} />
       </Route>
       <Route path="/privacy" element={isTelegram ? <Navigate to="/" replace /> : <Privacy />} />
