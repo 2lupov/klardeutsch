@@ -604,7 +604,7 @@ const ListeningEditor = ({ level }: { level: string }) => {
                 </div>
               ))}
             <button onClick={() => addDictation(txt.id, txt.listening_dictations?.length ?? 0)} className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 ml-2">
-              <Plus className="w-3 h-3" /> Добавить предложение
+              <Plus className="w-3 h-3" /> Додати речення
             </button>
           </div>
         );

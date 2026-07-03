@@ -94,7 +94,7 @@ const DemoUsersManager = () => {
     toast.success("Аватарка обновлена!"); silentReload();
   };
 
-  if (loading) return <p className="text-muted-foreground animate-pulse">Загрузка...</p>;
+  if (loading) return <p className="text-muted-foreground animate-pulse">Завантаження...</p>;
 
   return (
     <div className="flex flex-col gap-4">

@@ -72,7 +72,7 @@ const CafeEditor = ({ level }: { level: string }) => {
     setPendingUpdates(new Map());
     setDirty(false);
     setSaving(false);
-    toast.success("Сохранено!");
+    toast.success("Збережено!");
     load();
   };
 
@@ -209,7 +209,7 @@ const CafeEditor = ({ level }: { level: string }) => {
       })}
 
       <button onClick={addScenario} className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all">
-        <Plus className="w-4 h-4" /> Добавить сценарий
+        <Plus className="w-4 h-4" /> Додати сценарій
       </button>
 
       {dirty && (
@@ -218,7 +218,7 @@ const CafeEditor = ({ level }: { level: string }) => {
           disabled={saving}
           className="sticky bottom-4 z-20 w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold glow-yellow transition-all disabled:opacity-60"
         >
-          {saving ? <span className="animate-pulse">{t("loading")}</span> : <><Check className="w-4 h-4" /> Сохранить</>}
+          {saving ? <span className="animate-pulse">{t("loading")}</span> : <><Check className="w-4 h-4" /> Зберегти</>}
         </button>
       )}
     </div>

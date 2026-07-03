@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import translations, { Lang } from "@/i18n/translations";
 
 const LANGS: Lang[] = ["ru", "uk"];
-const LANG_LABELS: Record<Lang, string> = { ru: "🇷🇺 Русский", uk: "🇺🇦 Українська" };
+const LANG_LABELS: Record<Lang, string> = { ru: "🇷🇺 Українська", uk: "🇺🇦 Українська" };
 
 const TranslationsEditor = () => {
   const keys = Object.keys(translations) as (keyof typeof translations)[];
@@ -71,7 +71,7 @@ const TranslationsEditor = () => {
       if (error) {
         toast.error(error.message);
       } else {
-        toast.success(`Сохранено ${upserts.length} изменений!`);
+        toast.success(`Збережено ${upserts.length} изменений!`);
         setLocalEdits({});
         await loadOverrides();
       }
@@ -178,7 +178,7 @@ const TranslationsEditor = () => {
             <span className="animate-pulse">Сохранение...</span>
           ) : (
             <>
-              <Check className="w-4 h-4" /> Сохранить изменения
+              <Check className="w-4 h-4" /> Зберегти зміни
             </>
           )}
         </button>

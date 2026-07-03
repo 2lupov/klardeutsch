@@ -105,7 +105,7 @@ const BulkGenerator = () => {
       if (data?.error) throw new Error(data.error);
 
       setCreationResult(data.results);
-      toast.success(`Тема "${newTopicName}" создана!`);
+      toast.success(`Тема "${newTopicName}" створеноа!`);
       setNewTopicName("");
       loadTopics();
     } catch (e: any) {
@@ -205,8 +205,8 @@ const BulkGenerator = () => {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      setConversionResult(`✅ Конвертировано: ${data.converted}/${data.total} уроков`);
-      toast.success(`Конвертировано ${data.converted} уроков грамматики!`);
+      setConversionResult(`✅ Конвертировано: ${data.converted}/${data.total} уроків`);
+      toast.success(`Конвертировано ${data.converted} уроків грамматики!`);
     } catch (e: any) {
       setConversionResult(`❌ Ошибка: ${e.message}`);
       toast.error("Ошибка конвертации: " + e.message);
@@ -221,7 +221,7 @@ const BulkGenerator = () => {
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-display font-bold text-sm text-foreground flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-purple-400" />
-            Создать новую тему с ИИ
+            Створити нову тему з ШІ
           </h3>
           <button
             onClick={() => setShowNewTopic(!showNewTopic)}
@@ -301,12 +301,12 @@ const BulkGenerator = () => {
               {creatingTopic ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Создаю тему и контент...
+                  Створюю тему и контент...
                 </>
               ) : (
                 <>
                   <Plus className="w-4 h-4" />
-                  Создать тему с контентом
+                  Створити тему з контентом
                 </>
               )}
             </button>
@@ -314,7 +314,7 @@ const BulkGenerator = () => {
             {/* Creation result */}
             {creationResult && (
               <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20">
-                <p className="text-xs text-green-400 font-bold mb-1">✅ Тема создана!</p>
+                <p className="text-xs text-green-400 font-bold mb-1">✅ Тема створеноа!</p>
                 <div className="grid grid-cols-2 gap-1 text-[10px] text-muted-foreground">
                   <span>📖 Слова: {creationResult.vocab}</span>
                   <span>📝 Грамматика: {creationResult.grammar}</span>

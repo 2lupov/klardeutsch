@@ -299,7 +299,7 @@ const AllTextsEditor = () => {
     if (errorCount > 0) {
       toast.error(`Ошибка: ${errorCount} из ${edits.size} не сохранились. Проверьте, что вы вошли как админ.`);
     } else {
-      toast.success(`Сохранено ${successCount} изменений!`);
+      toast.success(`Збережено ${successCount} изменений!`);
       setEdits(new Map());
     }
     setSaving(false);
@@ -322,7 +322,7 @@ const AllTextsEditor = () => {
                 : "bg-secondary text-muted-foreground hover:text-foreground"
             }`}
           >
-            {lang === "ru" ? "🇷🇺 Русский" : "🇺🇦 Українська"}
+            {lang === "ru" ? "🇷🇺 Українська" : "🇺🇦 Українська"}
           </button>
         ))}
       </div>
@@ -432,7 +432,7 @@ const AllTextsEditor = () => {
             <span className="animate-pulse">Сохранение...</span>
           ) : (
             <>
-              <Check className="w-4 h-4" /> Сохранить {edits.size} изменений
+              <Check className="w-4 h-4" /> Зберегти {edits.size} изменений
             </>
           )}
         </button>

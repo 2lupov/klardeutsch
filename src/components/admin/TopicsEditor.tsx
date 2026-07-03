@@ -97,7 +97,7 @@ const TopicsEditor = () => {
       else toast.error("Ошибка: " + error.message);
       return;
     }
-    toast.success(`Тема "${newName.trim()}" создана!`);
+    toast.success(`Тема "${newName.trim()}" створеноа!`);
     setNewName("");
     setNewEmoji("📂");
     withScroll(load);
@@ -106,7 +106,7 @@ const TopicsEditor = () => {
   const deleteTopic = async (topic: Topic) => {
     const total = (topic.vocab_count || 0) + (topic.grammar_count || 0) + (topic.reading_count || 0) + (topic.listening_count || 0);
     if (total > 0) {
-      if (!confirm(`В теме "${topic.name}" есть ${total} единиц контента. Контент будет перемещён в "Allgemein". Продолжить?`)) return;
+      if (!confirm(`У темі "${topic.name}" є ${total} одиниць контенту. Контент буде переміщено в "Allgemein". Продовжити?`)) return;
       // Move content to Allgemein
       await Promise.all([
         supabase.from("vocab_cards").update({ topic: "Allgemein" } as any).eq("level", activeLevel).eq("topic", topic.name),
@@ -116,10 +116,10 @@ const TopicsEditor = () => {
         supabase.from("listening_texts").update({ topic: "Allgemein" } as any).eq("level", activeLevel).eq("topic", topic.name),
       ]);
     } else {
-      if (!confirm(`Удалить тему "${topic.name}"?`)) return;
+      if (!confirm(`Видалити тему "${topic.name}"?`)) return;
     }
     await supabase.from("topics").delete().eq("id", topic.id);
-    toast.success("Тема удалена");
+    toast.success("Тема видалено");
     withScroll(load);
   };
 
@@ -215,7 +215,7 @@ const TopicsEditor = () => {
             disabled={!newName.trim()}
             className="flex-1 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-bold disabled:opacity-40 flex items-center justify-center gap-1.5"
           >
-            <Plus className="w-3.5 h-3.5" /> Добавить в {activeLevel}
+            <Plus className="w-3.5 h-3.5" /> Додати в {activeLevel}
           </button>
           <button
             onClick={addToAllLevels}
