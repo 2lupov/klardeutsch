@@ -224,24 +224,8 @@ const DemoUsersManager = () => {
             >
               {avatarPickerFor === du.id ? "Приховати аватарки" : "Вибрати аватарку"}
             </button>
-            <div className="flex items-center gap-1.5">
-              <MessageSquare className="w-3 h-3 text-muted-foreground" />
-              <input
-                type="number"
-                placeholder="Telegram chat ID"
-                defaultValue={du.telegram_chat_id ?? ""}
-                onBlur={async (e) => {
-                  const val = e.target.value.trim();
-                  const chatId = val ? parseInt(val) : null;
-                  if (chatId === du.telegram_chat_id) return;
-                  await supabase.from("demo_leaderboard").update({ telegram_chat_id: chatId } as any).eq("id", du.id);
-                  toast.success(chatId ? "Telegram підключено!" : "Telegram відключено");
-                  silentReload();
-                }}
-                className="w-36 px-2 py-1 rounded-lg bg-secondary text-foreground border border-border text-xs focus:border-primary focus:outline-none"
-              />
-              {du.telegram_chat_id && <span className="text-[10px] text-green-500 font-medium">✓</span>}
-            </div>
+          </div>
+
           </div>
 
           {avatarPickerFor === du.id && (
