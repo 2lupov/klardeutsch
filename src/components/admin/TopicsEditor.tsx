@@ -142,7 +142,7 @@ const TopicsEditor = () => {
       ]);
     }
 
-    toast.success("Тема обновлена ✅");
+    toast.success("Тему оновлено ✅");
     setEditingId(null);
     withScroll(load);
   };

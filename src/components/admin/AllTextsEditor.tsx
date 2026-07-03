@@ -306,7 +306,7 @@ const AllTextsEditor = () => {
     loadAll();
   };
 
-  if (loading) return <p className="text-muted-foreground animate-pulse">Загрузка всех текстов...</p>;
+  if (loading) return <p className="text-muted-foreground animate-pulse">Завантаження всіх текстів...</p>;
 
   return (
     <div className="flex flex-col gap-4">
@@ -429,7 +429,7 @@ const AllTextsEditor = () => {
           className="sticky bottom-4 z-20 w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold transition-all disabled:opacity-60"
         >
           {saving ? (
-            <span className="animate-pulse">Сохранение...</span>
+            <span className="animate-pulse">Збереження...</span>
           ) : (
             <>
               <Check className="w-4 h-4" /> Зберегти {edits.size} изменений

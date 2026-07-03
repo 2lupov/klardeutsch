@@ -122,7 +122,7 @@ const UsersEditor = () => {
       toast.error("Помилка оновлення профілю: " + updateError.message);
       return;
     }
-    toast.success("Аватарка обновлена!");
+    toast.success("Аватарку оновлено!");
     setUsers(prev => prev.map(u => u.user_id === userId ? { ...u, avatar_url: avatarUrl } : u));
   };
 
@@ -159,7 +159,7 @@ const UsersEditor = () => {
     if (error) {
       toast.error("Помилка: " + error.message);
     } else {
-      toast.success("Имя обновлено");
+      toast.success("Ім'я оновлено");
       setEditingDemoId(null);
       loadDemo();
     }
@@ -219,7 +219,7 @@ const UsersEditor = () => {
     if (error) {
       toast.error("Помилка: " + error.message);
     } else {
-      toast.success(`Напоминания: ${data?.sent ?? 0} отправлено из ${data?.total ?? 0}`);
+      toast.success(`Нагадування: ${data?.sent ?? 0} відправлено з ${data?.total ?? 0}`);
     }
     setTriggering(false);
   };
@@ -252,7 +252,7 @@ const UsersEditor = () => {
     } else if (data?.error) {
       toast.error("Помилка: " + data.error);
     } else {
-      toast.success(`Письмо отправлено на ${email}`);
+      toast.success(`Лист відправлено на ${email}`);
     }
     setResending(null);
   };

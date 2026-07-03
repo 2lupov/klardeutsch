@@ -69,7 +69,7 @@ const NotebookLesson = ({ lesson, onComplete, lang }: Props) => {
               <Save className="w-3 h-3" /> {lang === "uk" ? "Збережено" : "Сохранено"}
             </span>
           ) : (
-            lang === "uk" ? "Автозбереження..." : "Автосохранение..."
+            "Автозбереження..."
           )}
         </span>
 

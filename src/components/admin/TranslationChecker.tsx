@@ -45,7 +45,7 @@ const TranslationChecker = () => {
       if (errs.length === 0) {
         toast.success("Все ідеально! Помилок не знайдено 🎉");
       } else {
-        toast.warning(`Найдено ${errs.length} ошибок`);
+        toast.warning(`Знайдено ${errs.length} помилок`);
       }
     } catch (e: any) {
       console.error("Scan error:", e);
@@ -94,7 +94,7 @@ const TranslationChecker = () => {
       if (failCount > 0) {
         toast.warning(`Исправлено ${successCount}, не удалось ${failCount}`);
       } else {
-        toast.success(`Исправлено ${successCount} ошибок!`);
+        toast.success(`Виправлено ${successCount} помилок!`);
       }
     } catch (e: any) {
       console.error("Fix error:", e);
@@ -191,7 +191,7 @@ const TranslationChecker = () => {
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-1.5">
               <AlertTriangle className="w-4 h-4 text-destructive" />
-              Найдено ошибок: {errors.length}
+              Знайдено помилок: {errors.length}
             </h3>
             <div className="flex gap-2">
               <button

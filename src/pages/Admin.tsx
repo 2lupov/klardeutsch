@@ -82,7 +82,7 @@ const Admin = () => {
   if (isAdmin === null) {
     return (
       <div className="h-[100dvh] bg-background flex items-center justify-center px-4 overflow-y-auto">
-        <p className="text-muted-foreground animate-pulse">Загрузка...</p>
+        <p className="text-muted-foreground animate-pulse">Завантаження...</p>
       </div>
     );
   }
@@ -634,7 +634,7 @@ const GamesEditor = ({ level }: { level: Level }) => {
     load();
   }, [level]);
 
-  if (loading) return <p className="text-muted-foreground">Загрузка...</p>;
+  if (loading) return <p className="text-muted-foreground">Завантаження...</p>;
 
   return (
     <div className="flex flex-col gap-4">

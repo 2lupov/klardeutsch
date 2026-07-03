@@ -81,7 +81,7 @@ const DemoUsersManager = () => {
 
   const setDemoAvatar = async (id: string, url: string) => {
     await supabase.from("demo_leaderboard").update({ avatar_url: url }).eq("id", id);
-    toast.success("Аватарка обновлена!"); setAvatarPickerFor(null); silentReload();
+    toast.success("Аватарку оновлено!"); setAvatarPickerFor(null); silentReload();
   };
 
   const uploadAvatar = async (id: string, file: File) => {
@@ -91,7 +91,7 @@ const DemoUsersManager = () => {
     if (upErr) { toast.error("Помилка: " + upErr.message); return; }
     const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
     await supabase.from("demo_leaderboard").update({ avatar_url: urlData.publicUrl + "?t=" + Date.now() }).eq("id", id);
-    toast.success("Аватарка обновлена!"); silentReload();
+    toast.success("Аватарку оновлено!"); silentReload();
   };
 
   if (loading) return <p className="text-muted-foreground animate-pulse">Завантаження...</p>;

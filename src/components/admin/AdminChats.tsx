@@ -116,7 +116,7 @@ const AdminChats = () => {
     setSending(false);
     // Reload
     openChat(selectedUser);
-    toast.success("Ответ отправлен!");
+    toast.success("Відповідь відправлено!");
   };
 
   if (selectedUser) {
@@ -177,7 +177,7 @@ const AdminChats = () => {
       </h3>
 
       {loading ? (
-        <p className="text-xs text-muted-foreground animate-pulse">Загрузка...</p>
+        <p className="text-xs text-muted-foreground animate-pulse">Завантаження...</p>
       ) : chats.length === 0 ? (
         <div className="glass-card p-8 text-center">
           <MessageCircle className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
