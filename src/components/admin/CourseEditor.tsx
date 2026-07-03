@@ -392,7 +392,7 @@ const LessonEditor = ({ lesson, onChange, level }: { lesson: CourseLesson; onCha
     setGenerating(section);
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { toast.error("Нет сессии"); return; }
+      if (!session) { toast.error("Немає сесії"); return; }
 
       const existingMap: Record<string, any> = {
         vocab: ex.vocab_cards,

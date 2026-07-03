@@ -33,7 +33,7 @@ const CourseHero = ({ lang }: { lang: Lang }) => (
         <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.02] tracking-tight text-foreground">
           {lang === "uk" ? "Мови " : "Мови "}
           <span className="italic text-accent">
-            {lang === "uk" ? "як кіно." : "как кино."}
+            {lang === "uk" ? "як кіно." : "як кіно."}
           </span>
           <br />
           <span className="text-foreground/70">

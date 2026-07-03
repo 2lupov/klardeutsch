@@ -140,7 +140,7 @@ const Academy = () => {
           <div className="text-center py-16">
             <p className="text-3xl mb-3">📚</p>
             <p className="text-muted-foreground text-sm">
-              {lang === "uk" ? "Курсів поки немає" : "Курсов пока нет"}
+              {lang === "uk" ? "Курсів поки немає" : "Курсів поки немає"}
             </p>
           </div>
         ) : (

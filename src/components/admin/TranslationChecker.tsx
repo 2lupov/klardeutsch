@@ -269,7 +269,7 @@ const TranslationChecker = () => {
         <div className="glass-card p-6 text-center border-green-500/20">
           <CheckCircle2 className="w-10 h-10 text-green-500 mx-auto mb-2" />
           <p className="font-display font-semibold text-foreground">Все ідеально!</p>
-          <p className="text-xs text-muted-foreground mt-1">Ошибок в переводах не найдено</p>
+          <p className="text-xs text-muted-foreground mt-1">Помилок у перекладах не знайдено</p>
         </div>
       )}
     </div>
