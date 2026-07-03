@@ -346,6 +346,10 @@ const PresenterMode = ({ lesson, words, exercises, studentName, studentProfile, 
 
           <LiveFeedbackPanel session={session} exercises={exercises} />
 
+          <PanelCard title="Чат с учеником" icon={<MessageCircle className="w-4 h-4" />}>
+            <SessionChat sessionId={session?.id} role="teacher" compact />
+          </PanelCard>
+
           <PanelCard title="Заметки (приватно)" icon={<StickyNote className="w-4 h-4" />} grow>
             <Textarea value={notes} onChange={(e) => setNotes(e.target.value)}
               placeholder="План урока, что спросить, домашка…"
@@ -355,6 +359,7 @@ const PresenterMode = ({ lesson, words, exercises, studentName, studentProfile, 
           <Button onClick={() => setAiOpen(true)} className="gap-2 w-full">
             <Sparkles className="w-4 h-4" /> AI-ассистент
           </Button>
+
         </div>
       </div>
 
