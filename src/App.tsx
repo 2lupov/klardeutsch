@@ -26,6 +26,8 @@ import TeachLessonBuilder from "./pages/teach/TeachLessonBuilder";
 import TeachGroups from "./pages/teach/TeachGroups";
 import TeachSchedule from "./pages/teach/TeachSchedule";
 import TeachStudents from "./pages/teach/TeachStudents";
+import TeachAttendance from "./pages/teach/TeachAttendance";
+import TeachFinance from "./pages/teach/TeachFinance";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
@@ -95,6 +97,8 @@ const AppRoutes = () => {
         <Route path="class" element={<TeachPlaceholder title="Live-клас" description="Запустіть Presenter Mode з будь-якого уроку в розділі «Уроки»." />} />
         <Route path="groups" element={<TeachGroups />} />
         <Route path="students" element={<TeachStudents />} />
+        <Route path="attendance" element={<TeachAttendance />} />
+        <Route path="finance" element={<TeachFinance />} />
         <Route path="homework" element={<TeachPlaceholder title="Домашні завдання" description="Призначення на групу, автоперевірка, feedback. Розширення tutoring_homework." />} />
       </Route>
       <Route path="/privacy" element={isTelegram ? <Navigate to="/" replace /> : <Privacy />} />

@@ -1954,6 +1954,60 @@ export type Database = {
           },
         ]
       }
+      school_attendance: {
+        Row: {
+          created_at: string
+          group_id: string | null
+          id: string
+          lesson_date: string
+          note: string | null
+          schedule_id: string | null
+          status: string
+          student_id: string
+          teacher_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          group_id?: string | null
+          id?: string
+          lesson_date?: string
+          note?: string | null
+          schedule_id?: string | null
+          status?: string
+          student_id: string
+          teacher_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          group_id?: string | null
+          id?: string
+          lesson_date?: string
+          note?: string | null
+          schedule_id?: string | null
+          status?: string
+          student_id?: string
+          teacher_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_attendance_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "school_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_attendance_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "school_schedule"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       school_group_members: {
         Row: {
           created_at: string
@@ -2018,6 +2072,59 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      school_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          group_id: string | null
+          id: string
+          note: string | null
+          paid_at: string | null
+          status: string
+          student_id: string
+          teacher_id: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          group_id?: string | null
+          id?: string
+          note?: string | null
+          paid_at?: string | null
+          status?: string
+          student_id: string
+          teacher_id: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          group_id?: string | null
+          id?: string
+          note?: string | null
+          paid_at?: string | null
+          status?: string
+          student_id?: string
+          teacher_id?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_payments_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "school_groups"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       school_schedule: {
         Row: {
