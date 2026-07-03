@@ -197,8 +197,14 @@ const PresenterMode = ({ lesson, words, exercises, studentName, studentProfile, 
         </div>
       </div>
 
+      {/* Timeline strip */}
+      <div className="px-4 pt-2 pb-1 border-b border-border bg-card/60">
+        <LessonTimeline view={view} words={words} exercises={exercises} interactive onJump={pushView} />
+      </div>
+
       {/* Body: 3 panels */}
       <div className="flex-1 grid grid-cols-12 gap-3 p-3 overflow-hidden">
+
         {/* LEFT: navigation of content */}
         <div className="col-span-3 flex flex-col gap-3 overflow-hidden">
           <PanelCard title="Что показать" icon={<ListChecks className="w-4 h-4" />}>
