@@ -151,7 +151,7 @@ const AcademyCourse = () => {
           <CourseHeroPlayer
             title={course.title}
             thumbnailUrl={course.thumbnail_url || course.image_url}
-            trailerUrl={course.trailer_url}
+            trailerUrl={null}
             difficulty={course.difficulty ?? course.level}
           />
 
