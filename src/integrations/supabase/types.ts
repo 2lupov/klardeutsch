@@ -764,7 +764,6 @@ export type Database = {
           duels_won: number
           id: string
           lessons_completed: number
-          telegram_chat_id: number | null
           total_xp: number
           words_learned: number
         }
@@ -776,7 +775,6 @@ export type Database = {
           duels_won?: number
           id?: string
           lessons_completed?: number
-          telegram_chat_id?: number | null
           total_xp?: number
           words_learned?: number
         }
@@ -788,7 +786,6 @@ export type Database = {
           duels_won?: number
           id?: string
           lessons_completed?: number
-          telegram_chat_id?: number | null
           total_xp?: number
           words_learned?: number
         }
@@ -3355,7 +3352,44 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_profiles: {
+        Row: {
+          active_target_language: string | null
+          avatar_url: string | null
+          created_at: string | null
+          display_name: string | null
+          nickname: string | null
+          preferred_lang: string | null
+          user_id: string | null
+        }
+        Insert: {
+          active_target_language?: string | null
+          avatar_url?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          nickname?: string | null
+          preferred_lang?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          active_target_language?: string | null
+          avatar_url?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          nickname?: string | null
+          preferred_lang?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_active_target_language_fkey"
+            columns: ["active_target_language"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
     }
     Functions: {
       activate_referral: { Args: { p_referred_id: string }; Returns: undefined }
