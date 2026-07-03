@@ -1954,6 +1954,124 @@ export type Database = {
           },
         ]
       }
+      school_group_members: {
+        Row: {
+          created_at: string
+          group_id: string
+          id: string
+          student_id: string
+        }
+        Insert: {
+          created_at?: string
+          group_id: string
+          id?: string
+          student_id: string
+        }
+        Update: {
+          created_at?: string
+          group_id?: string
+          id?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "school_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      school_groups: {
+        Row: {
+          color: string | null
+          created_at: string
+          description: string | null
+          id: string
+          language: string | null
+          level: string | null
+          name: string
+          teacher_id: string
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          language?: string | null
+          level?: string | null
+          name: string
+          teacher_id: string
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          language?: string | null
+          level?: string | null
+          name?: string
+          teacher_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      school_schedule: {
+        Row: {
+          created_at: string
+          duration_min: number
+          group_id: string | null
+          id: string
+          lesson_id: string | null
+          notes: string | null
+          starts_at: string
+          status: string
+          student_id: string | null
+          teacher_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          duration_min?: number
+          group_id?: string | null
+          id?: string
+          lesson_id?: string | null
+          notes?: string | null
+          starts_at: string
+          status?: string
+          student_id?: string | null
+          teacher_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          duration_min?: number
+          group_id?: string | null
+          id?: string
+          lesson_id?: string | null
+          notes?: string | null
+          starts_at?: string
+          status?: string
+          student_id?: string | null
+          teacher_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_schedule_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "school_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shop_items: {
         Row: {
           available: boolean
