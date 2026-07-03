@@ -226,7 +226,6 @@ const DemoUsersManager = () => {
             </button>
           </div>
 
-          </div>
 
           {avatarPickerFor === du.id && (
             <AvatarPicker
