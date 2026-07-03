@@ -23,6 +23,9 @@ import TeachPlaceholder from "./pages/teach/TeachPlaceholder";
 import TeachLibrary from "./pages/teach/TeachLibrary";
 import TeachLessons from "./pages/teach/TeachLessons";
 import TeachLessonBuilder from "./pages/teach/TeachLessonBuilder";
+import TeachGroups from "./pages/teach/TeachGroups";
+import TeachSchedule from "./pages/teach/TeachSchedule";
+import TeachStudents from "./pages/teach/TeachStudents";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
@@ -85,12 +88,13 @@ const AppRoutes = () => {
       {/* Teacher workspace (school staff only) */}
       <Route path="/teach" element={isTelegram ? <Navigate to="/" replace /> : <RequireTeacher><TeachLayout /></RequireTeacher>}>
         <Route index element={<TeachDashboard />} />
-        <Route path="schedule" element={<TeachPlaceholder title="Розклад" description="Календар груп та індивідуальних уроків. Наступний етап плану." />} />
+        <Route path="schedule" element={<TeachSchedule />} />
         <Route path="library" element={<TeachLibrary />} />
         <Route path="lessons" element={<TeachLessons />} />
         <Route path="lesson/:id/build" element={<TeachLessonBuilder />} />
-        <Route path="class" element={<TeachPlaceholder title="Live-клас" description="Розширення PresenterMode: таймлайн уроку, whiteboard, спільний фокус. Етап 4 плану." />} />
-        <Route path="students" element={<TeachPlaceholder title="Учні та групи" description="Групи, картки учнів, відвідуваність, оплати. Етапи 5–6 плану." />} />
+        <Route path="class" element={<TeachPlaceholder title="Live-клас" description="Запустіть Presenter Mode з будь-якого уроку в розділі «Уроки»." />} />
+        <Route path="groups" element={<TeachGroups />} />
+        <Route path="students" element={<TeachStudents />} />
         <Route path="homework" element={<TeachPlaceholder title="Домашні завдання" description="Призначення на групу, автоперевірка, feedback. Розширення tutoring_homework." />} />
       </Route>
       <Route path="/privacy" element={isTelegram ? <Navigate to="/" replace /> : <Privacy />} />
