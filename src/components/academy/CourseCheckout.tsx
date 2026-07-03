@@ -1,6 +1,5 @@
 import { Coins, ShieldCheck, Video, Bot, MessageCircle, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { Lang } from "@/i18n/translations";
 
 interface Props {
   course: {
@@ -14,22 +13,20 @@ interface Props {
   };
   isPurchased: boolean;
   purchasing: boolean;
-  onPurchase: (method: "coins" | "eur") => void;
+  onPurchase: (method: "coins" | "uah") => void;
   onStart: () => void;
-  lang: Lang;
 }
 
-const CourseCheckout = ({ course, isPurchased, purchasing, onPurchase, onStart, lang }: Props) => {
+const CourseCheckout = ({ course, isPurchased, purchasing, onPurchase, onStart }: Props) => {
   const features = [
-    { icon: Video, label: lang === "uk" ? "Відеолекції" : "Видеолекции" },
-    { icon: Bot, label: "AI-" + (lang === "uk" ? "практика" : "практика") },
-    { icon: MessageCircle, label: lang === "uk" ? "Чат з вчителем" : "Чат с учителем" },
-    { icon: Award, label: lang === "uk" ? "Сертифікат" : "Сертификат" },
+    { icon: Video, label: "Відеолекції" },
+    { icon: Bot, label: "AI-практика" },
+    { icon: MessageCircle, label: "Чат з вчителем" },
+    { icon: Award, label: "Сертифікат" },
   ];
 
   return (
     <div className="rounded-2xl border border-border/30 bg-card/60 backdrop-blur-sm overflow-hidden">
-      {/* Mini thumbnail */}
       {(course.thumbnail_url || course.image_url) && (
         <div className="aspect-video bg-muted/30">
           <img
@@ -45,52 +42,42 @@ const CourseCheckout = ({ course, isPurchased, purchasing, onPurchase, onStart, 
           <>
             <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/10 border border-primary/20">
               <ShieldCheck className="w-4 h-4 text-primary" />
-              <span className="text-xs font-semibold text-primary">
-                {lang === "uk" ? "Придбано" : "Куплено"}
-              </span>
+              <span className="text-xs font-semibold text-primary">Придбано</span>
             </div>
-            <Button
-              onClick={onStart}
-              className="w-full font-display font-bold"
-              size="lg"
-            >
-              {lang === "uk" ? "Почати навчатися" : "Начать учиться"}
+            <Button onClick={onStart} className="w-full font-display font-bold" size="lg">
+              Почати навчання
             </Button>
           </>
         ) : (
-          <>
-            {/* Prices */}
-            <div className="space-y-2">
-              {course.price_coins != null && (
-                <Button
-                  onClick={() => onPurchase("coins")}
-                  disabled={purchasing}
-                  className="w-full font-display font-bold"
-                  size="lg"
-                >
-                  <Coins className="w-4 h-4 mr-2" />
-                  {lang === "uk" ? "Купити за" : "Купить за"} {course.price_coins} {lang === "uk" ? "монет" : "монет"}
-                </Button>
-              )}
-              {course.price > 0 && (
-                <Button
-                  onClick={() => onPurchase("eur")}
-                  disabled={purchasing}
-                  variant="outline"
-                  className="w-full font-display font-bold"
-                  size="lg"
-                >
-                  {lang === "uk" ? "Купити за" : "Купить за"} ₴{course.price}
-                </Button>
-              )}
-            </div>
-          </>
+          <div className="space-y-2">
+            {course.price > 0 && (
+              <Button
+                onClick={() => onPurchase("uah")}
+                disabled={purchasing}
+                className="w-full font-display font-bold"
+                size="lg"
+              >
+                Купити за ₴{course.price}
+              </Button>
+            )}
+            {course.price_coins != null && (
+              <Button
+                onClick={() => onPurchase("coins")}
+                disabled={purchasing}
+                variant="outline"
+                className="w-full font-display font-bold"
+                size="lg"
+              >
+                <Coins className="w-4 h-4 mr-2" />
+                Купити за {course.price_coins} монет
+              </Button>
+            )}
+          </div>
         )}
 
-        {/* What's included */}
         <div className="space-y-2.5 pt-2">
           <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider">
-            {lang === "uk" ? "Що включено" : "Что включено"}
+            Що включено
           </p>
           {features.map((f, i) => (
             <div key={i} className="flex items-center gap-2.5 text-xs text-muted-foreground">
@@ -100,19 +87,17 @@ const CourseCheckout = ({ course, isPurchased, purchasing, onPurchase, onStart, 
           ))}
         </div>
 
-        {/* Guarantee */}
         <div className="pt-2 border-t border-border/20">
           <p className="text-[10px] text-muted-foreground text-center">
-            🛡️ {lang === "uk" ? "Гарантія повернення 7 днів" : "Гарантия возврата 7 дней"}
+            🛡️ Гарантія повернення 7 днів
           </p>
         </div>
 
-        {/* Cohort */}
         {course.cohort_start_date && (
           <div className="text-center">
             <p className="text-[11px] text-primary font-medium">
-              📅 {lang === "uk" ? "Наступний потік:" : "Следующий поток:"}{" "}
-              {new Date(course.cohort_start_date).toLocaleDateString(lang === "uk" ? "uk-UA" : "ru-RU")}
+              📅 Наступний потік:{" "}
+              {new Date(course.cohort_start_date).toLocaleDateString("uk-UA")}
             </p>
           </div>
         )}
