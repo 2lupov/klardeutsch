@@ -20,6 +20,7 @@ import RequireTeacher from "@/components/guards/RequireTeacher";
 import TeachLayout from "./pages/teach/TeachLayout";
 import TeachDashboard from "./pages/teach/TeachDashboard";
 import TeachPlaceholder from "./pages/teach/TeachPlaceholder";
+import TeachLibrary from "./pages/teach/TeachLibrary";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
@@ -83,7 +84,7 @@ const AppRoutes = () => {
       <Route path="/teach" element={isTelegram ? <Navigate to="/" replace /> : <RequireTeacher><TeachLayout /></RequireTeacher>}>
         <Route index element={<TeachDashboard />} />
         <Route path="schedule" element={<TeachPlaceholder title="Розклад" description="Календар груп та індивідуальних уроків. Наступний етап плану." />} />
-        <Route path="library" element={<TeachPlaceholder title="Бібліотека матеріалів" description="Централізовані слайди, вправи, відео, діалоги. Йде на етапі 2 плану — таблиця library_items + backfill існуючого контенту." />} />
+        <Route path="library" element={<TeachLibrary />} />
         <Route path="class" element={<TeachPlaceholder title="Live-клас" description="Розширення PresenterMode: таймлайн уроку, whiteboard, спільний фокус. Етап 4 плану." />} />
         <Route path="students" element={<TeachPlaceholder title="Учні та групи" description="Групи, картки учнів, відвідуваність, оплати. Етапи 5–6 плану." />} />
         <Route path="homework" element={<TeachPlaceholder title="Домашні завдання" description="Призначення на групу, автоперевірка, feedback. Розширення tutoring_homework." />} />
