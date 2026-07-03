@@ -7,8 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Menu, X, GraduationCap, Users, Presentation } from "lucide-react";
 import LessonSlidesViewer from "@/components/admin/LessonSlidesViewer";
 import LearnSidebar from "@/components/academy/LearnSidebar";
-import VideoLessonPlayer from "@/components/academy/lessons/VideoLessonPlayer";
-import VideoQuizLesson from "@/components/academy/lessons/VideoQuizLesson";
+import SlidesLesson from "@/components/academy/lessons/SlidesLesson";
 import AITutorLesson from "@/components/academy/lessons/AITutorLesson";
 import WritingTaskLesson from "@/components/academy/lessons/WritingTaskLesson";
 import TeacherChatPanel from "@/components/academy/TeacherChatPanel";
@@ -146,9 +145,8 @@ const AcademyLearn = () => {
 
     switch (activeLesson.lesson_type) {
       case "video":
-        return <VideoLessonPlayer key={key} lesson={activeLesson} onComplete={() => handleComplete()} lang={lang} />;
       case "video_quiz":
-        return <VideoQuizLesson key={key} lesson={activeLesson} onComplete={(s) => handleComplete(s)} lang={lang} />;
+        return <SlidesLesson key={key} lesson={activeLesson} onComplete={() => handleComplete()} lang={lang} />;
       case "article":
         return <ArticleLesson key={key} lesson={activeLesson} onComplete={() => handleComplete()} lang={lang} />;
       case "grammar":
