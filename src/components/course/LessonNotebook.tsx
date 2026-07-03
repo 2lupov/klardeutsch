@@ -68,7 +68,7 @@ const LessonNotebook = ({ lessonId, lang, theory, exercises }: LessonNotebookPro
       toast.error("Помилка збереження");
     } else {
       setLastSaved(new Date());
-      toast.success(lang === "uk" ? "Збережено ✓" : "Сохранено ✓");
+      toast.success("Збережено ✓");
     }
   }, [user, lessonId, pages, lang, serializePages]);
 
@@ -312,7 +312,7 @@ const LessonNotebook = ({ lessonId, lang, theory, exercises }: LessonNotebookPro
           >
             <Save className="w-3.5 h-3.5" />
             {saving
-              ? (lang === "uk" ? "Зберігаю..." : "Сохраняю...")
+              ? ("Зберігаю...")
               : "Зберегти"}
           </button>
         </div>

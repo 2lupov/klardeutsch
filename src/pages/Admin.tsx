@@ -231,7 +231,7 @@ const VocabEditor = ({ level }: { level: Level }) => {
     setPendingUpdates(new Map());
     setDirty(false);
     setSaving(false);
-    toast.success(t("saved") || "Сохранено!");
+    toast.success(t("saved") || "Збережено!");
   };
 
   const addCard = async () => {
@@ -362,7 +362,7 @@ const GrammarEditor = ({ level }: { level: Level }) => {
     setPendingLessonUpdates(new Map());
     setPendingQUpdates(new Map());
     setSaving(false);
-    toast.success(t("saved") || "Сохранено!");
+    toast.success(t("saved") || "Збережено!");
   };
 
   const addLesson = async () => {
@@ -524,7 +524,7 @@ const ReadingEditor = ({ level }: { level: Level }) => {
     setPendingTextUpdates(new Map());
     setPendingQUpdates(new Map());
     setSaving(false);
-    toast.success(t("saved") || "Сохранено!");
+    toast.success(t("saved") || "Збережено!");
   };
 
   const addText = async () => {

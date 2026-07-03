@@ -66,7 +66,7 @@ const NotebookLesson = ({ lesson, onComplete, lang }: Props) => {
         <span className="text-[11px] text-muted-foreground">
           {saved ? (
             <span className="flex items-center gap-1 text-primary">
-              <Save className="w-3 h-3" /> {lang === "uk" ? "Збережено" : "Сохранено"}
+              <Save className="w-3 h-3" /> {"Збережено"}
             </span>
           ) : (
             "Автозбереження..."
