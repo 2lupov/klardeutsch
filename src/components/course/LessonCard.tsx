@@ -64,7 +64,7 @@ const LessonCard = ({ lesson, index, lang, level = "A1", isExpanded, onToggle, o
     { key: "culture" as SectionKey, emoji: "🌍", label: lang === "uk" ? "Культура" : "Культура", sublabel: lang === "uk" ? "Цікаві факти" : "Цікаві факти", available: culturalNotes.length > 0, count: culturalNotes.length },
     { key: "notebook" as SectionKey, emoji: "📝", label: lang === "uk" ? "Зошит" : "Тетрадь", sublabel: lang === "uk" ? "Мої нотатки" : "Мои заметки", available: true },
     { key: "reading" as SectionKey, emoji: "📕", label: lang === "uk" ? "Читання" : "Чтение", sublabel: lang === "uk" ? "Текст для читання" : "Текст для чтения", available: !!ex.reading },
-    { key: "next" as SectionKey, emoji: "🚀", label: lang === "uk" ? `Готовий до ${nextLevel}?` : `Готов к ${nextLevel}?`, sublabel: lang === "uk" ? "Наступний рівень" : "Следующий уровень", available: true },
+    { key: "next" as SectionKey, emoji: "🚀", label: `Готовий до ${nextLevel}?`, sublabel: "Наступний рівень", available: true },
   ] as SectionDef[]).filter(s => s.available);
 
   const handleSectionSelect = (key: SectionKey) => {

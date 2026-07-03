@@ -166,7 +166,7 @@ const CohortChat = ({ courseId, lang, open, onClose }: Props) => {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
-                  placeholder={lang === "uk" ? "Повідомлення..." : "Сообщение..."}
+                  placeholder={"Повідомлення..."}
                   className="flex-1 px-3 py-2 rounded-lg bg-secondary text-foreground text-xs border border-border focus:border-primary focus:outline-none"
                   disabled={sending}
                 />

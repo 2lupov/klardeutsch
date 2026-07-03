@@ -385,7 +385,7 @@ const UsersEditor = () => {
         <div className="flex-1 glass-card p-3 flex items-center gap-2">
           <Users className="w-4 h-4 text-primary" />
           <span className="text-sm font-display font-bold text-foreground">{users.length}</span>
-          <span className="text-xs text-muted-foreground">пользователей</span>
+          <span className="text-xs text-muted-foreground">користувачів</span>
         </div>
         <div className="flex-1 glass-card p-3 flex items-center gap-2">
           <Shield className="w-4 h-4 text-primary" />

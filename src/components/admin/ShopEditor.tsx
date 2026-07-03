@@ -79,7 +79,7 @@ const ShopEditor = () => {
       
       toast.success("Фото загружено!");
     } catch (err: any) {
-      toast.error("Ошибка загрузки: " + err.message);
+      toast.error("Помилка завантаження: " + err.message);
     }
     setUploading(null);
   };
@@ -124,7 +124,7 @@ const ShopEditor = () => {
 
       toast.success(`Файл "${file.name}" загружен!`);
     } catch (err: any) {
-      toast.error("Ошибка загрузки файла: " + err.message);
+      toast.error("Помилка завантаження файлу: " + err.message);
     }
     setUploading(null);
   };

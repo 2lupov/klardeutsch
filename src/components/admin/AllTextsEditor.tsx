@@ -289,7 +289,7 @@ const AllTextsEditor = () => {
       }
 
       if (error) {
-        console.error(`Ошибка сохранения ${compositeKey}:`, error);
+        console.error(`Помилка збереження ${compositeKey}:`, error);
         errorCount++;
       } else {
         successCount++;
@@ -362,7 +362,7 @@ const AllTextsEditor = () => {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <input
           type="text"
-          placeholder="Поиск по любому тексту, ключу, уровню..."
+          placeholder="Пошук за будь-яким текстом, ключем, рівнем..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"

@@ -110,7 +110,7 @@ const BulkGenerator = () => {
       loadTopics();
     } catch (e: any) {
       console.error("Create topic error:", e);
-      toast.error("Ошибка: " + e.message);
+      toast.error("Помилка: " + e.message);
     }
 
     setCreatingTopic(false);
@@ -208,8 +208,8 @@ const BulkGenerator = () => {
       setConversionResult(`✅ Конвертировано: ${data.converted}/${data.total} уроків`);
       toast.success(`Конвертировано ${data.converted} уроків грамматики!`);
     } catch (e: any) {
-      setConversionResult(`❌ Ошибка: ${e.message}`);
-      toast.error("Ошибка конвертации: " + e.message);
+      setConversionResult(`❌ Помилка: ${e.message}`);
+      toast.error("Помилка конвертації: " + e.message);
     }
     setConvertingTheory(false);
   };

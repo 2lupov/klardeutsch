@@ -88,7 +88,7 @@ const DemoUsersManager = () => {
     const ext = file.name.split(".").pop() || "jpg";
     const path = `demo/${id}/avatar.${ext}`;
     const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
-    if (upErr) { toast.error("Ошибка: " + upErr.message); return; }
+    if (upErr) { toast.error("Помилка: " + upErr.message); return; }
     const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
     await supabase.from("demo_leaderboard").update({ avatar_url: urlData.publicUrl + "?t=" + Date.now() }).eq("id", id);
     toast.success("Аватарка обновлена!"); silentReload();

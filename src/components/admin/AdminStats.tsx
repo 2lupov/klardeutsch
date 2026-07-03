@@ -47,7 +47,7 @@ const AdminStats = () => {
       if (data?.stats) setStats(data.stats);
       else if (data?.error) throw new Error(data.error);
     } catch (err: any) {
-      toast.error("Ошибка загрузки: " + err.message);
+      toast.error("Помилка завантаження: " + err.message);
     }
     setLoading(false);
   }, []);

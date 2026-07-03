@@ -65,7 +65,7 @@ const LessonNotebook = ({ lessonId, lang, theory, exercises }: LessonNotebookPro
       .upsert({ user_id: user.id, lesson_id: lessonId, content, updated_at: new Date().toISOString() }, { onConflict: "user_id,lesson_id" });
     setSaving(false);
     if (error) {
-      toast.error(lang === "uk" ? "Помилка збереження" : "Ошибка сохранения");
+      toast.error("Помилка збереження");
     } else {
       setLastSaved(new Date());
       toast.success(lang === "uk" ? "Збережено ✓" : "Сохранено ✓");
@@ -313,7 +313,7 @@ const LessonNotebook = ({ lessonId, lang, theory, exercises }: LessonNotebookPro
             <Save className="w-3.5 h-3.5" />
             {saving
               ? (lang === "uk" ? "Зберігаю..." : "Сохраняю...")
-              : (lang === "uk" ? "Зберегти" : "Сохранить")}
+              : "Зберегти"}
           </button>
         </div>
       </div>
