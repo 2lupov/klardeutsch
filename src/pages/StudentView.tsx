@@ -154,7 +154,7 @@ const StudentView = () => {
       </div>
 
 
-      <div className="pt-20 pb-40 px-6 lg:px-16 max-w-5xl mx-auto">
+      <div className="pt-28 pb-40 px-6 lg:px-16 max-w-5xl mx-auto">
         <AnimatePresence mode="wait">
           <motion.div
             key={viewKey}
