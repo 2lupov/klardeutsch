@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
-import { Calendar, Library, Users, PlayCircle, ClipboardCheck, Sparkles } from "lucide-react";
+import { Calendar, Library, Users, PlayCircle, ClipboardCheck, Sparkles, LayoutList } from "lucide-react";
 
 const CARDS = [
   { to: "/teach/schedule", icon: Calendar, title: "Розклад на сьогодні", desc: "Найближчі уроки і групи" },
+  { to: "/teach/lessons", icon: LayoutList, title: "Конструктор уроку", desc: "Збирай уроки з блоків бібліотеки, drag-and-drop + AI" },
   { to: "/teach/class", icon: PlayCircle, title: "Провести урок", desc: "Live-клас з дошкою та таймлайном" },
   { to: "/teach/library", icon: Library, title: "Бібліотека матеріалів", desc: "Слайди, вправи, відео, діалоги" },
   { to: "/teach/students", icon: Users, title: "Мої учні", desc: "Групи, прогрес, картки учнів" },
