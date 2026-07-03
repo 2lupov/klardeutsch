@@ -20,91 +20,91 @@ interface GeneratedExercises {
 }
 
 const TYPE_CONFIG: { key: ExerciseType; icon: React.ElementType; label: string; labelDe: string }[] = [
-  { key: "vocab", icon: BookOpen, label: "Словарь", labelDe: "Wortschatz" },
-  { key: "grammar", icon: Languages, label: "Грамматика", labelDe: "Grammatik" },
-  { key: "reading", icon: BookText, label: "Чтение", labelDe: "Lesen" },
-  { key: "listening", icon: Headphones, label: "Аудирование", labelDe: "Hören" },
+  { key: "vocab", icon: BookOpen, label: "Словник", labelDe: "Wortschatz" },
+  { key: "grammar", icon: Languages, label: "Граматика", labelDe: "Grammatik" },
+  { key: "reading", icon: BookText, label: "Читання", labelDe: "Lesen" },
+  { key: "listening", icon: Headphones, label: "Аудіювання", labelDe: "Hören" },
 ];
 
 function buildPrompt(topic: string, level: Level, types: ExerciseType[]): string {
   const parts: string[] = [];
-  
-  parts.push(`Ты — эксперт по немецкому языку (DaF). Создай учебный контент для уровня ${level} CEFR на тему "${topic}".`);
+
+  parts.push(`Ти — експерт з німецької мови (DaF). Створи навчальний контент для рівня ${level} CEFR на тему "${topic}".`);
   parts.push("");
-  parts.push("ВАЖНО: Верни ТОЛЬКО валидный JSON без markdown-обёрток, без \`\`\`json, просто чистый JSON-объект.");
+  parts.push("ВАЖЛИВО: Поверни ТІЛЬКИ валідний JSON без markdown-обгорток, без \`\`\`json, просто чистий JSON-об'єкт.");
   parts.push("");
-  parts.push("Формат ответа — JSON-объект со следующими полями:");
+  parts.push("Формат відповіді — JSON-об'єкт з такими полями:");
   parts.push("");
-  
+
   if (types.includes("vocab")) {
-    parts.push(`"vocab_cards": массив из 15-25 слов. Каждый элемент:`);
+    parts.push(`"vocab_cards": масив із 15-25 слів. Кожен елемент:`);
     parts.push(`  {`);
-    parts.push(`    "german": "немецкое слово",`);
-    parts.push(`    "russian": "перевод на українська",`);
-    parts.push(`    "article": "der/die/das (если существительное, иначе null)",`);
-    parts.push(`    "example": "пример предложения на немецком",`);
+    parts.push(`    "german": "німецьке слово",`);
+    parts.push(`    "russian": "переклад українською",`);
+    parts.push(`    "article": "der/die/das (якщо іменник, інакше null)",`);
+    parts.push(`    "example": "приклад речення німецькою",`);
     parts.push(`    "topic": "${topic}"`);
     parts.push(`  }`);
-    parts.push(`  Требования:`);
-    parts.push(`  - Слова должны соответствовать уровню ${level}`);
-    parts.push(`  - Включи существительные, глаголы, прилагательные и полезные фразы`);
-    parts.push(`  - Примеры предложений — простые и практичные`);
-    parts.push(`  - Артикль ОБЯЗАТЕЛЕН для существительных`);
+    parts.push(`  Вимоги:`);
+    parts.push(`  - Слова мають відповідати рівню ${level}`);
+    parts.push(`  - Додай іменники, дієслова, прикметники та корисні фрази`);
+    parts.push(`  - Приклади речень — прості та практичні`);
+    parts.push(`  - Артикль ОБОВ'ЯЗКОВИЙ для іменників`);
     parts.push("");
   }
-  
+
   if (types.includes("grammar")) {
-    parts.push(`"grammar_questions": массив из 8-12 вопросов. Каждый элемент:`);
+    parts.push(`"grammar_questions": масив із 8-12 питань. Кожен елемент:`);
     parts.push(`  {`);
-    parts.push(`    "question": "вопрос с пропуском ___ на немецком",`);
-    parts.push(`    "options": ["вариант1", "вариант2", "вариант3", "вариант4"],`);
-    parts.push(`    "correct_index": 0,  // индекс правильного ответа (0-3)`);
-    parts.push(`    "explanation": "объяснение правила на українською",`);
+    parts.push(`    "question": "питання з пропуском ___ німецькою",`);
+    parts.push(`    "options": ["варіант1", "варіант2", "варіант3", "варіант4"],`);
+    parts.push(`    "correct_index": 0,  // індекс правильної відповіді (0-3)`);
+    parts.push(`    "explanation": "пояснення правила українською",`);
     parts.push(`    "topic": "${topic}"`);
     parts.push(`  }`);
-    parts.push(`  Требования:`);
-    parts.push(`  - Грамматика уровня ${level} (${level === "A1" ? "артикли, спряжение, порядок слов" : level === "A2" ? "модальные глаголы, Perfekt, предлоги" : level === "B1" ? "Konjunktiv II, пассив, косвенная речь" : level === "B2" ? "сложные конструкции, Partizip, Nominalisierung" : "стилистика, идиомы, сложный синтаксис"})`);
-    parts.push(`  - Всегда 4 варианта ответа`);
-    parts.push(`  - correct_index — числовой индекс (0, 1, 2 или 3)`);
+    parts.push(`  Вимоги:`);
+    parts.push(`  - Граматика рівня ${level} (${level === "A1" ? "артиклі, дієвідмінювання, порядок слів" : level === "A2" ? "модальні дієслова, Perfekt, прийменники" : level === "B1" ? "Konjunktiv II, пасив, непряма мова" : level === "B2" ? "складні конструкції, Partizip, Nominalisierung" : "стилістика, ідіоми, складний синтаксис"})`);
+    parts.push(`  - Завжди 4 варіанти відповіді`);
+    parts.push(`  - correct_index — числовий індекс (0, 1, 2 або 3)`);
     parts.push("");
   }
-  
+
   if (types.includes("reading")) {
-    parts.push(`"reading_text": объект с текстом для чтения:`);
+    parts.push(`"reading_text": об'єкт із текстом для читання:`);
     parts.push(`  {`);
-    parts.push(`    "title": "название текста на немецком",`);
-    parts.push(`    "text": "текст на немецком (${level === "A1" ? "80-120" : level === "A2" ? "120-180" : level === "B1" ? "180-250" : "250-400"} слов)",`);
+    parts.push(`    "title": "назва тексту німецькою",`);
+    parts.push(`    "text": "текст німецькою (${level === "A1" ? "80-120" : level === "A2" ? "120-180" : level === "B1" ? "180-250" : "250-400"} слів)",`);
     parts.push(`    "topic": "${topic}",`);
     parts.push(`    "questions": [`);
     parts.push(`      {`);
-    parts.push(`        "question": "вопрос по тексту на немецком",`);
-    parts.push(`        "options": ["вариант1", "вариант2", "вариант3", "вариант4"],`);
+    parts.push(`        "question": "питання за текстом німецькою",`);
+    parts.push(`        "options": ["варіант1", "варіант2", "варіант3", "варіант4"],`);
     parts.push(`        "correct_index": 0,`);
-    parts.push(`        "explanation": "пояснение на українською"`);
+    parts.push(`        "explanation": "пояснення українською"`);
     parts.push(`      }`);
-    parts.push(`    ]  // 4-6 вопросов`);
+    parts.push(`    ]  // 4-6 питань`);
     parts.push(`  }`);
-    parts.push(`  Требования:`);
-    parts.push(`  - Текст должен быть естественным и интересным`);
-    parts.push(`  - Вопросы проверяют понимание, а не знание слов`);
+    parts.push(`  Вимоги:`);
+    parts.push(`  - Текст має бути природним і цікавим`);
+    parts.push(`  - Питання перевіряють розуміння, а не знання слів`);
     parts.push("");
   }
-  
+
   if (types.includes("listening")) {
-    parts.push(`"listening_text": объект для аудирования (формат идентичен reading_text):`);
+    parts.push(`"listening_text": об'єкт для аудіювання (формат ідентичний reading_text):`);
     parts.push(`  {`);
-    parts.push(`    "title": "название",`);
-    parts.push(`    "text": "диалог или монолог на немецком (${level === "A1" ? "60-100" : level === "A2" ? "100-150" : level === "B1" ? "150-200" : "200-300"} слов)",`);
+    parts.push(`    "title": "назва",`);
+    parts.push(`    "text": "діалог або монолог німецькою (${level === "A1" ? "60-100" : level === "A2" ? "100-150" : level === "B1" ? "150-200" : "200-300"} слів)",`);
     parts.push(`    "topic": "${topic}",`);
-    parts.push(`    "questions": [... 4-6 вопросов, формат как у reading]`);
+    parts.push(`    "questions": [... 4-6 питань, формат як у reading]`);
     parts.push(`  }`);
-    parts.push(`  Требования:`);
-    parts.push(`  - Текст должен звучать как разговорная речь / реальный диалог`);
-    parts.push(`  - Используй бытовые ситуации по теме`);
+    parts.push(`  Вимоги:`);
+    parts.push(`  - Текст має звучати як розмовна мова / реальний діалог`);
+    parts.push(`  - Використовуй побутові ситуації за темою`);
     parts.push("");
   }
-  
-  parts.push("Пример структуры JSON:");
+
+  parts.push("Приклад структури JSON:");
   parts.push("{");
   if (types.includes("vocab")) parts.push('  "vocab_cards": [...],');
   if (types.includes("grammar")) parts.push('  "grammar_questions": [...],');
@@ -143,22 +143,22 @@ const ContentGenerator = ({ level }: { level: Level }) => {
 
   const generatePrompt = () => {
     if (!topic.trim()) {
-      toast.error("Введите тему");
+      toast.error("Введіть тему");
       return;
     }
     if (types.length === 0) {
-      toast.error("Выберите хотя бы один тип заданий");
+      toast.error("Оберіть хоча б один тип завдань");
       return;
     }
     const prompt = buildPrompt(topic.trim(), level, types);
     setGeneratedPrompt(prompt);
-    toast.success("Промпт створено! Скопируйте и вставьте в Claude.");
+    toast.success("Промпт створено! Скопіюйте та вставте в Claude.");
   };
 
   const copyPrompt = async () => {
     await navigator.clipboard.writeText(generatedPrompt);
     setCopied(true);
-    toast.success("Промпт скопирован!");
+    toast.success("Промпт скопійовано!");
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -170,13 +170,13 @@ const ContentGenerator = ({ level }: { level: Level }) => {
       const text = await file.text();
       setJsonInput(text);
     } catch {
-      toast.error("Не удалось прочитать файл");
+      toast.error("Не вдалося прочитати файл");
     }
   };
 
   const parseAndPreview = () => {
     if (!jsonInput.trim()) {
-      toast.error("Вставьте JSON или загрузите файл");
+      toast.error("Вставте JSON або завантажте файл");
       return;
     }
     try {
@@ -192,14 +192,14 @@ const ContentGenerator = ({ level }: { level: Level }) => {
       // Validate structure
       const hasContent = parsed.vocab_cards?.length || parsed.grammar_questions?.length || parsed.reading_text || parsed.listening_text;
       if (!hasContent) {
-        toast.error("JSON не содержит заданий. Проверьте формат.");
+        toast.error("JSON не містить завдань. Перевірте формат.");
         return;
       }
       
       setResult(parsed);
-      toast.success("JSON распознан! Проверьте и сохраните.");
+      toast.success("JSON розпізнано! Перевірте та збережіть.");
     } catch (err: any) {
-      toast.error("Невалидный JSON: " + err.message);
+      toast.error("Невалідний JSON: " + err.message);
     }
   };
 
@@ -293,12 +293,12 @@ const ContentGenerator = ({ level }: { level: Level }) => {
         saved += 1 + (lt.questions?.length || 0);
       }
 
-      toast.success(`✅ Збережено ${saved} элементов в базу!`);
+      toast.success(`✅ Збережено ${saved} елементів у базу!`);
       setResult(null);
       setJsonInput("");
       setFileName("");
     } catch (err: any) {
-      toast.error("Ошибка сохранения: " + err.message);
+      toast.error("Помилка збереження: " + err.message);
     }
     setSaving(false);
   };
@@ -329,7 +329,7 @@ const ContentGenerator = ({ level }: { level: Level }) => {
           }`}
         >
           <FileJson className="w-4 h-4" />
-          Импорт
+          Імпорт
         </button>
         <button
           onClick={() => setMode("bulk")}
@@ -340,7 +340,7 @@ const ContentGenerator = ({ level }: { level: Level }) => {
           }`}
         >
           <Zap className="w-4 h-4" />
-          Массовая
+          Масова
         </button>
       </div>
 
@@ -357,7 +357,7 @@ const ContentGenerator = ({ level }: { level: Level }) => {
               type="text"
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
-              placeholder="Введите тему, например: Essen und Trinken"
+              placeholder="Введіть тему, наприклад: Essen und Trinken"
               className="w-full px-3 py-2.5 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none placeholder:text-muted-foreground"
             />
 
@@ -410,13 +410,13 @@ const ContentGenerator = ({ level }: { level: Level }) => {
           {generatedPrompt && (
             <div className="glass-card p-4 flex flex-col gap-3">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-display font-semibold text-foreground">📝 Промпт готов</h3>
+                <h3 className="text-sm font-display font-semibold text-foreground">📝 Промпт готовий</h3>
                 <button
                   onClick={copyPrompt}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/15 text-primary text-xs font-bold hover:bg-primary/25 transition-colors"
                 >
                   {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  {copied ? "Скопировано!" : "Копировать"}
+                  {copied ? "Скопійовано!" : "Копіювати"}
                 </button>
               </div>
 
@@ -429,7 +429,7 @@ const ContentGenerator = ({ level }: { level: Level }) => {
               <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/5 border border-primary/20">
                 <ArrowRight className="w-4 h-4 text-primary flex-shrink-0" />
                 <p className="text-xs text-muted-foreground">
-                  <span className="text-foreground font-semibold">Следующий шаг:</span> Скопируйте промпт → вставьте в Claude → скопируйте JSON-ответ → переключитесь на вкладку «Импорт JSON»
+                  <span className="text-foreground font-semibold">Наступний крок:</span> Скопіюйте промпт → вставте в Claude → скопіюйте JSON-відповідь → перейдіть на вкладку «Імпорт JSON»
                 </p>
               </div>
             </div>
@@ -442,7 +442,7 @@ const ContentGenerator = ({ level }: { level: Level }) => {
           <div className="glass-card p-4 flex flex-col gap-3">
             <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-2">
               <FileJson className="w-4 h-4 text-primary" />
-              Импорт JSON от Claude ({level})
+              Імпорт JSON від Claude ({level})
             </h3>
 
             <label className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all cursor-pointer">
@@ -455,7 +455,7 @@ const ContentGenerator = ({ level }: { level: Level }) => {
               <textarea
                 value={jsonInput}
                 onChange={(e) => setJsonInput(e.target.value)}
-                placeholder="Или вставьте JSON от Claude сюда..."
+                placeholder="Або вставте JSON від Claude сюди..."
                 rows={8}
                 className="w-full px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-xs font-mono focus:border-primary focus:outline-none resize-y"
               />
@@ -472,19 +472,19 @@ const ContentGenerator = ({ level }: { level: Level }) => {
               className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-primary text-primary-foreground font-semibold glow-yellow transition-all disabled:opacity-40"
             >
               <Sparkles className="w-4 h-4" />
-              Распознать и предпросмотреть
+              Розпізнати та переглянути
             </button>
           </div>
 
           {/* Results preview */}
           {result && (
             <div className="flex flex-col gap-3">
-              <h3 className="text-sm font-display font-semibold text-foreground">📋 Предпросмотр</h3>
+              <h3 className="text-sm font-display font-semibold text-foreground">📋 Попередній перегляд</h3>
 
               {result.vocab_cards && result.vocab_cards.length > 0 && (
                 <div className="glass-card p-4">
                   <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                    <BookOpen className="w-3 h-3" /> Словарь ({result.vocab_cards.length} слов)
+                    <BookOpen className="w-3 h-3" /> Словник ({result.vocab_cards.length} слів)
                   </p>
                   <div className="flex flex-col gap-1.5 max-h-48 overflow-y-auto">
                     {result.vocab_cards.map((c, i) => (
@@ -502,7 +502,7 @@ const ContentGenerator = ({ level }: { level: Level }) => {
               {result.grammar_questions && result.grammar_questions.length > 0 && (
                 <div className="glass-card p-4">
                   <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                    <Languages className="w-3 h-3" /> Грамматика ({result.grammar_questions.length} вопросов)
+                    <Languages className="w-3 h-3" /> Граматика ({result.grammar_questions.length} питань)
                   </p>
                   <div className="flex flex-col gap-2 max-h-48 overflow-y-auto">
                     {result.grammar_questions.map((q, i) => (
@@ -524,22 +524,22 @@ const ContentGenerator = ({ level }: { level: Level }) => {
               {result.reading_text && (
                 <div className="glass-card p-4">
                   <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                    <BookText className="w-3 h-3" /> Чтение
+                    <BookText className="w-3 h-3" /> Читання
                   </p>
                   <p className="font-semibold text-foreground text-sm">{result.reading_text.title}</p>
                   <p className="text-xs text-muted-foreground mt-1 line-clamp-3">{result.reading_text.text}</p>
-                  <p className="text-[10px] text-muted-foreground mt-1">{result.reading_text.questions?.length || 0} вопросов</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">{result.reading_text.questions?.length || 0} питань</p>
                 </div>
               )}
 
               {result.listening_text && (
                 <div className="glass-card p-4">
                   <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                    <Headphones className="w-3 h-3" /> Аудирование
+                    <Headphones className="w-3 h-3" /> Аудіювання
                   </p>
                   <p className="font-semibold text-foreground text-sm">{result.listening_text.title}</p>
                   <p className="text-xs text-muted-foreground mt-1 line-clamp-3">{result.listening_text.text}</p>
-                  <p className="text-[10px] text-muted-foreground mt-1">{result.listening_text.questions?.length || 0} вопросов</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">{result.listening_text.questions?.length || 0} питань</p>
                 </div>
               )}
 
@@ -549,7 +549,7 @@ const ContentGenerator = ({ level }: { level: Level }) => {
                 className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-primary text-primary-foreground font-semibold glow-yellow transition-all disabled:opacity-40"
               >
                 {saving ? (
-                  <><Loader2 className="w-4 h-4 animate-spin" /> Сохранение...</>
+                  <><Loader2 className="w-4 h-4 animate-spin" /> Збереження...</>
                 ) : (
                   <><Save className="w-4 h-4" /> Зберегти все в базу</>
                 )}
