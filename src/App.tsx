@@ -26,6 +26,8 @@ import TeachLessonBuilder from "./pages/teach/TeachLessonBuilder";
 import TeachGroups from "./pages/teach/TeachGroups";
 import TeachSchedule from "./pages/teach/TeachSchedule";
 import TeachStudents from "./pages/teach/TeachStudents";
+import TeachAttendance from "./pages/teach/TeachAttendance";
+import TeachFinance from "./pages/teach/TeachFinance";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
