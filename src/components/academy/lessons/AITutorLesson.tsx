@@ -138,7 +138,7 @@ const AITutorLesson = ({ lesson, onComplete, lang }: Props) => {
     setShowHint(true);
     try {
       const apiMessages = messages.map(m => ({ role: m.role, content: m.content }));
-      apiMessages.push({ role: "user", content: isUk ? "Дай підказку що я можу відповісти (коротко, 1-2 варіанти німецькою)" : "Дай подсказку что я могу ответить (коротко, 1-2 варианта на немецком)" });
+      apiMessages.push({ role: "user", content: "Дай підказку що я можу відповісти (коротко, 1-2 варіанти німецькою)" });
 
       const res = await fetchEdgeFunction("ai-dialogue", { json: { messages: apiMessages, topic: scenario, level, lang } });
       if (!res.ok) { setHintText(isUk ? "Не вдалося отримати підказку" : "Не удалось получить подсказку"); setLoadingHint(false); return; }
@@ -384,7 +384,7 @@ const AITutorLesson = ({ lesson, onComplete, lang }: Props) => {
               {analysis.advice && (
                 <div>
                   <h4 className="text-xs font-bold text-foreground mb-1">
-                    📝 {isUk ? "Що покращити" : "Что улучшить"}
+                    📝 {"Що покращити"}
                   </h4>
                   <p className="text-xs text-foreground/80">{analysis.advice}</p>
                 </div>

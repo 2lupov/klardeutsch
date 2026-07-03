@@ -237,7 +237,7 @@ const UsersEditor = () => {
       setDmMsg("");
       setDmUserId(null);
     } else {
-      toast.error("Не удалось отправить (нет Telegram?)");
+      toast.error("Не вдалося відправити (немає Telegram?)");
     }
     setDmSending(false);
   };
@@ -375,7 +375,7 @@ const UsersEditor = () => {
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Поиск по email или имени..."
+          placeholder="Пошук за email або іменем..."
           className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none"
         />
       </div>
@@ -584,7 +584,7 @@ const UsersEditor = () => {
                 <button
                   onClick={() => {
                     const amt = parseInt(coinAmounts[user.user_id]) || 50;
-                    if (confirm(`Начислить +${amt} монет для ${user.display_name || user.email}?`)) {
+                    if (confirm(`Нарахувати +${amt} монет для ${user.display_name || user.email}?`)) {
                       adjustCoins(user.user_id, amt);
                     }
                   }}

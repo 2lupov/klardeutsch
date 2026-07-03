@@ -181,7 +181,7 @@ const AdminChats = () => {
       ) : chats.length === 0 ? (
         <div className="glass-card p-8 text-center">
           <MessageCircle className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-          <p className="text-sm text-muted-foreground">Пока нет сообщений от учеников</p>
+          <p className="text-sm text-muted-foreground">Поки немає повідомлень від учнів</p>
         </div>
       ) : (
         <div className="space-y-1">

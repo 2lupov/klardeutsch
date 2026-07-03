@@ -539,7 +539,7 @@ const LessonEditor = ({ lesson, onChange, level }: { lesson: CourseLesson; onCha
       {tab === "reading" && (
         <div className="space-y-2">
           <input value={ex.reading?.title || ""} onChange={e => onChange({ ...lesson, exercises: { ...ex, reading: { ...(ex.reading || { text: "", questions: [] }), title: e.target.value } } })} placeholder="Заголовок текста" className={inputCls} />
-          <textarea value={ex.reading?.text || ""} onChange={e => onChange({ ...lesson, exercises: { ...ex, reading: { ...(ex.reading || { title: "", questions: [] }), text: e.target.value } } })} placeholder="Текст для чтения..." rows={5} className={`${inputCls} resize-y`} />
+          <textarea value={ex.reading?.text || ""} onChange={e => onChange({ ...lesson, exercises: { ...ex, reading: { ...(ex.reading || { title: "", questions: [] }), text: e.target.value } } })} placeholder="Текст для читання..." rows={5} className={`${inputCls} resize-y`} />
           
           <p className="text-[10px] text-muted-foreground font-bold uppercase mt-2">Питання до тексту ({ex.reading?.questions?.length || 0})</p>
           {(ex.reading?.questions || []).map((q, qi) => (
@@ -685,7 +685,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
     if (!courseName.trim()) { toast.error("Введите название курса"); return; }
     
     const count = parseInt(lessonsCount) || 25;
-    if (!confirm(`Створити курс "${courseName}" и сгенерировать ${count} уроків? Это займе кілька хвилин.`)) return;
+    if (!confirm(`Створити курс "${courseName}" і згенерувати ${count} уроків? Це займе кілька хвилин.`)) return;
     
     setCreatingCourse(true);
     

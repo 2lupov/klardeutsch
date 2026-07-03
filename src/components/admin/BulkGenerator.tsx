@@ -234,7 +234,7 @@ const BulkGenerator = () => {
         {showNewTopic && (
           <div className="space-y-3">
             <p className="text-xs text-muted-foreground">
-              ИИ создаст тему и сгенерирует: 15 слов, грамматику с 10 упражнениями, текст для чтения и аудирования
+              AI створить тему і згенерує: 15 слів, граматику з 10 вправами, текст для читання та аудіювання
             </p>
 
             {/* Level selector */}

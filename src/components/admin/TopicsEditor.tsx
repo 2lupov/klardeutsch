@@ -93,7 +93,7 @@ const TopicsEditor = () => {
       sort_order: topics.length,
     } as any);
     if (error) {
-      if (error.message.includes("duplicate")) toast.error("Тема с таким именем уже существует");
+      if (error.message.includes("duplicate")) toast.error("Тема з такою назвою вже існує");
       else toast.error("Ошибка: " + error.message);
       return;
     }
@@ -231,7 +231,7 @@ const TopicsEditor = () => {
       {loading ? (
         <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>
       ) : topics.length === 0 ? (
-        <p className="text-center text-sm text-muted-foreground py-8">Нет тем для {activeLevel}</p>
+        <p className="text-center text-sm text-muted-foreground py-8">Немає тем для {activeLevel}</p>
       ) : (
         <div className="flex flex-col gap-2">
           <p className="text-xs text-muted-foreground">{topics.length} тем для {activeLevel}</p>

@@ -76,7 +76,7 @@ const TranslationsEditor = () => {
         await loadOverrides();
       }
     } else {
-      toast.info("Нет изменений для сохранения");
+      toast.info("Немає змін для збереження");
     }
     setSaving(false);
   };
@@ -121,7 +121,7 @@ const TranslationsEditor = () => {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <input
           type="text"
-          placeholder="Поиск по ключу или тексту..."
+          placeholder="Пошук за ключем або текстом..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full pl-9 pr-3 py-2 rounded-xl bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
