@@ -12,6 +12,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { startOrResumeSession, updateSession, endSession, type LiveSession, type ViewType } from "@/lib/presenter-session";
 import TeacherAIAssistant from "./TeacherAIAssistant";
+import LessonTimeline from "./LessonTimeline";
+import SessionChat from "./SessionChat";
 
 interface Props {
   lesson: any;
