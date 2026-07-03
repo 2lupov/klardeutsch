@@ -94,19 +94,33 @@ const AcademyCourse = () => {
     load();
   }, [courseId, user]);
 
-  const handlePurchase = async (method: "coins" | "eur") => {
-    if (!user || !courseId || purchasing) return;
+  const handlePurchase = async (method: "coins" | "uah") => {
+    if (!user || !courseId || purchasing || !course) return;
     setPurchasing(true);
-    if (method === "coins") {
-      const { data } = await supabase.rpc("purchase_course", {
-        p_user_id: user.id,
-        p_course_id: courseId,
-      });
-      if (data) {
-        setIsPurchased(true);
+    try {
+      if (method === "coins") {
+        const { data } = await supabase.rpc("purchase_course", {
+          p_user_id: user.id,
+          p_course_id: courseId,
+        });
+        if (data) setIsPurchased(true);
+      } else {
+        const { data, error } = await supabase.functions.invoke("mono-create-invoice", {
+          body: {
+            amount: Math.round(course.price * 100),
+            ccy: 980,
+            description: `Курс: ${course.title}`,
+            reference: `course_${courseId}_${user.id}_${Date.now()}`,
+          },
+        });
+        if (error) throw error;
+        if (data?.pageUrl) window.location.href = data.pageUrl;
       }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setPurchasing(false);
     }
-    setPurchasing(false);
   };
 
   const handleStart = () => {
