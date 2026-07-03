@@ -85,7 +85,7 @@ const DialogueTextLesson = ({ lesson, onComplete, lang }: Props) => {
       {phrases.length > 0 && (
         <div className="space-y-2 pt-4 border-t border-border/20">
           <h3 className="text-xs font-display font-bold text-muted-foreground uppercase tracking-wider">
-            {lang === "uk" ? "Ключові фрази" : "Ключевые фразы"}
+            {lang === "uk" ? "Ключові фрази" : "Ключові фрази"}
           </h3>
           <div className="rounded-xl border border-border/30 bg-card/30 overflow-hidden">
             {phrases.map((p, i) => (
@@ -123,7 +123,7 @@ const DialogueTextLesson = ({ lesson, onComplete, lang }: Props) => {
           </div>
         ) : (
           <Button onClick={() => { setCompleted(true); onComplete(); }} className="font-display font-bold" size="lg">
-            {lang === "uk" ? "Урок завершено ✓" : "Урок завершён ✓"}
+            {lang === "uk" ? "Урок завершено ✓" : "Урок завершено ✓"}
           </Button>
         )}
       </div>

@@ -205,7 +205,7 @@ const TopicsEditor = () => {
             value={newName}
             onChange={e => setNewName(e.target.value)}
             onKeyDown={e => e.key === "Enter" && addTopic()}
-            placeholder="Название темы (Essen, Technik...)"
+            placeholder="Назва теми (Essen, Technik...)"
             className="flex-1 px-3 py-2.5 rounded-xl bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none"
           />
         </div>

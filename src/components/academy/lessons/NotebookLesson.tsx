@@ -51,7 +51,7 @@ const NotebookLesson = ({ lesson, onComplete, lang }: Props) => {
       <div>
         <h2 className="font-display text-xl font-bold text-foreground">{lesson.title}</h2>
         <p className="text-xs text-muted-foreground mt-1">
-          📓 {lang === "uk" ? "Записуй ключові думки та слова" : "Записывай ключевые мысли и слова"}
+          📓 {lang === "uk" ? "Записуй ключові думки та слова" : "Записуй ключові думки та слова"}
         </p>
       </div>
 
@@ -76,7 +76,7 @@ const NotebookLesson = ({ lesson, onComplete, lang }: Props) => {
         {!completed ? (
           <Button onClick={() => { setCompleted(true); onComplete(); }} variant="outline" size="sm" className="text-xs">
             <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
-            {lang === "uk" ? "Позначити як завершене" : "Отметить как завершённое"}
+            {lang === "uk" ? "Позначити як завершене" : "Позначити як завершене"}
           </Button>
         ) : (
           <span className="text-xs text-primary font-semibold flex items-center gap-1">

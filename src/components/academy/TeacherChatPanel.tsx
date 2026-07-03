@@ -28,9 +28,9 @@ interface Props {
 
 const QUICK_QUESTIONS = {
   ru: [
-    "Объясни это правило проще",
-    "Дай ещё примеры",
-    "Как это произносится?",
+    "Поясни це правило простіше",
+    "Дай ще приклади",
+    "Як це вимовляється?",
   ],
   uk: [
     "Поясни це правило простіше",
@@ -114,7 +114,7 @@ const TeacherChatPanel = ({ lessonId, courseId, lessonTitle, courseLevel, lang, 
     scrollAi();
 
     try {
-      const systemContext = `Ты — AI-помощник для урока "${lessonTitle}" (уровень ${courseLevel}). Отвечай ${isUk ? "українською" : "на русском"}, помогай с вопросами по немецкому языку и содержанию урока.`;
+      const systemContext = `Ти — AI-помічник для уроку "${lessonTitle}" (рівень ${courseLevel}). Відповідай українською, допомагай з питаннями з німецької мови та змісту уроку.`;
       
       const res = await fetchEdgeFunction("ai-dialogue", {
         json: {

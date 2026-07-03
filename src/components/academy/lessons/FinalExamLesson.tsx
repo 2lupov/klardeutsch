@@ -92,11 +92,11 @@ const FinalExamLesson = ({ lesson, onComplete, courseId, lang }: Props) => {
         <div className="text-5xl">{passed ? "🎓" : "📚"}</div>
         <h2 className="font-display text-3xl font-bold text-foreground">{score}%</h2>
         <p className="text-sm text-muted-foreground">
-          {correct}/{questions.length} {lang === "uk" ? "правильних" : "правильных"}
+          {correct}/{questions.length} {lang === "uk" ? "правильних" : "правильних"}
         </p>
         {passed ? (
           <p className="text-sm text-primary font-semibold">
-            🎉 {lang === "uk" ? "Вітаємо! Сертифікат видано!" : "Поздравляем! Сертификат выдан!"}
+            🎉 {lang === "uk" ? "Вітаємо! Сертифікат видано!" : "Вітаємо! Сертифікат видано!"}
           </p>
         ) : (
           <p className="text-sm text-muted-foreground">
@@ -149,7 +149,7 @@ const FinalExamLesson = ({ lesson, onComplete, courseId, lang }: Props) => {
         <Button onClick={handleNext} disabled={selected === null} className="font-display font-bold">
           {current < questions.length - 1
             ? lang === "uk" ? "Далі →" : "Далее →"
-            : lang === "uk" ? "Завершити іспит" : "Завершить экзамен"}
+            : lang === "uk" ? "Завершити іспит" : "Завершити іспит"}
         </Button>
       </div>
     </div>

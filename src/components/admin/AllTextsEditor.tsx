@@ -16,7 +16,7 @@ interface TextEntry {
 }
 
 const SOURCE_CONFIG: { key: TextSource; icon: React.ElementType; label: string; color: string }[] = [
-  { key: "ui", icon: Globe, label: "UI переводы", color: "text-blue-400" },
+  { key: "ui", icon: Globe, label: "UI переклади", color: "text-blue-400" },
   { key: "vocab", icon: BookOpen, label: "Словарь", color: "text-emerald-400" },
   { key: "grammar", icon: Languages, label: "Грамматика", color: "text-amber-400" },
   { key: "cafe", icon: Gamepad2, label: "Кафе", color: "text-pink-400" },
@@ -109,7 +109,7 @@ const AllTextsEditor = () => {
           source: "grammar",
           id: q.id,
           field: "explanation",
-          label: `💡 Объяснение`,
+          label: `💡 Пояснення`,
           value: q.explanation,
           context: `${q.level} · ${q.topic}`,
         });
@@ -297,7 +297,7 @@ const AllTextsEditor = () => {
     }
 
     if (errorCount > 0) {
-      toast.error(`Ошибка: ${errorCount} из ${edits.size} не сохранились. Проверьте, что вы вошли как админ.`);
+      toast.error(`Помилка: ${errorCount} з ${edits.size} не збереглися. Перевірте, що ви увійшли як адмін.`);
     } else {
       toast.success(`Збережено ${successCount} изменений!`);
       setEdits(new Map());
@@ -416,7 +416,7 @@ const AllTextsEditor = () => {
         })}
         {filtered.length > 100 && (
           <p className="text-xs text-center text-muted-foreground py-4">
-            Показаны первые 100 результатов. Используйте поиск для уточнения.
+            Показано перші 100 результатів. Використовуйте пошук для уточнення.
           </p>
         )}
       </div>

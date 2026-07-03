@@ -156,7 +156,7 @@ const BlockEditor = ({ block, onChange, onRemove, onDuplicate, onSplit, isCollap
             <input value={block.ru || ""} onChange={e => update({ ru: e.target.value })} placeholder="🇷🇺 Переклад" className={`flex-1 ${smallInputCls}`} />
             <input value={block.uk || ""} onChange={e => update({ uk: e.target.value })} placeholder="🇺🇦 Переклад" className={`flex-1 ${smallInputCls}`} />
           </div>
-          <input value={(block.highlight || []).join(", ")} onChange={e => update({ highlight: e.target.value.split(",").map(w => w.trim()).filter(Boolean) })} placeholder="Выделить слова (через запятую)" className={smallInputCls} />
+          <input value={(block.highlight || []).join(", ")} onChange={e => update({ highlight: e.target.value.split(",").map(w => w.trim()).filter(Boolean) })} placeholder="Виділити слова (через кому)" className={smallInputCls} />
         </>
       )}
 
@@ -334,7 +334,7 @@ const ExercisesEditor = ({ exercises, onChange }: { exercises: CourseLesson["exe
         <div key={i} className="p-3 rounded-xl bg-muted/30 border border-border/20 space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-bold text-muted-foreground uppercase">
-              {ex.type === "cloze" ? "✏️ Заполни пропуск" : "❓ Выбери ответ"} #{i + 1}
+              {ex.type === "cloze" ? "✏️ Заповни пропуск" : "❓ Обери відповідь"} #{i + 1}
             </span>
             <button onClick={() => onChange(items.filter((_, j) => j !== i))} className="p-1 text-destructive/60 hover:text-destructive"><X className="w-3 h-3" /></button>
           </div>
@@ -342,7 +342,7 @@ const ExercisesEditor = ({ exercises, onChange }: { exercises: CourseLesson["exe
           {ex.type === "cloze" ? (
             <>
               <input value={ex.sentence || ""} onChange={e => { const n = [...items]; n[i] = { ...n[i], sentence: e.target.value }; onChange(n); }} placeholder="Предложение с ___ (пропуск)" className={inputCls} />
-              <input value={ex.correct || ""} onChange={e => { const n = [...items]; n[i] = { ...n[i], correct: e.target.value }; onChange(n); }} placeholder="Правильный ответ" className={inputCls} />
+              <input value={ex.correct || ""} onChange={e => { const n = [...items]; n[i] = { ...n[i], correct: e.target.value }; onChange(n); }} placeholder="Правильна відповідь" className={inputCls} />
               <div className="flex gap-1 flex-wrap">
                 {(ex.options || []).map((o, oi) => (
                   <input key={oi} value={o} onChange={e => { const n = [...items]; n[i] = { ...n[i], options: (n[i].options || []).map((x, j) => j === oi ? e.target.value : x) }; onChange(n); }} placeholder={`Вариант ${oi + 1}`} className={`w-24 ${smallInputCls}`} />
@@ -388,7 +388,7 @@ const LessonEditor = ({ lesson, onChange, level }: { lesson: CourseLesson; onCha
   const ex = lesson.exercises || {};
 
   const handleAIGenerate = async (section: string) => {
-    if (!level) { toast.error("Уровень курса не определён"); return; }
+    if (!level) { toast.error("Рівень курса не определён"); return; }
     setGenerating(section);
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -541,7 +541,7 @@ const LessonEditor = ({ lesson, onChange, level }: { lesson: CourseLesson; onCha
           <input value={ex.reading?.title || ""} onChange={e => onChange({ ...lesson, exercises: { ...ex, reading: { ...(ex.reading || { text: "", questions: [] }), title: e.target.value } } })} placeholder="Заголовок текста" className={inputCls} />
           <textarea value={ex.reading?.text || ""} onChange={e => onChange({ ...lesson, exercises: { ...ex, reading: { ...(ex.reading || { title: "", questions: [] }), text: e.target.value } } })} placeholder="Текст для чтения..." rows={5} className={`${inputCls} resize-y`} />
           
-          <p className="text-[10px] text-muted-foreground font-bold uppercase mt-2">Вопросы к тексту ({ex.reading?.questions?.length || 0})</p>
+          <p className="text-[10px] text-muted-foreground font-bold uppercase mt-2">Питання до тексту ({ex.reading?.questions?.length || 0})</p>
           {(ex.reading?.questions || []).map((q, qi) => (
             <div key={qi} className="p-2 rounded-xl bg-muted/20 border border-border/20 space-y-1">
               <input value={q.question} onChange={e => {
@@ -612,9 +612,9 @@ const LessonEditor = ({ lesson, onChange, level }: { lesson: CourseLesson; onCha
             </div>
           ))}
           <button onClick={() => onChange({ ...lesson, exercises: { ...ex, cultural_notes: [...(ex.cultural_notes || []), { title: { ru: "", ua: "" }, content: { ru: "", ua: "" } }] } })} className="w-full py-2 rounded-xl bg-secondary border border-border text-xs text-primary flex items-center justify-center gap-1.5 hover:border-primary/30 transition-colors">
-            <Plus className="w-3 h-3" /> Культурный факт
+            <Plus className="w-3 h-3" /> Культурний факт
           </button>
-          {level && aiBtn("culture", "🤖 Сгенерировать культурные заметки через ИИ")}
+          {level && aiBtn("culture", "🤖 Згенерувати культурні нотатки через AI")}
         </div>
       )}
     </div>
@@ -726,13 +726,13 @@ const CourseEditor = ({ level }: { level: Level }) => {
 
   const generateAllLessons = async (course: ExistingCourse, existingCount = 0, targetCount = 25) => {
     const remaining = targetCount - existingCount;
-    if (remaining <= 0) { toast.info("Все уроки уже створеноы!"); return; }
+    if (remaining <= 0) { toast.info("Всі уроки вже створено!"); return; }
     
     setGenerating(true);
     genAbortRef.current = false;
     setGenTotal(remaining);
     setGenProgress(0);
-    setGenLog([existingCount > 0 ? `📚 Уже є ${existingCount} уроків, догенерируем ещё ${remaining}...` : `⏳ Починаємо генерацію ${remaining} уроків...`]);
+    setGenLog([existingCount > 0 ? `📚 Вже є ${existingCount} уроків, догенеруємо ще ${remaining}...` : `⏳ Починаємо генерацію ${remaining} уроків...`]);
 
     let retries = 0;
     for (let i = 0; i < remaining; i++) {
@@ -758,7 +758,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
       } catch (err: any) {
         if (err.message?.includes("Rate limit") && retries < 3) {
           retries++;
-          setGenLog(prev => [...prev, `⏳ Rate limit — ждём 60 сек (попытка ${retries}/3)...`]);
+          setGenLog(prev => [...prev, `⏳ Rate limit — чекаємо 60 сек (спроба ${retries}/3)...`]);
           await new Promise(r => setTimeout(r, 60000));
           i--; // retry same lesson
           continue;
@@ -856,7 +856,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
     if (error) { toast.error("Ошибка: " + error.message); setSavingNewLesson(false); return; }
     setEditLessons([...editLessons, data as any]);
     setExpandedLesson(editLessons.length);
-    toast.success("Новый урок створено! 🎉");
+    toast.success("Новий урок створено! 🎉");
     setSavingNewLesson(false);
   };
 
@@ -950,7 +950,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
           <textarea value={editCourse.description || ""} onChange={e => setEditCourse({ ...editCourse, description: e.target.value })} placeholder="Описание курса" rows={2} className="w-full px-3 py-2 rounded-xl bg-secondary text-foreground border border-border text-xs resize-y focus:border-primary focus:outline-none" />
           <div className="flex gap-2 items-end">
             <div>
-              <label className="text-[10px] text-muted-foreground block mb-1">Уровень</label>
+              <label className="text-[10px] text-muted-foreground block mb-1">Рівень</label>
               <select value={editCourse.level} onChange={e => setEditCourse({ ...editCourse, level: e.target.value })} className="px-3 py-2 rounded-xl bg-secondary text-foreground border border-border text-sm">
                 {["A1","A2","B1","B2","C1"].map(l => <option key={l}>{l}</option>)}
               </select>
@@ -977,7 +977,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
             </button>
             <button onClick={addNewLesson} disabled={savingNewLesson} className="px-3 py-1.5 rounded-xl bg-primary text-primary-foreground text-[10px] font-bold flex items-center gap-1 hover:bg-primary/90 disabled:opacity-40 transition-colors">
               {savingNewLesson ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
-              Новый урок
+              Новий урок
             </button>
           </div>
         </div>
@@ -1012,7 +1012,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
         ) : editLessons.length === 0 && !generating ? (
           <div className="glass-card p-8 text-center">
             <BookOpen className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground mb-3">В этом курсе пока нет уроків</p>
+            <p className="text-sm text-muted-foreground mb-3">У цьому курсі поки немає уроків</p>
             <button onClick={addNewLesson} disabled={savingNewLesson} className="px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-bold flex items-center gap-2 mx-auto hover:bg-primary/90 transition-colors">
               <Plus className="w-4 h-4" /> Створити перший урок
             </button>
@@ -1088,7 +1088,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
                       <input type="number" value={lesson.xp_reward || 20} onChange={e => { const n = [...editLessons]; n[i] = { ...n[i], xp_reward: parseInt(e.target.value) || 20 }; setEditLessons(n); }} className="w-20 px-2 py-1.5 rounded-lg bg-secondary text-foreground border border-border text-xs" />
                     </div>
                     <div>
-                      <label className="text-[10px] text-muted-foreground block mb-1">Монеты</label>
+                      <label className="text-[10px] text-muted-foreground block mb-1">Монети</label>
                       <input type="number" value={lesson.coins_reward || 10} onChange={e => { const n = [...editLessons]; n[i] = { ...n[i], coins_reward: parseInt(e.target.value) || 10 }; setEditLessons(n); }} className="w-20 px-2 py-1.5 rounded-lg bg-secondary text-foreground border border-border text-xs" />
                     </div>
                   </div>
@@ -1252,10 +1252,10 @@ const CourseEditor = ({ level }: { level: Level }) => {
       {step === "create" && (
         <div className="glass-card p-4 flex flex-col gap-3">
           <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-primary" /> Новый курс ({level})
+            <Sparkles className="w-4 h-4 text-primary" /> Новий курс ({level})
           </h3>
           <p className="text-xs text-muted-foreground">
-            ИИ автоматически создаст курс и сгенерирует все уроки с теорией, упражнениями, словарём и диалогами
+            AI автоматично створить курс і згенерує всі уроки з теорією, вправами, словником та діалогами
           </p>
           <input value={courseName} onChange={e => setCourseName(e.target.value)} placeholder="Название курса" className="w-full px-3 py-2.5 rounded-xl bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none" />
           <textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="Описание (опционально)" rows={2} className="w-full px-3 py-2 rounded-xl bg-secondary text-foreground border border-border text-sm resize-y focus:border-primary focus:outline-none" />

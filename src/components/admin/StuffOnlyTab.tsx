@@ -65,7 +65,7 @@ const DemoUsersManager = () => {
 
   const removeDemoUser = async (id: string) => {
     await supabase.from("demo_leaderboard").delete().eq("id", id);
-    toast.success("Удалён"); silentReload();
+    toast.success("Видалено"); silentReload();
   };
 
   const saveDemoName = async (id: string) => {
@@ -126,7 +126,7 @@ const DemoUsersManager = () => {
             <UserPlus className="w-4 h-4" />
           </button>
         </div>
-        <p className="text-[10px] text-muted-foreground">Выбери аватарку для нового юзера:</p>
+        <p className="text-[10px] text-muted-foreground">Вибери аватарку для нового юзера:</p>
         <AvatarPicker
           currentUrl={newUserAvatarUrl}
           onSelect={(url) => setNewUserAvatarUrl(url)}
@@ -196,8 +196,8 @@ const DemoUsersManager = () => {
             {([
               { key: "words_learned", label: "📚 Слова", value: du.words_learned },
               { key: "lessons_completed", label: "📖 Уроки", value: du.lessons_completed },
-              { key: "duels_won", label: "🏆 Победы", value: du.duels_won },
-              { key: "duels_played", label: "⚔️ Дуэли", value: du.duels_played },
+              { key: "duels_won", label: "🏆 Перемоги", value: du.duels_won },
+              { key: "duels_played", label: "⚔️ Дуелі", value: du.duels_played },
             ] as const).map((stat) => (
               <div key={stat.key} className="flex items-center gap-1.5 bg-secondary/50 rounded-lg px-2 py-1.5">
                 <span className="text-[10px] text-muted-foreground whitespace-nowrap">{stat.label}</span>
@@ -222,7 +222,7 @@ const DemoUsersManager = () => {
               onClick={() => setAvatarPickerFor(avatarPickerFor === du.id ? null : du.id)}
               className="text-xs text-primary hover:underline"
             >
-              {avatarPickerFor === du.id ? "Скрыть аватарки" : "Выбрать аватарку"}
+              {avatarPickerFor === du.id ? "Приховати аватарки" : "Вибрати аватарку"}
             </button>
             <div className="flex items-center gap-1.5">
               <MessageSquare className="w-3 h-3 text-muted-foreground" />
@@ -235,7 +235,7 @@ const DemoUsersManager = () => {
                   const chatId = val ? parseInt(val) : null;
                   if (chatId === du.telegram_chat_id) return;
                   await supabase.from("demo_leaderboard").update({ telegram_chat_id: chatId } as any).eq("id", du.id);
-                  toast.success(chatId ? "Telegram подключён!" : "Telegram отключён");
+                  toast.success(chatId ? "Telegram підключено!" : "Telegram відключено");
                   silentReload();
                 }}
                 className="w-36 px-2 py-1 rounded-lg bg-secondary text-foreground border border-border text-xs focus:border-primary focus:outline-none"

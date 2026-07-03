@@ -49,7 +49,7 @@ const CourseFilters = ({ lang, levels, tags, levelFilter, tagFilter, onLevelChan
               : "bg-muted/50 text-muted-foreground hover:bg-muted"
           }`}
         >
-          {lang === "uk" ? "Усі теми" : "Все темы"}
+          {lang === "uk" ? "Усі теми" : "Усі теми"}
         </button>
         {tags.map((tag) => (
           <button

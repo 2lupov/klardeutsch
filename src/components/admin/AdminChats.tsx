@@ -124,7 +124,7 @@ const AdminChats = () => {
     return (
       <div className="flex flex-col gap-3">
         <button onClick={() => setSelectedUser(null)} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground self-start">
-          <ArrowLeft className="w-3.5 h-3.5" /> Все чаты
+          <ArrowLeft className="w-3.5 h-3.5" /> Усі чати
         </button>
 
         <div className="glass-card p-3">
@@ -172,7 +172,7 @@ const AdminChats = () => {
   return (
     <div className="flex flex-col gap-3">
       <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-2">
-        <MessageCircle className="w-4 h-4 text-primary" /> Чаты учеников
+        <MessageCircle className="w-4 h-4 text-primary" /> Чати учнів
         <span className="ml-auto text-xs text-muted-foreground font-normal">{chats.length}</span>
       </h3>
 

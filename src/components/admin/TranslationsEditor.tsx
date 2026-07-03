@@ -129,7 +129,7 @@ const TranslationsEditor = () => {
       </div>
 
       <p className="text-xs text-muted-foreground">
-        {filtered.length} ключей · Изменённые выделены цветом. Пустое поле = стандартный текст.
+        {filtered.length} ключів · Змінені виділені кольором. Порожнє поле = стандартний текст.
       </p>
 
       {/* Translation list */}

@@ -187,7 +187,7 @@ const AcademyCourse = () => {
               {(course.outcomes ?? []).length > 0 && (
                 <div>
                   <h3 className="font-display font-bold text-sm text-foreground mb-3">
-                    {lang === "uk" ? "Що ти дізнаєшся" : "Чему ты научишься"}
+                    {lang === "uk" ? "Що ти дізнаєшся" : "Що ти дізнаєшся"}
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {course.outcomes!.map((item, i) => (

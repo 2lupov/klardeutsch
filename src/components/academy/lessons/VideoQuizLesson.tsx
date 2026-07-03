@@ -50,7 +50,7 @@ const VideoQuizLesson = ({ lesson, onComplete, lang }: Props) => {
   if (questions.length === 0) {
     return (
       <div className="text-center py-16 text-muted-foreground text-sm">
-        {lang === "uk" ? "Питання скоро з'являться" : "Вопросы скоро появятся"}
+        {lang === "uk" ? "Питання скоро з'являться" : "Питання скоро з'являться"}
       </div>
     );
   }
@@ -62,7 +62,7 @@ const VideoQuizLesson = ({ lesson, onComplete, lang }: Props) => {
         <div className="text-5xl">{pct >= 70 ? "🎉" : "📚"}</div>
         <h2 className="font-display text-2xl font-bold text-foreground">{pct}%</h2>
         <p className="text-sm text-muted-foreground">
-          {correctCount}/{questions.length} {lang === "uk" ? "правильних" : "правильных"}
+          {correctCount}/{questions.length} {lang === "uk" ? "правильних" : "правильних"}
         </p>
       </div>
     );

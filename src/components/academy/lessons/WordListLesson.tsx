@@ -71,7 +71,7 @@ const WordListLesson = ({ lesson, onComplete, lang }: Props) => {
           {!flipped ? (
             <>
               <p className="text-2xl font-display font-bold text-foreground">{card?.de}</p>
-              <p className="text-xs text-muted-foreground">{lang === "uk" ? "натисніть щоб перевернути" : "нажмите чтобы перевернуть"}</p>
+              <p className="text-xs text-muted-foreground">{lang === "uk" ? "натисніть щоб перевернути" : "натисніть щоб перевернути"}</p>
             </>
           ) : (
             <>
@@ -154,8 +154,8 @@ const WordListLesson = ({ lesson, onComplete, lang }: Props) => {
         ) : (
           <Button onClick={() => { setCompleted(true); onComplete(); }} className="font-display font-bold" size="lg">
             {savedCount >= threshold
-              ? (lang === "uk" ? "Слова вивчено ✓" : "Слова выучены ✓")
-              : (lang === "uk" ? "Все вивчив" : "Всё выучил")}
+              ? (lang === "uk" ? "Слова вивчено ✓" : "Слова вивчено ✓")
+              : (lang === "uk" ? "Все вивчив" : "Все вивчив")}
           </Button>
         )}
       </div>

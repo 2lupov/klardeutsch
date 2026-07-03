@@ -99,8 +99,8 @@ const AdminStats = () => {
         <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-2">👥 Пользователи</p>
         <div className="grid grid-cols-2 gap-2">
           <StatCard icon={Users} label="Всего" value={stats.totalUsers} />
-          <StatCard icon={Users} label="Новых сегодня" value={stats.newToday} sub={`за неделю: ${stats.newWeek}`} />
-          <StatCard icon={Users} label="Активных сегодня" value={stats.activeToday} sub={`за неделю: ${stats.activeWeek}`} />
+          <StatCard icon={Users} label="Нових сьогодні" value={stats.newToday} sub={`за тиждень: ${stats.newWeek}`} />
+          <StatCard icon={Users} label="Активних сьогодні" value={stats.activeToday} sub={`за тиждень: ${stats.activeWeek}`} />
           <StatCard icon={Users} label="С Telegram" value={stats.telegramUsers} sub={`${stats.totalUsers ? Math.round((stats.telegramUsers / stats.totalUsers) * 100) : 0}% от всех`} />
         </div>
       </section>
@@ -111,7 +111,7 @@ const AdminStats = () => {
         <div className="grid grid-cols-3 gap-2">
           <StatCard icon={BookOpen} label="Уроків" value={stats.lessonsToday} />
           <StatCard icon={BookOpen} label="Слов" value={stats.wordsToday} />
-          <StatCard icon={Swords} label="Дуэлей" value={stats.duelsToday} />
+          <StatCard icon={Swords} label="Дуелей" value={stats.duelsToday} />
         </div>
       </section>
 

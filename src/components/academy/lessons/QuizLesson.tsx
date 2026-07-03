@@ -108,7 +108,7 @@ const QuizLesson = ({ lesson, onComplete, lang }: Props) => {
   }
 
   if (questions.length === 0) {
-    return <div className="text-center py-16 text-muted-foreground text-sm">{lang === "uk" ? "Питання скоро з'являться" : "Вопросы скоро появятся"}</div>;
+    return <div className="text-center py-16 text-muted-foreground text-sm">{lang === "uk" ? "Питання скоро з'являться" : "Питання скоро з'являться"}</div>;
   }
 
   if (finished) {
@@ -119,7 +119,7 @@ const QuizLesson = ({ lesson, onComplete, lang }: Props) => {
         <div className="text-5xl">{passed ? "🎉" : "📚"}</div>
         <h2 className="font-display text-2xl font-bold text-foreground">{score}%</h2>
         <p className="text-sm text-muted-foreground">
-          {correctCount}/{questions.length} {lang === "uk" ? "правильних" : "правильных"}
+          {correctCount}/{questions.length} {lang === "uk" ? "правильних" : "правильних"}
         </p>
         {passed ? (
           <Button onClick={() => onComplete(score)} className="font-display font-bold" size="lg">
@@ -128,7 +128,7 @@ const QuizLesson = ({ lesson, onComplete, lang }: Props) => {
         ) : (
           <Button onClick={() => { setIdx(0); setCorrectCount(0); setFinished(false); setAnswered(false); setFillInput(""); setSelectedMC(null); }}
             variant="outline" className="font-display font-bold">
-            {lang === "uk" ? "Спробувати ще раз" : "Попробовать ещё раз"}
+            {lang === "uk" ? "Спробувати ще раз" : "Спробувати ще раз"}
           </Button>
         )}
       </div>
@@ -203,7 +203,7 @@ const QuizLesson = ({ lesson, onComplete, lang }: Props) => {
         {/* Match */}
         {q.type === "match" && (
           <>
-            <p className="text-sm font-semibold">{lang === "uk" ? "З'єднайте пари" : "Соедините пары"}</p>
+            <p className="text-sm font-semibold">{lang === "uk" ? "З'єднайте пари" : "З'єднайте пари"}</p>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 {(q as MatchQuestion).pairs.map(([left], i) => (

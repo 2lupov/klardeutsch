@@ -31,7 +31,7 @@ const CourseHero = ({ lang }: { lang: Lang }) => (
         </div>
 
         <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.02] tracking-tight text-foreground">
-          {lang === "uk" ? "Мови " : "Языки "}
+          {lang === "uk" ? "Мови " : "Мови "}
           <span className="italic text-accent">
             {lang === "uk" ? "як кіно." : "как кино."}
           </span>
@@ -44,7 +44,7 @@ const CourseHero = ({ lang }: { lang: Lang }) => (
         <p className="text-muted-foreground text-base sm:text-lg max-w-xl leading-relaxed">
           {lang === "uk"
             ? "Структуровані відеокурси, живе спільнотне навчання, AI-практика та сертифікат після завершення."
-            : "Структурированные видеокурсы, живое сообщество, AI-практика и сертификат по окончании."}
+            : "Структуровані відеокурси, живе ком'юніті, AI-практика та сертифікат після завершення."}
         </p>
 
         <div className="flex flex-wrap items-center gap-4 pt-2 text-xs text-muted-foreground">

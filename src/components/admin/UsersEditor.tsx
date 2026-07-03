@@ -102,7 +102,7 @@ const UsersEditor = () => {
     if (error) {
       toast.error("Ошибка: " + error.message);
     } else {
-      toast.success(`Монеты: ${delta > 0 ? "+" : ""}${delta}`);
+      toast.success(`Монети: ${delta > 0 ? "+" : ""}${delta}`);
       setUsers(prev => prev.map(u => u.user_id === userId ? { ...u, coin_balance: u.coin_balance + delta } : u));
     }
   };
@@ -148,7 +148,7 @@ const UsersEditor = () => {
     if (error) {
       toast.error("Ошибка: " + error.message);
     } else {
-      toast.success("Удалён");
+      toast.success("Видалено");
       loadDemo();
     }
   };
@@ -268,7 +268,7 @@ const UsersEditor = () => {
     } else if (data?.error) {
       toast.error("Ошибка: " + data.error);
     } else {
-      toast.success("Email подтверждён!");
+      toast.success("Email підтверджено!");
       setUsers(prev => prev.map(u => u.user_id === userId ? { ...u, email_confirmed: true } : u));
     }
     setConfirming(null);
@@ -288,7 +288,7 @@ const UsersEditor = () => {
       {/* Demo Users Section */}
       <section className="glass-card p-4 flex flex-col gap-3">
         <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-2">
-          <Bot className="w-4 h-4 text-primary" /> Фейк-юзеры (рейтинг)
+          <Bot className="w-4 h-4 text-primary" /> Фейк-юзери (рейтинг)
           <span className="ml-auto text-xs text-muted-foreground font-normal">{demoUsers.length}</span>
         </h3>
 
@@ -337,7 +337,7 @@ const UsersEditor = () => {
                 <span
                   className="flex-1 text-xs font-medium text-foreground cursor-pointer hover:text-primary transition-colors"
                   onClick={() => { setEditingDemoId(du.id); setEditingDemoName(du.display_name); }}
-                  title="Нажми чтобы переименовать"
+                  title="Натисни щоб перейменувати"
                 >
                   {du.display_name} <Pencil className="w-2.5 h-2.5 inline text-muted-foreground" />
                 </span>
@@ -400,7 +400,7 @@ const UsersEditor = () => {
           <Send className="w-4 h-4 text-primary" /> Telegram
           {selectedUsers.size > 0 && (
             <span className="ml-auto text-xs text-primary font-normal">
-              Выбрано: {selectedUsers.size}
+              Вибрано: {selectedUsers.size}
               <button onClick={() => setSelectedUsers(new Set())} className="ml-1.5 text-muted-foreground hover:text-foreground">
                 <X className="w-3 h-3 inline" />
               </button>
@@ -410,7 +410,7 @@ const UsersEditor = () => {
         <textarea
           value={broadcastMsg}
           onChange={(e) => setBroadcastMsg(e.target.value)}
-          placeholder={selectedUsers.size > 0 ? `Сообщение для ${selectedUsers.size} выбранных...` : "Сообщение для всех пользователей..."}
+          placeholder={selectedUsers.size > 0 ? `Повідомлення для ${selectedUsers.size} вибраних...` : "Повідомлення для всіх користувачів..."}
           rows={3}
           maxLength={1000}
           className="w-full px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none resize-y"
@@ -434,7 +434,7 @@ const UsersEditor = () => {
           </button>
         </div>
         <p className="text-[10px] text-muted-foreground">
-          Выберите пользователей ниже для точечной отправки, или отправьте всем.
+          Виберіть користувачів нижче для точкової відправки, або відправте всім.
         </p>
       </div>
 
@@ -480,7 +480,7 @@ const UsersEditor = () => {
         ) : (
           <Square className="w-3.5 h-3.5" />
         )}
-        {selectedUsers.size === filtered.length && filtered.length > 0 ? "Снять выделение" : "Выбрать всех"}
+        {selectedUsers.size === filtered.length && filtered.length > 0 ? "Зняти виділення" : "Вибрати всіх"}
       </button>
 
       {/* Users list */}
@@ -528,7 +528,7 @@ const UsersEditor = () => {
                   {(() => {
                     const isOnline = user.last_active && (Date.now() - new Date(user.last_active).getTime()) < 5 * 60 * 1000;
                     return (
-                      <span className={`shrink-0 w-2 h-2 rounded-full ${isOnline ? "bg-green-500 shadow-[0_0_4px_hsl(142,76%,36%)]" : "bg-muted-foreground/30"}`} title={isOnline ? "Онлайн" : user.last_active ? `Был(а) ${new Date(user.last_active).toLocaleString("ru")}` : "Нет данных"} />
+                      <span className={`shrink-0 w-2 h-2 rounded-full ${isOnline ? "bg-green-500 shadow-[0_0_4px_hsl(142,76%,36%)]" : "bg-muted-foreground/30"}`} title={isOnline ? "Онлайн" : user.last_active ? `Був(ла) ${new Date(user.last_active).toLocaleString("uk")}` : "Немає даних"} />
                     );
                   })()}
                 </div>
@@ -615,7 +615,7 @@ const UsersEditor = () => {
                 📝 <span className="font-semibold text-foreground">{user.words_learned}</span> слов
               </span>
               <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                ⚔️ <span className="font-semibold text-foreground">{user.duels_played}</span> дуэлей
+                ⚔️ <span className="font-semibold text-foreground">{user.duels_played}</span> дуелей
                 {user.duels_won > 0 && <span className="text-primary font-bold">({user.duels_won} W)</span>}
               </span>
               <span className="text-[10px] text-muted-foreground">
@@ -670,7 +670,7 @@ const UsersEditor = () => {
       })}
 
       {filtered.length === 0 && (
-        <p className="text-center text-sm text-muted-foreground py-8">Пользователи не найдены</p>
+        <p className="text-center text-sm text-muted-foreground py-8">Користувачів не знайдено</p>
       )}
     </div>
   );

@@ -28,7 +28,7 @@ const ShopEditor = () => {
 
   const addItem = async () => {
     await supabase.from("shop_items").insert([{
-      title: "Новый товар",
+      title: "Новий товар",
       description: "Описание",
       price: 100,
       item_type: "task",
@@ -138,7 +138,7 @@ const ShopEditor = () => {
     setItems(prev => prev.map(item =>
       item.id === id ? { ...item, file_url: null } : item
     ));
-    toast.success("Файл удалён");
+    toast.success("Файл видалено");
   };
 
   return (
@@ -243,13 +243,13 @@ const ShopEditor = () => {
               step="1"
               defaultValue={item.price_eur ?? ""}
               onBlur={(e) => updateItem(item.id, "price_eur", e.target.value ? parseFloat(e.target.value) : null)}
-              placeholder="Цена в ₴ (пусто = за монеты)"
+              placeholder="Ціна в ₴ (пусто = за монети)"
               className="w-36 px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none"
             />
             <input
               defaultValue={item.payment_link ?? ""}
               onBlur={(e) => updateItem(item.id, "payment_link", e.target.value || null)}
-              placeholder="Ссылка оплаты (PayPal/Mono)"
+              placeholder="Посилання оплати (PayPal/Mono)"
               className="flex-1 px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none"
             />
           </div>

@@ -368,7 +368,7 @@ const AITutorLesson = ({ lesson, onComplete, lang }: Props) => {
               {analysis.new_words.length > 0 && (
                 <div>
                   <h4 className="text-xs font-bold text-foreground mb-1.5">
-                    💡 {isUk ? "Нові слова" : "Новые слова"}
+                    💡 {isUk ? "Нові слова" : "Нові слова"}
                   </h4>
                   <div className="flex flex-wrap gap-1.5">
                     {analysis.new_words.map((w, i) => (

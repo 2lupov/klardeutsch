@@ -120,7 +120,7 @@ const ReadingLesson = ({ lesson, onComplete, lang }: Props) => {
           <button onClick={() => setShowTranslation(!showTranslation)}
             className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
             {showTranslation ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-            {showTranslation ? (lang === "uk" ? "Приховати переклад" : "Скрыть перевод") : (lang === "uk" ? "Показати переклад" : "Показать перевод")}
+            {showTranslation ? (lang === "uk" ? "Приховати переклад" : "Приховати переклад") : (lang === "uk" ? "Показати переклад" : "Показати переклад")}
           </button>
         </div>
 
@@ -202,10 +202,10 @@ const ReadingLesson = ({ lesson, onComplete, lang }: Props) => {
       {finished && !completed && (
         <div className="flex flex-col items-center gap-3 pt-4">
           <p className="text-sm text-muted-foreground">
-            {correctCount}/{questions.length} {lang === "uk" ? "правильних" : "правильных"}
+            {correctCount}/{questions.length} {lang === "uk" ? "правильних" : "правильних"}
           </p>
           <Button onClick={() => { setCompleted(true); onComplete(Math.round((correctCount / Math.max(1, questions.length)) * 100)); }} className="font-display font-bold" size="lg">
-            {lang === "uk" ? "Урок завершено ✓" : "Урок завершён ✓"}
+            {lang === "uk" ? "Урок завершено ✓" : "Урок завершено ✓"}
           </Button>
         </div>
       )}

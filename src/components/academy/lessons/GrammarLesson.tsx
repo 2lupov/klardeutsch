@@ -108,7 +108,7 @@ const GrammarLesson = ({ lesson, onComplete, lang }: Props) => {
       {c.examples && c.examples.length > 0 && (
         <div className="space-y-2">
           <h3 className="text-xs font-display font-bold text-muted-foreground uppercase tracking-wider">
-            {lang === "uk" ? "Приклади" : "Примеры"}
+            {lang === "uk" ? "Приклади" : "Приклади"}
           </h3>
           {c.examples.map((ex, i) => (
             <div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-border/30 bg-card/40">
@@ -190,7 +190,7 @@ const GrammarLesson = ({ lesson, onComplete, lang }: Props) => {
             </div>
           ) : (
             <Button onClick={() => { setCompleted(true); onComplete(); }} className="font-display font-bold" size="lg">
-              {lang === "uk" ? "Урок завершено ✓" : "Урок завершён ✓"}
+              {lang === "uk" ? "Урок завершено ✓" : "Урок завершено ✓"}
             </Button>
           )}
         </div>

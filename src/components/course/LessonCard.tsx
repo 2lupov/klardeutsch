@@ -57,11 +57,11 @@ const LessonCard = ({ lesson, index, lang, level = "A1", isExpanded, onToggle, o
   const nextLevel = nextLevelMap[level] || "A2";
 
   const sections = ([
-    { key: "theory" as SectionKey, emoji: "📖", label: lang === "uk" ? "Теорія" : "Теория", sublabel: lang === "uk" ? "Правила та пояснення" : "Правила и объяснения", available: !!lesson.theory },
+    { key: "theory" as SectionKey, emoji: "📖", label: lang === "uk" ? "Теорія" : "Теорія", sublabel: lang === "uk" ? "Правила та пояснення" : "Правила та пояснення", available: !!lesson.theory },
     { key: "exercises" as SectionKey, emoji: "✍️", label: lang === "uk" ? "Вправи" : "Упражнения", sublabel: lang === "uk" ? "Перевірте знання" : "Проверьте знания", available: hasExercises, count: exerciseCount },
-    { key: "vocab" as SectionKey, emoji: "📚", label: lang === "uk" ? `Словник ${level}` : `Словарь ${level}`, sublabel: lang === "uk" ? "Нові слова" : "Новые слова", available: vocab.length > 0, count: vocab.length },
+    { key: "vocab" as SectionKey, emoji: "📚", label: lang === "uk" ? `Словник ${level}` : `Словник ${level}`, sublabel: lang === "uk" ? "Нові слова" : "Нові слова", available: vocab.length > 0, count: vocab.length },
     { key: "dialog" as SectionKey, emoji: "💬", label: lang === "uk" ? "Діалог" : "Диалог", sublabel: lang === "uk" ? "Практика розмови" : "Практика разговора", available: !!dialog },
-    { key: "culture" as SectionKey, emoji: "🌍", label: lang === "uk" ? "Культура" : "Культура", sublabel: lang === "uk" ? "Цікаві факти" : "Интересные факты", available: culturalNotes.length > 0, count: culturalNotes.length },
+    { key: "culture" as SectionKey, emoji: "🌍", label: lang === "uk" ? "Культура" : "Культура", sublabel: lang === "uk" ? "Цікаві факти" : "Цікаві факти", available: culturalNotes.length > 0, count: culturalNotes.length },
     { key: "notebook" as SectionKey, emoji: "📝", label: lang === "uk" ? "Зошит" : "Тетрадь", sublabel: lang === "uk" ? "Мої нотатки" : "Мои заметки", available: true },
     { key: "reading" as SectionKey, emoji: "📕", label: lang === "uk" ? "Читання" : "Чтение", sublabel: lang === "uk" ? "Текст для читання" : "Текст для чтения", available: !!ex.reading },
     { key: "next" as SectionKey, emoji: "🚀", label: lang === "uk" ? `Готовий до ${nextLevel}?` : `Готов к ${nextLevel}?`, sublabel: lang === "uk" ? "Наступний рівень" : "Следующий уровень", available: true },

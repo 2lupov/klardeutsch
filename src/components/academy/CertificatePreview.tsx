@@ -39,7 +39,7 @@ const CertificatePreview = ({ lang }: { lang: Lang }) => {
         <p className="mt-2 text-xs text-muted-foreground max-w-[90%] leading-snug">
           {t(
             "успішно завершив(-ла) курс німецької мови рівня A1 на платформі KLAR",
-            "успешно завершил(-а) курс немецкого языка уровня A1 на платформе KLAR",
+            "успішно завершив(-ла) курс німецької мови рівня A1 на платформі KLAR",
           )}
         </p>
 
