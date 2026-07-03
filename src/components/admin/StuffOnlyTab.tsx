@@ -100,7 +100,7 @@ const DemoUsersManager = () => {
     <div className="flex flex-col gap-4">
       {/* Add new */}
       <div className="glass-card p-4 flex flex-col gap-3">
-        <p className="text-xs text-muted-foreground font-medium">Новый фейк-юзер</p>
+        <p className="text-xs text-muted-foreground font-medium">Новий фейк-юзер</p>
         <div className="flex gap-2">
           {newUserAvatarUrl && (
             <img src={newUserAvatarUrl} alt="" className="w-10 h-10 rounded-full object-cover border-2 border-primary shrink-0" />

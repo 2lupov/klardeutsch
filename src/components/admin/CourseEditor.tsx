@@ -388,7 +388,7 @@ const LessonEditor = ({ lesson, onChange, level }: { lesson: CourseLesson; onCha
   const ex = lesson.exercises || {};
 
   const handleAIGenerate = async (section: string) => {
-    if (!level) { toast.error("Рівень курса не определён"); return; }
+    if (!level) { toast.error("Рівень курсу не визначено"); return; }
     setGenerating(section);
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -1062,7 +1062,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
                       <option value="grammar">📐 Грамматика</option>
                       <option value="reading">📖 Чтение</option>
                       <option value="dialogue_text">💬 Диалог</option>
-                      <option value="word_list">📋 Слова темы</option>
+                      <option value="word_list">📋 Слова теми</option>
                       <option value="quiz">📝 Квиз</option>
                       <option value="ai_tutor">🤖 AI-тьютор</option>
                       <option value="writing">✍️ Письмо</option>

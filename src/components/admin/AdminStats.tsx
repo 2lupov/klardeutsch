@@ -74,7 +74,7 @@ const AdminStats = () => {
   }
 
   if (!stats) {
-    return <p className="text-sm text-muted-foreground text-center py-8">Нет данных</p>;
+    return <p className="text-sm text-muted-foreground text-center py-8">Немає даних</p>;
   }
 
   return (
@@ -126,7 +126,7 @@ const AdminStats = () => {
       </section>
 
       <div className="glass-card p-3 text-center">
-        <p className="text-[10px] text-muted-foreground">⭐ Общий XP платформы</p>
+        <p className="text-[10px] text-muted-foreground">⭐ Загальний XP платформи</p>
         <p className="text-xl font-display font-bold text-foreground">{stats.totalXP.toLocaleString("ru-RU")}</p>
       </div>
     </div>

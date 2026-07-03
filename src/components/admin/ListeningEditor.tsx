@@ -518,7 +518,7 @@ const ListeningEditor = ({ level }: { level: string }) => {
                 }}
               />
               {txt.audio_url && (
-                <span className="text-[10px] text-success">✓ Аудио закэшировано</span>
+                <span className="text-[10px] text-success">✓ Аудіо закешовано</span>
               )}
             </div>
 
