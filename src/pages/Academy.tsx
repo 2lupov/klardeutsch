@@ -131,15 +131,6 @@ const Academy = () => {
 
       <div className="max-w-6xl mx-auto px-4 pb-8 pt-4">
         <TutoringBanner />
-        <CourseFilters
-          lang={lang}
-          levels={levels}
-          tags={allTags}
-          levelFilter={levelFilter}
-          tagFilter={tagFilter}
-          onLevelChange={setLevelFilter}
-          onTagChange={setTagFilter}
-        />
 
         {loading ? (
           <div className="flex items-center justify-center py-20">
