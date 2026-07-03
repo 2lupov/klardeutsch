@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Clock, BookOpen, ChevronRight, Play, Coins } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import type { Lang } from "@/i18n/translations";
+import pandaCourseDefault from "@/assets/panda-course-default.jpg";
 
 interface CourseData {
   id: string;
