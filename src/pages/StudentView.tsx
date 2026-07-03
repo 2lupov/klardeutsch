@@ -138,13 +138,21 @@ const StudentView = () => {
 
   return (
     <div ref={containerRef} className="min-h-screen bg-background relative overflow-hidden">
-      {/* Top bar — minimal, only "LIVE" indicator */}
-      <div className="fixed top-0 left-0 right-0 z-20 px-6 py-3 flex items-center justify-between bg-background/80 backdrop-blur-md border-b border-border">
-        <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
-          <span className="text-sm font-bold text-foreground">LIVE • Урок</span>
+      {/* Top bar — minimal, only "LIVE" indicator + timeline */}
+      <div className="fixed top-0 left-0 right-0 z-20 px-6 py-2.5 bg-background/80 backdrop-blur-md border-b border-border">
+        <div className="flex items-center justify-between mb-1.5">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
+            <span className="text-sm font-bold text-foreground">LIVE • Урок</span>
+          </div>
         </div>
+        <LessonTimeline
+          view={v}
+          words={lessonData?.words || []}
+          exercises={lessonData?.exercises || []}
+        />
       </div>
+
 
       <div className="pt-20 pb-40 px-6 lg:px-16 max-w-5xl mx-auto">
         <AnimatePresence mode="wait">
