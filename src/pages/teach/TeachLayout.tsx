@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useLocation } from "react-router-dom";
-import { Calendar, Library, Users, ClipboardCheck, LayoutDashboard, PlayCircle, LayoutList, UsersRound } from "lucide-react";
+import { Calendar, Library, Users, ClipboardCheck, LayoutDashboard, PlayCircle, LayoutList, UsersRound, CheckSquare, Wallet } from "lucide-react";
 
 const NAV = [
   { to: "/teach", icon: LayoutDashboard, label: "Огляд", end: true },
@@ -9,6 +9,8 @@ const NAV = [
   { to: "/teach/class", icon: PlayCircle, label: "Клас" },
   { to: "/teach/groups", icon: UsersRound, label: "Групи" },
   { to: "/teach/students", icon: Users, label: "Учні" },
+  { to: "/teach/attendance", icon: CheckSquare, label: "Відвідуваність" },
+  { to: "/teach/finance", icon: Wallet, label: "Фінанси" },
   { to: "/teach/homework", icon: ClipboardCheck, label: "Домашнє" },
 ];
 
