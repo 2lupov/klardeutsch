@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Sparkles, Hand, ThumbsUp, HelpCircle, Flame, Send, Check } from "lucide-react";
 import { toast } from "sonner";
+import LessonTimeline from "@/components/tutoring/LessonTimeline";
+import SessionChat from "@/components/tutoring/SessionChat";
 
 /**
  * Полноэкранная "чистая" страница для ученика во время демонстрации.
