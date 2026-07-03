@@ -1174,6 +1174,66 @@ export type Database = {
         }
         Relationships: []
       }
+      lesson_blocks: {
+        Row: {
+          block_type: string
+          created_at: string
+          created_by: string | null
+          duration_min: number | null
+          id: string
+          inline_payload: Json | null
+          lesson_id: string
+          library_item_id: string | null
+          settings: Json
+          sort_order: number
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          block_type: string
+          created_at?: string
+          created_by?: string | null
+          duration_min?: number | null
+          id?: string
+          inline_payload?: Json | null
+          lesson_id: string
+          library_item_id?: string | null
+          settings?: Json
+          sort_order?: number
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          block_type?: string
+          created_at?: string
+          created_by?: string | null
+          duration_min?: number | null
+          id?: string
+          inline_payload?: Json | null
+          lesson_id?: string
+          library_item_id?: string | null
+          settings?: Json
+          sort_order?: number
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_blocks_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "tutoring_lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_blocks_library_item_id_fkey"
+            columns: ["library_item_id"]
+            isOneToOne: false
+            referencedRelation: "library_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       library_items: {
         Row: {
           cover_url: string | null
