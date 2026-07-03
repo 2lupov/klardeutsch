@@ -1174,6 +1174,60 @@ export type Database = {
         }
         Relationships: []
       }
+      library_items: {
+        Row: {
+          cover_url: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_published: boolean
+          level: string | null
+          owner_id: string | null
+          payload: Json
+          source: string
+          tags: string[]
+          target_language: string
+          title: string
+          topic: string | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          level?: string | null
+          owner_id?: string | null
+          payload?: Json
+          source?: string
+          tags?: string[]
+          target_language?: string
+          title: string
+          topic?: string | null
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          level?: string | null
+          owner_id?: string | null
+          payload?: Json
+          source?: string
+          tags?: string[]
+          target_language?: string
+          title?: string
+          topic?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       listening_dictations: {
         Row: {
           created_at: string
