@@ -40,7 +40,7 @@ function buildPrompt(topic: string, level: Level, types: ExerciseType[]): string
     parts.push(`"vocab_cards": массив из 15-25 слов. Каждый элемент:`);
     parts.push(`  {`);
     parts.push(`    "german": "немецкое слово",`);
-    parts.push(`    "russian": "перевод на русский",`);
+    parts.push(`    "russian": "перевод на українська",`);
     parts.push(`    "article": "der/die/das (если существительное, иначе null)",`);
     parts.push(`    "example": "пример предложения на немецком",`);
     parts.push(`    "topic": "${topic}"`);
@@ -59,7 +59,7 @@ function buildPrompt(topic: string, level: Level, types: ExerciseType[]): string
     parts.push(`    "question": "вопрос с пропуском ___ на немецком",`);
     parts.push(`    "options": ["вариант1", "вариант2", "вариант3", "вариант4"],`);
     parts.push(`    "correct_index": 0,  // индекс правильного ответа (0-3)`);
-    parts.push(`    "explanation": "объяснение правила на русском",`);
+    parts.push(`    "explanation": "объяснение правила на українською",`);
     parts.push(`    "topic": "${topic}"`);
     parts.push(`  }`);
     parts.push(`  Требования:`);
@@ -80,7 +80,7 @@ function buildPrompt(topic: string, level: Level, types: ExerciseType[]): string
     parts.push(`        "question": "вопрос по тексту на немецком",`);
     parts.push(`        "options": ["вариант1", "вариант2", "вариант3", "вариант4"],`);
     parts.push(`        "correct_index": 0,`);
-    parts.push(`        "explanation": "пояснение на русском"`);
+    parts.push(`        "explanation": "пояснение на українською"`);
     parts.push(`      }`);
     parts.push(`    ]  // 4-6 вопросов`);
     parts.push(`  }`);
@@ -152,7 +152,7 @@ const ContentGenerator = ({ level }: { level: Level }) => {
     }
     const prompt = buildPrompt(topic.trim(), level, types);
     setGeneratedPrompt(prompt);
-    toast.success("Промпт создан! Скопируйте и вставьте в Claude.");
+    toast.success("Промпт створено! Скопируйте и вставьте в Claude.");
   };
 
   const copyPrompt = async () => {
@@ -293,7 +293,7 @@ const ContentGenerator = ({ level }: { level: Level }) => {
         saved += 1 + (lt.questions?.length || 0);
       }
 
-      toast.success(`✅ Сохранено ${saved} элементов в базу!`);
+      toast.success(`✅ Збережено ${saved} элементов в базу!`);
       setResult(null);
       setJsonInput("");
       setFileName("");
@@ -402,7 +402,7 @@ const ContentGenerator = ({ level }: { level: Level }) => {
               className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-primary text-primary-foreground font-semibold glow-yellow transition-all disabled:opacity-40"
             >
               <Wand2 className="w-4 h-4" />
-              Создать промпт для Claude
+              Створити промпт для Claude
             </button>
           </div>
 
@@ -447,7 +447,7 @@ const ContentGenerator = ({ level }: { level: Level }) => {
 
             <label className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all cursor-pointer">
               <Upload className="w-4 h-4" />
-              {fileName || "Загрузить .json файл"}
+              {fileName || "Завантажити .json файл"}
               <input type="file" className="hidden" accept=".json,.txt" onChange={handleJsonFile} />
             </label>
 
@@ -551,7 +551,7 @@ const ContentGenerator = ({ level }: { level: Level }) => {
                 {saving ? (
                   <><Loader2 className="w-4 h-4 animate-spin" /> Сохранение...</>
                 ) : (
-                  <><Save className="w-4 h-4" /> Сохранить всё в базу</>
+                  <><Save className="w-4 h-4" /> Зберегти все в базу</>
                 )}
               </button>
             </div>

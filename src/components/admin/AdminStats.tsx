@@ -109,7 +109,7 @@ const AdminStats = () => {
       <section>
         <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-2">📚 Обучение</p>
         <div className="grid grid-cols-3 gap-2">
-          <StatCard icon={BookOpen} label="Уроков" value={stats.lessonsToday} />
+          <StatCard icon={BookOpen} label="Уроків" value={stats.lessonsToday} />
           <StatCard icon={BookOpen} label="Слов" value={stats.wordsToday} />
           <StatCard icon={Swords} label="Дуэлей" value={stats.duelsToday} />
         </div>

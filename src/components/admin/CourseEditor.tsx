@@ -56,7 +56,7 @@ const BLOCK_TYPES: Array<{ type: TheoryBlock["type"]; emoji: string; label: stri
   { type: "rule", emoji: "💡", label: "Правило" },
   { type: "table", emoji: "📊", label: "Таблица" },
   { type: "example", emoji: "💬", label: "Пример" },
-  { type: "comparison", emoji: "🔄", label: "Сравнение" },
+  { type: "comparison", emoji: "🔄", label: "Порівняння" },
   { type: "tip", emoji: "⚡", label: "Подсказка" },
   { type: "list", emoji: "📋", label: "Список" },
 ];
@@ -153,7 +153,7 @@ const BlockEditor = ({ block, onChange, onRemove, onDuplicate, onSplit, isCollap
         <>
           <input value={block.de || ""} onChange={e => update({ de: e.target.value })} placeholder="Немецкий: Ich gehe nach Hause." className={inputCls} />
           <div className="flex gap-2">
-            <input value={block.ru || ""} onChange={e => update({ ru: e.target.value })} placeholder="🇷🇺 Перевод" className={`flex-1 ${smallInputCls}`} />
+            <input value={block.ru || ""} onChange={e => update({ ru: e.target.value })} placeholder="🇷🇺 Переклад" className={`flex-1 ${smallInputCls}`} />
             <input value={block.uk || ""} onChange={e => update({ uk: e.target.value })} placeholder="🇺🇦 Переклад" className={`flex-1 ${smallInputCls}`} />
           </div>
           <input value={(block.highlight || []).join(", ")} onChange={e => update({ highlight: e.target.value.split(",").map(w => w.trim()).filter(Boolean) })} placeholder="Выделить слова (через запятую)" className={smallInputCls} />
@@ -170,7 +170,7 @@ const BlockEditor = ({ block, onChange, onRemove, onDuplicate, onSplit, isCollap
               <button onClick={() => update({ items: (block.items || []).filter((_, j) => j !== i) })} className="p-1 text-destructive/60"><X className="w-3 h-3" /></button>
             </div>
           ))}
-          <button onClick={() => update({ items: [...(block.items || []), { de: "", ru: "", uk: "" }] })} className="text-[10px] text-primary flex items-center gap-1"><Plus className="w-3 h-3" /> Сравнение</button>
+          <button onClick={() => update({ items: [...(block.items || []), { de: "", ru: "", uk: "" }] })} className="text-[10px] text-primary flex items-center gap-1"><Plus className="w-3 h-3" /> Порівняння</button>
         </>
       )}
 
@@ -489,14 +489,14 @@ const LessonEditor = ({ lesson, onChange, level }: { lesson: CourseLesson; onCha
             <div key={i} className="flex gap-1 items-center flex-wrap p-2 rounded-xl bg-muted/30 border border-border/20">
               <input value={v.article || ""} onChange={e => { const n = [...(ex.vocab_cards || [])]; n[i] = { ...n[i], article: e.target.value }; onChange({ ...lesson, exercises: { ...ex, vocab_cards: n } }); }} placeholder="der" className={`w-10 text-center ${smallInputCls}`} />
               <input value={v.german} onChange={e => { const n = [...(ex.vocab_cards || [])]; n[i] = { ...n[i], german: e.target.value }; onChange({ ...lesson, exercises: { ...ex, vocab_cards: n } }); }} placeholder="🇩🇪 Deutsch" className={`flex-1 min-w-[70px] ${smallInputCls}`} />
-              <input value={v.russian} onChange={e => { const n = [...(ex.vocab_cards || [])]; n[i] = { ...n[i], russian: e.target.value }; onChange({ ...lesson, exercises: { ...ex, vocab_cards: n } }); }} placeholder="🇷🇺 Русский" className={`flex-1 min-w-[70px] ${smallInputCls}`} />
+              <input value={v.russian} onChange={e => { const n = [...(ex.vocab_cards || [])]; n[i] = { ...n[i], russian: e.target.value }; onChange({ ...lesson, exercises: { ...ex, vocab_cards: n } }); }} placeholder="🇷🇺 Українська" className={`flex-1 min-w-[70px] ${smallInputCls}`} />
               <input value={v.ukrainian || ""} onChange={e => { const n = [...(ex.vocab_cards || [])]; n[i] = { ...n[i], ukrainian: e.target.value }; onChange({ ...lesson, exercises: { ...ex, vocab_cards: n } }); }} placeholder="🇺🇦 Українська" className={`flex-1 min-w-[70px] ${smallInputCls}`} />
               <input value={v.example || ""} onChange={e => { const n = [...(ex.vocab_cards || [])]; n[i] = { ...n[i], example: e.target.value }; onChange({ ...lesson, exercises: { ...ex, vocab_cards: n } }); }} placeholder="Пример" className={`w-full mt-1 ${smallInputCls}`} />
               <button onClick={() => onChange({ ...lesson, exercises: { ...ex, vocab_cards: (ex.vocab_cards || []).filter((_, j) => j !== i) } })} className="p-1 text-destructive/60"><X className="w-3 h-3" /></button>
             </div>
           ))}
           <button onClick={() => onChange({ ...lesson, exercises: { ...ex, vocab_cards: [...(ex.vocab_cards || []), { german: "", russian: "", ukrainian: "", article: "", example: "" }] } })} className="w-full py-2 rounded-xl bg-secondary border border-border text-xs text-primary flex items-center justify-center gap-1.5 hover:border-primary/30 transition-colors">
-            <Plus className="w-3 h-3" /> Добавить слово
+            <Plus className="w-3 h-3" /> Додати слово
           </button>
           {level && aiBtn("vocab", "🤖 Догенерировать слова через ИИ")}
         </div>
@@ -526,7 +526,7 @@ const LessonEditor = ({ lesson, onChange, level }: { lesson: CourseLesson; onCha
                 ))}
               </div>
               <input value={q.explanation || ""} onChange={e => { const n = [...(ex.grammar_questions || [])]; n[i] = { ...n[i], explanation: e.target.value }; onChange({ ...lesson, exercises: { ...ex, grammar_questions: n } }); }} placeholder="Пояснение" className={smallInputCls} />
-              <button onClick={() => onChange({ ...lesson, exercises: { ...ex, grammar_questions: (ex.grammar_questions || []).filter((_, j) => j !== i) } })} className="text-[10px] text-destructive flex items-center gap-1"><Trash2 className="w-3 h-3" /> Удалить</button>
+              <button onClick={() => onChange({ ...lesson, exercises: { ...ex, grammar_questions: (ex.grammar_questions || []).filter((_, j) => j !== i) } })} className="text-[10px] text-destructive flex items-center gap-1"><Trash2 className="w-3 h-3" /> Видалити</button>
             </div>
           ))}
           <button onClick={() => onChange({ ...lesson, exercises: { ...ex, grammar_questions: [...(ex.grammar_questions || []), { question: "", options: ["", "", "", ""], correct_index: 0, explanation: "" }] } })} className="w-full py-2 rounded-xl bg-secondary border border-border text-xs text-primary flex items-center justify-center gap-1.5 hover:border-primary/30 transition-colors">
@@ -568,7 +568,7 @@ const LessonEditor = ({ lesson, onChange, level }: { lesson: CourseLesson; onCha
               <button onClick={() => {
                 const qs = (ex.reading?.questions || []).filter((_, j) => j !== qi);
                 onChange({ ...lesson, exercises: { ...ex, reading: { ...(ex.reading || { title: "", text: "" }), questions: qs } } });
-              }} className="text-[10px] text-destructive flex items-center gap-1"><X className="w-3 h-3" /> Удалить</button>
+              }} className="text-[10px] text-destructive flex items-center gap-1"><X className="w-3 h-3" /> Видалити</button>
             </div>
           ))}
           <button onClick={() => {
@@ -608,7 +608,7 @@ const LessonEditor = ({ lesson, onChange, level }: { lesson: CourseLesson; onCha
               <input value={note.title?.ua || ""} onChange={e => { const n = [...(ex.cultural_notes || [])]; n[i] = { ...n[i], title: { ...n[i].title, ua: e.target.value } }; onChange({ ...lesson, exercises: { ...ex, cultural_notes: n } }); }} placeholder="🇺🇦 Заголовок" className={inputCls} />
               <textarea value={note.content?.ru || ""} onChange={e => { const n = [...(ex.cultural_notes || [])]; n[i] = { ...n[i], content: { ...n[i].content, ru: e.target.value } }; onChange({ ...lesson, exercises: { ...ex, cultural_notes: n } }); }} placeholder="🇷🇺 Контент..." rows={2} className={`${inputCls} resize-y`} />
               <textarea value={note.content?.ua || ""} onChange={e => { const n = [...(ex.cultural_notes || [])]; n[i] = { ...n[i], content: { ...n[i].content, ua: e.target.value } }; onChange({ ...lesson, exercises: { ...ex, cultural_notes: n } }); }} placeholder="🇺🇦 Контент..." rows={2} className={`${inputCls} resize-y`} />
-              <button onClick={() => onChange({ ...lesson, exercises: { ...ex, cultural_notes: (ex.cultural_notes || []).filter((_, j) => j !== i) } })} className="text-[10px] text-destructive flex items-center gap-1"><Trash2 className="w-3 h-3" /> Удалить</button>
+              <button onClick={() => onChange({ ...lesson, exercises: { ...ex, cultural_notes: (ex.cultural_notes || []).filter((_, j) => j !== i) } })} className="text-[10px] text-destructive flex items-center gap-1"><Trash2 className="w-3 h-3" /> Видалити</button>
             </div>
           ))}
           <button onClick={() => onChange({ ...lesson, exercises: { ...ex, cultural_notes: [...(ex.cultural_notes || []), { title: { ru: "", ua: "" }, content: { ru: "", ua: "" } }] } })} className="w-full py-2 rounded-xl bg-secondary border border-border text-xs text-primary flex items-center justify-center gap-1.5 hover:border-primary/30 transition-colors">
@@ -685,7 +685,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
     if (!courseName.trim()) { toast.error("Введите название курса"); return; }
     
     const count = parseInt(lessonsCount) || 25;
-    if (!confirm(`Создать курс "${courseName}" и сгенерировать ${count} уроков? Это займёт несколько минут.`)) return;
+    if (!confirm(`Створити курс "${courseName}" и сгенерировать ${count} уроків? Это займе кілька хвилин.`)) return;
     
     setCreatingCourse(true);
     
@@ -701,7 +701,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
       
       if (courseErr) throw courseErr;
       
-      toast.success(`Курс создан! Начинаем генерацию ${count} уроков...`);
+      toast.success(`Курс створено! Починаємо генерацію ${count} уроків...`);
       
       // Open edit mode and start generation
       setEditCourse(courseRow as ExistingCourse);
@@ -718,7 +718,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
       setLessonsCount("25");
       
     } catch (err: any) {
-      toast.error("Ошибка создания курса: " + err.message);
+      toast.error("Ошибка створеноия курса: " + err.message);
     }
     
     setCreatingCourse(false);
@@ -726,13 +726,13 @@ const CourseEditor = ({ level }: { level: Level }) => {
 
   const generateAllLessons = async (course: ExistingCourse, existingCount = 0, targetCount = 25) => {
     const remaining = targetCount - existingCount;
-    if (remaining <= 0) { toast.info("Все уроки уже созданы!"); return; }
+    if (remaining <= 0) { toast.info("Все уроки уже створеноы!"); return; }
     
     setGenerating(true);
     genAbortRef.current = false;
     setGenTotal(remaining);
     setGenProgress(0);
-    setGenLog([existingCount > 0 ? `📚 Уже есть ${existingCount} уроков, догенерируем ещё ${remaining}...` : `⏳ Начинаем генерацию ${remaining} уроков...`]);
+    setGenLog([existingCount > 0 ? `📚 Уже є ${existingCount} уроків, догенерируем ещё ${remaining}...` : `⏳ Починаємо генерацію ${remaining} уроків...`]);
 
     let retries = 0;
     for (let i = 0; i < remaining; i++) {
@@ -829,7 +829,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
       video_subtitles_url: lesson.video_subtitles_url || null,
     } as any).eq("id", lesson.id);
     if (error) toast.error("Ошибка: " + error.message);
-    else toast.success("Урок сохранён ✅");
+    else toast.success("Урок збережено ✅");
     setSavingEdit(false);
   };
 
@@ -838,7 +838,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
     await supabase.from("courses").update({
       title: editCourse.title, description: editCourse.description, level: editCourse.level, price: editCourse.price,
     } as any).eq("id", editCourse.id);
-    toast.success("Курс обновлён ✅");
+    toast.success("Курс оновлено ✅");
     withScroll(loadCourses);
   };
 
@@ -856,16 +856,16 @@ const CourseEditor = ({ level }: { level: Level }) => {
     if (error) { toast.error("Ошибка: " + error.message); setSavingNewLesson(false); return; }
     setEditLessons([...editLessons, data as any]);
     setExpandedLesson(editLessons.length);
-    toast.success("Новый урок создан! 🎉");
+    toast.success("Новый урок створено! 🎉");
     setSavingNewLesson(false);
   };
 
   const deleteLesson = async (lessonId: string, index: number) => {
-    if (!confirm("Удалить этот урок?")) return;
+    if (!confirm("Видалити цей урок?")) return;
     await supabase.from("course_lessons").delete().eq("id", lessonId);
     setEditLessons(editLessons.filter((_, i) => i !== index));
     if (expandedLesson === index) setExpandedLesson(null);
-    toast.success("Урок удалён");
+    toast.success("Урок видалено");
   };
 
   const duplicateLesson = async (lesson: any) => {
@@ -880,7 +880,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
     } as any).select("*").single();
     if (error) { toast.error("Ошибка: " + error.message); return; }
     setEditLessons([...editLessons, data as any]);
-    toast.success("Урок скопирован! 📋");
+    toast.success("Урок скопійовано! 📋");
   };
 
   const moveLesson = async (index: number, dir: -1 | 1) => {
@@ -915,21 +915,21 @@ const CourseEditor = ({ level }: { level: Level }) => {
       } as any).eq("id", lesson.id);
       if (!error) ok++;
     }
-    toast.success(`Сохранено ${ok}/${editLessons.length} уроков ✅`);
+    toast.success(`Збережено ${ok}/${editLessons.length} уроків ✅`);
     setSavingEdit(false);
   };
 
   const toggleCourseAvailability = async (id: string, current: boolean) => {
     await supabase.from("courses").update({ available: !current } as any).eq("id", id);
-    toast.success(current ? "Курс скрыт" : "Курс опубликован");
+    toast.success(current ? "Курс приховано" : "Курс опубліковано");
     withScroll(loadCourses);
   };
 
   const deleteCourse = async (id: string) => {
-    if (!confirm("Удалить курс и все уроки?")) return;
+    if (!confirm("Видалити курс і всі уроки?")) return;
     await supabase.from("course_lessons").delete().eq("course_id", id);
     await supabase.from("courses").delete().eq("id", id);
-    toast.success("Курс удалён");
+    toast.success("Курс видалено");
     withScroll(loadCourses);
   };
 
@@ -944,7 +944,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
         {/* Course meta */}
         <div className="glass-card p-4 space-y-3">
           <h3 className="text-sm font-display font-bold text-foreground flex items-center gap-2">
-            <Edit3 className="w-4 h-4 text-primary" /> Настройки курса
+            <Edit3 className="w-4 h-4 text-primary" /> Налаштування курсу
           </h3>
           <input value={editCourse.title} onChange={e => setEditCourse({ ...editCourse, title: e.target.value })} placeholder="Название курса" className="w-full px-3 py-2 rounded-xl bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none" />
           <textarea value={editCourse.description || ""} onChange={e => setEditCourse({ ...editCourse, description: e.target.value })} placeholder="Описание курса" rows={2} className="w-full px-3 py-2 rounded-xl bg-secondary text-foreground border border-border text-xs resize-y focus:border-primary focus:outline-none" />
@@ -960,7 +960,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
               <input type="number" value={editCourse.price} onChange={e => setEditCourse({ ...editCourse, price: parseInt(e.target.value) || 0 })} className="w-24 px-3 py-2 rounded-xl bg-secondary text-foreground border border-border text-sm" />
             </div>
             <button onClick={saveEditedCourse} className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold flex items-center gap-1.5 hover:bg-primary/90 transition-colors">
-              <Save className="w-3 h-3" /> Сохранить
+              <Save className="w-3 h-3" /> Зберегти
             </button>
           </div>
         </div>
@@ -973,7 +973,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
           <div className="flex gap-2">
             <button onClick={saveAllLessons} disabled={savingEdit} className="px-3 py-1.5 rounded-xl bg-primary/10 text-primary text-[10px] font-bold flex items-center gap-1 hover:bg-primary/20 disabled:opacity-40 transition-colors">
               {savingEdit ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
-              Сохранить все
+              Зберегти всі
             </button>
             <button onClick={addNewLesson} disabled={savingNewLesson} className="px-3 py-1.5 rounded-xl bg-primary text-primary-foreground text-[10px] font-bold flex items-center gap-1 hover:bg-primary/90 disabled:opacity-40 transition-colors">
               {savingNewLesson ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
@@ -985,7 +985,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
         {/* Auto-generate lessons */}
         {editCourse && editLessons.length < 25 && !generating && (
           <button onClick={() => generateAllLessons(editCourse, editLessons.length)} className="w-full py-3 rounded-xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground text-sm font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
-            <Sparkles className="w-4 h-4" /> {editLessons.length === 0 ? `Авто-генерация 25 уроков (${editCourse.level})` : `Догенерировать до 25 уроков (есть ${editLessons.length})`}
+            <Sparkles className="w-4 h-4" /> {editLessons.length === 0 ? `Авто-генерация 25 уроків (${editCourse.level})` : `Догенерировать до 25 уроків (є ${editLessons.length})`}
           </button>
         )}
 
@@ -993,7 +993,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
           <div className="glass-card p-4 space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-sm font-bold text-foreground flex items-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin text-primary" /> Генерация уроков...
+                <Loader2 className="w-4 h-4 animate-spin text-primary" /> Генерация уроків...
               </span>
               <span className="text-xs text-muted-foreground">{genProgress}/{genTotal}</span>
             </div>
@@ -1012,9 +1012,9 @@ const CourseEditor = ({ level }: { level: Level }) => {
         ) : editLessons.length === 0 && !generating ? (
           <div className="glass-card p-8 text-center">
             <BookOpen className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground mb-3">В этом курсе пока нет уроков</p>
+            <p className="text-sm text-muted-foreground mb-3">В этом курсе пока нет уроків</p>
             <button onClick={addNewLesson} disabled={savingNewLesson} className="px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-bold flex items-center gap-2 mx-auto hover:bg-primary/90 transition-colors">
-              <Plus className="w-4 h-4" /> Создать первый урок
+              <Plus className="w-4 h-4" /> Створити перший урок
             </button>
           </div>
         ) : (
@@ -1033,13 +1033,13 @@ const CourseEditor = ({ level }: { level: Level }) => {
                 </button>
 
                 <div className="flex items-center gap-1 shrink-0">
-                  <button onClick={(e) => { e.stopPropagation(); saveEditedLesson(lesson); }} className="p-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors" disabled={savingEdit} title="Сохранить">
+                  <button onClick={(e) => { e.stopPropagation(); saveEditedLesson(lesson); }} className="p-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors" disabled={savingEdit} title="Зберегти">
                     {savingEdit ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
                   </button>
                   <button onClick={(e) => { e.stopPropagation(); duplicateLesson(lesson); }} className="p-1.5 rounded-lg bg-secondary text-muted-foreground hover:text-foreground transition-colors" title="Дублировать">
                     <CopyPlus className="w-3 h-3" />
                   </button>
-                  <button onClick={(e) => { e.stopPropagation(); deleteLesson(lesson.id, i); }} className="p-1.5 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors" title="Удалить">
+                  <button onClick={(e) => { e.stopPropagation(); deleteLesson(lesson.id, i); }} className="p-1.5 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors" title="Видалити">
                     <Trash2 className="w-3 h-3" />
                   </button>
                   {expandedLesson === i ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
@@ -1204,7 +1204,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
         {editLessons.length > 0 && (
           <button onClick={addNewLesson} disabled={savingNewLesson} className="w-full py-3 rounded-xl border-2 border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/30 text-sm font-medium flex items-center justify-center gap-2 transition-colors">
             {savingNewLesson ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-            Добавить урок
+            Додати урок
           </button>
         )}
       </div>
@@ -1216,9 +1216,9 @@ const CourseEditor = ({ level }: { level: Level }) => {
       {/* Existing courses */}
       <section className="glass-card p-4 flex flex-col gap-3">
         <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-2">
-          <GraduationCap className="w-4 h-4 text-primary" /> Курсы <span className="ml-auto text-xs text-muted-foreground font-normal">{existingCourses.length}</span>
+          <GraduationCap className="w-4 h-4 text-primary" /> Курси <span className="ml-auto text-xs text-muted-foreground font-normal">{existingCourses.length}</span>
         </h3>
-        {loadingCourses ? <p className="text-xs text-muted-foreground">Загрузка...</p> : existingCourses.length === 0 ? <p className="text-xs text-muted-foreground">Курсов нет</p> : (
+        {loadingCourses ? <p className="text-xs text-muted-foreground">Завантаження...</p> : existingCourses.length === 0 ? <p className="text-xs text-muted-foreground">Курсів немає</p> : (
           <div className="space-y-2">
             {existingCourses.map(c => (
               <div key={c.id} className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-muted/30 border border-border/20 hover:border-primary/20 transition-colors">
@@ -1227,7 +1227,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
                     <span className="text-xs font-bold text-primary">{c.level}</span>
                     <span className="text-sm font-semibold text-foreground truncate">{c.title}</span>
                   </div>
-                  <div className="text-[10px] text-muted-foreground mt-0.5">{c.lessons_count} уроков • {c.price} 🪙</div>
+                  <div className="text-[10px] text-muted-foreground mt-0.5">{c.lessons_count} уроків • {c.price} 🪙</div>
                 </div>
                 <button onClick={() => openEditCourse(c)} className="p-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20"><Edit3 className="w-3.5 h-3.5" /></button>
                 <button onClick={() => toggleCourseAvailability(c.id, c.available)} className={`p-1.5 rounded-lg ${c.available ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
@@ -1244,7 +1244,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
       <div className="flex gap-1">
         {(["list", "create"] as const).map((s, i) => (
           <button key={s} onClick={() => setStep(s)} className={`flex-1 py-1.5 rounded-lg text-[10px] font-display font-bold transition-all ${step === s ? "bg-primary/15 text-primary border border-primary/30" : "bg-secondary text-muted-foreground"}`}>
-            {["📋", "✨"][i]} {["Курсы", "Создать"][i]}
+            {["📋", "✨"][i]} {["Курси", "Створити"][i]}
           </button>
         ))}
       </div>
@@ -1260,12 +1260,12 @@ const CourseEditor = ({ level }: { level: Level }) => {
           <input value={courseName} onChange={e => setCourseName(e.target.value)} placeholder="Название курса" className="w-full px-3 py-2.5 rounded-xl bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none" />
           <textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="Описание (опционально)" rows={2} className="w-full px-3 py-2 rounded-xl bg-secondary text-foreground border border-border text-sm resize-y focus:border-primary focus:outline-none" />
           <div>
-            <label className="text-[10px] text-muted-foreground block mb-1">Количество уроков</label>
+            <label className="text-[10px] text-muted-foreground block mb-1">Количество уроків</label>
             <input type="number" value={lessonsCount} onChange={e => setLessonsCount(e.target.value)} min={1} max={30} className="w-full px-3 py-2 rounded-xl bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none" />
           </div>
           <button onClick={handleCreateAndGenerate} disabled={creatingCourse || !courseName.trim()} className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-semibold disabled:opacity-40">
             {creatingCourse ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
-            {creatingCourse ? "Создаю курс..." : "Создать и сгенерировать через ИИ"}
+            {creatingCourse ? "Створюю курс..." : "Створити та згенерувати через ШІ"}
           </button>
         </div>
       )}
