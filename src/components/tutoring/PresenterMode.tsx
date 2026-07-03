@@ -12,6 +12,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { startOrResumeSession, updateSession, endSession, type LiveSession, type ViewType } from "@/lib/presenter-session";
 import TeacherAIAssistant from "./TeacherAIAssistant";
+import LessonTimeline from "./LessonTimeline";
+import SessionChat from "./SessionChat";
 
 interface Props {
   lesson: any;
@@ -195,8 +197,14 @@ const PresenterMode = ({ lesson, words, exercises, studentName, studentProfile, 
         </div>
       </div>
 
+      {/* Timeline strip */}
+      <div className="px-4 pt-2 pb-1 border-b border-border bg-card/60">
+        <LessonTimeline view={view} words={words} exercises={exercises} interactive onJump={pushView} />
+      </div>
+
       {/* Body: 3 panels */}
       <div className="flex-1 grid grid-cols-12 gap-3 p-3 overflow-hidden">
+
         {/* LEFT: navigation of content */}
         <div className="col-span-3 flex flex-col gap-3 overflow-hidden">
           <PanelCard title="Что показать" icon={<ListChecks className="w-4 h-4" />}>
@@ -338,6 +346,10 @@ const PresenterMode = ({ lesson, words, exercises, studentName, studentProfile, 
 
           <LiveFeedbackPanel session={session} exercises={exercises} />
 
+          <PanelCard title="Чат с учеником" icon={<MessageCircle className="w-4 h-4" />}>
+            <SessionChat sessionId={session?.id} role="teacher" compact />
+          </PanelCard>
+
           <PanelCard title="Заметки (приватно)" icon={<StickyNote className="w-4 h-4" />} grow>
             <Textarea value={notes} onChange={(e) => setNotes(e.target.value)}
               placeholder="План урока, что спросить, домашка…"
@@ -347,6 +359,7 @@ const PresenterMode = ({ lesson, words, exercises, studentName, studentProfile, 
           <Button onClick={() => setAiOpen(true)} className="gap-2 w-full">
             <Sparkles className="w-4 h-4" /> AI-ассистент
           </Button>
+
         </div>
       </div>
 
