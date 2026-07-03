@@ -59,7 +59,7 @@ const DemoUsersManager = () => {
     };
     if (newUserAvatarUrl) insertData.avatar_url = newUserAvatarUrl;
     const { error } = await supabase.from("demo_leaderboard").insert(insertData);
-    if (error) toast.error("Ошибка: " + error.message);
+    if (error) toast.error("Помилка: " + error.message);
     else { toast.success("Добавлен!"); setNewDemoName(""); setNewDemoXp("100"); setNewUserAvatarUrl(null); silentReload(); }
   };
 

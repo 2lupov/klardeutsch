@@ -417,7 +417,7 @@ const LessonEditor = ({ lesson, onChange, level }: { lesson: CourseLesson; onCha
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({ error: "Unknown error" }));
-        toast.error(err.error || "Ошибка генерации");
+        toast.error(err.error || "Помилка генерації");
         return;
       }
 
@@ -442,7 +442,7 @@ const LessonEditor = ({ lesson, onChange, level }: { lesson: CourseLesson; onCha
       onChange({ ...lesson, exercises: newEx });
       toast.success("✨ Контент сгенерирован!");
     } catch (e: any) {
-      toast.error(e.message || "Ошибка");
+      toast.error(e.message || "Помилка");
     } finally {
       setGenerating(null);
     }
@@ -718,7 +718,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
       setLessonsCount("25");
       
     } catch (err: any) {
-      toast.error("Ошибка створеноия курса: " + err.message);
+      toast.error("Помилка створення курсу: " + err.message);
     }
     
     setCreatingCourse(false);
@@ -763,7 +763,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
           i--; // retry same lesson
           continue;
         }
-        setGenLog(prev => [...prev, `❌ Ошибка урока ${lessonNum + 1}: ${err.message}`]);
+        setGenLog(prev => [...prev, `❌ Помилка уроку ${lessonNum + 1}: ${err.message}`]);
         if (retries >= 3) { setGenLog(prev => [...prev, `🛑 Слишком много ошибок, остановка`]); break; }
         setGenLog(prev => [...prev, `⏭️ Пропускаем, продолжаем...`]);
         continue;
@@ -828,7 +828,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
       video_duration_sec: lesson.video_duration_sec || null,
       video_subtitles_url: lesson.video_subtitles_url || null,
     } as any).eq("id", lesson.id);
-    if (error) toast.error("Ошибка: " + error.message);
+    if (error) toast.error("Помилка: " + error.message);
     else toast.success("Урок збережено ✅");
     setSavingEdit(false);
   };
@@ -853,7 +853,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
       exercises: {},
       sort_order: nextOrder,
     } as any).select("*").single();
-    if (error) { toast.error("Ошибка: " + error.message); setSavingNewLesson(false); return; }
+    if (error) { toast.error("Помилка: " + error.message); setSavingNewLesson(false); return; }
     setEditLessons([...editLessons, data as any]);
     setExpandedLesson(editLessons.length);
     toast.success("Новий урок створено! 🎉");
@@ -878,7 +878,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
       exercises: lesson.exercises,
       sort_order: nextOrder,
     } as any).select("*").single();
-    if (error) { toast.error("Ошибка: " + error.message); return; }
+    if (error) { toast.error("Помилка: " + error.message); return; }
     setEditLessons([...editLessons, data as any]);
     toast.success("Урок скопійовано! 📋");
   };

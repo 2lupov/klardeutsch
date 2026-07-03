@@ -129,7 +129,7 @@ const TeacherChatPanel = ({ lessonId, courseId, lessonTitle, courseLevel, lang, 
       });
 
       if (!res.ok) {
-        setAiMessages([...newMsgs, { role: "assistant", content: isUk ? "Помилка" : "Ошибка" }]);
+        setAiMessages([...newMsgs, { role: "assistant", content: "Помилка" }]);
         setAiStreaming(false);
         return;
       }
@@ -161,7 +161,7 @@ const TeacherChatPanel = ({ lessonId, courseId, lessonTitle, courseLevel, lang, 
       setAiMessages([...newMsgs, { role: "assistant", content: fullText || "..." }]);
       setAiStreamText("");
     } catch {
-      setAiMessages([...newMsgs, { role: "assistant", content: isUk ? "Помилка з'єднання" : "Ошибка соединения" }]);
+      setAiMessages([...newMsgs, { role: "assistant", content: "Помилка з'єднання" }]);
     }
     setAiStreaming(false);
     scrollAi();

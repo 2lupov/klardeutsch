@@ -49,7 +49,7 @@ const TranslationChecker = () => {
       }
     } catch (e: any) {
       console.error("Scan error:", e);
-      toast.error(e.message || "Ошибка сканирования");
+      toast.error(e.message || "Помилка сканування");
       setStatus("idle");
     }
   };
@@ -98,7 +98,7 @@ const TranslationChecker = () => {
       }
     } catch (e: any) {
       console.error("Fix error:", e);
-      toast.error(e.message || "Ошибка исправления");
+      toast.error(e.message || "Помилка виправлення");
       setStatus("red");
     } finally {
       setFixing(false);

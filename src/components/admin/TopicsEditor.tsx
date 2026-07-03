@@ -94,7 +94,7 @@ const TopicsEditor = () => {
     } as any);
     if (error) {
       if (error.message.includes("duplicate")) toast.error("Тема з такою назвою вже існує");
-      else toast.error("Ошибка: " + error.message);
+      else toast.error("Помилка: " + error.message);
       return;
     }
     toast.success(`Тема "${newName.trim()}" створеноа!`);

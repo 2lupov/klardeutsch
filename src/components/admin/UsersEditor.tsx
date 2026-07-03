@@ -56,7 +56,7 @@ const UsersEditor = () => {
     const { data, error } = await supabase.rpc("get_admin_users");
     if (error) {
       console.error(error);
-      toast.error("Ошибка загрузки пользователей");
+      toast.error("Помилка завантаження користувачів");
     }
     setUsers((data as AdminUser[]) ?? []);
     setLoading(false);
@@ -89,7 +89,7 @@ const UsersEditor = () => {
     const newXp = Math.max(0, currentXp + delta);
     const { error } = await supabase.rpc("admin_set_xp", { p_user_id: userId, p_xp: newXp });
     if (error) {
-      toast.error("Ошибка: " + error.message);
+      toast.error("Помилка: " + error.message);
     } else {
       toast.success(`XP: ${currentXp} → ${newXp}`);
       setUsers(prev => prev.map(u => u.user_id === userId ? { ...u, total_xp: newXp } : u));
@@ -100,7 +100,7 @@ const UsersEditor = () => {
     const reason = delta > 0 ? "admin_award" : "admin_deduct";
     const { error } = await supabase.rpc("award_coins", { p_user_id: userId, p_amount: delta, p_reason: reason });
     if (error) {
-      toast.error("Ошибка: " + error.message);
+      toast.error("Помилка: " + error.message);
     } else {
       toast.success(`Монети: ${delta > 0 ? "+" : ""}${delta}`);
       setUsers(prev => prev.map(u => u.user_id === userId ? { ...u, coin_balance: u.coin_balance + delta } : u));
@@ -112,14 +112,14 @@ const UsersEditor = () => {
     const path = `${userId}/avatar.${ext}`;
     const { error: uploadError } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
     if (uploadError) {
-      toast.error("Ошибка загрузки: " + uploadError.message);
+      toast.error("Помилка завантаження: " + uploadError.message);
       return;
     }
     const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
     const avatarUrl = urlData.publicUrl + "?t=" + Date.now();
     const { error: updateError } = await supabase.from("profiles").update({ avatar_url: avatarUrl }).eq("user_id", userId);
     if (updateError) {
-      toast.error("Ошибка обновления профиля: " + updateError.message);
+      toast.error("Помилка оновлення профілю: " + updateError.message);
       return;
     }
     toast.success("Аватарка обновлена!");
@@ -134,7 +134,7 @@ const UsersEditor = () => {
       total_xp: parseInt(newDemoXp) || 100,
     });
     if (error) {
-      toast.error("Ошибка: " + error.message);
+      toast.error("Помилка: " + error.message);
     } else {
       toast.success("Фейк-юзер добавлен");
       setNewDemoName("");
@@ -146,7 +146,7 @@ const UsersEditor = () => {
   const removeDemoUser = async (id: string) => {
     const { error } = await supabase.from("demo_leaderboard").delete().eq("id", id);
     if (error) {
-      toast.error("Ошибка: " + error.message);
+      toast.error("Помилка: " + error.message);
     } else {
       toast.success("Видалено");
       loadDemo();
@@ -157,7 +157,7 @@ const UsersEditor = () => {
     if (!editingDemoName.trim()) return;
     const { error } = await supabase.from("demo_leaderboard").update({ display_name: editingDemoName.trim() }).eq("id", id);
     if (error) {
-      toast.error("Ошибка: " + error.message);
+      toast.error("Помилка: " + error.message);
     } else {
       toast.success("Имя обновлено");
       setEditingDemoId(null);
@@ -169,7 +169,7 @@ const UsersEditor = () => {
     const newXp = Math.max(0, currentXp + delta);
     const { error } = await supabase.from("demo_leaderboard").update({ total_xp: newXp }).eq("id", id);
     if (error) {
-      toast.error("Ошибка: " + error.message);
+      toast.error("Помилка: " + error.message);
     } else {
       loadDemo();
     }
@@ -201,7 +201,7 @@ const UsersEditor = () => {
     }
     const { data, error } = await supabase.functions.invoke("telegram-broadcast", { body });
     if (error) {
-      toast.error("Ошибка: " + error.message);
+      toast.error("Помилка: " + error.message);
     } else {
       toast.success(`Отправлено ${data?.sent ?? 0} из ${data?.total ?? 0}`);
       setBroadcastMsg("");
@@ -217,7 +217,7 @@ const UsersEditor = () => {
     }
     const { data, error } = await supabase.functions.invoke("telegram-reminders", { body });
     if (error) {
-      toast.error("Ошибка: " + error.message);
+      toast.error("Помилка: " + error.message);
     } else {
       toast.success(`Напоминания: ${data?.sent ?? 0} отправлено из ${data?.total ?? 0}`);
     }
@@ -231,9 +231,9 @@ const UsersEditor = () => {
       body: { message: dmMsg.trim(), user_ids: [dmUserId] },
     });
     if (error) {
-      toast.error("Ошибка: " + error.message);
+      toast.error("Помилка: " + error.message);
     } else if (data?.sent) {
-      toast.success("Сообщение отправлено!");
+      toast.success("Повідомлення відправлено!");
       setDmMsg("");
       setDmUserId(null);
     } else {
@@ -248,9 +248,9 @@ const UsersEditor = () => {
       body: { email },
     });
     if (error) {
-      toast.error("Ошибка: " + error.message);
+      toast.error("Помилка: " + error.message);
     } else if (data?.error) {
-      toast.error("Ошибка: " + data.error);
+      toast.error("Помилка: " + data.error);
     } else {
       toast.success(`Письмо отправлено на ${email}`);
     }
@@ -264,9 +264,9 @@ const UsersEditor = () => {
       body: { user_id: userId },
     });
     if (error) {
-      toast.error("Ошибка: " + error.message);
+      toast.error("Помилка: " + error.message);
     } else if (data?.error) {
-      toast.error("Ошибка: " + data.error);
+      toast.error("Помилка: " + data.error);
     } else {
       toast.success("Email підтверджено!");
       setUsers(prev => prev.map(u => u.user_id === userId ? { ...u, email_confirmed: true } : u));
@@ -444,7 +444,7 @@ const UsersEditor = () => {
           <div className="flex items-center justify-between">
             <h4 className="text-xs font-display font-semibold text-foreground flex items-center gap-1.5">
               <MessageSquare className="w-3.5 h-3.5 text-primary" />
-              Личное сообщение: {users.find(u => u.user_id === dmUserId)?.display_name || "Пользователь"}
+              Особисте повідомлення: {users.find(u => u.user_id === dmUserId)?.display_name || "Користувач"}
             </h4>
             <button onClick={() => { setDmUserId(null); setDmMsg(""); }} className="text-muted-foreground hover:text-foreground">
               <X className="w-4 h-4" />
@@ -453,7 +453,7 @@ const UsersEditor = () => {
           <textarea
             value={dmMsg}
             onChange={(e) => setDmMsg(e.target.value)}
-            placeholder="Напишите личное сообщение..."
+            placeholder="Напишіть особисте повідомлення..."
             rows={2}
             maxLength={1000}
             className="w-full px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none resize-y"
@@ -609,7 +609,7 @@ const UsersEditor = () => {
             {/* Learning stats row */}
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pl-7 mt-1">
               <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                📚 <span className="font-semibold text-foreground">{user.lessons_completed}</span> уроков
+                📚 <span className="font-semibold text-foreground">{user.lessons_completed}</span> уроків
               </span>
               <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
                 📝 <span className="font-semibold text-foreground">{user.words_learned}</span> слов

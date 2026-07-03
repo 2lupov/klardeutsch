@@ -52,7 +52,7 @@ const CurriculumAccordion = ({ modules, lessons, isPurchased, lang }: Props) => 
           {lang === "uk" ? "Програма курсу" : "Программа курса"}
         </h3>
         <span className="text-[11px] text-muted-foreground">
-          {modules.length} {lang === "uk" ? "модулів" : "модулей"} · {lessons.length} {lang === "uk" ? "уроків" : "уроков"} · ~{Math.round(totalMinutes / 60)}{lang === "uk" ? " год" : " ч"}
+          {modules.length} {lang === "uk" ? "модулів" : "модулей"} · {lessons.length} {lang === "uk" ? "уроків" : "уроків"} · ~{Math.round(totalMinutes / 60)}{lang === "uk" ? " год" : " ч"}
         </span>
       </div>
 

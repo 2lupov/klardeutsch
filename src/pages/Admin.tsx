@@ -180,7 +180,7 @@ const SaveButton = ({ dirty, saving, onSave }: { dirty: boolean; saving: boolean
         <span className="animate-pulse">{t("loading")}</span>
       ) : (
         <>
-          <Check className="w-4 h-4" /> {t("saveChanges") || "Сохранить изменения"}
+          <Check className="w-4 h-4" /> {t("saveChanges") || "Зберегти зміни"}
         </>
       )}
     </button>
