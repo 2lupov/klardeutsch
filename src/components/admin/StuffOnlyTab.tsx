@@ -34,7 +34,7 @@ const DemoUsersManager = () => {
     if (!silent) setLoading(true);
     const { data } = await supabase
       .from("demo_leaderboard")
-      .select("id, display_name, total_xp, avatar_url, telegram_chat_id, words_learned, lessons_completed, duels_won, duels_played")
+      .select("id, display_name, total_xp, avatar_url, words_learned, lessons_completed, duels_won, duels_played")
       .order("total_xp", { ascending: false });
     setDemoUsers((data as DemoUser[]) ?? []);
     if (!silent) setLoading(false);
