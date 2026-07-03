@@ -145,9 +145,8 @@ const AcademyLearn = () => {
 
     switch (activeLesson.lesson_type) {
       case "video":
-        return <VideoLessonPlayer key={key} lesson={activeLesson} onComplete={() => handleComplete()} lang={lang} />;
       case "video_quiz":
-        return <VideoQuizLesson key={key} lesson={activeLesson} onComplete={(s) => handleComplete(s)} lang={lang} />;
+        return <SlidesLesson key={key} lesson={activeLesson} onComplete={() => handleComplete()} lang={lang} />;
       case "article":
         return <ArticleLesson key={key} lesson={activeLesson} onComplete={() => handleComplete()} lang={lang} />;
       case "grammar":
