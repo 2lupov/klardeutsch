@@ -20,6 +20,7 @@ import RequireTeacher from "@/components/guards/RequireTeacher";
 import TeachLayout from "./pages/teach/TeachLayout";
 import TeachDashboard from "./pages/teach/TeachDashboard";
 import TeachPlaceholder from "./pages/teach/TeachPlaceholder";
+import TeachLibrary from "./pages/teach/TeachLibrary";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
