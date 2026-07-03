@@ -59,7 +59,7 @@ const AdminStats = () => {
     try {
       const { data, error } = await supabase.functions.invoke("daily-stats", { body: {} });
       if (error) throw error;
-      if (data?.ok) toast.success("Статистика отправлена в Telegram! 📊");
+      if (data?.ok) toast.success("Статистику відправлено в Telegram! 📊");
       else toast.error("Не удалось отправить");
     } catch (err: any) { toast.error(err.message); }
     setSending(false);
@@ -96,7 +96,7 @@ const AdminStats = () => {
 
       {/* Users */}
       <section>
-        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-2">👥 Пользователи</p>
+        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-2">👥 Користувачі</p>
         <div className="grid grid-cols-2 gap-2">
           <StatCard icon={Users} label="Всего" value={stats.totalUsers} />
           <StatCard icon={Users} label="Нових сьогодні" value={stats.newToday} sub={`за тиждень: ${stats.newWeek}`} />

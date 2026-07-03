@@ -233,7 +233,7 @@ const QuizLesson = ({ lesson, onComplete, lang }: Props) => {
         {answered && (
           <div className={`flex items-center gap-2 text-xs font-semibold ${isCorrect ? "text-primary" : "text-destructive"}`}>
             {isCorrect ? <><CheckCircle2 className="w-4 h-4" /> {lang === "uk" ? "Правильно! 🎉" : "Правильно! 🎉"}</> :
-              <><XCircle className="w-4 h-4" /> {lang === "uk" ? "Неправильно" : "Неверно"}</>}
+              <><XCircle className="w-4 h-4" /> {"Неправильно"}</>}
           </div>
         )}
 

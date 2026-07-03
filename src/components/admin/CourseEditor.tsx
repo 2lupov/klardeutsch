@@ -736,7 +736,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
 
     let retries = 0;
     for (let i = 0; i < remaining; i++) {
-      if (genAbortRef.current) { setGenLog(prev => [...prev, `🛑 Остановлено пользователем`]); break; }
+      if (genAbortRef.current) { setGenLog(prev => [...prev, `🛑 Зупинено користувачем`]); break; }
       const lessonNum = existingCount + i;
       setGenLog(prev => [...prev, `⏳ Урок ${lessonNum + 1}/${targetCount}...`]);
       
@@ -764,7 +764,7 @@ const CourseEditor = ({ level }: { level: Level }) => {
           continue;
         }
         setGenLog(prev => [...prev, `❌ Помилка уроку ${lessonNum + 1}: ${err.message}`]);
-        if (retries >= 3) { setGenLog(prev => [...prev, `🛑 Слишком много ошибок, остановка`]); break; }
+        if (retries >= 3) { setGenLog(prev => [...prev, `🛑 Забагато помилок, зупинка`]); break; }
         setGenLog(prev => [...prev, `⏭️ Пропускаем, продолжаем...`]);
         continue;
       }
