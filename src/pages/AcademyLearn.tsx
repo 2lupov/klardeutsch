@@ -143,10 +143,11 @@ const AcademyLearn = () => {
     const key = activeLesson.id;
     const content = activeLesson.content as any;
 
-    switch (activeLesson.lesson_type) {
-      case "video":
-      case "video_quiz":
-        return <SlidesLesson key={key} lesson={activeLesson} onComplete={() => handleComplete()} lang={lang} />;
+    const type = activeLesson.lesson_type;
+    if (type === "video" || type === "video_quiz") {
+      return <SlidesLesson key={key} lesson={activeLesson} onComplete={() => handleComplete()} lang={lang} />;
+    }
+    switch (type) {
       case "article":
         return <ArticleLesson key={key} lesson={activeLesson} onComplete={() => handleComplete()} lang={lang} />;
       case "grammar":
@@ -170,7 +171,7 @@ const AcademyLearn = () => {
       case "notebook":
         return <NotebookLesson key={key} lesson={activeLesson} onComplete={() => handleComplete()} lang={lang} />;
       default:
-        return <ArticleLesson key={key} lesson={activeLesson} onComplete={() => handleComplete()} lang={lang} />;
+        return <SlidesLesson key={key} lesson={activeLesson} onComplete={() => handleComplete()} lang={lang} />;
     }
   };
 
