@@ -9,12 +9,12 @@ interface DemoUser {
   display_name: string;
   total_xp: number;
   avatar_url: string | null;
-  telegram_chat_id: number | null;
   words_learned: number;
   lessons_completed: number;
   duels_won: number;
   duels_played: number;
 }
+
 
 const StuffOnlyTab = () => {
   return <DemoUsersManager />;
@@ -34,7 +34,7 @@ const DemoUsersManager = () => {
     if (!silent) setLoading(true);
     const { data } = await supabase
       .from("demo_leaderboard")
-      .select("id, display_name, total_xp, avatar_url, telegram_chat_id, words_learned, lessons_completed, duels_won, duels_played")
+      .select("id, display_name, total_xp, avatar_url, words_learned, lessons_completed, duels_won, duels_played")
       .order("total_xp", { ascending: false });
     setDemoUsers((data as DemoUser[]) ?? []);
     if (!silent) setLoading(false);
@@ -224,25 +224,8 @@ const DemoUsersManager = () => {
             >
               {avatarPickerFor === du.id ? "Приховати аватарки" : "Вибрати аватарку"}
             </button>
-            <div className="flex items-center gap-1.5">
-              <MessageSquare className="w-3 h-3 text-muted-foreground" />
-              <input
-                type="number"
-                placeholder="Telegram chat ID"
-                defaultValue={du.telegram_chat_id ?? ""}
-                onBlur={async (e) => {
-                  const val = e.target.value.trim();
-                  const chatId = val ? parseInt(val) : null;
-                  if (chatId === du.telegram_chat_id) return;
-                  await supabase.from("demo_leaderboard").update({ telegram_chat_id: chatId } as any).eq("id", du.id);
-                  toast.success(chatId ? "Telegram підключено!" : "Telegram відключено");
-                  silentReload();
-                }}
-                className="w-36 px-2 py-1 rounded-lg bg-secondary text-foreground border border-border text-xs focus:border-primary focus:outline-none"
-              />
-              {du.telegram_chat_id && <span className="text-[10px] text-green-500 font-medium">✓</span>}
-            </div>
           </div>
+
 
           {avatarPickerFor === du.id && (
             <AvatarPicker
