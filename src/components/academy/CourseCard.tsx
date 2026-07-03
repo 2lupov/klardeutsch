@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Clock, BookOpen, ChevronRight, Play, Coins } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import type { Lang } from "@/i18n/translations";
+import pandaCourseDefault from "@/assets/panda-course-default.jpg";
 
 interface CourseData {
   id: string;
@@ -57,11 +58,29 @@ const CourseCard = ({ course, lang, isPurchased, progress }: Props) => {
           <img
             src={course.thumbnail_url || course.image_url!}
             alt={course.title}
+            loading="lazy"
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
-            <BookOpen className="w-10 h-10 text-primary/30" />
+          <div className="relative w-full h-full">
+            <img
+              src={pandaCourseDefault}
+              alt={course.title}
+              loading="lazy"
+              width={1280}
+              height={768}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background/85 via-background/20 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 p-3">
+              <div className="flex items-center gap-2 text-[11px] font-semibold text-accent uppercase tracking-wider">
+                <BookOpen className="w-3.5 h-3.5" />
+                {lang === "uk" ? "Курс KLAR" : "Курс KLAR"}
+              </div>
+              <p className="font-display text-sm font-bold text-foreground line-clamp-2 leading-tight mt-1">
+                {course.title}
+              </p>
+            </div>
           </div>
         )}
 
