@@ -327,7 +327,10 @@ const StudentView = () => {
           })}
         </div>
       </div>
+
+      <SessionChat sessionId={sessionId} role="student" />
     </div>
+
   );
 };
 
