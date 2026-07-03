@@ -9,12 +9,12 @@ interface DemoUser {
   display_name: string;
   total_xp: number;
   avatar_url: string | null;
-  telegram_chat_id: number | null;
   words_learned: number;
   lessons_completed: number;
   duels_won: number;
   duels_played: number;
 }
+
 
 const StuffOnlyTab = () => {
   return <DemoUsersManager />;
