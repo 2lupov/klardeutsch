@@ -251,7 +251,6 @@ const AcademyCourse = () => {
               purchasing={purchasing}
               onPurchase={handlePurchase}
               onStart={handleStart}
-              lang={lang}
             />
           </div>
         </div>
