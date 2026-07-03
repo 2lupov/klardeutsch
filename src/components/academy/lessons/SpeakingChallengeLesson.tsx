@@ -37,7 +37,7 @@ const SpeakingChallengeLesson = ({ lesson, onComplete, lang }: Props) => {
         <p className="text-base text-foreground font-medium leading-relaxed">{textDe}</p>
         <Button variant="outline" size="sm" className="text-xs">
           <Volume2 className="w-3.5 h-3.5 mr-1.5" />
-          {lang === "uk" ? "Слухати еталон" : "Слушать эталон"}
+          {lang === "uk" ? "Слухати еталон" : "Слухати еталон"}
         </Button>
       </div>
 
@@ -67,7 +67,7 @@ const SpeakingChallengeLesson = ({ lesson, onComplete, lang }: Props) => {
               {lang === "uk" ? "Записати" : "Записать"}
             </Button>
             <p className="text-[11px] text-muted-foreground">
-              {lang === "uk" ? `Спроба ${attempts + 1} з 3` : `Попытка ${attempts + 1} из 3`}
+              {lang === "uk" ? `Спроба ${attempts + 1} з 3` : `Спроба ${attempts + 1} з 3`}
             </p>
           </>
         )}

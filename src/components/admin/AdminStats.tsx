@@ -47,7 +47,7 @@ const AdminStats = () => {
       if (data?.stats) setStats(data.stats);
       else if (data?.error) throw new Error(data.error);
     } catch (err: any) {
-      toast.error("Ошибка загрузки: " + err.message);
+      toast.error("Помилка завантаження: " + err.message);
     }
     setLoading(false);
   }, []);
@@ -59,7 +59,7 @@ const AdminStats = () => {
     try {
       const { data, error } = await supabase.functions.invoke("daily-stats", { body: {} });
       if (error) throw error;
-      if (data?.ok) toast.success("Статистика отправлена в Telegram! 📊");
+      if (data?.ok) toast.success("Статистику відправлено в Telegram! 📊");
       else toast.error("Не удалось отправить");
     } catch (err: any) { toast.error(err.message); }
     setSending(false);
@@ -74,7 +74,7 @@ const AdminStats = () => {
   }
 
   if (!stats) {
-    return <p className="text-sm text-muted-foreground text-center py-8">Нет данных</p>;
+    return <p className="text-sm text-muted-foreground text-center py-8">Немає даних</p>;
   }
 
   return (
@@ -96,11 +96,11 @@ const AdminStats = () => {
 
       {/* Users */}
       <section>
-        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-2">👥 Пользователи</p>
+        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-2">👥 Користувачі</p>
         <div className="grid grid-cols-2 gap-2">
           <StatCard icon={Users} label="Всего" value={stats.totalUsers} />
-          <StatCard icon={Users} label="Новых сегодня" value={stats.newToday} sub={`за неделю: ${stats.newWeek}`} />
-          <StatCard icon={Users} label="Активных сегодня" value={stats.activeToday} sub={`за неделю: ${stats.activeWeek}`} />
+          <StatCard icon={Users} label="Нових сьогодні" value={stats.newToday} sub={`за тиждень: ${stats.newWeek}`} />
+          <StatCard icon={Users} label="Активних сьогодні" value={stats.activeToday} sub={`за тиждень: ${stats.activeWeek}`} />
           <StatCard icon={Users} label="С Telegram" value={stats.telegramUsers} sub={`${stats.totalUsers ? Math.round((stats.telegramUsers / stats.totalUsers) * 100) : 0}% от всех`} />
         </div>
       </section>
@@ -111,7 +111,7 @@ const AdminStats = () => {
         <div className="grid grid-cols-3 gap-2">
           <StatCard icon={BookOpen} label="Уроків" value={stats.lessonsToday} />
           <StatCard icon={BookOpen} label="Слов" value={stats.wordsToday} />
-          <StatCard icon={Swords} label="Дуэлей" value={stats.duelsToday} />
+          <StatCard icon={Swords} label="Дуелей" value={stats.duelsToday} />
         </div>
       </section>
 
@@ -126,7 +126,7 @@ const AdminStats = () => {
       </section>
 
       <div className="glass-card p-3 text-center">
-        <p className="text-[10px] text-muted-foreground">⭐ Общий XP платформы</p>
+        <p className="text-[10px] text-muted-foreground">⭐ Загальний XP платформи</p>
         <p className="text-xl font-display font-bold text-foreground">{stats.totalXP.toLocaleString("ru-RU")}</p>
       </div>
     </div>

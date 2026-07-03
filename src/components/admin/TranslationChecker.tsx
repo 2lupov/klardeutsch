@@ -43,13 +43,13 @@ const TranslationChecker = () => {
       setStatus(errs.length > 0 ? "red" : "green");
 
       if (errs.length === 0) {
-        toast.success("Всё идеально! Ошибок не найдено 🎉");
+        toast.success("Все ідеально! Помилок не знайдено 🎉");
       } else {
-        toast.warning(`Найдено ${errs.length} ошибок`);
+        toast.warning(`Знайдено ${errs.length} помилок`);
       }
     } catch (e: any) {
       console.error("Scan error:", e);
-      toast.error(e.message || "Ошибка сканирования");
+      toast.error(e.message || "Помилка сканування");
       setStatus("idle");
     }
   };
@@ -57,7 +57,7 @@ const TranslationChecker = () => {
   const handleFix = async () => {
     const selectedFixes = errors.filter((e) => e.selected);
     if (selectedFixes.length === 0) {
-      toast.info("Выберите ошибки для исправления");
+      toast.info("Виберіть помилки для виправлення");
       return;
     }
 
@@ -94,11 +94,11 @@ const TranslationChecker = () => {
       if (failCount > 0) {
         toast.warning(`Исправлено ${successCount}, не удалось ${failCount}`);
       } else {
-        toast.success(`Исправлено ${successCount} ошибок!`);
+        toast.success(`Виправлено ${successCount} помилок!`);
       }
     } catch (e: any) {
       console.error("Fix error:", e);
-      toast.error(e.message || "Ошибка исправления");
+      toast.error(e.message || "Помилка виправлення");
       setStatus("red");
     } finally {
       setFixing(false);
@@ -142,7 +142,7 @@ const TranslationChecker = () => {
             ИИ-проверка переводов
           </h2>
           <p className="text-xs text-muted-foreground mt-1">
-            Сканирует карточки, грамматику и переводы интерфейса
+            Сканує картки, граматику та переклади інтерфейсу
           </p>
         </div>
 
@@ -191,14 +191,14 @@ const TranslationChecker = () => {
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-1.5">
               <AlertTriangle className="w-4 h-4 text-destructive" />
-              Найдено ошибок: {errors.length}
+              Знайдено помилок: {errors.length}
             </h3>
             <div className="flex gap-2">
               <button
                 onClick={() => toggleAll(true)}
                 className="text-xs text-primary hover:underline"
               >
-                Выбрать все
+                Вибрати всі
               </button>
               <button
                 onClick={() => toggleAll(false)}
@@ -268,8 +268,8 @@ const TranslationChecker = () => {
       {status === "green" && errors.length === 0 && scanned && (
         <div className="glass-card p-6 text-center border-green-500/20">
           <CheckCircle2 className="w-10 h-10 text-green-500 mx-auto mb-2" />
-          <p className="font-display font-semibold text-foreground">Всё идеально!</p>
-          <p className="text-xs text-muted-foreground mt-1">Ошибок в переводах не найдено</p>
+          <p className="font-display font-semibold text-foreground">Все ідеально!</p>
+          <p className="text-xs text-muted-foreground mt-1">Помилок у перекладах не знайдено</p>
         </div>
       )}
     </div>

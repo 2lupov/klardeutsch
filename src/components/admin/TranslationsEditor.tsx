@@ -76,7 +76,7 @@ const TranslationsEditor = () => {
         await loadOverrides();
       }
     } else {
-      toast.info("Нет изменений для сохранения");
+      toast.info("Немає змін для збереження");
     }
     setSaving(false);
   };
@@ -121,7 +121,7 @@ const TranslationsEditor = () => {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <input
           type="text"
-          placeholder="Поиск по ключу или тексту..."
+          placeholder="Пошук за ключем або текстом..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full pl-9 pr-3 py-2 rounded-xl bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
@@ -129,7 +129,7 @@ const TranslationsEditor = () => {
       </div>
 
       <p className="text-xs text-muted-foreground">
-        {filtered.length} ключей · Изменённые выделены цветом. Пустое поле = стандартный текст.
+        {filtered.length} ключів · Змінені виділені кольором. Порожнє поле = стандартний текст.
       </p>
 
       {/* Translation list */}
@@ -175,7 +175,7 @@ const TranslationsEditor = () => {
           className="sticky bottom-4 z-20 w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold transition-all disabled:opacity-60"
         >
           {saving ? (
-            <span className="animate-pulse">Сохранение...</span>
+            <span className="animate-pulse">Збереження...</span>
           ) : (
             <>
               <Check className="w-4 h-4" /> Зберегти зміни

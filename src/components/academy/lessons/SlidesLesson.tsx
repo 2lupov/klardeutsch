@@ -45,7 +45,7 @@ const SlidesLesson = ({ lesson, onComplete, lang }: Props) => {
           </div>
           <Button onClick={() => setOpen(true)} size="lg" className="font-display font-bold">
             <Presentation className="w-4 h-4 mr-2" />
-            {lang === "uk" ? "Відкрити презентацію" : "Открыть презентацию"}
+            {lang === "uk" ? "Відкрити презентацію" : "Відкрити презентацію"}
           </Button>
         </div>
       ) : (

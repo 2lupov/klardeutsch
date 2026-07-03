@@ -16,7 +16,7 @@ interface TextEntry {
 }
 
 const SOURCE_CONFIG: { key: TextSource; icon: React.ElementType; label: string; color: string }[] = [
-  { key: "ui", icon: Globe, label: "UI переводы", color: "text-blue-400" },
+  { key: "ui", icon: Globe, label: "UI переклади", color: "text-blue-400" },
   { key: "vocab", icon: BookOpen, label: "Словарь", color: "text-emerald-400" },
   { key: "grammar", icon: Languages, label: "Грамматика", color: "text-amber-400" },
   { key: "cafe", icon: Gamepad2, label: "Кафе", color: "text-pink-400" },
@@ -109,7 +109,7 @@ const AllTextsEditor = () => {
           source: "grammar",
           id: q.id,
           field: "explanation",
-          label: `💡 Объяснение`,
+          label: `💡 Пояснення`,
           value: q.explanation,
           context: `${q.level} · ${q.topic}`,
         });
@@ -289,7 +289,7 @@ const AllTextsEditor = () => {
       }
 
       if (error) {
-        console.error(`Ошибка сохранения ${compositeKey}:`, error);
+        console.error(`Помилка збереження ${compositeKey}:`, error);
         errorCount++;
       } else {
         successCount++;
@@ -297,7 +297,7 @@ const AllTextsEditor = () => {
     }
 
     if (errorCount > 0) {
-      toast.error(`Ошибка: ${errorCount} из ${edits.size} не сохранились. Проверьте, что вы вошли как админ.`);
+      toast.error(`Помилка: ${errorCount} з ${edits.size} не збереглися. Перевірте, що ви увійшли як адмін.`);
     } else {
       toast.success(`Збережено ${successCount} изменений!`);
       setEdits(new Map());
@@ -306,7 +306,7 @@ const AllTextsEditor = () => {
     loadAll();
   };
 
-  if (loading) return <p className="text-muted-foreground animate-pulse">Загрузка всех текстов...</p>;
+  if (loading) return <p className="text-muted-foreground animate-pulse">Завантаження всіх текстів...</p>;
 
   return (
     <div className="flex flex-col gap-4">
@@ -362,7 +362,7 @@ const AllTextsEditor = () => {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <input
           type="text"
-          placeholder="Поиск по любому тексту, ключу, уровню..."
+          placeholder="Пошук за будь-яким текстом, ключем, рівнем..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
@@ -416,7 +416,7 @@ const AllTextsEditor = () => {
         })}
         {filtered.length > 100 && (
           <p className="text-xs text-center text-muted-foreground py-4">
-            Показаны первые 100 результатов. Используйте поиск для уточнения.
+            Показано перші 100 результатів. Використовуйте пошук для уточнення.
           </p>
         )}
       </div>
@@ -429,7 +429,7 @@ const AllTextsEditor = () => {
           className="sticky bottom-4 z-20 w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold transition-all disabled:opacity-60"
         >
           {saving ? (
-            <span className="animate-pulse">Сохранение...</span>
+            <span className="animate-pulse">Збереження...</span>
           ) : (
             <>
               <Check className="w-4 h-4" /> Зберегти {edits.size} изменений

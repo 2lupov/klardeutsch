@@ -110,7 +110,7 @@ const Course = () => {
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
           <span className="text-sm text-muted-foreground">
-            {lang === "uk" ? "Завантаження..." : "Загрузка..."}
+            {lang === "uk" ? "Завантаження..." : "Завантаження..."}
           </span>
         </div>
       </div>
@@ -136,7 +136,7 @@ const Course = () => {
           {lang === "uk" ? "Уроки скоро з'являться" : "Уроки скоро появятся"}
         </h2>
         <p className="text-muted-foreground text-center text-sm max-w-xs">
-          {lang === "uk" ? "Ми готуємо матеріали для цього курсу. Поверніться пізніше!" : "Мы готовим материалы для этого курса. Вернитесь позже!"}
+          {lang === "uk" ? "Ми готуємо матеріали для цього курсу. Поверніться пізніше!" : "Ми готуємо матеріали для цього курсу. Поверніться пізніше!"}
         </p>
         <button onClick={() => navigate("/shop")} className="text-primary text-sm hover:underline">
           ← {lang === "uk" ? "До магазину" : "В магазин"}

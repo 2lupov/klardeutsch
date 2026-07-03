@@ -240,7 +240,7 @@ const AcademyLearn = () => {
                 disabled={activeLessonIndex <= 0}
                 className="text-xs"
               >
-                ← {lang === "uk" ? "Попередній" : "Предыдущий"}
+                ← {lang === "uk" ? "Попередній" : "Попередній"}
               </Button>
               <span className="text-[11px] text-muted-foreground">
                 {activeLessonIndex + 1} / {lessons.length}

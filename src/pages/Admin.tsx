@@ -82,7 +82,7 @@ const Admin = () => {
   if (isAdmin === null) {
     return (
       <div className="h-[100dvh] bg-background flex items-center justify-center px-4 overflow-y-auto">
-        <p className="text-muted-foreground animate-pulse">Загрузка...</p>
+        <p className="text-muted-foreground animate-pulse">Завантаження...</p>
       </div>
     );
   }
@@ -93,7 +93,7 @@ const Admin = () => {
         <div className="text-center">
           <Lock className="w-10 h-10 text-destructive mx-auto mb-3" />
           <h1 className="text-2xl font-display font-bold">{t("adminPanel")}</h1>
-          <p className="text-sm text-muted-foreground mt-2">Доступ запрещён. Требуется роль администратора.</p>
+          <p className="text-sm text-muted-foreground mt-2">Доступ заборонено. Потрібна роль адміністратора.</p>
         </div>
       </div>
     );
@@ -138,7 +138,7 @@ const Admin = () => {
               }`}
             >
               <Icon className="w-3.5 h-3.5" />
-              {key === "stats" ? "📊 Стата" : key === "topics" ? "Темы" : key === "games" ? "Игры" : key === "users" ? "Юзеры" : key === "translations" ? "Языки" : key === "generator" ? "ИИ-генератор" : key === "checker" ? "ИИ-проверка" : key === "alltexts" ? "Все тексты" : key === "stuffonly" ? "Stuff Only" : key === "courses" ? "Курсы" : key === "chats" ? "Чаты" : key === "products" ? "📦 Склад" : t(label as any)}
+              {key === "stats" ? "📊 Стата" : key === "topics" ? "Теми" : key === "games" ? "Ігри" : key === "users" ? "Юзери" : key === "translations" ? "Мови" : key === "generator" ? "AI-генератор" : key === "checker" ? "AI-перевірка" : key === "alltexts" ? "Всі тексти" : key === "stuffonly" ? "Stuff Only" : key === "courses" ? "Курси" : key === "chats" ? "Чати" : key === "products" ? "📦 Склад" : t(label as any)}
             </button>
           ))}
         </div>
@@ -180,7 +180,7 @@ const SaveButton = ({ dirty, saving, onSave }: { dirty: boolean; saving: boolean
         <span className="animate-pulse">{t("loading")}</span>
       ) : (
         <>
-          <Check className="w-4 h-4" /> {t("saveChanges") || "Сохранить изменения"}
+          <Check className="w-4 h-4" /> {t("saveChanges") || "Зберегти зміни"}
         </>
       )}
     </button>
@@ -231,7 +231,7 @@ const VocabEditor = ({ level }: { level: Level }) => {
     setPendingUpdates(new Map());
     setDirty(false);
     setSaving(false);
-    toast.success(t("saved") || "Сохранено!");
+    toast.success(t("saved") || "Збережено!");
   };
 
   const addCard = async () => {
@@ -362,7 +362,7 @@ const GrammarEditor = ({ level }: { level: Level }) => {
     setPendingLessonUpdates(new Map());
     setPendingQUpdates(new Map());
     setSaving(false);
-    toast.success(t("saved") || "Сохранено!");
+    toast.success(t("saved") || "Збережено!");
   };
 
   const addLesson = async () => {
@@ -524,7 +524,7 @@ const ReadingEditor = ({ level }: { level: Level }) => {
     setPendingTextUpdates(new Map());
     setPendingQUpdates(new Map());
     setSaving(false);
-    toast.success(t("saved") || "Сохранено!");
+    toast.success(t("saved") || "Збережено!");
   };
 
   const addText = async () => {
@@ -634,7 +634,7 @@ const GamesEditor = ({ level }: { level: Level }) => {
     load();
   }, [level]);
 
-  if (loading) return <p className="text-muted-foreground">Загрузка...</p>;
+  if (loading) return <p className="text-muted-foreground">Завантаження...</p>;
 
   return (
     <div className="flex flex-col gap-4">
@@ -643,7 +643,7 @@ const GamesEditor = ({ level }: { level: Level }) => {
           ♻️ Der/Die/Das: Сортировка мусора
         </h3>
         <p className="text-xs text-muted-foreground mb-3">
-          Игра берёт слова из карточек словаря (vocab_cards) с заполненным артиклем.
+          Гра бере слова з карток словника (vocab_cards) із заповненим артиклем.
         </p>
         <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 border border-border">
           <div className="text-center">
@@ -651,7 +651,7 @@ const GamesEditor = ({ level }: { level: Level }) => {
             <p className="text-[10px] text-muted-foreground">слов с артиклем</p>
           </div>
           <div className="flex-1 text-xs text-muted-foreground">
-            Уровень <span className="font-semibold text-foreground">{level}</span> · Чтобы добавить слова в игру, перейди во вкладку «Словарь» и убедись, что у карточек заполнено поле «Артикль» (der/die/das).
+            Рівень <span className="font-semibold text-foreground">{level}</span> · Щоб додати слова в гру, перейди у вкладку «Словник» і переконайся, що у карток заповнене поле «Артикль» (der/die/das).
           </div>
         </div>
       </div>
@@ -677,7 +677,7 @@ const TranslationsLauncher = () => {
       <Globe className="w-12 h-12 text-primary/40" />
       <h2 className="font-display text-lg font-bold text-foreground">Редактирование переводов</h2>
       <p className="text-sm text-muted-foreground text-center max-w-sm">
-        Нажмите кнопку, чтобы перейти на обычные страницы приложения. Все тексты станут кликабельными — нажмите на любой, чтобы отредактировать.
+        Натисніть кнопку, щоб перейти на звичайні сторінки застосунку. Усі тексти стануть клікабельними — натисніть на будь-який, щоб відредагувати.
       </p>
       <button
         onClick={handleLaunch}

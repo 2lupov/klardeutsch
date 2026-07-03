@@ -65,10 +65,10 @@ const LessonNotebook = ({ lessonId, lang, theory, exercises }: LessonNotebookPro
       .upsert({ user_id: user.id, lesson_id: lessonId, content, updated_at: new Date().toISOString() }, { onConflict: "user_id,lesson_id" });
     setSaving(false);
     if (error) {
-      toast.error(lang === "uk" ? "Помилка збереження" : "Ошибка сохранения");
+      toast.error("Помилка збереження");
     } else {
       setLastSaved(new Date());
-      toast.success(lang === "uk" ? "Збережено ✓" : "Сохранено ✓");
+      toast.success("Збережено ✓");
     }
   }, [user, lessonId, pages, lang, serializePages]);
 
@@ -148,7 +148,7 @@ const LessonNotebook = ({ lessonId, lang, theory, exercises }: LessonNotebookPro
           >
             <Highlighter className="w-3 h-3" />
             {highlighterOn 
-              ? (lang === "uk" ? "Виділити" : "Выделить")
+              ? (lang === "uk" ? "Виділити" : "Виділити")
               : (lang === "uk" ? "Маркер" : "Маркер")}
           </button>
           {lastSaved && (
@@ -169,7 +169,7 @@ const LessonNotebook = ({ lessonId, lang, theory, exercises }: LessonNotebookPro
               )}
             >
               <Sparkles className="w-3 h-3" />
-              {lang === "uk" ? "Теорія" : "Теория"}
+              {lang === "uk" ? "Теорія" : "Теорія"}
             </button>
           )}
           {vocab.length > 0 && (
@@ -190,7 +190,7 @@ const LessonNotebook = ({ lessonId, lang, theory, exercises }: LessonNotebookPro
         {showTheoryPicker && (
           <div className="mx-5 ml-6 mt-2 rounded-xl border border-border/40 bg-secondary/30 p-2 max-h-[180px] overflow-y-auto space-y-1 animate-slide-up">
             <p className="text-[10px] text-muted-foreground px-1 mb-1">
-              {lang === "uk" ? "Оберіть фрагмент:" : "Выберите фрагмент:"}
+              {lang === "uk" ? "Оберіть фрагмент:" : "Оберіть фрагмент:"}
             </p>
             {theoryParagraphs.map((para, i) => (
               <button
@@ -213,7 +213,7 @@ const LessonNotebook = ({ lessonId, lang, theory, exercises }: LessonNotebookPro
         {showVocabPicker && (
           <div className="mx-5 ml-6 mt-2 rounded-xl border border-border/40 bg-secondary/30 p-2 max-h-[180px] overflow-y-auto space-y-0.5 animate-slide-up">
             <p className="text-[10px] text-muted-foreground px-1 mb-1">
-              {lang === "uk" ? "Оберіть слова:" : "Выберите слова:"}
+              {lang === "uk" ? "Оберіть слова:" : "Оберіть слова:"}
             </p>
             {vocab.map((v: any, i: number) => {
               const de = v.de || v.german || "";
@@ -242,7 +242,7 @@ const LessonNotebook = ({ lessonId, lang, theory, exercises }: LessonNotebookPro
                 }).join("\n");
                 insertToCurrentPage(`📚 ${lang === "uk" ? "Словник" : "Словарь"}:\n${allLines}`);
                 setShowVocabPicker(false);
-                toast.success(lang === "uk" ? "Всі слова додано ✓" : "Все слова добавлены ✓");
+                toast.success(lang === "uk" ? "Всі слова додано ✓" : "Всі слова додано ✓");
               }}
               className="w-full text-center p-1.5 rounded-lg text-[10px] font-semibold text-primary hover:bg-primary/10 transition-colors mt-1 border-t border-border/20 pt-2"
             >
@@ -312,8 +312,8 @@ const LessonNotebook = ({ lessonId, lang, theory, exercises }: LessonNotebookPro
           >
             <Save className="w-3.5 h-3.5" />
             {saving
-              ? (lang === "uk" ? "Зберігаю..." : "Сохраняю...")
-              : (lang === "uk" ? "Зберегти" : "Сохранить")}
+              ? ("Зберігаю...")
+              : "Зберегти"}
           </button>
         </div>
       </div>

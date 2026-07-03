@@ -29,7 +29,7 @@ const CertificatePreview = ({ lang }: { lang: Lang }) => {
           {t("Сертифікат про завершення", "Сертификат об окончании")}
         </h3>
         <p className="mt-1 text-[11px] text-muted-foreground uppercase tracking-widest">
-          {t("цим засвідчується, що", "настоящим подтверждается, что")}
+          {t("цим засвідчується, що", "цим засвідчується, що")}
         </p>
 
         <p className="mt-2 font-display text-lg sm:text-xl italic text-accent">
@@ -39,7 +39,7 @@ const CertificatePreview = ({ lang }: { lang: Lang }) => {
         <p className="mt-2 text-xs text-muted-foreground max-w-[90%] leading-snug">
           {t(
             "успішно завершив(-ла) курс німецької мови рівня A1 на платформі KLAR",
-            "успешно завершил(-а) курс немецкого языка уровня A1 на платформе KLAR",
+            "успішно завершив(-ла) курс німецької мови рівня A1 на платформі KLAR",
           )}
         </p>
 

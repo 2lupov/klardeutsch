@@ -84,7 +84,7 @@ const BulkGenerator = () => {
 
   const createNewTopic = async () => {
     if (!newTopicName.trim()) {
-      toast.error("Введи название темы");
+      toast.error("Введи назву теми");
       return;
     }
 
@@ -110,7 +110,7 @@ const BulkGenerator = () => {
       loadTopics();
     } catch (e: any) {
       console.error("Create topic error:", e);
-      toast.error("Ошибка: " + e.message);
+      toast.error("Помилка: " + e.message);
     }
 
     setCreatingTopic(false);
@@ -118,7 +118,7 @@ const BulkGenerator = () => {
 
   const startGeneration = async () => {
     if (selectedTypes.length === 0 || selectedLevels.length === 0) {
-      toast.error("Выбери хотя бы один уровень и тип");
+      toast.error("Обери хоча б один рівень і тип");
       return;
     }
 
@@ -208,8 +208,8 @@ const BulkGenerator = () => {
       setConversionResult(`✅ Конвертировано: ${data.converted}/${data.total} уроків`);
       toast.success(`Конвертировано ${data.converted} уроків грамматики!`);
     } catch (e: any) {
-      setConversionResult(`❌ Ошибка: ${e.message}`);
-      toast.error("Ошибка конвертации: " + e.message);
+      setConversionResult(`❌ Помилка: ${e.message}`);
+      toast.error("Помилка конвертації: " + e.message);
     }
     setConvertingTheory(false);
   };
@@ -234,12 +234,12 @@ const BulkGenerator = () => {
         {showNewTopic && (
           <div className="space-y-3">
             <p className="text-xs text-muted-foreground">
-              ИИ создаст тему и сгенерирует: 15 слов, грамматику с 10 упражнениями, текст для чтения и аудирования
+              AI створить тему і згенерує: 15 слів, граматику з 10 вправами, текст для читання та аудіювання
             </p>
 
             {/* Level selector */}
             <div>
-              <p className="text-[10px] text-muted-foreground mb-1.5 uppercase tracking-wider">Уровень</p>
+              <p className="text-[10px] text-muted-foreground mb-1.5 uppercase tracking-wider">Рівень</p>
               <div className="flex gap-1.5 flex-wrap">
                 {LEVELS.map((l) => (
                   <button
@@ -260,7 +260,7 @@ const BulkGenerator = () => {
 
             {/* Topic name */}
             <div>
-              <p className="text-[10px] text-muted-foreground mb-1.5 uppercase tracking-wider">Название темы</p>
+              <p className="text-[10px] text-muted-foreground mb-1.5 uppercase tracking-wider">Назва теми</p>
               <input
                 type="text"
                 value={newTopicName}
@@ -334,7 +334,7 @@ const BulkGenerator = () => {
           Конвертация теории грамматики
         </h3>
         <p className="text-xs text-muted-foreground mb-3">
-          Преобразует markdown-теорию в красивые структурированные блоки (таблицы, правила, примеры)
+          Перетворює markdown-теорію на красиві структуровані блоки (таблиці, правила, приклади)
         </p>
         <button
           onClick={convertGrammarTheory}
@@ -359,7 +359,7 @@ const BulkGenerator = () => {
           Массовая генерация +10 заданий
         </h3>
         <p className="text-xs text-muted-foreground">
-          ИИ сгенерирует по 10 новых заданий для каждой темы и типа упражнения
+          AI згенерує по 10 нових завдань для кожної теми та типу вправи
         </p>
       </div>
 
@@ -395,7 +395,7 @@ const BulkGenerator = () => {
 
       {/* Type selection */}
       <div>
-        <p className="text-xs text-muted-foreground mb-2 font-semibold uppercase tracking-wider">Типы упражнений</p>
+        <p className="text-xs text-muted-foreground mb-2 font-semibold uppercase tracking-wider">Типи вправ</p>
         <div className="flex gap-2 flex-wrap">
           {CONTENT_TYPES.map((ct) => (
             <button
@@ -426,7 +426,7 @@ const BulkGenerator = () => {
             задач ({topics.filter((t) => selectedLevels.includes(t.level)).length} тем × {selectedTypes.length} типов)
           </p>
           <p className="text-[10px] text-muted-foreground">
-            ≈ {topics.filter((t) => selectedLevels.includes(t.level)).length * selectedTypes.length * 10} новых заданий
+            ≈ {topics.filter((t) => selectedLevels.includes(t.level)).length * selectedTypes.length * 10} нових завдань
           </p>
         </div>
       )}

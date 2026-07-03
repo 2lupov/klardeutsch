@@ -49,7 +49,7 @@ const CourseHeader = ({ title, description, level, lessonCount, completedSection
             <div className="flex items-center justify-between text-[10px] text-muted-foreground">
               <span className="flex items-center gap-1">
                 <BookOpen className="w-3 h-3" />
-                {lessonCount} {lang === "uk" ? "уроків" : "уроков"}
+                {lessonCount} {lang === "uk" ? "уроків" : "уроків"}
               </span>
               <span className="text-primary font-semibold">{progressPercent}%</span>
             </div>

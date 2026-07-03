@@ -88,7 +88,7 @@ const AITutorLesson = ({ lesson, onComplete, lang }: Props) => {
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        setMessages([...newMessages, { role: "assistant", content: err.error || (isUk ? "Помилка AI" : "Ошибка AI") }]);
+        setMessages([...newMessages, { role: "assistant", content: err.error || ("Помилка AI") }]);
         setStreaming(false);
         return;
       }
@@ -127,7 +127,7 @@ const AITutorLesson = ({ lesson, onComplete, lang }: Props) => {
       setMessages([...newMessages, { role: "assistant", content: fullText || (isUk ? "..." : "...") }]);
       setStreamText("");
     } catch {
-      setMessages([...newMessages, { role: "assistant", content: isUk ? "Помилка з'єднання" : "Ошибка соединения" }]);
+      setMessages([...newMessages, { role: "assistant", content: "Помилка з'єднання" }]);
     }
     setStreaming(false);
   }, [input, messages, streaming, scenario, role, level, lang, lesson.title, theorySummary, isUk]);
@@ -138,7 +138,7 @@ const AITutorLesson = ({ lesson, onComplete, lang }: Props) => {
     setShowHint(true);
     try {
       const apiMessages = messages.map(m => ({ role: m.role, content: m.content }));
-      apiMessages.push({ role: "user", content: isUk ? "Дай підказку що я можу відповісти (коротко, 1-2 варіанти німецькою)" : "Дай подсказку что я могу ответить (коротко, 1-2 варианта на немецком)" });
+      apiMessages.push({ role: "user", content: "Дай підказку що я можу відповісти (коротко, 1-2 варіанти німецькою)" });
 
       const res = await fetchEdgeFunction("ai-dialogue", { json: { messages: apiMessages, topic: scenario, level, lang } });
       if (!res.ok) { setHintText(isUk ? "Не вдалося отримати підказку" : "Не удалось получить подсказку"); setLoadingHint(false); return; }
@@ -166,7 +166,7 @@ const AITutorLesson = ({ lesson, onComplete, lang }: Props) => {
           }
         }
       }
-    } catch { setHintText(isUk ? "Помилка" : "Ошибка"); }
+    } catch { setHintText("Помилка"); }
     setLoadingHint(false);
   }, [messages, scenario, level, lang, loadingHint, isUk]);
 
@@ -351,7 +351,7 @@ const AITutorLesson = ({ lesson, onComplete, lang }: Props) => {
               {analysis.errors.length > 0 && (
                 <div>
                   <h4 className="text-xs font-bold text-foreground mb-1.5">
-                    🔍 {isUk ? "Помилки" : "Ошибки"}
+                    🔍 {"Помилки"}
                   </h4>
                   <div className="space-y-1.5">
                     {analysis.errors.map((e, i) => (
@@ -368,7 +368,7 @@ const AITutorLesson = ({ lesson, onComplete, lang }: Props) => {
               {analysis.new_words.length > 0 && (
                 <div>
                   <h4 className="text-xs font-bold text-foreground mb-1.5">
-                    💡 {isUk ? "Нові слова" : "Новые слова"}
+                    💡 {isUk ? "Нові слова" : "Нові слова"}
                   </h4>
                   <div className="flex flex-wrap gap-1.5">
                     {analysis.new_words.map((w, i) => (
@@ -384,7 +384,7 @@ const AITutorLesson = ({ lesson, onComplete, lang }: Props) => {
               {analysis.advice && (
                 <div>
                   <h4 className="text-xs font-bold text-foreground mb-1">
-                    📝 {isUk ? "Що покращити" : "Что улучшить"}
+                    📝 {"Що покращити"}
                   </h4>
                   <p className="text-xs text-foreground/80">{analysis.advice}</p>
                 </div>

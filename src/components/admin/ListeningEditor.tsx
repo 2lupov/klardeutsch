@@ -25,7 +25,7 @@ const GenerateAudioButton = ({ listeningId, audioUrl, onGenerated }: { listening
       onGenerated(data.audio_url);
       toast.success("Аудио сгенерировано и сохранено ✓");
     } catch (e: any) {
-      toast.error(`Ошибка: ${e.message}`);
+      toast.error(`Помилка: ${e.message}`);
     } finally {
       setGenerating(false);
     }
@@ -117,7 +117,7 @@ const PreviewButton = ({ text, voiceId }: { text: string; voiceId: string }) => 
       await audio.play();
       setState("playing");
     } catch {
-      toast.error("Ошибка воспроизведения");
+      toast.error("Помилка відтворення");
       setState("idle");
     }
   };
@@ -518,7 +518,7 @@ const ListeningEditor = ({ level }: { level: string }) => {
                 }}
               />
               {txt.audio_url && (
-                <span className="text-[10px] text-success">✓ Аудио закэшировано</span>
+                <span className="text-[10px] text-success">✓ Аудіо закешовано</span>
               )}
             </div>
 

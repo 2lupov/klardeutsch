@@ -135,7 +135,7 @@ const CohortChat = ({ courseId, lang, open, onClose }: Props) => {
             <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 py-3 space-y-2">
               {messages.length === 0 && (
                 <p className="text-xs text-muted-foreground text-center mt-8">
-                  {lang === "uk" ? "Напишіть першими!" : "Напишите первыми!"}
+                  {lang === "uk" ? "Напишіть першими!" : "Напишіть першими!"}
                 </p>
               )}
               {messages.map((msg) => {
@@ -166,7 +166,7 @@ const CohortChat = ({ courseId, lang, open, onClose }: Props) => {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
-                  placeholder={lang === "uk" ? "Повідомлення..." : "Сообщение..."}
+                  placeholder={"Повідомлення..."}
                   className="flex-1 px-3 py-2 rounded-lg bg-secondary text-foreground text-xs border border-border focus:border-primary focus:outline-none"
                   disabled={sending}
                 />

@@ -56,7 +56,7 @@ const UsersEditor = () => {
     const { data, error } = await supabase.rpc("get_admin_users");
     if (error) {
       console.error(error);
-      toast.error("Ошибка загрузки пользователей");
+      toast.error("Помилка завантаження користувачів");
     }
     setUsers((data as AdminUser[]) ?? []);
     setLoading(false);
@@ -89,7 +89,7 @@ const UsersEditor = () => {
     const newXp = Math.max(0, currentXp + delta);
     const { error } = await supabase.rpc("admin_set_xp", { p_user_id: userId, p_xp: newXp });
     if (error) {
-      toast.error("Ошибка: " + error.message);
+      toast.error("Помилка: " + error.message);
     } else {
       toast.success(`XP: ${currentXp} → ${newXp}`);
       setUsers(prev => prev.map(u => u.user_id === userId ? { ...u, total_xp: newXp } : u));
@@ -100,9 +100,9 @@ const UsersEditor = () => {
     const reason = delta > 0 ? "admin_award" : "admin_deduct";
     const { error } = await supabase.rpc("award_coins", { p_user_id: userId, p_amount: delta, p_reason: reason });
     if (error) {
-      toast.error("Ошибка: " + error.message);
+      toast.error("Помилка: " + error.message);
     } else {
-      toast.success(`Монеты: ${delta > 0 ? "+" : ""}${delta}`);
+      toast.success(`Монети: ${delta > 0 ? "+" : ""}${delta}`);
       setUsers(prev => prev.map(u => u.user_id === userId ? { ...u, coin_balance: u.coin_balance + delta } : u));
     }
   };
@@ -112,17 +112,17 @@ const UsersEditor = () => {
     const path = `${userId}/avatar.${ext}`;
     const { error: uploadError } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
     if (uploadError) {
-      toast.error("Ошибка загрузки: " + uploadError.message);
+      toast.error("Помилка завантаження: " + uploadError.message);
       return;
     }
     const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
     const avatarUrl = urlData.publicUrl + "?t=" + Date.now();
     const { error: updateError } = await supabase.from("profiles").update({ avatar_url: avatarUrl }).eq("user_id", userId);
     if (updateError) {
-      toast.error("Ошибка обновления профиля: " + updateError.message);
+      toast.error("Помилка оновлення профілю: " + updateError.message);
       return;
     }
-    toast.success("Аватарка обновлена!");
+    toast.success("Аватарку оновлено!");
     setUsers(prev => prev.map(u => u.user_id === userId ? { ...u, avatar_url: avatarUrl } : u));
   };
 
@@ -134,7 +134,7 @@ const UsersEditor = () => {
       total_xp: parseInt(newDemoXp) || 100,
     });
     if (error) {
-      toast.error("Ошибка: " + error.message);
+      toast.error("Помилка: " + error.message);
     } else {
       toast.success("Фейк-юзер добавлен");
       setNewDemoName("");
@@ -146,9 +146,9 @@ const UsersEditor = () => {
   const removeDemoUser = async (id: string) => {
     const { error } = await supabase.from("demo_leaderboard").delete().eq("id", id);
     if (error) {
-      toast.error("Ошибка: " + error.message);
+      toast.error("Помилка: " + error.message);
     } else {
-      toast.success("Удалён");
+      toast.success("Видалено");
       loadDemo();
     }
   };
@@ -157,9 +157,9 @@ const UsersEditor = () => {
     if (!editingDemoName.trim()) return;
     const { error } = await supabase.from("demo_leaderboard").update({ display_name: editingDemoName.trim() }).eq("id", id);
     if (error) {
-      toast.error("Ошибка: " + error.message);
+      toast.error("Помилка: " + error.message);
     } else {
-      toast.success("Имя обновлено");
+      toast.success("Ім'я оновлено");
       setEditingDemoId(null);
       loadDemo();
     }
@@ -169,7 +169,7 @@ const UsersEditor = () => {
     const newXp = Math.max(0, currentXp + delta);
     const { error } = await supabase.from("demo_leaderboard").update({ total_xp: newXp }).eq("id", id);
     if (error) {
-      toast.error("Ошибка: " + error.message);
+      toast.error("Помилка: " + error.message);
     } else {
       loadDemo();
     }
@@ -201,7 +201,7 @@ const UsersEditor = () => {
     }
     const { data, error } = await supabase.functions.invoke("telegram-broadcast", { body });
     if (error) {
-      toast.error("Ошибка: " + error.message);
+      toast.error("Помилка: " + error.message);
     } else {
       toast.success(`Отправлено ${data?.sent ?? 0} из ${data?.total ?? 0}`);
       setBroadcastMsg("");
@@ -217,9 +217,9 @@ const UsersEditor = () => {
     }
     const { data, error } = await supabase.functions.invoke("telegram-reminders", { body });
     if (error) {
-      toast.error("Ошибка: " + error.message);
+      toast.error("Помилка: " + error.message);
     } else {
-      toast.success(`Напоминания: ${data?.sent ?? 0} отправлено из ${data?.total ?? 0}`);
+      toast.success(`Нагадування: ${data?.sent ?? 0} відправлено з ${data?.total ?? 0}`);
     }
     setTriggering(false);
   };
@@ -231,13 +231,13 @@ const UsersEditor = () => {
       body: { message: dmMsg.trim(), user_ids: [dmUserId] },
     });
     if (error) {
-      toast.error("Ошибка: " + error.message);
+      toast.error("Помилка: " + error.message);
     } else if (data?.sent) {
-      toast.success("Сообщение отправлено!");
+      toast.success("Повідомлення відправлено!");
       setDmMsg("");
       setDmUserId(null);
     } else {
-      toast.error("Не удалось отправить (нет Telegram?)");
+      toast.error("Не вдалося відправити (немає Telegram?)");
     }
     setDmSending(false);
   };
@@ -248,11 +248,11 @@ const UsersEditor = () => {
       body: { email },
     });
     if (error) {
-      toast.error("Ошибка: " + error.message);
+      toast.error("Помилка: " + error.message);
     } else if (data?.error) {
-      toast.error("Ошибка: " + data.error);
+      toast.error("Помилка: " + data.error);
     } else {
-      toast.success(`Письмо отправлено на ${email}`);
+      toast.success(`Лист відправлено на ${email}`);
     }
     setResending(null);
   };
@@ -264,11 +264,11 @@ const UsersEditor = () => {
       body: { user_id: userId },
     });
     if (error) {
-      toast.error("Ошибка: " + error.message);
+      toast.error("Помилка: " + error.message);
     } else if (data?.error) {
-      toast.error("Ошибка: " + data.error);
+      toast.error("Помилка: " + data.error);
     } else {
-      toast.success("Email подтверждён!");
+      toast.success("Email підтверджено!");
       setUsers(prev => prev.map(u => u.user_id === userId ? { ...u, email_confirmed: true } : u));
     }
     setConfirming(null);
@@ -288,7 +288,7 @@ const UsersEditor = () => {
       {/* Demo Users Section */}
       <section className="glass-card p-4 flex flex-col gap-3">
         <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-2">
-          <Bot className="w-4 h-4 text-primary" /> Фейк-юзеры (рейтинг)
+          <Bot className="w-4 h-4 text-primary" /> Фейк-юзери (рейтинг)
           <span className="ml-auto text-xs text-muted-foreground font-normal">{demoUsers.length}</span>
         </h3>
 
@@ -337,7 +337,7 @@ const UsersEditor = () => {
                 <span
                   className="flex-1 text-xs font-medium text-foreground cursor-pointer hover:text-primary transition-colors"
                   onClick={() => { setEditingDemoId(du.id); setEditingDemoName(du.display_name); }}
-                  title="Нажми чтобы переименовать"
+                  title="Натисни щоб перейменувати"
                 >
                   {du.display_name} <Pencil className="w-2.5 h-2.5 inline text-muted-foreground" />
                 </span>
@@ -375,7 +375,7 @@ const UsersEditor = () => {
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Поиск по email или имени..."
+          placeholder="Пошук за email або іменем..."
           className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none"
         />
       </div>
@@ -385,7 +385,7 @@ const UsersEditor = () => {
         <div className="flex-1 glass-card p-3 flex items-center gap-2">
           <Users className="w-4 h-4 text-primary" />
           <span className="text-sm font-display font-bold text-foreground">{users.length}</span>
-          <span className="text-xs text-muted-foreground">пользователей</span>
+          <span className="text-xs text-muted-foreground">користувачів</span>
         </div>
         <div className="flex-1 glass-card p-3 flex items-center gap-2">
           <Shield className="w-4 h-4 text-primary" />
@@ -400,7 +400,7 @@ const UsersEditor = () => {
           <Send className="w-4 h-4 text-primary" /> Telegram
           {selectedUsers.size > 0 && (
             <span className="ml-auto text-xs text-primary font-normal">
-              Выбрано: {selectedUsers.size}
+              Вибрано: {selectedUsers.size}
               <button onClick={() => setSelectedUsers(new Set())} className="ml-1.5 text-muted-foreground hover:text-foreground">
                 <X className="w-3 h-3 inline" />
               </button>
@@ -410,7 +410,7 @@ const UsersEditor = () => {
         <textarea
           value={broadcastMsg}
           onChange={(e) => setBroadcastMsg(e.target.value)}
-          placeholder={selectedUsers.size > 0 ? `Сообщение для ${selectedUsers.size} выбранных...` : "Сообщение для всех пользователей..."}
+          placeholder={selectedUsers.size > 0 ? `Повідомлення для ${selectedUsers.size} вибраних...` : "Повідомлення для всіх користувачів..."}
           rows={3}
           maxLength={1000}
           className="w-full px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none resize-y"
@@ -434,7 +434,7 @@ const UsersEditor = () => {
           </button>
         </div>
         <p className="text-[10px] text-muted-foreground">
-          Выберите пользователей ниже для точечной отправки, или отправьте всем.
+          Виберіть користувачів нижче для точкової відправки, або відправте всім.
         </p>
       </div>
 
@@ -444,7 +444,7 @@ const UsersEditor = () => {
           <div className="flex items-center justify-between">
             <h4 className="text-xs font-display font-semibold text-foreground flex items-center gap-1.5">
               <MessageSquare className="w-3.5 h-3.5 text-primary" />
-              Личное сообщение: {users.find(u => u.user_id === dmUserId)?.display_name || "Пользователь"}
+              Особисте повідомлення: {users.find(u => u.user_id === dmUserId)?.display_name || "Користувач"}
             </h4>
             <button onClick={() => { setDmUserId(null); setDmMsg(""); }} className="text-muted-foreground hover:text-foreground">
               <X className="w-4 h-4" />
@@ -453,7 +453,7 @@ const UsersEditor = () => {
           <textarea
             value={dmMsg}
             onChange={(e) => setDmMsg(e.target.value)}
-            placeholder="Напишите личное сообщение..."
+            placeholder="Напишіть особисте повідомлення..."
             rows={2}
             maxLength={1000}
             className="w-full px-3 py-2 rounded-lg bg-secondary text-foreground border border-border text-sm focus:border-primary focus:outline-none resize-y"
@@ -480,7 +480,7 @@ const UsersEditor = () => {
         ) : (
           <Square className="w-3.5 h-3.5" />
         )}
-        {selectedUsers.size === filtered.length && filtered.length > 0 ? "Снять выделение" : "Выбрать всех"}
+        {selectedUsers.size === filtered.length && filtered.length > 0 ? "Зняти виділення" : "Вибрати всіх"}
       </button>
 
       {/* Users list */}
@@ -528,7 +528,7 @@ const UsersEditor = () => {
                   {(() => {
                     const isOnline = user.last_active && (Date.now() - new Date(user.last_active).getTime()) < 5 * 60 * 1000;
                     return (
-                      <span className={`shrink-0 w-2 h-2 rounded-full ${isOnline ? "bg-green-500 shadow-[0_0_4px_hsl(142,76%,36%)]" : "bg-muted-foreground/30"}`} title={isOnline ? "Онлайн" : user.last_active ? `Был(а) ${new Date(user.last_active).toLocaleString("ru")}` : "Нет данных"} />
+                      <span className={`shrink-0 w-2 h-2 rounded-full ${isOnline ? "bg-green-500 shadow-[0_0_4px_hsl(142,76%,36%)]" : "bg-muted-foreground/30"}`} title={isOnline ? "Онлайн" : user.last_active ? `Був(ла) ${new Date(user.last_active).toLocaleString("uk")}` : "Немає даних"} />
                     );
                   })()}
                 </div>
@@ -584,7 +584,7 @@ const UsersEditor = () => {
                 <button
                   onClick={() => {
                     const amt = parseInt(coinAmounts[user.user_id]) || 50;
-                    if (confirm(`Начислить +${amt} монет для ${user.display_name || user.email}?`)) {
+                    if (confirm(`Нарахувати +${amt} монет для ${user.display_name || user.email}?`)) {
                       adjustCoins(user.user_id, amt);
                     }
                   }}
@@ -609,13 +609,13 @@ const UsersEditor = () => {
             {/* Learning stats row */}
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pl-7 mt-1">
               <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                📚 <span className="font-semibold text-foreground">{user.lessons_completed}</span> уроков
+                📚 <span className="font-semibold text-foreground">{user.lessons_completed}</span> уроків
               </span>
               <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
                 📝 <span className="font-semibold text-foreground">{user.words_learned}</span> слов
               </span>
               <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                ⚔️ <span className="font-semibold text-foreground">{user.duels_played}</span> дуэлей
+                ⚔️ <span className="font-semibold text-foreground">{user.duels_played}</span> дуелей
                 {user.duels_won > 0 && <span className="text-primary font-bold">({user.duels_won} W)</span>}
               </span>
               <span className="text-[10px] text-muted-foreground">
@@ -670,7 +670,7 @@ const UsersEditor = () => {
       })}
 
       {filtered.length === 0 && (
-        <p className="text-center text-sm text-muted-foreground py-8">Пользователи не найдены</p>
+        <p className="text-center text-sm text-muted-foreground py-8">Користувачів не знайдено</p>
       )}
     </div>
   );

@@ -59,13 +59,13 @@ const DemoUsersManager = () => {
     };
     if (newUserAvatarUrl) insertData.avatar_url = newUserAvatarUrl;
     const { error } = await supabase.from("demo_leaderboard").insert(insertData);
-    if (error) toast.error("Ошибка: " + error.message);
+    if (error) toast.error("Помилка: " + error.message);
     else { toast.success("Добавлен!"); setNewDemoName(""); setNewDemoXp("100"); setNewUserAvatarUrl(null); silentReload(); }
   };
 
   const removeDemoUser = async (id: string) => {
     await supabase.from("demo_leaderboard").delete().eq("id", id);
-    toast.success("Удалён"); silentReload();
+    toast.success("Видалено"); silentReload();
   };
 
   const saveDemoName = async (id: string) => {
@@ -81,17 +81,17 @@ const DemoUsersManager = () => {
 
   const setDemoAvatar = async (id: string, url: string) => {
     await supabase.from("demo_leaderboard").update({ avatar_url: url }).eq("id", id);
-    toast.success("Аватарка обновлена!"); setAvatarPickerFor(null); silentReload();
+    toast.success("Аватарку оновлено!"); setAvatarPickerFor(null); silentReload();
   };
 
   const uploadAvatar = async (id: string, file: File) => {
     const ext = file.name.split(".").pop() || "jpg";
     const path = `demo/${id}/avatar.${ext}`;
     const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
-    if (upErr) { toast.error("Ошибка: " + upErr.message); return; }
+    if (upErr) { toast.error("Помилка: " + upErr.message); return; }
     const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
     await supabase.from("demo_leaderboard").update({ avatar_url: urlData.publicUrl + "?t=" + Date.now() }).eq("id", id);
-    toast.success("Аватарка обновлена!"); silentReload();
+    toast.success("Аватарку оновлено!"); silentReload();
   };
 
   if (loading) return <p className="text-muted-foreground animate-pulse">Завантаження...</p>;
@@ -100,7 +100,7 @@ const DemoUsersManager = () => {
     <div className="flex flex-col gap-4">
       {/* Add new */}
       <div className="glass-card p-4 flex flex-col gap-3">
-        <p className="text-xs text-muted-foreground font-medium">Новый фейк-юзер</p>
+        <p className="text-xs text-muted-foreground font-medium">Новий фейк-юзер</p>
         <div className="flex gap-2">
           {newUserAvatarUrl && (
             <img src={newUserAvatarUrl} alt="" className="w-10 h-10 rounded-full object-cover border-2 border-primary shrink-0" />
@@ -126,7 +126,7 @@ const DemoUsersManager = () => {
             <UserPlus className="w-4 h-4" />
           </button>
         </div>
-        <p className="text-[10px] text-muted-foreground">Выбери аватарку для нового юзера:</p>
+        <p className="text-[10px] text-muted-foreground">Вибери аватарку для нового юзера:</p>
         <AvatarPicker
           currentUrl={newUserAvatarUrl}
           onSelect={(url) => setNewUserAvatarUrl(url)}
@@ -196,8 +196,8 @@ const DemoUsersManager = () => {
             {([
               { key: "words_learned", label: "📚 Слова", value: du.words_learned },
               { key: "lessons_completed", label: "📖 Уроки", value: du.lessons_completed },
-              { key: "duels_won", label: "🏆 Победы", value: du.duels_won },
-              { key: "duels_played", label: "⚔️ Дуэли", value: du.duels_played },
+              { key: "duels_won", label: "🏆 Перемоги", value: du.duels_won },
+              { key: "duels_played", label: "⚔️ Дуелі", value: du.duels_played },
             ] as const).map((stat) => (
               <div key={stat.key} className="flex items-center gap-1.5 bg-secondary/50 rounded-lg px-2 py-1.5">
                 <span className="text-[10px] text-muted-foreground whitespace-nowrap">{stat.label}</span>
@@ -222,7 +222,7 @@ const DemoUsersManager = () => {
               onClick={() => setAvatarPickerFor(avatarPickerFor === du.id ? null : du.id)}
               className="text-xs text-primary hover:underline"
             >
-              {avatarPickerFor === du.id ? "Скрыть аватарки" : "Выбрать аватарку"}
+              {avatarPickerFor === du.id ? "Приховати аватарки" : "Вибрати аватарку"}
             </button>
             <div className="flex items-center gap-1.5">
               <MessageSquare className="w-3 h-3 text-muted-foreground" />
@@ -235,7 +235,7 @@ const DemoUsersManager = () => {
                   const chatId = val ? parseInt(val) : null;
                   if (chatId === du.telegram_chat_id) return;
                   await supabase.from("demo_leaderboard").update({ telegram_chat_id: chatId } as any).eq("id", du.id);
-                  toast.success(chatId ? "Telegram подключён!" : "Telegram отключён");
+                  toast.success(chatId ? "Telegram підключено!" : "Telegram відключено");
                   silentReload();
                 }}
                 className="w-36 px-2 py-1 rounded-lg bg-secondary text-foreground border border-border text-xs focus:border-primary focus:outline-none"
@@ -254,7 +254,7 @@ const DemoUsersManager = () => {
       ))}
 
       {demoUsers.length === 0 && (
-        <p className="text-center text-sm text-muted-foreground py-8">Пока нет фейк-юзеров</p>
+        <p className="text-center text-sm text-muted-foreground py-8">Поки немає фейк-юзерів</p>
       )}
     </div>
   );
