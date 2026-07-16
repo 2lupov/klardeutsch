@@ -31,6 +31,7 @@ import TeachFinance from "./pages/teach/TeachFinance";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
+import OAuthConsent from "./pages/OAuthConsent";
 import Admin from "./pages/Admin";
 import AdminV2 from "./pages/admin-v2/AdminV2";
 import Profile from "./pages/Profile";
@@ -76,6 +77,7 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/auth" element={<Auth />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
       <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/review" element={<Review />} />
       <Route path="/certificate/:code" element={<Certificate />} />
