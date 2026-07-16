@@ -1,0 +1,100 @@
+{
+  "version": 1,
+  "sdk_version": "0.22.2",
+  "path": "/functions/v1/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://jqqsszwbbxvevebmebfm.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "klar-academy-mcp",
+      "version": "0.1.0",
+      "title": "KLAR Academy"
+    },
+    "tools": [
+      {
+        "name": "get_progress",
+        "title": "Get my learning progress",
+        "description": "Returns the signed-in KLAR user's total XP, coin balance, current level, and profile display name.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_my_words",
+        "title": "List my saved vocabulary",
+        "description": "Returns the signed-in user's saved German vocabulary from their KLAR dictionary, most recent first.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "limit": {
+              "default": 20,
+              "description": "Max number of words to return.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "search": {
+              "description": "Optional substring filter on the German word.",
+              "type": "string",
+              "maxLength": 80
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_courses",
+        "title": "List available KLAR courses",
+        "description": "Lists KLAR Academy courses visible to the signed-in user (id, title, level, description, price).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "level": {
+              "description": "Optional CEFR level filter.",
+              "type": "string",
+              "enum": [
+                "A1",
+                "A2",
+                "B1",
+                "B2",
+                "C1"
+              ]
+            },
+            "limit": {
+              "default": 20,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
