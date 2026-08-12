@@ -77,6 +77,13 @@ export default {
           glow: "hsl(var(--yellow-glow))",
           soft: "hsl(var(--yellow-soft))",
         },
+        klar: {
+          bg: "hsl(var(--klar-bg))",
+          surface: "hsl(var(--klar-surface))",
+          pearl: "hsl(var(--klar-pearl))",
+          aqua: "hsl(var(--klar-aqua))",
+          sand: "hsl(var(--klar-sand))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
