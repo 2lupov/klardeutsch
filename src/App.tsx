@@ -114,7 +114,7 @@ const AppRoutes = () => {
       {/* Authenticated routes with responsive layout */}
       <Route element={<AppLayout />}>
         {/* PUBLIC — guests + everyone */}
-        <Route path="/" element={<Index />} />
+        <Route path="/home" element={<Index />} />
         <Route path="/dictionary" element={<Dictionary />} />
         <Route path="/word-lookup" element={<WordLookup />} />
         <Route path="/games" element={<Games />} />
