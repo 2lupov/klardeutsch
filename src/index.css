@@ -428,3 +428,14 @@
     50% { opacity: 0.03; }
   }
 }
+
+@layer utilities {
+  /* «Клар» landing: soft attention pulse for the free-trial badge */
+  @keyframes klar-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 hsl(var(--klar-sand) / 0.28); }
+    50% { box-shadow: 0 0 26px 6px hsl(var(--klar-sand) / 0.16); }
+  }
+  .animate-klar-pulse {
+    animation: klar-pulse 3.2s ease-in-out infinite;
+  }
+}
