@@ -66,6 +66,8 @@ import TeacherStudentDashboard from "./pages/TeacherStudentDashboard";
 import NotFound from "./pages/NotFound";
 import PaymentResult from "./pages/PaymentResult";
 import Trial from "./pages/Trial";
+import HomeGate from "@/components/klar/HomeGate";
+import KlarPrivacy from "./pages/KlarPrivacy";
 
 
 const queryClient = new QueryClient();
