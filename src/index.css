@@ -65,6 +65,13 @@
     --shadow-primary: 0 20px 50px -12px hsl(246 96% 67% / 0.45);
     --shadow-accent: 0 20px 50px -12px hsl(37 92% 55% / 0.35);
     --shadow-card: 0 10px 30px -10px hsl(240 60% 5% / 0.6);
+
+    /* ═══ «Клар» landing palette (standalone page tokens) ═══ */
+    --klar-bg: 215 27% 9%;         /* #10151C deep blue-graphite */
+    --klar-surface: 215 24% 13%;   /* slightly lifted surface */
+    --klar-pearl: 192 17% 94%;     /* #EEF2F3 cool pearl */
+    --klar-aqua: 175 39% 55%;      /* #5FB8B0 aquamarine accent */
+    --klar-sand: 39 55% 67%;       /* #D9B87C warm sand (price) */
   }
 }
 
