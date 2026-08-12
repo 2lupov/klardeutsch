@@ -66,6 +66,8 @@ import TeacherStudentDashboard from "./pages/TeacherStudentDashboard";
 import NotFound from "./pages/NotFound";
 import PaymentResult from "./pages/PaymentResult";
 import Trial from "./pages/Trial";
+import HomeGate from "@/components/klar/HomeGate";
+import KlarPrivacy from "./pages/KlarPrivacy";
 
 
 const queryClient = new QueryClient();
@@ -75,6 +77,8 @@ const AppRoutes = () => {
 
   return (
     <Routes>
+      <Route path="/" element={<HomeGate />} />
+      <Route path="/klar-privacy" element={<KlarPrivacy />} />
       <Route path="/auth" element={<Auth />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
@@ -110,7 +114,7 @@ const AppRoutes = () => {
       {/* Authenticated routes with responsive layout */}
       <Route element={<AppLayout />}>
         {/* PUBLIC — guests + everyone */}
-        <Route path="/" element={<Index />} />
+        <Route path="/home" element={<Index />} />
         <Route path="/dictionary" element={<Dictionary />} />
         <Route path="/word-lookup" element={<WordLookup />} />
         <Route path="/games" element={<Games />} />

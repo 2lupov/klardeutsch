@@ -62,3 +62,6 @@ project_id = "jqqsszwbbxvevebmebfm"
 
 [functions.process-email-queue]
 verify_jwt = true
+
+[functions.notify-lead]
+verify_jwt = false

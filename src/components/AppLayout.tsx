@@ -41,7 +41,8 @@ const AppLayout = () => {
   useStudentLiveSync(user?.id);
 
   useEffect(() => {
-    if (!loading && !user && location.pathname !== "/") navigate("/auth");
+    const PUBLIC = ["/", "/dictionary", "/word-lookup", "/games"];
+    if (!loading && !user && !PUBLIC.includes(location.pathname)) navigate("/auth");
   }, [user, loading, navigate, location.pathname]);
 
   useEffect(() => {

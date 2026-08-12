@@ -17,6 +17,8 @@ export default {
         sans: ['Manrope', 'system-ui', 'sans-serif'],
         display: ['Sora', 'system-ui', 'sans-serif'],
         sora: ['Sora', 'system-ui', 'sans-serif'],
+        'klar-display': ['"Cormorant Garamond"', 'Georgia', 'serif'],
+        'klar-body': ['Manrope', 'system-ui', 'sans-serif'],
       },
       backgroundImage: {
         'gradient-primary': 'var(--gradient-primary)',
@@ -74,6 +76,13 @@ export default {
         yellow: {
           glow: "hsl(var(--yellow-glow))",
           soft: "hsl(var(--yellow-soft))",
+        },
+        klar: {
+          bg: "hsl(var(--klar-bg))",
+          surface: "hsl(var(--klar-surface))",
+          pearl: "hsl(var(--klar-pearl))",
+          aqua: "hsl(var(--klar-aqua))",
+          sand: "hsl(var(--klar-sand))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",

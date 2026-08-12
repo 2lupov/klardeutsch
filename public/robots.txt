@@ -12,5 +12,6 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /api/
 
-Sitemap: https://klardeutsch.org/sitemap.xml
+Sitemap: https://klar.academy/sitemap.xml
