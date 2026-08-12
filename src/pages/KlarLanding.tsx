@@ -5,6 +5,7 @@ import WortschatzJar from "@/components/klar/WortschatzJar";
 import LeadModal from "@/components/klar/LeadModal";
 import FortuneWheel from "@/components/klar/FortuneWheel";
 import { useReveal, stagger } from "@/components/klar/useReveal";
+import { initMetaPixel } from "@/lib/meta-pixel";
 
 const TESTIMONIALS = [
   {
