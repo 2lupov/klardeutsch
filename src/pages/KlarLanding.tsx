@@ -86,6 +86,12 @@ const KlarLanding = () => {
 
   const open = () => setModalOpen(true);
 
+  useEffect(() => {
+    initMetaPixel();
+  }, []);
+
+
+
   // Auto-open once per session: exit intent (desktop) or after 40s.
   useEffect(() => {
     if (sessionStorage.getItem("klar_lead_auto")) return;
