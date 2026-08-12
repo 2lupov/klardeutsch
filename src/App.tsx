@@ -77,6 +77,8 @@ const AppRoutes = () => {
 
   return (
     <Routes>
+      <Route path="/" element={<HomeGate />} />
+      <Route path="/klar-privacy" element={<KlarPrivacy />} />
       <Route path="/auth" element={<Auth />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
