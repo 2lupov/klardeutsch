@@ -17,8 +17,9 @@ export default {
         sans: ['Manrope', 'system-ui', 'sans-serif'],
         display: ['Sora', 'system-ui', 'sans-serif'],
         sora: ['Sora', 'system-ui', 'sans-serif'],
-        'klar-display': ['"Cormorant Garamond"', 'Georgia', 'serif'],
+        'klar-display': ['Sora', 'system-ui', 'sans-serif'],
         'klar-body': ['Manrope', 'system-ui', 'sans-serif'],
+
       },
       backgroundImage: {
         'gradient-primary': 'var(--gradient-primary)',
