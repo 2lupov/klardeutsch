@@ -62,6 +62,12 @@ export default function AdminV2() {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [active, setActive] = useState<NavKey>("dashboard");
   const [collapsed, setCollapsed] = useState(false);
+  const [dark, setDark] = useState(() => localStorage.getItem("klar-admin-theme") === "dark");
+
+  useEffect(() => {
+    localStorage.setItem("klar-admin-theme", dark ? "dark" : "light");
+  }, [dark]);
+
 
   useEffect(() => {
     if (!user) {
