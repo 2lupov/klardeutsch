@@ -177,7 +177,7 @@ const KlarLanding = () => {
             <img
               src={pandaCoach}
               alt="Панда-викладач KLAR тримає банку зі словами"
-              className="animate-float absolute -bottom-2 -right-1 w-[46%] max-w-[180px] object-contain drop-shadow-[0_16px_36px_hsl(240_60%_5%/0.6)] sm:-right-4"
+              className="animate-float absolute -bottom-3 -left-2 w-[44%] max-w-[170px] object-contain drop-shadow-[0_16px_36px_hsl(240_60%_5%/0.6)] sm:-left-8"
             />
           </div>
 
