@@ -126,7 +126,7 @@ const KlarLanding = () => {
       <WordRain />
 
       {/* ══ Header ══ */}
-      <header className="fixed inset-x-0 top-0 z-50 border-b border-primary/10 bg-background/70 backdrop-blur-md">
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-border/50 bg-background/70 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3.5 sm:px-6">
           <a href="#top" className="flex items-center gap-2">
             <img
@@ -357,7 +357,7 @@ const KlarLanding = () => {
       </Section>
 
       {/* ══ Footer ══ */}
-      <footer className="relative z-10 border-t border-primary/10 px-4 py-10 sm:px-6">
+      <footer className="relative z-10 border-t border-border/50 px-4 py-10 sm:px-6">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-3 text-sm text-foreground/55 sm:flex-row sm:justify-between">
           <span className="font-display text-lg text-foreground">Клар</span>
           <span>Клар © 2026</span>

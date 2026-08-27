@@ -119,7 +119,7 @@ const LeadModal = ({ open, onClose, discount }: Props) => {
         className="absolute inset-0 bg-background/80 backdrop-blur-sm animate-in fade-in duration-200"
         onClick={onClose}
       />
-      <div className="relative z-10 w-full sm:max-w-md max-h-[92dvh] overflow-y-auto rounded-t-2xl sm:rounded-2xl border border-primary/25 bg-card p-6 shadow-2xl animate-in slide-in-from-bottom-4 fade-in duration-300">
+      <div className="relative z-10 w-full sm:max-w-md max-h-[92dvh] overflow-y-auto rounded-t-2xl sm:rounded-2xl border border-border/50 bg-card p-6 shadow-2xl animate-in slide-in-from-bottom-4 fade-in duration-300">
         <button
           onClick={onClose}
           aria-label="Закрити"
