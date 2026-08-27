@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { z } from "zod";
 import { X, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
 
 const schema = z.object({
   name: z.string().trim().min(2, "Вкажіть імʼя").max(80, "Занадто довге імʼя"),
@@ -134,15 +135,12 @@ const LeadModal = ({ open, onClose, discount }: Props) => {
               <Check className="h-7 w-7 text-primary" />
             </div>
             <h3 className="font-display text-2xl text-foreground">Дякуємо!</h3>
-            <p className="mt-2 text-foreground/70">
+            <p className="mt-2 text-muted-foreground">
               Я звʼяжуся з вами в Telegram найближчим часом.
             </p>
-            <button
-              onClick={onClose}
-              className="mt-6 rounded-xl border border-primary/40 px-6 py-2.5 text-primary transition-colors hover:bg-primary/10"
-            >
+            <Button onClick={onClose} variant="outline" className="mt-6 rounded-xl border-primary/40 bg-transparent text-primary hover:bg-primary/10 hover:text-primary">
               Закрити
-            </button>
+            </Button>
           </div>
         ) : (
           <form onSubmit={submit} className="space-y-4">
@@ -207,7 +205,7 @@ const LeadModal = ({ open, onClose, discount }: Props) => {
               </select>
             </Field>
 
-            <label className="flex cursor-pointer items-start gap-3 text-[13px] leading-relaxed text-foreground/70">
+            <label className="flex cursor-pointer items-start gap-3 text-[13px] leading-relaxed text-muted-foreground">
               <input
                 type="checkbox"
                 checked={consent}
@@ -223,15 +221,11 @@ const LeadModal = ({ open, onClose, discount }: Props) => {
               </span>
             </label>
 
-            {errors.form && <p className="text-sm text-red-400">{errors.form}</p>}
+            {errors.form && <p className="text-sm text-destructive">{errors.form}</p>}
 
-            <button
-              type="submit"
-              disabled={!consent || sending}
-              className="w-full rounded-xl bg-primary px-6 py-3.5 font-semibold text-primary-foreground transition-all hover:shadow-[0_0_28px_hsl(var(--primary)/0.45)] disabled:cursor-not-allowed disabled:opacity-40"
-            >
+            <Button type="submit" variant="glow" size="lg" disabled={!consent || sending} className="w-full rounded-xl">
               {sending ? "Надсилаю…" : "Надіслати заявку"}
-            </button>
+            </Button>
           </form>
         )}
       </div>
@@ -240,7 +234,7 @@ const LeadModal = ({ open, onClose, discount }: Props) => {
 };
 
 const inputCls =
-  "w-full rounded-xl border border-primary/20 bg-background/60 px-4 py-3 text-foreground placeholder:text-foreground/35 outline-none transition-colors focus:border-primary/60";
+  "w-full rounded-xl border border-input bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-primary";
 
 const Field = ({
   label,
@@ -252,9 +246,9 @@ const Field = ({
   children: React.ReactNode;
 }) => (
   <div>
-    <span className="mb-1.5 block text-xs uppercase tracking-wider text-foreground/50">{label}</span>
+    <span className="mb-1.5 block text-xs uppercase tracking-wider text-muted-foreground">{label}</span>
     {children}
-    {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
+    {error && <p className="mt-1 text-xs text-destructive">{error}</p>}
   </div>
 );
 

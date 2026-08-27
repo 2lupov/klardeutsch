@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 type Prize = { label: string; discount: string; weight: number; color: string };
 
@@ -74,13 +75,15 @@ const FortuneWheel = ({ onWin }: { onWin: (discount: string) => void }) => {
       {result ? (
         <div className="text-center">
           <p className="font-display text-2xl text-accent">{result.discount}</p>
-          <p className="mt-1 text-sm text-foreground/60">Знижку вже додано до вашої заявки</p>
+          <p className="mt-1 text-sm text-muted-foreground">Знижку вже додано до вашої заявки</p>
         </div>
       ) : (
-        <button
+        <Button
           onClick={spin}
           disabled={spinning}
-          className="rounded-xl bg-primary px-8 py-3.5 font-semibold text-primary-foreground transition-all hover:shadow-[0_0_28px_hsl(var(--primary)/0.45)] disabled:opacity-50"
+          variant="glow"
+          size="lg"
+          className="rounded-xl"
         >
           {spinning ? "Крутиться…" : "Крутити колесо"}
         </button>
