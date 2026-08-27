@@ -147,13 +147,13 @@ const KlarLanding = () => {
       <Section id="top" className="px-4 pb-14 pt-28 sm:px-6 sm:pt-36">
         <div className="mx-auto grid max-w-6xl items-center gap-10 md:grid-cols-2">
           <div>
-            <p className="mb-4 text-[11px] uppercase tracking-[0.22em] text-primary">
+            <p className="mb-4 text-xs uppercase tracking-[0.22em] text-primary">
               Німецька за авторською методикою
             </p>
             <h1 className="font-display text-[34px] font-semibold leading-[1.12] text-foreground sm:text-5xl lg:text-6xl">
               Німецька, яка нарешті залишається в голові
             </h1>
-            <p className="mt-5 max-w-lg text-[15px] leading-relaxed text-foreground/70 sm:text-base">
+            <p className="mt-5 max-w-lg text-base leading-relaxed text-muted-foreground sm:text-base">
               Індивідуальні онлайн-заняття A1–B2. Розмовна практика з першого уроку, Wortschatz
               через інтервальні повторення, граматика зрозумілою мовою та програма під вашу
               мету — побут, робота, переїзд чи іспит.
@@ -163,7 +163,7 @@ const KlarLanding = () => {
                 Залишити заявку
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Button>
-              <span className="text-sm text-foreground/55">Перше пробне заняття — безкоштовно</span>
+              <span className="text-sm text-muted-foreground">Перше пробне заняття — безкоштовно</span>
             </div>
           </div>
           <div className="relative mx-auto w-full max-w-md">
@@ -183,16 +183,16 @@ const KlarLanding = () => {
       <Section className="px-4 py-14 sm:px-6">
         <div className="mx-auto max-w-6xl">
           <div className="glass-card px-6 py-10 text-center sm:px-10">
-            <p className="text-[11px] uppercase tracking-[0.22em] text-foreground/45">
+            <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
               Вартість заняття
             </p>
             <div className="mt-4 flex items-end justify-center gap-4">
-              <span className="font-display text-2xl text-foreground/40 line-through">700 ₴</span>
+              <span className="font-display text-2xl text-muted-foreground line-through">700 ₴</span>
               <span className="font-display text-6xl font-semibold text-accent sm:text-7xl">
                 550 ₴
               </span>
             </div>
-            <p className="mt-3 text-sm text-foreground/60">за заняття · 60 хвилин · онлайн</p>
+            <p className="mt-3 text-sm text-muted-foreground">за заняття · 60 хвилин · онлайн</p>
             <div className="mt-7 inline-flex animate-klar-pulse items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-5 py-2.5 text-sm text-accent">
               <Sparkles className="h-4 w-4" />
               Перше пробне заняття — безкоштовно
@@ -219,9 +219,9 @@ const KlarLanding = () => {
               className="min-w-[82%] snap-center glass-card p-7 backdrop-blur-sm transition-colors hover:border-primary/35 sm:min-w-[60%] md:min-w-0"
             >
               <b.Icon className="h-6 w-6 text-primary" />
-              <p className="mt-5 text-[11px] uppercase tracking-[0.22em] text-primary/80">{b.de}</p>
+              <p className="mt-5 text-xs uppercase tracking-[0.22em] text-primary/80">{b.de}</p>
               <h3 className="mt-2 font-display text-2xl text-foreground">{b.title}</h3>
-              <p className="mt-3 text-[15px] leading-relaxed text-foreground/65">{b.text}</p>
+              <p className="mt-3 text-base leading-relaxed text-muted-foreground">{b.text}</p>
             </article>
           ))}
         </div>
@@ -235,7 +235,7 @@ const KlarLanding = () => {
               <h2 className="font-display text-3xl font-semibold text-foreground sm:text-4xl">
                 Не зубріння, а система
               </h2>
-              <p className="mt-5 text-[15px] leading-relaxed text-foreground/70 sm:text-base">
+              <p className="mt-5 text-base leading-relaxed text-muted-foreground sm:text-base">
                 Методика будується на трьох простих речах: ви говорите на кожному занятті, лексика
                 повертається за графіком повторень, а граматика подається як логіка мови, а не як
                 таблиця для запамʼятовування.
@@ -248,11 +248,11 @@ const KlarLanding = () => {
                 ].map((x, i) => (
                   <div key={x.t} style={stagger(i)} className="rounded-2xl border border-border/40 bg-background/40 p-5">
                     <h3 className="font-display text-lg font-semibold text-foreground">{x.t}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-foreground/65">{x.d}</p>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{x.d}</p>
                   </div>
                 ))}
               </div>
-              <p className="mt-8 text-sm text-foreground/50">
+              <p className="mt-8 text-sm text-muted-foreground">
                 Я не обіцяю «вільну німецьку за місяць». Обіцяю чесну системну роботу і зрозумілий
                 прогрес, який ви відчуєте на заняттях.
               </p>
@@ -293,7 +293,7 @@ const KlarLanding = () => {
               >
                 <span className="font-display text-3xl text-accent">{s.n}</span>
                 <h3 className="mt-3 font-display text-2xl text-foreground">{s.title}</h3>
-                <p className="mt-2 text-[15px] leading-relaxed text-foreground/65">{s.text}</p>
+                <p className="mt-2 text-base leading-relaxed text-muted-foreground">{s.text}</p>
               </div>
             ))}
           </div>
@@ -312,7 +312,7 @@ const KlarLanding = () => {
               style={stagger(i)}
               className="min-w-[85%] snap-center glass-card p-7 sm:min-w-[46%] lg:min-w-[31%]"
             >
-              <blockquote className="text-[15px] leading-relaxed text-foreground/75">
+              <blockquote className="text-base leading-relaxed text-muted-foreground">
                 «{t.text}»
               </blockquote>
               <figcaption className="mt-6 flex items-center gap-3">
@@ -342,7 +342,7 @@ const KlarLanding = () => {
             Ваша знижка на перший пакет
           </h2>
 
-          <p className="mx-auto mt-3 max-w-md text-[15px] text-foreground/65">
+          <p className="mx-auto mt-3 max-w-md text-base text-muted-foreground">
             Крутіть колесо — знижка автоматично додасться до вашої заявки.
           </p>
           <div className="mt-10">
@@ -358,7 +358,7 @@ const KlarLanding = () => {
 
       {/* ══ Footer ══ */}
       <footer className="relative z-10 border-t border-border/50 px-4 py-10 sm:px-6">
-        <div className="mx-auto flex max-w-6xl flex-col items-center gap-3 text-sm text-foreground/55 sm:flex-row sm:justify-between">
+        <div className="mx-auto flex max-w-6xl flex-col items-center gap-3 text-sm text-muted-foreground sm:flex-row sm:justify-between">
           <span className="font-display text-lg text-foreground">Клар</span>
           <span>Клар © 2026</span>
           <a href="/klar-privacy" className="transition-colors hover:text-primary">

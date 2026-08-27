@@ -124,7 +124,7 @@ const LeadModal = ({ open, onClose, discount }: Props) => {
         <button
           onClick={onClose}
           aria-label="Закрити"
-          className="absolute right-4 top-4 text-foreground/60 hover:text-foreground transition-colors"
+          className="absolute right-4 top-4 text-muted-foreground hover:text-foreground transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
@@ -144,7 +144,7 @@ const LeadModal = ({ open, onClose, discount }: Props) => {
           </div>
         ) : (
           <form onSubmit={submit} className="space-y-4">
-            <h3 className="pr-8 font-display text-[26px] leading-snug text-foreground">
+            <h3 className="pr-8 font-display text-2xl leading-snug text-foreground">
               Залиште заявку — я звʼяжуся з вами в Telegram
             </h3>
 
