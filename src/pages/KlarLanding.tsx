@@ -158,13 +158,10 @@ const KlarLanding = () => {
               мету — побут, робота, переїзд чи іспит.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-4">
-              <button
-                onClick={open}
-                className="group flex items-center gap-2 rounded-xl bg-primary px-7 py-3.5 font-semibold text-primary-foreground transition-all hover:shadow-[0_0_32px_hsl(var(--primary)/0.5)]"
-              >
+              <Button onClick={open} variant="glow" size="lg" className="group rounded-xl">
                 Залишити заявку
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </button>
+              </Button>
               <span className="text-sm text-foreground/55">Перше пробне заняття — безкоштовно</span>
             </div>
           </div>
