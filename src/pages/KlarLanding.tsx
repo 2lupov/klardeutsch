@@ -282,7 +282,16 @@ const KlarLanding = () => {
       {/* ══ Steps ══ */}
       <Section className="px-4 py-16 sm:px-6">
         <div className="mx-auto max-w-6xl">
-          <h2 className="font-klar-display text-3xl text-klar-pearl sm:text-4xl">Як почати</h2>
+          <div className="flex items-center gap-3">
+            <img
+              src={pandaGraduate}
+              alt="Панда-випускник KLAR"
+              loading="lazy"
+              className="h-14 w-14 object-contain drop-shadow-[0_6px_16px_hsl(240_60%_5%/0.5)]"
+            />
+            <h2 className="font-klar-display text-3xl text-klar-pearl sm:text-4xl">Як почати</h2>
+          </div>
+
           <div className="mt-9 grid gap-5 md:grid-cols-3">
             {STEPS.map((s, i) => (
               <div
