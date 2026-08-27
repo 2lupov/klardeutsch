@@ -463,7 +463,38 @@ const Auth = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="glass-card p-5 flex flex-col gap-3 animate-auth-scale-in" style={{ animationDelay: "0.5s" }}>
+          {isLogin && !forgotMode && (
+            <div className="flex flex-col gap-2">
+              <span className="text-xs text-muted-foreground">Хто ти?</span>
+              <div className="grid grid-cols-2 gap-2 p-1 rounded-xl bg-secondary border border-border">
+                <button
+                  type="button"
+                  onClick={() => { setStudentMode(false); setError(""); setMessage(""); }}
+                  className={`px-3 py-2 rounded-lg text-sm font-semibold transition-all ${
+                    !studentMode ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Звичайний юзер
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setStudentMode(true); setError(""); setMessage(""); }}
+                  className={`px-3 py-2 rounded-lg text-sm font-semibold transition-all ${
+                    studentMode ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Учень
+                </button>
+              </div>
+              {studentMode && (
+                <p className="text-xs text-muted-foreground">
+                  Вхід за нікнеймом і паролем, які видав викладач.
+                </p>
+              )}
+            </div>
+          )}
           {studentMode && isLogin && !forgotMode ? (
+
             <input
               type="text"
               placeholder="Никнейм ученика"
