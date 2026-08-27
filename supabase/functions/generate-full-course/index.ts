@@ -7,6 +7,12 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+
 const TOPICS: Record<string, string[]> = {
   A1: ["Begrüßung und Vorstellung","Zahlen und Alphabet","Familie und Freunde","Farben und Formen","Essen und Trinken","Tagesablauf","Wetter","Kleidung","Wohnung und Haus","Wegbeschreibung","Einkaufen","Körper und Gesundheit","Uhrzeit und Wochentage","Berufe","Hobbys und Freizeit","Verkehrsmittel","Beim Arzt","Im Restaurant","In der Schule","Tiere","Jahreszeiten und Monate","In der Stadt","Telefon und E-Mail","Feste und Feiertage","Wiederholung A1"],
   A2: ["Reisen und Urlaub","Wohnungssuche","Vorstellungsgespräch","Medien und Internet","Kochen und Rezepte","Sport und Fitness","Bank und Geld","Auf der Post","Auf dem Markt","Nachbarn und Zusammenleben","Feste und Feiern","Umwelt und Natur","Ausbildung und Schule","Kindheitserinnerungen","Pläne und Zukunft","Vergleiche","Gefühle und Emotionen","Deutsche Kultur","Unfälle und Notfälle","Behörden und Bürokratie","Musik und Kunst","Beziehungen","Technologie im Alltag","Traditionen und Bräuche","Wiederholung A2"],
@@ -15,17 +21,68 @@ const TOPICS: Record<string, string[]> = {
   C1: ["Wissenschaftliches Schreiben (Fortgeschritten)","Rhetorik","Linguistik","Grammatik-Feinheiten","Idiomatische Ausdrücke","Regionale Dialekte","Historische Sprachwissenschaft","Akademische Präsentationen","Kritische Analyse","Diskursanalyse","Pragmatik","Soziolinguistik","Psycholinguistik","Korpuslinguistik","Übersetzungswissenschaft","Vergleichende Literatur","Medientheorie","Politische Philosophie","Wirtschaftstheorie","Rechtsphilosophie","Ästhetik","Erkenntnistheorie","Ethik und Technologie","Deutsch im globalen Kontext","Wiederholung C1"],
 };
 
+const LANG_NAMES: Record<string, string> = {
+  de: "німецька", en: "англійська", pl: "польська", es: "іспанська",
+  fr: "французька", it: "італійська", uk: "українська", cs: "чеська",
+};
+
+/** Repair JSON that the model truncated mid-object (the classic failure). */
+function repairJson(raw: string): any | null {
+  const attempt = (s: string) => { try { return JSON.parse(s); } catch { return null; } };
+  let direct = attempt(raw);
+  if (direct) return direct;
+
+  // Cut trailing garbage and close open brackets/strings.
+  let s = raw;
+  // drop an unterminated string tail
+  const quotes = (s.match(/(?<!\\)"/g) || []).length;
+  if (quotes % 2 === 1) s = s.slice(0, s.lastIndexOf('"'));
+  s = s.replace(/[,\s]+$/, "");
+
+  const stack: string[] = [];
+  let inStr = false, esc = false;
+  for (const ch of s) {
+    if (inStr) {
+      if (esc) esc = false;
+      else if (ch === "\\") esc = true;
+      else if (ch === '"') inStr = false;
+      continue;
+    }
+    if (ch === '"') inStr = true;
+    else if (ch === "{" || ch === "[") stack.push(ch);
+    else if (ch === "}" || ch === "]") stack.pop();
+  }
+  let closed = s;
+  for (let i = stack.length - 1; i >= 0; i--) closed += stack[i] === "{" ? "}" : "]";
+  return attempt(closed);
+}
+
+function stripFence(content: string): string {
+  let c = content.trim();
+  if (c.startsWith("```json")) c = c.slice(7);
+  else if (c.startsWith("```")) c = c.slice(3);
+  if (c.endsWith("```")) c = c.slice(0, -3);
+  return c.trim();
+}
+
+const shuffleEx = (q: any) => {
+  if (!q || !Array.isArray(q.options) || q.options.length < 2) return q;
+  const idx = q.options.map((_: any, i: number) => i);
+  for (let i = idx.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [idx[i], idx[j]] = [idx[j], idx[i]];
+  }
+  const out: any = { ...q, options: idx.map((i: number) => q.options[i]) };
+  if (typeof q.correct_index === "number") out.correct_index = idx.indexOf(q.correct_index);
+  return out;
+};
+
 serve(async (req) => {
-  if (req.method === "OPTIONS")
-    return new Response(null, { headers: corsHeaders });
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    if (!authHeader?.startsWith("Bearer ")) return json({ error: "Unauthorized" }, 401);
 
     const supabaseAuth = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -33,11 +90,7 @@ serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } }
     );
     const { data: { user }, error: userErr } = await supabaseAuth.auth.getUser();
-    if (userErr || !user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    if (userErr || !user) return json({ error: "Unauthorized" }, 401);
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -45,254 +98,186 @@ serve(async (req) => {
     );
 
     const { data: roleData } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .eq("role", "admin")
-      .maybeSingle();
-    if (!roleData) {
-      return new Response(JSON.stringify({ error: "Admin only" }), {
-        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+      .from("user_roles").select("role")
+      .eq("user_id", user.id).eq("role", "admin").maybeSingle();
+    if (!roleData) return json({ error: "Admin only" }, 403);
 
-    const { courseId, level, batchStart, batchSize } = await req.json();
-    if (!courseId || !level || batchStart === undefined || !batchSize) {
-      return new Response(JSON.stringify({ error: "Missing params" }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    const body = await req.json().catch(() => ({}));
+    const {
+      courseId,
+      level,
+      batchStart = 0,
+      batchSize = 1,
+      topics: customTopics,       // ["Тема 1", ...] — сам задаєш теми
+      customPrompt,               // твій власний промпт (ціль курсу, стиль, правила)
+      targetLanguage = "de",      // мова, яку вчать
+      metaLanguage = "uk",        // мова пояснень
+    } = body;
 
-    const topics = TOPICS[level];
-    if (!topics) {
-      return new Response(JSON.stringify({ error: "Invalid level" }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    if (!courseId || !level) return json({ error: "Missing params" }, 400);
 
-    const batchTopics = topics.slice(batchStart, batchStart + batchSize);
-    if (batchTopics.length === 0) {
-      return new Response(JSON.stringify({ error: "No topics for this batch" }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    let batchTopics: string[];
+    if (Array.isArray(customTopics) && customTopics.length > 0) {
+      batchTopics = customTopics.map((t: any) => String(t).slice(0, 200)).slice(0, 5);
+    } else {
+      const all = TOPICS[level];
+      if (!all) return json({ error: "Invalid level" }, 400);
+      batchTopics = all.slice(batchStart, batchStart + Math.min(batchSize, 5));
     }
+    if (batchTopics.length === 0) return json({ error: "No topics for this batch" }, 400);
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
-    const lessonNumbers = batchTopics.map((_, i) => batchStart + i + 1);
+    const targetName = LANG_NAMES[targetLanguage] || targetLanguage;
+    const metaName = LANG_NAMES[metaLanguage] || "українська";
 
-    const systemPrompt = `Ты — лучший преподаватель немецкого как иностранного (DaF). Создавай уроки для уровня ${level}.
+    const buildSystem = (compact: boolean) => `Ти — найкращий методист і викладач (${targetName} як іноземна). Рівень: ${level}.
+Мова, яку вчить студент: ${targetName}. Мова пояснень і перекладів: ${metaName}.
 
-КРИТИЧЕСКИ ВАЖНО: Ответ — ТОЛЬКО валидный JSON-массив. Без markdown, без пояснений, без \`\`\`.
-
-Каждый урок — объект с ОБЯЗАТЕЛЬНЫМИ полями (пропущенные = брак):
+${customPrompt ? `ГОЛОВНА ЦІЛЬ І ВИМОГИ ВІД ВИКЛАДАЧА (найвищий приоритет):\n${String(customPrompt).slice(0, 3000)}\n` : ""}
+КРИТИЧНО: відповідь — ТІЛЬКИ один валідний JSON-обʼєкт одного уроку. Без markdown, без \`\`\`, без пояснень.
 
 {
-  "title": "Урок N: Тема",
-  "theory": [массив TheoryBlock — см. ниже],
+  "title": "Урок: Тема",
+  "theory": [TheoryBlock, ...],
   "exercises": {
     "topic": "Тема",
-    "vocabulary": [
-      {"german": "слово", "russian": "перевод_рус", "ukrainian": "перевод_укр", "article": "der/die/das или null", "example": "Примерное предложение на немецком"}
-    ],
+    "vocabulary": [{"german":"слово","russian":"переклад рос","ukrainian":"переклад укр","article":"der/die/das або null","example":"речення мовою, що вивчається"}],
     "exercises": [
-      {"type": "cloze", "sentence": "Предложение с ___", "blank_index": 0, "options": ["A","B","C","D"], "correct": "правильный ответ"},
-      {"type": "mc", "question": "Вопрос?", "options": ["A","B","C","D"], "correct_index": 0, "explanation": "Объяснение"}
+      {"type":"cloze","sentence":"Речення з ___","blank_index":0,"options":["A","B","C","D"],"correct":"правильна"},
+      {"type":"mc","question":"Питання?","options":["A","B","C","D"],"correct_index":0,"explanation":"Пояснення"}
     ],
-    "reading": {
-      "title": "Название текста",
-      "text": "Связный текст для чтения, 8-15 предложений, по теме урока",
-      "questions": [
-        {"question": "Вопрос по тексту?", "options": ["A","B","C","D"], "correct_index": 0, "explanation": "Почему этот ответ правильный"}
-      ]
-    },
-    "practice_dialog": {
-      "dialog": [
-        {"speaker": "A", "text_de": "Немецкий текст", "text_ru": "Русский перевод", "text_ua": "Украинский перевод"}
-      ]
-    },
-    "cultural_notes": [
-      {"title": {"ru": "Заголовок", "ua": "Заголовок"}, "content": {"ru": "Интересный факт о культуре", "ua": "Цікавий факт про культуру"}}
-    ]
+    "reading": {"title":"Назва","text":"звʼязний текст ${compact ? "6-8" : "8-15"} речень","questions":[{"question":"?","options":["A","B","C","D"],"correct_index":0,"explanation":"..."}]},
+    "practice_dialog": {"dialog":[{"speaker":"A","text_de":"...","text_ru":"...","text_ua":"..."}]},
+    "cultural_notes": [{"title":{"ru":"...","ua":"..."},"content":{"ru":"...","ua":"..."}}]
   }
 }
 
-TheoryBlock типы (используй разнообразно, 8-15 блоков на урок):
-- {"type": "heading", "content": "Заголовок раздела", "emoji": "📖"}
-- {"type": "text", "content": "Объясняющий текст на русском"}
-- {"type": "rule", "title": "Название правила", "content": "Описание правила", "emoji": "📌"}
-- {"type": "table", "headers": ["Столбец1", "Столбец2"], "rows": [["значение1", "значение2"]]}
-- {"type": "example", "de": "Немецкий пример", "ru": "Русский перевод", "uk": "Украинский перевод", "highlight": ["выделенное_слово"]}
-- {"type": "comparison", "items": [{"de": "...", "ru": "...", "uk": "..."}]}
-- {"type": "tip", "variant": "info", "title": "Совет", "content": "Полезная подсказка"}
-- {"type": "list", "items_list": ["пункт1", "пункт2"]}
+TheoryBlock типи:
+- {"type":"heading","content":"...","emoji":"📖"}
+- {"type":"text","content":"..."}
+- {"type":"rule","title":"...","content":"...","emoji":"📌"}
+- {"type":"table","headers":["A","B"],"rows":[["1","2"]]}
+- {"type":"example","de":"...","ru":"...","uk":"...","highlight":["слово"]}
+- {"type":"comparison","items":[{"de":"...","ru":"...","uk":"..."}]}
+- {"type":"tip","variant":"info","title":"...","content":"..."}
+- {"type":"list","items_list":["..."]}
 
-ОБЯЗАТЕЛЬНЫЕ ТРЕБОВАНИЯ для КАЖДОГО урока:
-✅ theory — 8-15 блоков (грамматика, таблицы, правила, примеры)
-✅ vocabulary — 10-15 слов с article, example, russian, ukrainian
-✅ exercises — 3-4 cloze + 3-4 mc = 6-8 упражнений
-✅ reading — ОБЯЗАТЕЛЬНО! Связный текст 8-15 предложений + 4-5 вопросов
-✅ practice_dialog — ОБЯЗАТЕЛЬНО! 6-10 реплик, жизненный диалог
-✅ cultural_notes — ОБЯЗАТЕЛЬНО! 1-2 культурных факта с ru и ua
-✅ Все переводы на РУССКОМ и УКРАИНСКОМ
-✅ Строго уровень ${level}!
+ОБОВʼЯЗКОВО в уроці: theory (${compact ? "6-8" : "8-15"} блоків), vocabulary (${compact ? "8-10" : "10-15"} слів),
+exercises (${compact ? "5-6" : "6-8"}: cloze + mc), reading + ${compact ? "3" : "4-5"} питання,
+practice_dialog (${compact ? "5-6" : "6-10"} реплік), cultural_notes (1-2).
+Строго рівень ${level}. Пиши компактно, без води — головне, щоб JSON був ПОВНИЙ і закритий.`;
 
-НЕ ПРОПУСКАЙ НИ ОДИН РАЗДЕЛ. Каждый урок ДОЛЖЕН содержать ВСЕ 6 разделов.`;
+    const askForLesson = async (topic: string, lessonNo: number, compact: boolean) => {
+      const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          max_tokens: 16000,
+          messages: [
+            { role: "system", content: buildSystem(compact) },
+            {
+              role: "user",
+              content: `Створи ПОВНИЙ урок №${lessonNo} на тему: "${topic}". Відповідь — тільки JSON-обʼєкт уроку.`,
+            },
+          ],
+        }),
+      });
 
-    const userPrompt = `Создай ${batchTopics.length} полных уроков для уровня ${level}:
-${batchTopics.map((t, i) => `${lessonNumbers[i]}. ${t}`).join("\n")}
-
-Ответь ТОЛЬКО JSON-массивом из ${batchTopics.length} объектов. Каждый объект ОБЯЗАН содержать ВСЕ поля: theory, vocabulary, exercises, reading, practice_dialog, cultural_notes.`;
-
-    console.log(`Generating ${batchTopics.length} lessons for ${level}, batch starting at ${batchStart}`);
-
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-      }),
-    });
-
-    if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limit exceeded, try again in a minute" }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+      if (!resp.ok) {
+        const text = await resp.text();
+        const err: any = new Error(`AI error ${resp.status}: ${text.slice(0, 200)}`);
+        err.status = resp.status;
+        throw err;
       }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Payment required — add credits" }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+
+      const data = await resp.json();
+      const raw = stripFence(data.choices?.[0]?.message?.content || "");
+      const parsed = repairJson(raw);
+      if (!parsed) {
+        console.error(`Lesson ${lessonNo}: unparsable JSON, tail:`, raw.slice(-300));
+        return null;
       }
-      const t = await response.text();
-      throw new Error(`AI error ${response.status}: ${t}`);
+      return Array.isArray(parsed) ? parsed[0] : parsed;
+    };
+
+    const generated: { topic: string; lessonNo: number; lesson: any }[] = [];
+    const failed: { topic: string; reason: string }[] = [];
+
+    for (let i = 0; i < batchTopics.length; i++) {
+      const topic = batchTopics[i];
+      const lessonNo = batchStart + i + 1;
+      let lesson: any = null;
+      try {
+        lesson = await askForLesson(topic, lessonNo, false);
+        if (!lesson) lesson = await askForLesson(topic, lessonNo, true); // retry, компактніше
+      } catch (e: any) {
+        if (e.status === 429) return json({ error: "Ліміт запитів — спробуй за хвилину" }, 429);
+        if (e.status === 402) return json({ error: "Закінчились AI-кредити" }, 402);
+        console.error(`Lesson ${lessonNo} failed:`, e.message);
+        failed.push({ topic, reason: e.message });
+        continue;
+      }
+      if (!lesson) {
+        failed.push({ topic, reason: "AI повернув неповний JSON двічі" });
+        continue;
+      }
+      generated.push({ topic, lessonNo, lesson });
     }
 
-    const aiData = await response.json();
-    let content = aiData.choices?.[0]?.message?.content || "";
-
-    // Clean markdown wrappers
-    content = content.trim();
-    if (content.startsWith("```json")) content = content.slice(7);
-    if (content.startsWith("```")) content = content.slice(3);
-    if (content.endsWith("```")) content = content.slice(0, -3);
-    content = content.trim();
-
-    let lessons: any[];
-    try {
-      const parsed = JSON.parse(content);
-      lessons = Array.isArray(parsed) ? parsed : parsed.lessons || [parsed];
-    } catch (e) {
-      console.error("Failed to parse AI response:", content.slice(0, 500));
-      throw new Error("AI returned invalid JSON");
+    if (generated.length === 0) {
+      return json({ error: failed[0]?.reason || "AI не створив жодного уроку", failed }, 502);
     }
 
-    // Validate and ensure all sections exist
-    const validatedLessons = lessons.map((lesson: any, i: number) => {
+    const inserts = generated.map(({ topic, lessonNo, lesson }) => {
       const ex = lesson.exercises || {};
-      
-      // Ensure all required sections exist with fallbacks
-      if (!ex.vocabulary || !Array.isArray(ex.vocabulary) || ex.vocabulary.length === 0) {
-        console.warn(`Lesson ${batchStart + i + 1}: missing vocabulary`);
-        ex.vocabulary = [];
-      }
-      if (!ex.exercises || !Array.isArray(ex.exercises) || ex.exercises.length === 0) {
-        console.warn(`Lesson ${batchStart + i + 1}: missing exercises`);
-        ex.exercises = [];
-      }
-      if (!ex.reading || !ex.reading.text) {
-        console.warn(`Lesson ${batchStart + i + 1}: missing reading`);
-        ex.reading = ex.reading || { title: batchTopics[i] || "Lesetext", text: "", questions: [] };
-      }
-      if (!ex.practice_dialog || !ex.practice_dialog.dialog) {
-        console.warn(`Lesson ${batchStart + i + 1}: missing dialog`);
-        ex.practice_dialog = ex.practice_dialog || { dialog: [] };
-      }
-      if (!ex.cultural_notes || !Array.isArray(ex.cultural_notes) || ex.cultural_notes.length === 0) {
-        console.warn(`Lesson ${batchStart + i + 1}: missing cultural_notes`);
-        ex.cultural_notes = ex.cultural_notes || [];
-      }
+      ex.topic = ex.topic || topic;
+      ex.vocabulary = Array.isArray(ex.vocabulary) ? ex.vocabulary : [];
+      ex.exercises = (Array.isArray(ex.exercises) ? ex.exercises : []).map(shuffleEx);
+      ex.reading = ex.reading?.text ? ex.reading : { title: topic, text: "", questions: [] };
+      if (Array.isArray(ex.reading.questions)) ex.reading.questions = ex.reading.questions.map(shuffleEx);
+      ex.practice_dialog = ex.practice_dialog?.dialog ? ex.practice_dialog : { dialog: [] };
+      ex.cultural_notes = Array.isArray(ex.cultural_notes) ? ex.cultural_notes : [];
 
-      // Shuffle quiz options so the correct answer isn't always at the same position
-      const shuffleEx = (q: any) => {
-        if (!q || !Array.isArray(q.options) || q.options.length < 2) return q;
-        const idx = q.options.map((_: any, i: number) => i);
-        for (let i = idx.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [idx[i], idx[j]] = [idx[j], idx[i]];
-        }
-        const newOptions = idx.map((i: number) => q.options[i]);
-        const out: any = { ...q, options: newOptions };
-        if (typeof q.correct_index === "number") {
-          out.correct_index = idx.indexOf(q.correct_index);
-        }
-        // For cloze/mc with `correct` value — value stays correct, only position changes
-        return out;
-      };
-      ex.exercises = (ex.exercises || []).map(shuffleEx);
-      if (ex.reading?.questions) ex.reading.questions = ex.reading.questions.map(shuffleEx);
-      if (ex.listening?.questions) ex.listening.questions = ex.listening.questions.map(shuffleEx);
-
-      return { ...lesson, exercises: ex };
-    });
-
-    // Insert lessons into DB
-    const inserts = validatedLessons.map((lesson: any, i: number) => {
-      let theory = lesson.theory;
-      if (typeof theory !== "string") {
-        theory = JSON.stringify(theory);
-      }
-
+      const theory = typeof lesson.theory === "string" ? lesson.theory : JSON.stringify(lesson.theory || []);
       return {
         course_id: courseId,
-        title: lesson.title || `Lektion ${batchStart + i + 1}: ${batchTopics[i]}`,
+        title: lesson.title || `Урок ${lessonNo}: ${topic}`,
         theory,
-        exercises: lesson.exercises || {},
-        sort_order: batchStart + i,
+        exercises: ex,
+        sort_order: lessonNo - 1,
       };
     });
 
     const { error: insertErr } = await supabase.from("course_lessons").insert(inserts);
     if (insertErr) {
       console.error("Insert error:", insertErr);
-      throw new Error("Failed to insert lessons: " + insertErr.message);
+      throw new Error("Не вдалося зберегти уроки: " + insertErr.message);
     }
 
-    // Log completeness stats
-    const stats = validatedLessons.map((l: any, i: number) => ({
-      lesson: batchStart + i + 1,
-      vocab: l.exercises.vocabulary?.length || 0,
-      exercises: l.exercises.exercises?.length || 0,
-      reading: l.exercises.reading?.text ? "✅" : "❌",
-      dialog: l.exercises.practice_dialog?.dialog?.length || 0,
-      culture: l.exercises.cultural_notes?.length || 0,
+    const stats = inserts.map((l, i) => ({
+      lesson: generated[i].lessonNo,
+      title: l.title,
+      vocab: (l.exercises as any).vocabulary?.length || 0,
+      exercises: (l.exercises as any).exercises?.length || 0,
+      reading: (l.exercises as any).reading?.text ? "✅" : "❌",
+      dialog: (l.exercises as any).practice_dialog?.dialog?.length || 0,
+      culture: (l.exercises as any).cultural_notes?.length || 0,
     }));
     console.log("Lesson completeness:", JSON.stringify(stats));
 
-    return new Response(JSON.stringify({
+    return json({
       success: true,
       lessonsGenerated: inserts.length,
       batchStart,
       batchEnd: batchStart + inserts.length,
+      failed,
       stats,
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-
   } catch (e) {
     console.error("generate-full-course error:", e);
-    return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return json({ error: e instanceof Error ? e.message : "Unknown error" }, 500);
   }
 });

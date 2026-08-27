@@ -16,7 +16,10 @@ import {
   Lock,
   ChevronLeft,
   ExternalLink,
+  Moon,
+  Sun,
 } from "lucide-react";
+
 
 import DashboardPage from "./pages/DashboardPage";
 import CoursesPage from "./pages/CoursesPage";
@@ -59,6 +62,12 @@ export default function AdminV2() {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [active, setActive] = useState<NavKey>("dashboard");
   const [collapsed, setCollapsed] = useState(false);
+  const [dark, setDark] = useState(() => localStorage.getItem("klar-admin-theme") === "dark");
+
+  useEffect(() => {
+    localStorage.setItem("klar-admin-theme", dark ? "dark" : "light");
+  }, [dark]);
+
 
   useEffect(() => {
     if (!user) {
@@ -106,9 +115,10 @@ export default function AdminV2() {
 
   return (
     <div
-      className="h-[100dvh] w-full flex overflow-hidden"
-      style={{ background: "#F8FAFC", fontFamily: "Inter, system-ui, sans-serif" }}
+      className={`h-[100dvh] w-full flex overflow-hidden ${dark ? "admin-dark" : ""}`}
+      style={{ background: dark ? "#0B1120" : "#F8FAFC", fontFamily: "Inter, system-ui, sans-serif" }}
     >
+
       {/* Sidebar */}
       <aside
         className={`${collapsed ? "w-16" : "w-64"} shrink-0 h-full bg-white border-r border-slate-200 flex flex-col transition-all duration-200`}
@@ -180,7 +190,15 @@ export default function AdminV2() {
               <h1 className="text-lg font-semibold text-slate-900 truncate">{activeItem.label}</h1>
             </div>
             <div className="flex items-center gap-3">
+              <button
+                onClick={() => setDark((d) => !d)}
+                className="w-9 h-9 rounded-xl border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50"
+                title={dark ? "Світла тема" : "Темна тема"}
+              >
+                {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </button>
               <LangSelector />
+
               <span
                 className="text-xs px-2.5 py-1 rounded-full font-medium hidden sm:inline"
                 style={{ background: "#FEF3C7", color: "#92400E" }}

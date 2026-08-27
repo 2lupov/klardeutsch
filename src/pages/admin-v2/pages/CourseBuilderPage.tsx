@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, SectionHeader, EmptyState } from "./_ui";
-import { Sparkles, Play, CheckCircle2, XCircle, Loader2, BookOpen } from "lucide-react";
+import { Play, CheckCircle2, XCircle, Loader2, BookOpen, RotateCcw, Settings2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useAdminLang } from "../LanguageContext";
 
@@ -14,10 +14,22 @@ interface Course {
 }
 
 type BatchStatus = "pending" | "running" | "done" | "error";
-interface Batch { start: number; size: number; status: BatchStatus; message?: string; }
+interface Batch { start: number; topics: string[]; status: BatchStatus; message?: string; }
 
-const BATCH_SIZE = 5;
-const TOTAL_TOPICS = 25;
+/** Стандартні теми — можна повністю замінити своїми */
+const DEFAULT_TOPICS: Record<string, string[]> = {
+  A1: ["Begrüßung und Vorstellung","Zahlen und Alphabet","Familie und Freunde","Farben und Formen","Essen und Trinken","Tagesablauf","Wetter","Kleidung","Wohnung und Haus","Wegbeschreibung"],
+  A2: ["Reisen und Urlaub","Wohnungssuche","Vorstellungsgespräch","Medien und Internet","Kochen und Rezepte","Sport und Fitness","Bank und Geld","Auf der Post","Auf dem Markt","Nachbarn und Zusammenleben"],
+  B1: ["Nachrichten und Medien","Arbeitsleben","Gesundheitssystem","Umwelt und Klima","Migration und Integration","Bildungssystem","Wirtschaft","Politik Grundlagen","Soziale Medien","Recht und Gesetze"],
+  B2: ["Wissenschaftliches Schreiben","Debatte und Argumentation","Medienanalyse","Wirtschaft vertieft","Politischer Diskurs","Rechtssprache","Medizinisches Deutsch","Technisches Deutsch","Geschäftskommunikation","Forschungsmethoden"],
+  C1: ["Rhetorik","Linguistik","Grammatik-Feinheiten","Idiomatische Ausdrücke","Regionale Dialekte","Akademische Präsentationen","Kritische Analyse","Diskursanalyse","Pragmatik","Soziolinguistik"],
+};
+
+const META_LANGS = [
+  { code: "uk", label: "Українська" },
+  { code: "ru", label: "Російська" },
+  { code: "en", label: "Англійська" },
+];
 
 export default function CourseBuilderPage() {
   const { lang, meta, isAll } = useAdminLang();
@@ -27,7 +39,15 @@ export default function CourseBuilderPage() {
   const [running, setRunning] = useState(false);
   const [existingLessons, setExistingLessons] = useState(0);
 
+  // ── налаштування генерації (зберігаються локально під кожен курс)
+  const [topicsText, setTopicsText] = useState("");
+  const [customPrompt, setCustomPrompt] = useState("");
+  const [metaLanguage, setMetaLanguage] = useState("uk");
+  const [batchSize, setBatchSize] = useState(2);
+  const [startFrom, setStartFrom] = useState(0);
+
   const selected = courses.find((c) => c.id === selectedId);
+  const topics = topicsText.split("\n").map((t) => t.trim()).filter(Boolean);
 
   const loadCourses = async () => {
     const base = supabase
@@ -46,6 +66,7 @@ export default function CourseBuilderPage() {
       .select("*", { count: "exact", head: true })
       .eq("course_id", courseId);
     setExistingLessons(count || 0);
+    setStartFrom(count || 0);
   };
 
   useEffect(() => { loadCourses(); }, [lang]);
@@ -56,53 +77,109 @@ export default function CourseBuilderPage() {
     return () => window.removeEventListener("admin-v2:open-builder", h);
   }, []);
 
+  // Підтягуємо збережені налаштування або дефолтні теми рівня
   useEffect(() => {
-    if (selectedId) loadLessonCount(selectedId);
-  }, [selectedId]);
-
-  const initBatches = () => {
-    const arr: Batch[] = [];
-    for (let s = 0; s < TOTAL_TOPICS; s += BATCH_SIZE) {
-      arr.push({ start: s, size: Math.min(BATCH_SIZE, TOTAL_TOPICS - s), status: "pending" });
+    if (!selectedId) return;
+    loadLessonCount(selectedId);
+    const course = courses.find((c) => c.id === selectedId);
+    const saved = localStorage.getItem(`klar-builder-${selectedId}`);
+    if (saved) {
+      try {
+        const s = JSON.parse(saved);
+        setTopicsText(s.topicsText ?? "");
+        setCustomPrompt(s.customPrompt ?? "");
+        setMetaLanguage(s.metaLanguage ?? "uk");
+        setBatchSize(s.batchSize ?? 2);
+        return;
+      } catch {}
     }
-    setBatches(arr);
+    setTopicsText((DEFAULT_TOPICS[course?.level || "A1"] || []).join("\n"));
+    setCustomPrompt("");
+    setMetaLanguage("uk");
+    setBatchSize(2);
+  }, [selectedId, courses.length]);
+
+  const saveSettings = () => {
+    if (!selectedId) return;
+    localStorage.setItem(
+      `klar-builder-${selectedId}`,
+      JSON.stringify({ topicsText, customPrompt, metaLanguage, batchSize })
+    );
+    toast({ title: "Налаштування збережено" });
+  };
+
+  const buildBatches = (list: string[]): Batch[] => {
+    const arr: Batch[] = [];
+    for (let i = 0; i < list.length; i += batchSize) {
+      arr.push({ start: startFrom + i, topics: list.slice(i, i + batchSize), status: "pending" });
+    }
+    return arr;
+  };
+
+  const runBatch = async (b: Batch) => {
+    if (!selected) return false;
+    setBatches((prev) => prev.map((x) => x.start === b.start ? { ...x, status: "running", message: undefined } : x));
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-full-course", {
+        body: {
+          courseId: selected.id,
+          level: selected.level || "A1",
+          batchStart: b.start,
+          batchSize: b.topics.length,
+          topics: b.topics,
+          customPrompt: customPrompt || undefined,
+          targetLanguage: selected.target_language || "de",
+          metaLanguage,
+        },
+      });
+      if (error || (data as any)?.error) throw new Error(error?.message || (data as any).error);
+      const failed = (data as any).failed?.length || 0;
+      setBatches((prev) => prev.map((x) => x.start === b.start
+        ? {
+            ...x,
+            status: failed ? "error" : "done",
+            message: failed
+              ? `${(data as any).lessonsGenerated} ок, ${failed} не вдалось`
+              : `${(data as any).lessonsGenerated} уроків`,
+          }
+        : x));
+      return !failed;
+    } catch (e: any) {
+      setBatches((prev) => prev.map((x) => x.start === b.start
+        ? { ...x, status: "error", message: e.message } : x));
+      return false;
+    }
   };
 
   const runGeneration = async () => {
     if (!selected) return;
-    initBatches();
-    setRunning(true);
-
-    const level = selected.level || "A1";
-    const total = Math.ceil(TOTAL_TOPICS / BATCH_SIZE);
-
-    for (let i = 0; i < total; i++) {
-      const start = i * BATCH_SIZE;
-      const size = Math.min(BATCH_SIZE, TOTAL_TOPICS - start);
-      setBatches((prev) => prev.map((b) => b.start === start ? { ...b, status: "running" } : b));
-
-      try {
-        const { data, error } = await supabase.functions.invoke("generate-full-course", {
-          body: { courseId: selected.id, level, batchStart: start, batchSize: size },
-        });
-        if (error || (data as any)?.error) throw new Error(error?.message || (data as any).error);
-        setBatches((prev) => prev.map((b) => b.start === start
-          ? { ...b, status: "done", message: `${(data as any).lessonsGenerated} уроків` } : b));
-      } catch (e: any) {
-        setBatches((prev) => prev.map((b) => b.start === start
-          ? { ...b, status: "error", message: e.message } : b));
-        toast({ title: `Помилка на batch ${i + 1}`, description: e.message });
-      }
+    if (topics.length === 0) {
+      toast({ title: "Додай хоча б одну тему уроку" });
+      return;
     }
-
+    const list = buildBatches(topics);
+    setBatches(list);
+    setRunning(true);
+    for (const b of list) await runBatch(b);
     setRunning(false);
     await loadLessonCount(selected.id);
     await loadCourses();
     toast({ title: "Генерацію завершено" });
   };
 
+  const retryFailed = async () => {
+    const bad = batches.filter((b) => b.status === "error");
+    if (bad.length === 0) return;
+    setRunning(true);
+    for (const b of bad) await runBatch(b);
+    setRunning(false);
+    if (selected) await loadLessonCount(selected.id);
+  };
+
   const doneCount = batches.filter((b) => b.status === "done").length;
+  const errorCount = batches.filter((b) => b.status === "error").length;
   const progress = batches.length ? (doneCount / batches.length) * 100 : 0;
+
 
   if (!selectedId) {
     return (
@@ -155,34 +232,112 @@ export default function CourseBuilderPage() {
         }
       />
 
-      <Card className="p-6">
+      <Card className="p-6 space-y-5">
         <div className="flex items-start gap-4">
           <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-white shrink-0"
             style={{ background: "linear-gradient(135deg,#4F46E5,#7C3AED)" }}>
-            <Sparkles className="w-6 h-6" />
+            <Settings2 className="w-6 h-6" />
           </div>
           <div className="flex-1">
-            <h3 className="font-semibold text-slate-900">Згенерувати повний курс</h3>
+            <h3 className="font-semibold text-slate-900">Налаштування генератора</h3>
             <p className="text-sm text-slate-500 mt-1">
-              AI створить {TOTAL_TOPICS} уроків для рівня {selected?.level} батчами по {BATCH_SIZE}.
-              Кожен урок: 8-15 блоків теорії, 10-15 слів, 6-8 вправ, читання, діалог, культурна нотатка.
+              Теми уроків і твій власний промпт — саме за ними AI будує курс. Один урок = один запит до AI (щоб не обривався JSON).
             </p>
-            {existingLessons > 0 && (
-              <p className="text-xs text-amber-600 mt-2">
-                ⚠️ У курсі вже {existingLessons} уроків — нові будуть додані додатково.
-              </p>
-            )}
-            <button
-              onClick={runGeneration}
-              disabled={running}
-              className="mt-4 px-4 py-2 rounded-xl text-white text-sm font-medium flex items-center gap-2 disabled:opacity-50"
-              style={{ background: "#4F46E5" }}>
-              {running ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
-              {running ? "Генерація..." : "Запустити генерацію"}
-            </button>
           </div>
         </div>
+
+        <div>
+          <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">
+            Твій промпт (ціль курсу, стиль, правила) — головний пріоритет для AI
+          </label>
+          <textarea
+            value={customPrompt}
+            onChange={(e) => setCustomPrompt(e.target.value)}
+            placeholder={"Напр.: курс для дорослих, які переїжджають до Німеччини. Пояснення українською, багато розмовних фраз, мінімум теорії, у кожному уроці 3 діалоги з побуту, гумор і приклади з життя."}
+            className="mt-2 w-full min-h-[110px] px-3 py-2 rounded-xl border border-slate-200 text-sm"
+          />
+        </div>
+
+        <div>
+          <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">
+            Теми уроків — по одній на рядок ({topics.length})
+          </label>
+          <textarea
+            value={topicsText}
+            onChange={(e) => setTopicsText(e.target.value)}
+            className="mt-2 w-full min-h-[160px] px-3 py-2 rounded-xl border border-slate-200 text-sm font-mono"
+          />
+          <button
+            onClick={() => setTopicsText((DEFAULT_TOPICS[selected?.level || "A1"] || []).join("\n"))}
+            className="mt-2 text-xs text-indigo-600 hover:underline"
+          >
+            Підставити стандартні теми рівня {selected?.level}
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Мова пояснень</label>
+            <select
+              value={metaLanguage}
+              onChange={(e) => setMetaLanguage(e.target.value)}
+              className="mt-2 w-full px-3 py-2 rounded-lg border border-slate-200 text-sm"
+            >
+              {META_LANGS.map((l) => <option key={l.code} value={l.code}>{l.label}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Уроків за один запуск батчу</label>
+            <select
+              value={batchSize}
+              onChange={(e) => setBatchSize(Number(e.target.value))}
+              className="mt-2 w-full px-3 py-2 rounded-lg border border-slate-200 text-sm"
+            >
+              {[1, 2, 3, 5].map((n) => <option key={n} value={n}>{n}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Нумерація з уроку №</label>
+            <input
+              type="number"
+              min={0}
+              value={startFrom}
+              onChange={(e) => setStartFrom(Math.max(0, Number(e.target.value)))}
+              className="mt-2 w-full px-3 py-2 rounded-lg border border-slate-200 text-sm"
+            />
+          </div>
+        </div>
+
+        {existingLessons > 0 && (
+          <p className="text-xs text-amber-600">
+            ⚠️ У курсі вже {existingLessons} уроків — нові додаються після них.
+          </p>
+        )}
+
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={runGeneration}
+            disabled={running}
+            className="px-4 py-2 rounded-xl text-white text-sm font-medium flex items-center gap-2 disabled:opacity-50"
+            style={{ background: "#4F46E5" }}>
+            {running ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
+            {running ? "Генерація..." : `Згенерувати ${topics.length} уроків`}
+          </button>
+          <button
+            onClick={saveSettings}
+            className="px-4 py-2 rounded-xl text-sm border border-slate-200 hover:bg-slate-50">
+            Зберегти налаштування
+          </button>
+          {errorCount > 0 && !running && (
+            <button
+              onClick={retryFailed}
+              className="px-4 py-2 rounded-xl text-sm border border-red-200 text-red-600 hover:bg-red-50 flex items-center gap-2">
+              <RotateCcw className="w-4 h-4" /> Повторити невдалі ({errorCount})
+            </button>
+          )}
+        </div>
       </Card>
+
 
       <Card className="p-6">
         <SectionHeader title="Що саме створюється" subtitle="Огляд AI-контенту та ручних елементів" />
@@ -233,7 +388,7 @@ export default function CourseBuilderPage() {
                 </div>
                 <div className="flex-1 text-sm">
                   <span className="text-slate-700 font-medium">
-                    Уроки {b.start + 1}—{b.start + b.size}
+                    Уроки {b.start + 1}—{b.start + b.topics.length}
                   </span>
                   {b.message && (
                     <span className={`ml-2 text-xs ${b.status === "error" ? "text-red-500" : "text-slate-500"}`}>
