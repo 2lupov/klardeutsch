@@ -235,35 +235,49 @@ const KlarLanding = () => {
         </div>
       </Section>
 
-      {/* ══ Method (light section) ══ */}
-      <Section className="relative z-10 bg-klar-pearl px-4 py-16 text-klar-bg sm:px-6 sm:py-20">
-        <div className="mx-auto max-w-4xl">
-          <h2 className="font-klar-display text-3xl font-semibold sm:text-4xl">
-            Не зубріння, а система
-          </h2>
-          <p className="mt-5 text-[15px] leading-relaxed text-klar-bg/75 sm:text-base">
-            Методика будується на трьох простих речах: ви говорите на кожному занятті, лексика
-            повертається за графіком повторень, а граматика подається як логіка мови, а не як
-            таблиця для запамʼятовування.
-          </p>
-          <div className="mt-10 grid gap-6 sm:grid-cols-3">
-            {[
-              { t: "Індивідуальна програма", d: "Складаю план під вашу мету і темп — без універсальних курсів «для всіх»." },
-              { t: "Інтервальні повторення", d: "Слова та конструкції повертаються тоді, коли мозок готовий їх забути." },
-              { t: "Матеріали після уроку", d: "Конспект, лексика та завдання — щоб заняття продовжувалось між уроками." },
-            ].map((x, i) => (
-              <div key={x.t} style={stagger(i)}>
-                <h3 className="font-klar-display text-xl font-semibold">{x.t}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-klar-bg/70">{x.d}</p>
+      {/* ══ Method ══ */}
+      <Section className="relative z-10 px-4 py-16 sm:px-6 sm:py-20">
+        <div className="mx-auto max-w-6xl overflow-hidden rounded-[2rem] border border-klar-aqua/15 bg-gradient-primary/10 bg-klar-surface/60 px-6 py-12 backdrop-blur-sm sm:px-12">
+          <div className="grid items-center gap-10 md:grid-cols-[1.4fr_1fr]">
+            <div>
+              <h2 className="font-klar-display text-3xl font-semibold text-klar-pearl sm:text-4xl">
+                Не зубріння, а система
+              </h2>
+              <p className="mt-5 text-[15px] leading-relaxed text-klar-pearl/70 sm:text-base">
+                Методика будується на трьох простих речах: ви говорите на кожному занятті, лексика
+                повертається за графіком повторень, а граматика подається як логіка мови, а не як
+                таблиця для запамʼятовування.
+              </p>
+              <div className="mt-9 grid gap-5 sm:grid-cols-3">
+                {[
+                  { t: "Індивідуальна програма", d: "Складаю план під вашу мету і темп — без універсальних курсів «для всіх»." },
+                  { t: "Інтервальні повторення", d: "Слова та конструкції повертаються тоді, коли мозок готовий їх забути." },
+                  { t: "Матеріали після уроку", d: "Конспект, лексика та завдання — щоб заняття продовжувалось між уроками." },
+                ].map((x, i) => (
+                  <div key={x.t} style={stagger(i)} className="rounded-2xl border border-klar-aqua/10 bg-klar-bg/40 p-5">
+                    <h3 className="font-klar-display text-lg font-semibold text-klar-pearl">{x.t}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-klar-pearl/65">{x.d}</p>
+                  </div>
+                ))}
               </div>
-            ))}
+              <p className="mt-8 text-sm text-klar-pearl/50">
+                Я не обіцяю «вільну німецьку за місяць». Обіцяю чесну системну роботу і зрозумілий
+                прогрес, який ви відчуєте на заняттях.
+              </p>
+            </div>
+            <div className="relative mx-auto w-full max-w-[260px]">
+              <div className="pointer-events-none absolute inset-6 -z-10 rounded-full bg-klar-sand/15 blur-3xl" />
+              <img
+                src={pandaScholar}
+                alt="Панда-науковець KLAR з книгою"
+                loading="lazy"
+                className="animate-float w-full object-contain drop-shadow-[0_18px_40px_hsl(240_60%_5%/0.55)]"
+              />
+            </div>
           </div>
-          <p className="mt-10 text-sm text-klar-bg/55">
-            Я не обіцяю «вільну німецьку за місяць». Обіцяю чесну системну роботу і зрозумілий
-            прогрес, який ви відчуєте на заняттях.
-          </p>
         </div>
       </Section>
+
 
       {/* ══ Steps ══ */}
       <Section className="px-4 py-16 sm:px-6">
