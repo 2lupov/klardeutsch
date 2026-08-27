@@ -388,7 +388,7 @@ export default function CourseBuilderPage() {
                 </div>
                 <div className="flex-1 text-sm">
                   <span className="text-slate-700 font-medium">
-                    Уроки {b.start + 1}—{b.start + b.size}
+                    Уроки {b.start + 1}—{b.start + b.topics.length}
                   </span>
                   {b.message && (
                     <span className={`ml-2 text-xs ${b.status === "error" ? "text-red-500" : "text-slate-500"}`}>
