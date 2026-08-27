@@ -7,6 +7,8 @@ import {
   BookOpen,
   Sparkles,
   Dumbbell,
+  Camera,
+
   Users,
   MessageSquare,
   BarChart3,
@@ -20,6 +22,7 @@ import DashboardPage from "./pages/DashboardPage";
 import CoursesPage from "./pages/CoursesPage";
 import CourseBuilderPage from "./pages/CourseBuilderPage";
 import ExerciseStudioPage from "./pages/ExerciseStudioPage";
+import BookCoursePage from "./pages/BookCoursePage";
 import StudentsPage from "./pages/StudentsPage";
 import TutorLogsPage from "./pages/TutorLogsPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
@@ -31,6 +34,7 @@ type NavKey =
   | "courses"
   | "builder"
   | "studio"
+  | "book"
   | "students"
   | "tutor"
   | "analytics"
@@ -41,6 +45,8 @@ const NAV: { key: NavKey; label: string; icon: any }[] = [
   { key: "courses", label: "Курси", icon: BookOpen },
   { key: "builder", label: "AI-конструктор курсів", icon: Sparkles },
   { key: "studio", label: "Студія завдань", icon: Dumbbell },
+  { key: "book", label: "Курс із книги (фото)", icon: Camera },
+
   { key: "students", label: "Учні", icon: Users },
   { key: "tutor", label: "Логи AI-репетитора", icon: MessageSquare },
   { key: "analytics", label: "Аналітика", icon: BarChart3 },
@@ -233,6 +239,9 @@ function PageRouter({ active }: { active: NavKey }) {
       return <CourseBuilderPage />;
     case "studio":
       return <ExerciseStudioPage />;
+    case "book":
+      return <BookCoursePage />;
+
     case "students":
       return <StudentsPage />;
     case "tutor":
