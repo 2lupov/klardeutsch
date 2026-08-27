@@ -171,7 +171,16 @@ const KlarLanding = () => {
               <span className="text-sm text-klar-pearl/55">Перше пробне заняття — безкоштовно</span>
             </div>
           </div>
-          <WortschatzJar />
+          <div className="relative mx-auto w-full max-w-md">
+            <div className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-klar-aqua/15 blur-3xl" />
+            <WortschatzJar />
+            <img
+              src={pandaCoach}
+              alt="Панда-викладач KLAR тримає банку зі словами"
+              className="animate-float absolute -bottom-2 -right-1 w-[46%] max-w-[180px] object-contain drop-shadow-[0_16px_36px_hsl(240_60%_5%/0.6)] sm:-right-4"
+            />
+          </div>
+
         </div>
       </Section>
 
