@@ -41,16 +41,23 @@ const Onboarding = () => {
       const hasProgress = (count ?? 0) > 0;
       const createdByTeacher = !!(profile as any)?.created_by_teacher_id;
 
-      // Students created by a teacher should always go through the placement test
-      // as a fresh user — never show the "existing user" skip-intro screen.
-      if (createdByTeacher && !hasProgress) {
-        setStep(0);
-      } else if (isOld || hasProgress) {
+      // Managed students (created by a teacher) skip onboarding entirely →
+      // straight to the Academy.
+      if (createdByTeacher) {
+        await supabase
+          .from("profiles")
+          .update({ onboarding_completed: true } as any)
+          .eq("user_id", user.id);
+        navigate("/academy", { replace: true });
+        return;
+      }
+      if (isOld || hasProgress) {
         setIsExisting(true);
         setShowIntro(true);
       } else {
         setStep(0);
       }
+
     };
     checkExisting();
   }, [user]);
