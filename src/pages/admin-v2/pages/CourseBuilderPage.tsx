@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, SectionHeader, EmptyState } from "./_ui";
-import { Sparkles, Play, CheckCircle2, XCircle, Loader2, BookOpen } from "lucide-react";
+import { Sparkles, Play, CheckCircle2, XCircle, Loader2, BookOpen, RotateCcw, Settings2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useAdminLang } from "../LanguageContext";
 
@@ -14,10 +14,22 @@ interface Course {
 }
 
 type BatchStatus = "pending" | "running" | "done" | "error";
-interface Batch { start: number; size: number; status: BatchStatus; message?: string; }
+interface Batch { start: number; topics: string[]; status: BatchStatus; message?: string; }
 
-const BATCH_SIZE = 5;
-const TOTAL_TOPICS = 25;
+/** Стандартні теми — можна повністю замінити своїми */
+const DEFAULT_TOPICS: Record<string, string[]> = {
+  A1: ["Begrüßung und Vorstellung","Zahlen und Alphabet","Familie und Freunde","Farben und Formen","Essen und Trinken","Tagesablauf","Wetter","Kleidung","Wohnung und Haus","Wegbeschreibung"],
+  A2: ["Reisen und Urlaub","Wohnungssuche","Vorstellungsgespräch","Medien und Internet","Kochen und Rezepte","Sport und Fitness","Bank und Geld","Auf der Post","Auf dem Markt","Nachbarn und Zusammenleben"],
+  B1: ["Nachrichten und Medien","Arbeitsleben","Gesundheitssystem","Umwelt und Klima","Migration und Integration","Bildungssystem","Wirtschaft","Politik Grundlagen","Soziale Medien","Recht und Gesetze"],
+  B2: ["Wissenschaftliches Schreiben","Debatte und Argumentation","Medienanalyse","Wirtschaft vertieft","Politischer Diskurs","Rechtssprache","Medizinisches Deutsch","Technisches Deutsch","Geschäftskommunikation","Forschungsmethoden"],
+  C1: ["Rhetorik","Linguistik","Grammatik-Feinheiten","Idiomatische Ausdrücke","Regionale Dialekte","Akademische Präsentationen","Kritische Analyse","Diskursanalyse","Pragmatik","Soziolinguistik"],
+};
+
+const META_LANGS = [
+  { code: "uk", label: "Українська" },
+  { code: "ru", label: "Російська" },
+  { code: "en", label: "Англійська" },
+];
 
 export default function CourseBuilderPage() {
   const { lang, meta, isAll } = useAdminLang();
@@ -27,7 +39,15 @@ export default function CourseBuilderPage() {
   const [running, setRunning] = useState(false);
   const [existingLessons, setExistingLessons] = useState(0);
 
+  // ── налаштування генерації (зберігаються локально під кожен курс)
+  const [topicsText, setTopicsText] = useState("");
+  const [customPrompt, setCustomPrompt] = useState("");
+  const [metaLanguage, setMetaLanguage] = useState("uk");
+  const [batchSize, setBatchSize] = useState(2);
+  const [startFrom, setStartFrom] = useState(0);
+
   const selected = courses.find((c) => c.id === selectedId);
+  const topics = topicsText.split("\n").map((t) => t.trim()).filter(Boolean);
 
   const loadCourses = async () => {
     const base = supabase
@@ -46,6 +66,7 @@ export default function CourseBuilderPage() {
       .select("*", { count: "exact", head: true })
       .eq("course_id", courseId);
     setExistingLessons(count || 0);
+    setStartFrom(count || 0);
   };
 
   useEffect(() => { loadCourses(); }, [lang]);
@@ -56,53 +77,109 @@ export default function CourseBuilderPage() {
     return () => window.removeEventListener("admin-v2:open-builder", h);
   }, []);
 
+  // Підтягуємо збережені налаштування або дефолтні теми рівня
   useEffect(() => {
-    if (selectedId) loadLessonCount(selectedId);
-  }, [selectedId]);
-
-  const initBatches = () => {
-    const arr: Batch[] = [];
-    for (let s = 0; s < TOTAL_TOPICS; s += BATCH_SIZE) {
-      arr.push({ start: s, size: Math.min(BATCH_SIZE, TOTAL_TOPICS - s), status: "pending" });
+    if (!selectedId) return;
+    loadLessonCount(selectedId);
+    const course = courses.find((c) => c.id === selectedId);
+    const saved = localStorage.getItem(`klar-builder-${selectedId}`);
+    if (saved) {
+      try {
+        const s = JSON.parse(saved);
+        setTopicsText(s.topicsText ?? "");
+        setCustomPrompt(s.customPrompt ?? "");
+        setMetaLanguage(s.metaLanguage ?? "uk");
+        setBatchSize(s.batchSize ?? 2);
+        return;
+      } catch {}
     }
-    setBatches(arr);
+    setTopicsText((DEFAULT_TOPICS[course?.level || "A1"] || []).join("\n"));
+    setCustomPrompt("");
+    setMetaLanguage("uk");
+    setBatchSize(2);
+  }, [selectedId, courses.length]);
+
+  const saveSettings = () => {
+    if (!selectedId) return;
+    localStorage.setItem(
+      `klar-builder-${selectedId}`,
+      JSON.stringify({ topicsText, customPrompt, metaLanguage, batchSize })
+    );
+    toast({ title: "Налаштування збережено" });
+  };
+
+  const buildBatches = (list: string[]): Batch[] => {
+    const arr: Batch[] = [];
+    for (let i = 0; i < list.length; i += batchSize) {
+      arr.push({ start: startFrom + i, topics: list.slice(i, i + batchSize), status: "pending" });
+    }
+    return arr;
+  };
+
+  const runBatch = async (b: Batch) => {
+    if (!selected) return false;
+    setBatches((prev) => prev.map((x) => x.start === b.start ? { ...x, status: "running", message: undefined } : x));
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-full-course", {
+        body: {
+          courseId: selected.id,
+          level: selected.level || "A1",
+          batchStart: b.start,
+          batchSize: b.topics.length,
+          topics: b.topics,
+          customPrompt: customPrompt || undefined,
+          targetLanguage: selected.target_language || "de",
+          metaLanguage,
+        },
+      });
+      if (error || (data as any)?.error) throw new Error(error?.message || (data as any).error);
+      const failed = (data as any).failed?.length || 0;
+      setBatches((prev) => prev.map((x) => x.start === b.start
+        ? {
+            ...x,
+            status: failed ? "error" : "done",
+            message: failed
+              ? `${(data as any).lessonsGenerated} ок, ${failed} не вдалось`
+              : `${(data as any).lessonsGenerated} уроків`,
+          }
+        : x));
+      return !failed;
+    } catch (e: any) {
+      setBatches((prev) => prev.map((x) => x.start === b.start
+        ? { ...x, status: "error", message: e.message } : x));
+      return false;
+    }
   };
 
   const runGeneration = async () => {
     if (!selected) return;
-    initBatches();
-    setRunning(true);
-
-    const level = selected.level || "A1";
-    const total = Math.ceil(TOTAL_TOPICS / BATCH_SIZE);
-
-    for (let i = 0; i < total; i++) {
-      const start = i * BATCH_SIZE;
-      const size = Math.min(BATCH_SIZE, TOTAL_TOPICS - start);
-      setBatches((prev) => prev.map((b) => b.start === start ? { ...b, status: "running" } : b));
-
-      try {
-        const { data, error } = await supabase.functions.invoke("generate-full-course", {
-          body: { courseId: selected.id, level, batchStart: start, batchSize: size },
-        });
-        if (error || (data as any)?.error) throw new Error(error?.message || (data as any).error);
-        setBatches((prev) => prev.map((b) => b.start === start
-          ? { ...b, status: "done", message: `${(data as any).lessonsGenerated} уроків` } : b));
-      } catch (e: any) {
-        setBatches((prev) => prev.map((b) => b.start === start
-          ? { ...b, status: "error", message: e.message } : b));
-        toast({ title: `Помилка на batch ${i + 1}`, description: e.message });
-      }
+    if (topics.length === 0) {
+      toast({ title: "Додай хоча б одну тему уроку" });
+      return;
     }
-
+    const list = buildBatches(topics);
+    setBatches(list);
+    setRunning(true);
+    for (const b of list) await runBatch(b);
     setRunning(false);
     await loadLessonCount(selected.id);
     await loadCourses();
     toast({ title: "Генерацію завершено" });
   };
 
+  const retryFailed = async () => {
+    const bad = batches.filter((b) => b.status === "error");
+    if (bad.length === 0) return;
+    setRunning(true);
+    for (const b of bad) await runBatch(b);
+    setRunning(false);
+    if (selected) await loadLessonCount(selected.id);
+  };
+
   const doneCount = batches.filter((b) => b.status === "done").length;
+  const errorCount = batches.filter((b) => b.status === "error").length;
   const progress = batches.length ? (doneCount / batches.length) * 100 : 0;
+
 
   if (!selectedId) {
     return (
