@@ -150,7 +150,7 @@ const KlarLanding = () => {
             <p className="mb-4 text-xs uppercase tracking-[0.22em] text-primary">
               Німецька за авторською методикою
             </p>
-            <h1 className="font-display text-[34px] font-semibold leading-[1.12] text-foreground sm:text-5xl lg:text-6xl">
+            <h1 className="font-display font-bold text-4xl font-bold leading-tight text-foreground sm:text-5xl lg:text-6xl">
               Німецька, яка нарешті залишається в голові
             </h1>
             <p className="mt-5 max-w-lg text-base leading-relaxed text-muted-foreground sm:text-base">
@@ -187,7 +187,7 @@ const KlarLanding = () => {
               Вартість заняття
             </p>
             <div className="mt-4 flex items-end justify-center gap-4">
-              <span className="font-display text-2xl text-muted-foreground line-through">700 ₴</span>
+              <span className="font-display font-bold text-2xl text-muted-foreground line-through">700 ₴</span>
               <span className="font-display text-6xl font-semibold text-accent sm:text-7xl">
                 550 ₴
               </span>
@@ -209,7 +209,7 @@ const KlarLanding = () => {
       {/* ══ Benefits ══ */}
       <Section className="py-14">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <h2 className="font-display text-3xl text-foreground sm:text-4xl">Що ви отримаєте</h2>
+          <h2 className="font-display font-bold text-3xl text-foreground sm:text-4xl">Що ви отримаєте</h2>
         </div>
         <div className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 sm:px-6 md:mx-auto md:max-w-6xl md:grid md:grid-cols-3 md:overflow-visible">
           {BENEFITS.map((b, i) => (
@@ -220,7 +220,7 @@ const KlarLanding = () => {
             >
               <b.Icon className="h-6 w-6 text-primary" />
               <p className="mt-5 text-xs uppercase tracking-[0.22em] text-primary/80">{b.de}</p>
-              <h3 className="mt-2 font-display text-2xl text-foreground">{b.title}</h3>
+              <h3 className="mt-2 font-display font-bold text-2xl text-foreground">{b.title}</h3>
               <p className="mt-3 text-base leading-relaxed text-muted-foreground">{b.text}</p>
             </article>
           ))}
@@ -232,7 +232,7 @@ const KlarLanding = () => {
         <div className="mx-auto max-w-6xl overflow-hidden glass-card px-6 py-12 sm:px-12">
           <div className="grid items-center gap-10 md:grid-cols-[1.4fr_1fr]">
             <div>
-              <h2 className="font-display text-3xl font-semibold text-foreground sm:text-4xl">
+              <h2 className="font-display font-bold text-3xl font-semibold text-foreground sm:text-4xl">
                 Не зубріння, а система
               </h2>
               <p className="mt-5 text-base leading-relaxed text-muted-foreground sm:text-base">
@@ -281,7 +281,7 @@ const KlarLanding = () => {
               loading="lazy"
               className="h-14 w-14 object-contain drop-shadow-[0_6px_16px_hsl(240_60%_5%/0.5)]"
             />
-            <h2 className="font-display text-3xl text-foreground sm:text-4xl">Як почати</h2>
+            <h2 className="font-display font-bold text-3xl text-foreground sm:text-4xl">Як почати</h2>
           </div>
 
           <div className="mt-9 grid gap-5 md:grid-cols-3">
@@ -291,8 +291,8 @@ const KlarLanding = () => {
                 style={stagger(i)}
                 className="glass-card p-7"
               >
-                <span className="font-display text-3xl text-accent">{s.n}</span>
-                <h3 className="mt-3 font-display text-2xl text-foreground">{s.title}</h3>
+                <span className="font-display font-bold text-3xl text-accent">{s.n}</span>
+                <h3 className="mt-3 font-display font-bold text-2xl text-foreground">{s.title}</h3>
                 <p className="mt-2 text-base leading-relaxed text-muted-foreground">{s.text}</p>
               </div>
             ))}
@@ -303,7 +303,7 @@ const KlarLanding = () => {
       {/* ══ Testimonials ══ */}
       <Section className="py-14">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <h2 className="font-display text-3xl text-foreground sm:text-4xl">Відгуки учнів</h2>
+          <h2 className="font-display font-bold text-3xl text-foreground sm:text-4xl">Відгуки учнів</h2>
         </div>
         <div className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 sm:px-6">
           {TESTIMONIALS.map((t, i) => (
@@ -338,7 +338,7 @@ const KlarLanding = () => {
             loading="lazy"
             className="animate-float pointer-events-none absolute -top-12 right-2 w-20 object-contain drop-shadow-[0_10px_24px_hsl(240_60%_5%/0.5)] sm:right-6 sm:w-28"
           />
-          <h2 className="font-display text-3xl text-foreground sm:text-4xl">
+          <h2 className="font-display font-bold text-3xl text-foreground sm:text-4xl">
             Ваша знижка на перший пакет
           </h2>
 
