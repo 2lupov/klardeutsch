@@ -150,7 +150,7 @@ const KlarLanding = () => {
             <p className="mb-4 text-xs uppercase tracking-[0.22em] text-primary">
               Німецька за авторською методикою
             </p>
-            <h1 className="font-display font-bold text-4xl font-bold leading-tight text-foreground sm:text-5xl lg:text-6xl">
+            <h1 className="font-display font-bold text-4xl leading-tight text-foreground sm:text-5xl lg:text-6xl">
               Німецька, яка нарешті залишається в голові
             </h1>
             <p className="mt-5 max-w-lg text-base leading-relaxed text-muted-foreground sm:text-base">
@@ -232,7 +232,7 @@ const KlarLanding = () => {
         <div className="mx-auto max-w-6xl overflow-hidden glass-card px-6 py-12 sm:px-12">
           <div className="grid items-center gap-10 md:grid-cols-[1.4fr_1fr]">
             <div>
-              <h2 className="font-display font-bold text-3xl font-semibold text-foreground sm:text-4xl">
+              <h2 className="font-display font-bold text-3xl text-foreground sm:text-4xl">
                 Не зубріння, а система
               </h2>
               <p className="mt-5 text-base leading-relaxed text-muted-foreground sm:text-base">
