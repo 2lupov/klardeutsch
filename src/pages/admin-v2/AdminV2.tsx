@@ -233,6 +233,9 @@ function PageRouter({ active }: { active: NavKey }) {
       return <CourseBuilderPage />;
     case "studio":
       return <ExerciseStudioPage />;
+    case "book":
+      return <BookCoursePage />;
+
     case "students":
       return <StudentsPage />;
     case "tutor":
