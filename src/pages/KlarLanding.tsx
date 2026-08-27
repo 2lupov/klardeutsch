@@ -128,11 +128,14 @@ const KlarLanding = () => {
       <header className="fixed inset-x-0 top-0 z-50 border-b border-klar-aqua/10 bg-klar-bg/70 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3.5 sm:px-6">
           <a href="#top" className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-md border border-klar-aqua/50">
-              <Sparkles className="h-3.5 w-3.5 text-klar-aqua" />
-            </span>
-            <span className="font-klar-display text-xl tracking-wide text-klar-pearl">Клар</span>
+            <img
+              src={pandaWaving}
+              alt="Маскот KLAR — панда"
+              className="h-9 w-9 object-contain drop-shadow-[0_2px_8px_hsl(var(--klar-aqua)/0.4)]"
+            />
+            <span className="font-klar-display text-xl font-bold tracking-tight text-klar-pearl">Клар</span>
           </a>
+
           <button
             onClick={open}
             className="rounded-xl bg-klar-aqua px-4 py-2 text-sm font-semibold text-klar-bg transition-all hover:shadow-[0_0_24px_hsl(var(--klar-aqua)/0.45)] sm:px-5 sm:py-2.5"
