@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { ArrowRight, MessagesSquare, BookOpen, PenLine, Sparkles } from "lucide-react";
 import WordRain from "@/components/klar/WordRain";
 import WortschatzJar from "@/components/klar/WortschatzJar";
@@ -121,27 +122,24 @@ const KlarLanding = () => {
   }, []);
 
   return (
-    <div className="standalone-scroll relative min-h-[100dvh] bg-klar-bg font-klar-body text-klar-pearl">
+    <div className="standalone-scroll relative min-h-[100dvh] bg-background font-sans text-foreground">
       <WordRain />
 
       {/* ══ Header ══ */}
-      <header className="fixed inset-x-0 top-0 z-50 border-b border-klar-aqua/10 bg-klar-bg/70 backdrop-blur-md">
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-border/50 bg-background/70 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3.5 sm:px-6">
           <a href="#top" className="flex items-center gap-2">
             <img
               src={pandaWaving}
               alt="Маскот KLAR — панда"
-              className="h-9 w-9 object-contain drop-shadow-[0_2px_8px_hsl(var(--klar-aqua)/0.4)]"
+              className="h-9 w-9 object-contain drop-shadow-[0_2px_8px_hsl(var(--primary)/0.4)]"
             />
-            <span className="font-klar-display text-xl font-bold tracking-tight text-klar-pearl">Клар</span>
+            <span className="font-display text-xl font-bold tracking-tight text-foreground">Клар</span>
           </a>
 
-          <button
-            onClick={open}
-            className="rounded-xl bg-klar-aqua px-4 py-2 text-sm font-semibold text-klar-bg transition-all hover:shadow-[0_0_24px_hsl(var(--klar-aqua)/0.45)] sm:px-5 sm:py-2.5"
-          >
+          <Button onClick={open} variant="glow" size="sm" className="rounded-xl">
             Залишити заявку
-          </button>
+          </Button>
         </div>
       </header>
 
@@ -149,35 +147,32 @@ const KlarLanding = () => {
       <Section id="top" className="px-4 pb-14 pt-28 sm:px-6 sm:pt-36">
         <div className="mx-auto grid max-w-6xl items-center gap-10 md:grid-cols-2">
           <div>
-            <p className="mb-4 text-[11px] uppercase tracking-[0.22em] text-klar-aqua">
+            <p className="mb-4 text-xs uppercase tracking-[0.22em] text-primary">
               Німецька за авторською методикою
             </p>
-            <h1 className="font-klar-display text-[34px] font-semibold leading-[1.12] text-klar-pearl sm:text-5xl lg:text-6xl">
+            <h1 className="font-display font-bold text-4xl leading-tight text-foreground sm:text-5xl lg:text-6xl">
               Німецька, яка нарешті залишається в голові
             </h1>
-            <p className="mt-5 max-w-lg text-[15px] leading-relaxed text-klar-pearl/70 sm:text-base">
+            <p className="mt-5 max-w-lg text-base leading-relaxed text-muted-foreground sm:text-base">
               Індивідуальні онлайн-заняття A1–B2. Розмовна практика з першого уроку, Wortschatz
               через інтервальні повторення, граматика зрозумілою мовою та програма під вашу
               мету — побут, робота, переїзд чи іспит.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-4">
-              <button
-                onClick={open}
-                className="group flex items-center gap-2 rounded-xl bg-klar-aqua px-7 py-3.5 font-semibold text-klar-bg transition-all hover:shadow-[0_0_32px_hsl(var(--klar-aqua)/0.5)]"
-              >
+              <Button onClick={open} variant="glow" size="lg" className="group rounded-xl">
                 Залишити заявку
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </button>
-              <span className="text-sm text-klar-pearl/55">Перше пробне заняття — безкоштовно</span>
+              </Button>
+              <span className="text-sm text-muted-foreground">Перше пробне заняття — безкоштовно</span>
             </div>
           </div>
           <div className="relative mx-auto w-full max-w-md">
-            <div className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-klar-aqua/15 blur-3xl" />
+            <div className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-primary/15 blur-3xl" />
             <WortschatzJar />
             <img
               src={pandaCoach}
               alt="Панда-викладач KLAR тримає банку зі словами"
-              className="animate-float absolute -bottom-3 -left-2 w-[44%] max-w-[170px] object-contain drop-shadow-[0_16px_36px_hsl(240_60%_5%/0.6)] sm:-left-8"
+              className="animate-float absolute -bottom-6 -left-6 w-[38%] max-w-[150px] sm:-left-12 object-contain drop-shadow-[0_16px_36px_hsl(240_60%_5%/0.6)]"
             />
           </div>
 
@@ -187,28 +182,25 @@ const KlarLanding = () => {
       {/* ══ Price ══ */}
       <Section className="px-4 py-14 sm:px-6">
         <div className="mx-auto max-w-6xl">
-          <div className="rounded-3xl border border-klar-aqua/15 bg-klar-surface/70 px-6 py-10 text-center backdrop-blur-sm sm:px-10">
-            <p className="text-[11px] uppercase tracking-[0.22em] text-klar-pearl/45">
+          <div className="glass-card px-6 py-10 text-center sm:px-10">
+            <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
               Вартість заняття
             </p>
             <div className="mt-4 flex items-end justify-center gap-4">
-              <span className="font-klar-display text-2xl text-klar-pearl/40 line-through">700 ₴</span>
-              <span className="font-klar-display text-6xl font-semibold text-klar-sand sm:text-7xl">
+              <span className="font-display font-bold text-2xl text-muted-foreground line-through">700 ₴</span>
+              <span className="font-display text-6xl font-semibold text-accent sm:text-7xl">
                 550 ₴
               </span>
             </div>
-            <p className="mt-3 text-sm text-klar-pearl/60">за заняття · 60 хвилин · онлайн</p>
-            <div className="mt-7 inline-flex animate-klar-pulse items-center gap-2 rounded-full border border-klar-sand/40 bg-klar-sand/10 px-5 py-2.5 text-sm text-klar-sand">
+            <p className="mt-3 text-sm text-muted-foreground">за заняття · 60 хвилин · онлайн</p>
+            <div className="mt-7 inline-flex animate-klar-pulse items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-5 py-2.5 text-sm text-accent">
               <Sparkles className="h-4 w-4" />
               Перше пробне заняття — безкоштовно
             </div>
             <div className="mt-8">
-              <button
-                onClick={open}
-                className="rounded-xl border border-klar-aqua/40 px-7 py-3 font-medium text-klar-aqua transition-all hover:bg-klar-aqua/10 hover:shadow-[0_0_24px_hsl(var(--klar-aqua)/0.3)]"
-              >
+              <Button onClick={open} variant="outline" size="lg" className="rounded-xl border-primary/40 bg-transparent text-primary hover:bg-primary/10 hover:text-primary">
                 Записатись на пробне
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -217,19 +209,19 @@ const KlarLanding = () => {
       {/* ══ Benefits ══ */}
       <Section className="py-14">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <h2 className="font-klar-display text-3xl text-klar-pearl sm:text-4xl">Що ви отримаєте</h2>
+          <h2 className="font-display font-bold text-3xl text-foreground sm:text-4xl">Що ви отримаєте</h2>
         </div>
         <div className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 sm:px-6 md:mx-auto md:max-w-6xl md:grid md:grid-cols-3 md:overflow-visible">
           {BENEFITS.map((b, i) => (
             <article
               key={b.de}
               style={stagger(i)}
-              className="min-w-[82%] snap-center rounded-3xl border border-klar-aqua/15 bg-klar-surface/60 p-7 backdrop-blur-sm transition-colors hover:border-klar-aqua/35 sm:min-w-[60%] md:min-w-0"
+              className="min-w-[82%] snap-center glass-card p-7 backdrop-blur-sm transition-colors hover:border-primary/35 sm:min-w-[60%] md:min-w-0"
             >
-              <b.Icon className="h-6 w-6 text-klar-aqua" />
-              <p className="mt-5 text-[11px] uppercase tracking-[0.22em] text-klar-aqua/80">{b.de}</p>
-              <h3 className="mt-2 font-klar-display text-2xl text-klar-pearl">{b.title}</h3>
-              <p className="mt-3 text-[15px] leading-relaxed text-klar-pearl/65">{b.text}</p>
+              <b.Icon className="h-6 w-6 text-primary" />
+              <p className="mt-5 text-xs uppercase tracking-[0.22em] text-primary/80">{b.de}</p>
+              <h3 className="mt-2 font-display font-bold text-2xl text-foreground">{b.title}</h3>
+              <p className="mt-3 text-base leading-relaxed text-muted-foreground">{b.text}</p>
             </article>
           ))}
         </div>
@@ -237,13 +229,13 @@ const KlarLanding = () => {
 
       {/* ══ Method ══ */}
       <Section className="relative z-10 px-4 py-16 sm:px-6 sm:py-20">
-        <div className="mx-auto max-w-6xl overflow-hidden rounded-[2rem] border border-klar-aqua/15 bg-gradient-primary/10 bg-klar-surface/60 px-6 py-12 backdrop-blur-sm sm:px-12">
+        <div className="mx-auto max-w-6xl overflow-hidden glass-card px-6 py-12 sm:px-12">
           <div className="grid items-center gap-10 md:grid-cols-[1.4fr_1fr]">
             <div>
-              <h2 className="font-klar-display text-3xl font-semibold text-klar-pearl sm:text-4xl">
+              <h2 className="font-display font-bold text-3xl text-foreground sm:text-4xl">
                 Не зубріння, а система
               </h2>
-              <p className="mt-5 text-[15px] leading-relaxed text-klar-pearl/70 sm:text-base">
+              <p className="mt-5 text-base leading-relaxed text-muted-foreground sm:text-base">
                 Методика будується на трьох простих речах: ви говорите на кожному занятті, лексика
                 повертається за графіком повторень, а граматика подається як логіка мови, а не як
                 таблиця для запамʼятовування.
@@ -254,19 +246,19 @@ const KlarLanding = () => {
                   { t: "Інтервальні повторення", d: "Слова та конструкції повертаються тоді, коли мозок готовий їх забути." },
                   { t: "Матеріали після уроку", d: "Конспект, лексика та завдання — щоб заняття продовжувалось між уроками." },
                 ].map((x, i) => (
-                  <div key={x.t} style={stagger(i)} className="rounded-2xl border border-klar-aqua/10 bg-klar-bg/40 p-5">
-                    <h3 className="font-klar-display text-lg font-semibold text-klar-pearl">{x.t}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-klar-pearl/65">{x.d}</p>
+                  <div key={x.t} style={stagger(i)} className="rounded-2xl border border-border/40 bg-background/40 p-5">
+                    <h3 className="font-display text-lg font-semibold text-foreground">{x.t}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{x.d}</p>
                   </div>
                 ))}
               </div>
-              <p className="mt-8 text-sm text-klar-pearl/50">
+              <p className="mt-8 text-sm text-muted-foreground">
                 Я не обіцяю «вільну німецьку за місяць». Обіцяю чесну системну роботу і зрозумілий
                 прогрес, який ви відчуєте на заняттях.
               </p>
             </div>
             <div className="relative mx-auto w-full max-w-[260px]">
-              <div className="pointer-events-none absolute inset-6 -z-10 rounded-full bg-klar-sand/15 blur-3xl" />
+              <div className="pointer-events-none absolute inset-6 -z-10 rounded-full bg-accent/15 blur-3xl" />
               <img
                 src={pandaScholar}
                 alt="Панда-науковець KLAR з книгою"
@@ -289,7 +281,7 @@ const KlarLanding = () => {
               loading="lazy"
               className="h-14 w-14 object-contain drop-shadow-[0_6px_16px_hsl(240_60%_5%/0.5)]"
             />
-            <h2 className="font-klar-display text-3xl text-klar-pearl sm:text-4xl">Як почати</h2>
+            <h2 className="font-display font-bold text-3xl text-foreground sm:text-4xl">Як почати</h2>
           </div>
 
           <div className="mt-9 grid gap-5 md:grid-cols-3">
@@ -297,11 +289,11 @@ const KlarLanding = () => {
               <div
                 key={s.n}
                 style={stagger(i)}
-                className="rounded-3xl border border-klar-aqua/15 bg-klar-surface/50 p-7"
+                className="glass-card p-7"
               >
-                <span className="font-klar-display text-3xl text-klar-sand">{s.n}</span>
-                <h3 className="mt-3 font-klar-display text-2xl text-klar-pearl">{s.title}</h3>
-                <p className="mt-2 text-[15px] leading-relaxed text-klar-pearl/65">{s.text}</p>
+                <span className="font-display font-bold text-3xl text-accent">{s.n}</span>
+                <h3 className="mt-3 font-display font-bold text-2xl text-foreground">{s.title}</h3>
+                <p className="mt-2 text-base leading-relaxed text-muted-foreground">{s.text}</p>
               </div>
             ))}
           </div>
@@ -311,16 +303,16 @@ const KlarLanding = () => {
       {/* ══ Testimonials ══ */}
       <Section className="py-14">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <h2 className="font-klar-display text-3xl text-klar-pearl sm:text-4xl">Відгуки учнів</h2>
+          <h2 className="font-display font-bold text-3xl text-foreground sm:text-4xl">Відгуки учнів</h2>
         </div>
         <div className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 sm:px-6">
           {TESTIMONIALS.map((t, i) => (
             <figure
               key={t.name}
               style={stagger(i)}
-              className="min-w-[85%] snap-center rounded-3xl border border-klar-aqua/15 bg-klar-surface/60 p-7 sm:min-w-[46%] lg:min-w-[31%]"
+              className="min-w-[85%] snap-center glass-card p-7 sm:min-w-[46%] lg:min-w-[31%]"
             >
-              <blockquote className="text-[15px] leading-relaxed text-klar-pearl/75">
+              <blockquote className="text-base leading-relaxed text-muted-foreground">
                 «{t.text}»
               </blockquote>
               <figcaption className="mt-6 flex items-center gap-3">
@@ -330,7 +322,7 @@ const KlarLanding = () => {
                   loading="lazy"
                   className="h-11 w-11 rounded-full object-cover"
                 />
-                <span className="font-klar-display text-lg text-klar-pearl">{t.name}</span>
+                <span className="font-display text-lg text-foreground">{t.name}</span>
               </figcaption>
             </figure>
           ))}
@@ -339,18 +331,18 @@ const KlarLanding = () => {
 
       {/* ══ Final CTA — wheel ══ */}
       <Section className="px-4 py-16 sm:px-6 sm:py-20">
-        <div className="relative mx-auto max-w-3xl rounded-3xl border border-klar-aqua/15 bg-klar-surface/60 px-6 py-12 text-center backdrop-blur-sm sm:px-10">
+        <div className="relative mx-auto max-w-3xl glass-card px-6 py-12 text-center backdrop-blur-sm sm:px-10">
           <img
             src={pandaCelebrating}
             alt="Панда KLAR святкує знижку"
             loading="lazy"
             className="animate-float pointer-events-none absolute -top-12 right-2 w-20 object-contain drop-shadow-[0_10px_24px_hsl(240_60%_5%/0.5)] sm:right-6 sm:w-28"
           />
-          <h2 className="font-klar-display text-3xl text-klar-pearl sm:text-4xl">
+          <h2 className="font-display font-bold text-3xl text-foreground sm:text-4xl">
             Ваша знижка на перший пакет
           </h2>
 
-          <p className="mx-auto mt-3 max-w-md text-[15px] text-klar-pearl/65">
+          <p className="mx-auto mt-3 max-w-md text-base text-muted-foreground">
             Крутіть колесо — знижка автоматично додасться до вашої заявки.
           </p>
           <div className="mt-10">
@@ -365,11 +357,11 @@ const KlarLanding = () => {
       </Section>
 
       {/* ══ Footer ══ */}
-      <footer className="relative z-10 border-t border-klar-aqua/10 px-4 py-10 sm:px-6">
-        <div className="mx-auto flex max-w-6xl flex-col items-center gap-3 text-sm text-klar-pearl/55 sm:flex-row sm:justify-between">
-          <span className="font-klar-display text-lg text-klar-pearl">Клар</span>
+      <footer className="relative z-10 border-t border-border/50 px-4 py-10 sm:px-6">
+        <div className="mx-auto flex max-w-6xl flex-col items-center gap-3 text-sm text-muted-foreground sm:flex-row sm:justify-between">
+          <span className="font-display text-lg text-foreground">Клар</span>
           <span>Клар © 2026</span>
-          <a href="/klar-privacy" className="transition-colors hover:text-klar-aqua">
+          <a href="/klar-privacy" className="transition-colors hover:text-primary">
             Політика конфіденційності
           </a>
         </div>

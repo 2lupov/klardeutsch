@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { z } from "zod";
 import { X, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
 
 const schema = z.object({
   name: z.string().trim().min(2, "Вкажіть імʼя").max(80, "Занадто довге імʼя"),
@@ -116,42 +117,39 @@ const LeadModal = ({ open, onClose, discount }: Props) => {
   return (
     <div className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div
-        className="absolute inset-0 bg-klar-bg/80 backdrop-blur-sm animate-in fade-in duration-200"
+        className="absolute inset-0 bg-background/80 backdrop-blur-sm animate-in fade-in duration-200"
         onClick={onClose}
       />
-      <div className="relative z-10 w-full sm:max-w-md max-h-[92dvh] overflow-y-auto rounded-t-3xl sm:rounded-3xl border border-klar-aqua/25 bg-klar-surface p-6 shadow-2xl animate-in slide-in-from-bottom-4 fade-in duration-300">
+      <div className="relative z-10 w-full sm:max-w-md max-h-[92dvh] overflow-y-auto rounded-t-2xl sm:rounded-2xl border border-border/50 bg-card p-6 shadow-2xl animate-in slide-in-from-bottom-4 fade-in duration-300">
         <button
           onClick={onClose}
           aria-label="Закрити"
-          className="absolute right-4 top-4 text-klar-pearl/60 hover:text-klar-pearl transition-colors"
+          className="absolute right-4 top-4 text-muted-foreground hover:text-foreground transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
 
         {done ? (
           <div className="py-10 text-center">
-            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-klar-aqua/15">
-              <Check className="h-7 w-7 text-klar-aqua" />
+            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-primary/15">
+              <Check className="h-7 w-7 text-primary" />
             </div>
-            <h3 className="font-klar-display text-2xl text-klar-pearl">Дякуємо!</h3>
-            <p className="mt-2 text-klar-pearl/70">
+            <h3 className="font-display text-2xl text-foreground">Дякуємо!</h3>
+            <p className="mt-2 text-muted-foreground">
               Я звʼяжуся з вами в Telegram найближчим часом.
             </p>
-            <button
-              onClick={onClose}
-              className="mt-6 rounded-xl border border-klar-aqua/40 px-6 py-2.5 text-klar-aqua transition-colors hover:bg-klar-aqua/10"
-            >
+            <Button onClick={onClose} variant="outline" className="mt-6 rounded-xl border-primary/40 bg-transparent text-primary hover:bg-primary/10 hover:text-primary">
               Закрити
-            </button>
+            </Button>
           </div>
         ) : (
           <form onSubmit={submit} className="space-y-4">
-            <h3 className="pr-8 font-klar-display text-[26px] leading-snug text-klar-pearl">
+            <h3 className="pr-8 font-display text-2xl leading-snug text-foreground">
               Залиште заявку — я звʼяжуся з вами в Telegram
             </h3>
 
             {discount && (
-              <p className="rounded-xl bg-klar-sand/15 px-4 py-2.5 text-sm text-klar-sand">
+              <p className="rounded-xl bg-accent/15 px-4 py-2.5 text-sm text-accent">
                 Ваша знижка: <strong>{discount}</strong>
               </p>
             )}
@@ -200,38 +198,34 @@ const LeadModal = ({ open, onClose, discount }: Props) => {
             <Field label="Рівень німецької">
               <select value={level} onChange={(e) => setLevel(e.target.value)} className={inputCls}>
                 {LEVELS.map((l) => (
-                  <option key={l.value} value={l.value} className="bg-klar-surface">
+                  <option key={l.value} value={l.value} className="bg-card">
                     {l.label}
                   </option>
                 ))}
               </select>
             </Field>
 
-            <label className="flex cursor-pointer items-start gap-3 text-[13px] leading-relaxed text-klar-pearl/70">
+            <label className="flex cursor-pointer items-start gap-3 text-[13px] leading-relaxed text-muted-foreground">
               <input
                 type="checkbox"
                 checked={consent}
                 onChange={(e) => setConsent(e.target.checked)}
-                className="mt-0.5 h-4 w-4 accent-[hsl(var(--klar-aqua))]"
+                className="mt-0.5 h-4 w-4 accent-[hsl(var(--primary))]"
               />
               <span>
                 Я даю згоду на обробку моїх персональних даних відповідно до{" "}
-                <a href="/klar-privacy" target="_blank" rel="noreferrer" className="text-klar-aqua underline">
+                <a href="/klar-privacy" target="_blank" rel="noreferrer" className="text-primary underline">
                   Політики конфіденційності
                 </a>
                 .
               </span>
             </label>
 
-            {errors.form && <p className="text-sm text-red-400">{errors.form}</p>}
+            {errors.form && <p className="text-sm text-destructive">{errors.form}</p>}
 
-            <button
-              type="submit"
-              disabled={!consent || sending}
-              className="w-full rounded-xl bg-klar-aqua px-6 py-3.5 font-semibold text-klar-bg transition-all hover:shadow-[0_0_28px_hsl(var(--klar-aqua)/0.45)] disabled:cursor-not-allowed disabled:opacity-40"
-            >
+            <Button type="submit" variant="glow" size="lg" disabled={!consent || sending} className="w-full rounded-xl">
               {sending ? "Надсилаю…" : "Надіслати заявку"}
-            </button>
+            </Button>
           </form>
         )}
       </div>
@@ -240,7 +234,7 @@ const LeadModal = ({ open, onClose, discount }: Props) => {
 };
 
 const inputCls =
-  "w-full rounded-xl border border-klar-aqua/20 bg-klar-bg/60 px-4 py-3 text-klar-pearl placeholder:text-klar-pearl/35 outline-none transition-colors focus:border-klar-aqua/60";
+  "w-full rounded-xl border border-input bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-primary";
 
 const Field = ({
   label,
@@ -252,9 +246,9 @@ const Field = ({
   children: React.ReactNode;
 }) => (
   <div>
-    <span className="mb-1.5 block text-xs uppercase tracking-wider text-klar-pearl/50">{label}</span>
+    <span className="mb-1.5 block text-xs uppercase tracking-wider text-muted-foreground">{label}</span>
     {children}
-    {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
+    {error && <p className="mt-1 text-xs text-destructive">{error}</p>}
   </div>
 );
 
