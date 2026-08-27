@@ -23,7 +23,8 @@ import { supabase } from "@/integrations/supabase/client";
  */
 
 export interface TheoryBlock {
-  type: "heading" | "text" | "rule" | "table" | "example" | "comparison" | "tip" | "list";
+  type: "heading" | "text" | "rule" | "table" | "example" | "comparison" | "tip" | "list" | "image";
+
   // Common
   content?: string;
   title?: string;
