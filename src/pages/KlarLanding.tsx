@@ -339,10 +339,17 @@ const KlarLanding = () => {
 
       {/* ══ Final CTA — wheel ══ */}
       <Section className="px-4 py-16 sm:px-6 sm:py-20">
-        <div className="mx-auto max-w-3xl rounded-3xl border border-klar-aqua/15 bg-klar-surface/60 px-6 py-12 text-center backdrop-blur-sm sm:px-10">
+        <div className="relative mx-auto max-w-3xl rounded-3xl border border-klar-aqua/15 bg-klar-surface/60 px-6 py-12 text-center backdrop-blur-sm sm:px-10">
+          <img
+            src={pandaCelebrating}
+            alt="Панда KLAR святкує знижку"
+            loading="lazy"
+            className="animate-float pointer-events-none absolute -top-12 right-2 w-20 object-contain drop-shadow-[0_10px_24px_hsl(240_60%_5%/0.5)] sm:right-6 sm:w-28"
+          />
           <h2 className="font-klar-display text-3xl text-klar-pearl sm:text-4xl">
             Ваша знижка на перший пакет
           </h2>
+
           <p className="mx-auto mt-3 max-w-md text-[15px] text-klar-pearl/65">
             Крутіть колесо — знижка автоматично додасться до вашої заявки.
           </p>
