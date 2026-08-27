@@ -109,7 +109,11 @@ const tipConfig = {
 
 function RenderBlock({ block, lang }: { block: TheoryBlock; lang: string }) {
   switch (block.type) {
+    case "image":
+      return <TheoryImage block={block} />;
+
     case "heading":
+
       return (
         <h3 className="font-display font-bold text-base text-foreground flex items-center gap-2 mt-2">
           {block.emoji && <span>{block.emoji}</span>}
