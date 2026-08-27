@@ -115,9 +115,10 @@ export default function AdminV2() {
 
   return (
     <div
-      className="h-[100dvh] w-full flex overflow-hidden"
-      style={{ background: "#F8FAFC", fontFamily: "Inter, system-ui, sans-serif" }}
+      className={`h-[100dvh] w-full flex overflow-hidden ${dark ? "admin-dark" : ""}`}
+      style={{ background: dark ? "#0B1120" : "#F8FAFC", fontFamily: "Inter, system-ui, sans-serif" }}
     >
+
       {/* Sidebar */}
       <aside
         className={`${collapsed ? "w-16" : "w-64"} shrink-0 h-full bg-white border-r border-slate-200 flex flex-col transition-all duration-200`}
