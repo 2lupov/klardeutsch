@@ -23,14 +23,20 @@ const RequirePremium = ({ children, require }: Props) => {
     if (!user) { setWhitelisted(false); return; }
     supabase
       .from("profiles")
-      .select("display_name, nickname")
+      .select("display_name, nickname, created_by_teacher_id")
       .eq("user_id", user.id)
       .single()
       .then(({ data }) => {
         const name = (data?.display_name ?? "").toLowerCase().trim();
         const nick = (data?.nickname ?? "").toLowerCase().trim();
-        setWhitelisted(FULL_ACCESS_NAMES.includes(name) || FULL_ACCESS_NAMES.includes(nick));
+        const isManagedStudent = !!(data as any)?.created_by_teacher_id;
+        setWhitelisted(
+          isManagedStudent ||
+            FULL_ACCESS_NAMES.includes(name) ||
+            FULL_ACCESS_NAMES.includes(nick)
+        );
       });
+
   }, [user]);
 
   if (authLoading || loading || whitelisted === null) return null;
