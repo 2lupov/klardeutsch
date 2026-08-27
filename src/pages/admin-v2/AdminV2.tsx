@@ -16,7 +16,10 @@ import {
   Lock,
   ChevronLeft,
   ExternalLink,
+  Moon,
+  Sun,
 } from "lucide-react";
+
 
 import DashboardPage from "./pages/DashboardPage";
 import CoursesPage from "./pages/CoursesPage";
