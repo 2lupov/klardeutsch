@@ -7,6 +7,8 @@ import {
   BookOpen,
   Sparkles,
   Dumbbell,
+  Camera,
+
   Users,
   MessageSquare,
   BarChart3,
