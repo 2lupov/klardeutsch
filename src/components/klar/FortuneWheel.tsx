@@ -86,7 +86,7 @@ const FortuneWheel = ({ onWin }: { onWin: (discount: string) => void }) => {
           className="rounded-xl"
         >
           {spinning ? "Крутиться…" : "Крутити колесо"}
-        </button>
+        </Button>
       )}
     </div>
   );
