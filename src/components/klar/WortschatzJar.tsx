@@ -57,7 +57,7 @@ const WortschatzJar = () => {
         <rect x="46" y="134" width="128" height="10" rx="5" fill="hsl(var(--klar-aqua) / 0.35)" />
 
         {/* words inside */}
-        <g fontFamily="'Cormorant Garamond', serif" fontSize="22" fill="hsl(var(--klar-pearl) / 0.75)">
+        <g fontFamily="Sora, system-ui, sans-serif" fontSize="22" fill="hsl(var(--klar-pearl) / 0.75)">
           {LETTERS.map((l, i) => (
             <text
               key={l.t + i}
@@ -82,7 +82,7 @@ const WortschatzJar = () => {
           x="110"
           y="353"
           textAnchor="middle"
-          fontFamily="'Cormorant Garamond', serif"
+          fontFamily="Sora, system-ui, sans-serif"
           fontSize="19"
           letterSpacing="1"
           fill="hsl(var(--klar-bg))"

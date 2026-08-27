@@ -6,6 +6,12 @@ import LeadModal from "@/components/klar/LeadModal";
 import FortuneWheel from "@/components/klar/FortuneWheel";
 import { useReveal, stagger } from "@/components/klar/useReveal";
 import { initMetaPixel } from "@/lib/meta-pixel";
+import pandaCoach from "@/assets/panda-coach.png";
+import pandaScholar from "@/assets/panda-scholar.png";
+import pandaGraduate from "@/assets/mascot/panda-graduate.png";
+import pandaWaving from "@/assets/mascot/panda-waving.png";
+import pandaCelebrating from "@/assets/mascot/panda-celebrating.png";
+
 
 const TESTIMONIALS = [
   {
@@ -122,11 +128,14 @@ const KlarLanding = () => {
       <header className="fixed inset-x-0 top-0 z-50 border-b border-klar-aqua/10 bg-klar-bg/70 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3.5 sm:px-6">
           <a href="#top" className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-md border border-klar-aqua/50">
-              <Sparkles className="h-3.5 w-3.5 text-klar-aqua" />
-            </span>
-            <span className="font-klar-display text-xl tracking-wide text-klar-pearl">Клар</span>
+            <img
+              src={pandaWaving}
+              alt="Маскот KLAR — панда"
+              className="h-9 w-9 object-contain drop-shadow-[0_2px_8px_hsl(var(--klar-aqua)/0.4)]"
+            />
+            <span className="font-klar-display text-xl font-bold tracking-tight text-klar-pearl">Клар</span>
           </a>
+
           <button
             onClick={open}
             className="rounded-xl bg-klar-aqua px-4 py-2 text-sm font-semibold text-klar-bg transition-all hover:shadow-[0_0_24px_hsl(var(--klar-aqua)/0.45)] sm:px-5 sm:py-2.5"
@@ -162,7 +171,16 @@ const KlarLanding = () => {
               <span className="text-sm text-klar-pearl/55">Перше пробне заняття — безкоштовно</span>
             </div>
           </div>
-          <WortschatzJar />
+          <div className="relative mx-auto w-full max-w-md">
+            <div className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-klar-aqua/15 blur-3xl" />
+            <WortschatzJar />
+            <img
+              src={pandaCoach}
+              alt="Панда-викладач KLAR тримає банку зі словами"
+              className="animate-float absolute -bottom-3 -left-2 w-[44%] max-w-[170px] object-contain drop-shadow-[0_16px_36px_hsl(240_60%_5%/0.6)] sm:-left-8"
+            />
+          </div>
+
         </div>
       </Section>
 
@@ -217,40 +235,63 @@ const KlarLanding = () => {
         </div>
       </Section>
 
-      {/* ══ Method (light section) ══ */}
-      <Section className="relative z-10 bg-klar-pearl px-4 py-16 text-klar-bg sm:px-6 sm:py-20">
-        <div className="mx-auto max-w-4xl">
-          <h2 className="font-klar-display text-3xl font-semibold sm:text-4xl">
-            Не зубріння, а система
-          </h2>
-          <p className="mt-5 text-[15px] leading-relaxed text-klar-bg/75 sm:text-base">
-            Методика будується на трьох простих речах: ви говорите на кожному занятті, лексика
-            повертається за графіком повторень, а граматика подається як логіка мови, а не як
-            таблиця для запамʼятовування.
-          </p>
-          <div className="mt-10 grid gap-6 sm:grid-cols-3">
-            {[
-              { t: "Індивідуальна програма", d: "Складаю план під вашу мету і темп — без універсальних курсів «для всіх»." },
-              { t: "Інтервальні повторення", d: "Слова та конструкції повертаються тоді, коли мозок готовий їх забути." },
-              { t: "Матеріали після уроку", d: "Конспект, лексика та завдання — щоб заняття продовжувалось між уроками." },
-            ].map((x, i) => (
-              <div key={x.t} style={stagger(i)}>
-                <h3 className="font-klar-display text-xl font-semibold">{x.t}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-klar-bg/70">{x.d}</p>
+      {/* ══ Method ══ */}
+      <Section className="relative z-10 px-4 py-16 sm:px-6 sm:py-20">
+        <div className="mx-auto max-w-6xl overflow-hidden rounded-[2rem] border border-klar-aqua/15 bg-gradient-primary/10 bg-klar-surface/60 px-6 py-12 backdrop-blur-sm sm:px-12">
+          <div className="grid items-center gap-10 md:grid-cols-[1.4fr_1fr]">
+            <div>
+              <h2 className="font-klar-display text-3xl font-semibold text-klar-pearl sm:text-4xl">
+                Не зубріння, а система
+              </h2>
+              <p className="mt-5 text-[15px] leading-relaxed text-klar-pearl/70 sm:text-base">
+                Методика будується на трьох простих речах: ви говорите на кожному занятті, лексика
+                повертається за графіком повторень, а граматика подається як логіка мови, а не як
+                таблиця для запамʼятовування.
+              </p>
+              <div className="mt-9 grid gap-5 sm:grid-cols-3">
+                {[
+                  { t: "Індивідуальна програма", d: "Складаю план під вашу мету і темп — без універсальних курсів «для всіх»." },
+                  { t: "Інтервальні повторення", d: "Слова та конструкції повертаються тоді, коли мозок готовий їх забути." },
+                  { t: "Матеріали після уроку", d: "Конспект, лексика та завдання — щоб заняття продовжувалось між уроками." },
+                ].map((x, i) => (
+                  <div key={x.t} style={stagger(i)} className="rounded-2xl border border-klar-aqua/10 bg-klar-bg/40 p-5">
+                    <h3 className="font-klar-display text-lg font-semibold text-klar-pearl">{x.t}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-klar-pearl/65">{x.d}</p>
+                  </div>
+                ))}
               </div>
-            ))}
+              <p className="mt-8 text-sm text-klar-pearl/50">
+                Я не обіцяю «вільну німецьку за місяць». Обіцяю чесну системну роботу і зрозумілий
+                прогрес, який ви відчуєте на заняттях.
+              </p>
+            </div>
+            <div className="relative mx-auto w-full max-w-[260px]">
+              <div className="pointer-events-none absolute inset-6 -z-10 rounded-full bg-klar-sand/15 blur-3xl" />
+              <img
+                src={pandaScholar}
+                alt="Панда-науковець KLAR з книгою"
+                loading="lazy"
+                className="animate-float w-full object-contain drop-shadow-[0_18px_40px_hsl(240_60%_5%/0.55)]"
+              />
+            </div>
           </div>
-          <p className="mt-10 text-sm text-klar-bg/55">
-            Я не обіцяю «вільну німецьку за місяць». Обіцяю чесну системну роботу і зрозумілий
-            прогрес, який ви відчуєте на заняттях.
-          </p>
         </div>
       </Section>
+
 
       {/* ══ Steps ══ */}
       <Section className="px-4 py-16 sm:px-6">
         <div className="mx-auto max-w-6xl">
-          <h2 className="font-klar-display text-3xl text-klar-pearl sm:text-4xl">Як почати</h2>
+          <div className="flex items-center gap-3">
+            <img
+              src={pandaGraduate}
+              alt="Панда-випускник KLAR"
+              loading="lazy"
+              className="h-14 w-14 object-contain drop-shadow-[0_6px_16px_hsl(240_60%_5%/0.5)]"
+            />
+            <h2 className="font-klar-display text-3xl text-klar-pearl sm:text-4xl">Як почати</h2>
+          </div>
+
           <div className="mt-9 grid gap-5 md:grid-cols-3">
             {STEPS.map((s, i) => (
               <div
@@ -298,10 +339,17 @@ const KlarLanding = () => {
 
       {/* ══ Final CTA — wheel ══ */}
       <Section className="px-4 py-16 sm:px-6 sm:py-20">
-        <div className="mx-auto max-w-3xl rounded-3xl border border-klar-aqua/15 bg-klar-surface/60 px-6 py-12 text-center backdrop-blur-sm sm:px-10">
+        <div className="relative mx-auto max-w-3xl rounded-3xl border border-klar-aqua/15 bg-klar-surface/60 px-6 py-12 text-center backdrop-blur-sm sm:px-10">
+          <img
+            src={pandaCelebrating}
+            alt="Панда KLAR святкує знижку"
+            loading="lazy"
+            className="animate-float pointer-events-none absolute -top-12 right-2 w-20 object-contain drop-shadow-[0_10px_24px_hsl(240_60%_5%/0.5)] sm:right-6 sm:w-28"
+          />
           <h2 className="font-klar-display text-3xl text-klar-pearl sm:text-4xl">
             Ваша знижка на перший пакет
           </h2>
+
           <p className="mx-auto mt-3 max-w-md text-[15px] text-klar-pearl/65">
             Крутіть колесо — знижка автоматично додасться до вашої заявки.
           </p>
