@@ -578,7 +578,7 @@ const Auth = () => {
             {loading ? "..." : forgotMode ? t("sendResetLink") : isLogin ? t("login") : t("signup")}
           </button>
 
-          {isLogin && !forgotMode && (
+          {isLogin && !forgotMode && !studentMode && (
             <button
               type="button"
               onClick={() => { setForgotMode(true); setError(""); setMessage(""); }}
@@ -588,28 +588,28 @@ const Auth = () => {
             </button>
           )}
 
-
-
-
-          <button
-            type="button"
-            onClick={() => { 
-              if (forgotMode) {
-                setForgotMode(false);
-              } else {
-                setIsLogin(!isLogin);
-              }
-              setError(""); 
-              setMessage(""); 
-            }}
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            {forgotMode ? t("hasAccount") : isLogin ? t("noAccount") : t("hasAccount")}
-          </button>
+          {!studentMode && (
+            <button
+              type="button"
+              onClick={() => { 
+                if (forgotMode) {
+                  setForgotMode(false);
+                } else {
+                  setIsLogin(!isLogin);
+                }
+                setError(""); 
+                setMessage(""); 
+              }}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {forgotMode ? t("hasAccount") : isLogin ? t("noAccount") : t("hasAccount")}
+            </button>
+          )}
         </form>
 
         {/* Social Login */}
-        {!isTelegram && (
+        {!isTelegram && !studentMode && (
+
           <div className="mt-3 animate-auth-fade-up" style={{ animationDelay: "0.7s" }}>
             <div className="flex items-center gap-3 mb-3">
               <div className="flex-1 h-px bg-border" />
