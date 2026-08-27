@@ -60,7 +60,7 @@ const WordRain = () => {
         p.x += p.drift;
         if (p.y > window.innerHeight + 30) particles[i] = spawn();
         ctx.font = `500 ${p.size}px 'Cormorant Garamond', serif`;
-        ctx.fillStyle = `hsl(var(--klar-aqua) / ${p.alpha})`;
+        ctx.fillStyle = `hsl(var(--primary) / ${p.alpha})`;
         ctx.fillText(p.text, p.x, p.y);
       }
       raf = requestAnimationFrame(draw);
