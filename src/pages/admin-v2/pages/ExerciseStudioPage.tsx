@@ -47,7 +47,7 @@ export default function ExerciseStudioPage() {
   return (
     <div className="space-y-6">
       <SectionHeader
-        title="Exercise Studio"
+        title="Студія завдань"
         subtitle="Згенеруй набір вправ з будь-якого тексту — словник, граматика, читання, аудіювання"
       />
 

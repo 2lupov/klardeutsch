@@ -62,7 +62,7 @@ export default function TutorLogsPage() {
 
   return (
     <div className="space-y-6">
-      <SectionHeader title="AI Tutor Logs" subtitle={`Останні ${chats.length} діалогів`} />
+      <SectionHeader title="Логи AI-репетитора" subtitle={`Останні ${chats.length} діалогів`} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="space-y-2 lg:col-span-1">

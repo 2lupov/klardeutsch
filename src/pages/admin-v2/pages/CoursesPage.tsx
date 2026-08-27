@@ -128,7 +128,7 @@ export default function CoursesPage() {
       ) : courses.length === 0 ? (
         <EmptyState
           title="Ще немає курсів"
-          description="Створи перший курс — далі AI Course Builder згенерує модулі й уроки."
+          description="Створи перший курс — далі AI-конструктор згенерує модулі й уроки."
           cta={{ label: "+ Новий курс", onClick: () => setShowNew(true) }}
         />
       ) : (
