@@ -1,5 +1,8 @@
+import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+
 
 /**
  * TheoryRenderer renders theory content in a beautiful, structured way.
