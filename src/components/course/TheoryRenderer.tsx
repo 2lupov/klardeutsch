@@ -43,7 +43,40 @@ export interface TheoryBlock {
   items_list?: string[];
   // For tip
   variant?: "info" | "warning" | "remember";
+  // For image (photo of a book page stored in the course-images bucket)
+  path?: string;
+  url?: string;
+  caption?: string;
 }
+
+/** Image from the private course-images bucket (or a plain URL). */
+function TheoryImage({ block }: { block: TheoryBlock }) {
+  const [src, setSrc] = useState<string | null>(block.url ?? null);
+
+  useEffect(() => {
+    if (block.url || !block.path) return;
+    let cancelled = false;
+    supabase.storage
+      .from("course-images")
+      .createSignedUrl(block.path, 60 * 60)
+      .then(({ data }) => {
+        if (!cancelled && data?.signedUrl) setSrc(data.signedUrl);
+      });
+    return () => { cancelled = true; };
+  }, [block.url, block.path]);
+
+  if (!src) return null;
+
+  return (
+    <figure className="rounded-xl overflow-hidden border border-border bg-card">
+      <img src={src} alt={block.caption || "Сторінка книги"} loading="lazy" className="w-full h-auto" />
+      {block.caption && (
+        <figcaption className="px-3 py-2 text-xs text-muted-foreground">{block.caption}</figcaption>
+      )}
+    </figure>
+  );
+}
+
 
 function parseTheory(theory: string): TheoryBlock[] | null {
   if (!theory.trim()) return null;
