@@ -197,12 +197,9 @@ const KlarLanding = () => {
               Перше пробне заняття — безкоштовно
             </div>
             <div className="mt-8">
-              <button
-                onClick={open}
-                className="rounded-xl border border-primary/40 px-7 py-3 font-medium text-primary transition-all hover:bg-primary/10 hover:shadow-[0_0_24px_hsl(var(--primary)/0.3)]"
-              >
+              <Button onClick={open} variant="outline" size="lg" className="rounded-xl border-primary/40 bg-transparent text-primary hover:bg-primary/10 hover:text-primary">
                 Записатись на пробне
-              </button>
+              </Button>
             </div>
           </div>
         </div>
