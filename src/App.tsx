@@ -30,6 +30,7 @@ import TeachAttendance from "./pages/teach/TeachAttendance";
 import TeachFinance from "./pages/teach/TeachFinance";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import AuthCallback from "./pages/AuthCallback";
 import ResetPassword from "./pages/ResetPassword";
 import OAuthConsent from "./pages/OAuthConsent";
 import Admin from "./pages/Admin";
