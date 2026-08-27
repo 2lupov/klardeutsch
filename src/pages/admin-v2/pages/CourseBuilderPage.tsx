@@ -232,34 +232,112 @@ export default function CourseBuilderPage() {
         }
       />
 
-      <Card className="p-6">
+      <Card className="p-6 space-y-5">
         <div className="flex items-start gap-4">
           <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-white shrink-0"
             style={{ background: "linear-gradient(135deg,#4F46E5,#7C3AED)" }}>
-            <Sparkles className="w-6 h-6" />
+            <Settings2 className="w-6 h-6" />
           </div>
           <div className="flex-1">
-            <h3 className="font-semibold text-slate-900">Згенерувати повний курс</h3>
+            <h3 className="font-semibold text-slate-900">Налаштування генератора</h3>
             <p className="text-sm text-slate-500 mt-1">
-              AI створить {TOTAL_TOPICS} уроків для рівня {selected?.level} батчами по {BATCH_SIZE}.
-              Кожен урок: 8-15 блоків теорії, 10-15 слів, 6-8 вправ, читання, діалог, культурна нотатка.
+              Теми уроків і твій власний промпт — саме за ними AI будує курс. Один урок = один запит до AI (щоб не обривався JSON).
             </p>
-            {existingLessons > 0 && (
-              <p className="text-xs text-amber-600 mt-2">
-                ⚠️ У курсі вже {existingLessons} уроків — нові будуть додані додатково.
-              </p>
-            )}
-            <button
-              onClick={runGeneration}
-              disabled={running}
-              className="mt-4 px-4 py-2 rounded-xl text-white text-sm font-medium flex items-center gap-2 disabled:opacity-50"
-              style={{ background: "#4F46E5" }}>
-              {running ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
-              {running ? "Генерація..." : "Запустити генерацію"}
-            </button>
           </div>
         </div>
+
+        <div>
+          <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">
+            Твій промпт (ціль курсу, стиль, правила) — головний пріоритет для AI
+          </label>
+          <textarea
+            value={customPrompt}
+            onChange={(e) => setCustomPrompt(e.target.value)}
+            placeholder={"Напр.: курс для дорослих, які переїжджають до Німеччини. Пояснення українською, багато розмовних фраз, мінімум теорії, у кожному уроці 3 діалоги з побуту, гумор і приклади з життя."}
+            className="mt-2 w-full min-h-[110px] px-3 py-2 rounded-xl border border-slate-200 text-sm"
+          />
+        </div>
+
+        <div>
+          <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">
+            Теми уроків — по одній на рядок ({topics.length})
+          </label>
+          <textarea
+            value={topicsText}
+            onChange={(e) => setTopicsText(e.target.value)}
+            className="mt-2 w-full min-h-[160px] px-3 py-2 rounded-xl border border-slate-200 text-sm font-mono"
+          />
+          <button
+            onClick={() => setTopicsText((DEFAULT_TOPICS[selected?.level || "A1"] || []).join("\n"))}
+            className="mt-2 text-xs text-indigo-600 hover:underline"
+          >
+            Підставити стандартні теми рівня {selected?.level}
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Мова пояснень</label>
+            <select
+              value={metaLanguage}
+              onChange={(e) => setMetaLanguage(e.target.value)}
+              className="mt-2 w-full px-3 py-2 rounded-lg border border-slate-200 text-sm"
+            >
+              {META_LANGS.map((l) => <option key={l.code} value={l.code}>{l.label}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Уроків за один запуск батчу</label>
+            <select
+              value={batchSize}
+              onChange={(e) => setBatchSize(Number(e.target.value))}
+              className="mt-2 w-full px-3 py-2 rounded-lg border border-slate-200 text-sm"
+            >
+              {[1, 2, 3, 5].map((n) => <option key={n} value={n}>{n}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Нумерація з уроку №</label>
+            <input
+              type="number"
+              min={0}
+              value={startFrom}
+              onChange={(e) => setStartFrom(Math.max(0, Number(e.target.value)))}
+              className="mt-2 w-full px-3 py-2 rounded-lg border border-slate-200 text-sm"
+            />
+          </div>
+        </div>
+
+        {existingLessons > 0 && (
+          <p className="text-xs text-amber-600">
+            ⚠️ У курсі вже {existingLessons} уроків — нові додаються після них.
+          </p>
+        )}
+
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={runGeneration}
+            disabled={running}
+            className="px-4 py-2 rounded-xl text-white text-sm font-medium flex items-center gap-2 disabled:opacity-50"
+            style={{ background: "#4F46E5" }}>
+            {running ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
+            {running ? "Генерація..." : `Згенерувати ${topics.length} уроків`}
+          </button>
+          <button
+            onClick={saveSettings}
+            className="px-4 py-2 rounded-xl text-sm border border-slate-200 hover:bg-slate-50">
+            Зберегти налаштування
+          </button>
+          {errorCount > 0 && !running && (
+            <button
+              onClick={retryFailed}
+              className="px-4 py-2 rounded-xl text-sm border border-red-200 text-red-600 hover:bg-red-50 flex items-center gap-2">
+              <RotateCcw className="w-4 h-4" /> Повторити невдалі ({errorCount})
+            </button>
+          )}
+        </div>
       </Card>
+
 
       <Card className="p-6">
         <SectionHeader title="Що саме створюється" subtitle="Огляд AI-контенту та ручних елементів" />
