@@ -136,12 +136,9 @@ const KlarLanding = () => {
             <span className="font-display text-xl font-bold tracking-tight text-foreground">Клар</span>
           </a>
 
-          <button
-            onClick={open}
-            className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-all hover:shadow-[0_0_24px_hsl(var(--primary)/0.45)] sm:px-5 sm:py-2.5"
-          >
+          <Button onClick={open} variant="glow" size="sm" className="rounded-xl">
             Залишити заявку
-          </button>
+          </Button>
         </div>
       </header>
 
