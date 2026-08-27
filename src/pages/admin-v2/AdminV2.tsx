@@ -190,7 +190,15 @@ export default function AdminV2() {
               <h1 className="text-lg font-semibold text-slate-900 truncate">{activeItem.label}</h1>
             </div>
             <div className="flex items-center gap-3">
+              <button
+                onClick={() => setDark((d) => !d)}
+                className="w-9 h-9 rounded-xl border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50"
+                title={dark ? "Світла тема" : "Темна тема"}
+              >
+                {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </button>
               <LangSelector />
+
               <span
                 className="text-xs px-2.5 py-1 rounded-full font-medium hidden sm:inline"
                 style={{ background: "#FEF3C7", color: "#92400E" }}
