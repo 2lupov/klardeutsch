@@ -18,12 +18,14 @@ import { LogOut } from "lucide-react";
 // Routes a managed student is allowed to visit. Anything else
 // is redirected to /assignments (their only home).
 const STUDENT_ALLOWED = [
+  /^\/academy/,
+  /^\/course\/[^/]+$/,
   /^\/assignments$/,
   /^\/tutoring\/lesson\/[^/]+$/,
   /^\/tutoring\/homework\/[^/]+$/,
   /^\/tutoring\/placement\/[^/]+$/,
-  /^\/onboarding$/,
 ];
+
 
 const isStudentAllowed = (path: string) =>
   STUDENT_ALLOWED.some((re) => re.test(path));
