@@ -182,7 +182,7 @@ const KlarLanding = () => {
       {/* ══ Price ══ */}
       <Section className="px-4 py-14 sm:px-6">
         <div className="mx-auto max-w-6xl">
-          <div className="rounded-2xl border border-primary/15 bg-card/70 px-6 py-10 text-center backdrop-blur-sm sm:px-10">
+          <div className="glass-card px-6 py-10 text-center sm:px-10">
             <p className="text-[11px] uppercase tracking-[0.22em] text-foreground/45">
               Вартість заняття
             </p>
@@ -216,7 +216,7 @@ const KlarLanding = () => {
             <article
               key={b.de}
               style={stagger(i)}
-              className="min-w-[82%] snap-center rounded-2xl glass-card p-7 backdrop-blur-sm transition-colors hover:border-primary/35 sm:min-w-[60%] md:min-w-0"
+              className="min-w-[82%] snap-center glass-card p-7 backdrop-blur-sm transition-colors hover:border-primary/35 sm:min-w-[60%] md:min-w-0"
             >
               <b.Icon className="h-6 w-6 text-primary" />
               <p className="mt-5 text-[11px] uppercase tracking-[0.22em] text-primary/80">{b.de}</p>
@@ -229,7 +229,7 @@ const KlarLanding = () => {
 
       {/* ══ Method ══ */}
       <Section className="relative z-10 px-4 py-16 sm:px-6 sm:py-20">
-        <div className="mx-auto max-w-6xl overflow-hidden rounded-2xl border border-primary/15 bg-gradient-primary/10 bg-card/60 px-6 py-12 backdrop-blur-sm sm:px-12">
+        <div className="mx-auto max-w-6xl overflow-hidden glass-card px-6 py-12 sm:px-12">
           <div className="grid items-center gap-10 md:grid-cols-[1.4fr_1fr]">
             <div>
               <h2 className="font-display text-3xl font-semibold text-foreground sm:text-4xl">
@@ -289,7 +289,7 @@ const KlarLanding = () => {
               <div
                 key={s.n}
                 style={stagger(i)}
-                className="rounded-2xl glass-card p-7"
+                className="glass-card p-7"
               >
                 <span className="font-display text-3xl text-accent">{s.n}</span>
                 <h3 className="mt-3 font-display text-2xl text-foreground">{s.title}</h3>
@@ -310,7 +310,7 @@ const KlarLanding = () => {
             <figure
               key={t.name}
               style={stagger(i)}
-              className="min-w-[85%] snap-center rounded-2xl glass-card p-7 sm:min-w-[46%] lg:min-w-[31%]"
+              className="min-w-[85%] snap-center glass-card p-7 sm:min-w-[46%] lg:min-w-[31%]"
             >
               <blockquote className="text-[15px] leading-relaxed text-foreground/75">
                 «{t.text}»
@@ -331,7 +331,7 @@ const KlarLanding = () => {
 
       {/* ══ Final CTA — wheel ══ */}
       <Section className="px-4 py-16 sm:px-6 sm:py-20">
-        <div className="relative mx-auto max-w-3xl rounded-2xl glass-card px-6 py-12 text-center backdrop-blur-sm sm:px-10">
+        <div className="relative mx-auto max-w-3xl glass-card px-6 py-12 text-center backdrop-blur-sm sm:px-10">
           <img
             src={pandaCelebrating}
             alt="Панда KLAR святкує знижку"
