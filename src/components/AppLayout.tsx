@@ -75,7 +75,8 @@ const AppLayout = () => {
   useEffect(() => {
     if (!profileChecked || !isStudent) return;
     if (!isStudentAllowed(location.pathname)) {
-      navigate("/assignments", { replace: true });
+      navigate("/academy", { replace: true });
+
     }
   }, [isStudent, profileChecked, location.pathname, navigate]);
 
