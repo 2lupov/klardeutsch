@@ -9,11 +9,27 @@ import AuthKlarLogo from "@/components/auth/AuthKlarLogo";
  */
 const HomeGate = () => {
   const { user, loading } = useAuth();
+  const [progress, setProgress] = useState(0);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const t = setTimeout(() => setReady(true), 1500);
-    return () => clearTimeout(t);
+    const start = performance.now();
+    const duration = 1500;
+    let raf = 0;
+
+    const tick = (now: number) => {
+      const elapsed = now - start;
+      const p = Math.min(elapsed / duration, 1);
+      setProgress(p);
+      if (p < 1) {
+        raf = requestAnimationFrame(tick);
+      } else {
+        setReady(true);
+      }
+    };
+
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
   }, []);
 
   if (loading) return <div className="min-h-[100dvh] bg-background" />;
@@ -22,7 +38,7 @@ const HomeGate = () => {
 
   return (
     <div className="min-h-[100dvh] bg-background flex flex-col items-center justify-center px-4">
-      <AuthKlarLogo className="w-48 h-48 md:w-64 md:h-64" />
+      <AuthKlarLogo progress={progress} />
       <p className="mt-8 text-muted-foreground animate-pulse font-display text-lg">
         KLAR
       </p>
