@@ -37,14 +37,14 @@ type NavKey =
   | "settings";
 
 const NAV: { key: NavKey; label: string; icon: any }[] = [
-  { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { key: "courses", label: "Courses", icon: BookOpen },
-  { key: "builder", label: "AI Course Builder", icon: Sparkles },
-  { key: "studio", label: "Exercise Studio", icon: Dumbbell },
-  { key: "students", label: "Students", icon: Users },
-  { key: "tutor", label: "AI Tutor Logs", icon: MessageSquare },
-  { key: "analytics", label: "Analytics", icon: BarChart3 },
-  { key: "settings", label: "Settings", icon: Settings },
+  { key: "dashboard", label: "Головна", icon: LayoutDashboard },
+  { key: "courses", label: "Курси", icon: BookOpen },
+  { key: "builder", label: "AI-конструктор курсів", icon: Sparkles },
+  { key: "studio", label: "Студія завдань", icon: Dumbbell },
+  { key: "students", label: "Учні", icon: Users },
+  { key: "tutor", label: "Логи AI-репетитора", icon: MessageSquare },
+  { key: "analytics", label: "Аналітика", icon: BarChart3 },
+  { key: "settings", label: "Налаштування", icon: Settings },
 ];
 
 export default function AdminV2() {
@@ -117,7 +117,7 @@ export default function AdminV2() {
           {!collapsed && (
             <div className="flex flex-col leading-tight">
               <span className="font-semibold text-slate-900 text-sm">KLAR Academy</span>
-              <span className="text-[11px] text-slate-500">Admin Console</span>
+              <span className="text-[11px] text-slate-500">Адмін-панель</span>
             </div>
           )}
         </div>
@@ -148,10 +148,10 @@ export default function AdminV2() {
           <Link
             to="/admin/legacy"
             className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-slate-500 hover:bg-slate-50"
-            title="Legacy admin"
+            title="Стара адмінка"
           >
             <ExternalLink className="w-4 h-4 shrink-0" />
-            {!collapsed && <span>Legacy admin</span>}
+            {!collapsed && <span>Стара адмінка</span>}
           </Link>
           <button
             onClick={() => setCollapsed((c) => !c)}
