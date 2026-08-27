@@ -1,0 +1,3 @@
+CREATE POLICY "Admins manage course images" ON storage.objects FOR ALL TO authenticated USING (bucket_id = 'course-images' AND public.has_role(auth.uid(), 'admin'::app_role)) WITH CHECK (bucket_id = 'course-images' AND public.has_role(auth.uid(), 'admin'::app_role));
+
+CREATE POLICY "Authenticated can read course images" ON storage.objects FOR SELECT TO authenticated USING (bucket_id = 'course-images');
