@@ -18,12 +18,14 @@ import { LogOut } from "lucide-react";
 // Routes a managed student is allowed to visit. Anything else
 // is redirected to /assignments (their only home).
 const STUDENT_ALLOWED = [
+  /^\/academy/,
+  /^\/course\/[^/]+$/,
   /^\/assignments$/,
   /^\/tutoring\/lesson\/[^/]+$/,
   /^\/tutoring\/homework\/[^/]+$/,
   /^\/tutoring\/placement\/[^/]+$/,
-  /^\/onboarding$/,
 ];
+
 
 const isStudentAllowed = (path: string) =>
   STUDENT_ALLOWED.some((re) => re.test(path));
@@ -60,10 +62,11 @@ const AppLayout = () => {
       setIsStudent(student);
       // Students are managed by their teacher → no nickname gate for them.
       setHasNickname(student ? true : !!data?.nickname?.trim());
-      if (data && !(data as any).onboarding_completed) {
+      if (data && !student && !(data as any).onboarding_completed) {
         navigate("/onboarding", { replace: true });
       }
       setProfileChecked(true);
+
     };
     check();
   }, [user, navigate]);
@@ -72,7 +75,8 @@ const AppLayout = () => {
   useEffect(() => {
     if (!profileChecked || !isStudent) return;
     if (!isStudentAllowed(location.pathname)) {
-      navigate("/assignments", { replace: true });
+      navigate("/academy", { replace: true });
+
     }
   }, [isStudent, profileChecked, location.pathname, navigate]);
 
