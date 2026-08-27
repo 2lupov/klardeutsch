@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { ArrowRight, MessagesSquare, BookOpen, PenLine, Sparkles } from "lucide-react";
 import WordRain from "@/components/klar/WordRain";
 import WortschatzJar from "@/components/klar/WortschatzJar";
@@ -215,7 +216,7 @@ const KlarLanding = () => {
             <article
               key={b.de}
               style={stagger(i)}
-              className="min-w-[82%] snap-center rounded-2xl border border-primary/15 bg-card/60 p-7 backdrop-blur-sm transition-colors hover:border-primary/35 sm:min-w-[60%] md:min-w-0"
+              className="min-w-[82%] snap-center rounded-2xl glass-card p-7 backdrop-blur-sm transition-colors hover:border-primary/35 sm:min-w-[60%] md:min-w-0"
             >
               <b.Icon className="h-6 w-6 text-primary" />
               <p className="mt-5 text-[11px] uppercase tracking-[0.22em] text-primary/80">{b.de}</p>
@@ -245,7 +246,7 @@ const KlarLanding = () => {
                   { t: "Інтервальні повторення", d: "Слова та конструкції повертаються тоді, коли мозок готовий їх забути." },
                   { t: "Матеріали після уроку", d: "Конспект, лексика та завдання — щоб заняття продовжувалось між уроками." },
                 ].map((x, i) => (
-                  <div key={x.t} style={stagger(i)} className="rounded-2xl border border-primary/10 bg-background/40 p-5">
+                  <div key={x.t} style={stagger(i)} className="rounded-2xl border border-border/40 bg-background/40 p-5">
                     <h3 className="font-display text-lg font-semibold text-foreground">{x.t}</h3>
                     <p className="mt-2 text-sm leading-relaxed text-foreground/65">{x.d}</p>
                   </div>
@@ -288,7 +289,7 @@ const KlarLanding = () => {
               <div
                 key={s.n}
                 style={stagger(i)}
-                className="rounded-2xl border border-primary/15 bg-card/50 p-7"
+                className="rounded-2xl glass-card p-7"
               >
                 <span className="font-display text-3xl text-accent">{s.n}</span>
                 <h3 className="mt-3 font-display text-2xl text-foreground">{s.title}</h3>
@@ -309,7 +310,7 @@ const KlarLanding = () => {
             <figure
               key={t.name}
               style={stagger(i)}
-              className="min-w-[85%] snap-center rounded-2xl border border-primary/15 bg-card/60 p-7 sm:min-w-[46%] lg:min-w-[31%]"
+              className="min-w-[85%] snap-center rounded-2xl glass-card p-7 sm:min-w-[46%] lg:min-w-[31%]"
             >
               <blockquote className="text-[15px] leading-relaxed text-foreground/75">
                 «{t.text}»
@@ -330,7 +331,7 @@ const KlarLanding = () => {
 
       {/* ══ Final CTA — wheel ══ */}
       <Section className="px-4 py-16 sm:px-6 sm:py-20">
-        <div className="relative mx-auto max-w-3xl rounded-2xl border border-primary/15 bg-card/60 px-6 py-12 text-center backdrop-blur-sm sm:px-10">
+        <div className="relative mx-auto max-w-3xl rounded-2xl glass-card px-6 py-12 text-center backdrop-blur-sm sm:px-10">
           <img
             src={pandaCelebrating}
             alt="Панда KLAR святкує знижку"
