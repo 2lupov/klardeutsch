@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, SectionHeader, EmptyState } from "./_ui";
-import { Sparkles, Play, CheckCircle2, XCircle, Loader2, BookOpen, RotateCcw, Settings2 } from "lucide-react";
+import { Play, CheckCircle2, XCircle, Loader2, BookOpen, RotateCcw, Settings2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useAdminLang } from "../LanguageContext";
 
