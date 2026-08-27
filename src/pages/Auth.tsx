@@ -586,7 +586,7 @@ const Auth = () => {
             <button
               onClick={async () => {
                 const result = await lovable.auth.signInWithOAuth("google", {
-                  redirect_uri: window.location.origin,
+                  redirect_uri: `${window.location.origin}/auth/callback`,
                 });
                 if (result.error) {
                   toast({ title: "Помилка входу через Google", description: String((result.error as any)?.message ?? result.error), variant: "destructive" });

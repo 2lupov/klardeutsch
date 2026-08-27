@@ -30,6 +30,7 @@ import TeachAttendance from "./pages/teach/TeachAttendance";
 import TeachFinance from "./pages/teach/TeachFinance";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import AuthCallback from "./pages/AuthCallback";
 import ResetPassword from "./pages/ResetPassword";
 import OAuthConsent from "./pages/OAuthConsent";
 import Admin from "./pages/Admin";
@@ -80,6 +81,7 @@ const AppRoutes = () => {
       <Route path="/" element={<HomeGate />} />
       <Route path="/klar-privacy" element={<KlarPrivacy />} />
       <Route path="/auth" element={<Auth />} />
+      <Route path="/auth/callback" element={<AuthCallback />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
       <Route path="/onboarding" element={<Onboarding />} />
