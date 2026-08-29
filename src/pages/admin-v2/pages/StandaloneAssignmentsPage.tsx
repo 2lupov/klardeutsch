@@ -251,6 +251,12 @@ export default function StandaloneAssignmentsPage() {
                     >
                       👀 Перегляд
                     </button>
+                    <button
+                      onClick={() => setEditing(a)}
+                      className="px-3 py-2 rounded-xl text-xs font-semibold border border-slate-200 text-slate-700 hover:bg-slate-50"
+                    >
+                      ✏️ Редагувати
+                    </button>
 
                     <button
                       onClick={() => remove(a.id)}
@@ -273,6 +279,17 @@ export default function StandaloneAssignmentsPage() {
           onCreated={() => { setShowNew(false); load(); }}
         />
       )}
+
+      {editing && (
+        <BuilderModal
+          key={editing.id}
+          editing={editing}
+          students={students}
+          onClose={() => setEditing(null)}
+          onCreated={() => { setEditing(null); load(); }}
+        />
+      )}
+
 
       {review && subs[review.id] && (
         <ReviewModal
