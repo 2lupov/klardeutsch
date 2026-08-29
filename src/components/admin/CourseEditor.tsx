@@ -14,6 +14,7 @@ import {
   MessageSquare, Lightbulb, Languages, CopyPlus, RotateCcw
 } from "lucide-react";
 import { toast } from "sonner";
+import { saveEditorAnchor, readEditorAnchor, clearEditorAnchor, type EditorSection } from "@/lib/editor-anchor";
 import TheoryRenderer, { type TheoryBlock } from "@/components/course/TheoryRenderer";
 import LessonSlidesViewer, { type Slide } from "@/components/admin/LessonSlidesViewer";
 import { Presentation } from "lucide-react";
@@ -382,8 +383,10 @@ const ExercisesEditor = ({ exercises, onChange }: { exercises: CourseLesson["exe
    Lesson Detail Editor (with all tabs)
    ══════════════════════════════════════════ */
 
-const LessonEditor = ({ lesson, onChange, level }: { lesson: CourseLesson; onChange: (l: CourseLesson) => void; level?: string }) => {
-  const [tab, setTab] = useState<"theory" | "vocab" | "exercises" | "grammar" | "reading" | "dialog" | "culture">("theory");
+const LessonEditor = ({ lesson, onChange, level, initialSection, onSectionChange }: { lesson: CourseLesson; onChange: (l: CourseLesson) => void; level?: string; initialSection?: EditorSection; onSectionChange?: (s: EditorSection) => void }) => {
+  const [tab, setTab] = useState<"theory" | "vocab" | "exercises" | "grammar" | "reading" | "dialog" | "culture">(initialSection || "theory");
+  useEffect(() => { if (initialSection) setTab(initialSection); }, [initialSection]);
+  useEffect(() => { onSectionChange?.(tab as EditorSection); }, [tab]);
   const [generating, setGenerating] = useState<string | null>(null);
   const ex = lesson.exercises || {};
 
@@ -647,6 +650,9 @@ const CourseEditor = ({ level }: { level: Level }) => {
   const [creatingCourse, setCreatingCourse] = useState(false);
   const [slidesFor, setSlidesFor] = useState<{ id: string; title: string; slides: Slide[] } | null>(null);
   const [generatingSlidesId, setGeneratingSlidesId] = useState<string | null>(null);
+  const [anchorSection, setAnchorSection] = useState<EditorSection | undefined>(undefined);
+  const [lastPlace, setLastPlace] = useState(() => readEditorAnchor());
+  const deepLinkDone = useRef(false);
 
   const generateSlidesForLesson = async (lesson: any) => {
     if (!lesson?.id) return;
@@ -803,16 +809,40 @@ const CourseEditor = ({ level }: { level: Level }) => {
 
   useEffect(() => { loadCourses(); }, [loadCourses]);
 
-  const openEditCourse = async (course: ExistingCourse) => {
+  const openEditCourse = async (course: ExistingCourse, focus?: { lessonId?: string | null; section?: EditorSection }) => {
     setEditCourse(course);
     setEditingCourseId(course.id);
     setLoadingLessons(true);
     setStep("edit");
     setExpandedLesson(null);
+    setAnchorSection(focus?.section);
     const { data } = await supabase.from("course_lessons").select("*").eq("course_id", course.id).order("sort_order", { ascending: true });
-    setEditLessons((data as any[]) || []);
+    const rows = (data as any[]) || [];
+    setEditLessons(rows);
     setLoadingLessons(false);
+    saveEditorAnchor({ courseId: course.id, courseTitle: course.title, level: course.level, lessonId: focus?.lessonId || null, section: focus?.section });
+    if (focus?.lessonId) {
+      const idx = rows.findIndex(r => r.id === focus.lessonId);
+      if (idx >= 0) {
+        setExpandedLesson(idx);
+        setTimeout(() => {
+          document.getElementById(`lesson-card-${focus.lessonId}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 250);
+      }
+    }
   };
+
+  // Deep-link: /admin?tab=courses&course=…&lesson=…&sec=…
+  useEffect(() => {
+    if (deepLinkDone.current || loadingCourses || !existingCourses.length) return;
+    const p = new URLSearchParams(window.location.search);
+    const courseId = p.get("course");
+    if (!courseId) return;
+    const course = existingCourses.find(c => c.id === courseId);
+    if (!course) return;
+    deepLinkDone.current = true;
+    openEditCourse(course, { lessonId: p.get("lesson"), section: (p.get("sec") as EditorSection) || undefined });
+  }, [existingCourses, loadingCourses]);
 
   const saveEditedLesson = async (lesson: any) => {
     setSavingEdit(true);
@@ -1019,14 +1049,18 @@ const CourseEditor = ({ level }: { level: Level }) => {
           </div>
         ) : (
           editLessons.map((lesson, i) => (
-            <div key={lesson.id} className="glass-card p-3">
+            <div key={lesson.id} id={`lesson-card-${lesson.id}`} className="glass-card p-3">
               <div className="flex items-center gap-2">
                 <div className="flex flex-col gap-0.5 shrink-0">
                   <button onClick={() => moveLesson(i, -1)} disabled={i === 0} className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-20"><ChevronUp className="w-3 h-3" /></button>
                   <button onClick={() => moveLesson(i, 1)} disabled={i === editLessons.length - 1} className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-20"><ChevronDown className="w-3 h-3" /></button>
                 </div>
 
-                <button onClick={() => setExpandedLesson(expandedLesson === i ? null : i)} className="flex-1 flex items-center gap-2 text-left min-w-0">
+                <button onClick={() => {
+                  const next = expandedLesson === i ? null : i;
+                  setExpandedLesson(next);
+                  if (next !== null && editCourse) saveEditorAnchor({ courseId: editCourse.id, courseTitle: editCourse.title, level: editCourse.level, lessonId: lesson.id, lessonTitle: lesson.title, section: anchorSection });
+                }} className="flex-1 flex items-center gap-2 text-left min-w-0">
                   <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center shrink-0">{i + 1}</span>
                   <span className="text-xs shrink-0">{{"article":"📄","grammar":"📐","reading":"📖","dialogue_text":"💬","word_list":"📋","quiz":"📝","ai_tutor":"🤖","writing":"✍️","speaking":"🎙️","notebook":"📓","video":"🎬","video_quiz":"🎬📝","exam":"🏆"}[lesson.lesson_type || "article"] || "📄"}</span>
                   <span className="text-sm font-semibold text-foreground truncate">{lesson.title}</span>
@@ -1194,6 +1228,11 @@ const CourseEditor = ({ level }: { level: Level }) => {
                     lesson={{ title: lesson.title, theory: lesson.theory, exercises: lesson.exercises }}
                     onChange={l => { const n = [...editLessons]; n[i] = { ...n[i], title: l.title, theory: l.theory, exercises: l.exercises }; setEditLessons(n); }}
                     level={editCourse?.level}
+                    initialSection={expandedLesson === i ? anchorSection : undefined}
+                    onSectionChange={(sec) => {
+                      setAnchorSection(sec);
+                      if (editCourse) saveEditorAnchor({ courseId: editCourse.id, courseTitle: editCourse.title, level: editCourse.level, lessonId: lesson.id, lessonTitle: lesson.title, section: sec });
+                    }}
                   />
                 </div>
               )}
@@ -1213,6 +1252,30 @@ const CourseEditor = ({ level }: { level: Level }) => {
 
   return (
     <div className="flex flex-col gap-4">
+      {/* Продовжити з останнього місця */}
+      {lastPlace && existingCourses.some(c => c.id === lastPlace.courseId) && (
+        <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-primary/5 border border-primary/20">
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] text-muted-foreground">Продовжити редагування</p>
+            <p className="text-xs font-semibold text-foreground truncate">
+              {lastPlace.courseTitle || "Курс"}{lastPlace.lessonTitle ? ` · ${lastPlace.lessonTitle}` : ""}
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              const c = existingCourses.find(x => x.id === lastPlace.courseId);
+              if (c) openEditCourse(c, { lessonId: lastPlace.lessonId, section: lastPlace.section });
+            }}
+            className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-[10px] font-bold shrink-0"
+          >
+            Перейти
+          </button>
+          <button onClick={() => { clearEditorAnchor(); setLastPlace(null); }} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground shrink-0" title="Прибрати">
+            <Trash2 className="w-3 h-3" />
+          </button>
+        </div>
+      )}
+
       {/* Existing courses */}
       <section className="glass-card p-4 flex flex-col gap-3">
         <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-2">
