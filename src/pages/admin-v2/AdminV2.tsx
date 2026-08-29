@@ -11,6 +11,7 @@ import {
 
   Users,
   ClipboardList,
+  FileCheck2,
   MessageSquare,
   BarChart3,
   Settings,
