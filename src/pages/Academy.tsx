@@ -38,6 +38,7 @@ const Academy = () => {
   const { lang } = useLanguage();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { isStudent, loading: studentLoading } = useIsManagedStudent();
   const [courses, setCourses] = useState<CourseRow[]>([]);
   const [purchasedIds, setPurchasedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
