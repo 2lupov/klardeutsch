@@ -21,6 +21,7 @@ const STUDENT_ALLOWED = [
   /^\/academy/,
   /^\/course\/[^/]+$/,
   /^\/assignments$/,
+  /^\/task\/[^/]+$/,
   /^\/tutoring\/lesson\/[^/]+$/,
   /^\/tutoring\/homework\/[^/]+$/,
   /^\/tutoring\/placement\/[^/]+$/,
