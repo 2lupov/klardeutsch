@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import {
   ClipboardList, GraduationCap, ListChecks, BookOpen, Sparkles, Clock,
   CheckCircle2, AlertCircle, ChevronRight, Loader2, Award, FileText,
-  Calendar, Video, BookMarked, Play,
+  Calendar, Video, BookMarked, Play, Layers,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
