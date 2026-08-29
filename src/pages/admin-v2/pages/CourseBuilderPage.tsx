@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, SectionHeader, EmptyState } from "./_ui";
 import { Play, CheckCircle2, XCircle, Loader2, BookOpen, RotateCcw, Settings2, Eye } from "lucide-react";
 import CoursePreview, { PreviewLesson } from "../components/CoursePreview";
+import { saveEditorAnchor, editorUrl } from "@/lib/editor-anchor";
 import { toast } from "@/hooks/use-toast";
 import { useAdminLang } from "../LanguageContext";
 
@@ -217,6 +218,8 @@ export default function CourseBuilderPage() {
     setPreviewLessons(collected);
   };
 
+  const [justSaved, setJustSaved] = useState<{ id: string; title: string; level: string | null; count: number } | null>(null);
+
   const savePreview = async (list: PreviewLesson[]) => {
     if (!selected) return;
     setSavingPreview(true);
@@ -231,6 +234,8 @@ export default function CourseBuilderPage() {
     setPreviewLessons(null);
     await loadLessonCount(selected.id);
     await loadCourses();
+    saveEditorAnchor({ courseId: selected.id, courseTitle: selected.title, level: (selected as any).level || null, section: "theory" });
+    setJustSaved({ id: selected.id, title: selected.title, level: (selected as any).level || null, count: Number((data as any).saved) || list.length });
     toast({ title: `Збережено ${(data as any).saved} уроків` });
   };
 
@@ -411,6 +416,22 @@ export default function CourseBuilderPage() {
           )}
         </div>
       </Card>
+
+      {justSaved && (
+        <Card className="p-4 flex flex-wrap items-center gap-3 border-primary/30 bg-primary/5">
+          <div className="flex-1 min-w-[200px]">
+            <p className="text-sm font-semibold">Збережено {justSaved.count} уроків у «{justSaved.title}»</p>
+            <p className="text-xs text-muted-foreground">Можеш одразу відкрити курс у редакторі й доналаштувати вправи.</p>
+          </div>
+          <a
+            href={editorUrl({ courseId: justSaved.id, courseTitle: justSaved.title, level: justSaved.level, section: "theory" })}
+            className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold"
+          >
+            Відкрити в редакторі
+          </a>
+          <button onClick={() => setJustSaved(null)} className="text-xs text-muted-foreground hover:text-foreground">Приховати</button>
+        </Card>
+      )}
 
       {previewLessons && (
         <CoursePreview
