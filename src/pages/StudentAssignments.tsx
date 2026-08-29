@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   ClipboardList, GraduationCap, ListChecks, BookOpen, Sparkles, Clock,
-  CheckCircle2, AlertCircle, ChevronRight, Loader2, Award, FileText,
-  Calendar, Video, BookMarked, Play, Layers,
+CheckCircle2, AlertCircle, ChevronRight, Loader2, Award, FileText,
+  BookMarked, Play, Layers,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -69,11 +69,7 @@ const StudentAssignments = () => {
   const navigate = useNavigate();
   const t = (uk: string, ru: string) => (lang === "uk" ? uk : ru);
 
-  const [items, setItems] = useState<AssignmentItem[]>([]);
-  const [upcoming, setUpcoming] = useState<Array<{
-    id: string; title: string; topic: string | null; level: string;
-    scheduled_at: string; meeting_link: string | null; teacherName: string;
-  }>>([]);
+const [items, setItems] = useState<AssignmentItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<Filter>("active");
 
@@ -230,23 +226,7 @@ const StudentAssignments = () => {
           })),
       ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
-      // Upcoming scheduled lessons (in the future, not completed)
-      const nowMs = Date.now();
-      const upcomingList = (lessons ?? [])
-        .filter((l) => l.scheduled_at && new Date(l.scheduled_at).getTime() > nowMs - 30 * 60 * 1000 && l.status !== "completed")
-        .sort((a, b) => new Date(a.scheduled_at!).getTime() - new Date(b.scheduled_at!).getTime())
-        .map((l) => ({
-          id: l.id,
-          title: l.title,
-          topic: l.topic,
-          level: l.level,
-          scheduled_at: l.scheduled_at!,
-          meeting_link: (l as any).meeting_link ?? null,
-          teacherName: teacherMap.get(l.teacher_id) ?? "—",
-        }));
-
-      setUpcoming(upcomingList);
-      setItems(merged);
+setItems(merged);
       setLoading(false);
     };
     load();
@@ -329,14 +309,11 @@ const StudentAssignments = () => {
     return map[item.status] ?? { label: item.status, cls: "bg-muted text-muted-foreground", Icon: Clock };
   };
 
-  // --- Next lesson card ---
-  const nextLesson = upcoming[0];
-
-  return (
+return (
     <div className="min-h-[100dvh] bg-gradient-to-br from-background via-background to-primary/5 pb-24 lg:pb-12">
       <div className="max-w-4xl mx-auto px-4 lg:px-8 pt-6 lg:pt-10 space-y-6">
 
-        {/* ===== BLOCK 1: Урок ===== */}
+        {/* ===== BLOCK 2: Мои задания ===== */}
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
