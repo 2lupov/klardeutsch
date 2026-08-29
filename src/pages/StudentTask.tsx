@@ -340,7 +340,7 @@ const StudentTask = () => {
     <div className="min-h-[100dvh] bg-gradient-to-br from-background via-background to-primary/5 pb-28 lg:pb-12">
       <div className="max-w-2xl mx-auto px-4 lg:px-8 pt-6 space-y-5">
         <button
-          onClick={() => (preview ? window.close() || navigate(-1 as any) : navigate("/assignments"))}
+          onClick={() => { if (preview) { window.close(); navigate(-1); } else navigate("/assignments"); }}
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="w-4 h-4" /> {preview ? t("Закрити перегляд", "Закрыть просмотр") : t("До завдань", "К заданиям")}
