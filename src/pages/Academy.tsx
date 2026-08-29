@@ -8,6 +8,8 @@ import CourseCard from "@/components/academy/CourseCard";
 import { Construction, Presentation, ChevronRight, Sparkles, ClipboardList } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useIsManagedStudent } from "@/hooks/useIsManagedStudent";
+import StudentAcademy from "@/pages/StudentAcademy";
 
 interface CourseRow {
   id: string;
