@@ -102,7 +102,9 @@ export default function StandaloneAssignmentsPage() {
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [showNew, setShowNew] = useState(false);
+  const [editing, setEditing] = useState<Assignment | null>(null);
   const [review, setReview] = useState<Assignment | null>(null);
+
 
   const load = async () => {
     const [{ data: a }, { data: s }, { data: st }] = await Promise.all([
