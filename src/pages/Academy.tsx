@@ -8,6 +8,8 @@ import CourseCard from "@/components/academy/CourseCard";
 import { Construction, Presentation, ChevronRight, Sparkles, ClipboardList } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useIsManagedStudent } from "@/hooks/useIsManagedStudent";
+import StudentAcademy from "@/pages/StudentAcademy";
 
 interface CourseRow {
   id: string;
@@ -36,6 +38,7 @@ const Academy = () => {
   const { lang } = useLanguage();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { isStudent, loading: studentLoading } = useIsManagedStudent();
   const [courses, setCourses] = useState<CourseRow[]>([]);
   const [purchasedIds, setPurchasedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
@@ -82,7 +85,10 @@ const Academy = () => {
     load();
   }, [user, hasAccess]);
 
-  if (!profileLoaded) {
+  // Managed students get a minimal dashboard: tests / homework / reading / courses
+  if (isStudent) return <StudentAcademy />;
+
+  if (!profileLoaded || studentLoading) {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
