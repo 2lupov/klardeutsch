@@ -85,7 +85,10 @@ const Academy = () => {
     load();
   }, [user, hasAccess]);
 
-  if (!profileLoaded) {
+  // Managed students get a minimal dashboard: tests / homework / reading / courses
+  if (isStudent) return <StudentAcademy />;
+
+  if (!profileLoaded || studentLoading) {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
