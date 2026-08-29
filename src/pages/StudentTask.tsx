@@ -110,11 +110,21 @@ const StudentTask = () => {
         navigate("/assignments");
         return;
       }
+      let previewMode = false;
       if ((data as any).student_id !== user.id) {
-        toast.error(t("Немає доступу", "Нет доступа"));
-        navigate("/assignments");
-        return;
+        const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: user.id, _role: "admin" as any });
+        const { data: isTeacher } = await supabase.rpc("has_role", { _user_id: user.id, _role: "teacher" as any });
+        if (!isAdmin && !isTeacher) {
+          toast.error(t("Немає доступу", "Нет доступа"));
+          navigate("/assignments");
+          return;
+        }
+        previewMode = true;
+      } else if (isPreviewRequest) {
+        previewMode = true;
       }
+      if (!active) return;
+      setPreview(previewMode);
       setTask(data as any);
       const qs = ((data as any).payload?.questions ?? []) as Question[];
       setAnswers(new Array(qs.length).fill(null));
