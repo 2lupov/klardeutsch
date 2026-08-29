@@ -86,9 +86,10 @@ const StudentTask = () => {
   // text state
   const [text, setText] = useState("");
 
-  // modular state
+// modular state
   const [moduleAnswers, setModuleAnswers] = useState<any[]>([]);
   const [listenUrls, setListenUrls] = useState<Record<number, string>>({});
+  const [moduleStep, setModuleStep] = useState(0);
 
   // files
   const [files, setFiles] = useState<Array<{ path: string; name: string; size: number; type: string }>>([]);
@@ -131,9 +132,10 @@ const StudentTask = () => {
       } else if (isPreviewRequest) {
         previewMode = true;
       }
-      if (!active) return;
+if (!active) return;
       setPreview(previewMode);
       setTask(data as any);
+      setModuleStep(0);
       const qs = ((data as any).payload?.questions ?? []) as Question[];
       setAnswers(new Array(qs.length).fill(null));
 
@@ -187,7 +189,7 @@ const questions: Question[] = (task?.payload?.questions ?? []) as Question[];
   const hasSpeaking = modules.some((m) => m.kind === "speaking");
   const hasWriting = modules.some((m) => m.kind === "writing");
 
-  const setModuleAnswer = (mi: number, qi: number, value: number | string) =>
+const setModuleAnswer = (mi: number, qi: number, value: number | string) =>
     setModuleAnswers((prev) =>
       prev.map((entry, i) => {
         if (i !== mi) return entry;
@@ -196,6 +198,27 @@ const questions: Question[] = (task?.payload?.questions ?? []) as Question[];
         return arr;
       }),
     );
+
+  const moduleDone = (mi: number) => {
+    const m = modules[mi];
+    if (!m) return false;
+    if (m.kind === "reading" || m.kind === "listening" || m.kind === "grammar") {
+      const arr = moduleAnswers[mi];
+      return (m.questions ?? []).every((_, qi) => arr?.[qi] != null && arr?.[qi] !== "");
+    }
+    if (m.kind === "writing") return text.trim().length > 0;
+    if (m.kind === "speaking") return !!audioBlob;
+    return true;
+  };
+
+  const goNextModule = () => {
+    const mi = orderedModuleIndices[moduleStep];
+    if (!preview && mi != null && !moduleDone(mi)) {
+      toast.error(t("Спочатку виконай цей модуль", "Сначала выполни этот модуль"));
+      return;
+    }
+    setModuleStep((s) => Math.min(orderedModuleIndices.length - 1, s + 1));
+  };
 
 const uploadFiles = async (list: FileList | null) => {
     if (!list || !user) return;
