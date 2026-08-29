@@ -3,14 +3,28 @@ import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   ArrowLeft, Loader2, CheckCircle2, Award, Mic, Square, Play, Trash2,
-  Paperclip, Send, AlertCircle, ListChecks, PenLine, FileText,
+  Paperclip, Send, AlertCircle, ListChecks, PenLine, FileText, Layers, Headphones, BookOpen,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
 
-type TaskType = "test" | "homework" | "writing" | "audio";
+type TaskType = "test" | "homework" | "writing" | "audio" | "modular";
+
+type ModuleKind = "reading" | "writing" | "speaking" | "grammar" | "listening";
+
+interface TaskModule {
+  kind: ModuleKind;
+  title?: string;
+  text?: string;
+  script?: string;
+  audio_path?: string;
+  questions?: Array<{ format?: "choice" | "gap"; question: string; options?: string[]; answer?: string }>;
+  topic?: string;
+  criteria?: string[];
+  min_words?: number;
+}
 
 interface Question {
   question: string;
@@ -26,7 +40,7 @@ interface Task {
   payload: any;
   level: string | null;
   due_at: string | null;
-  status: "assigned" | "submitted" | "graded";
+  status: "assigned" | "in_progress" | "submitted" | "graded";
 }
 
 interface Submission {
@@ -60,6 +74,10 @@ const StudentTask = () => {
 
   // text state
   const [text, setText] = useState("");
+
+  // modular state
+  const [moduleAnswers, setModuleAnswers] = useState<any[]>([]);
+  const [listenUrls, setListenUrls] = useState<Record<number, string>>({});
 
   // files
   const [files, setFiles] = useState<Array<{ path: string; name: string; size: number; type: string }>>([]);
@@ -98,6 +116,28 @@ const StudentTask = () => {
       const qs = ((data as any).payload?.questions ?? []) as Question[];
       setAnswers(new Array(qs.length).fill(null));
 
+      const mods = ((data as any).payload?.modules ?? []) as TaskModule[];
+      if (mods.length) {
+        setModuleAnswers(
+          mods.map((m) =>
+            m.kind === "reading" || m.kind === "listening" || m.kind === "grammar"
+              ? new Array((m.questions ?? []).length).fill(null)
+              : null,
+          ),
+        );
+        const urls: Record<number, string> = {};
+        await Promise.all(
+          mods.map(async (m, mi) => {
+            if (!m.audio_path) return;
+            const { data: signed } = await supabase.storage
+              .from("assignment-audio")
+              .createSignedUrl(m.audio_path, 3600);
+            if (signed?.signedUrl) urls[mi] = signed.signedUrl;
+          }),
+        );
+        if (active) setListenUrls(urls);
+      }
+
       const { data: sub } = await supabase
         .from("student_submissions")
         .select("id, auto_score, ai_feedback, grade, teacher_feedback, text, status")
@@ -116,6 +156,19 @@ const StudentTask = () => {
   }, [audioUrl]);
 
   const questions: Question[] = (task?.payload?.questions ?? []) as Question[];
+  const modules: TaskModule[] = (task?.payload?.modules ?? []) as TaskModule[];
+  const hasSpeaking = modules.some((m) => m.kind === "speaking");
+  const hasWriting = modules.some((m) => m.kind === "writing");
+
+  const setModuleAnswer = (mi: number, qi: number, value: number | string) =>
+    setModuleAnswers((prev) =>
+      prev.map((entry, i) => {
+        if (i !== mi) return entry;
+        const arr = Array.isArray(entry) ? [...entry] : [];
+        arr[qi] = value;
+        return arr;
+      }),
+    );
 
   const uploadFiles = async (list: FileList | null) => {
     if (!list || !user) return;
@@ -176,6 +229,27 @@ const StudentTask = () => {
       toast.error(t("Додай відповідь або файл", "Добавь ответ или файл"));
       return;
     }
+    if (task.type === "modular") {
+      const missing = modules.some((m, mi) => {
+        if (m.kind === "reading" || m.kind === "listening" || m.kind === "grammar") {
+          const arr = moduleAnswers[mi];
+          return (m.questions ?? []).some((_, qi) => arr?.[qi] == null || arr?.[qi] === "");
+        }
+        return false;
+      });
+      if (missing) {
+        toast.error(t("Виконай усі тестові завдання", "Выполни все тестовые задания"));
+        return;
+      }
+      if (hasWriting && !text.trim()) {
+        toast.error(t("Напиши письмову відповідь", "Напиши письменный ответ"));
+        return;
+      }
+      if (hasSpeaking && !audioBlob) {
+        toast.error(t("Запиши аудіо для говоріння", "Запиши аудио для говорения"));
+        return;
+      }
+    }
     if (task.type === "audio" && !audioBlob) {
       toast.error(t("Спочатку запиши аудіо", "Сначала запиши аудио"));
       return;
@@ -184,7 +258,7 @@ const StudentTask = () => {
     setSending(true);
 
     let audioPath: string | null = null;
-    if (task.type === "audio" && audioBlob) {
+    if ((task.type === "audio" || task.type === "modular") && audioBlob) {
       audioPath = `${user.id}/${task.id}/${Date.now()}-recording.webm`;
       const { error } = await supabase.storage
         .from("student-submissions")
@@ -200,6 +274,7 @@ const StudentTask = () => {
       body: {
         assignment_id: task.id,
         answers: task.type === "test" ? answers : undefined,
+        module_answers: task.type === "modular" ? moduleAnswers : undefined,
         text: text.trim() || undefined,
         files,
         audio_path: audioPath,
@@ -213,7 +288,7 @@ const StudentTask = () => {
     }
 
     const res = data as any;
-    if (task.type === "test") {
+    if (task.type === "test" || task.type === "modular") {
       setResult({ correct: res.correct, total: res.total, score: res.auto_score ?? 0 });
     }
     setSubmission({
@@ -240,7 +315,7 @@ const StudentTask = () => {
 
   const alreadyDone = task.status !== "assigned" && !result;
   const TypeIcon =
-    task.type === "test" ? ListChecks : task.type === "writing" ? PenLine : task.type === "audio" ? Mic : FileText;
+    task.type === "test" ? ListChecks : task.type === "writing" ? PenLine : task.type === "audio" ? Mic : task.type === "modular" ? Layers : FileText;
 
   return (
     <div className="min-h-[100dvh] bg-gradient-to-br from-background via-background to-primary/5 pb-28 lg:pb-12">
@@ -371,6 +446,128 @@ const StudentTask = () => {
                     </button>
                   )}
                 </div>
+              </div>
+            )}
+
+            {task.type === "modular" && (
+              <div className="space-y-4">
+                {modules.map((m, mi) => (
+                  <div key={mi} className="rounded-3xl p-5 border border-border bg-card space-y-3">
+                    <div className="flex items-center gap-2 font-display font-bold">
+                      {m.kind === "listening" ? <Headphones className="w-4 h-4 text-primary" />
+                        : m.kind === "reading" ? <BookOpen className="w-4 h-4 text-primary" />
+                        : m.kind === "writing" ? <PenLine className="w-4 h-4 text-primary" />
+                        : m.kind === "speaking" ? <Mic className="w-4 h-4 text-primary" />
+                        : <ListChecks className="w-4 h-4 text-primary" />}
+                      {m.title || m.kind}
+                    </div>
+
+                    {m.kind === "reading" && m.text && (
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap bg-muted rounded-2xl p-4">{m.text}</p>
+                    )}
+
+                    {m.kind === "listening" && (
+                      listenUrls[mi] ? (
+                        <audio controls src={listenUrls[mi]} className="w-full" />
+                      ) : (
+                        <p className="text-xs text-muted-foreground">{t("Аудіо недоступне", "Аудио недоступно")}</p>
+                      )
+                    )}
+
+                    {(m.kind === "writing" || m.kind === "speaking") && m.topic && (
+                      <p className="text-sm font-semibold">{m.topic}</p>
+                    )}
+
+                    {m.kind === "writing" && (
+                      <>
+                        {(m.criteria ?? []).filter(Boolean).length > 0 && (
+                          <ul className="text-xs text-muted-foreground list-disc pl-5 space-y-0.5">
+                            {(m.criteria ?? []).filter(Boolean).map((c, ci) => <li key={ci}>{c}</li>)}
+                          </ul>
+                        )}
+                        <textarea
+                          value={text}
+                          onChange={(e) => setText(e.target.value)}
+                          rows={8}
+                          placeholder={t("Твій текст…", "Твой текст…")}
+                          className="w-full px-4 py-3 rounded-2xl border border-border bg-background text-sm resize-y"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          {t("Слів", "Слов")}: {text.trim() ? text.trim().split(/\s+/).length : 0}
+                          {m.min_words ? ` / ${m.min_words}` : ""}
+                        </p>
+                      </>
+                    )}
+
+                    {m.kind === "speaking" && (
+                      <div className="space-y-2 text-center">
+                        {(m.questions ?? []).map((q, qi) => (
+                          <p key={qi} className="text-sm text-left">• {q.question}</p>
+                        ))}
+                        {!recording ? (
+                          <button
+                            onClick={startRecording}
+                            className="w-full px-4 py-3 rounded-2xl bg-primary text-primary-foreground text-sm font-semibold inline-flex items-center justify-center gap-2"
+                          >
+                            <Mic className="w-4 h-4" /> {t("Записати відповідь", "Записать ответ")}
+                          </button>
+                        ) : (
+                          <button
+                            onClick={stopRecording}
+                            className="w-full px-4 py-3 rounded-2xl bg-destructive text-destructive-foreground text-sm font-semibold inline-flex items-center justify-center gap-2"
+                          >
+                            <Square className="w-4 h-4" /> {t("Зупинити", "Остановить")}
+                          </button>
+                        )}
+                        {audioUrl && <audio controls src={audioUrl} className="w-full" />}
+                      </div>
+                    )}
+
+                    {(m.kind === "reading" || m.kind === "listening" || m.kind === "grammar") && (
+                      <div className="space-y-3">
+                        {(m.questions ?? []).map((q, qi) => (
+                          <div key={qi} className="space-y-2">
+                            <p className="text-sm font-medium">{qi + 1}. {q.question}</p>
+                            {q.format === "gap" ? (
+                              <input
+                                value={(moduleAnswers[mi]?.[qi] as string) ?? ""}
+                                onChange={(e) => setModuleAnswer(mi, qi, e.target.value)}
+                                placeholder={t("Відповідь", "Ответ")}
+                                className="w-full px-4 py-2.5 rounded-2xl border border-border bg-background text-sm"
+                              />
+                            ) : (
+                              <div className="space-y-1.5">
+                                {(q.options ?? []).map((opt, oi) => {
+                                  const on = moduleAnswers[mi]?.[qi] === oi;
+                                  return (
+                                    <button
+                                      key={oi}
+                                      onClick={() => setModuleAnswer(mi, qi, oi)}
+                                      className={`w-full text-left px-4 py-2.5 rounded-2xl border text-sm ${
+                                        on ? "border-primary bg-primary/10 font-semibold" : "border-border hover:bg-muted"
+                                      }`}
+                                    >
+                                      {opt}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                <button
+                  disabled={sending}
+                  onClick={submit}
+                  className="w-full px-4 py-3 rounded-2xl bg-primary text-primary-foreground text-sm font-semibold inline-flex items-center justify-center gap-2 disabled:opacity-60"
+                >
+                  {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                  {t("Відправити вчителю", "Отправить учителю")}
+                </button>
               </div>
             )}
 

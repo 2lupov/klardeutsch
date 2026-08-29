@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import {
   ClipboardList, GraduationCap, ListChecks, BookOpen, Sparkles, Clock,
   CheckCircle2, AlertCircle, ChevronRight, Loader2, Award, FileText,
-  Calendar, Video, BookMarked, Play,
+  Calendar, Video, BookMarked, Play, Layers,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -52,11 +52,11 @@ type AssignmentItem =
       id: string;
       title: string;
       subtitle: string;
-      status: "assigned" | "submitted" | "graded";
+      status: "assigned" | "in_progress" | "submitted" | "graded";
       created_at: string;
       action: string;
       route: string;
-      taskType: "test" | "homework" | "writing" | "audio";
+      taskType: "test" | "homework" | "writing" | "audio" | "modular";
       due_at?: string | null;
       grade?: number | null;
     };
@@ -191,6 +191,7 @@ const StudentAssignments = () => {
             homework: t("Домашнє завдання", "Домашнее задание"),
             writing: t("Письмове завдання", "Письменное задание"),
             audio: t("Аудіо / вимова", "Аудио / произношение"),
+            modular: t("Індивідуальне завдання", "Индивидуальное задание"),
           };
           return {
             kind: "task",
@@ -291,14 +292,15 @@ const StudentAssignments = () => {
     }
     if (item.kind === "task") {
       const icons: Record<string, any> = {
-        test: ListChecks, homework: FileText, writing: BookMarked, audio: Play,
+        test: ListChecks, homework: FileText, writing: BookMarked, audio: Play, modular: Layers,
       };
       return {
         Icon: icons[item.taskType] ?? ClipboardList,
         accent: "from-violet-500/15 to-purple-500/5 text-violet-700 dark:text-violet-300",
         chip: {
           label:
-            item.taskType === "test" ? t("Тест", "Тест")
+            item.taskType === "modular" ? t("Індивідуальне", "Индивидуальное")
+            : item.taskType === "test" ? t("Тест", "Тест")
             : item.taskType === "writing" ? t("Письмо", "Письмо")
             : item.taskType === "audio" ? t("Аудіо", "Аудио")
             : t("ДЗ", "ДЗ"),

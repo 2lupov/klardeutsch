@@ -23,7 +23,23 @@ const TYPE_LABEL: Record<string, string> = {
   homework: "📚 Домашка",
   writing: "✍️ Письмо",
   audio: "🎙 Аудіо / вимова",
+  modular: "🧩 Індивідуальне завдання",
 };
+
+const MODULE_LABEL: Record<string, string> = {
+  reading: "📖 Читання (Lesen)",
+  listening: "🎧 Аудіювання (Hören)",
+  grammar: "🧩 Граматика / лексика",
+  writing: "✍️ Письмо (Schreiben)",
+  speaking: "🗣 Говоріння (Sprechen)",
+};
+
+const norm = (v: unknown) =>
+  String(v ?? "")
+    .toLowerCase()
+    .replace(/[.,!?;:"'\u00AB\u00BB]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 
 async function notifyTelegram(text: string) {
   const TELEGRAM_BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN");
@@ -69,6 +85,7 @@ serve(async (req) => {
     if (!assignmentId) return json({ error: "assignment_id is required" }, 400);
 
     const answers = Array.isArray(body?.answers) ? body.answers : null;
+    const moduleAnswers = Array.isArray(body?.module_answers) ? body.module_answers : null;
     const textAnswer = body?.text ? String(body.text).slice(0, 20000) : null;
     const files = Array.isArray(body?.files) ? body.files.slice(0, 10) : [];
     const audioPath = body?.audio_path ? String(body.audio_path) : null;
@@ -111,9 +128,44 @@ serve(async (req) => {
       autoScore = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : null;
     }
 
+    // Server-side scoring for modular (standalone) assignments
+    const moduleReport: Array<{ label: string; correct: number; total: number }> = [];
+    if (assignment.type === "modular") {
+      const modules = ((assignment.payload as any)?.modules ?? []) as any[];
+      modules.forEach((m, mi) => {
+        const kind = String(m?.kind ?? "");
+        const given = moduleAnswers?.[mi];
+        if (kind === "reading" || kind === "listening" || kind === "grammar") {
+          const qs = Array.isArray(m?.questions) ? m.questions : [];
+          let mc = 0;
+          qs.forEach((q: any, qi: number) => {
+            const answer = Array.isArray(given) ? given[qi] : undefined;
+            const ok = q?.format === "gap"
+              ? norm(answer) !== "" && norm(answer) === norm(q?.answer)
+              : Number(answer) === Number(q?.correct_index);
+            if (ok) mc++;
+            else {
+              mistakes.push({
+                q: String(q?.question ?? ""),
+                given: answer == null || answer === "" ? "—" : String(q?.format === "gap" ? answer : (q?.options?.[Number(answer)] ?? answer)),
+                correct: String(q?.format === "gap" ? (q?.answer ?? "") : (q?.options?.[Number(q?.correct_index)] ?? "")),
+              });
+            }
+          });
+          correctCount += mc;
+          totalCount += qs.length;
+          if (qs.length) moduleReport.push({ label: MODULE_LABEL[kind] ?? kind, correct: mc, total: qs.length });
+        }
+      });
+      autoScore = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : null;
+    }
+
     // AI feedback for writing
     let aiFeedback: string | null = null;
-    if (assignment.type === "writing" && textAnswer) {
+    const hasWritingModule =
+      assignment.type === "modular" &&
+      (((assignment.payload as any)?.modules ?? []) as any[]).some((m) => m?.kind === "writing");
+    if ((assignment.type === "writing" || hasWritingModule) && textAnswer) {
       const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
       if (LOVABLE_API_KEY) {
         const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -154,7 +206,7 @@ serve(async (req) => {
       .insert({
         assignment_id: assignmentId,
         student_id: userId,
-        answers: answers,
+        answers: assignment.type === "modular" ? { modules: moduleAnswers ?? [] } : answers,
         text: textAnswer,
         files,
         audio_path: audioPath,
@@ -203,7 +255,21 @@ serve(async (req) => {
       }
     }
 
-    if (assignment.type === "writing") {
+    if (assignment.type === "modular") {
+      if (autoScore != null) lines.push(`📊 <b>Тестова частина:</b> ${correctCount}/${totalCount} (${autoScore}%)`);
+      moduleReport.forEach((m) => lines.push(`   ${m.label}: ${m.correct}/${m.total}`));
+      if (textAnswer) lines.push("", `✍️ ${esc(textAnswer.slice(0, 500))}`);
+      if (audioPath) lines.push("🗣 Аудіо-відповідь додана");
+      if (mistakes.length) {
+        lines.push("", "<b>Помилки:</b>");
+        mistakes.slice(0, 6).forEach((m) => {
+          lines.push(`• ${esc(m.q)}\n   ❌ ${esc(m.given)} → ✅ ${esc(m.correct)}`);
+        });
+        if (mistakes.length > 6) lines.push(`… та ще ${mistakes.length - 6}`);
+      }
+    }
+
+    if (assignment.type === "writing" || hasWritingModule) {
       const scoreMatch = aiFeedback?.match(/SCORE:\s*(\d+)/i);
       if (scoreMatch) lines.push(`🤖 <b>AI-оцінка:</b> ${scoreMatch[1]}/10`);
       if (aiFeedback) lines.push("", esc(aiFeedback.replace(/SCORE:\s*\d+/i, "").slice(0, 700)));
