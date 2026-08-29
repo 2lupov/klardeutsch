@@ -64,6 +64,16 @@ const MODULE_ORDER: Record<ModuleKind, number> = {
   grammar: 4, // Grammatik
 };
 
+/* --- shared visual language --- */
+const CARD =
+  "rounded-[28px] border border-border/60 bg-card/80 backdrop-blur-xl shadow-[0_24px_60px_-34px_hsl(var(--primary)/0.55)]";
+const BTN_PRIMARY =
+  "flex-1 px-5 py-3 rounded-2xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground text-sm font-bold shadow-lg shadow-primary/25 inline-flex items-center justify-center gap-2 transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-50 disabled:shadow-none";
+const BTN_GHOST =
+  "flex-1 px-5 py-3 rounded-2xl border border-border/70 bg-background/60 text-sm font-semibold transition-colors hover:bg-muted disabled:opacity-40";
+const LETTERS = ["A", "B", "C", "D", "E", "F"];
+
+
 const StudentTask = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
