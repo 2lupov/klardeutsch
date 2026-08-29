@@ -10,6 +10,7 @@ import {
   Camera,
 
   Users,
+  ClipboardList,
   MessageSquare,
   BarChart3,
   Settings,
@@ -27,6 +28,7 @@ import CourseBuilderPage from "./pages/CourseBuilderPage";
 import ExerciseStudioPage from "./pages/ExerciseStudioPage";
 import BookCoursePage from "./pages/BookCoursePage";
 import StudentsPage from "./pages/StudentsPage";
+import AssignmentsPage from "./pages/AssignmentsPage";
 import TutorLogsPage from "./pages/TutorLogsPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import SettingsPage from "./pages/SettingsPage";
@@ -39,6 +41,7 @@ type NavKey =
   | "studio"
   | "book"
   | "students"
+  | "assignments"
   | "tutor"
   | "analytics"
   | "settings";
@@ -51,6 +54,7 @@ const NAV: { key: NavKey; label: string; icon: any }[] = [
   { key: "book", label: "Курс із книги (фото)", icon: Camera },
 
   { key: "students", label: "Учні", icon: Users },
+  { key: "assignments", label: "Завдання учнів", icon: ClipboardList },
   { key: "tutor", label: "Логи AI-репетитора", icon: MessageSquare },
   { key: "analytics", label: "Аналітика", icon: BarChart3 },
   { key: "settings", label: "Налаштування", icon: Settings },
@@ -262,6 +266,8 @@ function PageRouter({ active }: { active: NavKey }) {
 
     case "students":
       return <StudentsPage />;
+    case "assignments":
+      return <AssignmentsPage />;
     case "tutor":
       return <TutorLogsPage />;
     case "analytics":
