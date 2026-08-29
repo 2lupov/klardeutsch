@@ -102,7 +102,9 @@ export default function StandaloneAssignmentsPage() {
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [showNew, setShowNew] = useState(false);
+  const [editing, setEditing] = useState<Assignment | null>(null);
   const [review, setReview] = useState<Assignment | null>(null);
+
 
   const load = async () => {
     const [{ data: a }, { data: s }, { data: st }] = await Promise.all([
@@ -249,6 +251,12 @@ export default function StandaloneAssignmentsPage() {
                     >
                       👀 Перегляд
                     </button>
+                    <button
+                      onClick={() => setEditing(a)}
+                      className="px-3 py-2 rounded-xl text-xs font-semibold border border-slate-200 text-slate-700 hover:bg-slate-50"
+                    >
+                      ✏️ Редагувати
+                    </button>
 
                     <button
                       onClick={() => remove(a.id)}
@@ -271,6 +279,17 @@ export default function StandaloneAssignmentsPage() {
           onCreated={() => { setShowNew(false); load(); }}
         />
       )}
+
+      {editing && (
+        <BuilderModal
+          key={editing.id}
+          editing={editing}
+          students={students}
+          onClose={() => setEditing(null)}
+          onCreated={() => { setEditing(null); load(); }}
+        />
+      )}
+
 
       {review && subs[review.id] && (
         <ReviewModal
@@ -313,17 +332,19 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 /* ─────────── builder ─────────── */
 
 function BuilderModal({
-  students, onClose, onCreated,
+  students, onClose, onCreated, editing,
 }: {
   students: StudentRow[];
   onClose: () => void;
   onCreated: () => void;
+  editing?: Assignment | null;
 }) {
-  const [studentIds, setStudentIds] = useState<string[]>([]);
-  const [title, setTitle] = useState("");
-  const [instructions, setInstructions] = useState("");
-  const [level, setLevel] = useState("A1");
-  const [dueAt, setDueAt] = useState("");
+  const isEdit = !!editing;
+  const [studentIds, setStudentIds] = useState<string[]>(editing ? [editing.student_id] : []);
+  const [title, setTitle] = useState(editing?.title ?? "");
+  const [instructions, setInstructions] = useState(editing?.instructions ?? "");
+  const [level, setLevel] = useState(editing?.level ?? "A1");
+  const [dueAt, setDueAt] = useState(editing?.due_at ? editing.due_at.slice(0, 10) : "");
   const [prompt, setPrompt] = useState("");
   const [picked, setPicked] = useState<Record<string, { on: boolean; count: number; topic: string }>>({
     reading: { on: true, count: 4, topic: "" },
@@ -332,7 +353,7 @@ function BuilderModal({
     writing: { on: false, count: 1, topic: "" },
     speaking: { on: false, count: 3, topic: "" },
   });
-  const [modules, setModules] = useState<TaskModule[]>([]);
+  const [modules, setModules] = useState<TaskModule[]>(editing?.payload?.modules ?? []);
   const [generating, setGenerating] = useState(false);
   const [ttsFor, setTtsFor] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
@@ -358,6 +379,7 @@ function BuilderModal({
               questions: [{ format: "choice", question: "", options: ["", "", "", ""], correct_index: 0, explanation: "" }],
             },
     ]);
+
 
   const generate = async () => {
     const chosen = (Object.keys(picked) as ModuleKind[])
@@ -418,6 +440,24 @@ function BuilderModal({
       return toast({ title: "Сесія втрачена", variant: "destructive" });
     }
 
+    if (isEdit && editing) {
+      const { error } = await supabase
+        .from("student_assignments")
+        .update({
+          title: title.trim(),
+          instructions: instructions.trim() || null,
+          level,
+          due_at: dueAt ? new Date(dueAt).toISOString() : null,
+          payload: { modules },
+        } as any)
+        .eq("id", editing.id);
+      setSaving(false);
+      if (error) return toast({ title: "Помилка", description: error.message, variant: "destructive" });
+      toast({ title: "Зміни збережено" });
+      onCreated();
+      return;
+    }
+
     const rows = studentIds.map((sid) => ({
       teacher_id: teacherId,
       student_id: sid,
@@ -437,10 +477,12 @@ function BuilderModal({
   };
 
   return (
-    <Modal title="Нове індивідуальне завдання" onClose={onClose}>
+    <Modal title={isEdit ? "Редагування завдання" : "Нове індивідуальне завдання"} onClose={onClose}>
       <div className="space-y-5">
         {/* students */}
+        {!isEdit && (
         <Field label="Учні *">
+
           <div className="max-h-36 overflow-y-auto rounded-xl border border-slate-200 divide-y divide-slate-100">
             {students.length === 0 ? (
               <p className="p-3 text-xs text-slate-500">Немає учнів. Створіть учня в розділі «Учні».</p>
@@ -464,6 +506,8 @@ function BuilderModal({
             )}
           </div>
         </Field>
+        )}
+
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="sm:col-span-1">
@@ -732,7 +776,7 @@ function BuilderModal({
           className="w-full px-4 py-3 rounded-xl text-white text-sm font-semibold disabled:opacity-60 inline-flex items-center justify-center gap-2"
           style={{ background: "#4F46E5" }}
         >
-          <ClipboardList className="w-4 h-4" /> {saving ? "Зберігаємо…" : "Видати завдання учню"}
+          <ClipboardList className="w-4 h-4" /> {saving ? "Зберігаємо…" : isEdit ? "Зберегти зміни" : "Видати завдання учню"}
         </button>
       </div>
     </Modal>
