@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   ClipboardList, GraduationCap, ListChecks, BookOpen, Sparkles, Clock,
-  CheckCircle2, AlertCircle, ChevronRight, Loader2, Award, FileText,
-  Calendar, Video, BookMarked, Play, Layers,
+CheckCircle2, AlertCircle, ChevronRight, Loader2, Award, FileText,
+  BookMarked, Play, Layers,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -69,11 +69,7 @@ const StudentAssignments = () => {
   const navigate = useNavigate();
   const t = (uk: string, ru: string) => (lang === "uk" ? uk : ru);
 
-  const [items, setItems] = useState<AssignmentItem[]>([]);
-  const [upcoming, setUpcoming] = useState<Array<{
-    id: string; title: string; topic: string | null; level: string;
-    scheduled_at: string; meeting_link: string | null; teacherName: string;
-  }>>([]);
+const [items, setItems] = useState<AssignmentItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<Filter>("active");
 
@@ -230,23 +226,7 @@ const StudentAssignments = () => {
           })),
       ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
-      // Upcoming scheduled lessons (in the future, not completed)
-      const nowMs = Date.now();
-      const upcomingList = (lessons ?? [])
-        .filter((l) => l.scheduled_at && new Date(l.scheduled_at).getTime() > nowMs - 30 * 60 * 1000 && l.status !== "completed")
-        .sort((a, b) => new Date(a.scheduled_at!).getTime() - new Date(b.scheduled_at!).getTime())
-        .map((l) => ({
-          id: l.id,
-          title: l.title,
-          topic: l.topic,
-          level: l.level,
-          scheduled_at: l.scheduled_at!,
-          meeting_link: (l as any).meeting_link ?? null,
-          teacherName: teacherMap.get(l.teacher_id) ?? "—",
-        }));
-
-      setUpcoming(upcomingList);
-      setItems(merged);
+setItems(merged);
       setLoading(false);
     };
     load();
@@ -329,179 +309,10 @@ const StudentAssignments = () => {
     return map[item.status] ?? { label: item.status, cls: "bg-muted text-muted-foreground", Icon: Clock };
   };
 
-  // --- Next lesson card ---
-  const nextLesson = upcoming[0];
-
-  return (
+return (
     <div className="min-h-[100dvh] bg-gradient-to-br from-background via-background to-primary/5 pb-24 lg:pb-12">
       <div className="max-w-4xl mx-auto px-4 lg:px-8 pt-6 lg:pt-10 space-y-6">
 
-        {/* ===== BLOCK 1: Урок ===== */}
-        <motion.div
-          initial={{ opacity: 0, y: -8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="rounded-3xl p-6 lg:p-8 bg-gradient-to-br from-primary/10 via-card to-card border border-border shadow-sm"
-        >
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-11 h-11 rounded-2xl bg-primary/15 text-primary flex items-center justify-center">
-              <Video className="w-6 h-6" />
-            </div>
-            <div>
-              <h1 className="text-2xl lg:text-3xl font-display font-black leading-tight">
-                {t("Урок", "Урок")}
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                {t("Найближчий запланований урок", "Ближайший запланированный урок")}
-              </p>
-            </div>
-          </div>
-
-          {loading ? (
-            <div className="flex justify-center py-10">
-              <Loader2 className="w-7 h-7 animate-spin text-primary" />
-            </div>
-          ) : nextLesson ? (
-            <div className="space-y-3">
-              {( () => {
-                const date = new Date(nextLesson.scheduled_at);
-                const diffMs = date.getTime() - Date.now();
-                const isLive = diffMs < 15 * 60 * 1000 && diffMs > -90 * 60 * 1000;
-                const dateStr = date.toLocaleString(lang === "uk" ? "uk-UA" : "ru-RU", {
-                  weekday: "short", day: "numeric", month: "short",
-                  hour: "2-digit", minute: "2-digit",
-                });
-                const inDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
-                const inHours = Math.round(diffMs / (1000 * 60 * 60));
-                const relStr =
-                  diffMs < 0 ? t("Зараз триває", "Идёт сейчас")
-                  : inHours < 1 ? t("Менше години", "Менее часа")
-                  : inHours < 24 ? t(`Через ${inHours} год`, `Через ${inHours} ч`)
-                  : t(`Через ${inDays} дн`, `Через ${inDays} дн`);
-
-                return (
-                  <motion.div
-                    key={nextLesson.id}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={`rounded-2xl p-4 lg:p-5 border shadow-sm ${
-                      isLive
-                        ? "bg-gradient-to-br from-emerald-500/15 via-card to-card border-emerald-500/40"
-                        : "bg-gradient-to-br from-primary/5 via-card to-card border-border"
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className={`w-11 h-11 rounded-2xl shrink-0 flex items-center justify-center ${
-                        isLive ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300" : "bg-primary/15 text-primary"
-                      }`}>
-                        <Calendar className="w-5 h-5" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex flex-wrap items-center gap-2 mb-1">
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-                            {nextLesson.level}
-                          </span>
-                          {isLive ? (
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 inline-flex items-center gap-1">
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                              LIVE
-                            </span>
-                          ) : (
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
-                              {relStr}
-                            </span>
-                          )}
-                        </div>
-                        <h3 className="font-display font-bold text-foreground leading-tight">
-                          {nextLesson.title}
-                        </h3>
-                        <div className="flex flex-wrap items-center gap-3 mt-1.5 text-xs text-muted-foreground">
-                          <span className="inline-flex items-center gap-1">
-                            <Clock className="w-3 h-3" /> {dateStr}
-                          </span>
-                          <span className="inline-flex items-center gap-1">
-                            <GraduationCap className="w-3 h-3" /> {nextLesson.teacherName}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2 mt-3">
-                      {nextLesson.meeting_link ? (
-                        <a
-                          href={nextLesson.meeting_link}
-                          target="_blank"
-                          rel="noreferrer"
-                          className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition ${
-                            isLive
-                              ? "bg-emerald-500 text-white hover:bg-emerald-600 shadow-md"
-                              : "bg-primary text-primary-foreground hover:bg-primary/90"
-                          }`}
-                        >
-                          <Video className="w-4 h-4" />
-                          {t("Приєднатися до Google Meet", "Подключиться к Google Meet")}
-                        </a>
-                      ) : (
-                        <span className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-muted-foreground bg-muted">
-                          <Video className="w-3.5 h-3.5" />
-                          {t("Посилання з'явиться пізніше", "Ссылка появится позже")}
-                        </span>
-                      )}
-                      <button
-                        onClick={() => navigate(`/tutoring/lesson/${nextLesson.id}`)}
-                        className="inline-flex items-center gap-1 px-3 py-2.5 rounded-xl text-sm font-bold bg-card border border-border hover:border-primary/40 transition"
-                      >
-                        {t("Відкрити урок", "Открыть урок")}
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </motion.div>
-                );
-              })()}
-
-              {/* Other upcoming lessons (if more than 1) */}
-              {upcoming.length > 1 && (
-                <div className="space-y-2">
-                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground px-1">
-                    {t("Наступні уроки", "Следующие уроки")}
-                  </p>
-                  {upcoming.slice(1).map((l) => {
-                    const date = new Date(l.scheduled_at);
-                    const dateStr = date.toLocaleString(lang === "uk" ? "uk-UA" : "ru-RU", {
-                      weekday: "short", day: "numeric", month: "short",
-                      hour: "2-digit", minute: "2-digit",
-                    });
-                    return (
-                      <button
-                        key={l.id}
-                        onClick={() => navigate(`/tutoring/lesson/${l.id}`)}
-                        className="w-full text-left rounded-xl border border-border bg-card/60 hover:bg-card hover:border-primary/30 transition px-4 py-3 flex items-center gap-3"
-                      >
-                        <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                          <Calendar className="w-4 h-4" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-display font-bold text-sm truncate">{l.title}</p>
-                          <p className="text-xs text-muted-foreground">{dateStr} · {l.teacherName}</p>
-                        </div>
-                        <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="rounded-2xl border border-dashed border-border bg-card/50 p-8 text-center">
-              <Calendar className="w-10 h-10 mx-auto text-muted-foreground/40 mb-2" />
-              <p className="font-display font-bold text-base">
-                {t("Немає запланованих уроків", "Нет запланированных уроков")}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {t("Ваш викладач додасть урок найближчим часом", "Ваш преподаватель добавит урок в ближайшее время")}
-              </p>
-            </div>
-          )}
-        </motion.div>
 
         {/* ===== BLOCK 2: Мои задания ===== */}
         <motion.div

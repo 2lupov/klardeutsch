@@ -55,6 +55,14 @@ interface Submission {
 
 const MAX_SIZE = 20 * 1024 * 1024;
 
+const MODULE_ORDER: Record<ModuleKind, number> = {
+  reading: 0, // Lesen
+  listening: 1, // Hören
+  writing: 2, // Schreiben
+  speaking: 3, // Sprechen
+  grammar: 4, // Grammatik
+};
+
 const StudentTask = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
@@ -170,8 +178,12 @@ const StudentTask = () => {
     return () => { if (audioUrl) URL.revokeObjectURL(audioUrl); };
   }, [audioUrl]);
 
-  const questions: Question[] = (task?.payload?.questions ?? []) as Question[];
+const questions: Question[] = (task?.payload?.questions ?? []) as Question[];
   const modules: TaskModule[] = (task?.payload?.modules ?? []) as TaskModule[];
+  // Stable display order: Lesen → Hören → Schreiben → Sprechen → Grammatik
+  const orderedModuleIndices = modules
+    .map((_, i) => i)
+    .sort((a, b) => (MODULE_ORDER[modules[a].kind] ?? 99) - (MODULE_ORDER[modules[b].kind] ?? 99));
   const hasSpeaking = modules.some((m) => m.kind === "speaking");
   const hasWriting = modules.some((m) => m.kind === "writing");
 
@@ -481,7 +493,9 @@ const uploadFiles = async (list: FileList | null) => {
 
             {task.type === "modular" && (
               <div className="space-y-4">
-                {modules.map((m, mi) => (
+{orderedModuleIndices.map((mi) => {
+                  const m = modules[mi];
+                  return (
                   <div key={mi} className="rounded-3xl p-5 border border-border bg-card space-y-3">
                     <div className="flex items-center gap-2 font-display font-bold">
                       {m.kind === "listening" ? <Headphones className="w-4 h-4 text-primary" />
@@ -591,9 +605,10 @@ const uploadFiles = async (list: FileList | null) => {
                           </div>
                         ))}
                       </div>
-                    )}
+)}
                   </div>
-                ))}
+                  );
+                })}
 
 <button
                   disabled={sending || preview}
