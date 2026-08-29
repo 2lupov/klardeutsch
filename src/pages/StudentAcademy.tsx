@@ -163,7 +163,7 @@ const StudentAcademy = () => {
           subtitle: c.description ? String(c.description).slice(0, 90) : undefined,
           route: `/academy/${c.id}`,
           done: false,
-          badge: `${c.level}${c.total_lessons ? ` · ${c.total_lessons} уроків` : ""}`,
+          badge: `${c.level}`,
           icon: GraduationCap,
         }))
       );
