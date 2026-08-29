@@ -185,8 +185,12 @@ const StudentTask = () => {
       }),
     );
 
-  const uploadFiles = async (list: FileList | null) => {
+const uploadFiles = async (list: FileList | null) => {
     if (!list || !user) return;
+    if (preview) {
+      toast.info(t("Режим перегляду — файли не завантажуються", "Режим просмотра — файлы не загружаются"));
+      return;
+    }
     setUploading(true);
     const added: typeof files = [];
     for (const f of Array.from(list)) {
@@ -511,12 +515,17 @@ const StudentTask = () => {
                             {(m.criteria ?? []).filter(Boolean).map((c, ci) => <li key={ci}>{c}</li>)}
                           </ul>
                         )}
-                        <textarea
+<textarea
                           value={text}
                           onChange={(e) => setText(e.target.value)}
                           rows={8}
-                          placeholder={t("Твій текст…", "Твой текст…")}
-                          className="w-full px-4 py-3 rounded-2xl border border-border bg-background text-sm resize-y"
+                          readOnly={preview}
+                          placeholder={preview
+                            ? t("Режим перегляду — введення заблоковано", "Режим просмотра — ввод заблокирован")
+                            : t("Твій текст…", "Твой текст…")}
+                          className={`w-full px-4 py-3 rounded-2xl border border-border text-sm resize-y ${
+                            preview ? "bg-muted/40 opacity-80 cursor-not-allowed" : "bg-background"
+                          }`}
                         />
                         <p className="text-xs text-muted-foreground">
                           {t("Слів", "Слов")}: {text.trim() ? text.trim().split(/\s+/).length : 0}
@@ -586,25 +595,31 @@ const StudentTask = () => {
                   </div>
                 ))}
 
-                <button
-                  disabled={sending}
+<button
+                  disabled={sending || preview}
                   onClick={submit}
-                  className="w-full px-4 py-3 rounded-2xl bg-primary text-primary-foreground text-sm font-semibold inline-flex items-center justify-center gap-2 disabled:opacity-60"
+                  title={preview ? t("Відправку заблоковано в режимі перегляду", "Отправка заблокирована в режиме просмотра") : undefined}
+                  className="w-full px-4 py-3 rounded-2xl bg-primary text-primary-foreground text-sm font-semibold inline-flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                  {t("Відправити вчителю", "Отправить учителю")}
+                  {preview ? t("Відправку заблоковано", "Отправка заблокирована") : t("Відправити вчителю", "Отправить учителю")}
                 </button>
               </div>
             )}
 
             {(task.type === "writing" || task.type === "homework") && (
               <div className="rounded-3xl p-6 border border-border bg-card space-y-3">
-                <textarea
+<textarea
                   value={text}
                   onChange={(e) => setText(e.target.value)}
                   rows={10}
-                  placeholder={t("Твоя відповідь…", "Твой ответ…")}
-                  className="w-full px-4 py-3 rounded-2xl border border-border bg-background text-sm resize-y"
+                  readOnly={preview}
+                  placeholder={preview
+                    ? t("Режим перегляду — введення заблоковано", "Режим просмотра — ввод заблокирован")
+                    : t("Твоя відповідь…", "Твой ответ…")}
+                  className={`w-full px-4 py-3 rounded-2xl border border-border text-sm resize-y ${
+                    preview ? "bg-muted/40 opacity-80 cursor-not-allowed" : "bg-background"
+                  }`}
                 />
                 <p className="text-xs text-muted-foreground">
                   {t("Слів", "Слов")}: {text.trim() ? text.trim().split(/\s+/).length : 0}
@@ -619,9 +634,10 @@ const StudentTask = () => {
                       className="hidden"
                       onChange={(e) => uploadFiles(e.target.files)}
                     />
-                    <button
+<button
                       onClick={() => fileInputRef.current?.click()}
-                      disabled={uploading}
+                      disabled={uploading || preview}
+                      title={preview ? t("Завантаження файлів заблоковано в режимі перегляду", "Загрузка файлов заблокирована в режиме просмотра") : undefined}
                       className="w-full px-4 py-2.5 rounded-2xl border border-border text-sm font-semibold inline-flex items-center justify-center gap-2 disabled:opacity-60"
                     >
                       {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Paperclip className="w-4 h-4" />}
@@ -638,13 +654,14 @@ const StudentTask = () => {
                   </>
                 )}
 
-                <button
-                  disabled={sending}
+<button
+                  disabled={sending || preview}
                   onClick={submit}
-                  className="w-full px-4 py-3 rounded-2xl bg-primary text-primary-foreground text-sm font-semibold inline-flex items-center justify-center gap-2 disabled:opacity-60"
+                  title={preview ? t("Відправку заблоковано в режимі перегляду", "Отправка заблокирована в режиме просмотра") : undefined}
+                  className="w-full px-4 py-3 rounded-2xl bg-primary text-primary-foreground text-sm font-semibold inline-flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                  {t("Відправити вчителю", "Отправить учителю")}
+                  {preview ? t("Відправку заблоковано", "Отправка заблокирована") : t("Відправити вчителю", "Отправить учителю")}
                 </button>
               </div>
             )}
