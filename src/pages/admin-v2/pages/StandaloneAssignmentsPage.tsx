@@ -244,6 +244,13 @@ export default function StandaloneAssignmentsPage() {
                       {sub ? "Перевірити" : "Ще не здано"}
                     </button>
                     <button
+                      onClick={() => window.open(`/task/${a.id}?preview=1`, "_blank")}
+                      className="px-3 py-2 rounded-xl text-xs font-semibold border border-indigo-200 text-indigo-600 hover:bg-indigo-50"
+                    >
+                      👀 Перегляд
+                    </button>
+
+                    <button
                       onClick={() => remove(a.id)}
                       className="px-3 py-2 rounded-xl text-xs border border-slate-200 text-red-500 hover:bg-red-50 inline-flex justify-center"
                     >
