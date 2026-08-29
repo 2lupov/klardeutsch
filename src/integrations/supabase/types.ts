@@ -2350,6 +2350,51 @@ export type Database = {
         }
         Relationships: []
       }
+      student_assignments: {
+        Row: {
+          created_at: string
+          due_at: string | null
+          id: string
+          instructions: string | null
+          level: string | null
+          payload: Json
+          status: string
+          student_id: string
+          teacher_id: string
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          due_at?: string | null
+          id?: string
+          instructions?: string | null
+          level?: string | null
+          payload?: Json
+          status?: string
+          student_id: string
+          teacher_id: string
+          title: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          due_at?: string | null
+          id?: string
+          instructions?: string | null
+          level?: string | null
+          payload?: Json
+          status?: string
+          student_id?: string
+          teacher_id?: string
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       student_login_attempts: {
         Row: {
           failed_count: number
@@ -2373,6 +2418,71 @@ export type Database = {
           nickname?: string
         }
         Relationships: []
+      }
+      student_submissions: {
+        Row: {
+          ai_feedback: string | null
+          answers: Json | null
+          assignment_id: string
+          audio_path: string | null
+          auto_score: number | null
+          created_at: string
+          files: Json
+          grade: number | null
+          graded_at: string | null
+          id: string
+          status: string
+          student_id: string
+          submitted_at: string
+          teacher_feedback: string | null
+          text: string | null
+          updated_at: string
+        }
+        Insert: {
+          ai_feedback?: string | null
+          answers?: Json | null
+          assignment_id: string
+          audio_path?: string | null
+          auto_score?: number | null
+          created_at?: string
+          files?: Json
+          grade?: number | null
+          graded_at?: string | null
+          id?: string
+          status?: string
+          student_id: string
+          submitted_at?: string
+          teacher_feedback?: string | null
+          text?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ai_feedback?: string | null
+          answers?: Json | null
+          assignment_id?: string
+          audio_path?: string | null
+          auto_score?: number | null
+          created_at?: string
+          files?: Json
+          grade?: number | null
+          graded_at?: string | null
+          id?: string
+          status?: string
+          student_id?: string
+          submitted_at?: string
+          teacher_feedback?: string | null
+          text?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_submissions_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "student_assignments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       subscriptions: {
         Row: {
