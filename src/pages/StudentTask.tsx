@@ -57,12 +57,15 @@ const MAX_SIZE = 20 * 1024 * 1024;
 
 const StudentTask = () => {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+  const isPreviewRequest = searchParams.get("preview") === "1";
   const { user } = useAuth();
   const { lang } = useLanguage();
   const navigate = useNavigate();
   const t = (uk: string, ru: string) => (lang === "uk" ? uk : ru);
 
   const [task, setTask] = useState<Task | null>(null);
+  const [preview, setPreview] = useState(false);
   const [submission, setSubmission] = useState<Submission | null>(null);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
