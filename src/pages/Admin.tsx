@@ -62,6 +62,15 @@ const Admin = () => {
   const [level, setLevel] = useState<Level>("A1");
   const [tab, setTab] = useState<Tab>("stats");
 
+  // Deep-link з попереднього перегляду курсу: /admin?tab=courses&level=B1&course=…&lesson=…&sec=exercises
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search);
+    const qTab = p.get("tab");
+    const qLevel = p.get("level");
+    if (qTab && (LEVELS as readonly string[]).length) setTab(qTab as Tab);
+    if (qLevel && (LEVELS as readonly string[]).includes(qLevel)) setLevel(qLevel as Level);
+  }, []);
+
   useEffect(() => {
     if (!user) { setIsAdmin(false); return; }
     const checkRole = async () => {
