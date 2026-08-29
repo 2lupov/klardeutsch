@@ -46,6 +46,19 @@ type AssignmentItem =
       route: string;
       level: string;
       exercisesCount: number;
+    }
+  | {
+      kind: "task";
+      id: string;
+      title: string;
+      subtitle: string;
+      status: "assigned" | "submitted" | "graded";
+      created_at: string;
+      action: string;
+      route: string;
+      taskType: "test" | "homework" | "writing" | "audio";
+      due_at?: string | null;
+      grade?: number | null;
     };
 
 type Filter = "all" | "active" | "done";
@@ -95,6 +108,22 @@ const StudentAssignments = () => {
             .in("lesson_id", lessonIds)
             .order("created_at", { ascending: false })
         : { data: [] as any[] };
+
+      // 3b. Direct teacher assignments (tests / homework / writing / audio)
+      const { data: tasks } = await supabase
+        .from("student_assignments")
+        .select("id, type, title, instructions, status, due_at, created_at")
+        .eq("student_id", user.id)
+        .order("created_at", { ascending: false });
+
+      const taskIds = (tasks ?? []).map((x: any) => x.id);
+      const { data: taskSubs } = taskIds.length
+        ? await supabase
+            .from("student_submissions")
+            .select("assignment_id, grade, auto_score, status")
+            .in("assignment_id", taskIds)
+        : { data: [] as any[] };
+      const subMap = new Map((taskSubs ?? []).map((r: any) => [r.assignment_id, r]));
 
       // 4. Exercise counts per lesson
       const exCounts: Record<string, number> = {};
@@ -155,6 +184,35 @@ const StudentAssignments = () => {
           due_at: h.due_at,
           grade: h.grade,
         })),
+        ...(tasks ?? []).map<AssignmentItem>((tk: any) => {
+          const sub = subMap.get(tk.id);
+          const typeLabel: Record<string, string> = {
+            test: t("Тест", "Тест"),
+            homework: t("Домашнє завдання", "Домашнее задание"),
+            writing: t("Письмове завдання", "Письменное задание"),
+            audio: t("Аудіо / вимова", "Аудио / произношение"),
+          };
+          return {
+            kind: "task",
+            id: tk.id,
+            title: tk.title,
+            subtitle: tk.instructions
+              ? String(tk.instructions).slice(0, 120)
+              : typeLabel[tk.type] ?? "",
+            status: tk.status,
+            created_at: tk.created_at,
+            action:
+              tk.status === "graded"
+                ? t("Подивитися оцінку", "Посмотреть оценку")
+                : tk.status === "submitted"
+                ? t("На перевірці", "На проверке")
+                : t("Виконати", "Выполнить"),
+            route: `/task/${tk.id}`,
+            taskType: tk.type,
+            due_at: tk.due_at,
+            grade: sub?.grade ?? sub?.auto_score ?? null,
+          };
+        }),
         ...(lessons ?? [])
           .filter((l) => (exCounts[l.id] ?? 0) > 0 && l.status !== "completed")
           .map<AssignmentItem>((l) => ({
@@ -198,6 +256,7 @@ const StudentAssignments = () => {
     const isDone = (i: AssignmentItem) =>
       (i.kind === "placement" && i.status === "completed") ||
       (i.kind === "homework" && i.status === "graded") ||
+      (i.kind === "task" && i.status === "graded") ||
       (i.kind === "lesson" && i.status === "completed");
     return filter === "done" ? items.filter(isDone) : items.filter((i) => !isDone(i));
   }, [items, filter]);
@@ -208,6 +267,7 @@ const StudentAssignments = () => {
         !(
           (i.kind === "placement" && i.status === "completed") ||
           (i.kind === "homework" && i.status === "graded") ||
+          (i.kind === "task" && i.status === "graded") ||
           (i.kind === "lesson" && i.status === "completed")
         )
     ).length;
@@ -227,6 +287,23 @@ const StudentAssignments = () => {
         Icon: Sparkles,
         accent: "from-pink-500/15 to-rose-500/5 text-pink-700 dark:text-pink-300",
         chip: { label: t("ДЗ", "ДЗ"), bg: "bg-pink-500/15 text-pink-700 dark:text-pink-300" },
+      };
+    }
+    if (item.kind === "task") {
+      const icons: Record<string, any> = {
+        test: ListChecks, homework: FileText, writing: BookMarked, audio: Play,
+      };
+      return {
+        Icon: icons[item.taskType] ?? ClipboardList,
+        accent: "from-violet-500/15 to-purple-500/5 text-violet-700 dark:text-violet-300",
+        chip: {
+          label:
+            item.taskType === "test" ? t("Тест", "Тест")
+            : item.taskType === "writing" ? t("Письмо", "Письмо")
+            : item.taskType === "audio" ? t("Аудіо", "Аудио")
+            : t("ДЗ", "ДЗ"),
+          bg: "bg-violet-500/15 text-violet-700 dark:text-violet-300",
+        },
       };
     }
     return {
