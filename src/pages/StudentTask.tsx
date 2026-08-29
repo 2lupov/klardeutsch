@@ -332,7 +332,7 @@ const StudentTask = () => {
   }
   if (!task) return null;
 
-  const alreadyDone = task.status !== "assigned" && !result;
+  const alreadyDone = !preview && task.status !== "assigned" && !result;
   const TypeIcon =
     task.type === "test" ? ListChecks : task.type === "writing" ? PenLine : task.type === "audio" ? Mic : task.type === "modular" ? Layers : FileText;
 
@@ -340,11 +340,18 @@ const StudentTask = () => {
     <div className="min-h-[100dvh] bg-gradient-to-br from-background via-background to-primary/5 pb-28 lg:pb-12">
       <div className="max-w-2xl mx-auto px-4 lg:px-8 pt-6 space-y-5">
         <button
-          onClick={() => navigate("/assignments")}
+          onClick={() => (preview ? window.close() || navigate(-1 as any) : navigate("/assignments"))}
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
         >
-          <ArrowLeft className="w-4 h-4" /> {t("До завдань", "К заданиям")}
+          <ArrowLeft className="w-4 h-4" /> {preview ? t("Закрити перегляд", "Закрыть просмотр") : t("До завдань", "К заданиям")}
         </button>
+
+        {preview && (
+          <div className="rounded-2xl border border-amber-400/40 bg-amber-400/10 px-4 py-3 text-sm font-semibold text-amber-700 dark:text-amber-300">
+            👀 {t("Режим перегляду очима учня — відповіді не зберігаються", "Режим просмотра глазами ученика — ответы не сохраняются")}
+          </div>
+        )}
+
 
         <motion.div
           initial={{ opacity: 0, y: -6 }}
