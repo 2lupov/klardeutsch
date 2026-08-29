@@ -151,14 +151,16 @@ const StudentTask = () => {
         if (active) setListenUrls(urls);
       }
 
-      const { data: sub } = await supabase
-        .from("student_submissions")
-        .select("id, auto_score, ai_feedback, grade, teacher_feedback, text, status")
-        .eq("assignment_id", id)
-        .order("submitted_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (active && sub) setSubmission(sub as any);
+      if (!previewMode) {
+        const { data: sub } = await supabase
+          .from("student_submissions")
+          .select("id, auto_score, ai_feedback, grade, teacher_feedback, text, status")
+          .eq("assignment_id", id)
+          .order("submitted_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (active && sub) setSubmission(sub as any);
+      }
       setLoading(false);
     })();
     return () => { active = false; };
