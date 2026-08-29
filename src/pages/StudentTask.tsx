@@ -234,6 +234,10 @@ const StudentTask = () => {
   };
 
   const submit = async () => {
+    if (preview) {
+      toast.info(t("Режим перегляду — відповіді не зберігаються", "Режим просмотра — ответы не сохраняются"));
+      return;
+    }
     if (!task || !user) return;
 
     if (task.type === "test" && answers.some((a) => a == null)) {
