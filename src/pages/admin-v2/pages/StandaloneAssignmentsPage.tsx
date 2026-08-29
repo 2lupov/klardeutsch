@@ -757,7 +757,7 @@ function BuilderModal({
           className="w-full px-4 py-3 rounded-xl text-white text-sm font-semibold disabled:opacity-60 inline-flex items-center justify-center gap-2"
           style={{ background: "#4F46E5" }}
         >
-          <ClipboardList className="w-4 h-4" /> {saving ? "Зберігаємо…" : "Видати завдання учню"}
+          <ClipboardList className="w-4 h-4" /> {saving ? "Зберігаємо…" : isEdit ? "Зберегти зміни" : "Видати завдання учню"}
         </button>
       </div>
     </Modal>
