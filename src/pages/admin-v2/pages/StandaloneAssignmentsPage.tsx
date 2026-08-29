@@ -487,6 +487,8 @@ function BuilderModal({
             )}
           </div>
         </Field>
+        )}
+
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="sm:col-span-1">
