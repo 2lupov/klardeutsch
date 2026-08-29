@@ -313,17 +313,19 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 /* ─────────── builder ─────────── */
 
 function BuilderModal({
-  students, onClose, onCreated,
+  students, onClose, onCreated, editing,
 }: {
   students: StudentRow[];
   onClose: () => void;
   onCreated: () => void;
+  editing?: Assignment | null;
 }) {
-  const [studentIds, setStudentIds] = useState<string[]>([]);
-  const [title, setTitle] = useState("");
-  const [instructions, setInstructions] = useState("");
-  const [level, setLevel] = useState("A1");
-  const [dueAt, setDueAt] = useState("");
+  const isEdit = !!editing;
+  const [studentIds, setStudentIds] = useState<string[]>(editing ? [editing.student_id] : []);
+  const [title, setTitle] = useState(editing?.title ?? "");
+  const [instructions, setInstructions] = useState(editing?.instructions ?? "");
+  const [level, setLevel] = useState(editing?.level ?? "A1");
+  const [dueAt, setDueAt] = useState(editing?.due_at ? editing.due_at.slice(0, 10) : "");
   const [prompt, setPrompt] = useState("");
   const [picked, setPicked] = useState<Record<string, { on: boolean; count: number; topic: string }>>({
     reading: { on: true, count: 4, topic: "" },
@@ -332,7 +334,7 @@ function BuilderModal({
     writing: { on: false, count: 1, topic: "" },
     speaking: { on: false, count: 3, topic: "" },
   });
-  const [modules, setModules] = useState<TaskModule[]>([]);
+  const [modules, setModules] = useState<TaskModule[]>(editing?.payload?.modules ?? []);
   const [generating, setGenerating] = useState(false);
   const [ttsFor, setTtsFor] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
@@ -358,6 +360,7 @@ function BuilderModal({
               questions: [{ format: "choice", question: "", options: ["", "", "", ""], correct_index: 0, explanation: "" }],
             },
     ]);
+
 
   const generate = async () => {
     const chosen = (Object.keys(picked) as ModuleKind[])
