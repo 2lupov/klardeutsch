@@ -112,9 +112,27 @@ serve(async (req) => {
       customPrompt,               // твій власний промпт (ціль курсу, стиль, правила)
       targetLanguage = "de",      // мова, яку вчать
       metaLanguage = "uk",        // мова пояснень
+      preview = false,            // true → згенерувати і повернути БЕЗ збереження
+      lessons: lessonsToSave,     // [{title, theory, exercises, sort_order}] → лише зберегти
     } = body;
 
-    if (!courseId || !level) return json({ error: "Missing params" }, 400);
+    if (!courseId) return json({ error: "Missing params" }, 400);
+
+    // ── Режим збереження вже переглянутих уроків (без запитів до AI)
+    if (Array.isArray(lessonsToSave) && lessonsToSave.length > 0) {
+      const rows = lessonsToSave.slice(0, 50).map((l: any, i: number) => ({
+        course_id: courseId,
+        title: String(l.title || `Урок ${i + 1}`).slice(0, 300),
+        theory: typeof l.theory === "string" ? l.theory : JSON.stringify(l.theory ?? []),
+        exercises: l.exercises ?? {},
+        sort_order: Number.isFinite(l.sort_order) ? l.sort_order : batchStart + i,
+      }));
+      const { error: saveErr } = await supabase.from("course_lessons").insert(rows);
+      if (saveErr) throw new Error("Не вдалося зберегти уроки: " + saveErr.message);
+      return json({ success: true, saved: rows.length });
+    }
+
+    if (!level) return json({ error: "Missing params" }, 400);
 
     let batchTopics: string[];
     if (Array.isArray(customTopics) && customTopics.length > 0) {
@@ -250,6 +268,22 @@ practice_dialog (${compact ? "5-6" : "6-10"} реплік), cultural_notes (1-2)
         sort_order: lessonNo - 1,
       };
     });
+
+    if (preview) {
+      return json({
+        success: true,
+        preview: true,
+        failed,
+        lessons: inserts.map((l, i) => ({
+          title: l.title,
+          theory: l.theory,
+          exercises: l.exercises,
+          sort_order: l.sort_order,
+          topic: generated[i].topic,
+          lessonNo: generated[i].lessonNo,
+        })),
+      });
+    }
 
     const { error: insertErr } = await supabase.from("course_lessons").insert(inserts);
     if (insertErr) {

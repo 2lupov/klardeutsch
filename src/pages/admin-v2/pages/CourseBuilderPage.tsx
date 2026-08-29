@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, SectionHeader, EmptyState } from "./_ui";
-import { Play, CheckCircle2, XCircle, Loader2, BookOpen, RotateCcw, Settings2 } from "lucide-react";
+import { Play, CheckCircle2, XCircle, Loader2, BookOpen, RotateCcw, Settings2, Eye } from "lucide-react";
+import CoursePreview, { PreviewLesson } from "../components/CoursePreview";
 import { toast } from "@/hooks/use-toast";
 import { useAdminLang } from "../LanguageContext";
 
@@ -45,6 +46,12 @@ export default function CourseBuilderPage() {
   const [metaLanguage, setMetaLanguage] = useState("uk");
   const [batchSize, setBatchSize] = useState(2);
   const [startFrom, setStartFrom] = useState(0);
+
+  // ── попередній перегляд
+  const [previewing, setPreviewing] = useState(false);
+  const [previewLessons, setPreviewLessons] = useState<PreviewLesson[] | null>(null);
+  const [previewFailed, setPreviewFailed] = useState<{ topic: string; reason: string }[]>([]);
+  const [savingPreview, setSavingPreview] = useState(false);
 
   const selected = courses.find((c) => c.id === selectedId);
   const topics = topicsText.split("\n").map((t) => t.trim()).filter(Boolean);
@@ -165,6 +172,66 @@ export default function CourseBuilderPage() {
     await loadLessonCount(selected.id);
     await loadCourses();
     toast({ title: "Генерацію завершено" });
+  };
+
+  const runPreview = async () => {
+    if (!selected) return;
+    if (topics.length === 0) {
+      toast({ title: "Додай хоча б одну тему уроку" });
+      return;
+    }
+    setPreviewing(true);
+    setPreviewFailed([]);
+    const collected: PreviewLesson[] = [];
+    const problems: { topic: string; reason: string }[] = [];
+    try {
+      for (const b of buildBatches(topics)) {
+        const { data, error } = await supabase.functions.invoke("generate-full-course", {
+          body: {
+            courseId: selected.id,
+            level: selected.level || "A1",
+            batchStart: b.start,
+            batchSize: b.topics.length,
+            topics: b.topics,
+            customPrompt: customPrompt || undefined,
+            targetLanguage: selected.target_language || "de",
+            metaLanguage,
+            preview: true,
+          },
+        });
+        if (error || (data as any)?.error) {
+          problems.push({ topic: b.topics.join(", "), reason: error?.message || (data as any)?.error });
+          continue;
+        }
+        collected.push(...(((data as any).lessons || []) as PreviewLesson[]));
+        problems.push(...(((data as any).failed || []) as any[]));
+      }
+    } finally {
+      setPreviewing(false);
+    }
+    if (collected.length === 0) {
+      toast({ title: "AI не створив жодного уроку", description: problems[0]?.reason || "", variant: "destructive" });
+      return;
+    }
+    setPreviewFailed(problems);
+    setPreviewLessons(collected);
+  };
+
+  const savePreview = async (list: PreviewLesson[]) => {
+    if (!selected) return;
+    setSavingPreview(true);
+    const { data, error } = await supabase.functions.invoke("generate-full-course", {
+      body: { courseId: selected.id, lessons: list, batchStart: startFrom },
+    });
+    setSavingPreview(false);
+    if (error || (data as any)?.error) {
+      toast({ title: "Не вдалося зберегти", description: String((data as any)?.error || error?.message || ""), variant: "destructive" });
+      return;
+    }
+    setPreviewLessons(null);
+    await loadLessonCount(selected.id);
+    await loadCourses();
+    toast({ title: `Збережено ${(data as any).saved} уроків` });
   };
 
   const retryFailed = async () => {
@@ -324,6 +391,13 @@ export default function CourseBuilderPage() {
             {running ? "Генерація..." : `Згенерувати ${topics.length} уроків`}
           </button>
           <button
+            onClick={runPreview}
+            disabled={running || previewing}
+            className="px-4 py-2 rounded-xl text-sm font-medium border border-indigo-200 text-indigo-600 hover:bg-indigo-50 flex items-center gap-2 disabled:opacity-50">
+            {previewing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Eye className="w-4 h-4" />}
+            {previewing ? "Генеруємо перегляд..." : "Попередній перегляд"}
+          </button>
+          <button
             onClick={saveSettings}
             className="px-4 py-2 rounded-xl text-sm border border-slate-200 hover:bg-slate-50">
             Зберегти налаштування
@@ -338,6 +412,16 @@ export default function CourseBuilderPage() {
         </div>
       </Card>
 
+      {previewLessons && (
+        <CoursePreview
+          lessons={previewLessons}
+          courseTitle={selected?.title || "Курс"}
+          failed={previewFailed}
+          saving={savingPreview}
+          onSave={savePreview}
+          onClose={() => setPreviewLessons(null)}
+        />
+      )}
 
       <Card className="p-6">
         <SectionHeader title="Що саме створюється" subtitle="Огляд AI-контенту та ручних елементів" />
