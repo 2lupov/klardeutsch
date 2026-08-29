@@ -86,9 +86,10 @@ const StudentTask = () => {
   // text state
   const [text, setText] = useState("");
 
-  // modular state
+// modular state
   const [moduleAnswers, setModuleAnswers] = useState<any[]>([]);
   const [listenUrls, setListenUrls] = useState<Record<number, string>>({});
+  const [moduleStep, setModuleStep] = useState(0);
 
   // files
   const [files, setFiles] = useState<Array<{ path: string; name: string; size: number; type: string }>>([]);
@@ -131,9 +132,10 @@ const StudentTask = () => {
       } else if (isPreviewRequest) {
         previewMode = true;
       }
-      if (!active) return;
+if (!active) return;
       setPreview(previewMode);
       setTask(data as any);
+      setModuleStep(0);
       const qs = ((data as any).payload?.questions ?? []) as Question[];
       setAnswers(new Array(qs.length).fill(null));
 
@@ -187,7 +189,7 @@ const questions: Question[] = (task?.payload?.questions ?? []) as Question[];
   const hasSpeaking = modules.some((m) => m.kind === "speaking");
   const hasWriting = modules.some((m) => m.kind === "writing");
 
-  const setModuleAnswer = (mi: number, qi: number, value: number | string) =>
+const setModuleAnswer = (mi: number, qi: number, value: number | string) =>
     setModuleAnswers((prev) =>
       prev.map((entry, i) => {
         if (i !== mi) return entry;
@@ -196,6 +198,27 @@ const questions: Question[] = (task?.payload?.questions ?? []) as Question[];
         return arr;
       }),
     );
+
+  const moduleDone = (mi: number) => {
+    const m = modules[mi];
+    if (!m) return false;
+    if (m.kind === "reading" || m.kind === "listening" || m.kind === "grammar") {
+      const arr = moduleAnswers[mi];
+      return (m.questions ?? []).every((_, qi) => arr?.[qi] != null && arr?.[qi] !== "");
+    }
+    if (m.kind === "writing") return text.trim().length > 0;
+    if (m.kind === "speaking") return !!audioBlob;
+    return true;
+  };
+
+  const goNextModule = () => {
+    const mi = orderedModuleIndices[moduleStep];
+    if (!preview && mi != null && !moduleDone(mi)) {
+      toast.error(t("Спочатку виконай цей модуль", "Сначала выполни этот модуль"));
+      return;
+    }
+    setModuleStep((s) => Math.min(orderedModuleIndices.length - 1, s + 1));
+  };
 
 const uploadFiles = async (list: FileList | null) => {
     if (!list || !user) return;
@@ -491,134 +514,214 @@ const uploadFiles = async (list: FileList | null) => {
               </div>
             )}
 
-            {task.type === "modular" && (
+{task.type === "modular" && (
               <div className="space-y-4">
-{orderedModuleIndices.map((mi) => {
-                  const m = modules[mi];
-                  return (
-                  <div key={mi} className="rounded-3xl p-5 border border-border bg-card space-y-3">
-                    <div className="flex items-center gap-2 font-display font-bold">
-                      {m.kind === "listening" ? <Headphones className="w-4 h-4 text-primary" />
-                        : m.kind === "reading" ? <BookOpen className="w-4 h-4 text-primary" />
-                        : m.kind === "writing" ? <PenLine className="w-4 h-4 text-primary" />
-                        : m.kind === "speaking" ? <Mic className="w-4 h-4 text-primary" />
-                        : <ListChecks className="w-4 h-4 text-primary" />}
-                      {m.title || m.kind}
+                {orderedModuleIndices.length > 0 ? (
+                  <>
+                    {/* Module stepper */}
+                    <div className="rounded-3xl p-4 border border-border bg-card">
+                      <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
+                        <span>{t("Модуль", "Модуль")} {moduleStep + 1} / {orderedModuleIndices.length}</span>
+                        <span>{Math.round(((moduleStep + 1) / orderedModuleIndices.length) * 100)}%</span>
+                      </div>
+                      <div className="h-1.5 rounded-full bg-muted overflow-hidden mb-3">
+                        <div
+                          className="h-full bg-primary transition-all"
+                          style={{ width: `${((moduleStep + 1) / orderedModuleIndices.length) * 100}%` }}
+                        />
+                      </div>
+                      <div className="flex gap-1.5 overflow-x-auto pb-1">
+                        {orderedModuleIndices.map((mi, si) => {
+                          const m = modules[mi];
+                          const done = moduleDone(mi);
+                          const isCurrent = si === moduleStep;
+                          const Icon = m.kind === "listening" ? Headphones
+                            : m.kind === "reading" ? BookOpen
+                            : m.kind === "writing" ? PenLine
+                            : m.kind === "speaking" ? Mic
+                            : ListChecks;
+                          return (
+                            <button
+                              key={mi}
+                              onClick={() => { if (preview || si < moduleStep) setModuleStep(si); }}
+                              disabled={!preview && si > moduleStep}
+                              title={m.title || m.kind}
+                              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors shrink-0 ${
+                                isCurrent
+                                  ? "bg-primary text-primary-foreground border-primary"
+                                  : done
+                                    ? "border-green-500/40 bg-green-500/10 text-green-600 dark:text-green-400"
+                                    : "border-border text-muted-foreground"
+                              } ${!preview && si > moduleStep ? "opacity-40" : ""}`}
+                            >
+                              {done && !isCurrent ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Icon className="w-3.5 h-3.5" />}
+                              {m.title || m.kind}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
 
-                    {m.kind === "reading" && m.text && (
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap bg-muted rounded-2xl p-4">{m.text}</p>
-                    )}
+                    {/* Current module */}
+                    {(() => {
+                      const mi = orderedModuleIndices[moduleStep];
+                      const m = modules[mi];
+                      const isLast = moduleStep === orderedModuleIndices.length - 1;
+                      return (
+                        <div key={mi} className="rounded-3xl p-5 border border-border bg-card space-y-3">
+                          <div className="flex items-center gap-2 font-display font-bold">
+                            {m.kind === "listening" ? <Headphones className="w-4 h-4 text-primary" />
+                              : m.kind === "reading" ? <BookOpen className="w-4 h-4 text-primary" />
+                              : m.kind === "writing" ? <PenLine className="w-4 h-4 text-primary" />
+                              : m.kind === "speaking" ? <Mic className="w-4 h-4 text-primary" />
+                              : <ListChecks className="w-4 h-4 text-primary" />}
+                            {m.title || m.kind}
+                          </div>
 
-                    {m.kind === "listening" && (
-                      listenUrls[mi] ? (
-                        <audio controls src={listenUrls[mi]} className="w-full" />
-                      ) : (
-                        <p className="text-xs text-muted-foreground">{t("Аудіо недоступне", "Аудио недоступно")}</p>
-                      )
-                    )}
+                          {m.kind === "reading" && m.text && (
+                            <p className="text-sm leading-relaxed whitespace-pre-wrap bg-muted rounded-2xl p-4">{m.text}</p>
+                          )}
 
-                    {(m.kind === "writing" || m.kind === "speaking") && m.topic && (
-                      <p className="text-sm font-semibold">{m.topic}</p>
-                    )}
-
-                    {m.kind === "writing" && (
-                      <>
-                        {(m.criteria ?? []).filter(Boolean).length > 0 && (
-                          <ul className="text-xs text-muted-foreground list-disc pl-5 space-y-0.5">
-                            {(m.criteria ?? []).filter(Boolean).map((c, ci) => <li key={ci}>{c}</li>)}
-                          </ul>
-                        )}
-<textarea
-                          value={text}
-                          onChange={(e) => setText(e.target.value)}
-                          rows={8}
-                          readOnly={preview}
-                          placeholder={preview
-                            ? t("Режим перегляду — введення заблоковано", "Режим просмотра — ввод заблокирован")
-                            : t("Твій текст…", "Твой текст…")}
-                          className={`w-full px-4 py-3 rounded-2xl border border-border text-sm resize-y ${
-                            preview ? "bg-muted/40 opacity-80 cursor-not-allowed" : "bg-background"
-                          }`}
-                        />
-                        <p className="text-xs text-muted-foreground">
-                          {t("Слів", "Слов")}: {text.trim() ? text.trim().split(/\s+/).length : 0}
-                          {m.min_words ? ` / ${m.min_words}` : ""}
-                        </p>
-                      </>
-                    )}
-
-                    {m.kind === "speaking" && (
-                      <div className="space-y-2 text-center">
-                        {(m.questions ?? []).map((q, qi) => (
-                          <p key={qi} className="text-sm text-left">• {q.question}</p>
-                        ))}
-                        {!recording ? (
-                          <button
-                            onClick={startRecording}
-                            className="w-full px-4 py-3 rounded-2xl bg-primary text-primary-foreground text-sm font-semibold inline-flex items-center justify-center gap-2"
-                          >
-                            <Mic className="w-4 h-4" /> {t("Записати відповідь", "Записать ответ")}
-                          </button>
-                        ) : (
-                          <button
-                            onClick={stopRecording}
-                            className="w-full px-4 py-3 rounded-2xl bg-destructive text-destructive-foreground text-sm font-semibold inline-flex items-center justify-center gap-2"
-                          >
-                            <Square className="w-4 h-4" /> {t("Зупинити", "Остановить")}
-                          </button>
-                        )}
-                        {audioUrl && <audio controls src={audioUrl} className="w-full" />}
-                      </div>
-                    )}
-
-                    {(m.kind === "reading" || m.kind === "listening" || m.kind === "grammar") && (
-                      <div className="space-y-3">
-                        {(m.questions ?? []).map((q, qi) => (
-                          <div key={qi} className="space-y-2">
-                            <p className="text-sm font-medium">{qi + 1}. {q.question}</p>
-                            {q.format === "gap" ? (
-                              <input
-                                value={(moduleAnswers[mi]?.[qi] as string) ?? ""}
-                                onChange={(e) => setModuleAnswer(mi, qi, e.target.value)}
-                                placeholder={t("Відповідь", "Ответ")}
-                                className="w-full px-4 py-2.5 rounded-2xl border border-border bg-background text-sm"
-                              />
+                          {m.kind === "listening" && (
+                            listenUrls[mi] ? (
+                              <audio controls src={listenUrls[mi]} className="w-full" />
                             ) : (
-                              <div className="space-y-1.5">
-                                {(q.options ?? []).map((opt, oi) => {
-                                  const on = moduleAnswers[mi]?.[qi] === oi;
-                                  return (
-                                    <button
-                                      key={oi}
-                                      onClick={() => setModuleAnswer(mi, qi, oi)}
-                                      className={`w-full text-left px-4 py-2.5 rounded-2xl border text-sm ${
-                                        on ? "border-primary bg-primary/10 font-semibold" : "border-border hover:bg-muted"
-                                      }`}
-                                    >
-                                      {opt}
-                                    </button>
-                                  );
-                                })}
-                              </div>
+                              <p className="text-xs text-muted-foreground">{t("Аудіо недоступне", "Аудио недоступно")}</p>
+                            )
+                          )}
+
+                          {(m.kind === "writing" || m.kind === "speaking") && m.topic && (
+                            <p className="text-sm font-semibold">{m.topic}</p>
+                          )}
+
+                          {m.kind === "writing" && (
+                            <>
+                              {(m.criteria ?? []).filter(Boolean).length > 0 && (
+                                <ul className="text-xs text-muted-foreground list-disc pl-5 space-y-0.5">
+                                  {(m.criteria ?? []).filter(Boolean).map((c, ci) => <li key={ci}>{c}</li>)}
+                                </ul>
+                              )}
+                              <textarea
+                                value={text}
+                                onChange={(e) => setText(e.target.value)}
+                                rows={8}
+                                readOnly={preview}
+                                placeholder={preview
+                                  ? t("Режим перегляду — введення заблоковано", "Режим просмотра — ввод заблокирован")
+                                  : t("Твій текст…", "Твой текст…")}
+                                className={`w-full px-4 py-3 rounded-2xl border border-border text-sm resize-y ${
+                                  preview ? "bg-muted/40 opacity-80 cursor-not-allowed" : "bg-background"
+                                }`}
+                              />
+                              <p className="text-xs text-muted-foreground">
+                                {t("Слів", "Слов")}: {text.trim() ? text.trim().split(/\s+/).length : 0}
+                                {m.min_words ? ` / ${m.min_words}` : ""}
+                              </p>
+                            </>
+                          )}
+
+                          {m.kind === "speaking" && (
+                            <div className="space-y-2 text-center">
+                              {(m.questions ?? []).map((q, qi) => (
+                                <p key={qi} className="text-sm text-left">• {q.question}</p>
+                              ))}
+                              {!recording ? (
+                                <button
+                                  onClick={startRecording}
+                                  className="w-full px-4 py-3 rounded-2xl bg-primary text-primary-foreground text-sm font-semibold inline-flex items-center justify-center gap-2"
+                                >
+                                  <Mic className="w-4 h-4" /> {t("Записати відповідь", "Записать ответ")}
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={stopRecording}
+                                  className="w-full px-4 py-3 rounded-2xl bg-destructive text-destructive-foreground text-sm font-semibold inline-flex items-center justify-center gap-2"
+                                >
+                                  <Square className="w-4 h-4" /> {t("Зупинити", "Остановить")}
+                                </button>
+                              )}
+                              {audioUrl && <audio controls src={audioUrl} className="w-full" />}
+                            </div>
+                          )}
+
+                          {(m.kind === "reading" || m.kind === "listening" || m.kind === "grammar") && (
+                            <div className="space-y-3">
+                              {(m.questions ?? []).map((q, qi) => (
+                                <div key={qi} className="space-y-2">
+                                  <p className="text-sm font-medium">{qi + 1}. {q.question}</p>
+                                  {q.format === "gap" ? (
+                                    <input
+                                      value={(moduleAnswers[mi]?.[qi] as string) ?? ""}
+                                      onChange={(e) => setModuleAnswer(mi, qi, e.target.value)}
+                                      placeholder={t("Відповідь", "Ответ")}
+                                      className="w-full px-4 py-2.5 rounded-2xl border border-border bg-background text-sm"
+                                    />
+                                  ) : (
+                                    <div className="space-y-1.5">
+                                      {(q.options ?? []).map((opt, oi) => {
+                                        const on = moduleAnswers[mi]?.[qi] === oi;
+                                        return (
+                                          <button
+                                            key={oi}
+                                            onClick={() => setModuleAnswer(mi, qi, oi)}
+                                            className={`w-full text-left px-4 py-2.5 rounded-2xl border text-sm ${
+                                              on ? "border-primary bg-primary/10 font-semibold" : "border-border hover:bg-muted"
+                                            }`}
+                                          >
+                                            {opt}
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Nav */}
+                          <div className="flex gap-2 pt-2">
+                            <button
+                              disabled={moduleStep === 0}
+                              onClick={() => setModuleStep((s) => Math.max(0, s - 1))}
+                              className="flex-1 px-4 py-2.5 rounded-2xl border border-border text-sm font-semibold disabled:opacity-40"
+                            >
+                              {t("Назад", "Назад")}
+                            </button>
+                            {!isLast ? (
+                              <button
+                                onClick={goNextModule}
+                                className="flex-1 px-4 py-2.5 rounded-2xl bg-primary text-primary-foreground text-sm font-semibold"
+                              >
+                                {t("Далі", "Далее")}
+                              </button>
+                            ) : (
+                              <button
+                                disabled={sending || preview}
+                                onClick={submit}
+                                title={preview ? t("Відправку заблоковано в режимі перегляду", "Отправка заблокирована в режиме просмотра") : undefined}
+                                className="flex-1 px-4 py-2.5 rounded-2xl bg-primary text-primary-foreground text-sm font-semibold inline-flex items-center justify-center gap-2 disabled:opacity-50"
+                              >
+                                {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                                {preview ? t("Відправку заблоковано", "Отправка заблокирована") : t("Відправити вчителю", "Отправить учителю")}
+                              </button>
                             )}
                           </div>
-                        ))}
-                      </div>
-)}
-                  </div>
-                  );
-                })}
-
-<button
-                  disabled={sending || preview}
-                  onClick={submit}
-                  title={preview ? t("Відправку заблоковано в режимі перегляду", "Отправка заблокирована в режиме просмотра") : undefined}
-                  className="w-full px-4 py-3 rounded-2xl bg-primary text-primary-foreground text-sm font-semibold inline-flex items-center justify-center gap-2 disabled:opacity-50"
-                >
-                  {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                  {preview ? t("Відправку заблоковано", "Отправка заблокирована") : t("Відправити вчителю", "Отправить учителю")}
-                </button>
+                        </div>
+                      );
+                    })()}
+                  </>
+                ) : (
+                  <button
+                    disabled={sending || preview}
+                    onClick={submit}
+                    title={preview ? t("Відправку заблоковано в режимі перегляду", "Отправка заблокирована в режиме просмотра") : undefined}
+                    className="w-full px-4 py-3 rounded-2xl bg-primary text-primary-foreground text-sm font-semibold inline-flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                    {preview ? t("Відправку заблоковано", "Отправка заблокирована") : t("Відправити вчителю", "Отправить учителю")}
+                  </button>
+                )}
               </div>
             )}
 
