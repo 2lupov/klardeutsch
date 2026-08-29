@@ -421,6 +421,24 @@ function BuilderModal({
       return toast({ title: "Сесія втрачена", variant: "destructive" });
     }
 
+    if (isEdit && editing) {
+      const { error } = await supabase
+        .from("student_assignments")
+        .update({
+          title: title.trim(),
+          instructions: instructions.trim() || null,
+          level,
+          due_at: dueAt ? new Date(dueAt).toISOString() : null,
+          payload: { modules },
+        } as any)
+        .eq("id", editing.id);
+      setSaving(false);
+      if (error) return toast({ title: "Помилка", description: error.message, variant: "destructive" });
+      toast({ title: "Зміни збережено" });
+      onCreated();
+      return;
+    }
+
     const rows = studentIds.map((sid) => ({
       teacher_id: teacherId,
       student_id: sid,
@@ -440,10 +458,12 @@ function BuilderModal({
   };
 
   return (
-    <Modal title="Нове індивідуальне завдання" onClose={onClose}>
+    <Modal title={isEdit ? "Редагування завдання" : "Нове індивідуальне завдання"} onClose={onClose}>
       <div className="space-y-5">
         {/* students */}
+        {!isEdit && (
         <Field label="Учні *">
+
           <div className="max-h-36 overflow-y-auto rounded-xl border border-slate-200 divide-y divide-slate-100">
             {students.length === 0 ? (
               <p className="p-3 text-xs text-slate-500">Немає учнів. Створіть учня в розділі «Учні».</p>
