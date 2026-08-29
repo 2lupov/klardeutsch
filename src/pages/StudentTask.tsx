@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   ArrowLeft, Loader2, CheckCircle2, Award, Mic, Square, Play, Trash2,
@@ -57,12 +57,15 @@ const MAX_SIZE = 20 * 1024 * 1024;
 
 const StudentTask = () => {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+  const isPreviewRequest = searchParams.get("preview") === "1";
   const { user } = useAuth();
   const { lang } = useLanguage();
   const navigate = useNavigate();
   const t = (uk: string, ru: string) => (lang === "uk" ? uk : ru);
 
   const [task, setTask] = useState<Task | null>(null);
+  const [preview, setPreview] = useState(false);
   const [submission, setSubmission] = useState<Submission | null>(null);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
@@ -107,11 +110,21 @@ const StudentTask = () => {
         navigate("/assignments");
         return;
       }
+      let previewMode = false;
       if ((data as any).student_id !== user.id) {
-        toast.error(t("Немає доступу", "Нет доступа"));
-        navigate("/assignments");
-        return;
+        const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: user.id, _role: "admin" as any });
+        const { data: isTeacher } = await supabase.rpc("has_role", { _user_id: user.id, _role: "teacher" as any });
+        if (!isAdmin && !isTeacher) {
+          toast.error(t("Немає доступу", "Нет доступа"));
+          navigate("/assignments");
+          return;
+        }
+        previewMode = true;
+      } else if (isPreviewRequest) {
+        previewMode = true;
       }
+      if (!active) return;
+      setPreview(previewMode);
       setTask(data as any);
       const qs = ((data as any).payload?.questions ?? []) as Question[];
       setAnswers(new Array(qs.length).fill(null));
@@ -138,14 +151,16 @@ const StudentTask = () => {
         if (active) setListenUrls(urls);
       }
 
-      const { data: sub } = await supabase
-        .from("student_submissions")
-        .select("id, auto_score, ai_feedback, grade, teacher_feedback, text, status")
-        .eq("assignment_id", id)
-        .order("submitted_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (active && sub) setSubmission(sub as any);
+      if (!previewMode) {
+        const { data: sub } = await supabase
+          .from("student_submissions")
+          .select("id, auto_score, ai_feedback, grade, teacher_feedback, text, status")
+          .eq("assignment_id", id)
+          .order("submitted_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (active && sub) setSubmission(sub as any);
+      }
       setLoading(false);
     })();
     return () => { active = false; };
@@ -219,6 +234,10 @@ const StudentTask = () => {
   };
 
   const submit = async () => {
+    if (preview) {
+      toast.info(t("Режим перегляду — відповіді не зберігаються", "Режим просмотра — ответы не сохраняются"));
+      return;
+    }
     if (!task || !user) return;
 
     if (task.type === "test" && answers.some((a) => a == null)) {
@@ -313,7 +332,7 @@ const StudentTask = () => {
   }
   if (!task) return null;
 
-  const alreadyDone = task.status !== "assigned" && !result;
+  const alreadyDone = !preview && task.status !== "assigned" && !result;
   const TypeIcon =
     task.type === "test" ? ListChecks : task.type === "writing" ? PenLine : task.type === "audio" ? Mic : task.type === "modular" ? Layers : FileText;
 
@@ -321,11 +340,18 @@ const StudentTask = () => {
     <div className="min-h-[100dvh] bg-gradient-to-br from-background via-background to-primary/5 pb-28 lg:pb-12">
       <div className="max-w-2xl mx-auto px-4 lg:px-8 pt-6 space-y-5">
         <button
-          onClick={() => navigate("/assignments")}
+          onClick={() => { if (preview) { window.close(); navigate(-1); } else navigate("/assignments"); }}
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
         >
-          <ArrowLeft className="w-4 h-4" /> {t("До завдань", "К заданиям")}
+          <ArrowLeft className="w-4 h-4" /> {preview ? t("Закрити перегляд", "Закрыть просмотр") : t("До завдань", "К заданиям")}
         </button>
+
+        {preview && (
+          <div className="rounded-2xl border border-amber-400/40 bg-amber-400/10 px-4 py-3 text-sm font-semibold text-amber-700 dark:text-amber-300">
+            👀 {t("Режим перегляду очима учня — відповіді не зберігаються", "Режим просмотра глазами ученика — ответы не сохраняются")}
+          </div>
+        )}
+
 
         <motion.div
           initial={{ opacity: 0, y: -6 }}
