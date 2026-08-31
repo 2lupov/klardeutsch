@@ -29,6 +29,197 @@ export type Database = {
         }
         Relationships: []
       }
+      book_lektionen: {
+        Row: {
+          book_id: string
+          created_at: string
+          id: string
+          number: number
+          page_from: number
+          page_to: number
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          book_id: string
+          created_at?: string
+          id?: string
+          number: number
+          page_from?: number
+          page_to?: number
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          book_id?: string
+          created_at?: string
+          id?: string
+          number?: number
+          page_from?: number
+          page_to?: number
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "book_lektionen_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      book_pages: {
+        Row: {
+          book_id: string
+          created_at: string
+          id: string
+          image_path: string
+          lektion_id: string | null
+          ocr_status: string
+          page_number: number
+          updated_at: string
+        }
+        Insert: {
+          book_id: string
+          created_at?: string
+          id?: string
+          image_path: string
+          lektion_id?: string | null
+          ocr_status?: string
+          page_number: number
+          updated_at?: string
+        }
+        Update: {
+          book_id?: string
+          created_at?: string
+          id?: string
+          image_path?: string
+          lektion_id?: string | null
+          ocr_status?: string
+          page_number?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "book_pages_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "book_pages_lektion_id_fkey"
+            columns: ["lektion_id"]
+            isOneToOne: false
+            referencedRelation: "book_lektionen"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      book_tasks: {
+        Row: {
+          bbox: Json | null
+          book_id: string
+          code: string | null
+          content: Json
+          created_at: string
+          id: string
+          instructions: string | null
+          kind: string
+          page_id: string
+          sort_order: number
+          source: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          bbox?: Json | null
+          book_id: string
+          code?: string | null
+          content?: Json
+          created_at?: string
+          id?: string
+          instructions?: string | null
+          kind?: string
+          page_id: string
+          sort_order?: number
+          source?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bbox?: Json | null
+          book_id?: string
+          code?: string | null
+          content?: Json
+          created_at?: string
+          id?: string
+          instructions?: string | null
+          kind?: string
+          page_id?: string
+          sort_order?: number
+          source?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "book_tasks_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "book_tasks_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "book_pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      books: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          language: string
+          level: string | null
+          owner_id: string | null
+          publisher: string | null
+          title: string
+          total_pages: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind?: string
+          language?: string
+          level?: string | null
+          owner_id?: string | null
+          publisher?: string | null
+          title: string
+          total_pages?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          language?: string
+          level?: string | null
+          owner_id?: string | null
+          publisher?: string | null
+          title?: string
+          total_pages?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       cafe_scenarios: {
         Row: {
           barista_line: string
@@ -3975,6 +4166,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      student_has_book_access: { Args: { _book_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user" | "teacher"

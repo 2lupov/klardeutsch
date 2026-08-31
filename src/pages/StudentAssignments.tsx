@@ -59,7 +59,7 @@ lessonTitle?: string;
       created_at: string;
       action: string;
       route: string;
-taskType: "test" | "homework" | "writing" | "audio" | "modular";
+taskType: "test" | "homework" | "writing" | "audio" | "modular" | "book";
       due_at?: string | null;
       grade?: number | null;
       gradePct?: number | null;
@@ -209,7 +209,7 @@ lessonTitle: lessonTitleMap.get(h.lesson_id),
                 : tk.status === "submitted"
                 ? t("На перевірці", "На проверке")
                 : t("Виконати", "Выполнить"),
-            route: `/task/${tk.id}`,
+            route: tk.type === "book" ? `/book-task/${tk.id}` : `/task/${tk.id}`,
             taskType: tk.type,
 due_at: tk.due_at,
             grade: sub?.grade ?? sub?.auto_score ?? null,
@@ -278,14 +278,15 @@ if (item.kind === "placement") {
     }
     if (item.kind === "task") {
       const icons: Record<string, any> = {
-        test: ListChecks, homework: FileText, writing: BookMarked, audio: Play, modular: Layers,
+        test: ListChecks, homework: FileText, writing: BookMarked, audio: Play, modular: Layers, book: BookMarked,
       };
       return {
         Icon: icons[item.taskType] ?? ClipboardList,
         iconBg: "bg-violet-500/10 text-violet-700 dark:text-violet-300",
         chip: {
           label:
-            item.taskType === "modular" ? t("Індивідуальне", "Индивидуальное")
+            item.taskType === "book" ? t("З підручника", "Из учебника")
+            : item.taskType === "modular" ? t("Індивідуальне", "Индивидуальное")
             : item.taskType === "test" ? t("Тест", "Тест")
             : item.taskType === "writing" ? t("Письмо", "Письмо")
             : item.taskType === "audio" ? t("Аудіо", "Аудио")

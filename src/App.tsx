@@ -63,6 +63,7 @@ import PlacementTest from "./pages/PlacementTest";
 import StudentAssignments from "./pages/StudentAssignments";
 import StudentHomework from "./pages/StudentHomework";
 import StudentTask from "./pages/StudentTask";
+import StudentBookHomework from "./pages/StudentBookHomework";
 import StudentView from "./pages/StudentView";
 import LiveClass from "./pages/LiveClass";
 import StudentDictionary from "./pages/StudentDictionary";
@@ -134,6 +135,7 @@ const AppRoutes = () => {
         <Route path="/assignments" element={<RequireAuth><StudentAssignments /></RequireAuth>} />
         <Route path="/vocabulary" element={<RequireAuth><StudentDictionary /></RequireAuth>} />
         <Route path="/task/:id" element={<RequireAuth><StudentTask /></RequireAuth>} />
+        <Route path="/book-task/:id" element={<RequireAuth><StudentBookHomework /></RequireAuth>} />
         <Route path="/course/:id" element={<RequireAuth><Course /></RequireAuth>} />
 
         {/* PREMIUM — paid plans */}

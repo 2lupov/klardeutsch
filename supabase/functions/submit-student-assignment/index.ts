@@ -24,6 +24,7 @@ const TYPE_LABEL: Record<string, string> = {
   writing: "✍️ Письмо",
   audio: "🎙 Аудіо / вимова",
   modular: "🧩 Індивідуальне завдання",
+  book: "📕 Домашка з підручника",
 };
 
 const MODULE_LABEL: Record<string, string> = {
@@ -89,6 +90,7 @@ serve(async (req) => {
     const textAnswer = body?.text ? String(body.text).slice(0, 20000) : null;
     const files = Array.isArray(body?.files) ? body.files.slice(0, 10) : [];
     const audioPath = body?.audio_path ? String(body.audio_path) : null;
+    const bookAnswers = Array.isArray(body?.book_answers) ? body.book_answers : null;
 
     const admin = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -160,6 +162,34 @@ serve(async (req) => {
       autoScore = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : null;
     }
 
+    // Server-side scoring for book homework
+    if (assignment.type === "book") {
+      const bTasks = ((assignment.payload as any)?.tasks ?? []) as any[];
+      bTasks.forEach((bt) => {
+        const given = bookAnswers?.find((x: any) => x?.task_id === bt?.id)?.answers ?? [];
+        const items = Array.isArray(bt?.items) ? bt.items : [];
+        items.forEach((it: any, i: number) => {
+          const ans = given?.[i];
+          const isChoice = bt?.format === "choice" && Array.isArray(it?.options);
+          const hasKey = isChoice ? it?.correct_index != null : it?.answer != null && String(it.answer).trim() !== "";
+          if (!hasKey) return; // open/audio items are graded by the teacher
+          totalCount++;
+          const ok = isChoice
+            ? Number(ans) === Number(it.correct_index)
+            : norm(ans) !== "" && norm(ans) === norm(it.answer);
+          if (ok) correctCount++;
+          else {
+            mistakes.push({
+              q: `${bt?.code ? "№" + bt.code + " " : ""}${String(it?.prompt ?? "")}`,
+              given: ans == null || ans === "" ? "—" : String(isChoice ? (it.options?.[Number(ans)] ?? ans) : ans),
+              correct: String(isChoice ? (it.options?.[Number(it.correct_index)] ?? "") : it.answer),
+            });
+          }
+        });
+      });
+      autoScore = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : null;
+    }
+
     // AI feedback for writing
     let aiFeedback: string | null = null;
     const hasWritingModule =
@@ -206,7 +236,12 @@ serve(async (req) => {
       .insert({
         assignment_id: assignmentId,
         student_id: userId,
-        answers: assignment.type === "modular" ? { modules: moduleAnswers ?? [] } : answers,
+        answers:
+          assignment.type === "modular"
+            ? { modules: moduleAnswers ?? [] }
+            : assignment.type === "book"
+            ? { book: bookAnswers ?? [] }
+            : answers,
         text: textAnswer,
         files,
         audio_path: audioPath,
@@ -267,6 +302,23 @@ serve(async (req) => {
         });
         if (mistakes.length > 6) lines.push(`… та ще ${mistakes.length - 6}`);
       }
+    }
+
+    if (assignment.type === "book") {
+      const bTasks = ((assignment.payload as any)?.tasks ?? []) as any[];
+      lines.push(`📕 <b>${esc((assignment.payload as any)?.book?.title ?? "Підручник")}</b> · вправ: ${bTasks.length}`);
+      if (autoScore != null) lines.push(`📊 <b>Автоперевірка:</b> ${correctCount}/${totalCount} (${autoScore}%)`);
+      if (mistakes.length) {
+        lines.push("", "<b>Помилки:</b>");
+        mistakes.slice(0, 8).forEach((m) => {
+          lines.push(`• ${esc(m.q)}\n   ❌ ${esc(m.given)} → ✅ ${esc(m.correct)}`);
+        });
+        if (mistakes.length > 8) lines.push(`… та ще ${mistakes.length - 8}`);
+      } else if (autoScore != null) {
+        lines.push("🎉 Без помилок!");
+      }
+      const openItems = bTasks.filter((bt) => bt?.format === "open" || bt?.format === "audio").length;
+      if (openItems) lines.push(`✍️ Вправ на ручну перевірку: ${openItems}`);
     }
 
     if (assignment.type === "writing" || hasWritingModule) {
