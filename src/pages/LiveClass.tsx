@@ -185,19 +185,7 @@ export default function LiveClass() {
 export function Board({ strokes }: { strokes: any[] }) {
   return (
     <div className="rounded-2xl border border-border bg-card aspect-[4/3] w-full overflow-hidden">
-      <svg viewBox="0 0 1000 750" className="w-full h-full">
-        {(strokes || []).map((s: any, i: number) => (
-          <polyline
-            key={i}
-            fill="none"
-            stroke={s.color || "hsl(var(--primary))"}
-            strokeWidth={s.width || 3}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            points={(s.points || []).map((p: any) => `${p.x * 1000},${p.y * 750}`).join(" ")}
-          />
-        ))}
-      </svg>
+      <BoardView elements={strokes || []} className="w-full h-full" />
     </div>
   );
 }
