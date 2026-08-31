@@ -644,15 +644,18 @@ function BookDetail({ book, onBack }: { book: Book; onBack: () => void }) {
       {assigning && (
         <AssignBookHomeworkModal
           book={book}
-          tasks={selectedTasks}
+          tasks={planTasks ?? selectedTasks}
           pages={pages}
-          onClose={() => setAssigning(false)}
+          plan={planToIssue}
+          onClose={() => { setAssigning(false); setPlanToIssue(null); }}
           onDone={() => {
             setAssigning(false);
+            setPlanToIssue(null);
             setSelected([]);
           }}
         />
       )}
+
     </div>
   );
 }
