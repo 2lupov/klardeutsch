@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { BoardEl, BoardElement, BOARD_W, BOARD_H } from "./BoardRender";
@@ -34,18 +34,41 @@ export default function BoardEditor({ classId, initial }: { classId: string; ini
   const drafting = useRef<BoardEl | null>(null);
   const dragging = useRef<{ id: string; dx: number; dy: number } | null>(null);
   const saveTimer = useRef<any>(null);
+  const lastCast = useRef(0);
+
+  // Live broadcast channel — миттєва передача малювання учню
+  const chanRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  useEffect(() => {
+    const ch = supabase.channel(`live-board:${classId}`, { config: { broadcast: { self: false } } });
+    ch.subscribe();
+    chanRef.current = ch;
+    return () => { supabase.removeChannel(ch); chanRef.current = null; };
+  }, [classId]);
+
+  const broadcast = (next: BoardEl[]) => {
+    chanRef.current?.send({ type: "broadcast", event: "board", payload: { board: next } });
+  };
 
   const persist = (next: BoardEl[]) => {
     clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
-      supabase.from("live_classes").update({ board: next as any }).eq("id", classId);
-    }, 120);
+      void supabase.from("live_classes").update({ board: next as any }).eq("id", classId).then(({ error }) => {
+        if (error) console.error("board save failed", error);
+      });
+    }, 400);
   };
 
-  const commit = (next: BoardEl[]) => {
+  const commit = (next: BoardEl[], live = false) => {
     setEls(next);
+    if (live) {
+      const now = Date.now();
+      if (now - lastCast.current > 60) { lastCast.current = now; broadcast(next); }
+    } else {
+      broadcast(next);
+    }
     persist(next);
   };
+
 
   const pos = (e: React.PointerEvent) => {
     const r = svgRef.current!.getBoundingClientRect();
@@ -108,6 +131,8 @@ export default function BoardEditor({ classId, initial }: { classId: string; ini
       const { id, dx, dy } = dragging.current;
       setEls((prev) => {
         const next = prev.map((x) => (x.id === id ? { ...x, x: p.x - dx, y: p.y - dy } : x));
+        const now = Date.now();
+        if (now - lastCast.current > 60) { lastCast.current = now; broadcast(next); }
         persist(next);
         return next;
       });
@@ -120,6 +145,8 @@ export default function BoardEditor({ classId, initial }: { classId: string; ini
       d.points!.push(p);
       setEls((prev) => {
         const next = prev.map((x) => (x.id === d.id ? { ...d, points: [...d.points!] } : x));
+        const now = Date.now();
+        if (now - lastCast.current > 60) { lastCast.current = now; broadcast(next); }
         persist(next);
         return next;
       });
@@ -128,6 +155,8 @@ export default function BoardEditor({ classId, initial }: { classId: string; ini
       d.h = p.y - (d.y || 0);
       setEls((prev) => {
         const next = prev.map((x) => (x.id === d.id ? { ...d } : x));
+        const now = Date.now();
+        if (now - lastCast.current > 60) { lastCast.current = now; broadcast(next); }
         persist(next);
         return next;
       });
@@ -137,14 +166,15 @@ export default function BoardEditor({ classId, initial }: { classId: string; ini
   const onUp = () => {
     if (dragging.current) {
       dragging.current = null;
-      setEls((prev) => { persist(prev); return prev; });
+      setEls((prev) => { broadcast(prev); persist(prev); return prev; });
       return;
     }
     if (drafting.current) {
       drafting.current = null;
-      setEls((prev) => { persist(prev); return prev; });
+      setEls((prev) => { broadcast(prev); persist(prev); return prev; });
     }
   };
+
 
   const uploadImage = async (file: File) => {
     setUploading(true);
