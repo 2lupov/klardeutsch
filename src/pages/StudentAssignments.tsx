@@ -9,6 +9,8 @@ CheckCircle2, AlertCircle, ChevronRight, Loader2, Award, FileText,
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import pandaCelebrating from "@/assets/mascot/panda-celebrating.png";
+import pandaSleeping from "@/assets/mascot/panda-sleeping.png";
 
 type AssignmentItem =
   | {
@@ -256,18 +258,18 @@ setItems(merged);
   }, [items]);
 
   const meta = (item: AssignmentItem) => {
-    if (item.kind === "placement") {
+if (item.kind === "placement") {
       return {
         Icon: GraduationCap,
-        accent: "from-amber-500/15 to-yellow-500/5 text-amber-700 dark:text-amber-300",
-        chip: { label: t("Тест", "Тест"), bg: "bg-amber-500/15 text-amber-700 dark:text-amber-300" },
+        iconBg: "bg-amber-500/10 text-amber-700 dark:text-amber-300",
+        chip: { label: t("Тест", "Тест"), bg: "bg-amber-500/10 text-amber-700 dark:text-amber-300" },
       };
     }
     if (item.kind === "homework") {
       return {
         Icon: Sparkles,
-        accent: "from-pink-500/15 to-rose-500/5 text-pink-700 dark:text-pink-300",
-        chip: { label: t("ДЗ", "ДЗ"), bg: "bg-pink-500/15 text-pink-700 dark:text-pink-300" },
+        iconBg: "bg-pink-500/10 text-pink-700 dark:text-pink-300",
+        chip: { label: t("ДЗ", "ДЗ"), bg: "bg-pink-500/10 text-pink-700 dark:text-pink-300" },
       };
     }
     if (item.kind === "task") {
@@ -276,7 +278,7 @@ setItems(merged);
       };
       return {
         Icon: icons[item.taskType] ?? ClipboardList,
-        accent: "from-violet-500/15 to-purple-500/5 text-violet-700 dark:text-violet-300",
+        iconBg: "bg-violet-500/10 text-violet-700 dark:text-violet-300",
         chip: {
           label:
             item.taskType === "modular" ? t("Індивідуальне", "Индивидуальное")
@@ -284,14 +286,14 @@ setItems(merged);
             : item.taskType === "writing" ? t("Письмо", "Письмо")
             : item.taskType === "audio" ? t("Аудіо", "Аудио")
             : t("ДЗ", "ДЗ"),
-          bg: "bg-violet-500/15 text-violet-700 dark:text-violet-300",
+          bg: "bg-violet-500/10 text-violet-700 dark:text-violet-300",
         },
       };
     }
     return {
       Icon: ListChecks,
-      accent: "from-blue-500/15 to-indigo-500/5 text-blue-700 dark:text-blue-300",
-      chip: { label: t("Вправи", "Упражнения"), bg: "bg-blue-500/15 text-blue-700 dark:text-blue-300" },
+      iconBg: "bg-blue-500/10 text-blue-700 dark:text-blue-300",
+      chip: { label: t("Вправи", "Упражнения"), bg: "bg-blue-500/10 text-blue-700 dark:text-blue-300" },
     };
   };
 
@@ -363,9 +365,13 @@ return (
             <div className="flex justify-center py-20">
               <Loader2 className="w-7 h-7 animate-spin text-primary" />
             </div>
-          ) : filtered.length === 0 ? (
+) : filtered.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center">
-              <BookOpen className="w-12 h-12 mx-auto text-muted-foreground/40 mb-3" />
+              <img
+                src={counts.active === 0 ? pandaCelebrating : pandaSleeping}
+                alt=""
+                className="w-28 h-28 mx-auto mb-3 object-contain"
+              />
               <p className="font-display font-bold text-lg mb-1">
                 {filter === "active"
                   ? t("Усе виконано! 🎉", "Всё выполнено! 🎉")
@@ -383,20 +389,20 @@ return (
                 const Icon = m.Icon;
                 const StatusIcon = s.Icon;
                 return (
-                  <motion.button
+<motion.button
                     key={`${item.kind}-${item.id}`}
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: Math.min(idx * 0.03, 0.3) }}
                     onClick={() => navigate(item.route)}
-                    className="w-full text-left rounded-2xl border border-border bg-card hover:border-primary/40 hover:shadow-md transition overflow-hidden group"
+                    className="w-full text-left rounded-2xl border border-border bg-card hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-sm transition group p-4"
                   >
-                    <div className={`bg-gradient-to-r ${m.accent} px-5 py-3 flex items-center gap-3`}>
-                      <div className="w-9 h-9 rounded-xl bg-background/70 backdrop-blur flex items-center justify-center">
+                    <div className="flex items-start gap-3">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${m.iconBg}`}>
                         <Icon className="w-5 h-5" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-0.5">
+                        <div className="flex items-center gap-2 flex-wrap mb-1.5">
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${m.chip.bg}`}>
                             {m.chip.label}
                           </span>
@@ -415,37 +421,35 @@ return (
                             </span>
                           )}
                         </div>
-                      </div>
-                      <ChevronRight className="w-5 h-5 text-foreground/50 group-hover:translate-x-1 transition" />
-                    </div>
-                    <div className="px-5 py-4">
-                      <h3 className="font-display font-bold text-foreground leading-tight mb-1">
-                        {item.title}
-                      </h3>
-                      <p className="text-sm text-muted-foreground line-clamp-2">
-                        {item.subtitle}
-                      </p>
-                      <div className="flex items-center justify-between gap-3 mt-3 text-xs text-muted-foreground">
-                        <div className="flex items-center gap-3 flex-wrap">
-                          {item.kind === "homework" && item.lessonTitle && (
-                            <span className="inline-flex items-center gap-1">
-                              <BookOpen className="w-3 h-3" /> {item.lessonTitle}
-                            </span>
-                          )}
-                          {item.kind === "homework" && item.due_at && (
-                            <span className="inline-flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
-                              {t("До", "До")}: {new Date(item.due_at).toLocaleDateString(lang === "uk" ? "uk-UA" : "ru-RU")}
-                            </span>
-                          )}
-                          {item.kind === "placement" && item.teacherName && (
-                            <span className="inline-flex items-center gap-1">
-                              <GraduationCap className="w-3 h-3" /> {item.teacherName}
-                            </span>
-                          )}
+                        <h3 className="font-display font-bold text-foreground leading-tight mb-0.5">
+                          {item.title}
+                        </h3>
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {item.subtitle}
+                        </p>
+                        <div className="flex items-center justify-between gap-3 mt-3 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-3 flex-wrap">
+                            {item.kind === "homework" && item.lessonTitle && (
+                              <span className="inline-flex items-center gap-1">
+                                <BookOpen className="w-3 h-3" /> {item.lessonTitle}
+                              </span>
+                            )}
+                            {item.kind === "homework" && item.due_at && (
+                              <span className="inline-flex items-center gap-1">
+                                <Clock className="w-3 h-3" />
+                                {t("До", "До")}: {new Date(item.due_at).toLocaleDateString(lang === "uk" ? "uk-UA" : "ru-RU")}
+                              </span>
+                            )}
+                            {item.kind === "placement" && item.teacherName && (
+                              <span className="inline-flex items-center gap-1">
+                                <GraduationCap className="w-3 h-3" /> {item.teacherName}
+                              </span>
+                            )}
+                          </div>
+                          <span className="font-bold text-primary shrink-0">{item.action} →</span>
                         </div>
-                        <span className="font-bold text-primary">{item.action} →</span>
                       </div>
+                      <ChevronRight className="w-5 h-5 text-foreground/40 group-hover:translate-x-1 transition shrink-0 mt-1.5" />
                     </div>
                   </motion.button>
                 );
