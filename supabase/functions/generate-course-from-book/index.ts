@@ -44,8 +44,8 @@ Deno.serve(async (req) => {
     if (!roleData) return json({ error: "Admin only" }, 403);
 
     const body = await req.json().catch(() => ({}));
-    const images: string[] = Array.isArray(body.images) ? body.images.slice(0, 12) : [];
-    const paths: string[] = Array.isArray(body.paths) ? body.paths.slice(0, 12) : [];
+    const images: string[] = Array.isArray(body.images) ? body.images.slice(0, 50) : [];
+    const paths: string[] = Array.isArray(body.paths) ? body.paths.slice(0, 50) : [];
     const level = String(body.level || "A1");
     const targetLanguage = String(body.targetLanguage || "de");
     const lessonCount = Math.min(Math.max(Number(body.lessonCount) || 3, 1), 8);
