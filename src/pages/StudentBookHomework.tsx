@@ -106,6 +106,19 @@ export default function StudentBookHomework() {
       );
       setPageUrls(urls);
 
+      const tracks = ((data as any).payload?.audio ?? []) as AudioPayload[];
+      if (tracks.length) {
+        const aUrls: Record<string, string> = {};
+        await Promise.all(
+          tracks.map(async (t) => {
+            const u = await signedAudioUrl(t.file_path);
+            if (u) aUrls[t.file_path] = u;
+          }),
+        );
+        setAudioUrls(aUrls);
+      }
+
+
       const saved = localStorage.getItem(storageKey);
       if (saved) {
         try { setAnswers(JSON.parse(saved)); } catch { /* ignore */ }
