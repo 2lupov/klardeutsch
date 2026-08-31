@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, SectionHeader, EmptyState } from "./_ui";
 import {
-  Book, BookKind, BookLektion, BookPage, BookTask, BookAudio, BOOK_KIND_LABEL,
+  Book, BookKind, BookLektion, BookPage, BookTask, BookAudio, BookLessonPlan, BOOK_KIND_LABEL,
   bookToBank, createBook, deleteAudio, deleteBook, deletePage, deleteTask, detectLektionen,
   insertAudio, linkPagesToLektion, listAudio, listBooks, listLektionen, listPages, listTasks,
   recognisePage, signedAudioUrl, signedPageUrls, updateAudio, uploadAudioFile, upsertLektion,
@@ -16,6 +16,7 @@ import {
 import PdfUploader from "@/components/books/PdfUploader";
 import BookArchiveImporter from "@/components/books/BookArchiveImporter";
 import BookTheoryBlock from "@/components/books/BookTheoryBlock";
+import BookLessonPlanPanel from "@/components/books/BookLessonPlanPanel";
 
 
 interface StudentRow {
@@ -257,6 +258,15 @@ function BookDetail({ book, onBack }: { book: Book; onBack: () => void }) {
   const [selected, setSelected] = useState<string[]>([]);
   const [assigning, setAssigning] = useState(false);
   const [bulk, setBulk] = useState<{ total: number; done: number; failed: number } | null>(null);
+  const [planToIssue, setPlanToIssue] = useState<BookLessonPlan | null>(null);
+  const planTasks = useMemo(() => {
+    if (!planToIssue) return null;
+    const ids = new Set<string>([
+      ...planToIssue.stages.flatMap((s) => s.task_ids),
+      ...planToIssue.homework.task_ids,
+    ]);
+    return tasks.filter((t) => ids.has(t.id));
+  }, [planToIssue, tasks]);
   const bulkStop = useRef(false);
 
   const load = async () => {
@@ -447,6 +457,16 @@ function BookDetail({ book, onBack }: { book: Book; onBack: () => void }) {
       <BookAudioPanel bookId={book.id} lektionen={lektionen} />
 
       <BookAiLibrarian book={book} lektionen={lektionen} pages={pages} urls={urls} taskCount={tasks.length} />
+
+      <BookLessonPlanPanel
+        book={book}
+        lektionen={lektionen}
+        onIssue={(plan) => {
+          setPlanToIssue(plan);
+          setAssigning(true);
+        }}
+      />
+
 
 
 
@@ -644,15 +664,18 @@ function BookDetail({ book, onBack }: { book: Book; onBack: () => void }) {
       {assigning && (
         <AssignBookHomeworkModal
           book={book}
-          tasks={selectedTasks}
+          tasks={planTasks ?? selectedTasks}
           pages={pages}
-          onClose={() => setAssigning(false)}
+          plan={planToIssue}
+          onClose={() => { setAssigning(false); setPlanToIssue(null); }}
           onDone={() => {
             setAssigning(false);
+            setPlanToIssue(null);
             setSelected([]);
           }}
         />
       )}
+
     </div>
   );
 }
@@ -1065,18 +1088,20 @@ function LektionenEditor({
 /* ───────── assign homework ───────── */
 
 function AssignBookHomeworkModal({
-  book, tasks, pages, onClose, onDone,
+  book, tasks, pages, plan, onClose, onDone,
 }: {
   book: Book;
   tasks: BookTask[];
   pages: BookPage[];
+  plan?: BookLessonPlan | null;
   onClose: () => void;
   onDone: () => void;
 }) {
   const [students, setStudents] = useState<StudentRow[]>([]);
   const [ids, setIds] = useState<string[]>([]);
   const [title, setTitle] = useState(
-    `${book.title} — с. ${[...new Set(tasks.map((t) => pages.find((p) => p.id === t.page_id)?.page_number).filter(Boolean))].join(", ")}`,
+    plan?.title ??
+      `${book.title} — с. ${[...new Set(tasks.map((t) => pages.find((p) => p.id === t.page_id)?.page_number).filter(Boolean))].join(", ")}`,
   );
   const [instructions, setInstructions] = useState("");
   const [dueAt, setDueAt] = useState("");
@@ -1097,13 +1122,21 @@ function AssignBookHomeworkModal({
       try {
         const tracks = await listAudio(book.id);
         setAudio(tracks);
-        // auto-select audio that belongs to the Lektionen of the selected pages
-        const lektionIds = new Set(
-          tasks
-            .map((t) => pages.find((p) => p.id === t.page_id)?.lektion_id)
-            .filter(Boolean) as string[],
-        );
-        setAudioIds(tracks.filter((t) => t.lektion_id && lektionIds.has(t.lektion_id)).map((t) => t.id));
+        if (plan) {
+          const planAudio = new Set([
+            ...plan.stages.flatMap((s) => s.audio_ids),
+            ...plan.homework.audio_ids,
+          ]);
+          setAudioIds(tracks.filter((t) => planAudio.has(t.id)).map((t) => t.id));
+        } else {
+          // auto-select audio that belongs to the Lektionen of the selected pages
+          const lektionIds = new Set(
+            tasks
+              .map((t) => pages.find((p) => p.id === t.page_id)?.lektion_id)
+              .filter(Boolean) as string[],
+          );
+          setAudioIds(tracks.filter((t) => t.lektion_id && lektionIds.has(t.lektion_id)).map((t) => t.id));
+        }
       } catch { /* ignore */ }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1115,7 +1148,8 @@ function AssignBookHomeworkModal({
     try {
       const { data: auth } = await supabase.auth.getUser();
       const payload = {
-        category: "book",
+        category: plan ? "book_plan" : "book",
+        plan: plan ?? undefined,
         book: { id: book.id, title: book.title, kind: book.kind, level: book.level },
         audio: audio
           .filter((a) => audioIds.includes(a.id))
@@ -1173,9 +1207,13 @@ function AssignBookHomeworkModal({
   };
 
   return (
-    <Modal title="Домашка з підручника" onClose={onClose}>
+    <Modal title={plan ? "Видати план уроку" : "Домашка з підручника"} onClose={onClose}>
       <div className="space-y-4">
-        <p className="text-xs text-slate-500">Вибрано блоків: <b className="text-slate-900">{tasks.length}</b> (вправи + теорія)</p>
+        <p className="text-xs text-slate-500">
+          {plan
+            ? <>Етапів: <b className="text-slate-900">{plan.stages.length}</b> · блоків: <b className="text-slate-900">{tasks.length}</b> · домашка: <b className="text-slate-900">{plan.homework.task_ids.length}</b></>
+            : <>Вибрано блоків: <b className="text-slate-900">{tasks.length}</b> (вправи + теорія)</>}
+        </p>
         <Field label="Назва">
           <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm" />
         </Field>

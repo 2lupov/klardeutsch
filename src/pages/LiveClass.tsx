@@ -12,6 +12,7 @@ import {
 } from "@/lib/live-class";
 import { toast } from "sonner";
 import { BoardView } from "@/components/live/BoardRender";
+import { signedPageUrl } from "@/lib/books";
 
 export default function LiveClass() {
   const { id } = useParams<{ id: string }>();
@@ -25,6 +26,18 @@ export default function LiveClass() {
   const [answers, setAnswers] = useState<Record<string, { answer: string; is_correct: boolean | null }>>({});
   const [ready, setReady] = useState(false);
   const [boardFull, setBoardFull] = useState(false);
+  const [bookPageUrl, setBookPageUrl] = useState<string | null>(null);
+
+  const bookPagePath = cls?.book_page?.image_path ?? null;
+  useEffect(() => {
+    let cancelled = false;
+    if (!bookPagePath) { setBookPageUrl(null); return; }
+    (async () => {
+      const url = await signedPageUrl(bookPagePath);
+      if (!cancelled) setBookPageUrl(url);
+    })();
+    return () => { cancelled = true; };
+  }, [bookPagePath]);
 
   useEffect(() => {
     if (!loading && !user) navigate("/auth", { replace: true });
@@ -191,10 +204,25 @@ export default function LiveClass() {
         </header>
 
         {section === "board" ? (
-          <div className="flex-1 min-h-0 p-3">
-            <div className="w-full h-full rounded-2xl border border-border bg-card overflow-hidden">
+          <div className={`flex-1 min-h-0 p-3 flex flex-col gap-3 ${cls.book_page ? "overflow-y-auto" : ""}`}>
+            <div className={`w-full rounded-2xl border border-border bg-card overflow-hidden ${cls.book_page ? "h-[55vh] shrink-0" : "h-full"}`}>
               <BoardView elements={cls.board || []} className="w-full h-full" />
             </div>
+            {cls.book_page && (
+              <div className="rounded-2xl border border-border bg-card overflow-hidden">
+                <div className="px-3 py-2 text-xs text-muted-foreground border-b border-border">
+                  {cls.book_page.book_title}
+                  {cls.book_page.page_number ? ` · с. ${cls.book_page.page_number}` : ""}
+                </div>
+                {bookPageUrl ? (
+                  <img src={bookPageUrl} alt="Сторінка підручника" className="w-full" />
+                ) : (
+                  <div className="h-40 flex items-center justify-center text-xs text-muted-foreground">
+                    Завантаження сторінки…
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         ) : (
           <div className="p-5 max-w-3xl">

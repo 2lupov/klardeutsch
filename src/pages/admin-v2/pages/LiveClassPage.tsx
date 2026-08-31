@@ -16,6 +16,7 @@ import {
 import { Play, Square, Trash2 } from "lucide-react";
 import BoardEditor from "@/components/live/BoardEditor";
 import MaterialPicker from "@/components/live/MaterialPicker";
+import LiveBookPagePicker from "@/components/books/LiveBookPagePicker";
 
 interface StudentRow { user_id: string; display_name: string | null; email: string | null }
 
@@ -240,6 +241,9 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
           </>
         </Card>
       )}
+
+      <LiveBookPagePicker classId={cls.id} current={(cls as any).book_page ?? null} />
+
 
       {pickerOpen && section !== "board" && (
         <MaterialPicker

@@ -19,6 +19,7 @@ export interface LiveClass {
   status: "active" | "ended";
   current_section: LiveSection;
   board: any[];
+  book_page?: LiveBookPage | null;
   started_at: string;
   ended_at: string | null;
 }
@@ -95,4 +96,20 @@ export async function markSectionSeen(classId: string, studentId: string, sectio
       { class_id: classId, student_id: studentId, section, last_seen_at: new Date().toISOString() },
       { onConflict: "class_id,student_id,section" },
     );
+}
+
+/* ───────── textbook page shown under the whiteboard ───────── */
+
+export interface LiveBookPage {
+  book_title: string;
+  page_number: number | null;
+  image_path: string;
+}
+
+export async function setLiveBookPage(classId: string, page: LiveBookPage | null) {
+  const { error } = await supabase
+    .from("live_classes")
+    .update({ book_page: page } as any)
+    .eq("id", classId);
+  if (error) throw error;
 }
