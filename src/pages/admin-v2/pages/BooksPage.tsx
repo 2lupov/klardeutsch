@@ -665,7 +665,7 @@ function BookAiLibrarian({
             ))}
           </div>
           <button
-            onClick={() => window.dispatchEvent(new CustomEvent("admin-v2:navigate", { detail: { tab: "materials" } }))}
+            onClick={() => window.dispatchEvent(new CustomEvent("admin-v2:navigate", { detail: { key: "materials" } }))}
             className="text-xs text-indigo-600 font-medium"
           >
             Відкрити банк матеріалів →
