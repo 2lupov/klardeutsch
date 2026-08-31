@@ -114,6 +114,17 @@ const StudentTask = () => {
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
 
+  // ── autosave (draft progress in localStorage) ──
+  const draftKey = user && id ? `klar:task-draft:${user.id}:${id}` : null;
+  const restoredRef = useRef(false);
+  const [savedAt, setSavedAt] = useState<number | null>(null);
+
+  const clearDraft = () => {
+    if (draftKey) try { localStorage.removeItem(draftKey); } catch { /* ignore */ }
+    setSavedAt(null);
+  };
+
+
   useEffect(() => {
     if (!id || !user) return;
     let active = true;
@@ -181,11 +192,50 @@ if (!active) return;
           .limit(1)
           .maybeSingle();
         if (active && sub) setSubmission(sub as any);
+
+        // restore saved draft (only for the student, and only if not submitted yet)
+        if (active && !sub && draftKey) {
+          try {
+            const raw = localStorage.getItem(draftKey);
+            if (raw) {
+              const d = JSON.parse(raw);
+              if (Array.isArray(d.answers) && d.answers.length === qs.length) setAnswers(d.answers);
+              if (Array.isArray(d.moduleAnswers) && mods.length) setModuleAnswers(d.moduleAnswers);
+              if (typeof d.text === "string") setText(d.text);
+              if (Array.isArray(d.files)) setFiles(d.files);
+              if (typeof d.moduleStep === "number") setModuleStep(d.moduleStep);
+              if (typeof d.step === "number") setStep(d.step);
+              if (d.savedAt) setSavedAt(d.savedAt);
+              if (d.text || (d.files ?? []).length || d.moduleStep > 0 || d.step > 0) {
+                toast.info(t("Прогрес відновлено", "Прогресс восстановлен"));
+              }
+            }
+          } catch { /* ignore corrupt draft */ }
+        }
       }
+      restoredRef.current = true;
       setLoading(false);
     })();
     return () => { active = false; };
   }, [id, user]);
+
+  // autosave draft on every change
+  useEffect(() => {
+    if (!draftKey || preview || loading || !restoredRef.current) return;
+    if (submission || result) return;
+    const timer = setTimeout(() => {
+      try {
+        const ts = Date.now();
+        localStorage.setItem(
+          draftKey,
+          JSON.stringify({ answers, moduleAnswers, text, files, moduleStep, step, savedAt: ts }),
+        );
+        setSavedAt(ts);
+      } catch { /* storage full / unavailable */ }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [draftKey, preview, loading, submission, result, answers, moduleAnswers, text, files, moduleStep, step]);
+
 
   useEffect(() => {
     return () => { if (audioUrl) URL.revokeObjectURL(audioUrl); };
@@ -370,6 +420,7 @@ const uploadFiles = async (list: FileList | null) => {
       status: "submitted",
     });
     setTask({ ...task, status: "submitted" });
+    clearDraft();
     toast.success(t("Відправлено вчителю!", "Отправлено учителю!"));
   };
 
@@ -405,6 +456,14 @@ const uploadFiles = async (list: FileList | null) => {
           </span>
           {preview ? t("Закрити перегляд", "Закрыть просмотр") : t("До завдань", "К заданиям")}
         </button>
+
+        {!preview && !submission && !result && savedAt && (
+          <div className="text-xs text-muted-foreground flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            {t("Прогрес збережено автоматично", "Прогресс сохранён автоматически")} ·{" "}
+            {new Date(savedAt).toLocaleTimeString(lang === "uk" ? "uk-UA" : "ru-RU", { hour: "2-digit", minute: "2-digit" })}
+          </div>
+        )}
 
         {preview && (
           <div className="rounded-2xl border border-amber-400/40 bg-amber-400/10 px-4 py-3 text-sm font-semibold text-amber-700 dark:text-amber-300 flex items-center gap-2">
