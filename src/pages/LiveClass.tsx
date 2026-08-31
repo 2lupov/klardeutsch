@@ -162,26 +162,59 @@ export default function LiveClass() {
         </div>
       </aside>
 
-      <main className="flex-1 h-full overflow-y-auto">
-        <header className="sticky top-0 z-10 bg-background/90 backdrop-blur border-b border-border px-5 py-4">
-          <p className="text-[11px] uppercase tracking-widest text-primary font-bold">Живий урок</p>
-          <h1 className="font-display text-xl font-bold text-foreground">{cls.title}</h1>
+      <main className={`flex-1 h-full ${section === "board" ? "overflow-hidden flex flex-col" : "overflow-y-auto"}`}>
+        <header className="sticky top-0 z-10 bg-background/90 backdrop-blur border-b border-border px-5 py-4 flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[11px] uppercase tracking-widest text-primary font-bold">Живий урок</p>
+            <h1 className="font-display text-xl font-bold text-foreground truncate">{cls.title}</h1>
+          </div>
+          {section === "board" && (
+            <button
+              onClick={() => setBoardFull(true)}
+              className="shrink-0 px-3 py-2 rounded-xl border border-border text-xs font-medium text-foreground hover:bg-muted/60"
+            >
+              На весь екран
+            </button>
+          )}
         </header>
 
-        <div className="p-5 max-w-3xl">
-          {section === "board" ? (
-            <Board strokes={cls.board || []} />
-          ) : sectionItems.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Викладач ще нічого не додав у цей розділ.</p>
-          ) : (
-            <div className="space-y-4">
-              {sectionItems.map((it) => (
-                <ItemCard key={it.id} item={it} answer={answers[it.id]} onAnswer={submitAnswer} />
-              ))}
+        {section === "board" ? (
+          <div className="flex-1 min-h-0 p-3">
+            <div className="w-full h-full rounded-2xl border border-border bg-card overflow-hidden">
+              <BoardView elements={cls.board || []} className="w-full h-full" />
             </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="p-5 max-w-3xl">
+            {sectionItems.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Викладач ще нічого не додав у цей розділ.</p>
+            ) : (
+              <div className="space-y-4">
+                {sectionItems.map((it) => (
+                  <ItemCard key={it.id} item={it} answer={answers[it.id]} onAnswer={submitAnswer} />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </main>
+
+      {boardFull && (
+        <div className="fixed inset-0 z-50 bg-background flex flex-col">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+            <span className="font-display font-bold text-foreground text-sm">Дошка — {cls.title}</span>
+            <button
+              onClick={() => setBoardFull(false)}
+              className="px-3 py-1.5 rounded-xl border border-border text-xs font-medium hover:bg-muted/60"
+            >
+              Закрити
+            </button>
+          </div>
+          <div className="flex-1 min-h-0 p-2">
+            <BoardView elements={cls.board || []} className="w-full h-full" />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
