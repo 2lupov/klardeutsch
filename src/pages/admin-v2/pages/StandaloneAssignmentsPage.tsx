@@ -118,7 +118,11 @@ export default function StandaloneAssignmentsPage() {
   const [q, setQ] = useState("");
   const [showNew, setShowNew] = useState(false);
   const [editing, setEditing] = useState<Assignment | null>(null);
+  const [duplicating, setDuplicating] = useState<Assignment | null>(null);
+  const [assignMore, setAssignMore] = useState<Assignment | null>(null);
+  const [cat, setCat] = useState<CategoryKey | "all">("all");
   const [review, setReview] = useState<Assignment | null>(null);
+
 
 
   const load = async () => {
