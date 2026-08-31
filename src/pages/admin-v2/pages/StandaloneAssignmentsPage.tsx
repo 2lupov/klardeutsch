@@ -332,19 +332,23 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 /* ─────────── builder ─────────── */
 
 function BuilderModal({
-  students, onClose, onCreated, editing,
+  students, onClose, onCreated, editing, duplicating,
 }: {
   students: StudentRow[];
   onClose: () => void;
   onCreated: () => void;
   editing?: Assignment | null;
+  duplicating?: Assignment | null;
 }) {
   const isEdit = !!editing;
+  const src = editing ?? duplicating ?? null;
   const [studentIds, setStudentIds] = useState<string[]>(editing ? [editing.student_id] : []);
-  const [title, setTitle] = useState(editing?.title ?? "");
-  const [instructions, setInstructions] = useState(editing?.instructions ?? "");
-  const [level, setLevel] = useState(editing?.level ?? "A1");
-  const [dueAt, setDueAt] = useState(editing?.due_at ? editing.due_at.slice(0, 10) : "");
+  const [title, setTitle] = useState(src ? (duplicating ? `${src.title} (копія)` : src.title) : "");
+  const [instructions, setInstructions] = useState(src?.instructions ?? "");
+  const [level, setLevel] = useState(src?.level ?? "A1");
+  const [category, setCategory] = useState<CategoryKey>(catOf(src));
+  const [dueAt, setDueAt] = useState(src?.due_at ? src.due_at.slice(0, 10) : "");
+
   const [prompt, setPrompt] = useState("");
   const [picked, setPicked] = useState<Record<string, { on: boolean; count: number; topic: string }>>({
     reading: { on: true, count: 4, topic: "" },
