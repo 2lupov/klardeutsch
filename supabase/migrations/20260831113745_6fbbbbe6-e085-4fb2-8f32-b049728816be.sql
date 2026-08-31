@@ -1,0 +1,2 @@
+ALTER TABLE public.student_assignments DROP CONSTRAINT student_assignments_type_check;
+ALTER TABLE public.student_assignments ADD CONSTRAINT student_assignments_type_check CHECK (type = ANY (ARRAY['test'::text,'homework'::text,'writing'::text,'audio'::text,'modular'::text,'book'::text,'book_plan'::text]));
