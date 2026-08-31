@@ -528,7 +528,156 @@ function BookDetail({ book, onBack }: { book: Book; onBack: () => void }) {
   );
 }
 
+/* ───────── AI librarian: book → materials bank / course ───────── */
+
+function BookAiLibrarian({
+  book, lektionen, pages, urls, taskCount,
+}: {
+  book: Book;
+  lektionen: BookLektion[];
+  pages: BookPage[];
+  urls: Record<string, string>;
+  taskCount: number;
+}) {
+  const [lektionId, setLektionId] = useState<string>("");
+  const [variants, setVariants] = useState(4);
+  const [busy, setBusy] = useState<"bank" | "course" | null>(null);
+  const [result, setResult] = useState<Awaited<ReturnType<typeof bookToBank>> | null>(null);
+
+  const scopePages = useMemo(
+    () => (lektionId ? pages.filter((p) => p.lektion_id === lektionId) : pages),
+    [pages, lektionId],
+  );
+
+  const runBank = async () => {
+    setBusy("bank");
+    setResult(null);
+    try {
+      const res = await bookToBank({ bookId: book.id, lektionId: lektionId || null, variants });
+      setResult(res);
+      toast.success(`Банк оновлено: папок ${res.folders.length}, матеріалів ${res.imported}, згенеровано ${res.generated}`);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Не вдалося опрацювати книгу");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const runCourse = async () => {
+    const imgs = scopePages.map((p) => urls[p.image_path]).filter(Boolean).slice(0, 12);
+    if (!imgs.length) {
+      toast.error("Немає сторінок для курсу");
+      return;
+    }
+    setBusy("course");
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-course-from-book", {
+        body: {
+          images: imgs,
+          paths: [],
+          level: book.level || "A1",
+          lessonCount: Math.min(6, Math.max(1, Math.ceil(imgs.length / 2))),
+          hint: `Матеріал із підручника «${book.title}»${lektionId ? ` (${lektionen.find((l) => l.id === lektionId)?.title || "Lektion"})` : ""}. Збережи структуру й лексику книги.`,
+        },
+      });
+      if (error) throw new Error((data as any)?.error || error.message);
+      if ((data as any)?.error) throw new Error((data as any).error);
+      toast.success(`Курс створено: ${(data as any).courseTitle || "новий курс"} · уроків ${(data as any).lessonsCreated}`);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Не вдалося створити курс");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  return (
+    <Card className="p-4 space-y-3">
+      <div className="flex items-start justify-between gap-3 flex-wrap">
+        <div>
+          <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-indigo-500" /> ІІ-бібліотекар
+          </h3>
+          <p className="text-xs text-slate-500 mt-0.5">
+            ІІ вивчає, що є в книзі (теорія + вправи), сам створює потрібні папки в банку матеріалів,
+            переносить туди зміст книги та генерує схожі завдання. Звідси ж можна зібрати курс.
+          </p>
+        </div>
+        <span className="text-xs text-slate-400">розпізнано: {taskCount}</span>
+      </div>
+
+      <div className="flex flex-wrap items-end gap-3">
+        <Field label="Обсяг">
+          <select
+            value={lektionId}
+            onChange={(e) => setLektionId(e.target.value)}
+            className="px-3 py-2 rounded-xl border border-slate-200 text-sm"
+          >
+            <option value="">Уся книга</option>
+            {lektionen.map((l) => (
+              <option key={l.id} value={l.id}>
+                Lektion {l.number}{l.title ? ` · ${l.title}` : ""}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field label="Схожих завдань на папку">
+          <input
+            type="number"
+            min={0}
+            max={10}
+            value={variants}
+            onChange={(e) => setVariants(Math.max(0, Math.min(10, Number(e.target.value) || 0)))}
+            className="w-24 px-3 py-2 rounded-xl border border-slate-200 text-sm"
+          />
+        </Field>
+        <button
+          onClick={runBank}
+          disabled={busy !== null || taskCount === 0}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium disabled:opacity-50"
+        >
+          {busy === "bank" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+          Розкласти в банк матеріалів
+        </button>
+        <button
+          onClick={runCourse}
+          disabled={busy !== null || scopePages.length === 0}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 text-slate-700 text-sm font-medium disabled:opacity-50"
+        >
+          {busy === "course" ? <Loader2 className="w-4 h-4 animate-spin" /> : <BookMarked className="w-4 h-4" />}
+          Створити курс із книги
+        </button>
+      </div>
+
+      {taskCount === 0 && (
+        <p className="text-xs text-amber-600">
+          Спершу розпізнайте сторінки — ІІ-бібліотекар працює з розпізнаною теорією та вправами.
+        </p>
+      )}
+
+      {result && (
+        <div className="rounded-xl bg-slate-50 border border-slate-200 p-3 space-y-2">
+          {result.summary && <p className="text-xs text-slate-600 whitespace-pre-line">{result.summary}</p>}
+          <div className="flex flex-wrap gap-2">
+            {result.folders.map((f) => (
+              <span key={f.folder_id} className="text-xs px-2.5 py-1 rounded-lg bg-white border border-slate-200">
+                📁 {f.name} · {f.imported} з книги{f.generated ? ` · +${f.generated} ІІ` : ""}
+              </span>
+            ))}
+          </div>
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent("admin-v2:navigate", { detail: { tab: "materials" } }))}
+            className="text-xs text-indigo-600 font-medium"
+          >
+            Відкрити банк матеріалів →
+          </button>
+        </div>
+      )}
+    </Card>
+  );
+}
+
 /* ───────── audio (Hören) ───────── */
+
 
 function BookAudioPanel({ bookId, lektionen }: { bookId: string; lektionen: BookLektion[] }) {
   const [tracks, setTracks] = useState<BookAudio[]>([]);
