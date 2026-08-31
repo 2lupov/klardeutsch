@@ -482,7 +482,7 @@ function BuilderModal({
   };
 
   return (
-    <Modal title={isEdit ? "Редагування завдання" : "Нове індивідуальне завдання"} onClose={onClose}>
+    <Modal title={isEdit ? "Редагування завдання" : duplicating ? "Копія завдання — оберіть учнів" : "Нове індивідуальне завдання"} onClose={onClose}>
       <div className="space-y-5">
         {/* students */}
         {!isEdit && (
