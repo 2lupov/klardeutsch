@@ -35,6 +35,7 @@ export default function BooksPage() {
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [archive, setArchive] = useState(false);
   const [openBook, setOpenBook] = useState<Book | null>(null);
 
   const load = async () => {
@@ -59,16 +60,36 @@ export default function BooksPage() {
     <div className="space-y-4">
       <SectionHeader
         title="Підручники"
-        subtitle="Kursbuch / Arbeitsbuch — джерело домашніх завдань"
+        subtitle="Kursbuch / Arbeitsbuch + аудіо (Hören) — джерело домашніх завдань"
         action={
-          <button
-            onClick={() => setCreating(true)}
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium"
-          >
-            <Plus className="w-4 h-4" /> Новий підручник
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setArchive((v) => !v)}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            >
+              <Archive className="w-4 h-4" /> Імпорт ZIP (книги + аудіо)
+            </button>
+            <button
+              onClick={() => setCreating(true)}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium"
+            >
+              <Plus className="w-4 h-4" /> Новий підручник
+            </button>
+          </div>
         }
       />
+
+      {archive && (
+        <Card className="p-4">
+          <h3 className="text-sm font-semibold text-slate-900">Імпорт архіву</h3>
+          <p className="text-xs text-slate-500 mt-1 mb-3">
+            Один ZIP може містити кілька книг (Kursbuch, Arbeitsbuch…) і всі аудіофайли до них.
+            Кожен PDF стане окремим підручником, аудіо привʼяжеться до вибраної книги.
+          </p>
+          <BookArchiveImporter onDone={load} />
+        </Card>
+      )}
+
 
       {loading ? (
         <Card className="p-10 flex justify-center">
