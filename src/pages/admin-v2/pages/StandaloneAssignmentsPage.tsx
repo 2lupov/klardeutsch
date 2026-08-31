@@ -357,7 +357,7 @@ function BuilderModal({
     writing: { on: false, count: 1, topic: "" },
     speaking: { on: false, count: 3, topic: "" },
   });
-  const [modules, setModules] = useState<TaskModule[]>(editing?.payload?.modules ?? []);
+  const [modules, setModules] = useState<TaskModule[]>(src?.payload?.modules ?? []);
   const [generating, setGenerating] = useState(false);
   const [ttsFor, setTtsFor] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
