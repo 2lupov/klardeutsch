@@ -13,7 +13,8 @@ import {
   addLiveItem,
   fetchLiveItems,
 } from "@/lib/live-class";
-import { Play, Square, Trash2, Eraser } from "lucide-react";
+import { Play, Square, Trash2 } from "lucide-react";
+import BoardEditor from "@/components/live/BoardEditor";
 
 interface StudentRow { user_id: string; display_name: string | null; email: string | null }
 
