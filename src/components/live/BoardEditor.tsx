@@ -21,7 +21,20 @@ type Tool = "select" | "pen" | "text" | "rect" | "ellipse" | "arrow" | "line" | 
 const COLORS = ["#0F172A", "#4F46E5", "#DC2626", "#059669", "#F59E0B", "#DB2777"];
 const uid = () => Math.random().toString(36).slice(2, 10);
 
-export default function BoardEditor({ classId, initial }: { classId: string; initial: BoardEl[] }) {
+export interface BoardApi {
+  /** Places an image on the board, fitted to the board and sent behind drawings. */
+  insertImage: (url: string) => void;
+}
+
+export default function BoardEditor({
+  classId,
+  initial,
+  apiRef,
+}: {
+  classId: string;
+  initial: BoardEl[];
+  apiRef?: React.MutableRefObject<BoardApi | null>;
+}) {
   const [els, setEls] = useState<BoardEl[]>(initial || []);
   const [tool, setTool] = useState<Tool>("pen");
   const [color, setColor] = useState(COLORS[1]);
