@@ -953,6 +953,8 @@ function AssignBookHomeworkModal({
   const [instructions, setInstructions] = useState("");
   const [dueAt, setDueAt] = useState("");
   const [saving, setSaving] = useState(false);
+  const [audio, setAudio] = useState<BookAudio[]>([]);
+  const [audioIds, setAudioIds] = useState<string[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -964,7 +966,19 @@ function AssignBookHomeworkModal({
           email: u.email,
         })),
       );
+      try {
+        const tracks = await listAudio(book.id);
+        setAudio(tracks);
+        // auto-select audio that belongs to the Lektionen of the selected pages
+        const lektionIds = new Set(
+          tasks
+            .map((t) => pages.find((p) => p.id === t.page_id)?.lektion_id)
+            .filter(Boolean) as string[],
+        );
+        setAudioIds(tracks.filter((t) => t.lektion_id && lektionIds.has(t.lektion_id)).map((t) => t.id));
+      } catch { /* ignore */ }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const submit = async () => {
@@ -975,6 +989,10 @@ function AssignBookHomeworkModal({
       const payload = {
         category: "book",
         book: { id: book.id, title: book.title, kind: book.kind, level: book.level },
+        audio: audio
+          .filter((a) => audioIds.includes(a.id))
+          .map((a) => ({ id: a.id, title: a.title, track_no: a.track_no, file_path: a.file_path })),
+
         tasks: tasks.map((t) => {
           const p = pages.find((x) => x.id === t.page_id);
           return {
