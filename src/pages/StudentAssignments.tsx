@@ -330,6 +330,7 @@ return (
             <div className="w-10 h-10 rounded-2xl bg-primary/15 text-primary flex items-center justify-center">
               <BookMarked className="w-5 h-5" />
             </div>
+
             <div>
               <h2 className="text-xl lg:text-2xl font-display font-black leading-tight">
                 {t("Мої завдання", "Мои задания")}
