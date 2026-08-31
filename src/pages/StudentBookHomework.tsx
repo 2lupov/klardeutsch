@@ -6,7 +6,8 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { signedPageUrl } from "@/lib/books";
+import { signedPageUrl, type BookTaskContent } from "@/lib/books";
+import BookTheoryBlock from "@/components/books/BookTheoryBlock";
 import { toast } from "sonner";
 
 interface BookTaskItem {
@@ -22,7 +23,8 @@ interface BookTaskPayload {
   kind: string | null;
   title: string | null;
   instructions: string | null;
-  format: "choice" | "gap" | "open" | "audio";
+  format: "choice" | "gap" | "open" | "audio" | "theory";
+  theory?: BookTaskContent | null;
   items: BookTaskItem[];
   page_number: number | null;
   image_path: string | null;
@@ -45,7 +47,10 @@ const KIND_LABEL: Record<string, string> = {
   writing: "Письмо",
   speaking: "Говоріння",
   vocab: "Лексика",
+  theory: "Теорія",
 };
+
+const isTheory = (t: BookTaskPayload) => t.format === "theory" || t.kind === "theory";
 
 export default function StudentBookHomework() {
   const { id } = useParams();
