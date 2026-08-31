@@ -241,6 +241,9 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
         </Card>
       )}
 
+      <LiveBookPagePicker classId={cls.id} current={(cls as any).book_page ?? null} />
+
+
       {pickerOpen && section !== "board" && (
         <MaterialPicker
           classId={cls.id}
