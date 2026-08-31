@@ -73,6 +73,8 @@ export default function StudentBookHomework() {
   const [loading, setLoading] = useState(true);
   const [answers, setAnswers] = useState<Record<string, Record<number, string | number>>>({});
   const [pageUrls, setPageUrls] = useState<Record<string, string>>({});
+  const [audioUrls, setAudioUrls] = useState<Record<string, string>>({});
+
   const [zoom, setZoom] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<{ correct: number; total: number; score: number | null } | null>(null);
