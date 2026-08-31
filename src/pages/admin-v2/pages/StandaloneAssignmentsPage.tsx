@@ -509,6 +509,24 @@ function BuilderModal({
         )}
 
 
+        <Field label="🗂 Категорія *">
+          <div className="flex flex-wrap gap-1.5">
+            {CATEGORIES.map((c) => (
+              <button
+                key={c.key}
+                onClick={() => setCategory(c.key)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold border ${
+                  category === c.key
+                    ? "border-indigo-300 bg-indigo-50 text-indigo-700"
+                    : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                }`}
+              >
+                {c.label}
+              </button>
+            ))}
+          </div>
+        </Field>
+
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="sm:col-span-1">
             <Field label="Рівень">
@@ -523,6 +541,7 @@ function BuilderModal({
             </Field>
           </div>
         </div>
+
 
         <Field label="📅 Дедлайн">
           <input type="date" value={dueAt} onChange={(e) => setDueAt(e.target.value)} className={inputCls} />
