@@ -420,6 +420,7 @@ const uploadFiles = async (list: FileList | null) => {
       status: "submitted",
     });
     setTask({ ...task, status: "submitted" });
+    clearDraft();
     toast.success(t("Відправлено вчителю!", "Отправлено учителю!"));
   };
 
