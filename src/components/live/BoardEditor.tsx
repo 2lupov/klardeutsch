@@ -131,6 +131,8 @@ export default function BoardEditor({ classId, initial }: { classId: string; ini
       const { id, dx, dy } = dragging.current;
       setEls((prev) => {
         const next = prev.map((x) => (x.id === id ? { ...x, x: p.x - dx, y: p.y - dy } : x));
+        const now = Date.now();
+        if (now - lastCast.current > 60) { lastCast.current = now; broadcast(next); }
         persist(next);
         return next;
       });
@@ -143,6 +145,8 @@ export default function BoardEditor({ classId, initial }: { classId: string; ini
       d.points!.push(p);
       setEls((prev) => {
         const next = prev.map((x) => (x.id === d.id ? { ...d, points: [...d.points!] } : x));
+        const now = Date.now();
+        if (now - lastCast.current > 60) { lastCast.current = now; broadcast(next); }
         persist(next);
         return next;
       });
@@ -151,6 +155,8 @@ export default function BoardEditor({ classId, initial }: { classId: string; ini
       d.h = p.y - (d.y || 0);
       setEls((prev) => {
         const next = prev.map((x) => (x.id === d.id ? { ...d } : x));
+        const now = Date.now();
+        if (now - lastCast.current > 60) { lastCast.current = now; broadcast(next); }
         persist(next);
         return next;
       });
@@ -160,14 +166,15 @@ export default function BoardEditor({ classId, initial }: { classId: string; ini
   const onUp = () => {
     if (dragging.current) {
       dragging.current = null;
-      setEls((prev) => { persist(prev); return prev; });
+      setEls((prev) => { broadcast(prev); persist(prev); return prev; });
       return;
     }
     if (drafting.current) {
       drafting.current = null;
-      setEls((prev) => { persist(prev); return prev; });
+      setEls((prev) => { broadcast(prev); persist(prev); return prev; });
     }
   };
+
 
   const uploadImage = async (file: File) => {
     setUploading(true);
