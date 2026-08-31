@@ -257,6 +257,15 @@ function BookDetail({ book, onBack }: { book: Book; onBack: () => void }) {
   const [selected, setSelected] = useState<string[]>([]);
   const [assigning, setAssigning] = useState(false);
   const [bulk, setBulk] = useState<{ total: number; done: number; failed: number } | null>(null);
+  const [planToIssue, setPlanToIssue] = useState<BookLessonPlan | null>(null);
+  const planTasks = useMemo(() => {
+    if (!planToIssue) return null;
+    const ids = new Set<string>([
+      ...planToIssue.stages.flatMap((s) => s.task_ids),
+      ...planToIssue.homework.task_ids,
+    ]);
+    return tasks.filter((t) => ids.has(t.id));
+  }, [planToIssue, tasks]);
   const bulkStop = useRef(false);
 
   const load = async () => {
