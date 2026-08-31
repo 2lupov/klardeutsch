@@ -61,6 +61,7 @@ export default function BoardEditor({
   const [editing, setEditing] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [dropHint, setDropHint] = useState(false);
+  const [pxW, setPxW] = useState(BOARD_W);
 
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
