@@ -319,6 +319,27 @@ export default function StandaloneAssignmentsPage() {
         />
       )}
 
+      {duplicating && (
+        <BuilderModal
+          key={`dup-${duplicating.id}`}
+          duplicating={duplicating}
+          students={students}
+          onClose={() => setDuplicating(null)}
+          onCreated={() => { setDuplicating(null); load(); }}
+        />
+      )}
+
+      {assignMore && (
+        <AssignMoreModal
+          assignment={assignMore}
+          students={students}
+          alreadyIds={assignments.filter((x) => x.title === assignMore.title).map((x) => x.student_id)}
+          onClose={() => setAssignMore(null)}
+          onDone={() => { setAssignMore(null); load(); }}
+        />
+      )}
+
+
       {editing && (
         <BuilderModal
           key={editing.id}
