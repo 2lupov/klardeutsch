@@ -69,7 +69,11 @@ export default function LiveClass() {
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "live_classes", filter: `id=eq.${id}` },
         ({ new: c }: any) => setCls(c as LiveClassRow))
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "live_class_items", filter: `class_id=eq.${id}` },
-        ({ new: it }: any) => setItems((prev) => [...prev, it as LiveItem]))
+        ({ new: it }: any) => {
+          setItems((prev) => [...prev, it as LiveItem]);
+          const label = LIVE_SECTIONS.find((s) => s.key === (it as LiveItem).section)?.label;
+          if (label) toast.info(`Новий матеріал: ${label}`);
+        })
       .on("postgres_changes", { event: "DELETE", schema: "public", table: "live_class_items", filter: `class_id=eq.${id}` },
         ({ old: it }: any) => setItems((prev) => prev.filter((p) => p.id !== it.id)))
       .subscribe();
