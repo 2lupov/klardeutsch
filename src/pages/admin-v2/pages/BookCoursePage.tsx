@@ -6,7 +6,7 @@ import { toast } from "@/hooks/use-toast";
 import { useAdminLang } from "../LanguageContext";
 
 const LEVELS = ["A1", "A2", "B1", "B2", "C1"];
-const MAX_PHOTOS = 12;
+const MAX_PHOTOS = 50;
 
 interface Photo {
   id: string;
