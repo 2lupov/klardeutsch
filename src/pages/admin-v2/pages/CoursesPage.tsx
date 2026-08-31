@@ -191,7 +191,59 @@ export default function CoursesPage() {
         </div>
       )}
 
+      {choosing && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+          onClick={() => setChoosing(false)}>
+          <div className="bg-white rounded-2xl p-6 max-w-lg w-full" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold text-slate-900">Як створюємо курс?</h3>
+            <p className="text-xs text-slate-500 mt-1">Виберіть спосіб наповнення</p>
+            <div className="mt-4 space-y-2">
+              {[
+                {
+                  key: "manual" as const,
+                  emoji: "✍️",
+                  title: "Створити все вручну",
+                  desc: "Порожній курс — модулі й уроки додаєте самі в конструкторі",
+                },
+                {
+                  key: "ai" as const,
+                  emoji: "✨",
+                  title: "Створити все з AI",
+                  desc: "AI-конструктор генерує програму, уроки та завдання за вашим промптом",
+                },
+                {
+                  key: "pdf" as const,
+                  emoji: "📚",
+                  title: "З PDF / ZIP (підручники + аудіо)",
+                  desc: "Завантажте архів із Kursbuch, Arbeitsbuch і аудіо Hören — усе піде в банк підручників",
+                },
+              ].map((o) => (
+                <button
+                  key={o.key}
+                  onClick={() => {
+                    setChoosing(false);
+                    if (o.key === "pdf") { goTo("books"); return; }
+                    setMode(o.key);
+                    setShowNew(true);
+                  }}
+                  className="w-full text-left p-4 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/40 transition-colors"
+                >
+                  <div className="flex items-start gap-3">
+                    <span className="text-xl leading-none">{o.emoji}</span>
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold text-slate-900">{o.title}</div>
+                      <p className="text-xs text-slate-500 mt-0.5">{o.desc}</p>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {(showNew || editing) && (
+
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
           onClick={() => { setShowNew(false); setEditing(null); }}>
           <div className="bg-white rounded-2xl p-6 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
