@@ -109,7 +109,7 @@ export interface LiveBookPage {
 export async function setLiveBookPage(classId: string, page: LiveBookPage | null) {
   const { error } = await supabase
     .from("live_classes")
-    .update({ book_page: page as any })
+    .update({ book_page: page } as any)
     .eq("id", classId);
   if (error) throw error;
 }
