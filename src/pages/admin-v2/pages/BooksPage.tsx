@@ -331,6 +331,9 @@ function BookDetail({ book, onBack }: { book: Book; onBack: () => void }) {
 
       <BookAudioPanel bookId={book.id} lektionen={lektionen} />
 
+      <BookAiLibrarian book={book} lektionen={lektionen} pages={pages} urls={urls} taskCount={tasks.length} />
+
+
 
 
       <LektionenEditor
