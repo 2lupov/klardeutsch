@@ -256,6 +256,8 @@ function BookDetail({ book, onBack }: { book: Book; onBack: () => void }) {
   const [recognising, setRecognising] = useState<string | null>(null);
   const [selected, setSelected] = useState<string[]>([]);
   const [assigning, setAssigning] = useState(false);
+  const [bulk, setBulk] = useState<{ total: number; done: number; failed: number } | null>(null);
+  const bulkStop = useRef(false);
 
   const load = async () => {
     try {
@@ -286,11 +288,28 @@ function BookDetail({ book, onBack }: { book: Book; onBack: () => void }) {
     [pages],
   );
 
+  const isTheory = (t: BookTask) => t.kind === "theory" || t.content?.format === "theory";
+
   const page = pages.find((p) => p.id === activePage) ?? null;
   const pageAll = tasks.filter((t) => t.page_id === activePage);
-  const pageTheory = pageAll.filter((t) => t.kind === "theory" || t.content?.format === "theory");
-  const pageTasks = pageAll.filter((t) => !(t.kind === "theory" || t.content?.format === "theory"));
+  const pageTheory = pageAll.filter(isTheory);
+  const pageTasks = pageAll.filter((t) => !isTheory(t));
   const selectedTasks = tasks.filter((t) => selected.includes(t.id));
+
+  const stats = useMemo(() => {
+    const m = new Map<string, { theory: number; tasks: number }>();
+    for (const t of tasks) {
+      const cur = m.get(t.page_id) ?? { theory: 0, tasks: 0 };
+      if (isTheory(t)) cur.theory += 1;
+      else cur.tasks += 1;
+      m.set(t.page_id, cur);
+    }
+    return m;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tasks]);
+
+  const totalTheory = tasks.filter(isTheory).length;
+  const totalTasks = tasks.length - totalTheory;
 
   const runRecognise = async (pageId: string) => {
     setRecognising(pageId);
@@ -311,6 +330,47 @@ function BookDetail({ book, onBack }: { book: Book; onBack: () => void }) {
     }
   };
 
+  /** Recognise every page in the background, one by one. */
+  const runRecogniseAll = async (onlyNew: boolean) => {
+    const queue = pages.filter((p) => (onlyNew ? !stats.get(p.id) : true));
+    if (queue.length === 0) {
+      toast.info("Немає сторінок для обробки");
+      return;
+    }
+    bulkStop.current = false;
+    setBulk({ total: queue.length, done: 0, failed: 0 });
+    let done = 0;
+    let failed = 0;
+    for (const p of queue) {
+      if (bulkStop.current) break;
+      try {
+        await recognisePage(p.id);
+      } catch {
+        failed += 1;
+      }
+      done += 1;
+      setBulk({ total: queue.length, done, failed });
+      // refresh the list every few pages so progress is visible
+      if (done % 3 === 0) {
+        try {
+          setTasks(await listTasks(book.id));
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+    try {
+      setTasks(await listTasks(book.id));
+    } catch {
+      /* ignore */
+    }
+    setBulk(null);
+    if (bulkStop.current) toast.info(`Зупинено. Оброблено ${done} з ${queue.length}`);
+    else if (failed) toast.warning(`Готово: ${done - failed} сторінок, помилок ${failed}`);
+    else toast.success(`Готово: оброблено ${done} сторінок`);
+  };
+
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
@@ -329,8 +389,56 @@ function BookDetail({ book, onBack }: { book: Book; onBack: () => void }) {
 
       <SectionHeader
         title={book.title}
-        subtitle={`${BOOK_KIND_LABEL[book.kind] ?? book.kind}${book.level ? ` · ${book.level}` : ""} · сторінок: ${pages.length} · вправ: ${tasks.length}`}
+        subtitle={`${BOOK_KIND_LABEL[book.kind] ?? book.kind}${book.level ? ` · ${book.level}` : ""} · сторінок: ${pages.length} · вправ: ${totalTasks} · теорії: ${totalTheory}`}
       />
+
+      {pages.length > 0 && (
+        <Card className="p-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="mr-auto min-w-[200px]">
+              <p className="text-sm font-semibold text-slate-900">Розпізнати всю книгу</p>
+              <p className="text-xs text-slate-500">
+                {bulk
+                  ? `Обробка у фоні: ${bulk.done} / ${bulk.total}${bulk.failed ? ` · помилок ${bulk.failed}` : ""}`
+                  : "AI пройде сторінки одну за одною і витягне теорію та вправи."}
+              </p>
+            </div>
+            {bulk ? (
+              <button
+                onClick={() => { bulkStop.current = true; }}
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-rose-50 text-rose-600 text-sm font-medium"
+              >
+                <X className="w-4 h-4" /> Зупинити
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={() => runRecogniseAll(true)}
+                  className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900 text-white text-sm font-medium"
+                >
+                  <Sparkles className="w-4 h-4" /> Розпізнати всі нові
+                </button>
+                <button
+                  onClick={() => {
+                    if (confirm("Пройти AI по ВСІХ сторінках заново?")) runRecogniseAll(false);
+                  }}
+                  className="px-3 py-2 rounded-xl border border-slate-200 text-slate-600 text-sm"
+                >
+                  Заново всі
+                </button>
+              </>
+            )}
+          </div>
+          {bulk && (
+            <div className="mt-3 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+              <div
+                className="h-full bg-indigo-500 transition-all"
+                style={{ width: `${Math.round((bulk.done / Math.max(1, bulk.total)) * 100)}%` }}
+              />
+            </div>
+          )}
+        </Card>
+      )}
 
       <Card className="p-4">
         <PdfUploader bookId={book.id} startPage={nextPageNumber} onDone={load} />
@@ -358,21 +466,35 @@ function BookDetail({ book, onBack }: { book: Book; onBack: () => void }) {
           {/* page list */}
           <Card className="p-2 max-h-[70vh] overflow-y-auto">
             {pages.map((p) => {
-              const count = tasks.filter((t) => t.page_id === p.id).length;
+              const st = stats.get(p.id);
               const on = p.id === activePage;
               return (
                 <button
                   key={p.id}
                   onClick={() => setActivePage(p.id)}
-                  className={`w-full text-left px-3 py-2 rounded-xl text-sm flex items-center justify-between ${on ? "bg-indigo-50 text-indigo-700" : "hover:bg-slate-50 text-slate-700"}`}
+                  className={`w-full text-left px-3 py-2 rounded-xl text-sm flex items-center justify-between gap-2 ${on ? "bg-indigo-50 text-indigo-700" : "hover:bg-slate-50 text-slate-700"}`}
                 >
                   <span>Стор. {p.page_number}</span>
-                  <span className={`text-xs ${count ? "text-emerald-600" : "text-slate-400"}`}>
-                    {count ? `${count} вправ` : "—"}
-                  </span>
+                  {st ? (
+                    <span className="flex items-center gap-1 text-[11px] shrink-0">
+                      {st.theory > 0 && (
+                        <span className="px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-700">
+                          {st.theory} теорія
+                        </span>
+                      )}
+                      {st.tasks > 0 && (
+                        <span className="px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-700">
+                          {st.tasks} вправ
+                        </span>
+                      )}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-slate-400">—</span>
+                  )}
                 </button>
               );
             })}
+
           </Card>
 
           {/* page detail */}
