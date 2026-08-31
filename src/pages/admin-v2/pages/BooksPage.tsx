@@ -389,8 +389,56 @@ function BookDetail({ book, onBack }: { book: Book; onBack: () => void }) {
 
       <SectionHeader
         title={book.title}
-        subtitle={`${BOOK_KIND_LABEL[book.kind] ?? book.kind}${book.level ? ` · ${book.level}` : ""} · сторінок: ${pages.length} · вправ: ${tasks.length}`}
+        subtitle={`${BOOK_KIND_LABEL[book.kind] ?? book.kind}${book.level ? ` · ${book.level}` : ""} · сторінок: ${pages.length} · вправ: ${totalTasks} · теорії: ${totalTheory}`}
       />
+
+      {pages.length > 0 && (
+        <Card className="p-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="mr-auto min-w-[200px]">
+              <p className="text-sm font-semibold text-slate-900">Розпізнати всю книгу</p>
+              <p className="text-xs text-slate-500">
+                {bulk
+                  ? `Обробка у фоні: ${bulk.done} / ${bulk.total}${bulk.failed ? ` · помилок ${bulk.failed}` : ""}`
+                  : "AI пройде сторінки одну за одною і витягне теорію та вправи."}
+              </p>
+            </div>
+            {bulk ? (
+              <button
+                onClick={() => { bulkStop.current = true; }}
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-rose-50 text-rose-600 text-sm font-medium"
+              >
+                <X className="w-4 h-4" /> Зупинити
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={() => runRecogniseAll(true)}
+                  className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900 text-white text-sm font-medium"
+                >
+                  <Sparkles className="w-4 h-4" /> Розпізнати всі нові
+                </button>
+                <button
+                  onClick={() => {
+                    if (confirm("Пройти AI по ВСІХ сторінках заново?")) runRecogniseAll(false);
+                  }}
+                  className="px-3 py-2 rounded-xl border border-slate-200 text-slate-600 text-sm"
+                >
+                  Заново всі
+                </button>
+              </>
+            )}
+          </div>
+          {bulk && (
+            <div className="mt-3 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+              <div
+                className="h-full bg-indigo-500 transition-all"
+                style={{ width: `${Math.round((bulk.done / Math.max(1, bulk.total)) * 100)}%` }}
+              />
+            </div>
+          )}
+        </Card>
+      )}
 
       <Card className="p-4">
         <PdfUploader bookId={book.id} startPage={nextPageNumber} onDone={load} />
@@ -418,21 +466,35 @@ function BookDetail({ book, onBack }: { book: Book; onBack: () => void }) {
           {/* page list */}
           <Card className="p-2 max-h-[70vh] overflow-y-auto">
             {pages.map((p) => {
-              const count = tasks.filter((t) => t.page_id === p.id).length;
+              const st = stats.get(p.id);
               const on = p.id === activePage;
               return (
                 <button
                   key={p.id}
                   onClick={() => setActivePage(p.id)}
-                  className={`w-full text-left px-3 py-2 rounded-xl text-sm flex items-center justify-between ${on ? "bg-indigo-50 text-indigo-700" : "hover:bg-slate-50 text-slate-700"}`}
+                  className={`w-full text-left px-3 py-2 rounded-xl text-sm flex items-center justify-between gap-2 ${on ? "bg-indigo-50 text-indigo-700" : "hover:bg-slate-50 text-slate-700"}`}
                 >
                   <span>Стор. {p.page_number}</span>
-                  <span className={`text-xs ${count ? "text-emerald-600" : "text-slate-400"}`}>
-                    {count ? `${count} вправ` : "—"}
-                  </span>
+                  {st ? (
+                    <span className="flex items-center gap-1 text-[11px] shrink-0">
+                      {st.theory > 0 && (
+                        <span className="px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-700">
+                          {st.theory} теорія
+                        </span>
+                      )}
+                      {st.tasks > 0 && (
+                        <span className="px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-700">
+                          {st.tasks} вправ
+                        </span>
+                      )}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-slate-400">—</span>
+                  )}
                 </button>
               );
             })}
+
           </Card>
 
           {/* page detail */}
