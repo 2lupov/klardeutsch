@@ -78,8 +78,19 @@ export default function LiveClass() {
       .on("postgres_changes", { event: "DELETE", schema: "public", table: "live_class_items", filter: `class_id=eq.${id}` },
         ({ old: it }: any) => setItems((prev) => prev.filter((p) => p.id !== it.id)))
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
+
+    // Миттєвий стрім дошки від вчителя
+    const boardCh = supabase
+      .channel(`live-board:${id}`)
+      .on("broadcast", { event: "board" }, ({ payload }: any) => {
+        if (!payload?.board) return;
+        setCls((prev) => (prev ? ({ ...prev, board: payload.board } as LiveClassRow) : prev));
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(ch); supabase.removeChannel(boardCh); };
   }, [id]);
+
 
   // Учень сам вибирає розділ — вчитель його не перекидає.
   // Про новий матеріал повідомляє червоний індикатор у сайдбарі.
