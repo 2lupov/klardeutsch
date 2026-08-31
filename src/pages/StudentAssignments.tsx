@@ -389,20 +389,20 @@ return (
                 const Icon = m.Icon;
                 const StatusIcon = s.Icon;
                 return (
-                  <motion.button
+<motion.button
                     key={`${item.kind}-${item.id}`}
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: Math.min(idx * 0.03, 0.3) }}
                     onClick={() => navigate(item.route)}
-                    className="w-full text-left rounded-2xl border border-border bg-card hover:border-primary/40 hover:shadow-md transition overflow-hidden group"
+                    className="w-full text-left rounded-2xl border border-border bg-card hover:border-primary/40 hover:-translate-y-0.5 hover:shadow-sm transition group p-4"
                   >
-                    <div className={`bg-gradient-to-r ${m.accent} px-5 py-3 flex items-center gap-3`}>
-                      <div className="w-9 h-9 rounded-xl bg-background/70 backdrop-blur flex items-center justify-center">
+                    <div className="flex items-start gap-3">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${m.iconBg}`}>
                         <Icon className="w-5 h-5" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-0.5">
+                        <div className="flex items-center gap-2 flex-wrap mb-1.5">
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${m.chip.bg}`}>
                             {m.chip.label}
                           </span>
@@ -421,37 +421,35 @@ return (
                             </span>
                           )}
                         </div>
-                      </div>
-                      <ChevronRight className="w-5 h-5 text-foreground/50 group-hover:translate-x-1 transition" />
-                    </div>
-                    <div className="px-5 py-4">
-                      <h3 className="font-display font-bold text-foreground leading-tight mb-1">
-                        {item.title}
-                      </h3>
-                      <p className="text-sm text-muted-foreground line-clamp-2">
-                        {item.subtitle}
-                      </p>
-                      <div className="flex items-center justify-between gap-3 mt-3 text-xs text-muted-foreground">
-                        <div className="flex items-center gap-3 flex-wrap">
-                          {item.kind === "homework" && item.lessonTitle && (
-                            <span className="inline-flex items-center gap-1">
-                              <BookOpen className="w-3 h-3" /> {item.lessonTitle}
-                            </span>
-                          )}
-                          {item.kind === "homework" && item.due_at && (
-                            <span className="inline-flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
-                              {t("До", "До")}: {new Date(item.due_at).toLocaleDateString(lang === "uk" ? "uk-UA" : "ru-RU")}
-                            </span>
-                          )}
-                          {item.kind === "placement" && item.teacherName && (
-                            <span className="inline-flex items-center gap-1">
-                              <GraduationCap className="w-3 h-3" /> {item.teacherName}
-                            </span>
-                          )}
+                        <h3 className="font-display font-bold text-foreground leading-tight mb-0.5">
+                          {item.title}
+                        </h3>
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {item.subtitle}
+                        </p>
+                        <div className="flex items-center justify-between gap-3 mt-3 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-3 flex-wrap">
+                            {item.kind === "homework" && item.lessonTitle && (
+                              <span className="inline-flex items-center gap-1">
+                                <BookOpen className="w-3 h-3" /> {item.lessonTitle}
+                              </span>
+                            )}
+                            {item.kind === "homework" && item.due_at && (
+                              <span className="inline-flex items-center gap-1">
+                                <Clock className="w-3 h-3" />
+                                {t("До", "До")}: {new Date(item.due_at).toLocaleDateString(lang === "uk" ? "uk-UA" : "ru-RU")}
+                              </span>
+                            )}
+                            {item.kind === "placement" && item.teacherName && (
+                              <span className="inline-flex items-center gap-1">
+                                <GraduationCap className="w-3 h-3" /> {item.teacherName}
+                              </span>
+                            )}
+                          </div>
+                          <span className="font-bold text-primary shrink-0">{item.action} →</span>
                         </div>
-                        <span className="font-bold text-primary">{item.action} →</span>
                       </div>
+                      <ChevronRight className="w-5 h-5 text-foreground/40 group-hover:translate-x-1 transition shrink-0 mt-1.5" />
                     </div>
                   </motion.button>
                 );
