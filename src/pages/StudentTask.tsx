@@ -192,11 +192,50 @@ if (!active) return;
           .limit(1)
           .maybeSingle();
         if (active && sub) setSubmission(sub as any);
+
+        // restore saved draft (only for the student, and only if not submitted yet)
+        if (active && !sub && draftKey) {
+          try {
+            const raw = localStorage.getItem(draftKey);
+            if (raw) {
+              const d = JSON.parse(raw);
+              if (Array.isArray(d.answers) && d.answers.length === qs.length) setAnswers(d.answers);
+              if (Array.isArray(d.moduleAnswers) && mods.length) setModuleAnswers(d.moduleAnswers);
+              if (typeof d.text === "string") setText(d.text);
+              if (Array.isArray(d.files)) setFiles(d.files);
+              if (typeof d.moduleStep === "number") setModuleStep(d.moduleStep);
+              if (typeof d.step === "number") setStep(d.step);
+              if (d.savedAt) setSavedAt(d.savedAt);
+              if (d.text || (d.files ?? []).length || d.moduleStep > 0 || d.step > 0) {
+                toast.info(t("Прогрес відновлено", "Прогресс восстановлен"));
+              }
+            }
+          } catch { /* ignore corrupt draft */ }
+        }
       }
+      restoredRef.current = true;
       setLoading(false);
     })();
     return () => { active = false; };
   }, [id, user]);
+
+  // autosave draft on every change
+  useEffect(() => {
+    if (!draftKey || preview || loading || !restoredRef.current) return;
+    if (submission || result) return;
+    const timer = setTimeout(() => {
+      try {
+        const ts = Date.now();
+        localStorage.setItem(
+          draftKey,
+          JSON.stringify({ answers, moduleAnswers, text, files, moduleStep, step, savedAt: ts }),
+        );
+        setSavedAt(ts);
+      } catch { /* storage full / unavailable */ }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [draftKey, preview, loading, submission, result, answers, moduleAnswers, text, files, moduleStep, step]);
+
 
   useEffect(() => {
     return () => { if (audioUrl) URL.revokeObjectURL(audioUrl); };
