@@ -14,6 +14,7 @@ import {
 } from "@/lib/books";
 import PdfUploader from "@/components/books/PdfUploader";
 import BookArchiveImporter from "@/components/books/BookArchiveImporter";
+import BookTheoryBlock from "@/components/books/BookTheoryBlock";
 
 
 interface StudentRow {
@@ -285,7 +286,9 @@ function BookDetail({ book, onBack }: { book: Book; onBack: () => void }) {
   );
 
   const page = pages.find((p) => p.id === activePage) ?? null;
-  const pageTasks = tasks.filter((t) => t.page_id === activePage);
+  const pageAll = tasks.filter((t) => t.page_id === activePage);
+  const pageTheory = pageAll.filter((t) => t.kind === "theory" || t.content?.format === "theory");
+  const pageTasks = pageAll.filter((t) => !(t.kind === "theory" || t.content?.format === "theory"));
   const selectedTasks = tasks.filter((t) => selected.includes(t.id));
 
   const runRecognise = async (pageId: string) => {
@@ -407,10 +410,51 @@ function BookDetail({ book, onBack }: { book: Book; onBack: () => void }) {
               </Card>
             )}
 
+            {pageTheory.length > 0 && (
+              <Card className="p-4">
+                <h3 className="text-sm font-semibold text-slate-900 mb-3">
+                  Теорія на сторінці · {pageTheory.length}
+                </h3>
+                <div className="space-y-3">
+                  {pageTheory.map((t) => {
+                    const on = selected.includes(t.id);
+                    return (
+                      <div key={t.id} className="flex items-start gap-3">
+                        <button
+                          onClick={() => setSelected((v) => (on ? v.filter((x) => x !== t.id) : [...v, t.id]))}
+                          className={`mt-1 w-5 h-5 shrink-0 rounded-md flex items-center justify-center border ${on ? "bg-indigo-600 border-indigo-600 text-white" : "border-slate-300 text-transparent"}`}
+                          title="Додати теорію до домашки"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                        </button>
+                        <div className="min-w-0 flex-1">
+                          <BookTheoryBlock title={t.title} content={t.content} tone="admin" />
+                        </div>
+                        <button
+                          onClick={async () => {
+                            try {
+                              await deleteTask(t.id);
+                              setSelected((v) => v.filter((x) => x !== t.id));
+                              await load();
+                            } catch (e: any) {
+                              toast.error(e?.message ?? "Помилка");
+                            }
+                          }}
+                          className="text-slate-300 hover:text-rose-500"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </Card>
+            )}
+
             <Card className="p-4">
               <h3 className="text-sm font-semibold text-slate-900 mb-3">Вправи на сторінці</h3>
               {pageTasks.length === 0 ? (
-                <p className="text-xs text-slate-500">Ще не розпізнано. Натисніть «Розпізнати вправи».</p>
+                <p className="text-xs text-slate-500">Ще не розпізнано. Натисніть «Розпізнати вправи» — AI витягне і теорію, і вправи.</p>
               ) : (
                 <div className="space-y-2">
                   {pageTasks.map((t) => {
@@ -750,6 +794,16 @@ function AssignBookHomeworkModal({
             title: t.title,
             instructions: t.instructions,
             format: t.content?.format ?? "open",
+            theory:
+              t.content?.format === "theory" || t.kind === "theory"
+                ? {
+                    summary: t.content?.summary ?? t.instructions ?? null,
+                    rules: t.content?.rules ?? [],
+                    examples: t.content?.examples ?? [],
+                    phrases: t.content?.phrases ?? [],
+                    table: t.content?.table ?? null,
+                  }
+                : null,
             items: (t.content?.items ?? []).map((it) => ({
               prompt: it.prompt ?? "",
               options: it.options ?? undefined,
@@ -785,7 +839,7 @@ function AssignBookHomeworkModal({
   return (
     <Modal title="Домашка з підручника" onClose={onClose}>
       <div className="space-y-4">
-        <p className="text-xs text-slate-500">Вибрано вправ: <b className="text-slate-900">{tasks.length}</b></p>
+        <p className="text-xs text-slate-500">Вибрано блоків: <b className="text-slate-900">{tasks.length}</b> (вправи + теорія)</p>
         <Field label="Назва">
           <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm" />
         </Field>

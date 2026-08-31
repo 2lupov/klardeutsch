@@ -14,9 +14,19 @@ const json = (body: unknown, status = 200) =>
   });
 
 const SYSTEM = `Ти — асистент викладача німецької мови. На зображенні — сторінка підручника (Kursbuch) або робочого зошита (Arbeitsbuch).
-Твоє завдання: розпізнати ОКРЕМІ вправи на сторінці й повернути їх структуровано.
+Твоє завдання: розпізнати на сторінці (1) ТЕОРІЮ / правила / пояснення і (2) ОКРЕМІ ВПРАВИ, і повернути все структуровано.
 
-Правила:
+ТЕОРІЯ (theory) — це будь-який пояснювальний матеріал, не вправа: грамматичні правила, таблиці відмінювання/спряження,
+рамки "Grammatik", "Merke", "Redemittel", корисні фрази, словничок теми, приклади вживання.
+- title: коротка назва українською (до 60 символів), напр. "Präteritum: сильні дієслова".
+- summary: пояснення правила українською, простими словами (2–6 речень). Німецькі приклади залишай німецькою.
+- rules: масив коротких пунктів-правил українською (0–8 пунктів).
+- examples: масив прикладів { de, uk } — німецьке речення і переклад українською.
+- table (якщо на сторінці є таблиця): { headers: [...], rows: [[...], ...] } — переноси її як є.
+- phrases: масив корисних фраз/лексики { de, uk } (для Redemittel і словничків).
+Не вигадуй правил, яких немає на сторінці. Якщо теорії немає — theory: [].
+
+ВПРАВИ (tasks):
 - code: номер вправи як у книзі ("1", "2b", "3a"). Якщо номера немає — null.
 - kind: одне з "reading" | "listening" | "grammar" | "writing" | "speaking" | "vocab".
 - title: коротка назва українською (до 60 символів).
@@ -24,9 +34,11 @@ const SYSTEM = `Ти — асистент викладача німецької 
 - content.format: "choice" (варіанти), "gap" (вписати слово), "open" (розгорнута відповідь), "audio" (усно/аудіо).
 - content.items: для choice → { prompt, options: [...], correct_index }. Для gap → { prompt, answer }.
   Для open/audio → { prompt } без відповіді. Якщо правильної відповіді не видно — став null.
-- Не вигадуй вправ, яких немає на сторінці. Не додавай пояснень поза JSON.
+- Не вигадуй вправ, яких немає на сторінці.
 
-Поверни ЛИШЕ JSON: { "tasks": [ { "code", "kind", "title", "instructions", "content": { "format", "items": [...] } } ] }`;
+Не додавай пояснень поза JSON. Поверни ЛИШЕ JSON:
+{ "theory": [ { "title", "summary", "rules": [...], "examples": [{"de","uk"}], "table": { "headers": [...], "rows": [[...]] }, "phrases": [{"de","uk"}] } ],
+  "tasks": [ { "code", "kind", "title", "instructions", "content": { "format", "items": [...] } } ] }`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -97,7 +109,7 @@ serve(async (req) => {
           {
             role: "user",
             content: [
-              { type: "text", text: `Сторінка ${page.page_number}. Розпізнай вправи.` },
+              { type: "text", text: `Сторінка ${page.page_number}. Розпізнай теорію (правила, таблиці, Redemittel) і вправи.` },
               { type: "image_url", image_url: { url: `data:image/jpeg;base64,${base64}` } },
             ],
           },
@@ -130,12 +142,50 @@ serve(async (req) => {
     }
 
     const tasks = Array.isArray(parsed?.tasks) ? parsed.tasks : [];
-    if (tasks.length === 0) {
+    const theory = Array.isArray(parsed?.theory) ? parsed.theory : [];
+    if (tasks.length === 0 && theory.length === 0) {
       await admin.from("book_pages").update({ ocr_status: "empty" }).eq("id", pageId);
-      return json({ ok: true, tasks: 0 });
+      return json({ ok: true, tasks: 0, theory: 0 });
     }
 
     await admin.from("book_tasks").delete().eq("page_id", pageId).eq("source", "ai");
+
+    const clean = (v: unknown, max: number) =>
+      v === null || v === undefined ? null : String(v).slice(0, max);
+
+    const theoryRows = theory.slice(0, 10).map((t: any, i: number) => ({
+      book_id: page.book_id,
+      page_id: pageId,
+      code: null,
+      kind: "theory",
+      title: clean(t?.title, 200) ?? "Теорія",
+      instructions: clean(t?.summary, 4000),
+      content: {
+        format: "theory",
+        summary: clean(t?.summary, 4000),
+        rules: Array.isArray(t?.rules) ? t.rules.slice(0, 12).map((r: any) => clean(r, 500)) : [],
+        examples: Array.isArray(t?.examples)
+          ? t.examples.slice(0, 20).map((e: any) => ({ de: clean(e?.de, 400), uk: clean(e?.uk, 400) }))
+          : [],
+        phrases: Array.isArray(t?.phrases)
+          ? t.phrases.slice(0, 40).map((e: any) => ({ de: clean(e?.de, 300), uk: clean(e?.uk, 300) }))
+          : [],
+        table:
+          t?.table && Array.isArray(t.table?.rows)
+            ? {
+                headers: Array.isArray(t.table?.headers)
+                  ? t.table.headers.slice(0, 8).map((h: any) => clean(h, 120))
+                  : [],
+                rows: t.table.rows.slice(0, 30).map((r: any) =>
+                  Array.isArray(r) ? r.slice(0, 8).map((c: any) => clean(c, 200)) : [],
+                ),
+              }
+            : null,
+        items: [],
+      },
+      source: "ai",
+      sort_order: i,
+    }));
 
     const rows = tasks.slice(0, 30).map((t: any, i: number) => ({
       book_id: page.book_id,
@@ -146,10 +196,11 @@ serve(async (req) => {
       instructions: t?.instructions ? String(t.instructions).slice(0, 2000) : null,
       content: t?.content ?? null,
       source: "ai",
-      sort_order: i,
+      sort_order: 100 + i,
     }));
 
-    const { error: insErr } = await admin.from("book_tasks").insert(rows);
+    const allRows = [...theoryRows, ...rows];
+    const { error: insErr } = await admin.from("book_tasks").insert(allRows);
     if (insErr) {
       console.error("insert book_tasks failed:", insErr);
       await admin.from("book_pages").update({ ocr_status: "failed" }).eq("id", pageId);
@@ -157,7 +208,7 @@ serve(async (req) => {
     }
 
     await admin.from("book_pages").update({ ocr_status: "done" }).eq("id", pageId);
-    return json({ ok: true, tasks: rows.length });
+    return json({ ok: true, tasks: rows.length, theory: theoryRows.length });
   } catch (e) {
     console.error("parse-book-page error:", e);
     return json({ error: e instanceof Error ? e.message : "Unknown error" }, 500);

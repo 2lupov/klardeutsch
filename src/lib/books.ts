@@ -32,7 +32,12 @@ export interface BookPage {
   ocr_status: string | null;
 }
 
-export type BookTaskFormat = "choice" | "gap" | "open" | "audio";
+export type BookTaskFormat = "choice" | "gap" | "open" | "audio" | "theory";
+
+export interface BookTheoryTable {
+  headers?: (string | null)[];
+  rows?: (string | null)[][];
+}
 
 export interface BookTaskContent {
   format?: BookTaskFormat;
@@ -43,7 +48,14 @@ export interface BookTaskContent {
     answer?: string;
   }>;
   note?: string;
+  /* theory blocks */
+  summary?: string | null;
+  rules?: (string | null)[];
+  examples?: Array<{ de?: string | null; uk?: string | null }>;
+  phrases?: Array<{ de?: string | null; uk?: string | null }>;
+  table?: BookTheoryTable | null;
 }
+
 
 export interface BookTask {
   id: string;

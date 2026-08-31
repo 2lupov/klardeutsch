@@ -6,7 +6,8 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { signedPageUrl } from "@/lib/books";
+import { signedPageUrl, type BookTaskContent } from "@/lib/books";
+import BookTheoryBlock from "@/components/books/BookTheoryBlock";
 import { toast } from "sonner";
 
 interface BookTaskItem {
@@ -22,7 +23,8 @@ interface BookTaskPayload {
   kind: string | null;
   title: string | null;
   instructions: string | null;
-  format: "choice" | "gap" | "open" | "audio";
+  format: "choice" | "gap" | "open" | "audio" | "theory";
+  theory?: BookTaskContent | null;
   items: BookTaskItem[];
   page_number: number | null;
   image_path: string | null;
@@ -45,7 +47,10 @@ const KIND_LABEL: Record<string, string> = {
   writing: "Письмо",
   speaking: "Говоріння",
   vocab: "Лексика",
+  theory: "Теорія",
 };
+
+const isTheory = (t: BookTaskPayload) => t.format === "theory" || t.kind === "theory";
 
 export default function StudentBookHomework() {
   const { id } = useParams();
@@ -102,7 +107,9 @@ export default function StudentBookHomework() {
     if (Object.keys(answers).length) localStorage.setItem(storageKey, JSON.stringify(answers));
   }, [answers, storageKey]);
 
-  const tasks = useMemo(() => assignment?.payload?.tasks ?? [], [assignment]);
+  const allBlocks = useMemo(() => assignment?.payload?.tasks ?? [], [assignment]);
+  const theoryBlocks = useMemo(() => allBlocks.filter(isTheory), [allBlocks]);
+  const tasks = useMemo(() => allBlocks.filter((t) => !isTheory(t)), [allBlocks]);
   const done = assignment?.status === "submitted" || assignment?.status === "graded";
 
   const setAnswer = (taskId: string, index: number, value: string | number) =>
@@ -191,6 +198,21 @@ export default function StudentBookHomework() {
           {result && result.total > 0 && (
             <p className="mt-1">Автоперевірка: {result.correct}/{result.total} ({result.score ?? 0}%)</p>
           )}
+        </div>
+      )}
+
+      {theoryBlocks.length > 0 && (
+        <div className="mt-6 space-y-3">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            Теорія до завдання
+          </h2>
+          {theoryBlocks.map((t) => (
+            <BookTheoryBlock
+              key={t.id}
+              title={t.title}
+              content={t.theory ?? { summary: t.instructions }}
+            />
+          ))}
         </div>
       )}
 
