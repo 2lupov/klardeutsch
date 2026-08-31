@@ -89,11 +89,21 @@ serve(async (req) => {
 
     const bytes = new Uint8Array(await file.arrayBuffer());
     if (bytes.length === 0) return json({ error: "Порожній файл сторінки" }, 400);
+    console.log(`page ${page.page_number}: ${(bytes.length / 1024 / 1024).toFixed(2)} MB (${file.type || "?"})`);
+    if (bytes.length > 12 * 1024 * 1024) {
+      await admin.from("book_pages").update({ ocr_status: "failed" }).eq("id", pageId);
+      return json(
+        { error: `Скан завеликий (${(bytes.length / 1024 / 1024).toFixed(1)} МБ). Завантажте сторінку меншого розміру (до 12 МБ).` },
+        400,
+      );
+    }
     let binary = "";
     for (let i = 0; i < bytes.length; i += 8192) {
       binary += String.fromCharCode(...bytes.subarray(i, i + 8192));
     }
     const base64 = btoa(binary);
+    const mime = (file.type && file.type.startsWith("image/") ? file.type : "image/jpeg");
+
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) return json({ error: "AI не налаштований" }, 500);
