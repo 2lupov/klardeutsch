@@ -2,16 +2,18 @@ import { useEffect, useState } from "react";
 import { Loader2, BookMarked, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import {
-  listBooks, listPages, signedPageUrls,
+  listBooks, listPages, signedPageUrls, longSignedPageUrl,
   type Book, type BookPage,
 } from "@/lib/books";
 import { setLiveBookPage, type LiveBookPage } from "@/lib/live-class";
 
 export default function LiveBookPagePicker({
-  classId, current,
+  classId, current, onToBoard,
 }: {
   classId: string;
   current?: LiveBookPage | null;
+  /** When provided, clicking a page puts it right onto the whiteboard. */
+  onToBoard?: (url: string, page: BookPage, bookTitle: string) => void;
 }) {
   const [books, setBooks] = useState<Book[]>([]);
   const [bookId, setBookId] = useState("");
@@ -45,6 +47,15 @@ export default function LiveBookPagePicker({
     })();
   }, [bookId]);
 
+  const toBoard = async (p: BookPage) => {
+    if (!onToBoard) return;
+    const book = books.find((b) => b.id === bookId);
+    const url = await longSignedPageUrl(p.image_path);
+    if (!url) { toast.error("Не вдалося отримати сторінку"); return; }
+    onToBoard(url, p, book?.title ?? "Підручник");
+    toast.success(`Сторінка ${p.page_number ?? ""} на дошці`);
+  };
+
   const show = async (p: BookPage) => {
     const book = books.find((b) => b.id === bookId);
     const payload: LiveBookPage = {
@@ -75,7 +86,9 @@ export default function LiveBookPagePicker({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <BookMarked className="w-4 h-4 text-indigo-600" />
-          <h3 className="text-sm font-bold text-slate-900">Сторінка підручника для учня</h3>
+          <h3 className="text-sm font-bold text-slate-900">
+            {onToBoard ? "Сторінка підручника на дошку" : "Сторінка підручника для учня"}
+          </h3>
         </div>
         {shown && (
           <button
@@ -115,7 +128,7 @@ export default function LiveBookPagePicker({
             return (
               <button
                 key={p.id}
-                onClick={() => show(p)}
+                onClick={() => (onToBoard ? toBoard(p) : show(p))}
                 className={`relative rounded-xl overflow-hidden border-2 transition ${
                   on ? "border-emerald-500" : "border-slate-200 hover:border-indigo-300"
                 }`}
