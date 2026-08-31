@@ -1207,9 +1207,13 @@ function AssignBookHomeworkModal({
   };
 
   return (
-    <Modal title="Домашка з підручника" onClose={onClose}>
+    <Modal title={plan ? "Видати план уроку" : "Домашка з підручника"} onClose={onClose}>
       <div className="space-y-4">
-        <p className="text-xs text-slate-500">Вибрано блоків: <b className="text-slate-900">{tasks.length}</b> (вправи + теорія)</p>
+        <p className="text-xs text-slate-500">
+          {plan
+            ? <>Етапів: <b className="text-slate-900">{plan.stages.length}</b> · блоків: <b className="text-slate-900">{tasks.length}</b> · домашка: <b className="text-slate-900">{plan.homework.task_ids.length}</b></>
+            : <>Вибрано блоків: <b className="text-slate-900">{tasks.length}</b> (вправи + теорія)</>}
+        </p>
         <Field label="Назва">
           <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm" />
         </Field>
