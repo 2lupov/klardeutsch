@@ -39,7 +39,7 @@ export default function BoardEditor({ classId, initial }: { classId: string; ini
     clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
       supabase.from("live_classes").update({ board: next as any }).eq("id", classId);
-    }, 200);
+    }, 120);
   };
 
   const commit = (next: BoardEl[]) => {
@@ -106,7 +106,11 @@ export default function BoardEditor({ classId, initial }: { classId: string; ini
 
     if (dragging.current) {
       const { id, dx, dy } = dragging.current;
-      setEls((prev) => prev.map((x) => (x.id === id ? { ...x, x: p.x - dx, y: p.y - dy } : x)));
+      setEls((prev) => {
+        const next = prev.map((x) => (x.id === id ? { ...x, x: p.x - dx, y: p.y - dy } : x));
+        persist(next);
+        return next;
+      });
       return;
     }
 
@@ -114,11 +118,19 @@ export default function BoardEditor({ classId, initial }: { classId: string; ini
     if (!d) return;
     if (d.type === "stroke") {
       d.points!.push(p);
-      setEls((prev) => prev.map((x) => (x.id === d.id ? { ...d, points: [...d.points!] } : x)));
+      setEls((prev) => {
+        const next = prev.map((x) => (x.id === d.id ? { ...d, points: [...d.points!] } : x));
+        persist(next);
+        return next;
+      });
     } else {
       d.w = p.x - (d.x || 0);
       d.h = p.y - (d.y || 0);
-      setEls((prev) => prev.map((x) => (x.id === d.id ? { ...d } : x)));
+      setEls((prev) => {
+        const next = prev.map((x) => (x.id === d.id ? { ...d } : x));
+        persist(next);
+        return next;
+      });
     }
   };
 
@@ -137,13 +149,18 @@ export default function BoardEditor({ classId, initial }: { classId: string; ini
   const uploadImage = async (file: File) => {
     setUploading(true);
     try {
-      const path = `board/${classId}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
-      const { error } = await supabase.storage.from("tutoring-materials").upload(path, file, {
+      const ext = (file.name.split(".").pop() || "png").toLowerCase();
+      const path = `${classId}/${Date.now()}-${uid()}.${ext}`;
+      const { error } = await supabase.storage.from("board-images").upload(path, file, {
         contentType: file.type,
         upsert: true,
       });
       if (error) throw error;
-      const url = supabase.storage.from("tutoring-materials").getPublicUrl(path).data.publicUrl;
+      const { data: signed, error: sErr } = await supabase.storage
+        .from("board-images")
+        .createSignedUrl(path, 60 * 60 * 24 * 365);
+      if (sErr || !signed?.signedUrl) throw sErr || new Error("Не вдалося отримати посилання");
+      const url = signed.signedUrl;
       const img = new Image();
       img.onload = () => {
         const ratio = img.height / img.width || 0.75;
@@ -159,6 +176,7 @@ export default function BoardEditor({ classId, initial }: { classId: string; ini
       setUploading(false);
     }
   };
+
 
   const selectedEl = els.find((x) => x.id === selected) || null;
 
