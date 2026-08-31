@@ -295,8 +295,14 @@ function BookDetail({ book, onBack }: { book: Book; onBack: () => void }) {
   const runRecognise = async (pageId: string) => {
     setRecognising(pageId);
     try {
-      const res = await recognisePage(pageId);
-      toast.success(res.tasks ? `Розпізнано вправ: ${res.tasks}` : "Вправ не знайдено на сторінці");
+      const res: any = await recognisePage(pageId);
+      const t = Number(res?.tasks ?? 0);
+      const th = Number(res?.theory ?? 0);
+      if (t || th) {
+        toast.success(`Розпізнано: вправ ${t}, теорії ${th}`);
+      } else {
+        toast.info("На сторінці не знайдено ні вправ, ні теорії");
+      }
       await load();
     } catch (e: any) {
       toast.error(e?.message ?? "AI не змогла обробити сторінку");
