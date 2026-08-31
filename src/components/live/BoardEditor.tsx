@@ -82,6 +82,40 @@ export default function BoardEditor({
     persist(next);
   };
 
+  // ── imperative API: place an image (e.g. textbook page) onto the board ──
+  const elsRef = useRef<BoardEl[]>(els);
+  useEffect(() => { elsRef.current = els; }, [els]);
+
+  const insertImage = (url: string) => {
+    const place = (ratio: number) => {
+      let h = 0.94;
+      let w = (h * BOARD_H) / ratio / BOARD_W;
+      if (w > 0.96) { w = 0.96; h = (w * BOARD_W * ratio) / BOARD_H; }
+      const el: BoardEl = {
+        id: uid(),
+        type: "image",
+        url,
+        x: (1 - w) / 2,
+        y: (1 - h) / 2,
+        w,
+        h,
+      };
+      // behind strokes / text
+      commit([el, ...elsRef.current.filter((x) => !(x.type === "image" && x.url === url))]);
+      setTool("select");
+    };
+    const img = new Image();
+    img.onload = () => place(img.height / img.width || 1.4);
+    img.onerror = () => place(1.4);
+    img.src = url;
+  };
+
+  useEffect(() => {
+    if (!apiRef) return;
+    apiRef.current = { insertImage };
+    return () => { apiRef.current = null; };
+  });
+
 
   const pos = (e: React.PointerEvent) => {
     const r = svgRef.current!.getBoundingClientRect();
