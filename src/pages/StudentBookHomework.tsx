@@ -439,3 +439,93 @@ export default function StudentBookHomework() {
     </div>
   );
 }
+
+function TaskBlock({
+  t, answers, setAnswer, done, pageUrls, onZoom,
+}: {
+  t: BookTaskPayload;
+  answers: Record<string, Record<number, string | number>>;
+  setAnswer: (taskId: string, index: number, value: string | number) => void;
+  done: boolean;
+  pageUrls: Record<string, string>;
+  onZoom: (url: string) => void;
+}) {
+  return (
+    <div className="rounded-2xl border border-border bg-card p-4">
+      <div className="flex flex-wrap items-center gap-2">
+        {t.code && (
+          <span className="px-2 py-0.5 rounded-md bg-primary/10 text-primary text-xs font-semibold">
+            №{t.code}
+          </span>
+        )}
+        <h3 className="text-base font-semibold">{t.title || "Вправа"}</h3>
+        <span className="text-xs text-muted-foreground">
+          {KIND_LABEL[t.kind ?? ""] ?? ""}{t.page_number ? ` · с. ${t.page_number}` : ""}
+        </span>
+      </div>
+      {t.instructions && (
+        <p className="mt-1.5 text-sm text-muted-foreground whitespace-pre-wrap">{t.instructions}</p>
+      )}
+
+      <div className="mt-4 grid gap-4 md:grid-cols-2">
+        {t.image_path && pageUrls[t.image_path] && (
+          <button
+            onClick={() => onZoom(pageUrls[t.image_path!])}
+            className="relative group rounded-xl overflow-hidden border border-border"
+          >
+            <img
+              src={pageUrls[t.image_path]}
+              alt={`Сторінка ${t.page_number ?? ""} підручника`}
+              loading="lazy"
+              className="w-full"
+            />
+            <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-background/90 text-xs">
+              <ZoomIn className="w-3.5 h-3.5" /> Збільшити
+            </span>
+          </button>
+        )}
+
+        <div className="space-y-3">
+          {t.items.length === 0 && (
+            <p className="text-sm text-muted-foreground">
+              Виконайте вправу в зошиті — викладач перевірить на уроці.
+            </p>
+          )}
+          {t.items.map((it, i) => (
+            <div key={i} className="rounded-xl bg-muted/40 p-3">
+              <p className="text-sm font-medium">{i + 1}. {it.prompt}</p>
+              {t.format === "choice" && it.options?.length ? (
+                <div className="mt-2 space-y-1.5">
+                  {it.options.map((opt, oi) => {
+                    const on = answers[t.id]?.[i] === oi;
+                    return (
+                      <button
+                        key={oi}
+                        disabled={done}
+                        onClick={() => setAnswer(t.id, i, oi)}
+                        className={`w-full text-left px-3 py-2 rounded-lg border text-sm transition-colors ${
+                          on ? "border-primary bg-primary/10" : "border-border hover:bg-accent"
+                        } disabled:opacity-60`}
+                      >
+                        {opt}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <textarea
+                  disabled={done}
+                  value={String(answers[t.id]?.[i] ?? "")}
+                  onChange={(e) => setAnswer(t.id, i, e.target.value)}
+                  rows={t.format === "gap" ? 1 : 3}
+                  placeholder={t.format === "gap" ? "Ваша відповідь" : "Напишіть відповідь…"}
+                  className="mt-2 w-full px-3 py-2 rounded-lg border border-border bg-background text-sm disabled:opacity-60"
+                />
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
