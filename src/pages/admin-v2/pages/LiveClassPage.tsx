@@ -241,6 +241,15 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
         </Card>
       )}
 
+      {pickerOpen && section !== "board" && (
+        <MaterialPicker
+          classId={cls.id}
+          section={section}
+          onAdded={(added) => setItems((p) => [...p, ...added])}
+          onClose={() => setPickerOpen(false)}
+        />
+      )}
+
       {section !== "board" && (
         <Card className="p-5">
           <SectionHeader title="Уже в розділі" subtitle={`${sectionItems.length} елементів`} />
