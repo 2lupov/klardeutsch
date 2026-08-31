@@ -19,6 +19,7 @@ export interface LiveClass {
   status: "active" | "ended";
   current_section: LiveSection;
   board: any[];
+  book_page?: LiveBookPage | null;
   started_at: string;
   ended_at: string | null;
 }
