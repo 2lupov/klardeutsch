@@ -143,6 +143,20 @@ export default function StudentBookHomework() {
   const tasks = useMemo(() => allBlocks.filter((t) => !isTheory(t)), [allBlocks]);
   const done = assignment?.status === "submitted" || assignment?.status === "graded";
 
+  const plan = assignment?.payload?.plan ?? null;
+  const byId = useMemo(
+    () => new Map(allBlocks.map((t) => [t.id, t] as const)),
+    [allBlocks],
+  );
+  const audioById = useMemo(
+    () => new Map((assignment?.payload?.audio ?? []).map((a) => [a.id, a] as const)),
+    [assignment],
+  );
+  const homeworkTasks = useMemo(
+    () => (plan?.homework?.task_ids ?? []).map((tid) => byId.get(tid)).filter(Boolean) as BookTaskPayload[],
+    [plan, byId],
+  );
+
   const setAnswer = (taskId: string, index: number, value: string | number) =>
     setAnswers((prev) => ({ ...prev, [taskId]: { ...(prev[taskId] ?? {}), [index]: value } }));
 
