@@ -140,7 +140,7 @@ export default function CoursesPage() {
         <EmptyState
           title="Ще немає курсів"
           description="Створи перший курс — далі AI-конструктор згенерує модулі й уроки."
-          cta={{ label: "+ Новий курс", onClick: () => setShowNew(true) }}
+          cta={{ label: "+ Новий курс", onClick: () => setChoosing(true) }}
         />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
