@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, SectionHeader, EmptyState } from "./_ui";
 import {
-  Book, BookKind, BookLektion, BookPage, BookTask, BookAudio, BOOK_KIND_LABEL,
+  Book, BookKind, BookLektion, BookPage, BookTask, BookAudio, BookLessonPlan, BOOK_KIND_LABEL,
   bookToBank, createBook, deleteAudio, deleteBook, deletePage, deleteTask, detectLektionen,
   insertAudio, linkPagesToLektion, listAudio, listBooks, listLektionen, listPages, listTasks,
   recognisePage, signedAudioUrl, signedPageUrls, updateAudio, uploadAudioFile, upsertLektion,
@@ -16,6 +16,7 @@ import {
 import PdfUploader from "@/components/books/PdfUploader";
 import BookArchiveImporter from "@/components/books/BookArchiveImporter";
 import BookTheoryBlock from "@/components/books/BookTheoryBlock";
+import BookLessonPlanPanel from "@/components/books/BookLessonPlanPanel";
 
 
 interface StudentRow {
