@@ -15,6 +15,7 @@ import {
 } from "@/lib/live-class";
 import { Play, Square, Trash2 } from "lucide-react";
 import BoardEditor from "@/components/live/BoardEditor";
+import MaterialPicker from "@/components/live/MaterialPicker";
 
 interface StudentRow { user_id: string; display_name: string | null; email: string | null }
 
@@ -140,6 +141,7 @@ export default function LiveClassPage() {
 
 function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentName: string; onExit: () => void }) {
   const [section, setSection] = useState<LiveSection>(cls.current_section || "board");
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [items, setItems] = useState<LiveItem[]>([]);
   const [answers, setAnswers] = useState<any[]>([]);
   const [ended, setEnded] = useState(cls.status === "ended");
@@ -227,7 +229,15 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
       ) : (
         <Card className="p-5">
           <SectionHeader title="Додати матеріал" subtitle="Учень побачить це одразу" />
-          <AddForm section={section} classId={cls.id} onAdded={(it) => setItems((p) => [...p, it])} />
+          <>
+            <button
+              onClick={() => setPickerOpen(true)}
+              className="mb-4 px-4 py-2 rounded-xl text-sm font-medium border border-indigo-200 bg-indigo-50 text-indigo-700"
+            >
+              📂 Додати з банку матеріалів
+            </button>
+            <AddForm section={section} classId={cls.id} onAdded={(it) => setItems((p) => [...p, it])} />
+          </>
         </Card>
       )}
 
