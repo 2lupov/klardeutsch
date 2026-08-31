@@ -457,6 +457,14 @@ const uploadFiles = async (list: FileList | null) => {
           {preview ? t("Закрити перегляд", "Закрыть просмотр") : t("До завдань", "К заданиям")}
         </button>
 
+        {!preview && !submission && !result && savedAt && (
+          <div className="text-xs text-muted-foreground flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            {t("Прогрес збережено автоматично", "Прогресс сохранён автоматически")} ·{" "}
+            {new Date(savedAt).toLocaleTimeString(lang === "uk" ? "uk-UA" : "ru-RU", { hour: "2-digit", minute: "2-digit" })}
+          </div>
+        )}
+
         {preview && (
           <div className="rounded-2xl border border-amber-400/40 bg-amber-400/10 px-4 py-3 text-sm font-semibold text-amber-700 dark:text-amber-300 flex items-center gap-2">
             <span className="text-base">👀</span>
