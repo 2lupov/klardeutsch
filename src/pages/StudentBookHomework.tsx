@@ -30,6 +30,13 @@ interface BookTaskPayload {
   image_path: string | null;
 }
 
+interface AudioPayload {
+  id: string;
+  title: string;
+  track_no: number | null;
+  file_path: string;
+}
+
 interface Assignment {
   id: string;
   title: string;
@@ -37,8 +44,13 @@ interface Assignment {
   level: string | null;
   due_at: string | null;
   status: string;
-  payload: { book?: { title?: string; kind?: string }; tasks?: BookTaskPayload[] };
+  payload: {
+    book?: { title?: string; kind?: string };
+    tasks?: BookTaskPayload[];
+    audio?: AudioPayload[];
+  };
 }
+
 
 const KIND_LABEL: Record<string, string> = {
   reading: "Читання",
