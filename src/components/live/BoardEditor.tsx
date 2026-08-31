@@ -174,7 +174,10 @@ export default function BoardEditor({
     if (!el) return;
     const onWheel = (e: WheelEvent) => { e.preventDefault(); wheelRef.current(e); };
     el.addEventListener("wheel", onWheel, { passive: false });
-    return () => el.removeEventListener("wheel", onWheel);
+    const ro = new ResizeObserver(() => setPxW(el.getBoundingClientRect().width || BOARD_W));
+    ro.observe(el);
+    setPxW(el.getBoundingClientRect().width || BOARD_W);
+    return () => { el.removeEventListener("wheel", onWheel); ro.disconnect(); };
   }, []);
 
   const fitAll = () => {
