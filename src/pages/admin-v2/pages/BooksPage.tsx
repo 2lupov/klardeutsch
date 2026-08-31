@@ -1057,6 +1057,32 @@ function AssignBookHomeworkModal({
         <Field label="Дедлайн">
           <input type="datetime-local" value={dueAt} onChange={(e) => setDueAt(e.target.value)} className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm" />
         </Field>
+        {audio.length > 0 && (
+          <Field label="Аудіо (Hören) до завдання">
+            <div className="max-h-40 overflow-y-auto rounded-xl border border-slate-200 divide-y divide-slate-100">
+              {audio.map((a) => {
+                const on = audioIds.includes(a.id);
+                return (
+                  <button
+                    key={a.id}
+                    onClick={() => setAudioIds((v) => (on ? v.filter((x) => x !== a.id) : [...v, a.id]))}
+                    className={`w-full flex items-center justify-between px-3 py-2 text-sm text-left ${on ? "bg-emerald-50" : "hover:bg-slate-50"}`}
+                  >
+                    <span className="truncate">
+                      <span className="text-slate-400 text-xs mr-2">{a.track_no ?? "—"}</span>
+                      {a.title}
+                    </span>
+                    {on && <Check className="w-4 h-4 text-emerald-600 shrink-0" />}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mt-1 text-[11px] text-slate-400">
+              Треки з Lektion вибраних сторінок позначені автоматично.
+            </p>
+          </Field>
+        )}
+
         <Field label="Учні *">
           <div className="max-h-52 overflow-y-auto rounded-xl border border-slate-200 divide-y divide-slate-100">
             {students.length === 0 ? (
