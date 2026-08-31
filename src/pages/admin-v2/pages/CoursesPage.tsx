@@ -21,8 +21,11 @@ export default function CoursesPage() {
   const { lang, createLang, isAll, meta } = useAdminLang();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
+  const [choosing, setChoosing] = useState(false);
+  const [mode, setMode] = useState<"manual" | "ai">("ai");
   const [showNew, setShowNew] = useState(false);
   const [editing, setEditing] = useState<Course | null>(null);
+
 
   const [form, setForm] = useState({
     title: "",
@@ -56,6 +59,10 @@ export default function CoursesPage() {
     window.dispatchEvent(new CustomEvent("admin-v2:open-builder", { detail: { courseId } }));
   };
 
+  const goTo = (key: string) => {
+    window.dispatchEvent(new CustomEvent("admin-v2:navigate", { detail: { key } }));
+  };
+
   const createCourse = async () => {
     if (!form.title.trim()) return;
     const { data, error } = await supabase.from("courses").insert({
@@ -67,12 +74,16 @@ export default function CoursesPage() {
       available: false,
     } as any).select().single();
     if (error) { toast({ title: "Помилка", description: error.message }); return; }
-    toast({ title: "Курс створено" });
+    toast({
+      title: "Курс створено",
+      description: mode === "ai" ? "Відкриваю AI-конструктор" : "Наповнюйте уроки вручну в конструкторі",
+    });
     setShowNew(false);
     setForm({ title: "", description: "", level: "A1", target_language: createLang, price: 200 });
     await load();
     if (data?.id) openBuilder(data.id);
   };
+
 
   const updateCourse = async () => {
     if (!editing) return;
@@ -107,7 +118,7 @@ export default function CoursesPage() {
         subtitle={isAll ? "Показані курси всіх мов школи" : `Фільтр: тільки ${meta.label.toLowerCase()}`}
         action={
           <button
-            onClick={() => setShowNew(true)}
+            onClick={() => setChoosing(true)}
             className="px-4 py-2 rounded-xl text-white text-sm font-medium"
             style={{ background: "#4F46E5" }}
           >
@@ -129,7 +140,7 @@ export default function CoursesPage() {
         <EmptyState
           title="Ще немає курсів"
           description="Створи перший курс — далі AI-конструктор згенерує модулі й уроки."
-          cta={{ label: "+ Новий курс", onClick: () => setShowNew(true) }}
+          cta={{ label: "+ Новий курс", onClick: () => setChoosing(true) }}
         />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -180,7 +191,59 @@ export default function CoursesPage() {
         </div>
       )}
 
+      {choosing && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+          onClick={() => setChoosing(false)}>
+          <div className="bg-white rounded-2xl p-6 max-w-lg w-full" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold text-slate-900">Як створюємо курс?</h3>
+            <p className="text-xs text-slate-500 mt-1">Виберіть спосіб наповнення</p>
+            <div className="mt-4 space-y-2">
+              {[
+                {
+                  key: "manual" as const,
+                  emoji: "✍️",
+                  title: "Створити все вручну",
+                  desc: "Порожній курс — модулі й уроки додаєте самі в конструкторі",
+                },
+                {
+                  key: "ai" as const,
+                  emoji: "✨",
+                  title: "Створити все з AI",
+                  desc: "AI-конструктор генерує програму, уроки та завдання за вашим промптом",
+                },
+                {
+                  key: "pdf" as const,
+                  emoji: "📚",
+                  title: "З PDF / ZIP (підручники + аудіо)",
+                  desc: "Завантажте архів із Kursbuch, Arbeitsbuch і аудіо Hören — усе піде в банк підручників",
+                },
+              ].map((o) => (
+                <button
+                  key={o.key}
+                  onClick={() => {
+                    setChoosing(false);
+                    if (o.key === "pdf") { goTo("books"); return; }
+                    setMode(o.key);
+                    setShowNew(true);
+                  }}
+                  className="w-full text-left p-4 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/40 transition-colors"
+                >
+                  <div className="flex items-start gap-3">
+                    <span className="text-xl leading-none">{o.emoji}</span>
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold text-slate-900">{o.title}</div>
+                      <p className="text-xs text-slate-500 mt-0.5">{o.desc}</p>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {(showNew || editing) && (
+
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
           onClick={() => { setShowNew(false); setEditing(null); }}>
           <div className="bg-white rounded-2xl p-6 max-w-md w-full" onClick={(e) => e.stopPropagation()}>

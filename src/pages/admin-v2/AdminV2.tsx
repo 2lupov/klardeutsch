@@ -88,6 +88,16 @@ export default function AdminV2() {
     localStorage.setItem("klar-admin-theme", dark ? "dark" : "light");
   }, [dark]);
 
+  useEffect(() => {
+    const h = (e: Event) => {
+      const key = (e as CustomEvent).detail?.key as NavKey | undefined;
+      if (key) setActive(key);
+    };
+    window.addEventListener("admin-v2:navigate", h);
+    return () => window.removeEventListener("admin-v2:navigate", h);
+  }, []);
+
+
 
   useEffect(() => {
     if (!user) {

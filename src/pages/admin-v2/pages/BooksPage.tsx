@@ -1,17 +1,20 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   BookMarked, Plus, Trash2, Loader2, Sparkles, X, ChevronLeft, Send, Check,
+  Archive, Music, Upload,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, SectionHeader, EmptyState } from "./_ui";
 import {
-  Book, BookKind, BookLektion, BookPage, BookTask, BOOK_KIND_LABEL,
-  createBook, deleteBook, deletePage, deleteTask, linkPagesToLektion,
-  listBooks, listLektionen, listPages, listTasks, recognisePage,
-  signedPageUrls, upsertLektion,
+  Book, BookKind, BookLektion, BookPage, BookTask, BookAudio, BOOK_KIND_LABEL,
+  createBook, deleteAudio, deleteBook, deletePage, deleteTask, insertAudio,
+  linkPagesToLektion, listAudio, listBooks, listLektionen, listPages, listTasks,
+  recognisePage, signedAudioUrl, signedPageUrls, updateAudio, uploadAudioFile, upsertLektion,
 } from "@/lib/books";
 import PdfUploader from "@/components/books/PdfUploader";
+import BookArchiveImporter from "@/components/books/BookArchiveImporter";
+
 
 interface StudentRow {
   user_id: string;
@@ -32,6 +35,7 @@ export default function BooksPage() {
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [archive, setArchive] = useState(false);
   const [openBook, setOpenBook] = useState<Book | null>(null);
 
   const load = async () => {
@@ -56,16 +60,36 @@ export default function BooksPage() {
     <div className="space-y-4">
       <SectionHeader
         title="Підручники"
-        subtitle="Kursbuch / Arbeitsbuch — джерело домашніх завдань"
+        subtitle="Kursbuch / Arbeitsbuch + аудіо (Hören) — джерело домашніх завдань"
         action={
-          <button
-            onClick={() => setCreating(true)}
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium"
-          >
-            <Plus className="w-4 h-4" /> Новий підручник
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setArchive((v) => !v)}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            >
+              <Archive className="w-4 h-4" /> Імпорт ZIP (книги + аудіо)
+            </button>
+            <button
+              onClick={() => setCreating(true)}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium"
+            >
+              <Plus className="w-4 h-4" /> Новий підручник
+            </button>
+          </div>
         }
       />
+
+      {archive && (
+        <Card className="p-4">
+          <h3 className="text-sm font-semibold text-slate-900">Імпорт архіву</h3>
+          <p className="text-xs text-slate-500 mt-1 mb-3">
+            Один ZIP може містити кілька книг (Kursbuch, Arbeitsbuch…) і всі аудіофайли до них.
+            Кожен PDF стане окремим підручником, аудіо привʼяжеться до вибраної книги.
+          </p>
+          <BookArchiveImporter onDone={load} />
+        </Card>
+      )}
+
 
       {loading ? (
         <Card className="p-10 flex justify-center">
@@ -302,6 +326,10 @@ function BookDetail({ book, onBack }: { book: Book; onBack: () => void }) {
         <PdfUploader bookId={book.id} startPage={nextPageNumber} onDone={load} />
       </Card>
 
+      <BookAudioPanel bookId={book.id} lektionen={lektionen} />
+
+
+
       <LektionenEditor
         bookId={book.id}
         lektionen={lektionen}
@@ -453,7 +481,152 @@ function BookDetail({ book, onBack }: { book: Book; onBack: () => void }) {
   );
 }
 
+/* ───────── audio (Hören) ───────── */
+
+function BookAudioPanel({ bookId, lektionen }: { bookId: string; lektionen: BookLektion[] }) {
+  const [tracks, setTracks] = useState<BookAudio[]>([]);
+  const [urls, setUrls] = useState<Record<string, string>>({});
+  const [busy, setBusy] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const load = async () => {
+    try {
+      const list = await listAudio(bookId);
+      setTracks(list);
+      const map: Record<string, string> = {};
+      await Promise.all(
+        list.map(async (t) => {
+          const u = await signedAudioUrl(t.file_path);
+          if (u) map[t.file_path] = u;
+        }),
+      );
+      setUrls(map);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Не вдалося завантажити аудіо");
+    }
+  };
+
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bookId]);
+
+  const handleFiles = async (files: File[]) => {
+    setBusy(true);
+    try {
+      for (const f of files) {
+        const path = await uploadAudioFile(bookId, f.name, f, f.type);
+        const num = f.name.match(/(\d{1,3})/);
+        await insertAudio({
+          book_id: bookId,
+          title: f.name.replace(/\.[^.]+$/, "").replace(/[_]+/g, " "),
+          file_path: path,
+          track_no: num ? Number(num[1]) : null,
+        });
+      }
+      toast.success(`Додано аудіо: ${files.length}`);
+      await load();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Помилка завантаження аудіо");
+    } finally {
+      setBusy(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  };
+
+  return (
+    <Card className="p-4">
+      <div className="flex items-center justify-between gap-2 mb-3">
+        <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+          <Music className="w-4 h-4 text-emerald-600" /> Аудіо (Hören) · {tracks.length}
+        </h3>
+        <input
+          ref={inputRef}
+          type="file"
+          accept="audio/*"
+          multiple
+          className="hidden"
+          onChange={(e) => {
+            const f = Array.from(e.target.files ?? []);
+            if (f.length) handleFiles(f);
+          }}
+        />
+        <button
+          disabled={busy}
+          onClick={() => inputRef.current?.click()}
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 disabled:opacity-60"
+        >
+          {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+          Додати аудіофайли
+        </button>
+      </div>
+
+      {tracks.length === 0 ? (
+        <p className="text-xs text-slate-500">
+          Аудіо ще немає. Завантажте файли або імпортуйте ZIP-архів із книгами та аудіо.
+        </p>
+      ) : (
+        <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
+          {tracks.map((t) => (
+            <div key={t.id} className="rounded-xl border border-slate-200 p-2.5 space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-slate-400 w-8 shrink-0">
+                  {t.track_no ?? "—"}
+                </span>
+                <input
+                  defaultValue={t.title}
+                  onBlur={async (e) => {
+                    const v = e.target.value.trim();
+                    if (v && v !== t.title) {
+                      await updateAudio(t.id, { title: v });
+                      toast.success("Назву оновлено");
+                    }
+                  }}
+                  className="flex-1 min-w-0 px-2.5 py-1.5 rounded-lg border border-slate-200 text-sm"
+                />
+                <select
+                  value={t.lektion_id ?? ""}
+                  onChange={async (e) => {
+                    await updateAudio(t.id, { lektion_id: e.target.value || null });
+                    await load();
+                  }}
+                  className="px-2 py-1.5 rounded-lg border border-slate-200 text-xs max-w-[150px]"
+                >
+                  <option value="">Без Lektion</option>
+                  {lektionen.map((l) => (
+                    <option key={l.id} value={l.id}>
+                      Lektion {l.number}{l.title ? ` · ${l.title}` : ""}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  onClick={async () => {
+                    if (!confirm(`Видалити «${t.title}»?`)) return;
+                    try {
+                      await deleteAudio(t);
+                      await load();
+                    } catch (e: any) {
+                      toast.error(e?.message ?? "Помилка");
+                    }
+                  }}
+                  className="text-slate-300 hover:text-rose-500"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+              {urls[t.file_path] && (
+                <audio src={urls[t.file_path]} controls preload="none" className="w-full h-8" />
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </Card>
+  );
+}
+
 /* ───────── lektionen ───────── */
+
 
 function LektionenEditor({
   bookId, lektionen, onChanged,
