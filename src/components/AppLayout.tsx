@@ -13,6 +13,7 @@ import EditModeToolbar from "@/components/EditModeToolbar";
 import DailyBonusDialog from "@/components/DailyBonusDialog";
 import { useTeacherLink } from "@/hooks/useTeacherLink";
 import { useStudentLiveSync } from "@/hooks/useStudentLiveSync";
+import { useLiveClassLock } from "@/hooks/useLiveClassLock";
 import { LogOut } from "lucide-react";
 
 // Routes a managed student is allowed to visit. Anything else
@@ -21,6 +22,7 @@ const STUDENT_ALLOWED = [
   /^\/academy/,
   /^\/course\/[^/]+$/,
   /^\/assignments$/,
+  /^\/vocabulary$/,
   /^\/task\/[^/]+$/,
   /^\/tutoring\/lesson\/[^/]+$/,
   /^\/tutoring\/homework\/[^/]+$/,
@@ -42,6 +44,7 @@ const AppLayout = () => {
 
   useTeacherLink(user?.id);
   useStudentLiveSync(user?.id);
+  useLiveClassLock(user?.id);
 
   useEffect(() => {
     const PUBLIC = ["/", "/dictionary", "/word-lookup", "/games"];

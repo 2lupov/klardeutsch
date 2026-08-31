@@ -330,6 +330,7 @@ return (
             <div className="w-10 h-10 rounded-2xl bg-primary/15 text-primary flex items-center justify-center">
               <BookMarked className="w-5 h-5" />
             </div>
+
             <div>
               <h2 className="text-xl lg:text-2xl font-display font-black leading-tight">
                 {t("Мої завдання", "Мои задания")}
@@ -338,7 +339,14 @@ return (
                 {t("Тести, вправи та домашні роботи", "Тесты, упражнения и домашние работы")}
               </p>
             </div>
+            <button
+              onClick={() => navigate("/vocabulary")}
+              className="ml-auto px-3 py-2 rounded-xl border border-border text-xs font-display font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition"
+            >
+              🗂 {t("Словник", "Словарь")}
+            </button>
           </div>
+
 
           {/* Filter chips */}
           <div className="flex gap-2 mb-4">

@@ -15,6 +15,7 @@ import {
   MessageSquare,
   BarChart3,
   Settings,
+  Radio,
   Lock,
   ChevronLeft,
   ExternalLink,
@@ -31,6 +32,7 @@ import BookCoursePage from "./pages/BookCoursePage";
 import StudentsPage from "./pages/StudentsPage";
 import AssignmentsPage from "./pages/AssignmentsPage";
 import StandaloneAssignmentsPage from "./pages/StandaloneAssignmentsPage";
+import LiveClassPage from "./pages/LiveClassPage";
 import TutorLogsPage from "./pages/TutorLogsPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import SettingsPage from "./pages/SettingsPage";
@@ -45,6 +47,7 @@ type NavKey =
   | "students"
   | "assignments"
   | "standalone"
+  | "live"
   | "tutor"
   | "analytics"
   | "settings";
@@ -56,6 +59,7 @@ const NAV: { key: NavKey; label: string; icon: any }[] = [
   { key: "studio", label: "Студія завдань", icon: Dumbbell },
   { key: "book", label: "Курс із книги (фото)", icon: Camera },
 
+  { key: "live", label: "Живий клас", icon: Radio },
   { key: "students", label: "Учні", icon: Users },
   { key: "assignments", label: "Завдання учнів", icon: ClipboardList },
   { key: "standalone", label: "Індивідуальні завдання", icon: FileCheck2 },
@@ -268,6 +272,8 @@ function PageRouter({ active }: { active: NavKey }) {
     case "book":
       return <BookCoursePage />;
 
+    case "live":
+      return <LiveClassPage />;
     case "students":
       return <StudentsPage />;
     case "assignments":

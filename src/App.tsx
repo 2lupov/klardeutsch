@@ -64,6 +64,8 @@ import StudentAssignments from "./pages/StudentAssignments";
 import StudentHomework from "./pages/StudentHomework";
 import StudentTask from "./pages/StudentTask";
 import StudentView from "./pages/StudentView";
+import LiveClass from "./pages/LiveClass";
+import StudentDictionary from "./pages/StudentDictionary";
 import TeacherStudentDashboard from "./pages/TeacherStudentDashboard";
 import NotFound from "./pages/NotFound";
 import PaymentResult from "./pages/PaymentResult";
@@ -92,6 +94,7 @@ const AppRoutes = () => {
       <Route path="/trial" element={<Trial />} />
 
       <Route path="/student-view/:sessionId" element={<StudentView />} />
+      <Route path="/live/:id" element={<LiveClass />} />
       {/* Web-only routes — redirect to home in Telegram */}
       <Route path="/admin" element={isTelegram ? <Navigate to="/" replace /> : <AdminV2 />} />
       <Route path="/admin/legacy" element={isTelegram ? <Navigate to="/" replace /> : <Admin />} />
@@ -129,6 +132,7 @@ const AppRoutes = () => {
         <Route path="/challenges" element={<RequireAuth><Challenges /></RequireAuth>} />
         <Route path="/chat" element={<RequireAuth><Chat /></RequireAuth>} />
         <Route path="/assignments" element={<RequireAuth><StudentAssignments /></RequireAuth>} />
+        <Route path="/vocabulary" element={<RequireAuth><StudentDictionary /></RequireAuth>} />
         <Route path="/task/:id" element={<RequireAuth><StudentTask /></RequireAuth>} />
         <Route path="/course/:id" element={<RequireAuth><Course /></RequireAuth>} />
 
