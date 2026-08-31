@@ -91,7 +91,22 @@ const STATUS_META: Record<string, { label: string; bg: string; color: string }> 
   graded: { label: "Перевірено", bg: "#D1FAE5", color: "#065F46" },
 };
 
+type CategoryKey = "test" | "homework" | "reading" | "course";
+
+const CATEGORIES: { key: CategoryKey; label: string; bg: string; color: string }[] = [
+  { key: "test", label: "📝 Тест", bg: "#EDE9FE", color: "#5B21B6" },
+  { key: "homework", label: "🏠 Домашка", bg: "#FEF3C7", color: "#92400E" },
+  { key: "reading", label: "📖 Читання", bg: "#DBEAFE", color: "#1E40AF" },
+  { key: "course", label: "🎓 Курси", bg: "#D1FAE5", color: "#065F46" },
+];
+
+const catOf = (a?: { payload?: any } | null): CategoryKey => {
+  const c = a?.payload?.category;
+  return CATEGORIES.some((x) => x.key === c) ? c : "test";
+};
+
 const inputCls = "w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm bg-white";
+
 
 /* ─────────── page ─────────── */
 
