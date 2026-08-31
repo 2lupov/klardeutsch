@@ -1476,6 +1476,178 @@ export type Database = {
           },
         ]
       }
+      live_class_answers: {
+        Row: {
+          answer: string | null
+          class_id: string
+          created_at: string
+          id: string
+          is_correct: boolean | null
+          item_id: string
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          answer?: string | null
+          class_id: string
+          created_at?: string
+          id?: string
+          is_correct?: boolean | null
+          item_id: string
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          answer?: string | null
+          class_id?: string
+          created_at?: string
+          id?: string
+          is_correct?: boolean | null
+          item_id?: string
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_class_answers_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "live_classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "live_class_answers_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "live_class_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      live_class_items: {
+        Row: {
+          class_id: string
+          content: Json
+          created_at: string
+          id: string
+          kind: string
+          section: string
+          sort_order: number
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          class_id: string
+          content?: Json
+          created_at?: string
+          id?: string
+          kind?: string
+          section: string
+          sort_order?: number
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          class_id?: string
+          content?: Json
+          created_at?: string
+          id?: string
+          kind?: string
+          section?: string
+          sort_order?: number
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_class_items_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "live_classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      live_class_seen: {
+        Row: {
+          class_id: string
+          created_at: string
+          id: string
+          last_seen_at: string
+          section: string
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          class_id: string
+          created_at?: string
+          id?: string
+          last_seen_at?: string
+          section: string
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          class_id?: string
+          created_at?: string
+          id?: string
+          last_seen_at?: string
+          section?: string
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_class_seen_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "live_classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      live_classes: {
+        Row: {
+          board: Json
+          created_at: string
+          current_section: string
+          ended_at: string | null
+          id: string
+          started_at: string
+          status: string
+          student_id: string
+          teacher_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          board?: Json
+          created_at?: string
+          current_section?: string
+          ended_at?: string | null
+          id?: string
+          started_at?: string
+          status?: string
+          student_id: string
+          teacher_id: string
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          board?: Json
+          created_at?: string
+          current_section?: string
+          ended_at?: string | null
+          id?: string
+          started_at?: string
+          status?: string
+          student_id?: string
+          teacher_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       mono_payments: {
         Row: {
           amount: number
