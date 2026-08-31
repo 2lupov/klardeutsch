@@ -14,7 +14,7 @@ import {
   fetchLiveItems,
 } from "@/lib/live-class";
 import { Play, Square, Trash2 } from "lucide-react";
-import BoardEditor from "@/components/live/BoardEditor";
+import BoardEditor, { type BoardApi } from "@/components/live/BoardEditor";
 import MaterialPicker from "@/components/live/MaterialPicker";
 import LiveBookPagePicker from "@/components/books/LiveBookPagePicker";
 
@@ -146,6 +146,7 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
   const [items, setItems] = useState<LiveItem[]>([]);
   const [answers, setAnswers] = useState<any[]>([]);
   const [ended, setEnded] = useState(cls.status === "ended");
+  const boardApi = useRef<BoardApi | null>(null);
 
   const reloadItems = async () => setItems(await fetchLiveItems(cls.id));
 
