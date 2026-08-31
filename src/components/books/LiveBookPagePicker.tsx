@@ -138,8 +138,16 @@ export default function LiveBookPagePicker({
             return (
               <button
                 key={p.id}
+                draggable={!!onToBoard}
+                onDragStart={(e) => {
+                  const u = longUrls[p.image_path] || urls[p.image_path];
+                  if (!u) return;
+                  e.dataTransfer.setData("application/x-board-image", u);
+                  e.dataTransfer.setData("text/plain", u);
+                  e.dataTransfer.effectAllowed = "copy";
+                }}
                 onClick={() => (onToBoard ? toBoard(p) : show(p))}
-                className={`relative rounded-xl overflow-hidden border-2 transition ${
+                className={`relative rounded-xl overflow-hidden border-2 transition ${onToBoard ? "cursor-grab active:cursor-grabbing" : ""} ${
                   on ? "border-emerald-500" : "border-slate-200 hover:border-indigo-300"
                 }`}
               >
