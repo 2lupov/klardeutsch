@@ -832,6 +832,26 @@ function LektionenEditor({
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [saving, setSaving] = useState(false);
+  const [aiBusy, setAiBusy] = useState(false);
+  const [aiSummary, setAiSummary] = useState<string | null>(null);
+
+  const runAi = async () => {
+    if (lektionen.length && !confirm("ІІ перестворить розділи книги. Поточні Lektionen буде замінено. Продовжити?")) return;
+    setAiBusy(true);
+    setAiSummary(null);
+    try {
+      const res = await detectLektionen(bookId, true);
+      setAiSummary(res.summary);
+      toast.success(
+        `ІІ створила розділів: ${res.lektionen.length}${res.audio_linked ? ` · аудіо привʼязано: ${res.audio_linked}` : ""}`,
+      );
+      onChanged();
+    } catch (e: any) {
+      toast.error(e?.message ?? "ІІ не змогла визначити розділи");
+    } finally {
+      setAiBusy(false);
+    }
+  };
 
   const add = async () => {
     const n = Number(number);
@@ -860,7 +880,24 @@ function LektionenEditor({
 
   return (
     <Card className="p-4">
-      <h3 className="text-sm font-semibold text-slate-900 mb-3">Lektionen (розділи книги)</h3>
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+        <h3 className="text-sm font-semibold text-slate-900">Lektionen (розділи книги)</h3>
+        <button
+          onClick={runAi}
+          disabled={aiBusy}
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-medium disabled:opacity-60"
+        >
+          {aiBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+          ІІ створює Lektionen
+        </button>
+      </div>
+      <p className="text-xs text-slate-500 -mt-2 mb-3">
+        ІІ сама читає книгу, визначає розділи з межами сторінок, привʼязує сторінки й розкладає аудіо по Lektionen.
+      </p>
+      {aiSummary && (
+        <p className="text-xs text-slate-600 mb-3 rounded-xl bg-slate-50 border border-slate-200 p-2.5">{aiSummary}</p>
+      )}
+
       {lektionen.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-3">
           {lektionen.map((l) => (
