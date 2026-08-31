@@ -1122,13 +1122,21 @@ function AssignBookHomeworkModal({
       try {
         const tracks = await listAudio(book.id);
         setAudio(tracks);
-        // auto-select audio that belongs to the Lektionen of the selected pages
-        const lektionIds = new Set(
-          tasks
-            .map((t) => pages.find((p) => p.id === t.page_id)?.lektion_id)
-            .filter(Boolean) as string[],
-        );
-        setAudioIds(tracks.filter((t) => t.lektion_id && lektionIds.has(t.lektion_id)).map((t) => t.id));
+        if (plan) {
+          const planAudio = new Set([
+            ...plan.stages.flatMap((s) => s.audio_ids),
+            ...plan.homework.audio_ids,
+          ]);
+          setAudioIds(tracks.filter((t) => planAudio.has(t.id)).map((t) => t.id));
+        } else {
+          // auto-select audio that belongs to the Lektionen of the selected pages
+          const lektionIds = new Set(
+            tasks
+              .map((t) => pages.find((p) => p.id === t.page_id)?.lektion_id)
+              .filter(Boolean) as string[],
+          );
+          setAudioIds(tracks.filter((t) => t.lektion_id && lektionIds.has(t.lektion_id)).map((t) => t.id));
+        }
       } catch { /* ignore */ }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1140,7 +1148,8 @@ function AssignBookHomeworkModal({
     try {
       const { data: auth } = await supabase.auth.getUser();
       const payload = {
-        category: "book",
+        category: plan ? "book_plan" : "book",
+        plan: plan ?? undefined,
         book: { id: book.id, title: book.title, kind: book.kind, level: book.level },
         audio: audio
           .filter((a) => audioIds.includes(a.id))
