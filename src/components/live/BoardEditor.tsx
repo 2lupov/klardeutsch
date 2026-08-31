@@ -39,7 +39,7 @@ export default function BoardEditor({ classId, initial }: { classId: string; ini
     clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
       supabase.from("live_classes").update({ board: next as any }).eq("id", classId);
-    }, 200);
+    }, 120);
   };
 
   const commit = (next: BoardEl[]) => {
@@ -106,7 +106,11 @@ export default function BoardEditor({ classId, initial }: { classId: string; ini
 
     if (dragging.current) {
       const { id, dx, dy } = dragging.current;
-      setEls((prev) => prev.map((x) => (x.id === id ? { ...x, x: p.x - dx, y: p.y - dy } : x)));
+      setEls((prev) => {
+        const next = prev.map((x) => (x.id === id ? { ...x, x: p.x - dx, y: p.y - dy } : x));
+        persist(next);
+        return next;
+      });
       return;
     }
 
@@ -114,11 +118,19 @@ export default function BoardEditor({ classId, initial }: { classId: string; ini
     if (!d) return;
     if (d.type === "stroke") {
       d.points!.push(p);
-      setEls((prev) => prev.map((x) => (x.id === d.id ? { ...d, points: [...d.points!] } : x)));
+      setEls((prev) => {
+        const next = prev.map((x) => (x.id === d.id ? { ...d, points: [...d.points!] } : x));
+        persist(next);
+        return next;
+      });
     } else {
       d.w = p.x - (d.x || 0);
       d.h = p.y - (d.y || 0);
-      setEls((prev) => prev.map((x) => (x.id === d.id ? { ...d } : x)));
+      setEls((prev) => {
+        const next = prev.map((x) => (x.id === d.id ? { ...d } : x));
+        persist(next);
+        return next;
+      });
     }
   };
 
