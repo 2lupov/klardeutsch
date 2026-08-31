@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { signedPageUrl, type BookTaskContent } from "@/lib/books";
+import { signedPageUrl, signedAudioUrl, type BookTaskContent } from "@/lib/books";
 import BookTheoryBlock from "@/components/books/BookTheoryBlock";
 import { toast } from "sonner";
 
@@ -30,6 +30,13 @@ interface BookTaskPayload {
   image_path: string | null;
 }
 
+interface AudioPayload {
+  id: string;
+  title: string;
+  track_no: number | null;
+  file_path: string;
+}
+
 interface Assignment {
   id: string;
   title: string;
@@ -37,8 +44,13 @@ interface Assignment {
   level: string | null;
   due_at: string | null;
   status: string;
-  payload: { book?: { title?: string; kind?: string }; tasks?: BookTaskPayload[] };
+  payload: {
+    book?: { title?: string; kind?: string };
+    tasks?: BookTaskPayload[];
+    audio?: AudioPayload[];
+  };
 }
+
 
 const KIND_LABEL: Record<string, string> = {
   reading: "Читання",
@@ -61,6 +73,8 @@ export default function StudentBookHomework() {
   const [loading, setLoading] = useState(true);
   const [answers, setAnswers] = useState<Record<string, Record<number, string | number>>>({});
   const [pageUrls, setPageUrls] = useState<Record<string, string>>({});
+  const [audioUrls, setAudioUrls] = useState<Record<string, string>>({});
+
   const [zoom, setZoom] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<{ correct: number; total: number; score: number | null } | null>(null);
@@ -93,6 +107,19 @@ export default function StudentBookHomework() {
         }),
       );
       setPageUrls(urls);
+
+      const tracks = ((data as any).payload?.audio ?? []) as AudioPayload[];
+      if (tracks.length) {
+        const aUrls: Record<string, string> = {};
+        await Promise.all(
+          tracks.map(async (t) => {
+            const u = await signedAudioUrl(t.file_path);
+            if (u) aUrls[t.file_path] = u;
+          }),
+        );
+        setAudioUrls(aUrls);
+      }
+
 
       const saved = localStorage.getItem(storageKey);
       if (saved) {
@@ -200,6 +227,27 @@ export default function StudentBookHomework() {
           )}
         </div>
       )}
+
+      {(assignment.payload?.audio ?? []).length > 0 && (
+        <div className="mt-6 space-y-2">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            Аудіо (Hören)
+          </h2>
+          {(assignment.payload?.audio ?? []).map((a) => (
+            <div key={a.id} className="rounded-2xl border border-border bg-card p-3">
+              <p className="text-sm font-medium">
+                {a.track_no ? `${a.track_no}. ` : ""}{a.title}
+              </p>
+              {audioUrls[a.file_path] ? (
+                <audio src={audioUrls[a.file_path]} controls preload="none" className="mt-2 w-full" />
+              ) : (
+                <div className="mt-2 h-8 rounded-lg bg-muted animate-pulse" />
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
 
       {theoryBlocks.length > 0 && (
         <div className="mt-6 space-y-3">

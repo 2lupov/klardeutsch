@@ -8,10 +8,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, SectionHeader, EmptyState } from "./_ui";
 import {
   Book, BookKind, BookLektion, BookPage, BookTask, BookAudio, BOOK_KIND_LABEL,
-  bookToBank, createBook, deleteAudio, deleteBook, deletePage, deleteTask, insertAudio,
-  linkPagesToLektion, listAudio, listBooks, listLektionen, listPages, listTasks,
+  bookToBank, createBook, deleteAudio, deleteBook, deletePage, deleteTask, detectLektionen,
+  insertAudio, linkPagesToLektion, listAudio, listBooks, listLektionen, listPages, listTasks,
   recognisePage, signedAudioUrl, signedPageUrls, updateAudio, uploadAudioFile, upsertLektion,
 } from "@/lib/books";
+
 import PdfUploader from "@/components/books/PdfUploader";
 import BookArchiveImporter from "@/components/books/BookArchiveImporter";
 import BookTheoryBlock from "@/components/books/BookTheoryBlock";
@@ -832,6 +833,26 @@ function LektionenEditor({
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [saving, setSaving] = useState(false);
+  const [aiBusy, setAiBusy] = useState(false);
+  const [aiSummary, setAiSummary] = useState<string | null>(null);
+
+  const runAi = async () => {
+    if (lektionen.length && !confirm("ІІ перестворить розділи книги. Поточні Lektionen буде замінено. Продовжити?")) return;
+    setAiBusy(true);
+    setAiSummary(null);
+    try {
+      const res = await detectLektionen(bookId, true);
+      setAiSummary(res.summary);
+      toast.success(
+        `ІІ створила розділів: ${res.lektionen.length}${res.audio_linked ? ` · аудіо привʼязано: ${res.audio_linked}` : ""}`,
+      );
+      onChanged();
+    } catch (e: any) {
+      toast.error(e?.message ?? "ІІ не змогла визначити розділи");
+    } finally {
+      setAiBusy(false);
+    }
+  };
 
   const add = async () => {
     const n = Number(number);
@@ -860,7 +881,24 @@ function LektionenEditor({
 
   return (
     <Card className="p-4">
-      <h3 className="text-sm font-semibold text-slate-900 mb-3">Lektionen (розділи книги)</h3>
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+        <h3 className="text-sm font-semibold text-slate-900">Lektionen (розділи книги)</h3>
+        <button
+          onClick={runAi}
+          disabled={aiBusy}
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-medium disabled:opacity-60"
+        >
+          {aiBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+          ІІ створює Lektionen
+        </button>
+      </div>
+      <p className="text-xs text-slate-500 -mt-2 mb-3">
+        ІІ сама читає книгу, визначає розділи з межами сторінок, привʼязує сторінки й розкладає аудіо по Lektionen.
+      </p>
+      {aiSummary && (
+        <p className="text-xs text-slate-600 mb-3 rounded-xl bg-slate-50 border border-slate-200 p-2.5">{aiSummary}</p>
+      )}
+
       {lektionen.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-3">
           {lektionen.map((l) => (
@@ -915,6 +953,8 @@ function AssignBookHomeworkModal({
   const [instructions, setInstructions] = useState("");
   const [dueAt, setDueAt] = useState("");
   const [saving, setSaving] = useState(false);
+  const [audio, setAudio] = useState<BookAudio[]>([]);
+  const [audioIds, setAudioIds] = useState<string[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -926,7 +966,19 @@ function AssignBookHomeworkModal({
           email: u.email,
         })),
       );
+      try {
+        const tracks = await listAudio(book.id);
+        setAudio(tracks);
+        // auto-select audio that belongs to the Lektionen of the selected pages
+        const lektionIds = new Set(
+          tasks
+            .map((t) => pages.find((p) => p.id === t.page_id)?.lektion_id)
+            .filter(Boolean) as string[],
+        );
+        setAudioIds(tracks.filter((t) => t.lektion_id && lektionIds.has(t.lektion_id)).map((t) => t.id));
+      } catch { /* ignore */ }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const submit = async () => {
@@ -937,6 +989,10 @@ function AssignBookHomeworkModal({
       const payload = {
         category: "book",
         book: { id: book.id, title: book.title, kind: book.kind, level: book.level },
+        audio: audio
+          .filter((a) => audioIds.includes(a.id))
+          .map((a) => ({ id: a.id, title: a.title, track_no: a.track_no, file_path: a.file_path })),
+
         tasks: tasks.map((t) => {
           const p = pages.find((x) => x.id === t.page_id);
           return {
@@ -1001,6 +1057,32 @@ function AssignBookHomeworkModal({
         <Field label="Дедлайн">
           <input type="datetime-local" value={dueAt} onChange={(e) => setDueAt(e.target.value)} className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm" />
         </Field>
+        {audio.length > 0 && (
+          <Field label="Аудіо (Hören) до завдання">
+            <div className="max-h-40 overflow-y-auto rounded-xl border border-slate-200 divide-y divide-slate-100">
+              {audio.map((a) => {
+                const on = audioIds.includes(a.id);
+                return (
+                  <button
+                    key={a.id}
+                    onClick={() => setAudioIds((v) => (on ? v.filter((x) => x !== a.id) : [...v, a.id]))}
+                    className={`w-full flex items-center justify-between px-3 py-2 text-sm text-left ${on ? "bg-emerald-50" : "hover:bg-slate-50"}`}
+                  >
+                    <span className="truncate">
+                      <span className="text-slate-400 text-xs mr-2">{a.track_no ?? "—"}</span>
+                      {a.title}
+                    </span>
+                    {on && <Check className="w-4 h-4 text-emerald-600 shrink-0" />}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mt-1 text-[11px] text-slate-400">
+              Треки з Lektion вибраних сторінок позначені автоматично.
+            </p>
+          </Field>
+        )}
+
         <Field label="Учні *">
           <div className="max-h-52 overflow-y-auto rounded-xl border border-slate-200 divide-y divide-slate-100">
             {students.length === 0 ? (
