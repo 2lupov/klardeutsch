@@ -91,7 +91,22 @@ const STATUS_META: Record<string, { label: string; bg: string; color: string }> 
   graded: { label: "Перевірено", bg: "#D1FAE5", color: "#065F46" },
 };
 
+type CategoryKey = "test" | "homework" | "reading" | "course";
+
+const CATEGORIES: { key: CategoryKey; label: string; bg: string; color: string }[] = [
+  { key: "test", label: "📝 Тест", bg: "#EDE9FE", color: "#5B21B6" },
+  { key: "homework", label: "🏠 Домашка", bg: "#FEF3C7", color: "#92400E" },
+  { key: "reading", label: "📖 Читання", bg: "#DBEAFE", color: "#1E40AF" },
+  { key: "course", label: "🎓 Курси", bg: "#D1FAE5", color: "#065F46" },
+];
+
+const catOf = (a?: { payload?: any } | null): CategoryKey => {
+  const c = a?.payload?.category;
+  return CATEGORIES.some((x) => x.key === c) ? c : "test";
+};
+
 const inputCls = "w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm bg-white";
+
 
 /* ─────────── page ─────────── */
 
@@ -103,7 +118,11 @@ export default function StandaloneAssignmentsPage() {
   const [q, setQ] = useState("");
   const [showNew, setShowNew] = useState(false);
   const [editing, setEditing] = useState<Assignment | null>(null);
+  const [duplicating, setDuplicating] = useState<Assignment | null>(null);
+  const [assignMore, setAssignMore] = useState<Assignment | null>(null);
+  const [cat, setCat] = useState<CategoryKey | "all">("all");
   const [review, setReview] = useState<Assignment | null>(null);
+
 
 
   const load = async () => {
@@ -141,11 +160,12 @@ export default function StandaloneAssignmentsPage() {
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
-    if (!s) return assignments;
-    return assignments.filter(
-      (a) => a.title.toLowerCase().includes(s) || nameOf(a.student_id).toLowerCase().includes(s),
-    );
-  }, [assignments, q, students]);
+    return assignments.filter((a) => {
+      if (cat !== "all" && catOf(a) !== cat) return false;
+      if (!s) return true;
+      return a.title.toLowerCase().includes(s) || nameOf(a.student_id).toLowerCase().includes(s);
+    });
+  }, [assignments, q, students, cat]);
 
   const remove = async (id: string) => {
     const { error } = await supabase.from("student_assignments").delete().eq("id", id);
@@ -182,6 +202,25 @@ export default function StandaloneAssignmentsPage() {
         />
       </div>
 
+      <div className="flex flex-wrap gap-1.5">
+        {[{ key: "all" as const, label: "Усі" }, ...CATEGORIES].map((c) => {
+          const count = c.key === "all" ? assignments.length : assignments.filter((a) => catOf(a) === c.key).length;
+          const on = cat === c.key;
+          return (
+            <button
+              key={c.key}
+              onClick={() => setCat(c.key as any)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold border ${
+                on ? "border-indigo-300 bg-indigo-50 text-indigo-700" : "border-slate-200 text-slate-600 hover:bg-slate-50"
+              }`}
+            >
+              {c.label} <span className="opacity-60">{count}</span>
+            </button>
+          );
+        })}
+      </div>
+
+
       {loading ? (
         <div className="space-y-3">
           {[0, 1, 2].map((i) => <Card key={i} className="p-4 animate-pulse h-20"><div /></Card>)}
@@ -203,12 +242,24 @@ export default function StandaloneAssignmentsPage() {
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-semibold text-slate-900">📌 {a.title}</h3>
+                      {(() => {
+                        const c = CATEGORIES.find((x) => x.key === catOf(a))!;
+                        return (
+                          <span
+                            className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                            style={{ background: c.bg, color: c.color }}
+                          >
+                            {c.label}
+                          </span>
+                        );
+                      })()}
                       <span
                         className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
                         style={{ background: meta.bg, color: meta.color }}
                       >
                         {meta.label}
                       </span>
+
                       {a.level && (
                         <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-600">
                           {a.level}
@@ -257,6 +308,19 @@ export default function StandaloneAssignmentsPage() {
                     >
                       ✏️ Редагувати
                     </button>
+                    <button
+                      onClick={() => setAssignMore(a)}
+                      className="px-3 py-2 rounded-xl text-xs font-semibold border border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                    >
+                      ➕ Видати ще учням
+                    </button>
+                    <button
+                      onClick={() => setDuplicating(a)}
+                      className="px-3 py-2 rounded-xl text-xs font-semibold border border-slate-200 text-slate-700 hover:bg-slate-50"
+                    >
+                      📄 Дублювати
+                    </button>
+
 
                     <button
                       onClick={() => remove(a.id)}
@@ -279,6 +343,27 @@ export default function StandaloneAssignmentsPage() {
           onCreated={() => { setShowNew(false); load(); }}
         />
       )}
+
+      {duplicating && (
+        <BuilderModal
+          key={`dup-${duplicating.id}`}
+          duplicating={duplicating}
+          students={students}
+          onClose={() => setDuplicating(null)}
+          onCreated={() => { setDuplicating(null); load(); }}
+        />
+      )}
+
+      {assignMore && (
+        <AssignMoreModal
+          assignment={assignMore}
+          students={students}
+          alreadyIds={assignments.filter((x) => x.title === assignMore.title).map((x) => x.student_id)}
+          onClose={() => setAssignMore(null)}
+          onDone={() => { setAssignMore(null); load(); }}
+        />
+      )}
+
 
       {editing && (
         <BuilderModal
@@ -329,22 +414,102 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
+/* ─────────── assign to more students ─────────── */
+
+function AssignMoreModal({
+  assignment, students, alreadyIds, onClose, onDone,
+}: {
+  assignment: Assignment;
+  students: StudentRow[];
+  alreadyIds: string[];
+  onClose: () => void;
+  onDone: () => void;
+}) {
+  const [ids, setIds] = useState<string[]>([]);
+  const [saving, setSaving] = useState(false);
+
+  const submit = async () => {
+    if (ids.length === 0) return toast({ title: "Оберіть хоча б одного учня", variant: "destructive" });
+    setSaving(true);
+    const { data: auth } = await supabase.auth.getUser();
+    const rows = ids.map((sid) => ({
+      teacher_id: auth?.user?.id,
+      student_id: sid,
+      type: "modular",
+      title: assignment.title,
+      instructions: assignment.instructions ?? null,
+      level: assignment.level ?? null,
+      due_at: assignment.due_at ?? null,
+      payload: { modules: assignment.payload?.modules ?? [], category: catOf(assignment) },
+    }));
+    const { error } = await supabase.from("student_assignments").insert(rows as any);
+    setSaving(false);
+    if (error) return toast({ title: "Помилка", description: error.message, variant: "destructive" });
+    toast({ title: `Видано ще: ${rows.length}` });
+    onDone();
+  };
+
+  return (
+    <Modal title={`Видати «${assignment.title}» іншим учням`} onClose={onClose}>
+      <div className="space-y-4">
+        <div className="max-h-72 overflow-y-auto rounded-xl border border-slate-200 divide-y divide-slate-100">
+          {students.length === 0 ? (
+            <p className="p-3 text-xs text-slate-500">Немає учнів.</p>
+          ) : (
+            students.map((s) => {
+              const has = alreadyIds.includes(s.user_id);
+              const on = ids.includes(s.user_id);
+              return (
+                <button
+                  key={s.user_id}
+                  onClick={() => setIds((v) => (on ? v.filter((i) => i !== s.user_id) : [...v, s.user_id]))}
+                  className={`w-full flex items-center justify-between px-3 py-2 text-sm text-left ${on ? "bg-indigo-50" : "hover:bg-slate-50"}`}
+                >
+                  <span className="truncate">
+                    <b className="text-slate-900">{s.display_name || "Без імені"}</b>{" "}
+                    <span className="text-slate-400 text-xs">{s.email}</span>
+                    {has && <span className="ml-2 text-[10px] font-bold text-amber-600">вже має</span>}
+                  </span>
+                  {on && <Check className="w-4 h-4 text-indigo-600 shrink-0" />}
+                </button>
+              );
+            })
+          )}
+        </div>
+        <button
+          onClick={submit}
+          disabled={saving}
+          className="w-full py-3 rounded-xl text-white text-sm font-semibold disabled:opacity-60"
+          style={{ background: "#4F46E5" }}
+        >
+          {saving ? "Видаю…" : `Видати (${ids.length})`}
+        </button>
+      </div>
+    </Modal>
+  );
+}
+
 /* ─────────── builder ─────────── */
 
+
 function BuilderModal({
-  students, onClose, onCreated, editing,
+  students, onClose, onCreated, editing, duplicating,
 }: {
   students: StudentRow[];
   onClose: () => void;
   onCreated: () => void;
   editing?: Assignment | null;
+  duplicating?: Assignment | null;
 }) {
   const isEdit = !!editing;
+  const src = editing ?? duplicating ?? null;
   const [studentIds, setStudentIds] = useState<string[]>(editing ? [editing.student_id] : []);
-  const [title, setTitle] = useState(editing?.title ?? "");
-  const [instructions, setInstructions] = useState(editing?.instructions ?? "");
-  const [level, setLevel] = useState(editing?.level ?? "A1");
-  const [dueAt, setDueAt] = useState(editing?.due_at ? editing.due_at.slice(0, 10) : "");
+  const [title, setTitle] = useState(src ? (duplicating ? `${src.title} (копія)` : src.title) : "");
+  const [instructions, setInstructions] = useState(src?.instructions ?? "");
+  const [level, setLevel] = useState(src?.level ?? "A1");
+  const [category, setCategory] = useState<CategoryKey>(catOf(src));
+  const [dueAt, setDueAt] = useState(src?.due_at ? src.due_at.slice(0, 10) : "");
+
   const [prompt, setPrompt] = useState("");
   const [picked, setPicked] = useState<Record<string, { on: boolean; count: number; topic: string }>>({
     reading: { on: true, count: 4, topic: "" },
@@ -353,7 +518,7 @@ function BuilderModal({
     writing: { on: false, count: 1, topic: "" },
     speaking: { on: false, count: 3, topic: "" },
   });
-  const [modules, setModules] = useState<TaskModule[]>(editing?.payload?.modules ?? []);
+  const [modules, setModules] = useState<TaskModule[]>(src?.payload?.modules ?? []);
   const [generating, setGenerating] = useState(false);
   const [ttsFor, setTtsFor] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
@@ -448,7 +613,7 @@ function BuilderModal({
           instructions: instructions.trim() || null,
           level,
           due_at: dueAt ? new Date(dueAt).toISOString() : null,
-          payload: { modules },
+          payload: { ...(editing.payload || {}), modules, category },
         } as any)
         .eq("id", editing.id);
       setSaving(false);
@@ -466,7 +631,7 @@ function BuilderModal({
       instructions: instructions.trim() || null,
       level,
       due_at: dueAt ? new Date(dueAt).toISOString() : null,
-      payload: { modules },
+      payload: { modules, category },
     }));
 
     const { error } = await supabase.from("student_assignments").insert(rows as any);
@@ -474,10 +639,11 @@ function BuilderModal({
     if (error) return toast({ title: "Помилка", description: error.message, variant: "destructive" });
     toast({ title: `Видано завдань: ${rows.length}` });
     onCreated();
+
   };
 
   return (
-    <Modal title={isEdit ? "Редагування завдання" : "Нове індивідуальне завдання"} onClose={onClose}>
+    <Modal title={isEdit ? "Редагування завдання" : duplicating ? "Копія завдання — оберіть учнів" : "Нове індивідуальне завдання"} onClose={onClose}>
       <div className="space-y-5">
         {/* students */}
         {!isEdit && (
@@ -509,6 +675,24 @@ function BuilderModal({
         )}
 
 
+        <Field label="🗂 Категорія *">
+          <div className="flex flex-wrap gap-1.5">
+            {CATEGORIES.map((c) => (
+              <button
+                key={c.key}
+                onClick={() => setCategory(c.key)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold border ${
+                  category === c.key
+                    ? "border-indigo-300 bg-indigo-50 text-indigo-700"
+                    : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                }`}
+              >
+                {c.label}
+              </button>
+            ))}
+          </div>
+        </Field>
+
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="sm:col-span-1">
             <Field label="Рівень">
@@ -523,6 +707,7 @@ function BuilderModal({
             </Field>
           </div>
         </div>
+
 
         <Field label="📅 Дедлайн">
           <input type="date" value={dueAt} onChange={(e) => setDueAt(e.target.value)} className={inputCls} />
