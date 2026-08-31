@@ -8,10 +8,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, SectionHeader, EmptyState } from "./_ui";
 import {
   Book, BookKind, BookLektion, BookPage, BookTask, BookAudio, BOOK_KIND_LABEL,
-  bookToBank, createBook, deleteAudio, deleteBook, deletePage, deleteTask, insertAudio,
-  linkPagesToLektion, listAudio, listBooks, listLektionen, listPages, listTasks,
+  bookToBank, createBook, deleteAudio, deleteBook, deletePage, deleteTask, detectLektionen,
+  insertAudio, linkPagesToLektion, listAudio, listBooks, listLektionen, listPages, listTasks,
   recognisePage, signedAudioUrl, signedPageUrls, updateAudio, uploadAudioFile, upsertLektion,
 } from "@/lib/books";
+
 import PdfUploader from "@/components/books/PdfUploader";
 import BookArchiveImporter from "@/components/books/BookArchiveImporter";
 import BookTheoryBlock from "@/components/books/BookTheoryBlock";
