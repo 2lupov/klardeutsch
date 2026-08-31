@@ -326,6 +326,10 @@ function BookDetail({ book, onBack }: { book: Book; onBack: () => void }) {
         <PdfUploader bookId={book.id} startPage={nextPageNumber} onDone={load} />
       </Card>
 
+      <BookAudioPanel bookId={book.id} lektionen={lektionen} />
+
+
+
       <LektionenEditor
         bookId={book.id}
         lektionen={lektionen}
