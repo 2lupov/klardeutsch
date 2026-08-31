@@ -1,0 +1,684 @@
+import { useEffect, useMemo, useState } from "react";
+import {
+  BookMarked, Plus, Trash2, Loader2, Sparkles, X, ChevronLeft, Send, Check,
+} from "lucide-react";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, SectionHeader, EmptyState } from "./_ui";
+import {
+  Book, BookKind, BookLektion, BookPage, BookTask, BOOK_KIND_LABEL,
+  createBook, deleteBook, deletePage, deleteTask, linkPagesToLektion,
+  listBooks, listLektionen, listPages, listTasks, recognisePage,
+  signedPageUrls, upsertLektion,
+} from "@/lib/books";
+import PdfUploader from "@/components/books/PdfUploader";
+
+interface StudentRow {
+  user_id: string;
+  display_name: string | null;
+  email: string | null;
+}
+
+const KIND_LABEL: Record<string, string> = {
+  reading: "📖 Читання",
+  listening: "🎧 Аудіювання",
+  grammar: "🧩 Граматика",
+  writing: "✍️ Письмо",
+  speaking: "🗣 Говоріння",
+  vocab: "📚 Лексика",
+};
+
+export default function BooksPage() {
+  const [books, setBooks] = useState<Book[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [creating, setCreating] = useState(false);
+  const [openBook, setOpenBook] = useState<Book | null>(null);
+
+  const load = async () => {
+    try {
+      setBooks(await listBooks());
+    } catch (e: any) {
+      toast.error(e?.message ?? "Не вдалося завантажити підручники");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  if (openBook) {
+    return <BookDetail book={openBook} onBack={() => { setOpenBook(null); load(); }} />;
+  }
+
+  return (
+    <div className="space-y-4">
+      <SectionHeader
+        title="Підручники"
+        subtitle="Kursbuch / Arbeitsbuch — джерело домашніх завдань"
+        action={
+          <button
+            onClick={() => setCreating(true)}
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium"
+          >
+            <Plus className="w-4 h-4" /> Новий підручник
+          </button>
+        }
+      />
+
+      {loading ? (
+        <Card className="p-10 flex justify-center">
+          <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
+        </Card>
+      ) : books.length === 0 ? (
+        <EmptyState
+          title="Ще немає підручників"
+          description="Додайте Kursbuch або Arbeitsbuch, завантажте сторінки PDF — і AI розпізнає вправи для домашніх завдань."
+          cta={{ label: "Додати підручник", onClick: () => setCreating(true) }}
+        />
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {books.map((b) => (
+            <Card key={b.id} className="p-4">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 text-slate-900 font-semibold">
+                    <BookMarked className="w-4 h-4 text-indigo-600" />
+                    <span className="truncate">{b.title}</span>
+                  </div>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {BOOK_KIND_LABEL[b.kind] ?? b.kind}
+                    {b.level ? ` · ${b.level}` : ""}
+                    {b.publisher ? ` · ${b.publisher}` : ""}
+                  </p>
+                </div>
+                <button
+                  onClick={async () => {
+                    if (!confirm(`Видалити «${b.title}» разом зі сторінками?`)) return;
+                    try {
+                      await deleteBook(b.id);
+                      toast.success("Видалено");
+                      load();
+                    } catch (e: any) {
+                      toast.error(e?.message ?? "Помилка");
+                    }
+                  }}
+                  className="text-slate-300 hover:text-rose-500"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+              <button
+                onClick={() => setOpenBook(b)}
+                className="mt-4 w-full px-3 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              >
+                Відкрити
+              </button>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {creating && (
+        <CreateBookModal
+          onClose={() => setCreating(false)}
+          onCreated={(b) => {
+            setCreating(false);
+            load();
+            setOpenBook(b);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+/* ───────── create book ───────── */
+
+function CreateBookModal({ onClose, onCreated }: { onClose: () => void; onCreated: (b: Book) => void }) {
+  const [title, setTitle] = useState("");
+  const [kind, setKind] = useState<BookKind>("kursbuch");
+  const [level, setLevel] = useState("A1");
+  const [publisher, setPublisher] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const submit = async () => {
+    if (!title.trim()) return toast.error("Вкажіть назву");
+    setSaving(true);
+    try {
+      const b = await createBook({
+        title: title.trim(),
+        kind,
+        level,
+        publisher: publisher.trim() || null,
+        language: "de",
+      });
+      toast.success("Підручник створено");
+      onCreated(b);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Помилка");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Modal title="Новий підручник" onClose={onClose}>
+      <div className="space-y-4">
+        <Field label="Назва *">
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Menschen A1.1 Kursbuch"
+            className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm"
+          />
+        </Field>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Тип">
+            <select
+              value={kind}
+              onChange={(e) => setKind(e.target.value as BookKind)}
+              className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm"
+            >
+              {(Object.keys(BOOK_KIND_LABEL) as BookKind[]).map((k) => (
+                <option key={k} value={k}>{BOOK_KIND_LABEL[k]}</option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Рівень">
+            <select
+              value={level}
+              onChange={(e) => setLevel(e.target.value)}
+              className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm"
+            >
+              {["A1", "A2", "B1", "B2", "C1"].map((l) => (
+                <option key={l} value={l}>{l}</option>
+              ))}
+            </select>
+          </Field>
+        </div>
+        <Field label="Видавництво">
+          <input
+            value={publisher}
+            onChange={(e) => setPublisher(e.target.value)}
+            placeholder="Hueber"
+            className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm"
+          />
+        </Field>
+        <button
+          onClick={submit}
+          disabled={saving}
+          className="w-full px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-medium disabled:opacity-60"
+        >
+          {saving ? "Створення…" : "Створити"}
+        </button>
+      </div>
+    </Modal>
+  );
+}
+
+/* ───────── book detail ───────── */
+
+function BookDetail({ book, onBack }: { book: Book; onBack: () => void }) {
+  const [pages, setPages] = useState<BookPage[]>([]);
+  const [lektionen, setLektionen] = useState<BookLektion[]>([]);
+  const [tasks, setTasks] = useState<BookTask[]>([]);
+  const [urls, setUrls] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(true);
+  const [activePage, setActivePage] = useState<string | null>(null);
+  const [recognising, setRecognising] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [assigning, setAssigning] = useState(false);
+
+  const load = async () => {
+    try {
+      const [p, l, t] = await Promise.all([
+        listPages(book.id),
+        listLektionen(book.id),
+        listTasks(book.id),
+      ]);
+      setPages(p);
+      setLektionen(l);
+      setTasks(t);
+      setUrls(await signedPageUrls(p.map((x) => x.image_path)));
+      setActivePage((cur) => cur ?? p[0]?.id ?? null);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Помилка завантаження");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [book.id]);
+
+  const nextPageNumber = useMemo(
+    () => (pages.length ? Math.max(...pages.map((p) => p.page_number)) + 1 : 1),
+    [pages],
+  );
+
+  const page = pages.find((p) => p.id === activePage) ?? null;
+  const pageTasks = tasks.filter((t) => t.page_id === activePage);
+  const selectedTasks = tasks.filter((t) => selected.includes(t.id));
+
+  const runRecognise = async (pageId: string) => {
+    setRecognising(pageId);
+    try {
+      const res = await recognisePage(pageId);
+      toast.success(res.tasks ? `Розпізнано вправ: ${res.tasks}` : "Вправ не знайдено на сторінці");
+      await load();
+    } catch (e: any) {
+      toast.error(e?.message ?? "AI не змогла обробити сторінку");
+    } finally {
+      setRecognising(null);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <button onClick={onBack} className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900">
+          <ChevronLeft className="w-4 h-4" /> Усі підручники
+        </button>
+        {selected.length > 0 && (
+          <button
+            onClick={() => setAssigning(true)}
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium"
+          >
+            <Send className="w-4 h-4" /> Видати як домашку ({selected.length})
+          </button>
+        )}
+      </div>
+
+      <SectionHeader
+        title={book.title}
+        subtitle={`${BOOK_KIND_LABEL[book.kind] ?? book.kind}${book.level ? ` · ${book.level}` : ""} · сторінок: ${pages.length} · вправ: ${tasks.length}`}
+      />
+
+      <Card className="p-4">
+        <PdfUploader bookId={book.id} startPage={nextPageNumber} onDone={load} />
+      </Card>
+
+      <LektionenEditor
+        bookId={book.id}
+        lektionen={lektionen}
+        onChanged={load}
+      />
+
+      {loading ? (
+        <Card className="p-10 flex justify-center"><Loader2 className="w-5 h-5 animate-spin text-slate-400" /></Card>
+      ) : pages.length === 0 ? (
+        <EmptyState title="Немає сторінок" description="Завантажте PDF підручника або фото окремих сторінок." />
+      ) : (
+        <div className="grid gap-4 lg:grid-cols-[220px_1fr]">
+          {/* page list */}
+          <Card className="p-2 max-h-[70vh] overflow-y-auto">
+            {pages.map((p) => {
+              const count = tasks.filter((t) => t.page_id === p.id).length;
+              const on = p.id === activePage;
+              return (
+                <button
+                  key={p.id}
+                  onClick={() => setActivePage(p.id)}
+                  className={`w-full text-left px-3 py-2 rounded-xl text-sm flex items-center justify-between ${on ? "bg-indigo-50 text-indigo-700" : "hover:bg-slate-50 text-slate-700"}`}
+                >
+                  <span>Стор. {p.page_number}</span>
+                  <span className={`text-xs ${count ? "text-emerald-600" : "text-slate-400"}`}>
+                    {count ? `${count} вправ` : "—"}
+                  </span>
+                </button>
+              );
+            })}
+          </Card>
+
+          {/* page detail */}
+          <div className="space-y-4">
+            {page && (
+              <Card className="p-4">
+                <div className="flex items-center justify-between gap-2 mb-3">
+                  <h3 className="text-sm font-semibold text-slate-900">Сторінка {page.page_number}</h3>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => runRecognise(page.id)}
+                      disabled={recognising === page.id}
+                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-medium disabled:opacity-60"
+                    >
+                      {recognising === page.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                      Розпізнати вправи
+                    </button>
+                    <button
+                      onClick={async () => {
+                        if (!confirm("Видалити сторінку?")) return;
+                        try {
+                          await deletePage(page);
+                          setActivePage(null);
+                          await load();
+                        } catch (e: any) {
+                          toast.error(e?.message ?? "Помилка");
+                        }
+                      }}
+                      className="text-slate-300 hover:text-rose-500"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+                {urls[page.image_path] ? (
+                  <img
+                    src={urls[page.image_path]}
+                    alt={`Сторінка ${page.page_number}`}
+                    loading="lazy"
+                    className="w-full rounded-xl border border-slate-200"
+                  />
+                ) : (
+                  <div className="h-64 rounded-xl bg-slate-100 animate-pulse" />
+                )}
+              </Card>
+            )}
+
+            <Card className="p-4">
+              <h3 className="text-sm font-semibold text-slate-900 mb-3">Вправи на сторінці</h3>
+              {pageTasks.length === 0 ? (
+                <p className="text-xs text-slate-500">Ще не розпізнано. Натисніть «Розпізнати вправи».</p>
+              ) : (
+                <div className="space-y-2">
+                  {pageTasks.map((t) => {
+                    const on = selected.includes(t.id);
+                    return (
+                      <div
+                        key={t.id}
+                        className={`rounded-xl border p-3 ${on ? "border-indigo-300 bg-indigo-50/50" : "border-slate-200"}`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <button
+                            onClick={() => setSelected((v) => (on ? v.filter((x) => x !== t.id) : [...v, t.id]))}
+                            className={`mt-0.5 w-5 h-5 rounded-md flex items-center justify-center border ${on ? "bg-indigo-600 border-indigo-600 text-white" : "border-slate-300 text-transparent"}`}
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                          </button>
+                          <div className="min-w-0 flex-1">
+                            <div className="text-sm font-medium text-slate-900">
+                              {t.code ? `№${t.code} · ` : ""}{t.title || "Вправа"}
+                            </div>
+                            <div className="text-xs text-slate-500 mt-0.5">
+                              {KIND_LABEL[t.kind ?? ""] ?? t.kind ?? "—"}
+                              {t.content?.format ? ` · ${t.content.format}` : ""}
+                              {t.content?.items?.length ? ` · пунктів: ${t.content.items.length}` : ""}
+                            </div>
+                            {t.instructions && (
+                              <p className="text-xs text-slate-600 mt-1.5 whitespace-pre-wrap">{t.instructions}</p>
+                            )}
+                          </div>
+                          <button
+                            onClick={async () => {
+                              try {
+                                await deleteTask(t.id);
+                                setSelected((v) => v.filter((x) => x !== t.id));
+                                await load();
+                              } catch (e: any) {
+                                toast.error(e?.message ?? "Помилка");
+                              }
+                            }}
+                            className="text-slate-300 hover:text-rose-500"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {assigning && (
+        <AssignBookHomeworkModal
+          book={book}
+          tasks={selectedTasks}
+          pages={pages}
+          onClose={() => setAssigning(false)}
+          onDone={() => {
+            setAssigning(false);
+            setSelected([]);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+/* ───────── lektionen ───────── */
+
+function LektionenEditor({
+  bookId, lektionen, onChanged,
+}: { bookId: string; lektionen: BookLektion[]; onChanged: () => void }) {
+  const [number, setNumber] = useState("");
+  const [title, setTitle] = useState("");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const add = async () => {
+    const n = Number(number);
+    if (!n) return toast.error("Вкажіть номер Lektion");
+    setSaving(true);
+    try {
+      await upsertLektion({
+        book_id: bookId,
+        number: n,
+        title: title.trim() || null,
+        page_from: from ? Number(from) : null,
+        page_to: to ? Number(to) : null,
+      });
+      const fresh = await listLektionen(bookId);
+      const created = fresh.find((l) => l.number === n);
+      if (created) await linkPagesToLektion(created);
+      setNumber(""); setTitle(""); setFrom(""); setTo("");
+      toast.success("Lektion збережено");
+      onChanged();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Помилка");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Card className="p-4">
+      <h3 className="text-sm font-semibold text-slate-900 mb-3">Lektionen (розділи книги)</h3>
+      {lektionen.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-3">
+          {lektionen.map((l) => (
+            <span key={l.id} className="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-100 text-xs text-slate-700">
+              L{l.number} {l.title ? `· ${l.title}` : ""} {l.page_from ? `(с. ${l.page_from}–${l.page_to ?? "?"})` : ""}
+              <button
+                onClick={async () => {
+                  await supabase.from("book_lektionen").delete().eq("id", l.id);
+                  onChanged();
+                }}
+                className="text-slate-400 hover:text-rose-500"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+      <div className="grid gap-2 sm:grid-cols-5">
+        <input value={number} onChange={(e) => setNumber(e.target.value)} placeholder="№" className="px-3 py-2 rounded-xl border border-slate-200 text-sm" />
+        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Назва" className="px-3 py-2 rounded-xl border border-slate-200 text-sm sm:col-span-2" />
+        <input value={from} onChange={(e) => setFrom(e.target.value)} placeholder="стор. від" className="px-3 py-2 rounded-xl border border-slate-200 text-sm" />
+        <input value={to} onChange={(e) => setTo(e.target.value)} placeholder="стор. до" className="px-3 py-2 rounded-xl border border-slate-200 text-sm" />
+      </div>
+      <button
+        onClick={add}
+        disabled={saving}
+        className="mt-3 px-3 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 disabled:opacity-60"
+      >
+        {saving ? "Збереження…" : "Додати Lektion"}
+      </button>
+    </Card>
+  );
+}
+
+/* ───────── assign homework ───────── */
+
+function AssignBookHomeworkModal({
+  book, tasks, pages, onClose, onDone,
+}: {
+  book: Book;
+  tasks: BookTask[];
+  pages: BookPage[];
+  onClose: () => void;
+  onDone: () => void;
+}) {
+  const [students, setStudents] = useState<StudentRow[]>([]);
+  const [ids, setIds] = useState<string[]>([]);
+  const [title, setTitle] = useState(
+    `${book.title} — с. ${[...new Set(tasks.map((t) => pages.find((p) => p.id === t.page_id)?.page_number).filter(Boolean))].join(", ")}`,
+  );
+  const [instructions, setInstructions] = useState("");
+  const [dueAt, setDueAt] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.rpc("get_admin_users");
+      setStudents(
+        ((data as any[]) ?? []).map((u) => ({
+          user_id: u.user_id,
+          display_name: u.display_name,
+          email: u.email,
+        })),
+      );
+    })();
+  }, []);
+
+  const submit = async () => {
+    if (ids.length === 0) return toast.error("Оберіть учнів");
+    setSaving(true);
+    try {
+      const { data: auth } = await supabase.auth.getUser();
+      const payload = {
+        category: "book",
+        book: { id: book.id, title: book.title, kind: book.kind, level: book.level },
+        tasks: tasks.map((t) => {
+          const p = pages.find((x) => x.id === t.page_id);
+          return {
+            id: t.id,
+            code: t.code,
+            kind: t.kind,
+            title: t.title,
+            instructions: t.instructions,
+            format: t.content?.format ?? "open",
+            items: (t.content?.items ?? []).map((it) => ({
+              prompt: it.prompt ?? "",
+              options: it.options ?? undefined,
+              correct_index: it.correct_index ?? null,
+              answer: it.answer ?? null,
+            })),
+            page_number: p?.page_number ?? null,
+            image_path: p?.image_path ?? null,
+          };
+        }),
+      };
+      const rows = ids.map((sid) => ({
+        teacher_id: auth?.user?.id,
+        student_id: sid,
+        type: "book",
+        title: title.trim() || book.title,
+        instructions: instructions.trim() || null,
+        level: book.level,
+        due_at: dueAt ? new Date(dueAt).toISOString() : null,
+        payload,
+      }));
+      const { error } = await supabase.from("student_assignments").insert(rows as any);
+      if (error) throw error;
+      toast.success(`Видано домашок: ${rows.length}`);
+      onDone();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Помилка");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Modal title="Домашка з підручника" onClose={onClose}>
+      <div className="space-y-4">
+        <p className="text-xs text-slate-500">Вибрано вправ: <b className="text-slate-900">{tasks.length}</b></p>
+        <Field label="Назва">
+          <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm" />
+        </Field>
+        <Field label="Коментар для учня">
+          <textarea value={instructions} onChange={(e) => setInstructions(e.target.value)} rows={2} className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm" />
+        </Field>
+        <Field label="Дедлайн">
+          <input type="datetime-local" value={dueAt} onChange={(e) => setDueAt(e.target.value)} className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm" />
+        </Field>
+        <Field label="Учні *">
+          <div className="max-h-52 overflow-y-auto rounded-xl border border-slate-200 divide-y divide-slate-100">
+            {students.length === 0 ? (
+              <p className="p-3 text-xs text-slate-500">Немає учнів.</p>
+            ) : (
+              students.map((s) => {
+                const on = ids.includes(s.user_id);
+                return (
+                  <button
+                    key={s.user_id}
+                    onClick={() => setIds((v) => (on ? v.filter((i) => i !== s.user_id) : [...v, s.user_id]))}
+                    className={`w-full flex items-center justify-between px-3 py-2 text-sm text-left ${on ? "bg-indigo-50" : "hover:bg-slate-50"}`}
+                  >
+                    <span className="truncate">
+                      <b className="text-slate-900">{s.display_name || "Без імені"}</b>{" "}
+                      <span className="text-slate-400 text-xs">{s.email}</span>
+                    </span>
+                    {on && <Check className="w-4 h-4 text-indigo-600 shrink-0" />}
+                  </button>
+                );
+              })
+            )}
+          </div>
+        </Field>
+        <button
+          onClick={submit}
+          disabled={saving}
+          className="w-full px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-medium disabled:opacity-60"
+        >
+          {saving ? "Видача…" : "Видати домашку"}
+        </button>
+      </div>
+    </Modal>
+  );
+}
+
+/* ───────── small ui ───────── */
+
+function Modal({ title, children, onClose }: { title: string; children: React.ReactNode; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 bg-slate-900/40 flex items-start justify-center p-4 overflow-y-auto">
+      <div className="bg-white rounded-2xl w-full max-w-lg my-8 shadow-xl">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+          <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-700"><X className="w-5 h-5" /></button>
+        </div>
+        <div className="p-5">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="block">
+      <span className="text-xs font-medium text-slate-500">{label}</span>
+      <div className="mt-1">{children}</div>
+    </label>
+  );
+}
