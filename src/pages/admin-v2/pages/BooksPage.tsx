@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, SectionHeader, EmptyState } from "./_ui";
 import {
   Book, BookKind, BookLektion, BookPage, BookTask, BookAudio, BOOK_KIND_LABEL,
-  createBook, deleteAudio, deleteBook, deletePage, deleteTask, insertAudio,
+  bookToBank, createBook, deleteAudio, deleteBook, deletePage, deleteTask, insertAudio,
   linkPagesToLektion, listAudio, listBooks, listLektionen, listPages, listTasks,
   recognisePage, signedAudioUrl, signedPageUrls, updateAudio, uploadAudioFile, upsertLektion,
 } from "@/lib/books";
