@@ -24,6 +24,7 @@ export default function LiveClass() {
   const [seen, setSeen] = useState<Record<string, string>>({});
   const [answers, setAnswers] = useState<Record<string, { answer: string; is_correct: boolean | null }>>({});
   const [ready, setReady] = useState(false);
+  const [boardFull, setBoardFull] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) navigate("/auth", { replace: true });
