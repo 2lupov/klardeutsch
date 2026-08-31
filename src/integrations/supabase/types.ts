@@ -1851,6 +1851,7 @@ export type Database = {
       live_classes: {
         Row: {
           board: Json
+          book_page: Json | null
           created_at: string
           current_section: string
           ended_at: string | null
@@ -1864,6 +1865,7 @@ export type Database = {
         }
         Insert: {
           board?: Json
+          book_page?: Json | null
           created_at?: string
           current_section?: string
           ended_at?: string | null
@@ -1877,6 +1879,7 @@ export type Database = {
         }
         Update: {
           board?: Json
+          book_page?: Json | null
           created_at?: string
           current_section?: string
           ended_at?: string | null
