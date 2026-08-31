@@ -328,3 +328,24 @@ export async function recognisePage(pageId: string) {
   if ((data as any)?.error) throw new Error((data as any).error);
   return data as { ok: true; tasks: number };
 }
+
+/** AI-librarian: study the book, build bank folders, import material and generate similar tasks. */
+export interface BookToBankResult {
+  summary: string;
+  imported: number;
+  generated: number;
+  folders: Array<{ folder_id: string; name: string; category: string; imported: number; generated: number }>;
+}
+
+export async function bookToBank(input: {
+  bookId: string;
+  lektionId?: string | null;
+  variants?: number;
+}): Promise<BookToBankResult> {
+  const { data, error } = await supabase.functions.invoke("book-to-bank", {
+    body: { book_id: input.bookId, lektion_id: input.lektionId ?? null, variants: input.variants ?? 4 },
+  });
+  if (error) throw new Error((data as any)?.error || error.message);
+  if ((data as any)?.error) throw new Error((data as any).error);
+  return data as BookToBankResult;
+}
