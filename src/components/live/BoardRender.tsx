@@ -1,6 +1,6 @@
 export interface BoardEl {
   id?: string;
-  type?: "stroke" | "text" | "image" | "shape";
+  type?: "stroke" | "text" | "image" | "shape" | "view";
   // stroke
   points?: { x: number; y: number }[];
   color?: string;
@@ -20,9 +20,41 @@ export interface BoardEl {
 export const BOARD_W = 1000;
 export const BOARD_H = 750;
 
+/** Camera on the infinite canvas: top-left world point + visible width (world units). */
+export interface BoardCam {
+  x: number;
+  y: number;
+  w: number;
+}
+
+export const DEFAULT_CAM: BoardCam = { x: 0, y: 0, w: 1 };
+export const CAM_ID = "__view";
+
+/** Camera is stored inside the board array so it syncs/persists without extra columns. */
+export function camFromBoard(board: BoardEl[] | null | undefined): BoardCam {
+  const el = (board || []).find((e) => e.type === "view");
+  if (!el) return DEFAULT_CAM;
+  return { x: el.x || 0, y: el.y || 0, w: el.w && el.w > 0 ? el.w : 1 };
+}
+
+export function contentOfBoard(board: BoardEl[] | null | undefined): BoardEl[] {
+  return (board || []).filter((e) => e.type !== "view");
+}
+
+export function camToEl(cam: BoardCam): BoardEl {
+  return { id: CAM_ID, type: "view", x: cam.x, y: cam.y, w: cam.w };
+}
+
+export function camTransform(cam: BoardCam) {
+  const k = 1 / (cam.w || 1);
+  return `translate(${-cam.x * BOARD_W * k} ${-cam.y * BOARD_H * k}) scale(${k})`;
+}
+
 /** Renders one board element inside a 1000x750 SVG (coords are normalized 0..1). */
 export function BoardElement({ el }: { el: BoardEl }) {
   const type = el.type || "stroke";
+
+  if (type === "view") return null;
 
   if (type === "stroke") {
     return (
@@ -126,13 +158,16 @@ export function BoardElement({ el }: { el: BoardEl }) {
   );
 }
 
-/** Read-only board view (student side). */
+/** Read-only board view (student side) — follows the teacher's camera. */
 export function BoardView({ elements, className }: { elements: BoardEl[]; className?: string }) {
+  const cam = camFromBoard(elements);
   return (
-    <svg viewBox={`0 0 ${BOARD_W} ${BOARD_H}`} className={className}>
-      {(elements || []).map((el, i) => (
-        <BoardElement key={el.id || i} el={el} />
-      ))}
+    <svg viewBox={`0 0 ${BOARD_W} ${BOARD_H}`} className={className} preserveAspectRatio="xMidYMid slice">
+      <g transform={camTransform(cam)}>
+        {contentOfBoard(elements).map((el, i) => (
+          <BoardElement key={el.id || i} el={el} />
+        ))}
+      </g>
     </svg>
   );
 }
