@@ -59,6 +59,10 @@ export default function CoursesPage() {
     window.dispatchEvent(new CustomEvent("admin-v2:open-builder", { detail: { courseId } }));
   };
 
+  const goTo = (key: string) => {
+    window.dispatchEvent(new CustomEvent("admin-v2:navigate", { detail: { key } }));
+  };
+
   const createCourse = async () => {
     if (!form.title.trim()) return;
     const { data, error } = await supabase.from("courses").insert({
@@ -70,12 +74,16 @@ export default function CoursesPage() {
       available: false,
     } as any).select().single();
     if (error) { toast({ title: "Помилка", description: error.message }); return; }
-    toast({ title: "Курс створено" });
+    toast({
+      title: "Курс створено",
+      description: mode === "ai" ? "Відкриваю AI-конструктор" : "Наповнюйте уроки вручну в конструкторі",
+    });
     setShowNew(false);
     setForm({ title: "", description: "", level: "A1", target_language: createLang, price: 200 });
     await load();
     if (data?.id) openBuilder(data.id);
   };
+
 
   const updateCourse = async () => {
     if (!editing) return;
