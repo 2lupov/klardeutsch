@@ -139,6 +139,22 @@ export async function deleteLektion(id: string) {
   if (error) throw error;
 }
 
+/** AI reads the book and creates its Lektionen, links pages and audio tracks. */
+export async function detectLektionen(bookId: string, replace = true) {
+  const { data, error } = await supabase.functions.invoke("detect-book-lektionen", {
+    body: { book_id: bookId, replace },
+  });
+  if (error) throw new Error((data as any)?.error || error.message);
+  if ((data as any)?.error) throw new Error((data as any).error);
+  return data as {
+    ok: true;
+    summary: string | null;
+    lektionen: BookLektion[];
+    audio_linked: number;
+  };
+}
+
+
 /** Attach pages within a Lektion page range to that Lektion. */
 export async function linkPagesToLektion(lektion: BookLektion) {
   if (lektion.page_from == null || lektion.page_to == null) return;
