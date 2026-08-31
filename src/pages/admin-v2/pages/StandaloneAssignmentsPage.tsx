@@ -156,11 +156,12 @@ export default function StandaloneAssignmentsPage() {
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
-    if (!s) return assignments;
-    return assignments.filter(
-      (a) => a.title.toLowerCase().includes(s) || nameOf(a.student_id).toLowerCase().includes(s),
-    );
-  }, [assignments, q, students]);
+    return assignments.filter((a) => {
+      if (cat !== "all" && catOf(a) !== cat) return false;
+      if (!s) return true;
+      return a.title.toLowerCase().includes(s) || nameOf(a.student_id).toLowerCase().includes(s);
+    });
+  }, [assignments, q, students, cat]);
 
   const remove = async (id: string) => {
     const { error } = await supabase.from("student_assignments").delete().eq("id", id);
@@ -196,6 +197,25 @@ export default function StandaloneAssignmentsPage() {
           className="w-full pl-10 pr-3 py-2.5 rounded-xl border border-slate-200 text-sm bg-white"
         />
       </div>
+
+      <div className="flex flex-wrap gap-1.5">
+        {[{ key: "all" as const, label: "Усі" }, ...CATEGORIES].map((c) => {
+          const count = c.key === "all" ? assignments.length : assignments.filter((a) => catOf(a) === c.key).length;
+          const on = cat === c.key;
+          return (
+            <button
+              key={c.key}
+              onClick={() => setCat(c.key as any)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold border ${
+                on ? "border-indigo-300 bg-indigo-50 text-indigo-700" : "border-slate-200 text-slate-600 hover:bg-slate-50"
+              }`}
+            >
+              {c.label} <span className="opacity-60">{count}</span>
+            </button>
+          );
+        })}
+      </div>
+
 
       {loading ? (
         <div className="space-y-3">
