@@ -209,7 +209,7 @@ lessonTitle: lessonTitleMap.get(h.lesson_id),
                 : tk.status === "submitted"
                 ? t("На перевірці", "На проверке")
                 : t("Виконати", "Выполнить"),
-            route: tk.type === "book" ? `/book-task/${tk.id}` : `/task/${tk.id}`,
+            route: tk.type === "book" || tk.type === "book_plan" ? `/book-task/${tk.id}` : `/task/${tk.id}`,
             taskType: tk.type,
 due_at: tk.due_at,
             grade: sub?.grade ?? sub?.auto_score ?? null,
