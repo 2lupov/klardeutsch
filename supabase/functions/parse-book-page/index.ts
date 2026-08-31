@@ -124,7 +124,7 @@ serve(async (req) => {
             role: "user",
             content: [
               { type: "text", text: `Сторінка ${page.page_number}. Розпізнай теорію (правила, таблиці, Redemittel) і вправи.` },
-              { type: "image_url", image_url: { url: `data:image/jpeg;base64,${base64}` } },
+              { type: "image_url", image_url: { url: `data:${mime};base64,${base64}` } },
             ],
           },
         ],
@@ -142,7 +142,7 @@ serve(async (req) => {
       if (res.status === 429) {
         return json({ error: "Забагато запитів до AI. Спробуйте за хвилину." }, 429);
       }
-      return json({ error: "AI не змогла обробити сторінку" }, 502);
+      return json({ error: `AI не змогла обробити сторінку (код ${res.status}). ${String(details).slice(0, 200)}` }, 502);
     }
 
     const data = await res.json();
