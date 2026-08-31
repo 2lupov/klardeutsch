@@ -118,7 +118,7 @@ export default function CoursesPage() {
         subtitle={isAll ? "Показані курси всіх мов школи" : `Фільтр: тільки ${meta.label.toLowerCase()}`}
         action={
           <button
-            onClick={() => setShowNew(true)}
+            onClick={() => setChoosing(true)}
             className="px-4 py-2 rounded-xl text-white text-sm font-medium"
             style={{ background: "#4F46E5" }}
           >
