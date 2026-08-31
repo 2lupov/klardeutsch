@@ -50,7 +50,7 @@ export default function LiveClass() {
     (async () => {
       const { data } = await supabase.from("live_classes").select("*").eq("id", id).maybeSingle();
       if (cancelled) return;
-      if (!data) { navigate("/assignments", { replace: true }); return; }
+      if (!data || (data as any).status === "ended") { navigate("/assignments", { replace: true }); return; }
       setCls(data as unknown as LiveClassRow);
       setItems(await fetchLiveItems(id));
       const { data: seenRows } = await supabase
@@ -81,7 +81,13 @@ export default function LiveClass() {
     const ch = supabase
       .channel(`live-class:${id}`)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "live_classes", filter: `id=eq.${id}` },
-        ({ new: c }: any) => setCls(c as LiveClassRow))
+        ({ new: c }: any) => {
+          setCls(c as LiveClassRow);
+          if (c?.status === "ended") {
+            toast.success("Урок завершено");
+            navigate("/assignments", { replace: true });
+          }
+        })
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "live_class_items", filter: `class_id=eq.${id}` },
         ({ new: it }: any) => {
           setItems((prev) => [...prev, it as LiveItem]);
@@ -102,7 +108,7 @@ export default function LiveClass() {
       .subscribe();
 
     return () => { supabase.removeChannel(ch); supabase.removeChannel(boardCh); };
-  }, [id]);
+  }, [id, navigate]);
 
 
   // Учень сам вибирає розділ — вчитель його не перекидає.
