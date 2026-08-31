@@ -12,6 +12,7 @@ import {
 } from "@/lib/live-class";
 import { toast } from "sonner";
 import { BoardView } from "@/components/live/BoardRender";
+import { signedPageUrl } from "@/lib/books";
 
 export default function LiveClass() {
   const { id } = useParams<{ id: string }>();
