@@ -96,3 +96,19 @@ export async function markSectionSeen(classId: string, studentId: string, sectio
       { onConflict: "class_id,student_id,section" },
     );
 }
+
+/* ───────── textbook page shown under the whiteboard ───────── */
+
+export interface LiveBookPage {
+  book_title: string;
+  page_number: number | null;
+  image_path: string;
+}
+
+export async function setLiveBookPage(classId: string, page: LiveBookPage | null) {
+  const { error } = await supabase
+    .from("live_classes")
+    .update({ book_page: page as any })
+    .eq("id", classId);
+  if (error) throw error;
+}

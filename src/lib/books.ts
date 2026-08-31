@@ -381,3 +381,61 @@ export async function bookToBank(input: {
   if ((data as any)?.error) throw new Error((data as any).error);
   return data as BookToBankResult;
 }
+
+/* ───────── lesson plan (теорія → вправи → аудіо → домашка) ───────── */
+
+export type LessonStageType =
+  | "warmup" | "theory" | "exercise" | "audio" | "speaking" | "writing" | "review";
+
+export interface LessonPlanStage {
+  type: LessonStageType;
+  title: string;
+  minutes: number;
+  student_text: string | null;
+  teacher_note: string | null;
+  task_ids: string[];
+  audio_ids: string[];
+}
+
+export interface BookLessonPlan {
+  title: string;
+  level: string | null;
+  summary: string | null;
+  goals: string[];
+  vocabulary: Array<{ de: string; uk: string }>;
+  minutes: number;
+  stages: LessonPlanStage[];
+  homework: { instructions: string | null; task_ids: string[]; audio_ids: string[] };
+  book: { id: string; title: string; kind: string; level: string | null };
+  lektion: { id: string; number: number; title: string | null } | null;
+}
+
+export const STAGE_META: Record<LessonStageType, { label: string; icon: string }> = {
+  warmup: { label: "Розігрів", icon: "🔥" },
+  theory: { label: "Теорія", icon: "📐" },
+  exercise: { label: "Вправи", icon: "✏️" },
+  audio: { label: "Аудіювання", icon: "🎧" },
+  speaking: { label: "Говоріння", icon: "🗣" },
+  writing: { label: "Письмо", icon: "📝" },
+  review: { label: "Повторення", icon: "🔁" },
+};
+
+/** AI builds a full lesson plan from a Lektion of the textbook. */
+export async function generateBookLessonPlan(input: {
+  bookId: string;
+  lektionId?: string | null;
+  minutes?: number;
+  notes?: string;
+}): Promise<BookLessonPlan> {
+  const { data, error } = await supabase.functions.invoke("generate-book-lesson-plan", {
+    body: {
+      book_id: input.bookId,
+      lektion_id: input.lektionId ?? null,
+      minutes: input.minutes ?? 60,
+      notes: input.notes ?? "",
+    },
+  });
+  if (error) throw new Error((data as any)?.error || error.message);
+  if ((data as any)?.error) throw new Error((data as any).error);
+  return (data as any).plan as BookLessonPlan;
+}
