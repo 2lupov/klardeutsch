@@ -1648,6 +1648,98 @@ export type Database = {
         }
         Relationships: []
       }
+      material_folders: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          is_published: boolean
+          level: string | null
+          name: string
+          owner_id: string | null
+          tags: string[]
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          level?: string | null
+          name: string
+          owner_id?: string | null
+          tags?: string[]
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          level?: string | null
+          name?: string
+          owner_id?: string | null
+          tags?: string[]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      material_items: {
+        Row: {
+          content: Json
+          created_at: string
+          folder_id: string
+          id: string
+          kind: string
+          level: string | null
+          owner_id: string | null
+          sort_order: number
+          source: string
+          tags: string[]
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          folder_id: string
+          id?: string
+          kind?: string
+          level?: string | null
+          owner_id?: string | null
+          sort_order?: number
+          source?: string
+          tags?: string[]
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          folder_id?: string
+          id?: string
+          kind?: string
+          level?: string | null
+          owner_id?: string | null
+          sort_order?: number
+          source?: string
+          tags?: string[]
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_items_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "material_folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mono_payments: {
         Row: {
           amount: number
