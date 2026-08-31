@@ -114,6 +114,17 @@ const StudentTask = () => {
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
 
+  // ── autosave (draft progress in localStorage) ──
+  const draftKey = user && id ? `klar:task-draft:${user.id}:${id}` : null;
+  const restoredRef = useRef(false);
+  const [savedAt, setSavedAt] = useState<number | null>(null);
+
+  const clearDraft = () => {
+    if (draftKey) try { localStorage.removeItem(draftKey); } catch { /* ignore */ }
+    setSavedAt(null);
+  };
+
+
   useEffect(() => {
     if (!id || !user) return;
     let active = true;
