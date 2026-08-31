@@ -9,6 +9,8 @@ CheckCircle2, AlertCircle, ChevronRight, Loader2, Award, FileText,
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import pandaCelebrating from "@/assets/mascot/panda-celebrating.png";
+import pandaSleeping from "@/assets/mascot/panda-sleeping.png";
 
 type AssignmentItem =
   | {
@@ -256,18 +258,18 @@ setItems(merged);
   }, [items]);
 
   const meta = (item: AssignmentItem) => {
-    if (item.kind === "placement") {
+if (item.kind === "placement") {
       return {
         Icon: GraduationCap,
-        accent: "from-amber-500/15 to-yellow-500/5 text-amber-700 dark:text-amber-300",
-        chip: { label: t("Тест", "Тест"), bg: "bg-amber-500/15 text-amber-700 dark:text-amber-300" },
+        iconBg: "bg-amber-500/10 text-amber-700 dark:text-amber-300",
+        chip: { label: t("Тест", "Тест"), bg: "bg-amber-500/10 text-amber-700 dark:text-amber-300" },
       };
     }
     if (item.kind === "homework") {
       return {
         Icon: Sparkles,
-        accent: "from-pink-500/15 to-rose-500/5 text-pink-700 dark:text-pink-300",
-        chip: { label: t("ДЗ", "ДЗ"), bg: "bg-pink-500/15 text-pink-700 dark:text-pink-300" },
+        iconBg: "bg-pink-500/10 text-pink-700 dark:text-pink-300",
+        chip: { label: t("ДЗ", "ДЗ"), bg: "bg-pink-500/10 text-pink-700 dark:text-pink-300" },
       };
     }
     if (item.kind === "task") {
@@ -276,7 +278,7 @@ setItems(merged);
       };
       return {
         Icon: icons[item.taskType] ?? ClipboardList,
-        accent: "from-violet-500/15 to-purple-500/5 text-violet-700 dark:text-violet-300",
+        iconBg: "bg-violet-500/10 text-violet-700 dark:text-violet-300",
         chip: {
           label:
             item.taskType === "modular" ? t("Індивідуальне", "Индивидуальное")
@@ -284,14 +286,14 @@ setItems(merged);
             : item.taskType === "writing" ? t("Письмо", "Письмо")
             : item.taskType === "audio" ? t("Аудіо", "Аудио")
             : t("ДЗ", "ДЗ"),
-          bg: "bg-violet-500/15 text-violet-700 dark:text-violet-300",
+          bg: "bg-violet-500/10 text-violet-700 dark:text-violet-300",
         },
       };
     }
     return {
       Icon: ListChecks,
-      accent: "from-blue-500/15 to-indigo-500/5 text-blue-700 dark:text-blue-300",
-      chip: { label: t("Вправи", "Упражнения"), bg: "bg-blue-500/15 text-blue-700 dark:text-blue-300" },
+      iconBg: "bg-blue-500/10 text-blue-700 dark:text-blue-300",
+      chip: { label: t("Вправи", "Упражнения"), bg: "bg-blue-500/10 text-blue-700 dark:text-blue-300" },
     };
   };
 
@@ -363,9 +365,13 @@ return (
             <div className="flex justify-center py-20">
               <Loader2 className="w-7 h-7 animate-spin text-primary" />
             </div>
-          ) : filtered.length === 0 ? (
+) : filtered.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center">
-              <BookOpen className="w-12 h-12 mx-auto text-muted-foreground/40 mb-3" />
+              <img
+                src={counts.active === 0 ? pandaCelebrating : pandaSleeping}
+                alt=""
+                className="w-28 h-28 mx-auto mb-3 object-contain"
+              />
               <p className="font-display font-bold text-lg mb-1">
                 {filter === "active"
                   ? t("Усе виконано! 🎉", "Всё выполнено! 🎉")
