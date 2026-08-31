@@ -5,7 +5,6 @@ import { insertPage, uploadPageImage } from "@/lib/books";
 
 // pdfjs-dist v4 ESM build + worker
 import * as pdfjsLib from "pdfjs-dist";
-// @ts-expect-error worker asset URL import
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 
 (pdfjsLib as any).GlobalWorkerOptions.workerSrc = pdfWorkerUrl;

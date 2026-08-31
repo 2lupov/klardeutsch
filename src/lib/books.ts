@@ -215,7 +215,7 @@ export async function listTasks(bookId: string, pageIds?: string[]): Promise<Boo
   if (pageIds?.length) q = q.in("page_id", pageIds);
   const { data, error } = await q.order("sort_order");
   if (error) throw error;
-  return (data ?? []) as BookTask[];
+  return (data ?? []) as unknown as BookTask[];
 }
 
 export async function updateTask(id: string, patch: Partial<BookTask>) {
