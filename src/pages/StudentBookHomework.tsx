@@ -246,7 +246,38 @@ export default function StudentBookHomework() {
         </div>
       )}
 
-      {(assignment.payload?.audio ?? []).length > 0 && (
+      {plan && (
+        <div className="mt-5 rounded-3xl border border-border bg-card p-4 md:p-5">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[11px] font-bold uppercase tracking-wide">
+              План уроку
+            </span>
+            <span className="text-xs text-muted-foreground">{plan.minutes} хв · {plan.stages.length} етапів</span>
+          </div>
+          {plan.summary && <p className="mt-2 text-sm text-muted-foreground">{plan.summary}</p>}
+          {plan.goals.length > 0 && (
+            <ul className="mt-3 space-y-1 text-sm">
+              {plan.goals.map((g, i) => (
+                <li key={i} className="flex gap-2">
+                  <span className="text-primary">•</span>
+                  <span>{g}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+          {plan.vocabulary.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {plan.vocabulary.map((v, i) => (
+                <span key={i} className="px-2 py-1 rounded-lg bg-muted text-xs">
+                  <b className="font-semibold">{v.de}</b>{v.uk ? ` — ${v.uk}` : ""}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {!plan && (assignment.payload?.audio ?? []).length > 0 && (
         <div className="mt-6 space-y-2">
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
             Аудіо (Hören)
