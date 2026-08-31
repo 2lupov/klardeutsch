@@ -448,6 +448,16 @@ function BookDetail({ book, onBack }: { book: Book; onBack: () => void }) {
 
       <BookAiLibrarian book={book} lektionen={lektionen} pages={pages} urls={urls} taskCount={tasks.length} />
 
+      <BookLessonPlanPanel
+        book={book}
+        lektionen={lektionen}
+        onIssue={(plan) => {
+          setPlanToIssue(plan);
+          setAssigning(true);
+        }}
+      />
+
+
 
 
 
