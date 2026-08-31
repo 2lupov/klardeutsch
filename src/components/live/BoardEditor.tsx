@@ -682,7 +682,7 @@ export default function BoardEditor({
               top: `${((editingEl.y! - cam.y) / cam.w) * 100 - ((editingEl.size || 0.045) / cam.w) * 100 * 0.78}%`,
               width: `${Math.max(20, 100 - ((editingEl.x! - cam.x) / cam.w) * 100)}%`,
               color: editingEl.color || "#0F172A",
-              fontSize: `calc(${((editingEl.size || 0.045) / cam.w) * 100}% * 0.75)`,
+              fontSize: `${((editingEl.size || 0.045) * BOARD_H * (pxW / BOARD_W)) / cam.w}px`,
               lineHeight: 1.25,
               caretColor: editingEl.color || "#0F172A",
             }}
