@@ -448,7 +448,7 @@ function BuilderModal({
           instructions: instructions.trim() || null,
           level,
           due_at: dueAt ? new Date(dueAt).toISOString() : null,
-          payload: { modules },
+          payload: { ...(editing.payload || {}), modules, category },
         } as any)
         .eq("id", editing.id);
       setSaving(false);
@@ -466,7 +466,7 @@ function BuilderModal({
       instructions: instructions.trim() || null,
       level,
       due_at: dueAt ? new Date(dueAt).toISOString() : null,
-      payload: { modules },
+      payload: { modules, category },
     }));
 
     const { error } = await supabase.from("student_assignments").insert(rows as any);
@@ -474,6 +474,7 @@ function BuilderModal({
     if (error) return toast({ title: "Помилка", description: error.message, variant: "destructive" });
     toast({ title: `Видано завдань: ${rows.length}` });
     onCreated();
+
   };
 
   return (
