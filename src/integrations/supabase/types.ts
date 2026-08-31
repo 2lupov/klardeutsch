@@ -29,6 +29,57 @@ export type Database = {
         }
         Relationships: []
       }
+      book_audio: {
+        Row: {
+          book_id: string
+          created_at: string
+          duration_seconds: number | null
+          file_path: string
+          id: string
+          lektion_id: string | null
+          title: string
+          track_no: number | null
+          updated_at: string
+        }
+        Insert: {
+          book_id: string
+          created_at?: string
+          duration_seconds?: number | null
+          file_path: string
+          id?: string
+          lektion_id?: string | null
+          title: string
+          track_no?: number | null
+          updated_at?: string
+        }
+        Update: {
+          book_id?: string
+          created_at?: string
+          duration_seconds?: number | null
+          file_path?: string
+          id?: string
+          lektion_id?: string | null
+          title?: string
+          track_no?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "book_audio_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "book_audio_lektion_id_fkey"
+            columns: ["lektion_id"]
+            isOneToOne: false
+            referencedRelation: "book_lektionen"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       book_lektionen: {
         Row: {
           book_id: string
