@@ -137,6 +137,87 @@ export default function BoardEditor({ classId, initial }: { classId: string; ini
   const uploadImage = async (file: File) => {
     setUploading(true);
     try {
+      const ext = (file.name.split(".").pop() || "png").toLowerCase();
+      const path = `${classId}/${Date.now()}-${uid()}.${ext}`;
+      const { error } = await supabase.storage.from("board-images").upload(path, file, {
+        contentType: file.type,
+        upsert: true,
+      });
+      if (error) throw error;
+      const { data: signed, error: sErr } = await supabase.storage
+        .from("board-images")
+        .createSignedUrl(path, 60 * 60 * 24 * 365);
+      if (sErr || !signed?.signedUrl) throw sErr || new Error("Не вдалося отримати посилання");
+      const url = signed.signedUrl;
+      const img = new Image();
+      img.onload = () => {
+        const ratio = img.height / img.width || 0.75;
+        const w = 0.34;
+        commit([...els, { id: uid(), type: "image", url, x: 0.08, y: 0.08, w, h: (w * BOARD_W * ratio) / BOARD_H }]);
+      };
+      img.onerror = () => commit([...els, { id: uid(), type: "image", url, x: 0.08, y: 0.08, w: 0.34, h: 0.26 }]);
+      img.src = url;
+      setTool("select");
+      return;
+    }
+
+    if (tool === "pen") {
+      drafting.current = { id: uid(), type: "stroke", color, width, points: [p] };
+      setEls((prev) => [...prev, drafting.current!]);
+      return;
+    }
+
+    // shapes
+    drafting.current = {
+      id: uid(),
+      type: "shape",
+      shape: tool as any,
+      x: p.x,
+      y: p.y,
+      w: 0,
+      h: 0,
+      color,
+      width,
+    };
+    setEls((prev) => [...prev, drafting.current!]);
+  };
+
+  const onMove = (e: React.PointerEvent) => {
+    const p = pos(e);
+
+    if (dragging.current) {
+      const { id, dx, dy } = dragging.current;
+      setEls((prev) => prev.map((x) => (x.id === id ? { ...x, x: p.x - dx, y: p.y - dy } : x)));
+      return;
+    }
+
+    const d = drafting.current;
+    if (!d) return;
+    if (d.type === "stroke") {
+      d.points!.push(p);
+      setEls((prev) => prev.map((x) => (x.id === d.id ? { ...d, points: [...d.points!] } : x)));
+    } else {
+      d.w = p.x - (d.x || 0);
+      d.h = p.y - (d.y || 0);
+      setEls((prev) => prev.map((x) => (x.id === d.id ? { ...d } : x)));
+    }
+  };
+
+  const onUp = () => {
+    if (dragging.current) {
+      dragging.current = null;
+      setEls((prev) => { persist(prev); return prev; });
+      return;
+    }
+    if (drafting.current) {
+      drafting.current = null;
+      setEls((prev) => { persist(prev); return prev; });
+    }
+  };
+
+  const uploadImage = async (file: File) => {
+    setUploading(true);
+    try {
       const path = `board/${classId}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
       const { error } = await supabase.storage.from("tutoring-materials").upload(path, file, {
         contentType: file.type,
