@@ -6,7 +6,10 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { signedPageUrl, signedAudioUrl, type BookTaskContent } from "@/lib/books";
+import {
+  signedPageUrl, signedAudioUrl, STAGE_META,
+  type BookTaskContent, type BookLessonPlan,
+} from "@/lib/books";
 import BookTheoryBlock from "@/components/books/BookTheoryBlock";
 import { toast } from "sonner";
 
