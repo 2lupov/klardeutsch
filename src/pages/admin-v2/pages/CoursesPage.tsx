@@ -21,8 +21,11 @@ export default function CoursesPage() {
   const { lang, createLang, isAll, meta } = useAdminLang();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
+  const [choosing, setChoosing] = useState(false);
+  const [mode, setMode] = useState<"manual" | "ai">("ai");
   const [showNew, setShowNew] = useState(false);
   const [editing, setEditing] = useState<Course | null>(null);
+
 
   const [form, setForm] = useState({
     title: "",
