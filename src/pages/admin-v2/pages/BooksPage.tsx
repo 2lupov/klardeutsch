@@ -256,6 +256,8 @@ function BookDetail({ book, onBack }: { book: Book; onBack: () => void }) {
   const [recognising, setRecognising] = useState<string | null>(null);
   const [selected, setSelected] = useState<string[]>([]);
   const [assigning, setAssigning] = useState(false);
+  const [bulk, setBulk] = useState<{ total: number; done: number; failed: number } | null>(null);
+  const bulkStop = useRef(false);
 
   const load = async () => {
     try {
@@ -286,11 +288,28 @@ function BookDetail({ book, onBack }: { book: Book; onBack: () => void }) {
     [pages],
   );
 
+  const isTheory = (t: BookTask) => t.kind === "theory" || t.content?.format === "theory";
+
   const page = pages.find((p) => p.id === activePage) ?? null;
   const pageAll = tasks.filter((t) => t.page_id === activePage);
-  const pageTheory = pageAll.filter((t) => t.kind === "theory" || t.content?.format === "theory");
-  const pageTasks = pageAll.filter((t) => !(t.kind === "theory" || t.content?.format === "theory"));
+  const pageTheory = pageAll.filter(isTheory);
+  const pageTasks = pageAll.filter((t) => !isTheory(t));
   const selectedTasks = tasks.filter((t) => selected.includes(t.id));
+
+  const stats = useMemo(() => {
+    const m = new Map<string, { theory: number; tasks: number }>();
+    for (const t of tasks) {
+      const cur = m.get(t.page_id) ?? { theory: 0, tasks: 0 };
+      if (isTheory(t)) cur.theory += 1;
+      else cur.tasks += 1;
+      m.set(t.page_id, cur);
+    }
+    return m;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tasks]);
+
+  const totalTheory = tasks.filter(isTheory).length;
+  const totalTasks = tasks.length - totalTheory;
 
   const runRecognise = async (pageId: string) => {
     setRecognising(pageId);
@@ -310,6 +329,47 @@ function BookDetail({ book, onBack }: { book: Book; onBack: () => void }) {
       setRecognising(null);
     }
   };
+
+  /** Recognise every page in the background, one by one. */
+  const runRecogniseAll = async (onlyNew: boolean) => {
+    const queue = pages.filter((p) => (onlyNew ? !stats.get(p.id) : true));
+    if (queue.length === 0) {
+      toast.info("Немає сторінок для обробки");
+      return;
+    }
+    bulkStop.current = false;
+    setBulk({ total: queue.length, done: 0, failed: 0 });
+    let done = 0;
+    let failed = 0;
+    for (const p of queue) {
+      if (bulkStop.current) break;
+      try {
+        await recognisePage(p.id);
+      } catch {
+        failed += 1;
+      }
+      done += 1;
+      setBulk({ total: queue.length, done, failed });
+      // refresh the list every few pages so progress is visible
+      if (done % 3 === 0) {
+        try {
+          setTasks(await listTasks(book.id));
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+    try {
+      setTasks(await listTasks(book.id));
+    } catch {
+      /* ignore */
+    }
+    setBulk(null);
+    if (bulkStop.current) toast.info(`Зупинено. Оброблено ${done} з ${queue.length}`);
+    else if (failed) toast.warning(`Готово: ${done - failed} сторінок, помилок ${failed}`);
+    else toast.success(`Готово: оброблено ${done} сторінок`);
+  };
+
 
   return (
     <div className="space-y-4">
