@@ -1,17 +1,20 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   BookMarked, Plus, Trash2, Loader2, Sparkles, X, ChevronLeft, Send, Check,
+  Archive, Music, Upload,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, SectionHeader, EmptyState } from "./_ui";
 import {
-  Book, BookKind, BookLektion, BookPage, BookTask, BOOK_KIND_LABEL,
-  createBook, deleteBook, deletePage, deleteTask, linkPagesToLektion,
-  listBooks, listLektionen, listPages, listTasks, recognisePage,
-  signedPageUrls, upsertLektion,
+  Book, BookKind, BookLektion, BookPage, BookTask, BookAudio, BOOK_KIND_LABEL,
+  createBook, deleteAudio, deleteBook, deletePage, deleteTask, insertAudio,
+  linkPagesToLektion, listAudio, listBooks, listLektionen, listPages, listTasks,
+  recognisePage, signedAudioUrl, signedPageUrls, updateAudio, uploadAudioFile, upsertLektion,
 } from "@/lib/books";
 import PdfUploader from "@/components/books/PdfUploader";
+import BookArchiveImporter from "@/components/books/BookArchiveImporter";
+
 
 interface StudentRow {
   user_id: string;
