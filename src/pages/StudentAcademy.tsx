@@ -141,10 +141,14 @@ const StudentAcademy = () => {
 
       const typeIcon: Record<string, any> = {
         test: ListChecks, homework: FileText, writing: PenLine, audio: Mic, modular: Layers,
+        book: FileText, book_plan: Layers,
       };
       const typeLabel: Record<string, string> = {
         test: "Тест", homework: "ДЗ", writing: "Письмо", audio: "Аудіо", modular: "Модуль",
+        book: "Підручник", book_plan: "Урок",
       };
+      const taskRoute = (tk: any) =>
+        tk.type === "book" || tk.type === "book_plan" ? `/book-task/${tk.id}` : `/task/${tk.id}`;
 
       const allTasks = tasks ?? [];
 
