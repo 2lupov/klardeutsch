@@ -264,88 +264,105 @@ export default function StudentBookHomework() {
         </div>
       )}
 
-      <div className="mt-6 space-y-6">
-        {tasks.map((t) => (
-          <div key={t.id} className="rounded-2xl border border-border bg-card p-4">
-            <div className="flex flex-wrap items-center gap-2">
-              {t.code && (
-                <span className="px-2 py-0.5 rounded-md bg-primary/10 text-primary text-xs font-semibold">
-                  №{t.code}
-                </span>
-              )}
-              <h2 className="text-base font-semibold">{t.title || "Вправа"}</h2>
-              <span className="text-xs text-muted-foreground">
-                {KIND_LABEL[t.kind ?? ""] ?? ""}{t.page_number ? ` · с. ${t.page_number}` : ""}
-              </span>
-            </div>
-            {t.instructions && (
-              <p className="mt-1.5 text-sm text-muted-foreground whitespace-pre-wrap">{t.instructions}</p>
-            )}
-
-            <div className="mt-4 grid gap-4 md:grid-cols-2">
-              {/* original page scan */}
-              {t.image_path && pageUrls[t.image_path] && (
-                <button
-                  onClick={() => setZoom(pageUrls[t.image_path!])}
-                  className="relative group rounded-xl overflow-hidden border border-border"
-                >
-                  <img
-                    src={pageUrls[t.image_path]}
-                    alt={`Сторінка ${t.page_number ?? ""} підручника`}
-                    loading="lazy"
-                    className="w-full"
-                  />
-                  <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-background/90 text-xs">
-                    <ZoomIn className="w-3.5 h-3.5" /> Збільшити
-                  </span>
-                </button>
-              )}
-
-              {/* answers */}
-              <div className="space-y-3">
-                {t.items.length === 0 && (
-                  <p className="text-sm text-muted-foreground">
-                    Виконайте вправу в зошиті — викладач перевірить на уроці.
-                  </p>
+      {plan ? (
+        <div className="mt-6 space-y-6">
+          {plan.stages.map((st, si) => {
+            const stTasks = (st.task_ids ?? []).map((tid) => byId.get(tid)).filter(Boolean) as BookTaskPayload[];
+            const stAudio = (st.audio_ids ?? []).map((aid) => audioById.get(aid)).filter(Boolean) as AudioPayload[];
+            const meta = STAGE_META[st.type] ?? { label: "Етап", icon: "•" };
+            return (
+              <section key={si} className="rounded-3xl border border-border bg-card/60 p-4 md:p-5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-lg">{meta.icon}</span>
+                  <span className="text-[11px] uppercase tracking-wide font-semibold text-primary">{meta.label}</span>
+                  <span className="text-xs text-muted-foreground">· {st.minutes} хв</span>
+                </div>
+                <h2 className="mt-1 text-lg font-bold">{st.title}</h2>
+                {st.student_text && (
+                  <p className="mt-1.5 text-sm text-muted-foreground whitespace-pre-wrap">{st.student_text}</p>
                 )}
-                {t.items.map((it, i) => (
-                  <div key={i} className="rounded-xl bg-muted/40 p-3">
-                    <p className="text-sm font-medium">{i + 1}. {it.prompt}</p>
-                    {t.format === "choice" && it.options?.length ? (
-                      <div className="mt-2 space-y-1.5">
-                        {it.options.map((opt, oi) => {
-                          const on = answers[t.id]?.[i] === oi;
-                          return (
-                            <button
-                              key={oi}
-                              disabled={done}
-                              onClick={() => setAnswer(t.id, i, oi)}
-                              className={`w-full text-left px-3 py-2 rounded-lg border text-sm transition-colors ${
-                                on ? "border-primary bg-primary/10" : "border-border hover:bg-accent"
-                              } disabled:opacity-60`}
-                            >
-                              {opt}
-                            </button>
-                          );
-                        })}
+
+                {stAudio.length > 0 && (
+                  <div className="mt-3 space-y-2">
+                    {stAudio.map((a) => (
+                      <div key={a.id} className="rounded-2xl border border-border bg-background p-3">
+                        <p className="text-sm font-medium">{a.track_no ? `${a.track_no}. ` : ""}{a.title}</p>
+                        {audioUrls[a.file_path] ? (
+                          <audio src={audioUrls[a.file_path]} controls preload="none" className="mt-2 w-full" />
+                        ) : (
+                          <div className="mt-2 h-8 rounded-lg bg-muted animate-pulse" />
+                        )}
                       </div>
-                    ) : (
-                      <textarea
-                        disabled={done}
-                        value={String(answers[t.id]?.[i] ?? "")}
-                        onChange={(e) => setAnswer(t.id, i, e.target.value)}
-                        rows={t.format === "gap" ? 1 : 3}
-                        placeholder={t.format === "gap" ? "Ваша відповідь" : "Напишіть відповідь…"}
-                        className="mt-2 w-full px-3 py-2 rounded-lg border border-border bg-background text-sm disabled:opacity-60"
-                      />
-                    )}
+                    ))}
                   </div>
-                ))}
+                )}
+
+                <div className="mt-3 space-y-4">
+                  {stTasks.map((t) =>
+                    isTheory(t) ? (
+                      <BookTheoryBlock key={t.id} title={t.title} content={t.theory ?? { summary: t.instructions }} />
+                    ) : (
+                      <TaskBlock
+                        key={t.id}
+                        t={t}
+                        answers={answers}
+                        setAnswer={setAnswer}
+                        done={done}
+                        pageUrls={pageUrls}
+                        onZoom={setZoom}
+                      />
+                    ),
+                  )}
+                </div>
+              </section>
+            );
+          })}
+
+          {(plan.homework?.instructions || homeworkTasks.length > 0) && (
+            <section className="rounded-3xl border-2 border-primary/40 bg-primary/5 p-4 md:p-5">
+              <div className="flex items-center gap-2 text-primary">
+                <BookMarked className="w-4 h-4" />
+                <span className="text-[11px] uppercase tracking-wide font-bold">Домашнє завдання</span>
               </div>
-            </div>
-          </div>
-        ))}
-      </div>
+              {plan.homework?.instructions && (
+                <p className="mt-2 text-sm whitespace-pre-wrap">{plan.homework.instructions}</p>
+              )}
+              <div className="mt-3 space-y-4">
+                {homeworkTasks.map((t) =>
+                  isTheory(t) ? (
+                    <BookTheoryBlock key={t.id} title={t.title} content={t.theory ?? { summary: t.instructions }} />
+                  ) : (
+                    <TaskBlock
+                      key={t.id}
+                      t={t}
+                      answers={answers}
+                      setAnswer={setAnswer}
+                      done={done}
+                      pageUrls={pageUrls}
+                      onZoom={setZoom}
+                    />
+                  ),
+                )}
+              </div>
+            </section>
+          )}
+        </div>
+      ) : (
+        <div className="mt-6 space-y-6">
+          {tasks.map((t) => (
+            <TaskBlock
+              key={t.id}
+              t={t}
+              answers={answers}
+              setAnswer={setAnswer}
+              done={done}
+              pageUrls={pageUrls}
+              onZoom={setZoom}
+            />
+          ))}
+        </div>
+      )}
+
 
       {!done && (
         <div className="fixed bottom-20 left-0 right-0 px-4 md:bottom-6">
