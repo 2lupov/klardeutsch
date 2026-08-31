@@ -164,8 +164,11 @@ serve(async (req) => {
 
     // Server-side scoring for book homework
     if (assignment.type === "book") {
-      const bTasks = ((assignment.payload as any)?.tasks ?? []) as any[];
+      const bTasks = (((assignment.payload as any)?.tasks ?? []) as any[]).filter(
+        (bt) => bt?.format !== "theory" && bt?.kind !== "theory",
+      );
       bTasks.forEach((bt) => {
+
         const given = bookAnswers?.find((x: any) => x?.task_id === bt?.id)?.answers ?? [];
         const items = Array.isArray(bt?.items) ? bt.items : [];
         items.forEach((it: any, i: number) => {
