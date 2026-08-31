@@ -228,6 +228,27 @@ export default function StudentBookHomework() {
         </div>
       )}
 
+      {(assignment.payload?.audio ?? []).length > 0 && (
+        <div className="mt-6 space-y-2">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            Аудіо (Hören)
+          </h2>
+          {(assignment.payload?.audio ?? []).map((a) => (
+            <div key={a.id} className="rounded-2xl border border-border bg-card p-3">
+              <p className="text-sm font-medium">
+                {a.track_no ? `${a.track_no}. ` : ""}{a.title}
+              </p>
+              {audioUrls[a.file_path] ? (
+                <audio src={audioUrls[a.file_path]} controls preload="none" className="mt-2 w-full" />
+              ) : (
+                <div className="mt-2 h-8 rounded-lg bg-muted animate-pulse" />
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+
       {theoryBlocks.length > 0 && (
         <div className="mt-6 space-y-3">
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
