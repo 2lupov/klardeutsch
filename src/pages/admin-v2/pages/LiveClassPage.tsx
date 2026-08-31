@@ -226,7 +226,7 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
       </div>
 
       {section === "board" ? (
-        <BoardEditor classId={cls.id} initial={cls.board || []} />
+        <BoardEditor classId={cls.id} initial={cls.board || []} apiRef={boardApi} />
       ) : (
         <Card className="p-5">
           <SectionHeader title="Додати матеріал" subtitle="Учень побачить це одразу" />
@@ -242,7 +242,15 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
         </Card>
       )}
 
-      <LiveBookPagePicker classId={cls.id} current={(cls as any).book_page ?? null} />
+      {section === "board" ? (
+        <LiveBookPagePicker
+          classId={cls.id}
+          onToBoard={(url) => boardApi.current?.insertImage(url)}
+        />
+      ) : (
+        <LiveBookPagePicker classId={cls.id} current={(cls as any).book_page ?? null} />
+      )}
+
 
 
       {pickerOpen && section !== "board" && (
