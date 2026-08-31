@@ -191,10 +191,25 @@ export default function LiveClass() {
         </header>
 
         {section === "board" ? (
-          <div className="flex-1 min-h-0 p-3">
-            <div className="w-full h-full rounded-2xl border border-border bg-card overflow-hidden">
+          <div className={`flex-1 min-h-0 p-3 flex flex-col gap-3 ${cls.book_page ? "overflow-y-auto" : ""}`}>
+            <div className={`w-full rounded-2xl border border-border bg-card overflow-hidden ${cls.book_page ? "h-[55vh] shrink-0" : "h-full"}`}>
               <BoardView elements={cls.board || []} className="w-full h-full" />
             </div>
+            {cls.book_page && (
+              <div className="rounded-2xl border border-border bg-card overflow-hidden">
+                <div className="px-3 py-2 text-xs text-muted-foreground border-b border-border">
+                  {cls.book_page.book_title}
+                  {cls.book_page.page_number ? ` · с. ${cls.book_page.page_number}` : ""}
+                </div>
+                {bookPageUrl ? (
+                  <img src={bookPageUrl} alt="Сторінка підручника" className="w-full" />
+                ) : (
+                  <div className="h-40 flex items-center justify-center text-xs text-muted-foreground">
+                    Завантаження сторінки…
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         ) : (
           <div className="p-5 max-w-3xl">
