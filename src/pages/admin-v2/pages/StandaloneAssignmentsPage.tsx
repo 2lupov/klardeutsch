@@ -296,6 +296,19 @@ export default function StandaloneAssignmentsPage() {
                     >
                       ✏️ Редагувати
                     </button>
+                    <button
+                      onClick={() => setAssignMore(a)}
+                      className="px-3 py-2 rounded-xl text-xs font-semibold border border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                    >
+                      ➕ Видати ще учням
+                    </button>
+                    <button
+                      onClick={() => setDuplicating(a)}
+                      className="px-3 py-2 rounded-xl text-xs font-semibold border border-slate-200 text-slate-700 hover:bg-slate-50"
+                    >
+                      📄 Дублювати
+                    </button>
+
 
                     <button
                       onClick={() => remove(a.id)}
