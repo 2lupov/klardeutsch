@@ -208,7 +208,86 @@ export async function signedPageUrls(paths: string[]): Promise<Record<string, st
   return out;
 }
 
+/* ───────── audio (Hören) ───────── */
+
+export interface BookAudio {
+  id: string;
+  book_id: string;
+  lektion_id: string | null;
+  track_no: number | null;
+  title: string;
+  file_path: string;
+  duration_seconds: number | null;
+  created_at: string;
+}
+
+export async function listAudio(bookId: string): Promise<BookAudio[]> {
+  const { data, error } = await supabase
+    .from("book_audio")
+    .select("*")
+    .eq("book_id", bookId)
+    .order("track_no", { nullsFirst: false });
+  if (error) throw error;
+  return (data ?? []) as BookAudio[];
+}
+
+export async function uploadAudioFile(
+  bookId: string,
+  fileName: string,
+  file: Blob,
+  contentType?: string,
+): Promise<string> {
+  const safe = fileName.replace(/[^\w.\-]+/g, "_");
+  const path = `${bookId}/${Date.now()}-${safe}`;
+  const { error } = await supabase.storage
+    .from("book-audio")
+    .upload(path, file, { contentType: contentType || "audio/mpeg", upsert: true });
+  if (error) throw error;
+  return path;
+}
+
+export async function insertAudio(input: {
+  book_id: string;
+  title: string;
+  file_path: string;
+  track_no?: number | null;
+  lektion_id?: string | null;
+}): Promise<BookAudio> {
+  const { data, error } = await supabase
+    .from("book_audio")
+    .insert(input as any)
+    .select()
+    .single();
+  if (error) throw error;
+  return data as BookAudio;
+}
+
+export async function updateAudio(id: string, patch: Partial<BookAudio>) {
+  const { error } = await supabase.from("book_audio").update(patch as any).eq("id", id);
+  if (error) throw error;
+}
+
+export async function deleteAudio(track: BookAudio) {
+  await supabase.storage.from("book-audio").remove([track.file_path]);
+  const { error } = await supabase.from("book_audio").delete().eq("id", track.id);
+  if (error) throw error;
+}
+
+const audioUrlCache = new Map<string, { url: string; exp: number }>();
+
+export async function signedAudioUrl(path: string): Promise<string | null> {
+  const cached = audioUrlCache.get(path);
+  if (cached && cached.exp > Date.now()) return cached.url;
+  const { data, error } = await supabase.storage
+    .from("book-audio")
+    .createSignedUrl(path, 3600);
+  if (error || !data?.signedUrl) return null;
+  audioUrlCache.set(path, { url: data.signedUrl, exp: Date.now() + 50 * 60 * 1000 });
+  return data.signedUrl;
+}
+
 /* ───────── tasks ───────── */
+
 
 export async function listTasks(bookId: string, pageIds?: string[]): Promise<BookTask[]> {
   let q = supabase.from("book_tasks").select("*").eq("book_id", bookId);
