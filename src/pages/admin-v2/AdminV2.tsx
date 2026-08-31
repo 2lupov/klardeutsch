@@ -17,6 +17,7 @@ import {
   Settings,
   Radio,
   FolderOpen,
+  BookMarked,
   Lock,
   ChevronLeft,
   ExternalLink,
@@ -35,6 +36,7 @@ import AssignmentsPage from "./pages/AssignmentsPage";
 import StandaloneAssignmentsPage from "./pages/StandaloneAssignmentsPage";
 import LiveClassPage from "./pages/LiveClassPage";
 import MaterialsPage from "./pages/MaterialsPage";
+import BooksPage from "./pages/BooksPage";
 import TutorLogsPage from "./pages/TutorLogsPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import SettingsPage from "./pages/SettingsPage";
@@ -49,6 +51,7 @@ type NavKey =
   | "students"
   | "assignments"
   | "standalone"
+  | "books"
   | "materials"
   | "live"
   | "tutor"
@@ -62,6 +65,7 @@ const NAV: { key: NavKey; label: string; icon: any }[] = [
   { key: "studio", label: "Студія завдань", icon: Dumbbell },
   { key: "book", label: "Курс із книги (фото)", icon: Camera },
 
+  { key: "books", label: "Підручники", icon: BookMarked },
   { key: "materials", label: "Банк матеріалів", icon: FolderOpen },
   { key: "live", label: "Живий клас", icon: Radio },
   { key: "students", label: "Учні", icon: Users },
@@ -278,6 +282,8 @@ function PageRouter({ active }: { active: NavKey }) {
 
     case "materials":
       return <MaterialsPage />;
+    case "books":
+      return <BooksPage />;
     case "live":
       return <LiveClassPage />;
     case "students":
