@@ -414,7 +414,83 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
+/* ─────────── assign to more students ─────────── */
+
+function AssignMoreModal({
+  assignment, students, alreadyIds, onClose, onDone,
+}: {
+  assignment: Assignment;
+  students: StudentRow[];
+  alreadyIds: string[];
+  onClose: () => void;
+  onDone: () => void;
+}) {
+  const [ids, setIds] = useState<string[]>([]);
+  const [saving, setSaving] = useState(false);
+
+  const submit = async () => {
+    if (ids.length === 0) return toast({ title: "Оберіть хоча б одного учня", variant: "destructive" });
+    setSaving(true);
+    const { data: auth } = await supabase.auth.getUser();
+    const rows = ids.map((sid) => ({
+      teacher_id: auth?.user?.id,
+      student_id: sid,
+      type: "modular",
+      title: assignment.title,
+      instructions: assignment.instructions ?? null,
+      level: assignment.level ?? null,
+      due_at: assignment.due_at ?? null,
+      payload: { modules: assignment.payload?.modules ?? [], category: catOf(assignment) },
+    }));
+    const { error } = await supabase.from("student_assignments").insert(rows as any);
+    setSaving(false);
+    if (error) return toast({ title: "Помилка", description: error.message, variant: "destructive" });
+    toast({ title: `Видано ще: ${rows.length}` });
+    onDone();
+  };
+
+  return (
+    <Modal title={`Видати «${assignment.title}» іншим учням`} onClose={onClose}>
+      <div className="space-y-4">
+        <div className="max-h-72 overflow-y-auto rounded-xl border border-slate-200 divide-y divide-slate-100">
+          {students.length === 0 ? (
+            <p className="p-3 text-xs text-slate-500">Немає учнів.</p>
+          ) : (
+            students.map((s) => {
+              const has = alreadyIds.includes(s.user_id);
+              const on = ids.includes(s.user_id);
+              return (
+                <button
+                  key={s.user_id}
+                  onClick={() => setIds((v) => (on ? v.filter((i) => i !== s.user_id) : [...v, s.user_id]))}
+                  className={`w-full flex items-center justify-between px-3 py-2 text-sm text-left ${on ? "bg-indigo-50" : "hover:bg-slate-50"}`}
+                >
+                  <span className="truncate">
+                    <b className="text-slate-900">{s.display_name || "Без імені"}</b>{" "}
+                    <span className="text-slate-400 text-xs">{s.email}</span>
+                    {has && <span className="ml-2 text-[10px] font-bold text-amber-600">вже має</span>}
+                  </span>
+                  {on && <Check className="w-4 h-4 text-indigo-600 shrink-0" />}
+                </button>
+              );
+            })
+          )}
+        </div>
+        <button
+          onClick={submit}
+          disabled={saving}
+          className="w-full py-3 rounded-xl text-white text-sm font-semibold disabled:opacity-60"
+          style={{ background: "#4F46E5" }}
+        >
+          {saving ? "Видаю…" : `Видати (${ids.length})`}
+        </button>
+      </div>
+    </Modal>
+  );
+}
+
 /* ─────────── builder ─────────── */
+
 
 function BuilderModal({
   students, onClose, onCreated, editing, duplicating,
