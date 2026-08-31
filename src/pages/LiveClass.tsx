@@ -76,10 +76,9 @@ export default function LiveClass() {
     return () => { supabase.removeChannel(ch); };
   }, [id]);
 
-  // teacher-driven section follow
-  useEffect(() => {
-    if (cls?.current_section) setSection(cls.current_section);
-  }, [cls?.current_section]);
+  // Учень сам вибирає розділ — вчитель його не перекидає.
+  // Про новий матеріал повідомляє червоний індикатор у сайдбарі.
+
 
   // mark current section as seen
   useEffect(() => {
