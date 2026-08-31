@@ -1088,18 +1088,20 @@ function LektionenEditor({
 /* ───────── assign homework ───────── */
 
 function AssignBookHomeworkModal({
-  book, tasks, pages, onClose, onDone,
+  book, tasks, pages, plan, onClose, onDone,
 }: {
   book: Book;
   tasks: BookTask[];
   pages: BookPage[];
+  plan?: BookLessonPlan | null;
   onClose: () => void;
   onDone: () => void;
 }) {
   const [students, setStudents] = useState<StudentRow[]>([]);
   const [ids, setIds] = useState<string[]>([]);
   const [title, setTitle] = useState(
-    `${book.title} — с. ${[...new Set(tasks.map((t) => pages.find((p) => p.id === t.page_id)?.page_number).filter(Boolean))].join(", ")}`,
+    plan?.title ??
+      `${book.title} — с. ${[...new Set(tasks.map((t) => pages.find((p) => p.id === t.page_id)?.page_number).filter(Boolean))].join(", ")}`,
   );
   const [instructions, setInstructions] = useState("");
   const [dueAt, setDueAt] = useState("");
