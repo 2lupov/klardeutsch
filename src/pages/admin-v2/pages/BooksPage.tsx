@@ -510,7 +510,7 @@ function BookDetail({ book, onBack }: { book: Book; onBack: () => void }) {
                       className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-medium disabled:opacity-60"
                     >
                       {recognising === page.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-                      Розпізнати вправи
+Розпізнати вправи та теорію
                     </button>
                     <button
                       onClick={async () => {
@@ -586,7 +586,7 @@ function BookDetail({ book, onBack }: { book: Book; onBack: () => void }) {
             <Card className="p-4">
               <h3 className="text-sm font-semibold text-slate-900 mb-3">Вправи на сторінці</h3>
               {pageTasks.length === 0 ? (
-                <p className="text-xs text-slate-500">Ще не розпізнано. Натисніть «Розпізнати вправи» — AI витягне і теорію, і вправи.</p>
+                <p className="text-xs text-slate-500">Ще не розпізнано. Натисніть «Розпізнати вправи та теорію» — AI витягне і теорію, і вправи.</p>
               ) : (
                 <div className="space-y-2">
                   {pageTasks.map((t) => {
