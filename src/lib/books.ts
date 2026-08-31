@@ -340,10 +340,26 @@ export async function recognisePage(pageId: string) {
   const { data, error } = await supabase.functions.invoke("parse-book-page", {
     body: { page_id: pageId },
   });
-  if (error) throw error;
+  if (error) {
+    // Surface the real server message instead of "non-2xx status code"
+    let message = error.message;
+    const res = (error as any)?.context;
+    if (res && typeof res.text === "function") {
+      try {
+        const body = await res.text();
+        const parsed = JSON.parse(body);
+        if (parsed?.error) message = String(parsed.error);
+        else if (body) message = body.slice(0, 300);
+      } catch {
+        /* keep default message */
+      }
+    }
+    throw new Error(message);
+  }
   if ((data as any)?.error) throw new Error((data as any).error);
-  return data as { ok: true; tasks: number };
+  return data as { ok: true; tasks: number; theory?: number };
 }
+
 
 /** AI-librarian: study the book, build bank folders, import material and generate similar tasks. */
 export interface BookToBankResult {
