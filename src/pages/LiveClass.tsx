@@ -25,6 +25,18 @@ export default function LiveClass() {
   const [answers, setAnswers] = useState<Record<string, { answer: string; is_correct: boolean | null }>>({});
   const [ready, setReady] = useState(false);
   const [boardFull, setBoardFull] = useState(false);
+  const [bookPageUrl, setBookPageUrl] = useState<string | null>(null);
+
+  const bookPagePath = cls?.book_page?.image_path ?? null;
+  useEffect(() => {
+    let cancelled = false;
+    if (!bookPagePath) { setBookPageUrl(null); return; }
+    (async () => {
+      const url = await signedPageUrl(bookPagePath);
+      if (!cancelled) setBookPageUrl(url);
+    })();
+    return () => { cancelled = true; };
+  }, [bookPagePath]);
 
   useEffect(() => {
     if (!loading && !user) navigate("/auth", { replace: true });
