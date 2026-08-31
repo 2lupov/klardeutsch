@@ -241,16 +241,19 @@ const StudentAcademy = () => {
       setReading(readRows);
       setCourses(courseRowsArr);
 
-      // Stats: active / graded / average grade (0–100)
-      const active = [...testRows, ...hwRows].filter((r) => !r.done).length;
-      const graded = [...testRows, ...hwRows].filter((r) => r.graded).length;
+// Stats: active / graded / average grade (0–100)
+      const taskRows = [...testRows, ...hwRows, ...readRows.filter((r) => r.route.startsWith("/task/"))];
+      const active = taskRows.filter((r) => !r.done).length;
+      const graded = taskRows.filter((r) => r.graded).length;
+      const toPct = (g: number, scale: number) => Math.round((g / scale) * 100);
       const grades: number[] = [];
       (subs ?? []).forEach((s: any) => {
-        const g = s.grade ?? s.auto_score;
+        // Manual grade is 1–12 scale, auto_score is already a percentage
+        const g = s.grade != null ? toPct(s.grade, 12) : s.auto_score;
         if (typeof g === "number" && Number.isFinite(g)) grades.push(g);
       });
       (hw ?? []).forEach((h: any) => {
-        if (typeof h.grade === "number" && Number.isFinite(h.grade)) grades.push(h.grade);
+        if (typeof h.grade === "number" && Number.isFinite(h.grade)) grades.push(toPct(h.grade, 5));
       });
       const avg = grades.length ? Math.round(grades.reduce((a, b) => a + b, 0) / grades.length) : null;
       setStats({ active, graded, avg });
@@ -273,8 +276,8 @@ const StudentAcademy = () => {
   const totalTodo = pending.tests + pending.homework;
   const showStats = stats.active > 0 || stats.graded > 0 || stats.avg != null;
 
-  const nextUp = useMemo(() => {
-    const candidates = [...tests, ...homework].filter((r) => !r.done);
+const nextUp = useMemo(() => {
+    const candidates = [...tests, ...homework, ...reading.filter((r) => r.route.startsWith("/task/"))].filter((r) => !r.done);
     if (!candidates.length) return null;
     const withDue = candidates
       .filter((r) => r.due_at)
@@ -292,8 +295,9 @@ const StudentAcademy = () => {
     { key: "courses", label: "Курси", count: pending.courses },
   ];
 
-  const rows = tab === "tests" ? tests : tab === "homework" ? homework : tab === "reading" ? reading : courses;
-  const allClear = totalTodo === 0 && tab !== "courses";
+const rows = tab === "tests" ? tests : tab === "homework" ? homework : tab === "reading" ? reading : courses;
+  const hasAnyContent = tests.length + homework.length + reading.length > 0;
+  const allClear = totalTodo === 0 && hasAnyContent && tab !== "courses";
 
   return (
     <div className="min-h-full bg-background">
@@ -303,8 +307,8 @@ const StudentAcademy = () => {
           <div className="flex items-end justify-between gap-4">
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Моє навчання</p>
-              <h1 className="font-display text-2xl font-black leading-tight">
-                {totalTodo > 0 ? `Треба зробити: ${totalTodo}` : "Усе виконано 🎉"}
+<h1 className="font-display text-2xl font-black leading-tight">
+                {totalTodo > 0 ? `Треба зробити: ${totalTodo}` : hasAnyContent ? "Усе виконано 🎉" : "Ласкаво просимо 👋"}
               </h1>
             </div>
             {totalTodo > 0 && (
@@ -382,21 +386,29 @@ const StudentAcademy = () => {
               </button>
             )}
 
-            {rows.length === 0 ? (
+{rows.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-border p-8 text-center">
                 <img
                   src={allClear ? pandaCelebrating : pandaSleeping}
                   alt=""
                   className="w-24 h-24 mx-auto mb-3 object-contain"
                 />
-                <p className="font-display font-bold">
-                  {allClear ? "Усе виконано! 🎉" : "Тут поки що порожньо"}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {allClear
-                    ? "Гарна робота! Заглянь сюди пізніше"
-                    : "Викладач додасть матеріали найближчим часом"}
-                </p>
+                {allClear ? (
+                  <>
+                    <p className="font-display font-bold">Усе виконано! 🎉</p>
+                    <p className="text-sm text-muted-foreground">Гарна робота! Заглянь сюди пізніше</p>
+                  </>
+                ) : hasAnyContent ? (
+                  <>
+                    <p className="font-display font-bold">Немає завдань у цьому розділі</p>
+                    <p className="text-sm text-muted-foreground">Спробуй інший розділ вище</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="font-display font-bold">Тут поки що порожньо</p>
+                    <p className="text-sm text-muted-foreground">Викладач додасть матеріали найближчим часом</p>
+                  </>
+                )}
               </div>
             ) : (
               <div className="space-y-2">

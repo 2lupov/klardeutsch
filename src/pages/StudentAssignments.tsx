@@ -33,9 +33,10 @@ type AssignmentItem =
       created_at: string;
       action: string;
       route: string;
-      lessonTitle?: string;
+lessonTitle?: string;
       due_at?: string | null;
       grade?: number | null;
+      gradePct?: number | null;
     }
   | {
       kind: "lesson";
@@ -58,9 +59,10 @@ type AssignmentItem =
       created_at: string;
       action: string;
       route: string;
-      taskType: "test" | "homework" | "writing" | "audio" | "modular";
+taskType: "test" | "homework" | "writing" | "audio" | "modular";
       due_at?: string | null;
       grade?: number | null;
+      gradePct?: number | null;
     };
 
 type Filter = "all" | "active" | "done";
@@ -178,9 +180,10 @@ const [items, setItems] = useState<AssignmentItem[]>([]);
               ? t("На перевірці", "На проверке")
               : t("Виконати", "Выполнить"),
           route: `/tutoring/homework/${h.id}`,
-          lessonTitle: lessonTitleMap.get(h.lesson_id),
+lessonTitle: lessonTitleMap.get(h.lesson_id),
           due_at: h.due_at,
           grade: h.grade,
+          gradePct: h.grade != null ? Math.round((h.grade / 5) * 100) : null,
         })),
         ...(tasks ?? []).map<AssignmentItem>((tk: any) => {
           const sub = subMap.get(tk.id);
@@ -208,8 +211,9 @@ const [items, setItems] = useState<AssignmentItem[]>([]);
                 : t("Виконати", "Выполнить"),
             route: `/task/${tk.id}`,
             taskType: tk.type,
-            due_at: tk.due_at,
+due_at: tk.due_at,
             grade: sub?.grade ?? sub?.auto_score ?? null,
+            gradePct: sub?.grade != null ? Math.round((sub.grade / 12) * 100) : sub?.auto_score ?? null,
           };
         }),
         ...(lessons ?? [])
@@ -368,18 +372,38 @@ return (
 ) : filtered.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center">
               <img
-                src={counts.active === 0 ? pandaCelebrating : pandaSleeping}
+                src={counts.all === 0 ? pandaSleeping : pandaCelebrating}
                 alt=""
                 className="w-28 h-28 mx-auto mb-3 object-contain"
               />
-              <p className="font-display font-bold text-lg mb-1">
-                {filter === "active"
-                  ? t("Усе виконано! 🎉", "Всё выполнено! 🎉")
-                  : t("Поки що порожньо", "Пока пусто")}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {t("Завдання з'являться, коли викладач їх призначить", "Задания появятся, когда преподаватель их назначит")}
-              </p>
+              {counts.all === 0 ? (
+                <>
+                  <p className="font-display font-bold text-lg mb-1">
+                    {t("Поки що порожньо", "Пока пусто")}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {t("Завдання з'являться, коли викладач їх призначить", "Задания появятся, когда преподаватель их назначит")}
+                  </p>
+                </>
+              ) : filter === "active" ? (
+                <>
+                  <p className="font-display font-bold text-lg mb-1">
+                    {t("Усе виконано! 🎉", "Всё выполнено! 🎉")}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {t("Гарна робота! Заглянь сюди пізніше", "Отличная работа! Загляни сюда позже")}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="font-display font-bold text-lg mb-1">
+                    {t("Виконаних поки немає", "Выполненных пока нет")}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {t("Як завершиш завдання — воно з'явиться тут", "Когда завершишь задание, оно появится здесь")}
+                  </p>
+                </>
+              )}
             </div>
           ) : (
             <div className="space-y-3">
@@ -415,9 +439,9 @@ return (
                               {item.level} · {item.exercisesCount} {t("вправ", "упр.")}
                             </span>
                           )}
-                          {item.kind === "homework" && item.grade != null && (
+{(item.kind === "homework" || item.kind === "task") && item.gradePct != null && (
                             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-500/15 text-green-700 dark:text-green-300">
-                              {item.grade}/100
+                              {item.gradePct}%
                             </span>
                           )}
                         </div>
