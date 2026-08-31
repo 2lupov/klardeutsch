@@ -242,12 +242,24 @@ export default function StandaloneAssignmentsPage() {
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-semibold text-slate-900">📌 {a.title}</h3>
+                      {(() => {
+                        const c = CATEGORIES.find((x) => x.key === catOf(a))!;
+                        return (
+                          <span
+                            className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                            style={{ background: c.bg, color: c.color }}
+                          >
+                            {c.label}
+                          </span>
+                        );
+                      })()}
                       <span
                         className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
                         style={{ background: meta.bg, color: meta.color }}
                       >
                         {meta.label}
                       </span>
+
                       {a.level && (
                         <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-600">
                           {a.level}
