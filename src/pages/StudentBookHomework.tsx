@@ -51,6 +51,7 @@ interface Assignment {
     book?: { title?: string; kind?: string };
     tasks?: BookTaskPayload[];
     audio?: AudioPayload[];
+    plan?: BookLessonPlan;
   };
 }
 
