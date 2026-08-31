@@ -439,3 +439,12 @@ export async function generateBookLessonPlan(input: {
   if ((data as any)?.error) throw new Error((data as any).error);
   return (data as any).plan as BookLessonPlan;
 }
+
+/** Long-lived signed URL for a book page (used when the page is placed on the live board). */
+export async function longSignedPageUrl(path: string): Promise<string | null> {
+  const { data, error } = await supabase.storage
+    .from("book-pages")
+    .createSignedUrl(path, 60 * 60 * 24 * 365);
+  if (error || !data?.signedUrl) return null;
+  return data.signedUrl;
+}

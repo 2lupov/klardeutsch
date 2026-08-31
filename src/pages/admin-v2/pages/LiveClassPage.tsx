@@ -14,7 +14,7 @@ import {
   fetchLiveItems,
 } from "@/lib/live-class";
 import { Play, Square, Trash2 } from "lucide-react";
-import BoardEditor from "@/components/live/BoardEditor";
+import BoardEditor, { type BoardApi } from "@/components/live/BoardEditor";
 import MaterialPicker from "@/components/live/MaterialPicker";
 import LiveBookPagePicker from "@/components/books/LiveBookPagePicker";
 
@@ -146,6 +146,7 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
   const [items, setItems] = useState<LiveItem[]>([]);
   const [answers, setAnswers] = useState<any[]>([]);
   const [ended, setEnded] = useState(cls.status === "ended");
+  const boardApi = useRef<BoardApi | null>(null);
 
   const reloadItems = async () => setItems(await fetchLiveItems(cls.id));
 
@@ -226,7 +227,7 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
       </div>
 
       {section === "board" ? (
-        <BoardEditor classId={cls.id} initial={cls.board || []} />
+        <BoardEditor classId={cls.id} initial={cls.board || []} apiRef={boardApi} />
       ) : (
         <Card className="p-5">
           <SectionHeader title="Додати матеріал" subtitle="Учень побачить це одразу" />
@@ -242,7 +243,15 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
         </Card>
       )}
 
-      <LiveBookPagePicker classId={cls.id} current={(cls as any).book_page ?? null} />
+      {section === "board" ? (
+        <LiveBookPagePicker
+          classId={cls.id}
+          onToBoard={(url) => boardApi.current?.insertImage(url)}
+        />
+      ) : (
+        <LiveBookPagePicker classId={cls.id} current={(cls as any).book_page ?? null} />
+      )}
+
 
 
       {pickerOpen && section !== "board" && (

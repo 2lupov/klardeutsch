@@ -21,7 +21,20 @@ type Tool = "select" | "pen" | "text" | "rect" | "ellipse" | "arrow" | "line" | 
 const COLORS = ["#0F172A", "#4F46E5", "#DC2626", "#059669", "#F59E0B", "#DB2777"];
 const uid = () => Math.random().toString(36).slice(2, 10);
 
-export default function BoardEditor({ classId, initial }: { classId: string; initial: BoardEl[] }) {
+export interface BoardApi {
+  /** Places an image on the board, fitted to the board and sent behind drawings. */
+  insertImage: (url: string) => void;
+}
+
+export default function BoardEditor({
+  classId,
+  initial,
+  apiRef,
+}: {
+  classId: string;
+  initial: BoardEl[];
+  apiRef?: React.MutableRefObject<BoardApi | null>;
+}) {
   const [els, setEls] = useState<BoardEl[]>(initial || []);
   const [tool, setTool] = useState<Tool>("pen");
   const [color, setColor] = useState(COLORS[1]);
@@ -68,6 +81,40 @@ export default function BoardEditor({ classId, initial }: { classId: string; ini
     }
     persist(next);
   };
+
+  // ── imperative API: place an image (e.g. textbook page) onto the board ──
+  const elsRef = useRef<BoardEl[]>(els);
+  useEffect(() => { elsRef.current = els; }, [els]);
+
+  const insertImage = (url: string) => {
+    const place = (ratio: number) => {
+      let h = 0.94;
+      let w = (h * BOARD_H) / ratio / BOARD_W;
+      if (w > 0.96) { w = 0.96; h = (w * BOARD_W * ratio) / BOARD_H; }
+      const el: BoardEl = {
+        id: uid(),
+        type: "image",
+        url,
+        x: (1 - w) / 2,
+        y: (1 - h) / 2,
+        w,
+        h,
+      };
+      // behind strokes / text
+      commit([el, ...elsRef.current.filter((x) => !(x.type === "image" && x.url === url))]);
+      setTool("select");
+    };
+    const img = new Image();
+    img.onload = () => place(img.height / img.width || 1.4);
+    img.onerror = () => place(1.4);
+    img.src = url;
+  };
+
+  useEffect(() => {
+    if (!apiRef) return;
+    apiRef.current = { insertImage };
+    return () => { apiRef.current = null; };
+  });
 
 
   const pos = (e: React.PointerEvent) => {
