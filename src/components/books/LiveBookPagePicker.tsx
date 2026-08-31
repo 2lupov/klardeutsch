@@ -19,6 +19,7 @@ export default function LiveBookPagePicker({
   const [bookId, setBookId] = useState("");
   const [pages, setPages] = useState<BookPage[]>([]);
   const [urls, setUrls] = useState<Record<string, string>>({});
+  const [longUrls, setLongUrls] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [shown, setShown] = useState<LiveBookPage | null>(current ?? null);
 
@@ -39,13 +40,22 @@ export default function LiveBookPagePicker({
         const p = await listPages(bookId);
         setPages(p);
         setUrls(await signedPageUrls(p.map((x) => x.image_path)));
+        if (onToBoard) {
+          // довгі посилання потрібні одразу — щоб сторінку можна було перетягнути на дошку
+          const entries = await Promise.all(
+            p.map(async (x) => [x.image_path, await longSignedPageUrl(x.image_path)] as const),
+          );
+          const map: Record<string, string> = {};
+          entries.forEach(([path, u]) => { if (u) map[path] = u; });
+          setLongUrls(map);
+        }
       } catch (e: any) {
         toast.error(e?.message ?? "Не вдалося завантажити сторінки");
       } finally {
         setLoading(false);
       }
     })();
-  }, [bookId]);
+  }, [bookId, onToBoard]);
 
   const toBoard = async (p: BookPage) => {
     if (!onToBoard) return;
