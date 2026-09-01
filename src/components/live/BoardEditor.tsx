@@ -607,7 +607,18 @@ export default function BoardEditor({
         <Btn active={false} onClick={fitAll} title="Показати все">
           <Maximize className="w-4 h-4" />
         </Btn>
+        <Btn active={false} onClick={() => setCamera({ x: -cam.w / 2, y: -cam.w / 2, w: cam.w })} title="До центру дошки">
+          <Crosshair className="w-4 h-4" />
+        </Btn>
+        <Btn
+          active={false}
+          onClick={() => stuCam && setCamera(stuCam)}
+          title={stuCam ? "Перейти до вікна учня" : "Учень ще не відкрив дошку"}
+        >
+          <Eye className={`w-4 h-4 ${stuCam ? "" : "opacity-40"}`} />
+        </Btn>
         <span className="text-[11px] text-slate-500 w-10">{Math.round((1 / cam.w) * 100)}%</span>
+
 
         <span className="w-px h-6 bg-slate-200 mx-1" />
 
