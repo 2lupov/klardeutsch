@@ -15,6 +15,8 @@ import { BoardView } from "@/components/live/BoardRender";
 import BoardStudentView from "@/components/live/BoardStudentView";
 import type { BoardCam } from "@/components/live/BoardRender";
 import { signedPageUrl } from "@/lib/books";
+import AddMyWordForm, { addMyWord } from "@/components/dictionary/AddMyWordForm";
+import { BookmarkPlus } from "lucide-react";
 
 export default function LiveClass() {
   const { id } = useParams<{ id: string }>();
@@ -252,13 +254,21 @@ export default function LiveClass() {
             )}
           </div>
         ) : (
-          <div className="p-5 max-w-3xl">
+          <div className="p-5 max-w-3xl space-y-5">
+            {section === "vocab" && (
+              <div className="space-y-2">
+                <AddMyWordForm compact />
+                <a href="/vocabulary" className="inline-block text-xs text-primary underline">
+                  Відкрити мій словник →
+                </a>
+              </div>
+            )}
             {sectionItems.length === 0 ? (
               <p className="text-sm text-muted-foreground">Викладач ще нічого не додав у цей розділ.</p>
             ) : (
               <div className="space-y-4">
                 {sectionItems.map((it) => (
-                  <ItemCard key={it.id} item={it} answer={answers[it.id]} onAnswer={submitAnswer} />
+                  <ItemCard key={it.id} item={it} answer={answers[it.id]} onAnswer={submitAnswer} userId={user?.id} />
                 ))}
               </div>
             )}
@@ -298,13 +308,32 @@ function ItemCard({
   item,
   answer,
   onAnswer,
+  userId,
 }: {
   item: LiveItem;
   answer?: { answer: string; is_correct: boolean | null };
   onAnswer: (item: LiveItem, value: string) => void;
+  userId?: string;
 }) {
   const [value, setValue] = useState(answer?.answer || "");
+  const [saved, setSaved] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const saveWord = async () => {
+    if (!userId) return;
+    try {
+      await addMyWord(userId, {
+        german: item.content?.term || "",
+        russian: item.content?.translation || "",
+        article: item.content?.article || null,
+        example: item.content?.example || null,
+      });
+      setSaved(true);
+      toast.success("Слово у вашому словнику");
+    } catch {
+      toast.error("Не вдалося зберегти слово");
+    }
+  };
 
   return (
     <div className="rounded-2xl border border-border bg-card p-4">
@@ -326,6 +355,14 @@ function ItemCard({
           </p>
           <p className="text-sm text-muted-foreground">{item.content?.translation}</p>
           {item.content?.example && <p className="text-xs italic text-muted-foreground/80">{item.content.example}</p>}
+          <button
+            onClick={saveWord}
+            disabled={saved}
+            className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border text-xs font-medium hover:bg-muted/60 disabled:opacity-60"
+          >
+            <BookmarkPlus className="w-3.5 h-3.5" />
+            {saved ? "Додано" : "У мій словник"}
+          </button>
         </div>
       )}
 
