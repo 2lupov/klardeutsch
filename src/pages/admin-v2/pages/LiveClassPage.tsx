@@ -226,9 +226,12 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
         ))}
       </div>
 
-      {section === "board" ? (
+      {/* Дошка завжди змонтована — перехід між розділами нічого не стирає */}
+      <div className={section === "board" ? "" : "hidden"}>
         <BoardEditor classId={cls.id} initial={cls.board || []} apiRef={boardApi} />
-      ) : (
+      </div>
+
+      {section !== "board" && (
         <Card className="p-5">
           <SectionHeader title="Додати матеріал" subtitle="Учень побачить це одразу" />
           <>
@@ -242,6 +245,7 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
           </>
         </Card>
       )}
+
 
       {section === "board" ? (
         <LiveBookPagePicker
