@@ -707,6 +707,15 @@ export default function BoardEditor({
           onDrop={onDrop}
         >
           <g transform={camTransform(cam)}>
+            {/* центр нескінченної дошки */}
+            <g stroke="#94A3B8" strokeWidth={2 / k} opacity={0.7}>
+              <line x1={-40 / k} y1={0} x2={40 / k} y2={0} />
+              <line x1={0} y1={-40 / k} x2={0} y2={40 / k} />
+            </g>
+            <text x={12 / k} y={-12 / k} fill="#94A3B8" fontSize={13 / k} fontFamily="system-ui">
+              центр
+            </text>
+
             {els.map((el, i) => {
               const b = selected === el.id && el.type !== "stroke" ? box(el) : null;
               return (
