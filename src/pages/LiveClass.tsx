@@ -35,6 +35,19 @@ export default function LiveClass() {
     boardChanRef.current?.send({ type: "broadcast", event: "studentcam", payload: { cam } });
   };
 
+  const lastDraw = useRef(0);
+  const sendDraw = (el: any, live?: boolean) => {
+    if (live) {
+      const now = Date.now();
+      if (now - lastDraw.current < 60) return;
+      lastDraw.current = now;
+    }
+    boardChanRef.current?.send({ type: "broadcast", event: "studentdraw", payload: { el } });
+  };
+  const sendErase = (elId: string) => {
+    boardChanRef.current?.send({ type: "broadcast", event: "studenterase", payload: { id: elId } });
+  };
+
   const bookPagePath = cls?.book_page?.image_path ?? null;
   useEffect(() => {
     let cancelled = false;
@@ -220,7 +233,7 @@ export default function LiveClass() {
         {section === "board" ? (
           <div className={`flex-1 min-h-0 p-3 flex flex-col gap-3 ${cls.book_page ? "overflow-y-auto" : ""}`}>
             <div className={`w-full rounded-2xl border border-border bg-card overflow-hidden ${cls.book_page ? "h-[55vh] shrink-0" : "h-full"}`}>
-              <BoardStudentView elements={cls.board || []} className="w-full h-full" onCamChange={reportCam} />
+              <BoardStudentView elements={cls.board || []} className="w-full h-full" onCamChange={reportCam} onDraw={sendDraw} onErase={sendErase} />
             </div>
             {cls.book_page && (
               <div className="rounded-2xl border border-border bg-card overflow-hidden">
@@ -265,7 +278,7 @@ export default function LiveClass() {
             </button>
           </div>
           <div className="flex-1 min-h-0 p-2">
-            <BoardStudentView elements={cls.board || []} className="w-full h-full" onCamChange={reportCam} />
+            <BoardStudentView elements={cls.board || []} className="w-full h-full" onCamChange={reportCam} onDraw={sendDraw} onErase={sendErase} />
           </div>
         </div>
       )}

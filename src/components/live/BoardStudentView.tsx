@@ -48,6 +48,7 @@ export default function BoardStudentView({
   /** Локальні елементи учня — доки вчитель не поверне їх у спільній дошці. */
   const [mine, setMine] = useState<BoardEl[]>([]);
   const [editing, setEditing] = useState<string | null>(null);
+  const [pxW, setPxW] = useState(BOARD_W);
 
   const svgRef = useRef<SVGSVGElement | null>(null);
   const camRef = useRef(cam);
@@ -125,6 +126,15 @@ export default function BoardStudentView({
     const onWheel = (e: WheelEvent) => { e.preventDefault(); wheelRef.current(e); };
     el.addEventListener("wheel", onWheel, { passive: false });
     return () => el.removeEventListener("wheel", onWheel);
+  }, []);
+
+  useEffect(() => {
+    const el = svgRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(() => setPxW(el.getBoundingClientRect().width || BOARD_W));
+    ro.observe(el);
+    setPxW(el.getBoundingClientRect().width || BOARD_W);
+    return () => ro.disconnect();
   }, []);
 
   /* ─────────── малювання ─────────── */
@@ -247,7 +257,7 @@ export default function BoardStudentView({
             className="w-full rounded-xl border-2 border-primary bg-card/95 shadow-lg px-2 py-1 outline-none resize-none overflow-hidden font-display font-semibold leading-tight"
             style={{
               color: editingEl.color || "#0F172A",
-              fontSize: `${((editingEl.size || 0.045) * BOARD_H) / cam.w / (BOARD_H / 300)}px`,
+              fontSize: `${((editingEl.size || 0.045) * BOARD_H * (pxW / BOARD_W)) / cam.w}px`,
               lineHeight: 1.25,
             }}
           />
