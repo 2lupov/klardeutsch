@@ -47,14 +47,25 @@ export async function startLiveClass(teacherId: string, studentId: string, title
     .maybeSingle();
   if (existing) return existing as unknown as LiveClass;
 
+  // Дошка учня переноситься з попереднього уроку (як у Miro — одне полотно на учня)
+  const { data: prev } = await supabase
+    .from("live_classes")
+    .select("board")
+    .eq("teacher_id", teacherId)
+    .eq("student_id", studentId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
   const { data, error } = await supabase
     .from("live_classes")
-    .insert({ teacher_id: teacherId, student_id: studentId, title })
+    .insert({ teacher_id: teacherId, student_id: studentId, title, board: ((prev as any)?.board || []) as any })
     .select("*")
     .single();
   if (error) throw error;
   return data as unknown as LiveClass;
 }
+
 
 export async function endLiveClass(id: string) {
   const { error } = await supabase
