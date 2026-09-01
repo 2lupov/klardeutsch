@@ -117,6 +117,26 @@ export default function BoardEditor({
     ch.on("broadcast", { event: "studentcam" }, ({ payload }: any) => {
       if (payload?.cam) setStuCam(payload.cam as BoardCam);
     });
+    // Учень теж пише/малює — приймаємо його елементи й зберігаємо у спільній дошці
+    ch.on("broadcast", { event: "studentdraw" }, ({ payload }: any) => {
+      const el = payload?.el as BoardEl | undefined;
+      if (!el?.id) return;
+      const cur = elsRef.current;
+      const i = cur.findIndex((x) => x.id === el.id);
+      const next = i === -1 ? [...cur, el] : cur.map((x) => (x.id === el.id ? el : x));
+      setEls(next);
+      elsRef.current = next;
+      persist(next, camRef.current);
+    });
+    ch.on("broadcast", { event: "studenterase" }, ({ payload }: any) => {
+      const id = payload?.id as string | undefined;
+      if (!id) return;
+      const next = elsRef.current.filter((x) => x.id !== id);
+      setEls(next);
+      elsRef.current = next;
+      persist(next, camRef.current);
+    });
+
     ch.subscribe();
     chanRef.current = ch;
     return () => { supabase.removeChannel(ch); chanRef.current = null; };
