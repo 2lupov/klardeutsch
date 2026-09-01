@@ -750,28 +750,83 @@ export default function BoardEditor({
                 </g>
               );
             })}
+            {/* що бачить учень */}
+            {stuCam && (
+              <g pointerEvents="none">
+                <rect
+                  x={stuCam.x * BOARD_W}
+                  y={stuCam.y * BOARD_H}
+                  width={stuCam.w * BOARD_W}
+                  height={stuCam.w * BOARD_H}
+                  fill="none"
+                  stroke="#059669"
+                  strokeWidth={2.5 / k}
+                  strokeDasharray={`${8 / k} ${6 / k}`}
+                  rx={8 / k}
+                />
+                <text
+                  x={stuCam.x * BOARD_W + 10 / k}
+                  y={stuCam.y * BOARD_H + 22 / k}
+                  fill="#059669"
+                  fontSize={14 / k}
+                  fontFamily="system-ui"
+                >
+                  Бачить учень
+                </text>
+              </g>
+            )}
           </g>
         </svg>
 
         {editingEl && (
-          <textarea
-            autoFocus
-            value={editingEl.text || ""}
-            onChange={(e) => setText(editingEl.id!, e.target.value)}
-            onBlur={() => setEditing(null)}
-            placeholder="Пишіть…"
-            className="absolute z-10 bg-transparent outline-none resize-none overflow-hidden font-display font-semibold leading-tight"
+          <div
+            className="absolute z-10"
             style={{
               left: `${((editingEl.x! - cam.x) / cam.w) * 100}%`,
-              top: `${((editingEl.y! - cam.y) / cam.w) * 100 - ((editingEl.size || 0.045) / cam.w) * 100 * 0.78}%`,
-              width: `${Math.max(20, 100 - ((editingEl.x! - cam.x) / cam.w) * 100)}%`,
-              color: editingEl.color || "#0F172A",
-              fontSize: `${((editingEl.size || 0.045) * BOARD_H * (pxW / BOARD_W)) / cam.w}px`,
-              lineHeight: 1.25,
-              caretColor: editingEl.color || "#0F172A",
+              top: `${((editingEl.y! - cam.y) / cam.w) * 100 - ((editingEl.size || 0.045) / cam.w) * 100 * 0.95}%`,
+              width: `${Math.min(60, Math.max(24, 100 - ((editingEl.x! - cam.x) / cam.w) * 100))}%`,
             }}
-          />
+          >
+            <textarea
+              autoFocus
+              rows={Math.max(1, String(editingEl.text || "").split("\n").length)}
+              value={editingEl.text || ""}
+              onChange={(e) => setText(editingEl.id!, e.target.value)}
+              onBlur={() => setEditing(null)}
+              onKeyDown={(e) => { if (e.key === "Escape") setEditing(null); }}
+              placeholder="Пишіть…"
+              className="w-full rounded-xl border-2 border-indigo-400 bg-white/95 shadow-lg shadow-indigo-500/10 px-2 py-1 outline-none resize-none overflow-hidden font-display font-semibold leading-tight"
+              style={{
+                color: editingEl.color || "#0F172A",
+                fontSize: `${((editingEl.size || 0.045) * BOARD_H * (pxW / BOARD_W)) / cam.w}px`,
+                lineHeight: 1.25,
+                caretColor: editingEl.color || "#0F172A",
+              }}
+            />
+            <div className="mt-1 flex items-center gap-2 rounded-xl border border-slate-200 bg-white/95 px-2 py-1 shadow-sm w-fit">
+              <span className="text-[11px] text-slate-500">Розмір</span>
+              <input
+                type="range"
+                min={8}
+                max={400}
+                step={1}
+                value={Math.round((editingEl.size || 0.045) * 1000)}
+                onChange={(e) =>
+                  commit(els.map((x) => (x.id === editingEl.id ? { ...x, size: Number(e.target.value) / 1000 } : x)), true)
+                }
+                className="w-28"
+              />
+              <button
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => setEditing(null)}
+                className="text-[11px] px-2 py-0.5 rounded-lg bg-indigo-600 text-white"
+              >
+                Готово
+              </button>
+            </div>
+          </div>
         )}
+
       </div>
 
       <p className="text-xs text-slate-500">
