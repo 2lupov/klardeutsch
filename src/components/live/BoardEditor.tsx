@@ -295,7 +295,11 @@ export default function BoardEditor({
           w0: el.w || 0.2,
           h0: el.h || 0.2,
           size0: el.size,
+          px0: p.x,
+          py0: p.y,
+          lines: Math.max(1, String(el.text || " ").split("\n").length),
         };
+
         return;
       }
     }
