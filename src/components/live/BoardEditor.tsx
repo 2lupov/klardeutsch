@@ -372,9 +372,13 @@ export default function BoardEditor({
         const next = prev.map((x) => {
           if (x.id !== r.id) return x;
           if (x.type === "text") {
-            const factor = Math.max(0.1, (p.y - r.y0) / Math.max(0.0001, (r.size0 || 0.045)));
-            return { ...x, size: Math.max(0.005, (r.size0 || 0.045) * factor) };
+            // Плавно, як у картинки: приріст висоти боксу ділимо на кількість рядків
+            const size0 = r.size0 || 0.045;
+            const dy = p.y - (r.py0 ?? r.y0);
+            const next = size0 + dy / (1.35 * (r.lines || 1));
+            return { ...x, size: Math.max(0.008, Math.min(1.5, next)) };
           }
+
           const w = Math.max(0.01, p.x - r.x0);
           const ratio = r.h0 / (r.w0 || 1);
           return { ...x, w, h: x.type === "image" ? w * ratio : Math.max(0.01, p.y - r.y0) };
