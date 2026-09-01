@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Search } from "lucide-react";
+import { Search, Trash2 } from "lucide-react";
+import AddMyWordForm, { MyWord } from "@/components/dictionary/AddMyWordForm";
+import { toast } from "sonner";
 
 interface Row {
   id: string;
@@ -17,6 +19,25 @@ export default function StudentDictionary() {
   const [rows, setRows] = useState<Row[]>([]);
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(true);
+  const [mine, setMine] = useState<MyWord[]>([]);
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase
+        .from("custom_words")
+        .select("id, german, russian, article, example, created_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+      setMine((data || []) as unknown as MyWord[]);
+    })();
+  }, [user]);
+
+  const removeMine = async (id: string) => {
+    setMine((m) => m.filter((w) => w.id !== id));
+    const { error } = await supabase.from("custom_words").delete().eq("id", id);
+    if (error) toast.error("Не вдалося видалити");
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -73,6 +94,13 @@ export default function StudentDictionary() {
     })).sort((a, b) => +new Date(b.date) - +new Date(a.date));
   }, [rows, q]);
 
+  const myFiltered = useMemo(() => {
+    const s = q.trim().toLowerCase();
+    if (!s) return mine;
+    return mine.filter((w) =>
+      [w.german, w.russian, w.example].filter(Boolean).some((v) => String(v).toLowerCase().includes(s)));
+  }, [mine, q]);
+
   return (
     <div className="max-w-2xl mx-auto px-5 py-8">
       <header className="mb-6">
@@ -91,10 +119,46 @@ export default function StudentDictionary() {
         />
       </div>
 
+      <div className="mb-8 space-y-4">
+        <AddMyWordForm onAdded={(w) => setMine((m) => [w, ...m])} />
+
+        {myFiltered.length > 0 && (
+          <section>
+            <div className="flex items-baseline justify-between mb-3 border-b border-border pb-2">
+              <h2 className="font-display font-semibold text-foreground text-sm">Мої слова</h2>
+              <span className="text-xs text-muted-foreground">{myFiltered.length}</span>
+            </div>
+            <ul className="divide-y divide-border/60">
+              {myFiltered.map((w) => (
+                <li key={w.id} className="py-3 flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-display text-foreground">
+                      {w.article && <span className="text-primary mr-1">{w.article}</span>}
+                      {w.german}
+                    </p>
+                    {w.example && <p className="text-xs italic text-muted-foreground/80 mt-1">{w.example}</p>}
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="text-sm text-muted-foreground text-right">{w.russian}</span>
+                    <button
+                      onClick={() => removeMine(w.id)}
+                      className="text-muted-foreground hover:text-red-500"
+                      title="Видалити"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+      </div>
+
       {loading ? (
         <p className="text-sm text-muted-foreground animate-pulse">Завантаження…</p>
       ) : groups.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Поки що немає слів. Вони з’являться після уроку.</p>
+        <p className="text-sm text-muted-foreground">Поки що немає слів з уроків — але ви вже можете додавати свої вище.</p>
       ) : (
         <div className="space-y-8">
           {groups.map((g, i) => (
