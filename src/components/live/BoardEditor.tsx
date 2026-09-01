@@ -91,14 +91,35 @@ export default function BoardEditor({
   useEffect(() => { elsRef.current = els; }, [els]);
   useEffect(() => { camRef.current = cam; }, [cam]);
 
+  // Завантажуємо актуальну дошку з БД (щоб перехід між розділами нічого не стирав)
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.from("live_classes").select("board").eq("id", classId).maybeSingle();
+      if (cancelled || !data) return;
+      const board = ((data as any).board || []) as BoardEl[];
+      const content = contentOfBoard(board);
+      const c = camFromBoard(board);
+      setEls(content);
+      elsRef.current = content;
+      setCam(c);
+      camRef.current = c;
+    })();
+    return () => { cancelled = true; };
+  }, [classId]);
+
   // Live broadcast channel — миттєва передача дошки учню
   const chanRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   useEffect(() => {
     const ch = supabase.channel(`live-board:${classId}`, { config: { broadcast: { self: false } } });
+    ch.on("broadcast", { event: "studentcam" }, ({ payload }: any) => {
+      if (payload?.cam) setStuCam(payload.cam as BoardCam);
+    });
     ch.subscribe();
     chanRef.current = ch;
     return () => { supabase.removeChannel(ch); chanRef.current = null; };
   }, [classId]);
+
 
   const fullBoard = (content: BoardEl[], c: BoardCam) => [camToEl(c), ...content];
 
