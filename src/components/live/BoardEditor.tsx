@@ -29,6 +29,8 @@ import {
   ZoomIn,
   ZoomOut,
   Maximize,
+  Crosshair,
+  Eye,
 } from "lucide-react";
 
 type Tool = "select" | "pan" | "pen" | "text" | "rect" | "ellipse" | "arrow" | "line" | "erase";
@@ -803,7 +805,10 @@ export default function BoardEditor({
                 caretColor: editingEl.color || "#0F172A",
               }}
             />
-            <div className="mt-1 flex items-center gap-2 rounded-xl border border-slate-200 bg-white/95 px-2 py-1 shadow-sm w-fit">
+            <div
+              onMouseDown={(e) => e.preventDefault()}
+              className="mt-1 flex items-center gap-2 rounded-xl border border-slate-200 bg-white/95 px-2 py-1 shadow-sm w-fit"
+            >
               <span className="text-[11px] text-slate-500">Розмір</span>
               <input
                 type="range"
@@ -830,9 +835,10 @@ export default function BoardEditor({
       </div>
 
       <p className="text-xs text-slate-500">
-        Нескінченна дошка: колесо — прокрутка, Ctrl/⇧+колесо — зум, «рука» або порожнє місце — рух полотна. Перетягуйте
-        сторінки підручника прямо на дошку, змінюйте розмір за кутовий маркер, а текст учень бачить під час набору. Усе
-        зберігається для цього учня автоматично.
+        Нескінченна дошка: колесо — прокрутка, Ctrl/⇧+колесо — зум, «рука» або порожнє місце — рух полотна. Хрестик
+        показує центр дошки, зелена рамка — що саме зараз бачить учень (кнопка «око» переносить вас туди). Перетягуйте
+        сторінки підручника прямо на дошку, змінюйте розмір за кутовий маркер або повзунком. Дошка зберігається для цього
+        учня і переноситься на наступний урок.
       </p>
     </div>
   );
