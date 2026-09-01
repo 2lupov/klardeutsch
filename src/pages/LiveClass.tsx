@@ -12,6 +12,8 @@ import {
 } from "@/lib/live-class";
 import { toast } from "sonner";
 import { BoardView } from "@/components/live/BoardRender";
+import BoardStudentView from "@/components/live/BoardStudentView";
+import type { BoardCam } from "@/components/live/BoardRender";
 import { signedPageUrl } from "@/lib/books";
 
 export default function LiveClass() {
@@ -27,6 +29,11 @@ export default function LiveClass() {
   const [ready, setReady] = useState(false);
   const [boardFull, setBoardFull] = useState(false);
   const [bookPageUrl, setBookPageUrl] = useState<string | null>(null);
+  const boardChanRef = useRef<any>(null);
+
+  const reportCam = (cam: BoardCam) => {
+    boardChanRef.current?.send({ type: "broadcast", event: "studentcam", payload: { cam } });
+  };
 
   const bookPagePath = cls?.book_page?.image_path ?? null;
   useEffect(() => {
@@ -106,8 +113,9 @@ export default function LiveClass() {
         setCls((prev) => (prev ? ({ ...prev, board: payload.board } as LiveClassRow) : prev));
       })
       .subscribe();
+    boardChanRef.current = boardCh;
 
-    return () => { supabase.removeChannel(ch); supabase.removeChannel(boardCh); };
+    return () => { supabase.removeChannel(ch); supabase.removeChannel(boardCh); boardChanRef.current = null; };
   }, [id, navigate]);
 
 
@@ -212,7 +220,7 @@ export default function LiveClass() {
         {section === "board" ? (
           <div className={`flex-1 min-h-0 p-3 flex flex-col gap-3 ${cls.book_page ? "overflow-y-auto" : ""}`}>
             <div className={`w-full rounded-2xl border border-border bg-card overflow-hidden ${cls.book_page ? "h-[55vh] shrink-0" : "h-full"}`}>
-              <BoardView elements={cls.board || []} className="w-full h-full" />
+              <BoardStudentView elements={cls.board || []} className="w-full h-full" onCamChange={reportCam} />
             </div>
             {cls.book_page && (
               <div className="rounded-2xl border border-border bg-card overflow-hidden">
@@ -257,7 +265,7 @@ export default function LiveClass() {
             </button>
           </div>
           <div className="flex-1 min-h-0 p-2">
-            <BoardView elements={cls.board || []} className="w-full h-full" />
+            <BoardStudentView elements={cls.board || []} className="w-full h-full" onCamChange={reportCam} />
           </div>
         </div>
       )}

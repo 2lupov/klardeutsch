@@ -29,6 +29,8 @@ import {
   ZoomIn,
   ZoomOut,
   Maximize,
+  Crosshair,
+  Eye,
 } from "lucide-react";
 
 type Tool = "select" | "pan" | "pen" | "text" | "rect" | "ellipse" | "arrow" | "line" | "erase";
@@ -62,13 +64,26 @@ export default function BoardEditor({
   const [uploading, setUploading] = useState(false);
   const [dropHint, setDropHint] = useState(false);
   const [pxW, setPxW] = useState(BOARD_W);
+  const [stuCam, setStuCam] = useState<BoardCam | null>(null);
+
 
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
   const drafting = useRef<BoardEl | null>(null);
   const dragging = useRef<{ id: string; dx: number; dy: number } | null>(null);
-  const resizing = useRef<{ id: string; x0: number; y0: number; w0: number; h0: number; size0?: number } | null>(null);
+  const resizing = useRef<{
+    id: string;
+    x0: number;
+    y0: number;
+    w0: number;
+    h0: number;
+    size0?: number;
+    px0?: number;
+    py0?: number;
+    lines?: number;
+  } | null>(null);
+
   const panning = useRef<{ fx: number; fy: number; cam: BoardCam } | null>(null);
   const saveTimer = useRef<any>(null);
   const lastCast = useRef(0);
@@ -78,14 +93,35 @@ export default function BoardEditor({
   useEffect(() => { elsRef.current = els; }, [els]);
   useEffect(() => { camRef.current = cam; }, [cam]);
 
+  // Завантажуємо актуальну дошку з БД (щоб перехід між розділами нічого не стирав)
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.from("live_classes").select("board").eq("id", classId).maybeSingle();
+      if (cancelled || !data) return;
+      const board = ((data as any).board || []) as BoardEl[];
+      const content = contentOfBoard(board);
+      const c = camFromBoard(board);
+      setEls(content);
+      elsRef.current = content;
+      setCam(c);
+      camRef.current = c;
+    })();
+    return () => { cancelled = true; };
+  }, [classId]);
+
   // Live broadcast channel — миттєва передача дошки учню
   const chanRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   useEffect(() => {
     const ch = supabase.channel(`live-board:${classId}`, { config: { broadcast: { self: false } } });
+    ch.on("broadcast", { event: "studentcam" }, ({ payload }: any) => {
+      if (payload?.cam) setStuCam(payload.cam as BoardCam);
+    });
     ch.subscribe();
     chanRef.current = ch;
     return () => { supabase.removeChannel(ch); chanRef.current = null; };
   }, [classId]);
+
 
   const fullBoard = (content: BoardEl[], c: BoardCam) => [camToEl(c), ...content];
 
@@ -261,7 +297,11 @@ export default function BoardEditor({
           w0: el.w || 0.2,
           h0: el.h || 0.2,
           size0: el.size,
+          px0: p.x,
+          py0: p.y,
+          lines: Math.max(1, String(el.text || " ").split("\n").length),
         };
+
         return;
       }
     }
@@ -334,9 +374,13 @@ export default function BoardEditor({
         const next = prev.map((x) => {
           if (x.id !== r.id) return x;
           if (x.type === "text") {
-            const factor = Math.max(0.1, (p.y - r.y0) / Math.max(0.0001, (r.size0 || 0.045)));
-            return { ...x, size: Math.max(0.005, (r.size0 || 0.045) * factor) };
+            // Плавно, як у картинки: приріст висоти боксу ділимо на кількість рядків
+            const size0 = r.size0 || 0.045;
+            const dy = p.y - (r.py0 ?? r.y0);
+            const next = size0 + dy / (1.35 * (r.lines || 1));
+            return { ...x, size: Math.max(0.008, Math.min(1.5, next)) };
           }
+
           const w = Math.max(0.01, p.x - r.x0);
           const ratio = r.h0 / (r.w0 || 1);
           return { ...x, w, h: x.type === "image" ? w * ratio : Math.max(0.01, p.y - r.y0) };
@@ -565,7 +609,18 @@ export default function BoardEditor({
         <Btn active={false} onClick={fitAll} title="Показати все">
           <Maximize className="w-4 h-4" />
         </Btn>
+        <Btn active={false} onClick={() => setCamera({ x: -cam.w / 2, y: -cam.w / 2, w: cam.w })} title="До центру дошки">
+          <Crosshair className="w-4 h-4" />
+        </Btn>
+        <Btn
+          active={false}
+          onClick={() => stuCam && setCamera(stuCam)}
+          title={stuCam ? "Перейти до вікна учня" : "Учень ще не відкрив дошку"}
+        >
+          <Eye className={`w-4 h-4 ${stuCam ? "" : "opacity-40"}`} />
+        </Btn>
         <span className="text-[11px] text-slate-500 w-10">{Math.round((1 / cam.w) * 100)}%</span>
+
 
         <span className="w-px h-6 bg-slate-200 mx-1" />
 
@@ -581,15 +636,33 @@ export default function BoardEditor({
             <button onClick={() => scaleSelected(0.85)} className="px-2 h-9 rounded-xl border border-slate-200 text-sm">−</button>
             <button onClick={() => scaleSelected(1.18)} className="px-2 h-9 rounded-xl border border-slate-200 text-sm">+</button>
             {selectedEl.type === "text" && (
-              <button onClick={() => setEditing(selectedEl.id!)} className="px-2 h-9 rounded-xl border border-slate-200 text-sm">
-                Редагувати
-              </button>
+              <>
+                <input
+                  type="range"
+                  min={8}
+                  max={400}
+                  step={1}
+                  value={Math.round((selectedEl.size || 0.045) * 1000)}
+                  onChange={(e) =>
+                    commit(
+                      els.map((x) => (x.id === selectedEl.id ? { ...x, size: Number(e.target.value) / 1000 } : x)),
+                      true,
+                    )
+                  }
+                  className="w-28"
+                  title="Розмір тексту"
+                />
+                <button onClick={() => setEditing(selectedEl.id!)} className="px-2 h-9 rounded-xl border border-slate-200 text-sm">
+                  Редагувати
+                </button>
+              </>
             )}
             <button onClick={removeSelected} className="px-2 h-9 rounded-xl border border-red-200 text-red-600 text-sm">
               Видалити
             </button>
           </div>
         )}
+
 
         {uploading && <span className="text-xs text-slate-500">Завантаження…</span>}
       </div>
@@ -636,6 +709,15 @@ export default function BoardEditor({
           onDrop={onDrop}
         >
           <g transform={camTransform(cam)}>
+            {/* центр нескінченної дошки */}
+            <g stroke="#94A3B8" strokeWidth={2 / k} opacity={0.7}>
+              <line x1={-40 / k} y1={0} x2={40 / k} y2={0} />
+              <line x1={0} y1={-40 / k} x2={0} y2={40 / k} />
+            </g>
+            <text x={12 / k} y={-12 / k} fill="#94A3B8" fontSize={13 / k} fontFamily="system-ui">
+              центр
+            </text>
+
             {els.map((el, i) => {
               const b = selected === el.id && el.type !== "stroke" ? box(el) : null;
               return (
@@ -670,34 +752,93 @@ export default function BoardEditor({
                 </g>
               );
             })}
+            {/* що бачить учень */}
+            {stuCam && (
+              <g pointerEvents="none">
+                <rect
+                  x={stuCam.x * BOARD_W}
+                  y={stuCam.y * BOARD_H}
+                  width={stuCam.w * BOARD_W}
+                  height={stuCam.w * BOARD_H}
+                  fill="none"
+                  stroke="#059669"
+                  strokeWidth={2.5 / k}
+                  strokeDasharray={`${8 / k} ${6 / k}`}
+                  rx={8 / k}
+                />
+                <text
+                  x={stuCam.x * BOARD_W + 10 / k}
+                  y={stuCam.y * BOARD_H + 22 / k}
+                  fill="#059669"
+                  fontSize={14 / k}
+                  fontFamily="system-ui"
+                >
+                  Бачить учень
+                </text>
+              </g>
+            )}
           </g>
         </svg>
 
         {editingEl && (
-          <textarea
-            autoFocus
-            value={editingEl.text || ""}
-            onChange={(e) => setText(editingEl.id!, e.target.value)}
-            onBlur={() => setEditing(null)}
-            placeholder="Пишіть…"
-            className="absolute z-10 bg-transparent outline-none resize-none overflow-hidden font-display font-semibold leading-tight"
+          <div
+            className="absolute z-10"
             style={{
               left: `${((editingEl.x! - cam.x) / cam.w) * 100}%`,
-              top: `${((editingEl.y! - cam.y) / cam.w) * 100 - ((editingEl.size || 0.045) / cam.w) * 100 * 0.78}%`,
-              width: `${Math.max(20, 100 - ((editingEl.x! - cam.x) / cam.w) * 100)}%`,
-              color: editingEl.color || "#0F172A",
-              fontSize: `${((editingEl.size || 0.045) * BOARD_H * (pxW / BOARD_W)) / cam.w}px`,
-              lineHeight: 1.25,
-              caretColor: editingEl.color || "#0F172A",
+              top: `${((editingEl.y! - cam.y) / cam.w) * 100 - ((editingEl.size || 0.045) / cam.w) * 100 * 0.95}%`,
+              width: `${Math.min(60, Math.max(24, 100 - ((editingEl.x! - cam.x) / cam.w) * 100))}%`,
             }}
-          />
+          >
+            <textarea
+              autoFocus
+              rows={Math.max(1, String(editingEl.text || "").split("\n").length)}
+              value={editingEl.text || ""}
+              onChange={(e) => setText(editingEl.id!, e.target.value)}
+              onBlur={() => setEditing(null)}
+              onKeyDown={(e) => { if (e.key === "Escape") setEditing(null); }}
+              placeholder="Пишіть…"
+              className="w-full rounded-xl border-2 border-indigo-400 bg-white/95 shadow-lg shadow-indigo-500/10 px-2 py-1 outline-none resize-none overflow-hidden font-display font-semibold leading-tight"
+              style={{
+                color: editingEl.color || "#0F172A",
+                fontSize: `${((editingEl.size || 0.045) * BOARD_H * (pxW / BOARD_W)) / cam.w}px`,
+                lineHeight: 1.25,
+                caretColor: editingEl.color || "#0F172A",
+              }}
+            />
+            <div
+              onMouseDown={(e) => e.preventDefault()}
+              className="mt-1 flex items-center gap-2 rounded-xl border border-slate-200 bg-white/95 px-2 py-1 shadow-sm w-fit"
+            >
+              <span className="text-[11px] text-slate-500">Розмір</span>
+              <input
+                type="range"
+                min={8}
+                max={400}
+                step={1}
+                value={Math.round((editingEl.size || 0.045) * 1000)}
+                onChange={(e) =>
+                  commit(els.map((x) => (x.id === editingEl.id ? { ...x, size: Number(e.target.value) / 1000 } : x)), true)
+                }
+                className="w-28"
+              />
+              <button
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => setEditing(null)}
+                className="text-[11px] px-2 py-0.5 rounded-lg bg-indigo-600 text-white"
+              >
+                Готово
+              </button>
+            </div>
+          </div>
         )}
+
       </div>
 
       <p className="text-xs text-slate-500">
-        Нескінченна дошка: колесо — прокрутка, Ctrl/⇧+колесо — зум, «рука» або порожнє місце — рух полотна. Перетягуйте
-        сторінки підручника прямо на дошку, змінюйте розмір за кутовий маркер, а текст учень бачить під час набору. Усе
-        зберігається для цього учня автоматично.
+        Нескінченна дошка: колесо — прокрутка, Ctrl/⇧+колесо — зум, «рука» або порожнє місце — рух полотна. Хрестик
+        показує центр дошки, зелена рамка — що саме зараз бачить учень (кнопка «око» переносить вас туди). Перетягуйте
+        сторінки підручника прямо на дошку, змінюйте розмір за кутовий маркер або повзунком. Дошка зберігається для цього
+        учня і переноситься на наступний урок.
       </p>
     </div>
   );
