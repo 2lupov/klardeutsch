@@ -634,15 +634,33 @@ export default function BoardEditor({
             <button onClick={() => scaleSelected(0.85)} className="px-2 h-9 rounded-xl border border-slate-200 text-sm">−</button>
             <button onClick={() => scaleSelected(1.18)} className="px-2 h-9 rounded-xl border border-slate-200 text-sm">+</button>
             {selectedEl.type === "text" && (
-              <button onClick={() => setEditing(selectedEl.id!)} className="px-2 h-9 rounded-xl border border-slate-200 text-sm">
-                Редагувати
-              </button>
+              <>
+                <input
+                  type="range"
+                  min={8}
+                  max={400}
+                  step={1}
+                  value={Math.round((selectedEl.size || 0.045) * 1000)}
+                  onChange={(e) =>
+                    commit(
+                      els.map((x) => (x.id === selectedEl.id ? { ...x, size: Number(e.target.value) / 1000 } : x)),
+                      true,
+                    )
+                  }
+                  className="w-28"
+                  title="Розмір тексту"
+                />
+                <button onClick={() => setEditing(selectedEl.id!)} className="px-2 h-9 rounded-xl border border-slate-200 text-sm">
+                  Редагувати
+                </button>
+              </>
             )}
             <button onClick={removeSelected} className="px-2 h-9 rounded-xl border border-red-200 text-red-600 text-sm">
               Видалити
             </button>
           </div>
         )}
+
 
         {uploading && <span className="text-xs text-slate-500">Завантаження…</span>}
       </div>
