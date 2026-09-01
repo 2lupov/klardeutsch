@@ -70,7 +70,18 @@ export default function BoardEditor({
   const fileRef = useRef<HTMLInputElement | null>(null);
   const drafting = useRef<BoardEl | null>(null);
   const dragging = useRef<{ id: string; dx: number; dy: number } | null>(null);
-  const resizing = useRef<{ id: string; x0: number; y0: number; w0: number; h0: number; size0?: number } | null>(null);
+  const resizing = useRef<{
+    id: string;
+    x0: number;
+    y0: number;
+    w0: number;
+    h0: number;
+    size0?: number;
+    px0?: number;
+    py0?: number;
+    lines?: number;
+  } | null>(null);
+
   const panning = useRef<{ fx: number; fy: number; cam: BoardCam } | null>(null);
   const saveTimer = useRef<any>(null);
   const lastCast = useRef(0);
