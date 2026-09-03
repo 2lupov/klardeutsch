@@ -53,26 +53,37 @@ export function eraseAt(
       const pts = el.points || [];
       if (pts.length === 0) { next.push(el); continue; }
 
-      const keep = pts.map((q) => Math.sqrt(dist2(q, p)) > radius);
-      // також перевіряємо середини відрізків, щоб гумка «прорізала» довгі лінії
-      const cutSeg: boolean[] = [];
+      const touched = pts.some((q) => Math.sqrt(dist2(q, p)) <= radius) ||
+        pts.slice(0, -1).some((q, i) => segDist(p, q, pts[i + 1]) <= radius);
+      if (!touched) { next.push(el); continue; }
+
+      // Додаємо проміжні точки перед стиранням. Інакше один довгий SVG-відрізок
+      // зникає цілком навіть від короткого дотику гумки.
+      const dense: typeof pts = [];
+      const step = Math.max(radius * 0.35, 0.0008);
       for (let i = 0; i < pts.length - 1; i++) {
-        cutSeg[i] = segDist(p, pts[i], pts[i + 1]) <= radius;
+        const a = pts[i];
+        const b = pts[i + 1];
+        const length = Math.sqrt(dist2(a, b));
+        const count = Math.max(1, Math.ceil(length / step));
+        for (let j = 0; j < count; j++) {
+          const t = j / count;
+          dense.push({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t });
+        }
       }
+      dense.push(pts[pts.length - 1]);
 
-      if (keep.every(Boolean) && !cutSeg.some(Boolean)) { next.push(el); continue; }
-
-      // збираємо шматки, що залишились
+      // Лише точки безпосередньо під круглою гумкою зникають; решта штриха
+      // залишається окремими фрагментами й стирається поступово під час руху.
       const pieces: typeof pts[] = [];
       let cur: typeof pts = [];
-      for (let i = 0; i < pts.length; i++) {
-        const brokenBefore = i > 0 && cutSeg[i - 1];
-        if (!keep[i] || brokenBefore) {
+      for (const q of dense) {
+        if (Math.sqrt(dist2(q, p)) <= radius) {
           if (cur.length > 1) pieces.push(cur);
-          cur = keep[i] ? [pts[i]] : [];
-          continue;
+          cur = [];
+        } else {
+          cur.push(q);
         }
-        cur.push(pts[i]);
       }
       if (cur.length > 1) pieces.push(cur);
 
