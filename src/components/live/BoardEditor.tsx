@@ -702,10 +702,9 @@ export default function BoardEditor({
                   className="w-28"
                   title="Розмір тексту"
                 />
-                <button onClick={() => setEditing(selectedEl.id!)} className="px-2 h-9 rounded-xl border border-slate-200 text-sm">
-                  Редагувати
-                </button>
               </>
+            )}
+
             )}
             <button onClick={removeSelected} className="px-2 h-9 rounded-xl border border-red-200 text-red-600 text-sm">
               Видалити
