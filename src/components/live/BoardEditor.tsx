@@ -831,7 +831,9 @@ export default function BoardEditor({
         {editingEl && (() => {
           const fs = ((editingEl.size || 0.045) * BOARD_H * (pxW / BOARD_W)) / cam.w;
           const leftPx = ((editingEl.x! - cam.x) / cam.w) * pxW;
-          const topPx = ((editingEl.y! - cam.y) / cam.w) * pxW - fs * 0.93;
+          // по вертикалі 1 world-unit = BOARD_H px, а не BOARD_W — інакше поле
+          // «тікало» нижче кліку (іноді за межі дошки) і текст був невидимий
+          const topPx = ((editingEl.y! - cam.y) / cam.w) * pxW * (BOARD_H / BOARD_W) - fs * 0.93;
           const lines = Math.max(1, String(editingEl.text || "").split("\n").length);
           return (
             <div className="absolute z-10" style={{ left: leftPx, top: topPx }}>

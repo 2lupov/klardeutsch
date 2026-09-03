@@ -260,7 +260,7 @@ export default function BoardStudentView({
       {editingEl && (() => {
         const fs = ((editingEl.size || 0.045) * BOARD_H * (pxW / BOARD_W)) / cam.w;
         const leftPx = ((editingEl.x! - cam.x) / cam.w) * pxW;
-        const topPx = ((editingEl.y! - cam.y) / cam.w) * pxW - fs * 0.93;
+        const topPx = ((editingEl.y! - cam.y) / cam.w) * pxW * (BOARD_H / BOARD_W) - fs * 0.93;
         const lines = Math.max(1, String(editingEl.text || "").split("\n").length);
         const cols = Math.max(6, ...String(editingEl.text || "").split("\n").map((l) => l.length + 2));
         return (
