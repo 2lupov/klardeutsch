@@ -355,6 +355,11 @@ export default function BoardEditor({
       if (idAttr) {
         const el = els.find((x) => x.id === idAttr)!;
         if (el.type === "stroke") return;
+        // текст: клік по вже виділеному тексті — одразу редагування прямо на дошці
+        if (el.type === "text" && selected === idAttr) {
+          setEditing(el.id!);
+          return;
+        }
         dragging.current = { id: idAttr, dx: p.x - (el.x || 0), dy: p.y - (el.y || 0) };
       } else {
         // empty space → pan the infinite canvas
@@ -363,6 +368,7 @@ export default function BoardEditor({
       }
       return;
     }
+
 
     if (tool === "text") {
       const el: BoardEl = { id: uid(), type: "text", x: p.x, y: p.y, text: "", color, size: camRef.current.w * 0.05 };
@@ -696,11 +702,9 @@ export default function BoardEditor({
                   className="w-28"
                   title="Розмір тексту"
                 />
-                <button onClick={() => setEditing(selectedEl.id!)} className="px-2 h-9 rounded-xl border border-slate-200 text-sm">
-                  Редагувати
-                </button>
               </>
             )}
+
             <button onClick={removeSelected} className="px-2 h-9 rounded-xl border border-red-200 text-red-600 text-sm">
               Видалити
             </button>
@@ -852,32 +856,8 @@ export default function BoardEditor({
                   fontFamily: "Space Grotesk, system-ui, sans-serif",
                 }}
               />
-              <div
-                onMouseDown={(e) => e.preventDefault()}
-                className="absolute left-0 flex items-center gap-2 rounded-xl border border-slate-200 bg-white/95 px-2 py-1 shadow-sm w-fit"
-                style={{ top: `${fs * 1.25 * lines + 6}px` }}
-              >
-                <span className="text-[11px] text-slate-500">Розмір</span>
-                <input
-                  type="range"
-                  min={8}
-                  max={400}
-                  step={1}
-                  value={Math.round((editingEl.size || 0.045) * 1000)}
-                  onChange={(e) =>
-                    commit(els.map((x) => (x.id === editingEl.id ? { ...x, size: Number(e.target.value) / 1000 } : x)), true)
-                  }
-                  className="w-28"
-                />
-                <button
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => setEditing(null)}
-                  className="text-[11px] px-2 py-0.5 rounded-lg bg-indigo-600 text-white"
-                >
-                  Готово
-                </button>
-              </div>
             </div>
+
           );
         })()}
 
