@@ -13,6 +13,8 @@ import {
   camTransform,
   DEFAULT_CAM,
 } from "./BoardRender";
+import { eraseAt } from "./board-erase";
+
 import {
   MousePointer2,
   Hand,
@@ -85,8 +87,10 @@ export default function BoardEditor({
   } | null>(null);
 
   const panning = useRef<{ fx: number; fy: number; cam: BoardCam } | null>(null);
+  const erasing = useRef(false);
   const saveTimer = useRef<any>(null);
   const lastCast = useRef(0);
+
 
   const elsRef = useRef(els);
   const camRef = useRef(cam);
@@ -175,6 +179,14 @@ export default function BoardEditor({
     elsRef.current = next;
     sync(next, camRef.current, live);
   };
+
+  /** Гумка стирає частину штриха під курсором (як у Miro). */
+  const eraseAtPoint = (p: { x: number; y: number }) => {
+    const r = eraseAt(elsRef.current, p, width * 2.5 * camRef.current.w, undefined);
+    if (!r.changed) return;
+    commit(r.next, true);
+  };
+
 
   const setCamera = (next: BoardCam, live = true) => {
     setCam(next);
@@ -327,9 +339,12 @@ export default function BoardEditor({
     }
 
     if (tool === "erase") {
-      if (idAttr) commit(els.filter((x) => x.id !== idAttr));
+      (e.target as Element).setPointerCapture?.(e.pointerId);
+      erasing.current = true;
+      eraseAtPoint(p);
       return;
     }
+
 
     if (tool === "select") {
       setSelected(idAttr);
@@ -388,7 +403,10 @@ export default function BoardEditor({
 
     const p = world(e.clientX, e.clientY);
 
+    if (erasing.current) { eraseAtPoint(p); return; }
+
     if (resizing.current) {
+
       const r = resizing.current;
       setEls((prev) => {
         const next = prev.map((x) => {
@@ -448,6 +466,8 @@ export default function BoardEditor({
   const onUp = () => {
     panning.current = null;
     const finish = () => setEls((prev) => { elsRef.current = prev; sync(prev, camRef.current); return prev; });
+    if (erasing.current) { erasing.current = false; finish(); return; }
+
     if (resizing.current) { resizing.current = null; finish(); return; }
     if (dragging.current) { dragging.current = null; finish(); return; }
     if (drafting.current) { drafting.current = null; finish(); }
@@ -588,7 +608,7 @@ export default function BoardEditor({
         <Btn active={tool === "line"} onClick={() => setTool("line")} title="Лінія">
           <Minus className="w-4 h-4" />
         </Btn>
-        <Btn active={tool === "erase"} onClick={() => setTool("erase")} title="Видалити елемент">
+        <Btn active={tool === "erase"} onClick={() => setTool("erase")} title="Гумка — стирає намальоване">
           <Eraser className="w-4 h-4" />
         </Btn>
         <Btn active={false} onClick={() => fileRef.current?.click()} title="Додати фото">
@@ -707,7 +727,7 @@ export default function BoardEditor({
               : tool === "select"
               ? "cursor-default"
               : tool === "erase"
-              ? "cursor-pointer"
+              ? "cursor-cell"
               : "cursor-crosshair"
           }`}
           style={{
