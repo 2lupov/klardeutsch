@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import {
@@ -72,6 +72,7 @@ export default function BoardEditor({
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
+  const textInputRef = useRef<HTMLTextAreaElement | null>(null);
   const drafting = useRef<BoardEl | null>(null);
   const dragging = useRef<{ id: string; dx: number; dy: number } | null>(null);
   const resizing = useRef<{
@@ -96,6 +97,19 @@ export default function BoardEditor({
   const camRef = useRef(cam);
   useEffect(() => { elsRef.current = els; }, [els]);
   useEffect(() => { camRef.current = cam; }, [cam]);
+
+  useLayoutEffect(() => {
+    if (!editing) return;
+    const input = textInputRef.current;
+    if (!input) return;
+    input.focus({ preventScroll: true });
+    input.setSelectionRange(input.value.length, input.value.length);
+  }, [editing]);
+
+  useLayoutEffect(() => {
+    const svg = svgRef.current;
+    if (svg) setPxW(svg.getBoundingClientRect().width || BOARD_W);
+  }, []);
 
   // Завантажуємо актуальну дошку з БД (щоб перехід між розділами нічого не стирав)
   useEffect(() => {
@@ -541,7 +555,8 @@ export default function BoardEditor({
   };
 
   const setText = (id: string, text: string) => {
-    commit(els.map((x) => (x.id === id ? { ...x, text } : x)), true);
+    const next = elsRef.current.map((x) => (x.id === id ? { ...x, text } : x));
+    commit(next, true);
   };
 
   const removeSelected = () => {
@@ -561,7 +576,7 @@ export default function BoardEditor({
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  });
+  }, [editing, selected]);
 
   const k = 1 / cam.w;
   const hs = 10 / k; // handle size in world px (screen-constant)
@@ -830,19 +845,28 @@ export default function BoardEditor({
 
         {editingEl && (() => {
           const fs = ((editingEl.size || 0.045) * BOARD_H * (pxW / BOARD_W)) / cam.w;
-          const leftPx = ((editingEl.x! - cam.x) / cam.w) * pxW;
+          const leftPx = (((editingEl.x || 0) - cam.x) / cam.w) * pxW;
           // по вертикалі 1 world-unit = BOARD_H px, а не BOARD_W — інакше поле
           // «тікало» нижче кліку (іноді за межі дошки) і текст був невидимий
-          const topPx = ((editingEl.y! - cam.y) / cam.w) * pxW * (BOARD_H / BOARD_W) - fs * 0.93;
+          const topPx = (((editingEl.y || 0) - cam.y) / cam.w) * pxW * (BOARD_H / BOARD_W) - fs * 0.93;
           const lines = Math.max(1, String(editingEl.text || "").split("\n").length);
           return (
-            <div className="absolute z-10" style={{ left: leftPx, top: topPx }}>
+            <div
+              key={editingEl.id}
+              className="absolute z-20"
+              style={{ left: Math.max(0, leftPx), top: Math.max(0, topPx) }}
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+            >
               {/* Пишемо прямо на дошці: прозоре поле точно на місці тексту */}
               <textarea
-                autoFocus
+                ref={textInputRef}
                 rows={lines}
                 value={editingEl.text || ""}
-                onChange={(e) => setText(editingEl.id!, e.target.value)}
+                onChange={(e) => {
+                  const id = editingEl.id;
+                  if (id) setText(id, e.target.value);
+                }}
                 onBlur={() => setEditing(null)}
                 onKeyDown={(e) => { if (e.key === "Escape") setEditing(null); }}
                 placeholder="Пишіть…"

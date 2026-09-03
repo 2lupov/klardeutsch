@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   BoardEl,
   BoardElement,
@@ -52,6 +52,7 @@ export default function BoardStudentView({
   const [pxW, setPxW] = useState(BOARD_W);
 
   const svgRef = useRef<SVGSVGElement | null>(null);
+  const textInputRef = useRef<HTMLTextAreaElement | null>(null);
   const camRef = useRef(cam);
   const panning = useRef<{ fx: number; fy: number; cam: BoardCam } | null>(null);
   const drafting = useRef<BoardEl | null>(null);
@@ -59,6 +60,19 @@ export default function BoardStudentView({
   const allRef = useRef<BoardEl[]>([]);
   const lastCast = useRef(0);
   useEffect(() => { camRef.current = cam; }, [cam]);
+
+  useLayoutEffect(() => {
+    if (!editing) return;
+    const input = textInputRef.current;
+    if (!input) return;
+    input.focus({ preventScroll: true });
+    input.setSelectionRange(input.value.length, input.value.length);
+  }, [editing]);
+
+  useLayoutEffect(() => {
+    const svg = svgRef.current;
+    if (svg) setPxW(svg.getBoundingClientRect().width || BOARD_W);
+  }, []);
 
   const serverIds = useMemo(() => new Set(content.map((e) => e.id)), [content]);
   const pending = mine.filter((e) => !serverIds.has(e.id));
@@ -220,7 +234,7 @@ export default function BoardStudentView({
   };
 
   const setText = (id: string, text: string) => {
-    const el = all.find((x) => x.id === id);
+    const el = allRef.current.find((x) => x.id === id);
     if (!el) return;
     upsertMine({ ...el, text }, true);
   };
@@ -259,17 +273,26 @@ export default function BoardStudentView({
 
       {editingEl && (() => {
         const fs = ((editingEl.size || 0.045) * BOARD_H * (pxW / BOARD_W)) / cam.w;
-        const leftPx = ((editingEl.x! - cam.x) / cam.w) * pxW;
-        const topPx = ((editingEl.y! - cam.y) / cam.w) * pxW * (BOARD_H / BOARD_W) - fs * 0.93;
+        const leftPx = (((editingEl.x || 0) - cam.x) / cam.w) * pxW;
+        const topPx = (((editingEl.y || 0) - cam.y) / cam.w) * pxW * (BOARD_H / BOARD_W) - fs * 0.93;
         const lines = Math.max(1, String(editingEl.text || "").split("\n").length);
         const cols = Math.max(6, ...String(editingEl.text || "").split("\n").map((l) => l.length + 2));
         return (
-          <div className="absolute z-10" style={{ left: leftPx, top: topPx }}>
+          <div
+            key={editingEl.id}
+            className="absolute z-20"
+            style={{ left: Math.max(0, leftPx), top: Math.max(0, topPx) }}
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
+          >
             <textarea
-              autoFocus
+              ref={textInputRef}
               rows={lines}
               value={editingEl.text || ""}
-              onChange={(e) => setText(editingEl.id!, e.target.value)}
+              onChange={(e) => {
+                const id = editingEl.id;
+                if (id) setText(id, e.target.value);
+              }}
               onBlur={() => setEditing(null)}
               onKeyDown={(e) => { if (e.key === "Escape") setEditing(null); }}
               placeholder="Пишіть…"
