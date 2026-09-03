@@ -856,31 +856,8 @@ export default function BoardEditor({
                   fontFamily: "Space Grotesk, system-ui, sans-serif",
                 }}
               />
-              <div
-                onMouseDown={(e) => e.preventDefault()}
-                className="absolute left-0 flex items-center gap-2 rounded-xl border border-slate-200 bg-white/95 px-2 py-1 shadow-sm w-fit"
-                style={{ top: `${fs * 1.25 * lines + 6}px` }}
-              >
-                <span className="text-[11px] text-slate-500">Розмір</span>
-                <input
-                  type="range"
-                  min={8}
-                  max={400}
-                  step={1}
-                  value={Math.round((editingEl.size || 0.045) * 1000)}
-                  onChange={(e) =>
-                    commit(els.map((x) => (x.id === editingEl.id ? { ...x, size: Number(e.target.value) / 1000 } : x)), true)
-                  }
-                  className="w-28"
-                />
-                <button
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => setEditing(null)}
-                  className="text-[11px] px-2 py-0.5 rounded-lg bg-indigo-600 text-white"
-                >
-                  Готово
-                </button>
-              </div>
+            </div>
+
             </div>
           );
         })()}
