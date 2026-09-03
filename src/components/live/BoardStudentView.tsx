@@ -9,6 +9,7 @@ import {
   contentOfBoard,
   camTransform,
 } from "./BoardRender";
+import { eraseAt } from "./board-erase";
 import { ZoomIn, ZoomOut, Crosshair, Eye, Pencil, Hand, Type, Eraser } from "lucide-react";
 
 const MIN_W = 0.05;
@@ -54,12 +55,15 @@ export default function BoardStudentView({
   const camRef = useRef(cam);
   const panning = useRef<{ fx: number; fy: number; cam: BoardCam } | null>(null);
   const drafting = useRef<BoardEl | null>(null);
+  const erasing = useRef(false);
+  const allRef = useRef<BoardEl[]>([]);
   const lastCast = useRef(0);
   useEffect(() => { camRef.current = cam; }, [cam]);
 
   const serverIds = useMemo(() => new Set(content.map((e) => e.id)), [content]);
   const pending = mine.filter((e) => !serverIds.has(e.id));
   const all = [...content, ...pending];
+  allRef.current = all;
   const editingEl = all.find((e) => e.id === editing && e.type === "text");
 
   const report = (c: BoardCam, throttle = true) => {
@@ -98,6 +102,19 @@ export default function BoardStudentView({
       return next;
     });
     onDraw?.(el, live);
+  };
+
+  const isMine = (el: BoardEl) => /^[sk]/.test(String(el.id));
+
+  /** Справжня гумка: стирає частину свого штриха, а не весь елемент. */
+  const eraseAtPoint = (p: { x: number; y: number }) => {
+    const own = allRef.current.filter(isMine);
+    if (own.length === 0) return;
+    const r = eraseAt(own, p, 10 * camRef.current.w, undefined);
+    if (!r.changed) return;
+    setMine(r.next);
+    r.removed.forEach((id) => onErase?.(id));
+    r.upserted.forEach((el) => onDraw?.(el, true));
   };
 
   const zoomTo = (nextW: number, fx = 0.5, fy = 0.5) => {
@@ -178,6 +195,7 @@ export default function BoardStudentView({
       setCam({ x: s.cam.x - (f.fx - s.fx) * s.cam.w, y: s.cam.y - (f.fy - s.fy) * s.cam.w, w: s.cam.w });
       return;
     }
+    if (erasing.current) { eraseAtPoint(world(e.clientX, e.clientY)); return; }
     const d = drafting.current;
     if (d && tool === "pen") {
       const p = world(e.clientX, e.clientY);
@@ -189,6 +207,10 @@ export default function BoardStudentView({
 
   const endPointer = () => {
     panning.current = null;
+    if (erasing.current) {
+      erasing.current = false;
+      allRef.current.filter(isMine).forEach((el) => onDraw?.(el, false));
+    }
     if (drafting.current) {
       onDraw?.(drafting.current, false);
       drafting.current = null;
@@ -327,22 +349,4 @@ export default function BoardStudentView({
       </div>
     </div>
   );
-}
-
-/** Проста перевірка попадання по елементу (для гумки). */
-function nearElement(el: BoardEl, p: { x: number; y: number }, camW: number) {
-  const tol = 0.012 * camW;
-  if ((el.type || "stroke") === "stroke") {
-    return (el.points || []).some((q) => Math.abs(q.x - p.x) < tol && Math.abs(q.y - p.y) < tol);
-  }
-  const x = el.x || 0;
-  const y = el.y || 0;
-  if (el.type === "text") {
-    const s = el.size || 0.045;
-    return p.x > x - tol && p.x < x + s * 12 && p.y > y - s && p.y < y + s * 0.4;
-  }
-  const w = el.w || 0.2;
-  const h = el.h || 0.2;
-  return p.x > Math.min(x, x + w) - tol && p.x < Math.max(x, x + w) + tol &&
-    p.y > Math.min(y, y + h) - tol && p.y < Math.max(y, y + h) + tol;
 }
