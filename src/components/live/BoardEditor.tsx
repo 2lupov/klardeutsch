@@ -85,8 +85,10 @@ export default function BoardEditor({
   } | null>(null);
 
   const panning = useRef<{ fx: number; fy: number; cam: BoardCam } | null>(null);
+  const erasing = useRef(false);
   const saveTimer = useRef<any>(null);
   const lastCast = useRef(0);
+
 
   const elsRef = useRef(els);
   const camRef = useRef(cam);
