@@ -69,6 +69,11 @@ export default function BoardStudentView({
     input.setSelectionRange(input.value.length, input.value.length);
   }, [editing]);
 
+  useLayoutEffect(() => {
+    const svg = svgRef.current;
+    if (svg) setPxW(svg.getBoundingClientRect().width || BOARD_W);
+  }, []);
+
   const serverIds = useMemo(() => new Set(content.map((e) => e.id)), [content]);
   const pending = mine.filter((e) => !serverIds.has(e.id));
   const all = [...content, ...pending];
@@ -274,6 +279,7 @@ export default function BoardStudentView({
         const cols = Math.max(6, ...String(editingEl.text || "").split("\n").map((l) => l.length + 2));
         return (
           <div
+            key={editingEl.id}
             className="absolute z-20"
             style={{ left: Math.max(0, leftPx), top: Math.max(0, topPx) }}
             onPointerDown={(e) => e.stopPropagation()}

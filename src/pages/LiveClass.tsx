@@ -234,8 +234,24 @@ export default function LiveClass() {
 
         {section === "board" ? (
           <div className={`flex-1 min-h-0 p-3 flex flex-col gap-3 ${cls.book_page ? "overflow-y-auto" : ""}`}>
-            <div className={`w-full rounded-2xl border border-border bg-card overflow-hidden ${cls.book_page ? "h-[55vh] shrink-0" : "h-full"}`}>
+            <div className={boardFull
+              ? "fixed inset-0 z-50 bg-background flex flex-col"
+              : `w-full rounded-2xl border border-border bg-card overflow-hidden ${cls.book_page ? "h-[55vh] shrink-0" : "h-full"}`
+            }>
+              {boardFull && (
+                <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
+                  <span className="font-display font-bold text-foreground text-sm">Дошка — {cls.title}</span>
+                  <button
+                    onClick={() => setBoardFull(false)}
+                    className="px-3 py-1.5 rounded-xl border border-border text-xs font-medium hover:bg-muted/60"
+                  >
+                    Закрити
+                  </button>
+                </div>
+              )}
+              <div className={boardFull ? "flex-1 min-h-0 p-2" : "w-full h-full"}>
               <BoardStudentView elements={cls.board || []} className="w-full h-full" onCamChange={reportCam} onDraw={sendDraw} onErase={sendErase} />
+              </div>
             </div>
             {cls.book_page && (
               <div className="rounded-2xl border border-border bg-card overflow-hidden">
@@ -276,22 +292,6 @@ export default function LiveClass() {
         )}
       </main>
 
-      {boardFull && (
-        <div className="fixed inset-0 z-50 bg-background flex flex-col">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-            <span className="font-display font-bold text-foreground text-sm">Дошка — {cls.title}</span>
-            <button
-              onClick={() => setBoardFull(false)}
-              className="px-3 py-1.5 rounded-xl border border-border text-xs font-medium hover:bg-muted/60"
-            >
-              Закрити
-            </button>
-          </div>
-          <div className="flex-1 min-h-0 p-2">
-            <BoardStudentView elements={cls.board || []} className="w-full h-full" onCamChange={reportCam} onDraw={sendDraw} onErase={sendErase} />
-          </div>
-        </div>
-      )}
     </div>
   );
 }

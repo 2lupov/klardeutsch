@@ -106,6 +106,11 @@ export default function BoardEditor({
     input.setSelectionRange(input.value.length, input.value.length);
   }, [editing]);
 
+  useLayoutEffect(() => {
+    const svg = svgRef.current;
+    if (svg) setPxW(svg.getBoundingClientRect().width || BOARD_W);
+  }, []);
+
   // Завантажуємо актуальну дошку з БД (щоб перехід між розділами нічого не стирав)
   useEffect(() => {
     let cancelled = false;
@@ -571,7 +576,7 @@ export default function BoardEditor({
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  });
+  }, [editing, selected]);
 
   const k = 1 / cam.w;
   const hs = 10 / k; // handle size in world px (screen-constant)
@@ -847,6 +852,7 @@ export default function BoardEditor({
           const lines = Math.max(1, String(editingEl.text || "").split("\n").length);
           return (
             <div
+              key={editingEl.id}
               className="absolute z-20"
               style={{ left: Math.max(0, leftPx), top: Math.max(0, topPx) }}
               onPointerDown={(e) => e.stopPropagation()}
