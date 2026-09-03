@@ -251,37 +251,42 @@ export default function BoardStudentView({
             <line x1={0} y1={-30 * cam.w} x2={0} y2={30 * cam.w} />
           </g>
           {all.map((el, i) => (
-            <BoardElement key={el.id || i} el={el} />
+            editing === el.id ? null : <BoardElement key={el.id || i} el={el} />
           ))}
         </g>
       </svg>
 
-      {editingEl && (
-        <div
-          className="absolute z-10"
-          style={{
-            left: `${((editingEl.x! - cam.x) / cam.w) * 100}%`,
-            top: `${((editingEl.y! - cam.y) / cam.w) * 100 - ((editingEl.size || 0.045) / cam.w) * 100 * 0.95}%`,
-            width: `${Math.min(60, Math.max(24, 100 - ((editingEl.x! - cam.x) / cam.w) * 100))}%`,
-          }}
-        >
-          <textarea
-            autoFocus
-            rows={Math.max(1, String(editingEl.text || "").split("\n").length)}
-            value={editingEl.text || ""}
-            onChange={(e) => setText(editingEl.id!, e.target.value)}
-            onBlur={() => setEditing(null)}
-            onKeyDown={(e) => { if (e.key === "Escape") setEditing(null); }}
-            placeholder="Пишіть…"
-            className="w-full rounded-xl border-2 border-primary bg-card/95 shadow-lg px-2 py-1 outline-none resize-none overflow-hidden font-display font-semibold leading-tight"
-            style={{
-              color: editingEl.color || "#0F172A",
-              fontSize: `${((editingEl.size || 0.045) * BOARD_H * (pxW / BOARD_W)) / cam.w}px`,
-              lineHeight: 1.25,
-            }}
-          />
-        </div>
-      )}
+      {editingEl && (() => {
+        const fs = ((editingEl.size || 0.045) * BOARD_H * (pxW / BOARD_W)) / cam.w;
+        const leftPx = ((editingEl.x! - cam.x) / cam.w) * pxW;
+        const topPx = ((editingEl.y! - cam.y) / cam.w) * pxW - fs * 0.93;
+        const lines = Math.max(1, String(editingEl.text || "").split("\n").length);
+        const cols = Math.max(6, ...String(editingEl.text || "").split("\n").map((l) => l.length + 2));
+        return (
+          <div className="absolute z-10" style={{ left: leftPx, top: topPx }}>
+            <textarea
+              autoFocus
+              rows={lines}
+              value={editingEl.text || ""}
+              onChange={(e) => setText(editingEl.id!, e.target.value)}
+              onBlur={() => setEditing(null)}
+              onKeyDown={(e) => { if (e.key === "Escape") setEditing(null); }}
+              placeholder="Пишіть…"
+              spellCheck={false}
+              className="bg-transparent border-0 outline-none resize-none overflow-hidden font-display font-semibold p-0 m-0 placeholder:text-muted-foreground/40"
+              style={{
+                color: editingEl.color || "#0F172A",
+                fontSize: `${fs}px`,
+                lineHeight: 1.25,
+                caretColor: editingEl.color || "#0F172A",
+                width: `${Math.max(fs * 4, Math.min(pxW - leftPx - 4, fs * 0.62 * cols))}px`,
+                height: `${fs * 1.25 * lines + 2}px`,
+                fontFamily: "Space Grotesk, system-ui, sans-serif",
+              }}
+            />
+          </div>
+        );
+      })()}
 
       {/* панель інструментів учня */}
       <div className="absolute top-3 left-3 flex items-center gap-1.5 rounded-2xl bg-card/90 backdrop-blur border border-border p-1.5 shadow-sm">
