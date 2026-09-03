@@ -178,6 +178,14 @@ export default function BoardEditor({
     sync(next, camRef.current, live);
   };
 
+  /** Гумка стирає частину штриха під курсором (як у Miro). */
+  const eraseAtPoint = (p: { x: number; y: number }) => {
+    const r = eraseAt(elsRef.current, p, width * 2.5 * camRef.current.w, undefined);
+    if (!r.changed) return;
+    commit(r.next, true);
+  };
+
+
   const setCamera = (next: BoardCam, live = true) => {
     setCam(next);
     camRef.current = next;
