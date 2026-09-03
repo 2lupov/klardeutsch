@@ -182,7 +182,11 @@ export default function BoardEditor({
 
   /** Гумка стирає частину штриха під курсором (як у Miro). */
   const eraseAtPoint = (p: { x: number; y: number }) => {
-    const r = eraseAt(elsRef.current, p, width * 2.5 * camRef.current.w, undefined);
+    // Перетворюємо екранний радіус гумки у координати нескінченної дошки.
+    // Раніше сюди потрапляло значення 10+ world units, тому весь штрих
+    // опинявся всередині гумки та зникав одним дотиком.
+    const radius = (Math.max(10, width * 1.8) / BOARD_W) * camRef.current.w;
+    const r = eraseAt(elsRef.current, p, radius, undefined);
     if (!r.changed) return;
     commit(r.next, true);
   };

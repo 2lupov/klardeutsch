@@ -110,7 +110,8 @@ export default function BoardStudentView({
   const eraseAtPoint = (p: { x: number; y: number }) => {
     const own = allRef.current.filter(isMine);
     if (own.length === 0) return;
-    const r = eraseAt(own, p, 10 * camRef.current.w, undefined);
+    const radius = (12 / BOARD_W) * camRef.current.w;
+    const r = eraseAt(own, p, radius, undefined);
     if (!r.changed) return;
     setMine(r.next);
     r.removed.forEach((id) => onErase?.(id));
