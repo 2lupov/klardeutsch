@@ -355,6 +355,11 @@ export default function BoardEditor({
       if (idAttr) {
         const el = els.find((x) => x.id === idAttr)!;
         if (el.type === "stroke") return;
+        // текст: клік по вже виділеному тексті — одразу редагування прямо на дошці
+        if (el.type === "text" && selected === idAttr) {
+          setEditing(el.id!);
+          return;
+        }
         dragging.current = { id: idAttr, dx: p.x - (el.x || 0), dy: p.y - (el.y || 0) };
       } else {
         // empty space → pan the infinite canvas
@@ -363,6 +368,7 @@ export default function BoardEditor({
       }
       return;
     }
+
 
     if (tool === "text") {
       const el: BoardEl = { id: uid(), type: "text", x: p.x, y: p.y, text: "", color, size: camRef.current.w * 0.05 };
