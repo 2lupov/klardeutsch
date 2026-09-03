@@ -391,7 +391,10 @@ export default function BoardEditor({
 
     const p = world(e.clientX, e.clientY);
 
+    if (erasing.current) { eraseAtPoint(p); return; }
+
     if (resizing.current) {
+
       const r = resizing.current;
       setEls((prev) => {
         const next = prev.map((x) => {
