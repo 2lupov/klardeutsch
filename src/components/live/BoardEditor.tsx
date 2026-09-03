@@ -608,7 +608,7 @@ export default function BoardEditor({
         <Btn active={tool === "line"} onClick={() => setTool("line")} title="Лінія">
           <Minus className="w-4 h-4" />
         </Btn>
-        <Btn active={tool === "erase"} onClick={() => setTool("erase")} title="Видалити елемент">
+        <Btn active={tool === "erase"} onClick={() => setTool("erase")} title="Гумка — стирає намальоване">
           <Eraser className="w-4 h-4" />
         </Btn>
         <Btn active={false} onClick={() => fileRef.current?.click()} title="Додати фото">
@@ -727,7 +727,7 @@ export default function BoardEditor({
               : tool === "select"
               ? "cursor-default"
               : tool === "erase"
-              ? "cursor-pointer"
+              ? "cursor-cell"
               : "cursor-crosshair"
           }`}
           style={{
