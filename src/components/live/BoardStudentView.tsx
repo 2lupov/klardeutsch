@@ -164,15 +164,12 @@ export default function BoardStudentView({
     }
 
     if (tool === "erase") {
-      // видаляємо тільки свої елементи
-      const hit = [...pending].reverse().find((el) => nearElement(el, p, cam.w));
-      const own = hit || [...content].reverse().find((el) => String(el.id).startsWith("s") && nearElement(el, p, cam.w));
-      if (own?.id) {
-        setMine((m) => m.filter((x) => x.id !== own.id));
-        onErase?.(own.id);
-      }
+      (e.target as Element).setPointerCapture?.(e.pointerId);
+      erasing.current = true;
+      eraseAtPoint(p);
     }
   };
+
 
   const onPointerMove = (e: React.PointerEvent) => {
     if (panning.current) {
