@@ -31,7 +31,7 @@ function segDist(p: { x: number; y: number }, a: { x: number; y: number }, b: { 
 /**
  * Справжня гумка: стирає частину штриха під курсором, розбиваючи його
  * на окремі шматки. Інші типи елементів (текст, фігури, зображення)
- * видаляються цілком, коли гумка їх торкається.
+ * гумка не змінює — їх можна видалити лише окремою дією видалення.
  */
 export function eraseAt(
   els: BoardEl[],
@@ -101,26 +101,9 @@ export function eraseAt(
       continue;
     }
 
-    // не-штрихи: видаляємо цілком при попаданні
-    const x = el.x || 0;
-    const y = el.y || 0;
-    let hit = false;
-    if (type === "text") {
-      const s = el.size || 0.045;
-      hit = p.x > x - radius && p.x < x + s * 12 && p.y > y - s && p.y < y + s * 0.4;
-    } else {
-      const w = el.w || 0.2;
-      const h = el.h || 0.2;
-      hit =
-        p.x > Math.min(x, x + w) - radius && p.x < Math.max(x, x + w) + radius &&
-        p.y > Math.min(y, y + h) - radius && p.y < Math.max(y, y + h) + radius;
-    }
-    if (hit) {
-      changed = true;
-      removed.push(String(el.id));
-    } else {
-      next.push(el);
-    }
+    // Гумка призначена лише для ліній олівця. Текст, картинки й фігури
+    // завжди залишаються на дошці, навіть якщо провести гумкою поверх них.
+    next.push(el);
   }
 
   return { next, changed, removed, upserted };
