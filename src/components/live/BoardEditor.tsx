@@ -858,7 +858,6 @@ export default function BoardEditor({
               />
             </div>
 
-            </div>
           );
         })()}
 
