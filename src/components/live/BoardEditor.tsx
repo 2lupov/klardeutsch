@@ -454,6 +454,8 @@ export default function BoardEditor({
   const onUp = () => {
     panning.current = null;
     const finish = () => setEls((prev) => { elsRef.current = prev; sync(prev, camRef.current); return prev; });
+    if (erasing.current) { erasing.current = false; finish(); return; }
+
     if (resizing.current) { resizing.current = null; finish(); return; }
     if (dragging.current) { dragging.current = null; finish(); return; }
     if (drafting.current) { drafting.current = null; finish(); }
