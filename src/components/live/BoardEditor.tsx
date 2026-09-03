@@ -327,9 +327,12 @@ export default function BoardEditor({
     }
 
     if (tool === "erase") {
-      if (idAttr) commit(els.filter((x) => x.id !== idAttr));
+      (e.target as Element).setPointerCapture?.(e.pointerId);
+      erasing.current = true;
+      eraseAtPoint(p);
       return;
     }
+
 
     if (tool === "select") {
       setSelected(idAttr);
