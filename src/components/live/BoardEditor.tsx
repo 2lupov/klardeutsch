@@ -13,6 +13,8 @@ import {
   camTransform,
   DEFAULT_CAM,
 } from "./BoardRender";
+import { eraseAt } from "./board-erase";
+
 import {
   MousePointer2,
   Hand,
