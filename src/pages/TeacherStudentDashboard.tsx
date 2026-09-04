@@ -523,7 +523,18 @@ const TeacherStudentDashboard = () => {
 
           {/* ===== ASSIGN ===== */}
           <TabsContent value="assign" className="space-y-4">
+            {user && studentId && (
+              <AIHomeworkBuilder
+                teacherId={user.id}
+                studentId={studentId}
+                defaultLevel={profile?.recommended_level}
+                isKid={profile?.is_kid}
+                onSent={() => void loadAll()}
+              />
+            )}
+
             <div className="p-5 rounded-2xl border border-border bg-card space-y-3">
+
               <h3 className="font-display font-bold flex items-center gap-2">
                 <Plus className="w-5 h-5 text-primary" />
                 {t("Швидке завдання", "Быстрое задание")}
