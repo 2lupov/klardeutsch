@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import TeacherAIAssistant from "@/components/tutoring/TeacherAIAssistant";
+import AIHomeworkBuilder from "@/components/tutoring/AIHomeworkBuilder";
 
 interface StudentProfile {
   user_id: string;
