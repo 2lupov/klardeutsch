@@ -149,11 +149,61 @@ serve(async (req) => {
       return json({ error: "AI не знайшла на цій сторінці матеріалу для інтерактивної сцени." }, 422);
     }
 
-    // The hotspot block points at the original scan of this page.
-    for (const block of scene) {
-      if (block?.type === "hotspots" && !block.image_path && !block.image_url) {
-        block.image_path = page.image_path;
+    // Hotspot blocks get a freshly DRAWN illustration (never the book photo).
+    const drawIllustration = async (promptText: string): Promise<string | null> => {
+      const imgRes = await fetch("https://ai.gateway.lovable.dev/v1/images/generations", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "openai/gpt-image-2.5-sunburst",
+          prompt:
+            `Clean flat vector educational illustration, didactic diagram style, simple bold shapes, ` +
+            `soft limited color palette, plain white background, centered, no text, no letters, no labels, ` +
+            `no numbers, no watermark, not a photograph, not a scanned book page. Subject: ${promptText}`,
+          size: "1024x1024",
+          quality: "medium",
+        }),
+      });
+      if (!imgRes.ok) {
+        console.error(`image gateway error [${imgRes.status}]: ${(await imgRes.text()).slice(0, 300)}`);
+        return null;
       }
+      const imgJson = await imgRes.json();
+      const b64 = imgJson?.data?.[0]?.b64_json;
+      if (!b64) {
+        console.error("image gateway returned no image");
+        return null;
+      }
+      const bin = atob(b64);
+      const out = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+      const path = `interactive/${page.book_id ?? "misc"}/${crypto.randomUUID()}.png`;
+      const { error: upErr } = await admin.storage
+        .from("book-pages")
+        .upload(path, out, { contentType: "image/png", upsert: true });
+      if (upErr) {
+        console.error("illustration upload failed:", upErr);
+        return null;
+      }
+      return path;
+    };
+
+    for (const block of scene) {
+      if (block?.type !== "hotspots") continue;
+      const promptText = String(block.image_prompt ?? "").trim() || String(block.title ?? title ?? "").trim();
+      const drawn = promptText ? await drawIllustration(promptText) : null;
+      delete block.image_prompt;
+      if (drawn) {
+        block.image_path = drawn;
+        block.image_url = null;
+      } else if (!block.image_path && !block.image_url) {
+        // No illustration available — drop the block instead of showing the raw book photo.
+        block.__drop = true;
+      }
+    }
+    const cleanScene = scene.filter((b: any) => !b?.__drop);
+    if (cleanScene.length === 0) {
+      return json({ error: "AI не змогла створити ілюстрації для цієї сторінки. Спробуйте ще раз." }, 422);
     }
 
     const title = String(parsed?.title ?? "").slice(0, 120) || `Seite ${page.page_number ?? ""}`.trim();
