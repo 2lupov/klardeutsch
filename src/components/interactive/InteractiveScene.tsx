@@ -190,7 +190,7 @@ function HotspotsBlock({ block }: { block: Extract<SceneBlock, { type: "hotspots
     <BlockShell title={block.title}>
       <div className="relative rounded-xl overflow-hidden border border-border bg-background">
         {src ? (
-          <img src={src} alt={block.title || "Buchseite"} loading="lazy" className="w-full h-auto" />
+          <img src={src} alt={block.title || "Illustration"} loading="lazy" className="w-full h-auto" />
         ) : (
           <div className="h-48 flex items-center justify-center text-xs text-muted-foreground">Bild wird geladen…</div>
         )}
