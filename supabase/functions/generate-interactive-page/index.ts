@@ -100,9 +100,7 @@ serve(async (req) => {
       method: "POST",
       headers: { "Lovable-API-Key": LOVABLE_API_KEY, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "openai/gpt-6-astra",
-        reasoning_effort: "low",
-        reasoning_effort: "low",
+        model: "google/gemini-3.7-flash",
         messages: [
           { role: "system", content: SYSTEM },
           {

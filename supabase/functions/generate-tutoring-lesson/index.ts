@@ -391,7 +391,7 @@ ${attachedText ? `\nМАТЕРІАЛ:\n${attachedText.slice(0, 8000)}` : ""}`;
       : userMsg;
 
     // Always use Pro model in autoMode for higher quality
-    const model = autoMode || imageUrls.length "openai/gpt-6-astra";
+    const model = autoMode || imageUrls.length "google/gemini-3.7-flash";
 
     const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
