@@ -609,6 +609,19 @@ const TutoringLesson = () => {
                     )}
                   </div>
                   <p className="font-medium mb-3 whitespace-pre-wrap">{ex.question}</p>
+                  {isRichType(ex.exercise_type) && hasRichPayload(ex.exercise_type, ex.payload) ? (
+                    <>
+                      <RichExercise type={ex.exercise_type} payload={ex.payload} revealed={!!isRevealed} />
+                      <div className="flex items-center gap-2 mt-3">
+                        {!isRevealed && (
+                          <Button size="sm" variant="outline" onClick={() => setRevealed({ ...revealed, [ex.id]: true })}>
+                            {t("Показати відповіді", "Показать ответы")}
+                          </Button>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                  <>
                   {ex.exercise_type === "quiz" && Array.isArray(ex.options) && ex.options.length > 0 ? (
                     <div className="space-y-1.5">
                       {ex.options.map((opt: string) => (
@@ -645,6 +658,9 @@ const TutoringLesson = () => {
                       </span>
                     )}
                   </div>
+                  </>
+                  )}
+
                   {isRevealed && ex.explanation && (
                     <p className="text-xs text-muted-foreground mt-2 p-2 rounded bg-muted">{ex.explanation}</p>
                   )}
