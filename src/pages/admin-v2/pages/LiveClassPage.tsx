@@ -393,7 +393,7 @@ function AddForm({
               k === kind ? "border-indigo-300 bg-indigo-50 text-indigo-700" : "border-slate-200 text-slate-600"
             }`}
           >
-            {k === "text" ? "Текст / теорія" : k === "audio" ? "Аудіо" : k === "question" ? "Питання" : "Слово"}
+            {k === "text" ? "Текст / теорія" : k === "audio" ? "Аудіо" : k === "question" ? "Питання" : k === "interactive" ? "Інтерактивна сторінка" : "Слово"}
           </button>
         ))}
       </div>
