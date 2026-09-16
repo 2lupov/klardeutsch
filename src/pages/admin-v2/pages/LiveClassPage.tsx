@@ -17,6 +17,7 @@ import { Play, Square, Trash2 } from "lucide-react";
 import BoardEditor, { type BoardApi } from "@/components/live/BoardEditor";
 import MaterialPicker from "@/components/live/MaterialPicker";
 import LiveBookPagePicker from "@/components/books/LiveBookPagePicker";
+import { listPublishedInteractivePages } from "@/lib/interactivePages";
 
 interface StudentRow { user_id: string; display_name: string | null; email: string | null }
 

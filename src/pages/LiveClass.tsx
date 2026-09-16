@@ -17,6 +17,8 @@ import type { BoardCam } from "@/components/live/BoardRender";
 import { signedPageUrl } from "@/lib/books";
 import AddMyWordForm, { addMyWord } from "@/components/dictionary/AddMyWordForm";
 import { BookmarkPlus } from "lucide-react";
+import InteractiveScene from "@/components/interactive/InteractiveScene";
+import { fetchInteractivePage, type SceneBlock } from "@/lib/interactivePages";
 
 export default function LiveClass() {
   const { id } = useParams<{ id: string }>();
@@ -365,6 +367,8 @@ function ItemCard({
           </button>
         </div>
       )}
+
+      {item.kind === "interactive" && <LiveInteractive pageId={item.content?.page_id} />}
 
       {item.kind === "question" && (
         <div className="space-y-3">
