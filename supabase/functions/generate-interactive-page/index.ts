@@ -218,7 +218,7 @@ serve(async (req) => {
         owner_id: userId,
         title,
         level: level || String(parsed?.level ?? "").slice(0, 4) || null,
-        scene,
+        scene: cleanScene,
         status: "draft",
       })
       .select("id")
