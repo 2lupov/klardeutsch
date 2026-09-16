@@ -167,14 +167,16 @@ const TutoringLesson = () => {
     setIsTeacher(l.teacher_id === user.id);
     setTheoryDraft(l.theory || "");
 
-    const [w, e, h] = await Promise.all([
+    const [w, e, h, r] = await Promise.all([
       supabase.from("tutoring_lesson_words").select("*").eq("lesson_id", id).order("sort_order"),
       supabase.from("tutoring_lesson_exercises").select("*").eq("lesson_id", id).order("sort_order"),
       supabase.from("tutoring_homework").select("*").eq("lesson_id", id).order("created_at"),
+      supabase.from("tutoring_reading_tasks").select("*").eq("lesson_id", id).order("sort_order"),
     ]);
     setWords(w.data || []);
     setExercises(e.data || []);
     setHomework(h.data || []);
+    setReadingTasks(r.data || []);
     setHwSubmissions(
       (h.data || []).reduce((acc: any, hw: any) => ({ ...acc, [hw.id]: hw.submission || "" }), {})
     );
