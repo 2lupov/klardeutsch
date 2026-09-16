@@ -3373,6 +3373,7 @@ export type Database = {
           id: string
           lesson_id: string
           options: Json | null
+          payload: Json
           question: string
           sort_order: number | null
         }
@@ -3384,6 +3385,7 @@ export type Database = {
           id?: string
           lesson_id: string
           options?: Json | null
+          payload?: Json
           question: string
           sort_order?: number | null
         }
@@ -3395,6 +3397,7 @@ export type Database = {
           id?: string
           lesson_id?: string
           options?: Json | null
+          payload?: Json
           question?: string
           sort_order?: number | null
         }
