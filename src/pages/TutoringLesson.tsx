@@ -503,7 +503,22 @@ const TutoringLesson = () => {
                     <label className="text-xs font-bold uppercase text-muted-foreground mb-1 block">{t("Кількість", "Количество")}</label>
                     <Input type="number" min={1} max={40} value={aiCount} onChange={(e) => setAiCount(Math.max(1, Math.min(40, Number(e.target.value) || 1)))} />
                   </div>
+                  <div>
+                    <label className="text-xs font-bold uppercase text-muted-foreground mb-1 block">{t("Малюнки", "Картинки")}</label>
+                    <button
+                      type="button"
+                      onClick={() => setAiImages(!aiImages)}
+                      className={`w-full h-10 px-3 rounded-md border text-xs font-medium transition ${
+                        aiImages ? "border-primary bg-primary/10 text-primary" : "border-border bg-background text-muted-foreground"
+                      }`}
+                    >
+                      {aiImages
+                        ? t("🎨 Домалювати картинки", "🎨 Дорисовать картинки")
+                        : t("😀 Емодзі (швидко)", "😀 Эмодзи (быстро)")}
+                    </button>
+                  </div>
                 </div>
+
                 <div>
                   <label className="text-xs font-bold uppercase text-muted-foreground mb-1 block">{t("Типи вправ", "Типы упражнений")}</label>
                   <div className="flex flex-wrap gap-1.5">
@@ -542,9 +557,10 @@ const TutoringLesson = () => {
                     onChange={(e) => setNewEx({ ...newEx, exercise_type: e.target.value })}
                     className="w-full h-10 px-3 rounded-md border border-border bg-background text-sm"
                   >
-                    {EX_TYPES.map(ex => (
+                    {EX_TYPES.filter(ex => !isRichType(ex.id)).map(ex => (
                       <option key={ex.id} value={ex.id}>{lang === "uk" ? ex.uk : ex.ru}</option>
                     ))}
+
                   </select>
                 </div>
                 <div>
