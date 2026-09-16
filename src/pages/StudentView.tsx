@@ -6,6 +6,10 @@ import { Loader2, Sparkles, Hand, ThumbsUp, HelpCircle, Flame, Send, Check } fro
 import { toast } from "sonner";
 import LessonTimeline from "@/components/tutoring/LessonTimeline";
 import SessionChat from "@/components/tutoring/SessionChat";
+import LessonTheoryRenderer from "@/components/tutoring/LessonTheoryRenderer";
+import RichExercise from "@/components/exercises/RichExercise";
+import { isRichType, hasRichPayload } from "@/components/exercises/richExercises";
+
 
 /**
  * Полноэкранная "чистая" страница для ученика во время демонстрации.
