@@ -139,6 +139,15 @@ const TutoringLesson = () => {
   const [presenterOpen, setPresenterOpen] = useState(false);
   const [studentProfile, setStudentProfile] = useState<any>(null);
 
+  // Reading / grammar from photos
+  const [readingTasks, setReadingTasks] = useState<any[]>([]);
+  const [readKind, setReadKind] = useState<"reading" | "grammar">("reading");
+  const [readFiles, setReadFiles] = useState<File[]>([]);
+  const [readPrompt, setReadPrompt] = useState("");
+  const [readGaps, setReadGaps] = useState(10);
+  const [readQuiz, setReadQuiz] = useState(8);
+  const [readLoading, setReadLoading] = useState(false);
+
   const load = async () => {
     if (!id || !user) return;
     setLoading(true);
