@@ -401,6 +401,7 @@ ${attachedText ? `\nМАТЕРІАЛ:\n${attachedText.slice(0, 8000)}` : ""}`;
       },
       body: JSON.stringify({
         model,
+        ...(model.startsWith("openai/") ? { reasoning_effort: "low" } : {}),
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userContent },
