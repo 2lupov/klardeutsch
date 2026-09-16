@@ -14,17 +14,19 @@ import { startOrResumeSession, updateSession, endSession, type LiveSession, type
 import TeacherAIAssistant from "./TeacherAIAssistant";
 import LessonTimeline from "./LessonTimeline";
 import SessionChat from "./SessionChat";
+import ReadingTaskView from "./ReadingTaskView";
 
 interface Props {
   lesson: any;
   words: any[];
   exercises: any[];
+  readingTasks?: any[];
   studentName: string;
   studentProfile: any;
   onClose: () => void;
 }
 
-const PresenterMode = ({ lesson, words, exercises, studentName, studentProfile, onClose }: Props) => {
+const PresenterMode = ({ lesson, words, exercises, readingTasks = [], studentName, studentProfile, onClose }: Props) => {
   const [session, setSession] = useState<LiveSession | null>(null);
   const [view, setView] = useState<ViewType>({ type: "welcome" });
   const [highlightOn, setHighlightOn] = useState(false);
@@ -298,6 +300,24 @@ const PresenterMode = ({ lesson, words, exercises, studentName, studentProfile, 
               {exercises.length === 0 && <div className="text-xs text-muted-foreground p-2">Нет упражнений</div>}
             </div>
           </PanelCard>
+
+          <PanelCard title={`Чтение / грамматика (${readingTasks.length})`} icon={<BookOpen className="w-4 h-4" />} scroll>
+            <div className="space-y-1">
+              {readingTasks.map((rt) => {
+                const active = view.type === "reading" && (view as any).taskId === rt.id;
+                return (
+                  <button
+                    key={rt.id}
+                    onClick={() => pushView({ type: "reading", taskId: rt.id })}
+                    className={`w-full text-left rounded-lg border ${active ? "border-primary bg-primary/5" : "border-border bg-card hover:border-primary/40"} px-2.5 py-2 text-sm`}
+                  >
+                    <span className="text-xs text-muted-foreground">{rt.kind === "grammar" ? "✍️" : "📖"}</span> {rt.title}
+                  </button>
+                );
+              })}
+              {readingTasks.length === 0 && <div className="text-xs text-muted-foreground p-2">Нет заданий с фото</div>}
+            </div>
+          </PanelCard>
         </div>
 
         {/* CENTER: preview = что видит ученик */}
@@ -325,7 +345,7 @@ const PresenterMode = ({ lesson, words, exercises, studentName, studentProfile, 
               onMouseLeave={handlePreviewLeave}
               className={`w-full h-full rounded-xl bg-background border-2 border-dashed border-border relative overflow-auto ${highlightOn ? "cursor-crosshair" : ""}`}
             >
-              <PreviewContent view={view} words={words} exercises={exercises} theory={lesson.theory || ""}
+              <PreviewContent view={view} words={words} exercises={exercises} readingTasks={readingTasks} theory={lesson.theory || ""}
                 strokes={strokes} drawing={drawing}
                 onWBStart={wbStart} onWBMove={wbMove} onWBEnd={wbEnd}
               />
@@ -397,7 +417,7 @@ const NavBtn = ({ active, onClick, children }: any) => (
   </button>
 );
 
-const PreviewContent = ({ view, words, exercises, theory, strokes, onWBStart, onWBMove, onWBEnd }: any) => {
+const PreviewContent = ({ view, words, exercises, readingTasks, theory, strokes, onWBStart, onWBMove, onWBEnd }: any) => {
   if (view.type === "welcome") {
     return <div className="h-full flex items-center justify-center text-center p-8 text-muted-foreground">
       <div><Sparkles className="w-10 h-10 mx-auto mb-3 text-primary" /><div className="font-display font-bold text-lg">Готовы начать?</div></div>
@@ -427,6 +447,11 @@ const PreviewContent = ({ view, words, exercises, theory, strokes, onWBStart, on
         <div className="px-4 py-2 rounded-lg bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/30">✓ {ex.correct_answer}</div>
       )}
     </div>;
+  }
+  if (view.type === "reading") {
+    const rt = (readingTasks || []).find((x: any) => x.id === view.taskId);
+    if (!rt) return <div className="p-4 text-muted-foreground">Задание не найдено</div>;
+    return <div className="p-4"><ReadingTaskView task={rt} canAnswer showPhotos persist={false} /></div>;
   }
   if (view.type === "whiteboard") {
     return (

@@ -20,6 +20,8 @@ import LessonTheoryRenderer from "@/components/tutoring/LessonTheoryRenderer";
 import RichExercise from "@/components/exercises/RichExercise";
 import { isRichType, hasRichPayload } from "@/components/exercises/richExercises";
 import { AnimatePresence } from "framer-motion";
+import { Images } from "lucide-react";
+import ReadingTaskView from "@/components/tutoring/ReadingTaskView";
 
 
 const EX_TYPES = [
@@ -139,6 +141,15 @@ const TutoringLesson = () => {
   const [presenterOpen, setPresenterOpen] = useState(false);
   const [studentProfile, setStudentProfile] = useState<any>(null);
 
+  // Reading / grammar from photos
+  const [readingTasks, setReadingTasks] = useState<any[]>([]);
+  const [readKind, setReadKind] = useState<"reading" | "grammar">("reading");
+  const [readFiles, setReadFiles] = useState<File[]>([]);
+  const [readPrompt, setReadPrompt] = useState("");
+  const [readGaps, setReadGaps] = useState(10);
+  const [readQuiz, setReadQuiz] = useState(8);
+  const [readLoading, setReadLoading] = useState(false);
+
   const load = async () => {
     if (!id || !user) return;
     setLoading(true);
@@ -158,14 +169,16 @@ const TutoringLesson = () => {
     setIsTeacher(l.teacher_id === user.id);
     setTheoryDraft(l.theory || "");
 
-    const [w, e, h] = await Promise.all([
+    const [w, e, h, r] = await Promise.all([
       supabase.from("tutoring_lesson_words").select("*").eq("lesson_id", id).order("sort_order"),
       supabase.from("tutoring_lesson_exercises").select("*").eq("lesson_id", id).order("sort_order"),
       supabase.from("tutoring_homework").select("*").eq("lesson_id", id).order("created_at"),
+      supabase.from("tutoring_reading_tasks").select("*").eq("lesson_id", id).order("sort_order"),
     ]);
     setWords(w.data || []);
     setExercises(e.data || []);
     setHomework(h.data || []);
+    setReadingTasks(r.data || []);
     setHwSubmissions(
       (h.data || []).reduce((acc: any, hw: any) => ({ ...acc, [hw.id]: hw.submission || "" }), {})
     );
@@ -285,6 +298,52 @@ const TutoringLesson = () => {
     }
   };
 
+  const generateReading = async () => {
+    if (readFiles.length === 0) return;
+    setReadLoading(true);
+    try {
+      const paths: string[] = [];
+      for (const [i, file] of readFiles.entries()) {
+        const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+        const path = `reading/${id}/${Date.now()}-${i}.${ext}`;
+        const { error: upErr } = await supabase.storage
+          .from("tutoring-materials")
+          .upload(path, file, { contentType: file.type || "image/jpeg", upsert: false });
+        if (upErr) throw upErr;
+        paths.push(path);
+      }
+      const { data, error } = await supabase.functions.invoke("generate-reading-from-photos", {
+        body: {
+          lesson_id: id,
+          kind: readKind,
+          image_paths: paths,
+          instructions: readPrompt.trim(),
+          gaps_count: readGaps,
+          quiz_count: readQuiz,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setReadingTasks((prev) => [...prev, data.task]);
+      setReadFiles([]);
+      setReadPrompt("");
+      toast.success(t("Завдання створено", "Задание создано"));
+    } catch (e: any) {
+      const msg = String(e?.message || e);
+      if (msg.includes("402")) toast.error(t("Закінчились AI-кредити", "Закончились AI-кредиты"));
+      else if (msg.includes("429")) toast.error(t("Забагато запитів. Спробуйте пізніше", "Слишком много запросов"));
+      else toast.error(msg);
+    } finally {
+      setReadLoading(false);
+    }
+  };
+
+  const delReadingTask = async (rid: string) => {
+    if (!confirm(t("Видалити завдання?", "Удалить задание?"))) return;
+    await supabase.from("tutoring_reading_tasks").delete().eq("id", rid);
+    setReadingTasks((prev) => prev.filter((r) => r.id !== rid));
+  };
+
   const generateTheory = async () => {
     setTheoryLoading(true);
     try {
@@ -397,14 +456,87 @@ const TutoringLesson = () => {
         {/* Theory, words, exercises, homework tabs */}
 
         <Tabs defaultValue={isTeacher ? "theory" : "words"} className="w-full">
-          <TabsList className={`mb-4 grid w-full ${isTeacher ? "grid-cols-4" : "grid-cols-3"}`}>
+          <TabsList className={`mb-4 grid w-full ${isTeacher ? "grid-cols-5" : "grid-cols-4"}`}>
             {isTeacher && (
               <TabsTrigger value="theory" className="gap-1.5"><FileText className="w-4 h-4" /><span className="hidden sm:inline">{t("Теорія", "Теория")}</span></TabsTrigger>
             )}
             <TabsTrigger value="words" className="gap-1.5"><BookOpen className="w-4 h-4" /><span className="hidden sm:inline">{t("Слова", "Слова")}</span> <span className="text-[10px] opacity-60">({words.length})</span></TabsTrigger>
+            <TabsTrigger value="reading" className="gap-1.5"><Images className="w-4 h-4" /><span className="hidden sm:inline">{t("Читання", "Чтение")}</span> <span className="text-[10px] opacity-60">({readingTasks.length})</span></TabsTrigger>
             <TabsTrigger value="exercises" className="gap-1.5"><ListChecks className="w-4 h-4" /><span className="hidden sm:inline">{t("Вправи", "Упражнения")}</span> <span className="text-[10px] opacity-60">({exercises.length})</span></TabsTrigger>
             <TabsTrigger value="homework" className="gap-1.5"><Sparkles className="w-4 h-4" /><span className="hidden sm:inline">{t("ДЗ", "ДЗ")}</span> <span className="text-[10px] opacity-60">({homework.length})</span></TabsTrigger>
           </TabsList>
+
+          {/* READING / GRAMMAR FROM PHOTOS */}
+          <TabsContent value="reading" className="space-y-4">
+            {isTeacher && (
+              <div className="p-4 rounded-2xl border-2 border-dashed border-primary/40 bg-gradient-to-br from-primary/5 to-transparent space-y-3">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-bold">{t("Створити завдання з фото сторінок", "Создать задание из фото страниц")}</span>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-bold uppercase text-muted-foreground mb-1 block">{t("Тип", "Тип")}</label>
+                    <button
+                      type="button"
+                      onClick={() => setReadKind(readKind === "reading" ? "grammar" : "reading")}
+                      className="w-full h-10 px-3 rounded-md border border-border bg-background text-xs font-medium"
+                    >
+                      {readKind === "reading" ? t("📖 Читання", "📖 Чтение") : t("✍️ Граматика", "✍️ Грамматика")}
+                    </button>
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold uppercase text-muted-foreground mb-1 block">{t("Фото (до 8)", "Фото (до 8)")}</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={(e) => setReadFiles(Array.from(e.target.files || []).slice(0, 8))}
+                      className="w-full h-10 text-xs file:mr-2 file:h-8 file:px-3 file:rounded-md file:border-0 file:bg-primary file:text-primary-foreground file:text-xs file:font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold uppercase text-muted-foreground mb-1 block">{t("Пропусків", "Пропусков")}</label>
+                    <Input type="number" min={4} max={25} value={readGaps} onChange={(e) => setReadGaps(Math.max(4, Math.min(25, Number(e.target.value) || 4)))} />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold uppercase text-muted-foreground mb-1 block">{t("Питань у тесті", "Вопросов в тесте")}</label>
+                    <Input type="number" min={4} max={20} value={readQuiz} onChange={(e) => setReadQuiz(Math.max(4, Math.min(20, Number(e.target.value) || 4)))} />
+                  </div>
+                </div>
+                <Textarea
+                  value={readPrompt}
+                  onChange={(e) => setReadPrompt(e.target.value)}
+                  placeholder={t("Побажання: на що звернути увагу (напр. Perfekt, професії)", "Пожелания: на что обратить внимание")}
+                  rows={2}
+                />
+                {readFiles.length > 0 && (
+                  <p className="text-xs text-muted-foreground">{t("Обрано фото", "Выбрано фото")}: {readFiles.length}</p>
+                )}
+                <Button onClick={generateReading} disabled={readLoading || readFiles.length === 0} className="gap-1.5">
+                  {readLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                  {readLoading ? t("Розпізнаю й створюю…", "Распознаю и создаю…") : t("Створити завдання", "Создать задание")}
+                </Button>
+              </div>
+            )}
+
+            {readingTasks.map((rt) => (
+              <div key={rt.id} className="rounded-2xl border border-border bg-card p-4 lg:p-6 relative">
+                {isTeacher && (
+                  <button
+                    onClick={() => delReadingTask(rt.id)}
+                    className="absolute top-3 right-3 text-destructive hover:bg-destructive/10 p-2 rounded-lg transition"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
+                <ReadingTaskView task={rt as any} canAnswer showPhotos />
+              </div>
+            ))}
+            {readingTasks.length === 0 && !isTeacher && (
+              <div className="text-center py-12 text-muted-foreground">{t("Немає завдань на читання", "Нет заданий на чтение")}</div>
+            )}
+          </TabsContent>
 
           {/* THEORY — teacher only */}
           {isTeacher && (
@@ -806,6 +938,7 @@ const TutoringLesson = () => {
             lesson={lesson}
             words={words}
             exercises={exercises}
+            readingTasks={readingTasks}
             studentName={studentProfile?.display_name || t("Учень", "Ученик")}
             studentProfile={studentProfile}
             onClose={() => setPresenterOpen(false)}
