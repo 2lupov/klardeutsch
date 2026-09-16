@@ -28,7 +28,7 @@ export interface LiveItem {
   id: string;
   class_id: string;
   section: LiveSection;
-  kind: "text" | "audio" | "question" | "word";
+  kind: "text" | "audio" | "question" | "word" | "interactive";
   title: string | null;
   content: any;
   sort_order: number;

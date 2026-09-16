@@ -318,7 +318,16 @@ function AddForm({
   const kinds: LiveItem["kind"][] =
     section === "vocab" ? ["word"] :
     section === "listening" ? ["audio", "question", "text"] :
-    section === "tasks" ? ["question", "text"] : ["text", "question"];
+    section === "tasks" ? ["question", "text", "interactive"] : ["text", "question", "interactive"];
+
+  const [pages, setPages] = useState<{ id: string; title: string; level: string | null }[]>([]);
+  const [interactiveId, setInteractiveId] = useState("");
+
+  useEffect(() => {
+    listPublishedInteractivePages()
+      .then((p) => setPages(p as any))
+      .catch(() => {});
+  }, []);
 
   const [kind, setKind] = useState<LiveItem["kind"]>(kinds[0]);
   const [title, setTitle] = useState("");
