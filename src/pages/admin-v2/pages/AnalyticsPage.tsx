@@ -92,8 +92,8 @@ export default function AnalyticsPage() {
   return (
     <div className="space-y-6">
       <SectionHeader
-        title={`Аналітика · ${meta.flag} ${meta.label}`}
-        subtitle={isAll ? "Дані по всіх мовах" : `Фільтр: тільки ${meta.label}`}
+        title="Аналітика"
+        subtitle="Показники школи"
       />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard label="Всього юзерів" value={data.totalUsers} accent="#4F46E5" />

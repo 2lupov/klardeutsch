@@ -29,7 +29,7 @@ import StudentsPage from "./pages/StudentsPage";
 import LiveClassPage from "./pages/LiveClassPage";
 import MaterialsPage from "./pages/MaterialsPage";
 import SettingsPage from "./pages/SettingsPage";
-import { AdminLangProvider, useAdminLang, ADMIN_LANGS } from "./LanguageContext";
+import { AdminLangProvider } from "./LanguageContext";
 
 type NavKey =
   | "dashboard"
@@ -212,7 +212,7 @@ export default function AdminV2() {
               >
                 {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
               </button>
-              <LangSelector />
+              
               <span className="text-xs px-2.5 py-1 rounded-full font-medium hidden sm:inline bg-admin-accent/20 text-admin-fg">
                 Admin
               </span>
@@ -234,31 +234,6 @@ export default function AdminV2() {
   );
 }
 
-function LangSelector() {
-  const { lang, setLang, meta } = useAdminLang();
-  return (
-    <div className="relative">
-      <select
-        value={lang}
-        onChange={(e) => setLang(e.target.value)}
-        className="appearance-none pl-9 pr-8 py-1.5 rounded-xl border border-admin-border bg-admin-surface text-sm font-medium text-admin-fg focus:outline-none focus:ring-2 focus:ring-admin-accent/40 cursor-pointer"
-        title="Мова курсів"
-      >
-        {ADMIN_LANGS.map((l) => (
-          <option key={l.code} value={l.code}>
-            {l.flag} {l.label}
-          </option>
-        ))}
-      </select>
-      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-base pointer-events-none">
-        {meta.flag}
-      </span>
-      <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-admin-muted pointer-events-none text-xs">
-        ▾
-      </span>
-    </div>
-  );
-}
 
 function PageRouter({ active }: { active: NavKey }) {
   switch (active) {
