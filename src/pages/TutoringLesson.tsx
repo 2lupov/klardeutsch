@@ -17,7 +17,10 @@ import { toast } from "sonner";
 import PresenterMode from "@/components/tutoring/PresenterMode";
 import { Monitor } from "lucide-react";
 import LessonTheoryRenderer from "@/components/tutoring/LessonTheoryRenderer";
+import RichExercise from "@/components/exercises/RichExercise";
+import { isRichType, hasRichPayload } from "@/components/exercises/richExercises";
 import { AnimatePresence } from "framer-motion";
+
 
 const EX_TYPES = [
   { id: "quiz", uk: "Тест (4 варіанти)", ru: "Тест (4 варианта)" },
@@ -32,7 +35,12 @@ const EX_TYPES = [
   { id: "antonym", uk: "Антонім", ru: "Антоним" },
   { id: "question_formation", uk: "Скласти питання", ru: "Составить вопрос" },
   { id: "dictation", uk: "Диктант", ru: "Диктант" },
+  { id: "word_image", uk: "Слово ↔ малюнок", ru: "Слово ↔ картинка" },
+  { id: "drag_cloze", uk: "Пропуски перетягуванням", ru: "Пропуски перетаскиванием" },
+  { id: "matching", uk: "Знайти пару", ru: "Найти пару" },
+  { id: "sorting", uk: "Сортувати по групах", ru: "Сортировать по группам" },
 ];
+
 
 // Нормалізація відповіді: lowercase, ä→ae, ö→oe, ü→ue, ß→ss, забрати пунктуацію, схлопнути пробіли
 const normalizeAns = (s: string) =>
@@ -117,6 +125,13 @@ const TutoringLesson = () => {
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiCount, setAiCount] = useState(5);
   const [aiTypes, setAiTypes] = useState<string[]>(["quiz", "cloze", "translation"]);
+  const [aiImages, setAiImages] = useState(false);
+  const [showAiTheory, setShowAiTheory] = useState(false);
+  const [theoryPrompt, setTheoryPrompt] = useState("");
+  const [theoryBlocks, setTheoryBlocks] = useState(5);
+  const [theoryMode, setTheoryMode] = useState<"replace" | "append">("replace");
+  const [theoryLoading, setTheoryLoading] = useState(false);
+
   const [aiLoading, setAiLoading] = useState(false);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
@@ -251,7 +266,7 @@ const TutoringLesson = () => {
     setAiLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-lesson-extra-exercises", {
-        body: { lesson_id: id, prompt: aiPrompt.trim(), types: aiTypes, count: aiCount },
+        body: { lesson_id: id, prompt: aiPrompt.trim(), types: aiTypes, count: aiCount, with_images: aiImages },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
@@ -267,6 +282,29 @@ const TutoringLesson = () => {
       else toast.error(msg);
     } finally {
       setAiLoading(false);
+    }
+  };
+
+  const generateTheory = async () => {
+    setTheoryLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-lesson-theory", {
+        body: { lesson_id: id, prompt: theoryPrompt.trim(), blocks: theoryBlocks, mode: theoryMode },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setLesson((prev: any) => ({ ...prev, theory: data.theory }));
+      setTheoryDraft(data.theory || "");
+      setShowAiTheory(false);
+      setTheoryPrompt("");
+      toast.success(t("Теорію згенеровано", "Теория сгенерирована"));
+    } catch (e: any) {
+      const msg = String(e?.message || e);
+      if (msg.includes("402")) toast.error(t("Закінчились AI-кредити", "Закончились AI-кредиты"));
+      else if (msg.includes("429")) toast.error(t("Забагато запитів. Спробуйте пізніше", "Слишком много запросов. Попробуйте позже"));
+      else toast.error(msg);
+    } finally {
+      setTheoryLoading(false);
     }
   };
 
