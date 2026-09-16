@@ -188,14 +188,16 @@ ${TYPE_GLOSSARY}
 {
   "exercises": [
     {
-      "type": "quiz | cloze | translation | article | word_order | conjugation | plural | error_correction | synonym | antonym | question_formation | dictation",
+      "type": "quiz | cloze | translation | article | word_order | conjugation | plural | error_correction | synonym | antonym | question_formation | dictation | word_image | drag_cloze | matching | sorting",
       "question": "...",
       "options": ["..."],
       "correct_answer": "...",
+      "payload": {},
       "explanation": "Пояснення російською з емодзі"
     }
   ]
 }`;
+
 
     const userMsg = `Урок: "${lesson.title}" (рівень ${lesson.level}${lesson.topic ? `, тема: ${lesson.topic}` : ""}).
 ${lesson.theory ? `Коротко з теорії:\n${String(lesson.theory).slice(0, 1500)}\n` : ""}
