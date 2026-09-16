@@ -28,8 +28,14 @@ scene: 4–8 Blöcke in sinnvoller Reihenfolge. Erlaubte Blocktypen:
    NUR wenn die Seite etwas Kreisendes/Umlaufendes zeigt (Planeten, Monde, Elektronen, Kreisläufe).
    size 6–40 (relative Größe), speed 0.1–6 (größer = schneller), ring=true für Ringe (z. B. Saturn).
    Reihenfolge = von innen nach außen.
-3) { "type":"hotspots", "title":"...", "points":[{"x":42,"y":18,"label":"Sonne","description":"kurzer Satz"}] }
-   Punkte auf dem Originalfoto der Seite; x/y in Prozent (0–100) vom linken/oberen Rand.
+3) { "type":"hotspots", "title":"...", "image_prompt":"...", "points":[{"x":42,"y":18,"label":"Sonne","description":"kurzer Satz"}] }
+   WICHTIG: Das Buchfoto wird NICHT verwendet. Stattdessen wird aus "image_prompt" eine SAUBERE,
+   NEU GEZEICHNETE Illustration erzeugt (flache Vektor-Illustration / didaktisches Schaubild).
+   image_prompt: englische Bildbeschreibung (1–3 Sätze) des Objekts oder Schaubilds, das gezeichnet werden soll –
+   klare Formen, Seitenansicht bzw. Querschnitt, weißer Hintergrund, KEIN Text, KEINE Buchstaben, KEINE Beschriftungen im Bild,
+   kein Foto-Look, keine Fotokopie einer Buchseite. Beschreibe auch die Anordnung, damit die Punkte passen
+   (z. B. "full body side view of a T-Rex facing right, head top-left, tail bottom-right").
+   points: x/y in Prozent (0–100) vom linken/oberen Rand DIESER neuen Illustration (Bild ist quadratisch).
 4) { "type":"scale", "title":"...", "unit":"Mio. km", "items":[{"label":"Merkur","value":58,"note":"..."}] }
    Für Entfernungen, Größen, Zeitspannen, Temperaturen.
 5) { "type":"facts", "title":"...", "cards":[{"front":"Wie viele Planeten?","back":"Acht Planeten"}] }
@@ -143,11 +149,63 @@ serve(async (req) => {
       return json({ error: "AI не знайшла на цій сторінці матеріалу для інтерактивної сцени." }, 422);
     }
 
-    // The hotspot block points at the original scan of this page.
-    for (const block of scene) {
-      if (block?.type === "hotspots" && !block.image_path && !block.image_url) {
-        block.image_path = page.image_path;
+    // Hotspot blocks get a freshly DRAWN illustration (never the book photo).
+    const drawIllustration = async (promptText: string): Promise<string | null> => {
+      const imgRes = await fetch("https://ai.gateway.lovable.dev/v1/images/generations", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "openai/gpt-image-2.5-sunburst",
+          prompt:
+            `Clean flat vector educational illustration, didactic diagram style, simple bold shapes, ` +
+            `soft limited color palette, plain white background, centered, no text, no letters, no labels, ` +
+            `no numbers, no watermark, not a photograph, not a scanned book page. Subject: ${promptText}`,
+          size: "1024x1024",
+          quality: "medium",
+        }),
+      });
+      if (!imgRes.ok) {
+        console.error(`image gateway error [${imgRes.status}]: ${(await imgRes.text()).slice(0, 300)}`);
+        return null;
       }
+      const imgJson = await imgRes.json();
+      const b64 = imgJson?.data?.[0]?.b64_json;
+      if (!b64) {
+        console.error("image gateway returned no image");
+        return null;
+      }
+      const bin = atob(b64);
+      const out = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+      const path = `interactive/${page.book_id ?? "misc"}/${crypto.randomUUID()}.png`;
+      const { error: upErr } = await admin.storage
+        .from("book-pages")
+        .upload(path, out, { contentType: "image/png", upsert: true });
+      if (upErr) {
+        console.error("illustration upload failed:", upErr);
+        return null;
+      }
+      return path;
+    };
+
+    for (const block of scene) {
+      if (block?.type !== "hotspots") continue;
+      const promptText =
+        String(block.image_prompt ?? "").trim() ||
+        [String(block.title ?? ""), String(parsed?.title ?? "")].filter(Boolean).join(" — ").trim();
+      const drawn = promptText ? await drawIllustration(promptText) : null;
+      delete block.image_prompt;
+      if (drawn) {
+        block.image_path = drawn;
+        block.image_url = null;
+      } else if (!block.image_path && !block.image_url) {
+        // No illustration available — drop the block instead of showing the raw book photo.
+        block.__drop = true;
+      }
+    }
+    const cleanScene = scene.filter((b: any) => !b?.__drop);
+    if (cleanScene.length === 0) {
+      return json({ error: "AI не змогла створити ілюстрації для цієї сторінки. Спробуйте ще раз." }, 422);
     }
 
     const title = String(parsed?.title ?? "").slice(0, 120) || `Seite ${page.page_number ?? ""}`.trim();
@@ -160,7 +218,7 @@ serve(async (req) => {
         owner_id: userId,
         title,
         level: level || String(parsed?.level ?? "").slice(0, 4) || null,
-        scene,
+        scene: cleanScene,
         status: "draft",
       })
       .select("id")
@@ -170,7 +228,7 @@ serve(async (req) => {
       return json({ error: insErr.message }, 500);
     }
 
-    return json({ ok: true, id: inserted.id, blocks: scene.length });
+    return json({ ok: true, id: inserted.id, blocks: cleanScene.length });
   } catch (e) {
     console.error("generate-interactive-page error:", e);
     return json({ error: e instanceof Error ? e.message : "Unknown error" }, 500);
