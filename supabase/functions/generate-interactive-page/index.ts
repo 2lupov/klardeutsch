@@ -190,7 +190,9 @@ serve(async (req) => {
 
     for (const block of scene) {
       if (block?.type !== "hotspots") continue;
-      const promptText = String(block.image_prompt ?? "").trim() || String(block.title ?? title ?? "").trim();
+      const promptText =
+        String(block.image_prompt ?? "").trim() ||
+        [String(block.title ?? ""), String(parsed?.title ?? "")].filter(Boolean).join(" — ").trim();
       const drawn = promptText ? await drawIllustration(promptText) : null;
       delete block.image_prompt;
       if (drawn) {
