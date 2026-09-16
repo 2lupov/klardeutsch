@@ -269,6 +269,39 @@ ${existingSummary ? `Вже є вправи (НЕ дублюй їх):\n${existin
       return ex;
     });
 
+    // Валідація інтерактивних вправ: без коректного payload не зберігаємо
+    const validRich = (ex: any) => {
+      const p = ex.payload || {};
+      switch (ex.type) {
+        case "word_image":
+          return Array.isArray(p.items) && p.items.filter((i: any) => i?.word).length >= 2;
+        case "matching":
+          return Array.isArray(p.pairs) && p.pairs.filter((x: any) => x?.left && x?.right).length >= 2;
+        case "drag_cloze":
+          return typeof p.text === "string" && p.text.includes("___") && Array.isArray(p.tokens) && p.tokens.length > 0;
+        case "sorting":
+          return Array.isArray(p.groups) && p.groups.filter((g: any) => g?.name && Array.isArray(g.items)).length >= 2;
+        default:
+          return true;
+      }
+    };
+    list = list.filter(validRich);
+
+    // Малюємо ілюстрації для word_image (якщо вчитель попросив), інакше лишаємо емодзі
+    const withImages = body.with_images === true;
+    if (withImages) {
+      for (const ex of list) {
+        if (ex.type !== "word_image") continue;
+        const items = (ex.payload.items || []).slice(0, 6);
+        const paths = await Promise.all(
+          items.map((it: any) =>
+            it?.image_prompt ? drawItemImage(supabase, LOVABLE_API_KEY, lessonId, it.image_prompt) : Promise.resolve(null),
+          ),
+        );
+        ex.payload.items = items.map((it: any, i: number) => ({ ...it, image_path: paths[i] || null }));
+      }
+    }
+
     if (list.length === 0) {
       return new Response(JSON.stringify({ error: "AI returned no exercises" }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -284,8 +317,10 @@ ${existingSummary ? `Вже є вправи (НЕ дублюй їх):\n${existin
       options: Array.isArray(ex.options) ? ex.options : [],
       correct_answer: ex.correct_answer ?? null,
       explanation: ex.explanation ?? null,
+      payload: RICH_TYPES.includes(ex.type) && ex.payload ? ex.payload : {},
       sort_order: baseOrder + i,
     }));
+
 
     const { data: inserted, error: insErr } = await supabase
       .from("tutoring_lesson_exercises")
