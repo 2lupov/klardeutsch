@@ -6,6 +6,10 @@ import { Loader2, Sparkles, Hand, ThumbsUp, HelpCircle, Flame, Send, Check } fro
 import { toast } from "sonner";
 import LessonTimeline from "@/components/tutoring/LessonTimeline";
 import SessionChat from "@/components/tutoring/SessionChat";
+import LessonTheoryRenderer from "@/components/tutoring/LessonTheoryRenderer";
+import RichExercise from "@/components/exercises/RichExercise";
+import { isRichType, hasRichPayload } from "@/components/exercises/richExercises";
+
 
 /**
  * Полноэкранная "чистая" страница для ученика во время демонстрации.
@@ -181,11 +185,12 @@ const StudentView = () => {
             )}
 
             {v.type === "theory" && (
-              <div className="prose prose-lg max-w-none">
+              <div className="max-w-none">
                 <h2 className="text-2xl font-display font-bold mb-4">Теория</h2>
-                <div className="text-xl leading-relaxed whitespace-pre-wrap">{lessonData?.theory}</div>
+                <LessonTheoryRenderer content={lessonData?.theory || ""} />
               </div>
             )}
+
 
             {v.type === "word" && (() => {
               const w = lessonData?.words.find((x) => x.id === (v as any).wordId);
@@ -216,7 +221,16 @@ const StudentView = () => {
                   {currentExercise.question || currentExercise.prompt}
                 </h2>
 
-                {hasOptions ? (
+                {isRichType(currentExercise.exercise_type) && hasRichPayload(currentExercise.exercise_type, currentExercise.payload) ? (
+                  <RichExercise
+                    type={currentExercise.exercise_type}
+                    payload={currentExercise.payload}
+                    onResult={(ok, done) => {
+                      if (done && !submitted) submitAnswer(ok ? "✅ виконано правильно" : "⚠️ виконано з помилками");
+                    }}
+                  />
+                ) : hasOptions ? (
+
                   <div className="grid gap-3">
                     {currentExercise.options.map((opt: string, i: number) => {
                       const selected = answer === opt;

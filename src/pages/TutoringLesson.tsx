@@ -17,7 +17,10 @@ import { toast } from "sonner";
 import PresenterMode from "@/components/tutoring/PresenterMode";
 import { Monitor } from "lucide-react";
 import LessonTheoryRenderer from "@/components/tutoring/LessonTheoryRenderer";
+import RichExercise from "@/components/exercises/RichExercise";
+import { isRichType, hasRichPayload } from "@/components/exercises/richExercises";
 import { AnimatePresence } from "framer-motion";
+
 
 const EX_TYPES = [
   { id: "quiz", uk: "Тест (4 варіанти)", ru: "Тест (4 варианта)" },
@@ -32,7 +35,12 @@ const EX_TYPES = [
   { id: "antonym", uk: "Антонім", ru: "Антоним" },
   { id: "question_formation", uk: "Скласти питання", ru: "Составить вопрос" },
   { id: "dictation", uk: "Диктант", ru: "Диктант" },
+  { id: "word_image", uk: "Слово ↔ малюнок", ru: "Слово ↔ картинка" },
+  { id: "drag_cloze", uk: "Пропуски перетягуванням", ru: "Пропуски перетаскиванием" },
+  { id: "matching", uk: "Знайти пару", ru: "Найти пару" },
+  { id: "sorting", uk: "Сортувати по групах", ru: "Сортировать по группам" },
 ];
+
 
 // Нормалізація відповіді: lowercase, ä→ae, ö→oe, ü→ue, ß→ss, забрати пунктуацію, схлопнути пробіли
 const normalizeAns = (s: string) =>
@@ -117,6 +125,13 @@ const TutoringLesson = () => {
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiCount, setAiCount] = useState(5);
   const [aiTypes, setAiTypes] = useState<string[]>(["quiz", "cloze", "translation"]);
+  const [aiImages, setAiImages] = useState(false);
+  const [showAiTheory, setShowAiTheory] = useState(false);
+  const [theoryPrompt, setTheoryPrompt] = useState("");
+  const [theoryBlocks, setTheoryBlocks] = useState(5);
+  const [theoryMode, setTheoryMode] = useState<"replace" | "append">("replace");
+  const [theoryLoading, setTheoryLoading] = useState(false);
+
   const [aiLoading, setAiLoading] = useState(false);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
@@ -251,7 +266,7 @@ const TutoringLesson = () => {
     setAiLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-lesson-extra-exercises", {
-        body: { lesson_id: id, prompt: aiPrompt.trim(), types: aiTypes, count: aiCount },
+        body: { lesson_id: id, prompt: aiPrompt.trim(), types: aiTypes, count: aiCount, with_images: aiImages },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
@@ -267,6 +282,29 @@ const TutoringLesson = () => {
       else toast.error(msg);
     } finally {
       setAiLoading(false);
+    }
+  };
+
+  const generateTheory = async () => {
+    setTheoryLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-lesson-theory", {
+        body: { lesson_id: id, prompt: theoryPrompt.trim(), blocks: theoryBlocks, mode: theoryMode },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setLesson((prev: any) => ({ ...prev, theory: data.theory }));
+      setTheoryDraft(data.theory || "");
+      setShowAiTheory(false);
+      setTheoryPrompt("");
+      toast.success(t("Теорію згенеровано", "Теория сгенерирована"));
+    } catch (e: any) {
+      const msg = String(e?.message || e);
+      if (msg.includes("402")) toast.error(t("Закінчились AI-кредити", "Закончились AI-кредиты"));
+      else if (msg.includes("429")) toast.error(t("Забагато запитів. Спробуйте пізніше", "Слишком много запросов. Попробуйте позже"));
+      else toast.error(msg);
+    } finally {
+      setTheoryLoading(false);
     }
   };
 
@@ -373,10 +411,61 @@ const TutoringLesson = () => {
           <TabsContent value="theory">
             <div className="rounded-2xl border border-border bg-card p-6">
               {isTeacher && !editingTheory && (
-                <div className="flex justify-end mb-3">
+                <div className="flex justify-end gap-2 mb-3">
+                  <Button
+                    size="sm"
+                    onClick={() => setShowAiTheory(!showAiTheory)}
+                    className="gap-1.5 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:opacity-90"
+                  >
+                    <Sparkles className="w-4 h-4" />{showAiTheory ? t("Сховати ШІ", "Скрыть ИИ") : t("Теорія через ШІ", "Теория через ИИ")}
+                  </Button>
                   <Button size="sm" variant="ghost" onClick={() => setEditingTheory(true)}><Edit3 className="w-4 h-4 mr-1" />{t("Редагувати", "Редактировать")}</Button>
                 </div>
               )}
+              {isTeacher && showAiTheory && !editingTheory && (
+                <div className="mb-4 p-4 rounded-2xl border-2 border-dashed border-primary/40 bg-gradient-to-br from-primary/5 to-transparent space-y-3">
+                  <div>
+                    <label className="text-xs font-bold uppercase text-muted-foreground mb-1 block">
+                      {t("Що пояснити?", "Что объяснить?")}
+                    </label>
+                    <Textarea
+                      value={theoryPrompt}
+                      onChange={(e) => setTheoryPrompt(e.target.value)}
+                      placeholder={t("Напр.: Genitiv — коли вживається, закінчення, приклади", "Напр.: Genitiv — когда употребляется, окончания, примеры")}
+                      rows={2}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-bold uppercase text-muted-foreground mb-1 block">{t("Блоків", "Блоков")}</label>
+                      <Input
+                        type="number" min={2} max={8} value={theoryBlocks}
+                        onChange={(e) => setTheoryBlocks(Math.max(2, Math.min(8, Number(e.target.value) || 2)))}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold uppercase text-muted-foreground mb-1 block">{t("Режим", "Режим")}</label>
+                      <button
+                        type="button"
+                        onClick={() => setTheoryMode(theoryMode === "replace" ? "append" : "replace")}
+                        className="w-full h-10 px-3 rounded-md border border-border bg-background text-xs font-medium"
+                      >
+                        {theoryMode === "replace" ? t("Замінити теорію", "Заменить теорию") : t("Додати в кінець", "Добавить в конец")}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={generateTheory} disabled={theoryLoading} className="gap-1.5">
+                      {theoryLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                      {theoryLoading ? t("Генерую…", "Генерирую…") : t("Згенерувати", "Сгенерировать")}
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => setShowAiTheory(false)} disabled={theoryLoading}>
+                      {t("Скасувати", "Отмена")}
+                    </Button>
+                  </div>
+                </div>
+              )}
+
               {editingTheory ? (
                 <div className="space-y-3">
                   <Textarea value={theoryDraft} onChange={(e) => setTheoryDraft(e.target.value)} rows={20} className="font-mono text-sm" />
@@ -465,7 +554,22 @@ const TutoringLesson = () => {
                     <label className="text-xs font-bold uppercase text-muted-foreground mb-1 block">{t("Кількість", "Количество")}</label>
                     <Input type="number" min={1} max={40} value={aiCount} onChange={(e) => setAiCount(Math.max(1, Math.min(40, Number(e.target.value) || 1)))} />
                   </div>
+                  <div>
+                    <label className="text-xs font-bold uppercase text-muted-foreground mb-1 block">{t("Малюнки", "Картинки")}</label>
+                    <button
+                      type="button"
+                      onClick={() => setAiImages(!aiImages)}
+                      className={`w-full h-10 px-3 rounded-md border text-xs font-medium transition ${
+                        aiImages ? "border-primary bg-primary/10 text-primary" : "border-border bg-background text-muted-foreground"
+                      }`}
+                    >
+                      {aiImages
+                        ? t("🎨 Домалювати картинки", "🎨 Дорисовать картинки")
+                        : t("😀 Емодзі (швидко)", "😀 Эмодзи (быстро)")}
+                    </button>
+                  </div>
                 </div>
+
                 <div>
                   <label className="text-xs font-bold uppercase text-muted-foreground mb-1 block">{t("Типи вправ", "Типы упражнений")}</label>
                   <div className="flex flex-wrap gap-1.5">
@@ -504,9 +608,10 @@ const TutoringLesson = () => {
                     onChange={(e) => setNewEx({ ...newEx, exercise_type: e.target.value })}
                     className="w-full h-10 px-3 rounded-md border border-border bg-background text-sm"
                   >
-                    {EX_TYPES.map(ex => (
+                    {EX_TYPES.filter(ex => !isRichType(ex.id)).map(ex => (
                       <option key={ex.id} value={ex.id}>{lang === "uk" ? ex.uk : ex.ru}</option>
                     ))}
+
                   </select>
                 </div>
                 <div>
@@ -571,6 +676,19 @@ const TutoringLesson = () => {
                     )}
                   </div>
                   <p className="font-medium mb-3 whitespace-pre-wrap">{ex.question}</p>
+                  {isRichType(ex.exercise_type) && hasRichPayload(ex.exercise_type, ex.payload) ? (
+                    <>
+                      <RichExercise type={ex.exercise_type} payload={ex.payload} revealed={!!isRevealed} />
+                      <div className="flex items-center gap-2 mt-3">
+                        {!isRevealed && (
+                          <Button size="sm" variant="outline" onClick={() => setRevealed({ ...revealed, [ex.id]: true })}>
+                            {t("Показати відповіді", "Показать ответы")}
+                          </Button>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                  <>
                   {ex.exercise_type === "quiz" && Array.isArray(ex.options) && ex.options.length > 0 ? (
                     <div className="space-y-1.5">
                       {ex.options.map((opt: string) => (
@@ -607,6 +725,9 @@ const TutoringLesson = () => {
                       </span>
                     )}
                   </div>
+                  </>
+                  )}
+
                   {isRevealed && ex.explanation && (
                     <p className="text-xs text-muted-foreground mt-2 p-2 rounded bg-muted">{ex.explanation}</p>
                   )}

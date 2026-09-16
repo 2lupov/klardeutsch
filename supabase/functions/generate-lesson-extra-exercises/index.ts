@@ -10,7 +10,11 @@ const ALLOWED_TYPES = [
   "quiz", "cloze", "translation", "article", "word_order",
   "conjugation", "plural", "error_correction", "synonym", "antonym",
   "question_formation", "dictation",
+  // інтерактивні
+  "word_image", "drag_cloze", "matching", "sorting",
 ];
+
+const RICH_TYPES = ["word_image", "drag_cloze", "matching", "sorting"];
 
 const TYPE_GLOSSARY = `
 ДОВІДНИК ТИПІВ ВПРАВ (використовуй ТОЧНО ці значення в полі "type"):
@@ -27,9 +31,62 @@ const TYPE_GLOSSARY = `
 - "question_formation" — question = "Утвори питання до: <речення>", correct_answer — нім. питання зі знаком "?".
 - "dictation" — question = "Запиши почуте: <нім. речення>", correct_answer = саме це речення.
 
+ІНТЕРАКТИВНІ ТИПИ (усі дані в полі "payload", correct_answer НЕ потрібен):
+- "word_image" — слово ↔ малюнок. question = інструкція українською. payload:
+  { "items": [ { "word": "der Hund", "translation": "пес", "emoji": "🐶", "image_prompt": "a friendly dog sitting, flat vector illustration" } ] }
+  4–6 items, кожне слово конкретний предмет/істота/дія (щоб можна було намалювати). emoji ОБОВ'ЯЗКОВО. image_prompt — англійською, 1 реченням.
+- "drag_cloze" — заповнити пропуски перетягуванням. payload:
+  { "text": "Anna ___ heute ins Kino und ___ Popcorn.", "tokens": ["geht","kauft"], "distractors": ["gehst","kaufen"] }
+  tokens — правильні слова В ПОРЯДКУ пропусків "___" (2–5 пропусків). distractors — 2–4 зайві схожі форми.
+- "matching" — знайти пару. payload: { "pairs": [ { "left": "der Arzt", "right": "лікар" } ] } — 4–6 пар (слово↔переклад, питання↔відповідь, дієслово↔Partizip II).
+- "sorting" — сортувати по групах. payload: { "groups": [ { "name": "der", "items": ["Tisch","Hund"] }, { "name": "die", "items": ["Lampe"] } ] } — 2–3 групи, разом 6–9 елементів.
+
 Для всіх типів КРІМ "quiz" поле options НЕ ставити (або []). explanation — обов'язково російською (1-2 речення).
 Для quiz перемішуй правильну відповідь — вона НЕ повинна завжди бути першою.
 `;
+
+/** Малює просту векторну ілюстрацію для word_image і кладе її в bucket exercise-images. */
+async function drawItemImage(
+  supabase: any,
+  apiKey: string,
+  lessonId: string,
+  promptText: string,
+): Promise<string | null> {
+  try {
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/images/generations", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "openai/gpt-image-2.5-sunburst",
+        prompt: `Clean flat vector educational illustration, simple bold shapes, soft limited color palette, plain white background, centered single subject, no text, no letters, no numbers, no watermark, not a photograph. Subject: ${promptText}`,
+        size: "1024x1024",
+        quality: "low",
+      }),
+    });
+    if (!res.ok) {
+      console.error("image gen failed", res.status, await res.text());
+      return null;
+    }
+    const json = await res.json();
+    const b64 = json?.data?.[0]?.b64_json;
+    if (!b64) return null;
+    const bin = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+    const path = `${lessonId}/${crypto.randomUUID()}.png`;
+    const { error } = await supabase.storage.from("exercise-images").upload(path, bin, {
+      contentType: "image/png",
+      upsert: false,
+    });
+    if (error) {
+      console.error("upload failed", error.message);
+      return null;
+    }
+    return path;
+  } catch (e) {
+    console.error("drawItemImage", e);
+    return null;
+  }
+}
+
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -131,14 +188,16 @@ ${TYPE_GLOSSARY}
 {
   "exercises": [
     {
-      "type": "quiz | cloze | translation | article | word_order | conjugation | plural | error_correction | synonym | antonym | question_formation | dictation",
+      "type": "quiz | cloze | translation | article | word_order | conjugation | plural | error_correction | synonym | antonym | question_formation | dictation | word_image | drag_cloze | matching | sorting",
       "question": "...",
       "options": ["..."],
       "correct_answer": "...",
+      "payload": {},
       "explanation": "Пояснення російською з емодзі"
     }
   ]
 }`;
+
 
     const userMsg = `Урок: "${lesson.title}" (рівень ${lesson.level}${lesson.topic ? `, тема: ${lesson.topic}` : ""}).
 ${lesson.theory ? `Коротко з теорії:\n${String(lesson.theory).slice(0, 1500)}\n` : ""}
@@ -210,6 +269,39 @@ ${existingSummary ? `Вже є вправи (НЕ дублюй їх):\n${existin
       return ex;
     });
 
+    // Валідація інтерактивних вправ: без коректного payload не зберігаємо
+    const validRich = (ex: any) => {
+      const p = ex.payload || {};
+      switch (ex.type) {
+        case "word_image":
+          return Array.isArray(p.items) && p.items.filter((i: any) => i?.word).length >= 2;
+        case "matching":
+          return Array.isArray(p.pairs) && p.pairs.filter((x: any) => x?.left && x?.right).length >= 2;
+        case "drag_cloze":
+          return typeof p.text === "string" && p.text.includes("___") && Array.isArray(p.tokens) && p.tokens.length > 0;
+        case "sorting":
+          return Array.isArray(p.groups) && p.groups.filter((g: any) => g?.name && Array.isArray(g.items)).length >= 2;
+        default:
+          return true;
+      }
+    };
+    list = list.filter(validRich);
+
+    // Малюємо ілюстрації для word_image (якщо вчитель попросив), інакше лишаємо емодзі
+    const withImages = body.with_images === true;
+    if (withImages) {
+      for (const ex of list) {
+        if (ex.type !== "word_image") continue;
+        const items = (ex.payload.items || []).slice(0, 6);
+        const paths = await Promise.all(
+          items.map((it: any) =>
+            it?.image_prompt ? drawItemImage(supabase, LOVABLE_API_KEY, lessonId, it.image_prompt) : Promise.resolve(null),
+          ),
+        );
+        ex.payload.items = items.map((it: any, i: number) => ({ ...it, image_path: paths[i] || null }));
+      }
+    }
+
     if (list.length === 0) {
       return new Response(JSON.stringify({ error: "AI returned no exercises" }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -225,8 +317,10 @@ ${existingSummary ? `Вже є вправи (НЕ дублюй їх):\n${existin
       options: Array.isArray(ex.options) ? ex.options : [],
       correct_answer: ex.correct_answer ?? null,
       explanation: ex.explanation ?? null,
+      payload: RICH_TYPES.includes(ex.type) && ex.payload ? ex.payload : {},
       sort_order: baseOrder + i,
     }));
+
 
     const { data: inserted, error: insErr } = await supabase
       .from("tutoring_lesson_exercises")
