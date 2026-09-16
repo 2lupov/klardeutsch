@@ -9,6 +9,7 @@ import SessionChat from "@/components/tutoring/SessionChat";
 import LessonTheoryRenderer from "@/components/tutoring/LessonTheoryRenderer";
 import RichExercise from "@/components/exercises/RichExercise";
 import { isRichType, hasRichPayload } from "@/components/exercises/richExercises";
+import ReadingTaskView from "@/components/tutoring/ReadingTaskView";
 
 
 /**
@@ -30,7 +31,7 @@ const REACTIONS: { type: Reaction["type"]; Icon: any; label: string; color: stri
 const StudentView = () => {
   const { sessionId } = useParams();
   const [session, setSession] = useState<any>(null);
-  const [lessonData, setLessonData] = useState<{ words: any[]; exercises: any[]; theory: string } | null>(null);
+  const [lessonData, setLessonData] = useState<{ words: any[]; exercises: any[]; theory: string; reading: any[] } | null>(null);
   const [loading, setLoading] = useState(true);
   const [answer, setAnswer] = useState<string>("");
   const [submitted, setSubmitted] = useState(false);
@@ -60,13 +61,14 @@ const StudentView = () => {
       if (!mounted || !s) { setLoading(false); return; }
       setSession(s);
 
-      const [{ data: l }, { data: w }, { data: e }] = await Promise.all([
+      const [{ data: l }, { data: w }, { data: e }, { data: r }] = await Promise.all([
         supabase.from("tutoring_lessons").select("theory").eq("id", s.lesson_id).maybeSingle(),
         supabase.from("tutoring_lesson_words").select("*").eq("lesson_id", s.lesson_id).order("sort_order"),
         supabase.from("tutoring_lesson_exercises").select("*").eq("lesson_id", s.lesson_id).order("sort_order"),
+        supabase.from("tutoring_reading_tasks").select("*").eq("lesson_id", s.lesson_id).order("sort_order"),
       ]);
       if (!mounted) return;
-      setLessonData({ theory: l?.theory || "", words: w || [], exercises: e || [] });
+      setLessonData({ theory: l?.theory || "", words: w || [], exercises: e || [], reading: r || [] });
       setLoading(false);
     };
     load();
@@ -183,6 +185,19 @@ const StudentView = () => {
                 <div className="text-xl lg:text-2xl leading-relaxed whitespace-pre-wrap">{v.body}</div>
               </div>
             )}
+
+            {v.type === "reading" && (() => {
+              const rt = lessonData?.reading.find((x: any) => x.id === (v as any).taskId);
+              if (!rt) return <div className="text-muted-foreground">Задание не найдено</div>;
+              return (
+                <ReadingTaskView
+                  task={rt}
+                  canAnswer
+                  showPhotos
+                  onQuizFinished={(got, total) => submitAnswer(`Gelesen! Тест: ${got}/${total}`)}
+                />
+              );
+            })()}
 
             {v.type === "theory" && (
               <div className="max-w-none">
