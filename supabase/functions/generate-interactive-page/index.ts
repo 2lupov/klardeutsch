@@ -28,8 +28,14 @@ scene: 4–8 Blöcke in sinnvoller Reihenfolge. Erlaubte Blocktypen:
    NUR wenn die Seite etwas Kreisendes/Umlaufendes zeigt (Planeten, Monde, Elektronen, Kreisläufe).
    size 6–40 (relative Größe), speed 0.1–6 (größer = schneller), ring=true für Ringe (z. B. Saturn).
    Reihenfolge = von innen nach außen.
-3) { "type":"hotspots", "title":"...", "points":[{"x":42,"y":18,"label":"Sonne","description":"kurzer Satz"}] }
-   Punkte auf dem Originalfoto der Seite; x/y in Prozent (0–100) vom linken/oberen Rand.
+3) { "type":"hotspots", "title":"...", "image_prompt":"...", "points":[{"x":42,"y":18,"label":"Sonne","description":"kurzer Satz"}] }
+   WICHTIG: Das Buchfoto wird NICHT verwendet. Stattdessen wird aus "image_prompt" eine SAUBERE,
+   NEU GEZEICHNETE Illustration erzeugt (flache Vektor-Illustration / didaktisches Schaubild).
+   image_prompt: englische Bildbeschreibung (1–3 Sätze) des Objekts oder Schaubilds, das gezeichnet werden soll –
+   klare Formen, Seitenansicht bzw. Querschnitt, weißer Hintergrund, KEIN Text, KEINE Buchstaben, KEINE Beschriftungen im Bild,
+   kein Foto-Look, keine Fotokopie einer Buchseite. Beschreibe auch die Anordnung, damit die Punkte passen
+   (z. B. "full body side view of a T-Rex facing right, head top-left, tail bottom-right").
+   points: x/y in Prozent (0–100) vom linken/oberen Rand DIESER neuen Illustration (Bild ist quadratisch).
 4) { "type":"scale", "title":"...", "unit":"Mio. km", "items":[{"label":"Merkur","value":58,"note":"..."}] }
    Für Entfernungen, Größen, Zeitspannen, Temperaturen.
 5) { "type":"facts", "title":"...", "cards":[{"front":"Wie viele Planeten?","back":"Acht Planeten"}] }
