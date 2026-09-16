@@ -938,6 +938,7 @@ const TutoringLesson = () => {
             lesson={lesson}
             words={words}
             exercises={exercises}
+            readingTasks={readingTasks}
             studentName={studentProfile?.display_name || t("Учень", "Ученик")}
             studentProfile={studentProfile}
             onClose={() => setPresenterOpen(false)}
