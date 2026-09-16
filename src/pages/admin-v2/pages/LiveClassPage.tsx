@@ -362,6 +362,9 @@ function AddForm({
     } else if (kind === "word") {
       if (!term.trim()) return toast({ title: "Введіть слово" });
       content = { term, article, translation, example };
+    } else if (kind === "interactive") {
+      if (!interactiveId) return toast({ title: "Виберіть інтерактивну сторінку" });
+      content = { page_id: interactiveId };
     }
     setBusy(true);
     try {
