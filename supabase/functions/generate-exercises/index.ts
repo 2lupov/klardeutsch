@@ -175,7 +175,8 @@ ${enabledTypes.includes("listening") ? "Generate 1 listening text with 3-5 quest
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "openai/gpt-6-astra",
+        reasoning_effort: "low",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },

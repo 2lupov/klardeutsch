@@ -133,7 +133,8 @@ Return ONLY a valid JSON array. No markdown, no extra text.`;
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
+          model: "openai/gpt-6-astra",
+        reasoning_effort: "low",
           messages: [
             { role: "system", content: "You are a precise translation checker. Return only valid JSON arrays." },
             { role: "user", content: prompt },

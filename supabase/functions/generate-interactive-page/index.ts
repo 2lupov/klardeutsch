@@ -102,6 +102,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "openai/gpt-6-astra",
         reasoning_effort: "low",
+        reasoning_effort: "low",
         messages: [
           { role: "system", content: SYSTEM },
           {

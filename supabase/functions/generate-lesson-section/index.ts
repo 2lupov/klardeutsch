@@ -250,7 +250,8 @@ Deno.serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "openai/gpt-6-astra",
+        reasoning_effort: "low",
         messages: [
           { role: "system", content: `You are an expert German language teacher. Generate high-quality educational content for level ${level}. Always use proper German grammar and accurate translations.` },
           { role: "user", content: config.prompt },

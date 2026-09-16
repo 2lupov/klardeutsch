@@ -58,7 +58,8 @@ async function callAI(apiKey: string, system: string, user: string) {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "google/gemini-3.7-flash",
+      model: "openai/gpt-6-astra",
+        reasoning_effort: "low",
       messages: [{ role: "system", content: system }, { role: "user", content: user }],
       response_format: { type: "json_object" },
     }),

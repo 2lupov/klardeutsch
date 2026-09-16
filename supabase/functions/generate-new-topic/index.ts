@@ -128,7 +128,8 @@ Requirements:
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "openai/gpt-6-astra",
+        reasoning_effort: "low",
         messages: [
           { role: "system", content: `You are a ${langName} language expert. Return only valid JSON arrays.` },
           { role: "user", content: vocabPrompt },
@@ -185,7 +186,8 @@ Generate 10 questions. Make sure correct_index matches the position of the corre
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "openai/gpt-6-astra",
+        reasoning_effort: "low",
         messages: [
           { role: "system", content: `You are a ${langName} grammar expert. Return only valid JSON.` },
           { role: "user", content: grammarPrompt },
@@ -254,7 +256,8 @@ Generate 5 comprehension questions.`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "openai/gpt-6-astra",
+        reasoning_effort: "low",
         messages: [
           { role: "system", content: `You are a ${langName} language teacher. Return only valid JSON.` },
           { role: "user", content: readingPrompt },
@@ -325,7 +328,8 @@ Generate 5 questions about the audio content.`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "openai/gpt-6-astra",
+        reasoning_effort: "low",
         messages: [
           { role: "system", content: `You are a ${langName} language teacher. Return only valid JSON.` },
           { role: "user", content: listeningPrompt },
