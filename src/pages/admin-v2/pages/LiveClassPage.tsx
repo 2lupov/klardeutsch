@@ -414,6 +414,17 @@ function AddForm({
           <input value={correct} onChange={(e) => setCorrect(e.target.value)} placeholder="Правильна відповідь" className={input} />
         </>
       )}
+      {kind === "interactive" && (
+        <select value={interactiveId} onChange={(e) => setInteractiveId(e.target.value)} className={input}>
+          <option value="">— виберіть опубліковану сторінку —</option>
+          {pages.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.title}
+              {p.level ? ` · ${p.level}` : ""}
+            </option>
+          ))}
+        </select>
+      )}
       {kind === "word" && (
         <div className="grid gap-3 md:grid-cols-2">
           <input value={article} onChange={(e) => setArticle(e.target.value)} placeholder="Артикль (der / die / das)" className={input} />
