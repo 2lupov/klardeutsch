@@ -19,12 +19,13 @@ interface Props {
   lesson: any;
   words: any[];
   exercises: any[];
+  readingTasks?: any[];
   studentName: string;
   studentProfile: any;
   onClose: () => void;
 }
 
-const PresenterMode = ({ lesson, words, exercises, studentName, studentProfile, onClose }: Props) => {
+const PresenterMode = ({ lesson, words, exercises, readingTasks = [], studentName, studentProfile, onClose }: Props) => {
   const [session, setSession] = useState<LiveSession | null>(null);
   const [view, setView] = useState<ViewType>({ type: "welcome" });
   const [highlightOn, setHighlightOn] = useState(false);
