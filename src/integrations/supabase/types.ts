@@ -3833,6 +3833,71 @@ export type Database = {
         }
         Relationships: []
       }
+      tutoring_reading_tasks: {
+        Row: {
+          body: string
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          gaps: Json
+          id: string
+          images: string[]
+          kind: string
+          lesson_id: string
+          level: string | null
+          quiz: Json
+          quiz_answers: Json
+          sort_order: number
+          student_answers: Json
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body?: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          gaps?: Json
+          id?: string
+          images?: string[]
+          kind?: string
+          lesson_id: string
+          level?: string | null
+          quiz?: Json
+          quiz_answers?: Json
+          sort_order?: number
+          student_answers?: Json
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          gaps?: Json
+          id?: string
+          images?: string[]
+          kind?: string
+          lesson_id?: string
+          level?: string | null
+          quiz?: Json
+          quiz_answers?: Json
+          sort_order?: number
+          student_answers?: Json
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tutoring_reading_tasks_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "tutoring_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tutoring_relationships: {
         Row: {
           created_at: string
