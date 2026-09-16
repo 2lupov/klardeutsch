@@ -298,6 +298,24 @@ const PresenterMode = ({ lesson, words, exercises, studentName, studentProfile, 
               {exercises.length === 0 && <div className="text-xs text-muted-foreground p-2">Нет упражнений</div>}
             </div>
           </PanelCard>
+
+          <PanelCard title={`Чтение / грамматика (${readingTasks.length})`} icon={<BookOpen className="w-4 h-4" />} scroll>
+            <div className="space-y-1">
+              {readingTasks.map((rt) => {
+                const active = view.type === "reading" && (view as any).taskId === rt.id;
+                return (
+                  <button
+                    key={rt.id}
+                    onClick={() => pushView({ type: "reading", taskId: rt.id })}
+                    className={`w-full text-left rounded-lg border ${active ? "border-primary bg-primary/5" : "border-border bg-card hover:border-primary/40"} px-2.5 py-2 text-sm`}
+                  >
+                    <span className="text-xs text-muted-foreground">{rt.kind === "grammar" ? "✍️" : "📖"}</span> {rt.title}
+                  </button>
+                );
+              })}
+              {readingTasks.length === 0 && <div className="text-xs text-muted-foreground p-2">Нет заданий с фото</div>}
+            </div>
+          </PanelCard>
         </div>
 
         {/* CENTER: preview = что видит ученик */}
