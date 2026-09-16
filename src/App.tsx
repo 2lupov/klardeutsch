@@ -33,7 +33,6 @@ import Auth from "./pages/Auth";
 import AuthCallback from "./pages/AuthCallback";
 import ResetPassword from "./pages/ResetPassword";
 import OAuthConsent from "./pages/OAuthConsent";
-import Admin from "./pages/Admin";
 import AdminV2 from "./pages/admin-v2/AdminV2";
 import Profile from "./pages/Profile";
 import Dictionary from "./pages/Dictionary";
@@ -98,8 +97,7 @@ const AppRoutes = () => {
       <Route path="/student-view/:sessionId" element={<StudentView />} />
       <Route path="/live/:id" element={<LiveClass />} />
       {/* Web-only routes — redirect to home in Telegram */}
-      <Route path="/admin" element={isTelegram ? <Navigate to="/" replace /> : <AdminV2 />} />
-      <Route path="/admin/legacy" element={isTelegram ? <Navigate to="/" replace /> : <Admin />} />
+      <Route path="/admin" element={isTelegram ? <Navigate to="/" replace /> : <AdminV2 />} /> : <Admin />} />
       <Route path="/method" element={isTelegram ? <Navigate to="/" replace /> : <Method />} />
       {/* Teacher workspace (school staff only) */}
       <Route path="/teach" element={isTelegram ? <Navigate to="/" replace /> : <RequireTeacher><TeachLayout /></RequireTeacher>}>
