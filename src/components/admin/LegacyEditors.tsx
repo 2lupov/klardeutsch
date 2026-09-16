@@ -1,27 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Plus, Trash2, Lock, Check, BookOpen, Languages, Headphones, BookText, ShoppingBag, Gamepad2, Users, Globe, Pencil, Sparkles, ScanSearch, FileText, Bot, GraduationCap, FolderOpen, BarChart3, MessageCircle, Package } from "lucide-react";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
-import ShopEditor from "@/components/admin/ShopEditor";
-
-import ListeningEditor from "@/components/admin/ListeningEditor";
-import UsersEditor from "@/components/admin/UsersEditor";
+import { Plus, Trash2, Check, Globe, Pencil } from "lucide-react";
 import CafeEditor from "@/components/admin/CafeEditor";
-import ContentGenerator from "@/components/admin/ContentGenerator";
-import CourseEditor from "@/components/admin/CourseEditor";
-import TranslationChecker from "@/components/admin/TranslationChecker";
-import AllTextsEditor from "@/components/admin/AllTextsEditor";
-import AdminStats from "@/components/admin/AdminStats";
-import AdminChats from "@/components/admin/AdminChats";
-import StuffOnlyTab from "@/components/admin/StuffOnlyTab";
-import TopicsEditor from "@/components/admin/TopicsEditor";
 import { toast } from "sonner";
 
-type Level = "A1" | "A2" | "B1" | "B2" | "C1";
-type Tab = "stats" | "topics" | "vocabulary" | "grammar" | "reading" | "listening" | "shop" | "products" | "games" | "users" | "translations" | "generator" | "checker" | "alltexts" | "stuffonly" | "courses" | "chats";
+export type Level = "A1" | "A2" | "B1" | "B2" | "C1";
 
 /** Preserves scroll position of admin container across async reload */
 const withScroll = async (fn: () => Promise<void>) => {
@@ -33,150 +18,8 @@ const withScroll = async (fn: () => Promise<void>) => {
   });
 };
 
-const LEVELS: Level[] = ["A1", "A2", "B1", "B2", "C1"];
-
-const TAB_CONFIG: { key: Tab; icon: React.ElementType; label: string }[] = [
-  { key: "stats", icon: BarChart3, label: "stats" },
-  // { key: "topics", icon: FolderOpen, label: "topics" },
-  // { key: "vocabulary", icon: BookOpen, label: "vocabulary" },
-  // { key: "grammar", icon: Languages, label: "grammar" },
-  // { key: "reading", icon: BookText, label: "reading" },
-  // { key: "listening", icon: Headphones, label: "listening" },
-  // { key: "shop", icon: ShoppingBag, label: "shopTab" },
-  // { key: "games", icon: Gamepad2, label: "games" },
-  { key: "users", icon: Users, label: "users" },
-  // { key: "translations", icon: Globe, label: "translations" },
-  { key: "generator", icon: Sparkles, label: "generator" },
-  // { key: "checker", icon: ScanSearch, label: "checker" },
-  // { key: "alltexts", icon: FileText, label: "alltexts" },
-  { key: "stuffonly", icon: Bot, label: "stuffonly" },
-  { key: "courses", icon: GraduationCap, label: "courses" },
-  { key: "chats", icon: MessageCircle, label: "chats" },
-  
-];
-
-const Admin = () => {
-  const { user } = useAuth();
-  const { t } = useLanguage();
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
-  const [level, setLevel] = useState<Level>("A1");
-  const [tab, setTab] = useState<Tab>("stats");
-
-  // Deep-link з попереднього перегляду курсу: /admin?tab=courses&level=B1&course=…&lesson=…&sec=exercises
-  useEffect(() => {
-    const p = new URLSearchParams(window.location.search);
-    const qTab = p.get("tab");
-    const qLevel = p.get("level");
-    if (qTab && (LEVELS as readonly string[]).length) setTab(qTab as Tab);
-    if (qLevel && (LEVELS as readonly string[]).includes(qLevel)) setLevel(qLevel as Level);
-  }, []);
-
-  useEffect(() => {
-    if (!user) { setIsAdmin(false); return; }
-    const checkRole = async () => {
-      const { data } = await supabase.rpc("has_role", { _user_id: user.id, _role: "admin" });
-      setIsAdmin(!!data);
-    };
-    checkRole();
-  }, [user]);
-
-  if (!user) {
-    return (
-      <div className="h-[100dvh] bg-background flex items-center justify-center px-4 overflow-y-auto">
-        <p className="text-muted-foreground">{t("loginFirst")}</p>
-      </div>
-    );
-  }
-
-  if (isAdmin === null) {
-    return (
-      <div className="h-[100dvh] bg-background flex items-center justify-center px-4 overflow-y-auto">
-        <p className="text-muted-foreground animate-pulse">Завантаження...</p>
-      </div>
-    );
-  }
-
-  if (!isAdmin) {
-    return (
-      <div className="h-[100dvh] bg-background flex items-center justify-center px-4 overflow-y-auto">
-        <div className="text-center">
-          <Lock className="w-10 h-10 text-destructive mx-auto mb-3" />
-          <h1 className="text-2xl font-display font-bold">{t("adminPanel")}</h1>
-          <p className="text-sm text-muted-foreground mt-2">Доступ заборонено. Потрібна роль адміністратора.</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div id="admin-scroll" className="h-[100dvh] bg-background overflow-y-auto" onFocus={(e) => { const t = e.target as HTMLElement; if (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA') (t as HTMLInputElement).select(); }}>
-      <div className="w-full max-w-2xl mx-auto px-4 py-6 pb-12">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-display font-bold text-gradient">{t("adminPanel")}</h1>
-          <div className="flex items-center gap-3">
-            <LanguageSwitcher />
-            <a href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t("toApp")}</a>
-          </div>
-        </div>
-
-        {/* Level selector */}
-        <div className="flex gap-2 mb-4">
-          {LEVELS.map((l) => (
-            <button
-              key={l}
-              onClick={() => setLevel(l)}
-              className={`px-4 py-2 rounded-xl font-display font-bold text-sm transition-all ${
-                level === l ? "bg-primary text-primary-foreground glow-yellow" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-              }`}
-            >
-              {l}
-            </button>
-          ))}
-        </div>
-
-        {/* Tab selector */}
-        <div className="flex gap-1.5 mb-6 flex-wrap">
-          {TAB_CONFIG.map(({ key, icon: Icon, label }) => (
-            <button
-              key={key}
-              onClick={() => setTab(key)}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm transition-all ${
-                tab === key 
-                  ? "bg-card border border-primary/50 text-foreground shadow-sm" 
-                  : "text-muted-foreground hover:text-foreground hover:bg-card/50"
-              }`}
-            >
-              <Icon className="w-3.5 h-3.5" />
-              {key === "stats" ? "📊 Стата" : key === "topics" ? "Теми" : key === "games" ? "Ігри" : key === "users" ? "Юзери" : key === "translations" ? "Мови" : key === "generator" ? "AI-генератор" : key === "checker" ? "AI-перевірка" : key === "alltexts" ? "Всі тексти" : key === "stuffonly" ? "Stuff Only" : key === "courses" ? "Курси" : key === "chats" ? "Чати" : key === "products" ? "📦 Склад" : t(label as any)}
-            </button>
-          ))}
-        </div>
-
-        {/* Hide level selector for non-level tabs */}
-        {tab === "stats" && <AdminStats />}
-        {tab === "topics" && <TopicsEditor />}
-        {tab === "vocabulary" && <VocabEditor level={level} />}
-        {tab === "grammar" && <GrammarEditor level={level} />}
-        {tab === "reading" && <ReadingEditor level={level} />}
-        {tab === "listening" && <ListeningEditor level={level} />}
-        {tab === "shop" && <ShopEditor />}
-        {tab === "games" && <GamesEditor level={level} />}
-        {tab === "users" && <UsersEditor />}
-        {tab === "translations" && <TranslationsLauncher />}
-        {tab === "generator" && <ContentGenerator level={level} />}
-        {tab === "checker" && <TranslationChecker />}
-        {tab === "alltexts" && <AllTextsEditor />}
-        {tab === "stuffonly" && <StuffOnlyTab />}
-        {tab === "courses" && <CourseEditor level={level} />}
-        {tab === "chats" && <AdminChats />}
-        
-      </div>
-    </div>
-  );
-};
-
 // ——— Save Button Component ———
-const SaveButton = ({ dirty, saving, onSave }: { dirty: boolean; saving: boolean; onSave: () => void }) => {
+export const SaveButton = ({ dirty, saving, onSave }: { dirty: boolean; saving: boolean; onSave: () => void }) => {
   const { t } = useLanguage();
   if (!dirty) return null;
   return (
@@ -197,7 +40,7 @@ const SaveButton = ({ dirty, saving, onSave }: { dirty: boolean; saving: boolean
 };
 
 // ——— Vocabulary Editor ———
-const VocabEditor = ({ level }: { level: Level }) => {
+export const VocabEditor = ({ level }: { level: Level }) => {
   const { t } = useLanguage();
   const [cards, setCards] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -307,7 +150,7 @@ const VocabEditor = ({ level }: { level: Level }) => {
 };
 
 // ——— Grammar Editor ———
-const GrammarEditor = ({ level }: { level: Level }) => {
+export const GrammarEditor = ({ level }: { level: Level }) => {
   const { t } = useLanguage();
   const [lessons, setLessons] = useState<any[]>([]);
   const [questions, setQuestions] = useState<any[]>([]);
@@ -474,7 +317,7 @@ const GrammarEditor = ({ level }: { level: Level }) => {
 };
 
 // ——— Reading Editor ———
-const ReadingEditor = ({ level }: { level: Level }) => {
+export const ReadingEditor = ({ level }: { level: Level }) => {
   const { t } = useLanguage();
   const [texts, setTexts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -625,7 +468,7 @@ const ReadingEditor = ({ level }: { level: Level }) => {
 };
 
 // ——— Games Editor ———
-const GamesEditor = ({ level }: { level: Level }) => {
+export const GamesEditor = ({ level }: { level: Level }) => {
   const [wordsCount, setWordsCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
@@ -672,7 +515,7 @@ const GamesEditor = ({ level }: { level: Level }) => {
 };
 
 // ——— Translations Launcher ———
-const TranslationsLauncher = () => {
+export const TranslationsLauncher = () => {
   const navigate = useNavigate();
   const { setEditMode } = useLanguage();
 
@@ -699,4 +542,3 @@ const TranslationsLauncher = () => {
   );
 };
 
-export default Admin;

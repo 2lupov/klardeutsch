@@ -65,8 +65,9 @@ serve(async (req) => {
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        max_tokens: 8000,
+        model: "openai/gpt-6-astra",
+        reasoning_effort: "low",
+        max_completion_tokens: 8000,
         messages: [
           { role: "system", content: system },
           { role: "user", content: topic || `Склади домашню роботу рівня ${level} на актуальну повсякденну тему.` },

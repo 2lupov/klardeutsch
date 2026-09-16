@@ -53,7 +53,8 @@ Return ONE JSON object only.`;
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: "openai/gpt-6-astra",
+        reasoning_effort: "low",
         messages: [{ role: 'system', content: sys }, { role: 'user', content: usr }],
         response_format: { type: 'json_object' },
       }),

@@ -156,7 +156,8 @@ ${existingSummary ? `Вже є вправи (НЕ дублюй їх):\n${existin
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "openai/gpt-6-astra",
+        reasoning_effort: "low",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userMsg },

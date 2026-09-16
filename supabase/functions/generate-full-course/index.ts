@@ -192,8 +192,9 @@ practice_dialog (${compact ? "5-6" : "6-10"} реплік), cultural_notes (1-2)
         method: "POST",
         headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
-          max_tokens: 16000,
+          model: "openai/gpt-6-astra",
+        reasoning_effort: "low",
+          max_completion_tokens: 16000,
           messages: [
             { role: "system", content: buildSystem(compact) },
             {

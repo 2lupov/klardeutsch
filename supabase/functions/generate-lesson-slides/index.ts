@@ -115,7 +115,8 @@ ${extraPrompt ? `Додаткові побажання вчителя: ${extraPr
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "openai/gpt-6-astra",
+        reasoning_effort: "low",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userMsg },
@@ -167,7 +168,8 @@ ${extraPrompt ? `Додаткові побажання вчителя: ${extraPr
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
+          model: "openai/gpt-6-astra",
+        reasoning_effort: "low",
           messages: [
             { role: "system", content: 'Виправ і поверни ТІЛЬКИ валідний JSON у форматі {"slides":[...]}. Без пояснень, без markdown.' },
             { role: "user", content: content.slice(0, 12000) },

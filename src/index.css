@@ -444,38 +444,84 @@
   }
 }
 
-/* ============ Admin V2 dark mode (scoped overrides) ============ */
-.admin-dark { color-scheme: dark; }
-.admin-dark { background: #0B1120 !important; }
-.admin-dark .bg-white,
-.admin-dark .bg-slate-50,
-.admin-dark .bg-slate-50\/50,
-.admin-dark .bg-slate-100 { background-color: #131C31 !important; }
-.admin-dark .border-slate-200,
-.admin-dark .border-slate-100 { border-color: #24304d !important; }
-.admin-dark .text-slate-900,
-.admin-dark .text-slate-800,
-.admin-dark .text-slate-700 { color: #E8EDF7 !important; }
-.admin-dark .text-slate-600,
-.admin-dark .text-slate-500,
-.admin-dark .text-slate-400 { color: #94A3B8 !important; }
-.admin-dark input,
-.admin-dark textarea,
-.admin-dark select {
-  background-color: #0F172A !important;
-  color: #E8EDF7 !important;
-  border-color: #24304d !important;
+/* ============ KLAR Admin theme (navy · white · yellow) ============ */
+.klar-admin {
+  --admin-bg: 220 33% 97%;
+  --admin-surface: 0 0% 100%;
+  --admin-card: 0 0% 100%;
+  --admin-border: 219 28% 89%;
+  --admin-fg: 222 47% 11%;
+  --admin-muted: 218 15% 46%;
+  --admin-primary: 222 47% 11%;
+  --admin-primary-fg: 0 0% 100%;
+  --admin-accent: 45 96% 54%;
+  --admin-accent-fg: 222 47% 11%;
+  --admin-danger: 0 72% 51%;
+  font-family: Manrope, system-ui, sans-serif;
 }
-.admin-dark input::placeholder,
-.admin-dark textarea::placeholder { color: #64748B !important; }
-.admin-dark .hover\:bg-slate-50:hover,
-.admin-dark .hover\:bg-slate-100:hover { background-color: #1B2740 !important; }
-.admin-dark .bg-indigo-50 { background-color: #1e1b4b !important; }
-.admin-dark .border-indigo-100 { border-color: #312e81 !important; }
-.admin-dark .text-indigo-900 { color: #C7D2FE !important; }
-.admin-dark .bg-indigo-100 { background-color: #312e81 !important; }
-.admin-dark .text-indigo-700 { color: #C7D2FE !important; }
-.admin-dark .bg-amber-100 { background-color: #451a03 !important; }
-.admin-dark .text-amber-700 { color: #FCD34D !important; }
-.admin-dark table thead { background-color: #0F172A !important; }
-.admin-dark .shadow-sm, .admin-dark .shadow-md { box-shadow: 0 1px 3px rgba(0,0,0,.5) !important; }
+.klar-admin.dark {
+  color-scheme: dark;
+  --admin-bg: 222 47% 9%;
+  --admin-surface: 222 40% 13%;
+  --admin-card: 222 40% 13%;
+  --admin-border: 220 28% 24%;
+  --admin-fg: 210 40% 96%;
+  --admin-muted: 215 20% 68%;
+  --admin-primary: 45 96% 54%;
+  --admin-primary-fg: 222 47% 11%;
+  --admin-accent: 45 96% 54%;
+  --admin-accent-fg: 222 47% 11%;
+  --admin-danger: 0 84% 65%;
+}
+.klar-admin h1,
+.klar-admin h2,
+.klar-admin h3,
+.klar-admin .font-semibold {
+  font-family: Sora, system-ui, sans-serif;
+}
+
+/* Compatibility layer: legacy slate/indigo utilities inside the admin map onto the
+   tokens above, so both light and dark themes come from one source of truth. */
+.klar-admin .bg-white,
+.klar-admin .bg-slate-50,
+.klar-admin .bg-slate-50\/50,
+.klar-admin .bg-slate-100 { background-color: hsl(var(--admin-card)); }
+.klar-admin .bg-slate-50,
+.klar-admin .bg-slate-100 { background-color: hsl(var(--admin-bg)); }
+.klar-admin .border-slate-200,
+.klar-admin .border-slate-100,
+.klar-admin .border-slate-300 { border-color: hsl(var(--admin-border)); }
+.klar-admin .text-slate-900,
+.klar-admin .text-slate-800,
+.klar-admin .text-slate-700 { color: hsl(var(--admin-fg)); }
+.klar-admin .text-slate-600,
+.klar-admin .text-slate-500,
+.klar-admin .text-slate-400 { color: hsl(var(--admin-muted)); }
+.klar-admin input,
+.klar-admin textarea,
+.klar-admin select {
+  background-color: hsl(var(--admin-surface));
+  color: hsl(var(--admin-fg));
+  border-color: hsl(var(--admin-border));
+}
+.klar-admin input::placeholder,
+.klar-admin textarea::placeholder { color: hsl(var(--admin-muted) / 0.8); }
+.klar-admin .hover\:bg-slate-50:hover,
+.klar-admin .hover\:bg-slate-100:hover { background-color: hsl(var(--admin-fg) / 0.06); }
+.klar-admin .bg-indigo-50,
+.klar-admin .bg-indigo-100 { background-color: hsl(var(--admin-accent) / 0.16); }
+.klar-admin .border-indigo-100,
+.klar-admin .border-indigo-200 { border-color: hsl(var(--admin-accent) / 0.35); }
+.klar-admin .text-indigo-900,
+.klar-admin .text-indigo-700,
+.klar-admin .text-indigo-600 { color: hsl(var(--admin-fg)); }
+.klar-admin .bg-amber-100 { background-color: hsl(var(--admin-accent) / 0.2); }
+.klar-admin .text-amber-700 { color: hsl(var(--admin-fg)); }
+.klar-admin table thead {
+  background-color: hsl(var(--admin-bg));
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.klar-admin.dark .shadow-sm,
+.klar-admin.dark .shadow-md { box-shadow: 0 1px 3px hsl(222 47% 4% / 0.5); }
