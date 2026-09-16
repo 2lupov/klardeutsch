@@ -296,6 +296,52 @@ const TutoringLesson = () => {
     }
   };
 
+  const generateReading = async () => {
+    if (readFiles.length === 0) return;
+    setReadLoading(true);
+    try {
+      const paths: string[] = [];
+      for (const [i, file] of readFiles.entries()) {
+        const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+        const path = `reading/${id}/${Date.now()}-${i}.${ext}`;
+        const { error: upErr } = await supabase.storage
+          .from("tutoring-materials")
+          .upload(path, file, { contentType: file.type || "image/jpeg", upsert: false });
+        if (upErr) throw upErr;
+        paths.push(path);
+      }
+      const { data, error } = await supabase.functions.invoke("generate-reading-from-photos", {
+        body: {
+          lesson_id: id,
+          kind: readKind,
+          image_paths: paths,
+          instructions: readPrompt.trim(),
+          gaps_count: readGaps,
+          quiz_count: readQuiz,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setReadingTasks((prev) => [...prev, data.task]);
+      setReadFiles([]);
+      setReadPrompt("");
+      toast.success(t("Завдання створено", "Задание создано"));
+    } catch (e: any) {
+      const msg = String(e?.message || e);
+      if (msg.includes("402")) toast.error(t("Закінчились AI-кредити", "Закончились AI-кредиты"));
+      else if (msg.includes("429")) toast.error(t("Забагато запитів. Спробуйте пізніше", "Слишком много запросов"));
+      else toast.error(msg);
+    } finally {
+      setReadLoading(false);
+    }
+  };
+
+  const delReadingTask = async (rid: string) => {
+    if (!confirm(t("Видалити завдання?", "Удалить задание?"))) return;
+    await supabase.from("tutoring_reading_tasks").delete().eq("id", rid);
+    setReadingTasks((prev) => prev.filter((r) => r.id !== rid));
+  };
+
   const generateTheory = async () => {
     setTheoryLoading(true);
     try {
