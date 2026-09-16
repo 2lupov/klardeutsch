@@ -413,3 +413,19 @@ function ItemCard({
     </div>
   );
 }
+
+/** Інтерактивна сторінка енциклопедії, яку викладач додав на уроці. */
+function LiveInteractive({ pageId }: { pageId?: string }) {
+  const [scene, setScene] = useState<SceneBlock[] | null>(null);
+
+  useEffect(() => {
+    if (!pageId) return;
+    fetchInteractivePage(pageId)
+      .then((p) => setScene(p?.scene ?? []))
+      .catch(() => setScene([]));
+  }, [pageId]);
+
+  if (!pageId) return null;
+  if (!scene) return <p className="text-xs text-muted-foreground">Завантаження…</p>;
+  return <InteractiveScene scene={scene} />;
+}
