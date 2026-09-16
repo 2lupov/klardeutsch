@@ -20,6 +20,8 @@ import LessonTheoryRenderer from "@/components/tutoring/LessonTheoryRenderer";
 import RichExercise from "@/components/exercises/RichExercise";
 import { isRichType, hasRichPayload } from "@/components/exercises/richExercises";
 import { AnimatePresence } from "framer-motion";
+import { Images } from "lucide-react";
+import ReadingTaskView from "@/components/tutoring/ReadingTaskView";
 
 
 const EX_TYPES = [
