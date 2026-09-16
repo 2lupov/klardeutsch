@@ -447,6 +447,11 @@ const PreviewContent = ({ view, words, exercises, theory, strokes, onWBStart, on
       )}
     </div>;
   }
+  if (view.type === "reading") {
+    const rt = (readingTasks || []).find((x: any) => x.id === view.taskId);
+    if (!rt) return <div className="p-4 text-muted-foreground">Задание не найдено</div>;
+    return <div className="p-4"><ReadingTaskView task={rt} canAnswer showPhotos persist={false} /></div>;
+  }
   if (view.type === "whiteboard") {
     return (
       <svg viewBox="0 0 1600 1000" className="w-full h-full bg-background touch-none"
