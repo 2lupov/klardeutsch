@@ -228,7 +228,7 @@ serve(async (req) => {
       return json({ error: insErr.message }, 500);
     }
 
-    return json({ ok: true, id: inserted.id, blocks: scene.length });
+    return json({ ok: true, id: inserted.id, blocks: cleanScene.length });
   } catch (e) {
     console.error("generate-interactive-page error:", e);
     return json({ error: e instanceof Error ? e.message : "Unknown error" }, 500);
