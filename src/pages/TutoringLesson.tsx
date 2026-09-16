@@ -411,10 +411,61 @@ const TutoringLesson = () => {
           <TabsContent value="theory">
             <div className="rounded-2xl border border-border bg-card p-6">
               {isTeacher && !editingTheory && (
-                <div className="flex justify-end mb-3">
+                <div className="flex justify-end gap-2 mb-3">
+                  <Button
+                    size="sm"
+                    onClick={() => setShowAiTheory(!showAiTheory)}
+                    className="gap-1.5 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:opacity-90"
+                  >
+                    <Sparkles className="w-4 h-4" />{showAiTheory ? t("Сховати ШІ", "Скрыть ИИ") : t("Теорія через ШІ", "Теория через ИИ")}
+                  </Button>
                   <Button size="sm" variant="ghost" onClick={() => setEditingTheory(true)}><Edit3 className="w-4 h-4 mr-1" />{t("Редагувати", "Редактировать")}</Button>
                 </div>
               )}
+              {isTeacher && showAiTheory && !editingTheory && (
+                <div className="mb-4 p-4 rounded-2xl border-2 border-dashed border-primary/40 bg-gradient-to-br from-primary/5 to-transparent space-y-3">
+                  <div>
+                    <label className="text-xs font-bold uppercase text-muted-foreground mb-1 block">
+                      {t("Що пояснити?", "Что объяснить?")}
+                    </label>
+                    <Textarea
+                      value={theoryPrompt}
+                      onChange={(e) => setTheoryPrompt(e.target.value)}
+                      placeholder={t("Напр.: Genitiv — коли вживається, закінчення, приклади", "Напр.: Genitiv — когда употребляется, окончания, примеры")}
+                      rows={2}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-bold uppercase text-muted-foreground mb-1 block">{t("Блоків", "Блоков")}</label>
+                      <Input
+                        type="number" min={2} max={8} value={theoryBlocks}
+                        onChange={(e) => setTheoryBlocks(Math.max(2, Math.min(8, Number(e.target.value) || 2)))}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold uppercase text-muted-foreground mb-1 block">{t("Режим", "Режим")}</label>
+                      <button
+                        type="button"
+                        onClick={() => setTheoryMode(theoryMode === "replace" ? "append" : "replace")}
+                        className="w-full h-10 px-3 rounded-md border border-border bg-background text-xs font-medium"
+                      >
+                        {theoryMode === "replace" ? t("Замінити теорію", "Заменить теорию") : t("Додати в кінець", "Добавить в конец")}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={generateTheory} disabled={theoryLoading} className="gap-1.5">
+                      {theoryLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                      {theoryLoading ? t("Генерую…", "Генерирую…") : t("Згенерувати", "Сгенерировать")}
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => setShowAiTheory(false)} disabled={theoryLoading}>
+                      {t("Скасувати", "Отмена")}
+                    </Button>
+                  </div>
+                </div>
+              )}
+
               {editingTheory ? (
                 <div className="space-y-3">
                   <Textarea value={theoryDraft} onChange={(e) => setTheoryDraft(e.target.value)} rows={20} className="font-mono text-sm" />
