@@ -17,6 +17,8 @@ import type { BoardCam } from "@/components/live/BoardRender";
 import { signedPageUrl } from "@/lib/books";
 import AddMyWordForm, { addMyWord } from "@/components/dictionary/AddMyWordForm";
 import { BookmarkPlus } from "lucide-react";
+import InteractiveScene from "@/components/interactive/InteractiveScene";
+import { fetchInteractivePage, type SceneBlock } from "@/lib/interactivePages";
 
 export default function LiveClass() {
   const { id } = useParams<{ id: string }>();
@@ -366,6 +368,8 @@ function ItemCard({
         </div>
       )}
 
+      {item.kind === "interactive" && <LiveInteractive pageId={item.content?.page_id} />}
+
       {item.kind === "question" && (
         <div className="space-y-3">
           <p className="text-sm text-foreground/90">{item.content?.question}</p>
@@ -408,4 +412,20 @@ function ItemCard({
       )}
     </div>
   );
+}
+
+/** Інтерактивна сторінка енциклопедії, яку викладач додав на уроці. */
+function LiveInteractive({ pageId }: { pageId?: string }) {
+  const [scene, setScene] = useState<SceneBlock[] | null>(null);
+
+  useEffect(() => {
+    if (!pageId) return;
+    fetchInteractivePage(pageId)
+      .then((p) => setScene(p?.scene ?? []))
+      .catch(() => setScene([]));
+  }, [pageId]);
+
+  if (!pageId) return null;
+  if (!scene) return <p className="text-xs text-muted-foreground">Завантаження…</p>;
+  return <InteractiveScene scene={scene} />;
 }

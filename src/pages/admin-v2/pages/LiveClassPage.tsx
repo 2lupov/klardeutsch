@@ -17,6 +17,7 @@ import { Play, Square, Trash2 } from "lucide-react";
 import BoardEditor, { type BoardApi } from "@/components/live/BoardEditor";
 import MaterialPicker from "@/components/live/MaterialPicker";
 import LiveBookPagePicker from "@/components/books/LiveBookPagePicker";
+import { listPublishedInteractivePages } from "@/lib/interactivePages";
 
 interface StudentRow { user_id: string; display_name: string | null; email: string | null }
 
@@ -318,7 +319,16 @@ function AddForm({
   const kinds: LiveItem["kind"][] =
     section === "vocab" ? ["word"] :
     section === "listening" ? ["audio", "question", "text"] :
-    section === "tasks" ? ["question", "text"] : ["text", "question"];
+    section === "tasks" ? ["question", "text", "interactive"] : ["text", "question", "interactive"];
+
+  const [pages, setPages] = useState<{ id: string; title: string; level: string | null }[]>([]);
+  const [interactiveId, setInteractiveId] = useState("");
+
+  useEffect(() => {
+    listPublishedInteractivePages()
+      .then((p) => setPages(p as any))
+      .catch(() => {});
+  }, []);
 
   const [kind, setKind] = useState<LiveItem["kind"]>(kinds[0]);
   const [title, setTitle] = useState("");
@@ -353,6 +363,9 @@ function AddForm({
     } else if (kind === "word") {
       if (!term.trim()) return toast({ title: "Введіть слово" });
       content = { term, article, translation, example };
+    } else if (kind === "interactive") {
+      if (!interactiveId) return toast({ title: "Виберіть інтерактивну сторінку" });
+      content = { page_id: interactiveId };
     }
     setBusy(true);
     try {
@@ -381,7 +394,7 @@ function AddForm({
               k === kind ? "border-indigo-300 bg-indigo-50 text-indigo-700" : "border-slate-200 text-slate-600"
             }`}
           >
-            {k === "text" ? "Текст / теорія" : k === "audio" ? "Аудіо" : k === "question" ? "Питання" : "Слово"}
+            {k === "text" ? "Текст / теорія" : k === "audio" ? "Аудіо" : k === "question" ? "Питання" : k === "interactive" ? "Інтерактивна сторінка" : "Слово"}
           </button>
         ))}
       </div>
@@ -401,6 +414,17 @@ function AddForm({
             placeholder="Варіанти — по одному в рядку (порожньо = відкрита відповідь)" className={input} />
           <input value={correct} onChange={(e) => setCorrect(e.target.value)} placeholder="Правильна відповідь" className={input} />
         </>
+      )}
+      {kind === "interactive" && (
+        <select value={interactiveId} onChange={(e) => setInteractiveId(e.target.value)} className={input}>
+          <option value="">— виберіть опубліковану сторінку —</option>
+          {pages.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.title}
+              {p.level ? ` · ${p.level}` : ""}
+            </option>
+          ))}
+        </select>
       )}
       {kind === "word" && (
         <div className="grid gap-3 md:grid-cols-2">

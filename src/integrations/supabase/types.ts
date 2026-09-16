@@ -1330,6 +1330,60 @@ export type Database = {
           },
         ]
       }
+      interactive_pages: {
+        Row: {
+          book_id: string | null
+          created_at: string
+          id: string
+          level: string | null
+          owner_id: string
+          page_id: string | null
+          scene: Json
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          book_id?: string | null
+          created_at?: string
+          id?: string
+          level?: string | null
+          owner_id?: string
+          page_id?: string | null
+          scene?: Json
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          book_id?: string | null
+          created_at?: string
+          id?: string
+          level?: string | null
+          owner_id?: string
+          page_id?: string | null
+          scene?: Json
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interactive_pages_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interactive_pages_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "book_pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kids_placement_questions: {
         Row: {
           correct: number
