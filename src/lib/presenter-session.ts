@@ -6,6 +6,7 @@ export type ViewType =
   | { type: "exercise"; exerciseId: string; revealAnswer?: boolean }
   | { type: "word"; wordId: string; revealTranslation?: boolean }
   | { type: "text"; title?: string; body: string }
+  | { type: "reading"; taskId: string }
   | { type: "whiteboard" };
 
 export interface LiveSession {
