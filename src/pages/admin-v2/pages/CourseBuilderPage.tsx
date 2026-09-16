@@ -257,8 +257,8 @@ export default function CourseBuilderPage() {
     return (
       <div className="space-y-6">
         <SectionHeader
-          title={`AI Course Builder · ${meta.flag} ${meta.label}`}
-          subtitle={isAll ? "Обери курс — AI згенерує повний контент (усі мови)" : `Курси для мови: ${meta.label}`}
+          title="AI-конструктор курсів"
+          subtitle="Обери курс — AI згенерує повний контент"
         />
         {courses.length === 0 ? (
           <EmptyState title="Немає курсів" description="Спочатку створи курс у вкладці Courses." />

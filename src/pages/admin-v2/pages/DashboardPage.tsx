@@ -57,10 +57,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <SectionHeader
-        title={`Огляд · ${meta.flag} ${meta.label}`}
-        subtitle={isAll ? "Статистика всіх мов школи" : `Показано лише курси мови: ${meta.label}`}
-      />
+      <SectionHeader title="Огляд" subtitle="Статистика школи" />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard label="Всього студентів" value={stats.students} accent="#4F46E5" />
