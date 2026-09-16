@@ -1,18 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import { BookOpen, Sparkles, Camera, BookMarked } from "lucide-react";
+import { BookOpen, Sparkles, Camera } from "lucide-react";
 import { SubTabs } from "./_ui";
 import CoursesPage from "./CoursesPage";
 import CourseBuilderPage from "./CourseBuilderPage";
 import BookCoursePage from "./BookCoursePage";
-import BookLessonPlansPage from "./BookLessonPlansPage";
 
-type Tab = "catalog" | "builder" | "book" | "plans";
+type Tab = "catalog" | "builder" | "book";
 
 const TABS: { key: Tab; label: string; icon: any }[] = [
   { key: "catalog", label: "Каталог", icon: BookOpen },
   { key: "builder", label: "AI-конструктор", icon: Sparkles },
   { key: "book", label: "Із книги (фото)", icon: Camera },
-  { key: "plans", label: "Плани з підручника", icon: BookMarked },
 ];
 
 const KEY = "klar-admin-courses-tab";
@@ -61,7 +59,6 @@ export default function CoursesSection() {
       {tab === "catalog" && <CoursesPage />}
       {tab === "builder" && <CourseBuilderPage />}
       {tab === "book" && <BookCoursePage />}
-      {tab === "plans" && <BookLessonPlansPage />}
     </div>
   );
 }
