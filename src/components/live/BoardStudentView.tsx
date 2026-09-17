@@ -19,6 +19,21 @@ const uid = () => "s" + Math.random().toString(36).slice(2, 10);
 
 type Tool = "pan" | "pen" | "text" | "erase";
 
+/** Стікер-курсори: олівець і гумка їдуть точно за мишкою (кінчик = гаряча точка). */
+const PEN_CURSOR =
+  "url(\"data:image/svg+xml;utf8," +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><g transform="translate(2,2)"><path d="M2 30l1.6-6.2L21.4 6l4.6 4.6L8.2 28.4z" fill="%23FACC15" stroke="%230F172A" stroke-width="1.6" stroke-linejoin="round"/><path d="M21.4 6l3-3a2.2 2.2 0 013.2 0l1.4 1.4a2.2 2.2 0 010 3.2l-3 3z" fill="%230F172A"/><path d="M2 30l5.2-1.4L3.6 25z" fill="%230F172A"/></g></svg>`,
+  ) +
+  "\") 2 34, crosshair";
+const ERASER_CURSOR =
+  "url(\"data:image/svg+xml;utf8," +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><g transform="translate(3,3)"><rect x="4" y="14" width="20" height="12" rx="3" transform="rotate(-35 14 20)" fill="%23F9A8D4" stroke="%230F172A" stroke-width="1.6"/><rect x="14" y="6" width="12" height="12" rx="2.5" transform="rotate(-35 20 12)" fill="%23E5E7EB" stroke="%230F172A" stroke-width="1.6"/></g></svg>`,
+  ) +
+  "\") 6 30, cell";
+
+
 /**
  * Нескінченна дошка для учня: він може сам рухати полотно, зумити,
  * а також писати й малювати — все летить вчителю в реальному часі.
