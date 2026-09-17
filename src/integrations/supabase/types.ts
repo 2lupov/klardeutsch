@@ -1578,6 +1578,69 @@ export type Database = {
           },
         ]
       }
+      lesson_kits: {
+        Row: {
+          blocks: Json
+          book_id: string | null
+          created_at: string
+          focus: string
+          id: string
+          lektion_id: string | null
+          level: string | null
+          notes: string | null
+          owner_id: string
+          page_paths: Json
+          source: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          blocks?: Json
+          book_id?: string | null
+          created_at?: string
+          focus?: string
+          id?: string
+          lektion_id?: string | null
+          level?: string | null
+          notes?: string | null
+          owner_id: string
+          page_paths?: Json
+          source?: string
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          blocks?: Json
+          book_id?: string | null
+          created_at?: string
+          focus?: string
+          id?: string
+          lektion_id?: string | null
+          level?: string | null
+          notes?: string | null
+          owner_id?: string
+          page_paths?: Json
+          source?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_kits_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_kits_lektion_id_fkey"
+            columns: ["lektion_id"]
+            isOneToOne: false
+            referencedRelation: "book_lektionen"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       library_items: {
         Row: {
           cover_url: string | null
