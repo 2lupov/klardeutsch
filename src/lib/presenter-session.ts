@@ -8,6 +8,7 @@ export type ViewType =
   | { type: "text"; title?: string; body: string }
   | { type: "reading"; taskId: string }
   | { type: "block"; blockId: string }
+  | { type: "slide"; presentationId: string; page: number }
   | { type: "whiteboard" };
 
 
