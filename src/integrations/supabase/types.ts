@@ -3311,6 +3311,50 @@ export type Database = {
         }
         Relationships: []
       }
+      tutoring_block_answers: {
+        Row: {
+          answers: Json
+          block_id: string
+          created_at: string
+          id: string
+          max_score: number
+          score: number
+          student_id: string
+          submitted_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          answers?: Json
+          block_id: string
+          created_at?: string
+          id?: string
+          max_score?: number
+          score?: number
+          student_id: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          answers?: Json
+          block_id?: string
+          created_at?: string
+          id?: string
+          max_score?: number
+          score?: number
+          student_id?: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tutoring_block_answers_block_id_fkey"
+            columns: ["block_id"]
+            isOneToOne: false
+            referencedRelation: "tutoring_lesson_blocks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tutoring_homework: {
         Row: {
           created_at: string
@@ -3357,6 +3401,56 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "tutoring_homework_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "tutoring_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tutoring_lesson_blocks: {
+        Row: {
+          book_page_id: string | null
+          created_at: string
+          id: string
+          lesson_id: string
+          payload: Json
+          sort_order: number
+          source: string
+          title: string | null
+          type: string
+          updated_at: string
+          visible_to_student: boolean
+        }
+        Insert: {
+          book_page_id?: string | null
+          created_at?: string
+          id?: string
+          lesson_id: string
+          payload?: Json
+          sort_order?: number
+          source?: string
+          title?: string | null
+          type: string
+          updated_at?: string
+          visible_to_student?: boolean
+        }
+        Update: {
+          book_page_id?: string | null
+          created_at?: string
+          id?: string
+          lesson_id?: string
+          payload?: Json
+          sort_order?: number
+          source?: string
+          title?: string | null
+          type?: string
+          updated_at?: string
+          visible_to_student?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tutoring_lesson_blocks_lesson_id_fkey"
             columns: ["lesson_id"]
             isOneToOne: false
             referencedRelation: "tutoring_lessons"
