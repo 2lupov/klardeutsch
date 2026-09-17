@@ -53,10 +53,11 @@ export default function BookAutoWizard({
   const analyze = async (f: File, prevAnswers?: Record<string, string>) => {
     setPhase("reading");
     try {
-      setProgress("Читаємо сторінки підручника…");
       const doc = await (pdfjsLib as any).getDocument({ data: await f.arrayBuffer() }).promise;
       const total = Math.min(doc.numPages, 200);
-      const pages: Array<{ n: number; text: string }> = [];
+
+      setProgress("Читаємо сторінки підручника…");
+      let pages: Array<{ n: number; text: string }> = [];
       for (let n = 1; n <= total; n++) {
         const page = await doc.getPage(n);
         const content = await page.getTextContent();
@@ -64,7 +65,27 @@ export default function BookAutoWizard({
         if (text.length > 40) pages.push({ n, text });
         if (n % 20 === 0) setProgress(`Читаємо сторінки… ${n}/${total}`);
       }
-      if (pages.length === 0) throw new Error("У цьому PDF немає текстового шару — скористайтесь звичайним генератором зі сторінками");
+
+      // Скан без текстового шару — ШІ переглядає сторінки очима.
+      if (pages.length < Math.max(3, total * 0.2)) {
+        pages = [];
+        const batch = 6;
+        for (let start = 1; start <= total; start += batch) {
+          const end = Math.min(start + batch - 1, total);
+          setProgress(`ШІ переглядає сторінки… ${end}/${total}`);
+          const shots: Array<{ n: number; image: string }> = [];
+          for (let n = start; n <= end; n++) shots.push({ n, image: await thumbnail(doc, n) });
+          const { data, error } = await supabase.functions.invoke("scan-book-pages", { body: { pages: shots } });
+          if (error) throw error;
+          if ((data as any)?.error) throw new Error((data as any).error);
+          for (const p of (data as any).pages ?? []) {
+            const text = [p.heading, p.summary, (p.kinds ?? []).join(", ")].filter(Boolean).join(" · ");
+            if (text.trim().length > 5) pages.push({ n: Number(p.n) || start, text });
+          }
+        }
+      }
+
+      if (pages.length === 0) throw new Error("Не вдалося прочитати сторінки цього файлу");
 
       setProgress("ШІ визначає теми і рівень…");
       const { data, error } = await supabase.functions.invoke("analyze-book-outline", {
@@ -83,6 +104,24 @@ export default function BookAutoWizard({
     } finally {
       setProgress("");
     }
+  };
+
+  /** Маленький знімок сторінки для перегляду ШІ. */
+  const thumbnail = async (doc: any, n: number): Promise<string> => {
+    const page = await doc.getPage(n);
+    const base = page.getViewport({ scale: 1 });
+    const viewport = page.getViewport({ scale: Math.min(1.4, 900 / base.width) });
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.floor(viewport.width);
+    canvas.height = Math.floor(viewport.height);
+    const ctx = canvas.getContext("2d")!;
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    await page.render({ canvasContext: ctx, viewport }).promise;
+    const url = canvas.toDataURL("image/jpeg", 0.6);
+    canvas.width = 0;
+    canvas.height = 0;
+    return url;
   };
 
   const renderPages = async (doc: any, from: number, to: number, kitId: string) => {
