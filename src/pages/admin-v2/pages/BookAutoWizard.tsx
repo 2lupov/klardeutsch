@@ -4,6 +4,7 @@ import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { Check, FileUp, Loader2, Sparkles, Wand2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import LibraryBookPicker from "@/components/blocks/LibraryBookPicker";
 import { Btn, Card } from "./_ui";
 
 (pdfjsLib as any).GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
@@ -239,6 +240,18 @@ export default function BookAutoWizard({
               }}
             />
           </label>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <LibraryBookPicker
+              disabled={phase === "reading"}
+              label="Взяти з бібліотеки"
+              onPick={(f) => {
+                setFile(f);
+                analyze(f);
+              }}
+            />
+            <span className="text-xs text-admin-muted">книги, які ви вже закинули в бібліотеку</span>
+          </div>
 
           <label className="block">
             <span className="text-xs font-medium text-admin-muted">Побажання (необовʼязково)</span>

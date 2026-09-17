@@ -80,6 +80,51 @@ export type Database = {
           },
         ]
       }
+      book_files: {
+        Row: {
+          created_at: string
+          file_path: string
+          id: string
+          kind: string
+          level: string | null
+          notes: string | null
+          owner_id: string
+          publisher: string | null
+          size_bytes: number
+          title: string
+          total_pages: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          file_path: string
+          id?: string
+          kind?: string
+          level?: string | null
+          notes?: string | null
+          owner_id: string
+          publisher?: string | null
+          size_bytes?: number
+          title: string
+          total_pages?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          file_path?: string
+          id?: string
+          kind?: string
+          level?: string | null
+          notes?: string | null
+          owner_id?: string
+          publisher?: string | null
+          size_bytes?: number
+          title?: string
+          total_pages?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       book_lektionen: {
         Row: {
           book_id: string

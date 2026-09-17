@@ -8,6 +8,7 @@ import { toast } from "@/hooks/use-toast";
 import StudentBlocks from "@/components/blocks/StudentBlocks";
 import { kitBlocksToLessonBlocks, normalizeKit, type LessonKit } from "@/lib/lesson-kits";
 import { Btn, Card, EmptyState, SectionHeader } from "./_ui";
+import LibraryBookPicker from "@/components/blocks/LibraryBookPicker";
 import BookAutoWizard from "./BookAutoWizard";
 
 (pdfjsLib as any).GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
@@ -482,6 +483,19 @@ function Wizard({
               onChange={(e) => e.target.files?.[0] && pickPdf(e.target.files[0])}
             />
           </label>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <LibraryBookPicker
+              onPick={(f, b) => {
+                pickPdf(f);
+                if (!title.trim()) setTitle(b.title);
+                if (b.level) setLevel(b.level);
+                if (b.kind === "arbeitsbuch" || b.kind === "grammatik") setFocus("arbeitsbuch");
+              }}
+            />
+            <span className="text-xs text-admin-muted">книги з вашої бібліотеки</span>
+          </div>
+
 
           {pdf && pdfPages > 0 && (
             <div className="grid grid-cols-2 gap-3">
