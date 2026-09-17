@@ -16,8 +16,12 @@ export interface LessonKit {
   page_paths: string[];
   blocks: KitBlock[];
   notes: string | null;
+  topics: string[];
+  summary: string | null;
+  last_assigned_at: string | null;
   created_at: string;
 }
+
 
 /** Перетворює блоки набору в LessonBlock для рендера (без записів у базі). */
 export function kitBlocksToLessonBlocks(blocks: KitBlock[], prefix = "kit"): LessonBlock[] {
