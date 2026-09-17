@@ -292,3 +292,25 @@ export function PandaLookupDialog({
     </>
   );
 }
+
+/** Плаваюча кнопка з панда-словником — відкривається поверх уроку, без переходів. */
+export default function PandaLookupFab({
+  onSaved,
+  label = "Панда-словник",
+  className = "fixed bottom-24 right-5 z-[60] flex items-center gap-2 px-4 py-3 rounded-2xl bg-primary text-primary-foreground shadow-lg font-display font-semibold text-sm",
+}: {
+  onSaved?: (w: MyWord) => void;
+  label?: string;
+  className?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button onClick={() => setOpen(true)} className={className}>
+        <span className="text-base">🐼</span>
+        <span className="hidden sm:inline">{label}</span>
+      </button>
+      <PandaLookupDialog open={open} onOpenChange={setOpen} onSaved={onSaved} />
+    </>
+  );
+}
