@@ -19,6 +19,10 @@ export const SYSTEM_BLOCKS = `Ти — методист німецької мо�
 
 Дозволені типи і форма payload:
 
+0) "theorie" — коротке ПРАВИЛО перед вправами (граматика, лексичне поле, вживання).
+payload: { "instructions": "укр", "markdown": "## Заголовок\n\nпояснення українською\n\n- пункт\n- пункт", "examples": [ { "de": "Ich gehe ins Kino.", "uk": "переклад" } ] }
+Markdown: лише ## заголовки, абзаци, - списки та **жирне**. Пояснення українською, приклади німецькою. Додавай блок теорії перед вправами на нове правило.
+
 1) "hoer" — якщо біля завдання є значок аудіо / номер треку.
 payload: { "instructions": "укр", "transcript": [ { "t": 0, "de": "речення", "uk": "переклад" } ] }
 Транскрипт відтвори з книги; якщо тексту запису немає — склади правдоподібний діалог на 5–8 реплік за темою сторінки. t — приблизна секунда (крок 4–6 с).
@@ -41,7 +45,7 @@ payload: { "instructions": "укр", "sentences": [ { "words": ["Ich","gehe","he
 6) "schreiben" — якщо є завдання на письмо або усну відповідь.
 payload: { "instructions": "укр", "prompt": "німецьке завдання", "redemittel": ["фраза-клише"], "min_words": 30, "allow_voice": true }
 
-Правила: інструкції та підказки — українською, увесь навчальний матеріал — німецькою. Не вигадуй вправ, яких немає на сторінці (виняток — транскрипт аудіо). Мінімум 3 блоки, максимум 10. Без пояснень поза JSON.`;
+Правила: інструкції та підказки — українською, увесь навчальний матеріал — німецькою. Не вигадуй вправ, яких немає на сторінці (виняток — транскрипт аудіо). Починай тему блоком "theorie", якщо на сторінках є правило або нова граматика. Мінімум 3 блоки, максимум 12. Без пояснень поза JSON.`;
 
 export interface RawBlock {
   type?: string;
@@ -49,7 +53,7 @@ export interface RawBlock {
   payload?: Record<string, unknown>;
 }
 
-const ALLOWED = ["hoer", "lesen", "luecke", "paare", "satzbau", "schreiben"];
+const ALLOWED = ["theorie", "hoer", "lesen", "luecke", "paare", "satzbau", "schreiben"];
 const str = (v: unknown, max: number) => (v === null || v === undefined ? null : String(v).slice(0, max));
 
 /** Валідує блок і повертає нормалізований payload або null. */
@@ -60,6 +64,18 @@ export function normalizeBlock(raw: RawBlock): { type: string; title: string | n
   const payload: any = { instructions: str(p.instructions, 800) };
 
   switch (type) {
+    case "theorie": {
+      const markdown = str(p.markdown, 6000);
+      if (!markdown) return null;
+      payload.markdown = markdown;
+      payload.examples = Array.isArray(p.examples)
+        ? p.examples
+            .slice(0, 12)
+            .map((x: any) => ({ de: str(x?.de, 300) ?? "", uk: str(x?.uk, 300) }))
+            .filter((x: any) => x.de)
+        : [];
+      break;
+    }
     case "hoer": {
       const transcript = Array.isArray(p.transcript)
         ? p.transcript
