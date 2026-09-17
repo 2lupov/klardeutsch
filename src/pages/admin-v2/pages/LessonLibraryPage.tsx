@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Check, Loader2, Pencil, Search, Send, Sparkles, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 import StudentBlocks from "@/components/blocks/StudentBlocks";
 import { kitBlocksToLessonBlocks, normalizeKit, type LessonKit } from "@/lib/lesson-kits";
 import { assignKitToStudent, listAssignableStudents, type AssignableStudent } from "@/lib/kit-from-book";
@@ -13,7 +13,10 @@ const LEVELS = ["A1", "A2", "B1", "B2", "C1"];
 const focusLabel = (f: string) => (f === "arbeitsbuch" ? "Граматика" : "Читання й аудіо");
 
 /** Бібліотека готових уроків + ШІ-підбір уроку під запит і конкретного учня. */
-export default function LessonLibraryPage({ onNavigate }: { onNavigate?: (key: string) => void }) {
+const goTo = (key: string) => window.dispatchEvent(new CustomEvent("admin-v2:navigate", { detail: { key } }));
+
+export default function LessonLibraryPage() {
+  const onNavigate = goTo;
   const { user } = useAuth();
   const [kits, setKits] = useState<LessonKit[] | null>(null);
   const [q, setQ] = useState("");
