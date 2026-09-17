@@ -404,6 +404,45 @@ const PresenterMode = ({ lesson, words, exercises, readingTasks = [], studentNam
             </div>
           </PanelCard>
 
+          <PanelCard
+            title={`Презентації (${presentations.length})`}
+            icon={<PresIcon className="w-4 h-4" />}
+            actions={
+              <>
+                <input ref={presFileRef} type="file" accept="application/pdf" className="hidden"
+                  onChange={(e) => uploadPres(e.target.files)} />
+                <Button size="sm" variant="outline" className="h-7 gap-1.5 text-xs" disabled={!!presBusy}
+                  onClick={() => presFileRef.current?.click()}>
+                  <Upload className="w-3.5 h-3.5" /> PDF
+                </Button>
+              </>
+            }
+            scroll
+          >
+            {presBusy && <div className="text-xs text-primary font-bold px-2 pb-1">{presBusy}</div>}
+            <div className="space-y-1">
+              {presentations.map((p) => {
+                const active = slideView?.presentationId === p.id;
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => pushView({ type: "slide", presentationId: p.id, page: 1 })}
+                    className={`w-full text-left rounded-lg border ${active ? "border-primary bg-primary/5" : "border-border bg-card hover:border-primary/40"} px-2.5 py-2 text-sm`}
+                  >
+                    📊 {p.title}
+                    <span className="text-xs text-muted-foreground ml-1.5">{p.page_count} сл.</span>
+                  </button>
+                );
+              })}
+              {presentations.length === 0 && (
+                <div className="text-xs text-muted-foreground p-2">
+                  Немає презентацій. Додайте PDF кнопкою вище або в розділі «Презентації».
+                </div>
+              )}
+            </div>
+          </PanelCard>
+
+
         </div>
 
         {/* CENTER: preview = что видит ученик */}
