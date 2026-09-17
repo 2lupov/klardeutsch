@@ -455,16 +455,27 @@ const TutoringLesson = () => {
 
         {/* Theory, words, exercises, homework tabs */}
 
-        <Tabs defaultValue={isTeacher ? "theory" : "words"} className="w-full">
-          <TabsList className={`mb-4 grid w-full ${isTeacher ? "grid-cols-5" : "grid-cols-4"}`}>
+        <Tabs defaultValue={isTeacher ? "theory" : "blocks"} className="w-full">
+          <TabsList className={`mb-4 grid w-full ${isTeacher ? "grid-cols-6" : "grid-cols-5"}`}>
             {isTeacher && (
               <TabsTrigger value="theory" className="gap-1.5"><FileText className="w-4 h-4" /><span className="hidden sm:inline">{t("Теорія", "Теория")}</span></TabsTrigger>
             )}
+            <TabsTrigger value="blocks" className="gap-1.5"><LayoutGrid className="w-4 h-4" /><span className="hidden sm:inline">{t("Блоки", "Блоки")}</span></TabsTrigger>
             <TabsTrigger value="words" className="gap-1.5"><BookOpen className="w-4 h-4" /><span className="hidden sm:inline">{t("Слова", "Слова")}</span> <span className="text-[10px] opacity-60">({words.length})</span></TabsTrigger>
             <TabsTrigger value="reading" className="gap-1.5"><Images className="w-4 h-4" /><span className="hidden sm:inline">{t("Читання", "Чтение")}</span> <span className="text-[10px] opacity-60">({readingTasks.length})</span></TabsTrigger>
             <TabsTrigger value="exercises" className="gap-1.5"><ListChecks className="w-4 h-4" /><span className="hidden sm:inline">{t("Вправи", "Упражнения")}</span> <span className="text-[10px] opacity-60">({exercises.length})</span></TabsTrigger>
             <TabsTrigger value="homework" className="gap-1.5"><Sparkles className="w-4 h-4" /><span className="hidden sm:inline">{t("ДЗ", "ДЗ")}</span> <span className="text-[10px] opacity-60">({homework.length})</span></TabsTrigger>
           </TabsList>
+
+          {/* BLOCK BUILDER / STUDENT BLOCKS */}
+          <TabsContent value="blocks">
+            {isTeacher ? (
+              <LessonStudio lessonId={lesson.id} studentId={lesson.student_id} />
+            ) : (
+              <StudentLessonBlocks lessonId={lesson.id} studentId={lesson.student_id} />
+            )}
+          </TabsContent>
+
 
           {/* READING / GRAMMAR FROM PHOTOS */}
           <TabsContent value="reading" className="space-y-4">
