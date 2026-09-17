@@ -484,6 +484,19 @@ function Wizard({
             />
           </label>
 
+          <div className="flex flex-wrap items-center gap-2">
+            <LibraryBookPicker
+              onPick={(f, b) => {
+                pickPdf(f);
+                if (!title.trim()) setTitle(b.title);
+                if (b.level) setLevel(b.level);
+                if (b.kind === "arbeitsbuch" || b.kind === "grammatik") setFocus("arbeitsbuch");
+              }}
+            />
+            <span className="text-xs text-admin-muted">книги з вашої бібліотеки</span>
+          </div>
+
+
           {pdf && pdfPages > 0 && (
             <div className="grid grid-cols-2 gap-3">
               <Field label={`Від сторінки (усього ${pdfPages})`}>
