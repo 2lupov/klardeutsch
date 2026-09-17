@@ -33,7 +33,7 @@ const REACTIONS: { type: Reaction["type"]; Icon: any; label: string; color: stri
 const StudentView = () => {
   const { sessionId } = useParams();
   const [session, setSession] = useState<any>(null);
-  const [lessonData, setLessonData] = useState<{ words: any[]; exercises: any[]; theory: string; reading: any[] } | null>(null);
+  const [lessonData, setLessonData] = useState<{ words: any[]; exercises: any[]; theory: string; reading: any[]; blocks: any[] } | null>(null);
   const [loading, setLoading] = useState(true);
   const [answer, setAnswer] = useState<string>("");
   const [submitted, setSubmitted] = useState(false);
