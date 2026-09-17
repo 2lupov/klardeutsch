@@ -1,0 +1,2 @@
+DROP POLICY IF EXISTS "Teachers and admins read presentations" ON public.presentations;
+CREATE POLICY "Authenticated read presentations" ON public.presentations FOR SELECT TO authenticated USING (true);
