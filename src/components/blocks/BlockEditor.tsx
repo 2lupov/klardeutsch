@@ -73,6 +73,33 @@ export default function BlockEditor({ block, onChange }: Props) {
         <Textarea rows={2} value={line(p.instructions)} onChange={(e) => setPayload({ instructions: e.target.value })} />
       </div>
 
+      {block.type === "theorie" && (
+        <>
+          <div>
+            <Label className="text-xs">Теорія (Markdown: ## заголовок, **жирне**, - список)</Label>
+            <Textarea rows={8} value={line(p.markdown)} onChange={(e) => setPayload({ markdown: e.target.value })} />
+          </div>
+          <div>
+            <Label className="text-xs">Приклади — рядок: німецькою | переклад</Label>
+            <Textarea
+              rows={4}
+              value={(p.examples ?? []).map((x) => `${x.de} | ${x.uk ?? ""}`).join("\n")}
+              onChange={(e) =>
+                setPayload({
+                  examples: e.target.value
+                    .split("\n")
+                    .filter((l) => l.trim())
+                    .map((l) => {
+                      const [de, uk] = l.split("|").map((x) => x.trim());
+                      return { de: de ?? "", uk: uk || null };
+                    }),
+                })
+              }
+            />
+          </div>
+        </>
+      )}
+
       {block.type === "hoer" && (
         <>
           <div className="flex flex-wrap items-center gap-2">

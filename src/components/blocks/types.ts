@@ -1,6 +1,7 @@
 /** Блочна система уроків (DaF): типи блоків, ключі, підрахунок балів. */
 
 export const BLOCK_TYPES = [
+  "theorie",
   "hoer",
   "lesen",
   "luecke",
@@ -12,6 +13,7 @@ export const BLOCK_TYPES = [
 export type BlockType = (typeof BLOCK_TYPES)[number];
 
 export const BLOCK_META: Record<BlockType, { label: string; de: string; icon: string; hint: string }> = {
+  theorie: { label: "Теорія", de: "Grammatik & Theorie", icon: "graduation-cap", hint: "Правило з прикладами" },
   hoer: { label: "Аудіювання", de: "Hörverstehen", icon: "headphones", hint: "Аудіо + транскрипт" },
   lesen: { label: "Читання і лексика", de: "Leseverstehen & Wortschatz", icon: "book-open", hint: "Текст із клікабельними словами" },
   luecke: { label: "Пропуски", de: "Lückentext", icon: "pencil-line", hint: "Відмінки, прийменники, закінчення" },
@@ -52,6 +54,9 @@ export interface SatzItem {
 
 export interface BlockPayload {
   instructions?: string | null;
+  /** theorie */
+  markdown?: string;
+  examples?: Array<{ de: string; uk?: string | null }>;
   /** hoer */
   audio_path?: string | null;
   transcript?: TranscriptLine[];
@@ -147,6 +152,12 @@ export function scoreBlock(block: LessonBlock, value: any): { score: number; max
 
 export function emptyPayload(type: BlockType): BlockPayload {
   switch (type) {
+    case "theorie":
+      return {
+        instructions: "Прочитайте правило.",
+        markdown: "## Правило\n\nКоротке пояснення українською.\n\n- пункт перший\n- пункт другий",
+        examples: [{ de: "Ich gehe ins Kino.", uk: "Я йду в кіно." }],
+      };
     case "hoer":
       return { instructions: "Послухайте запис і виконайте завдання.", transcript: [{ t: 0, de: "" }] };
     case "lesen":
