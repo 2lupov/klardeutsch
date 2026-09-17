@@ -141,8 +141,15 @@ export default function LiveClass() {
   }, [id, navigate]);
 
 
-  // Учень сам вибирає розділ — вчитель його не перекидає.
-  // Про новий матеріал повідомляє червоний індикатор у сайдбарі.
+  // Учитель кнопкою «Перенести учня сюди» переносить учня у потрібний розділ
+  const teacherSection = cls?.current_section;
+  useEffect(() => {
+    if (!teacherSection) return;
+    if (!LIVE_SECTIONS.some((s) => s.key === teacherSection)) return;
+    setSection(teacherSection);
+  }, [teacherSection, (cls as any)?.live_view?.type, (cls as any)?.live_view?.kit_id]);
+
+
 
 
   // mark current section as seen
