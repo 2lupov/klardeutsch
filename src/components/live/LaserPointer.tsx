@@ -92,6 +92,8 @@ export function LaserSurface({
   const [own, setOwn] = useState<LaserPoint>(null);
   const shown = point ?? own;
 
+  useEffect(() => { if (!active) setOwn(null); }, [active]);
+
   const handle = (e: React.PointerEvent) => {
     const r = e.currentTarget.getBoundingClientRect();
     const p = { fx: (e.clientX - r.left) / r.width, fy: (e.clientY - r.top) / r.height };
