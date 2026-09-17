@@ -8,6 +8,7 @@ import { toast } from "@/hooks/use-toast";
 import StudentBlocks from "@/components/blocks/StudentBlocks";
 import { kitBlocksToLessonBlocks, normalizeKit, type LessonKit } from "@/lib/lesson-kits";
 import { Btn, Card, EmptyState, SectionHeader } from "./_ui";
+import BookAutoWizard from "./BookAutoWizard";
 
 (pdfjsLib as any).GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
@@ -28,6 +29,7 @@ export default function LessonGeneratorPage() {
   const [kits, setKits] = useState<LessonKit[]>([]);
   const [books, setBooks] = useState<Book[]>([]);
   const [wizard, setWizard] = useState(false);
+  const [autoWizard, setAutoWizard] = useState(false);
   const [openKit, setOpenKit] = useState<LessonKit | null>(null);
 
   const load = async () => {
@@ -49,6 +51,20 @@ export default function LessonGeneratorPage() {
     setKits((s) => s.filter((x) => x.id !== id));
     if (openKit?.id === id) setOpenKit(null);
   };
+
+  if (autoWizard) {
+    return (
+      <BookAutoWizard
+        ownerId={user?.id ?? ""}
+        books={books}
+        onDone={async () => {
+          setAutoWizard(false);
+          await load();
+        }}
+        onCancel={() => setAutoWizard(false)}
+      />
+    );
+  }
 
   if (wizard) {
     return (
@@ -90,15 +106,26 @@ export default function LessonGeneratorPage() {
     <div className="space-y-4">
       <SectionHeader
         title="Генератор уроку з книги"
-        subtitle="Крок за кроком: книга → фото або PDF → аудіо → готовий інтерактивний урок"
-        action={<Btn onClick={() => setWizard(true)}>Створити урок</Btn>}
+        subtitle="Кинули підручник — ШІ сам розбив на теми. Або крок за кроком: сторінки → аудіо → урок"
+        action={
+          <div className="flex flex-wrap gap-2">
+            <Btn onClick={() => setAutoWizard(true)}>
+              <span className="inline-flex items-center gap-1.5">
+                <Wand2 className="w-4 h-4" /> Підручник цілком (ШІ)
+              </span>
+            </Btn>
+            <Btn variant="ghost" onClick={() => setWizard(true)}>
+              Один урок
+            </Btn>
+          </div>
+        }
       />
 
       {kits.length === 0 ? (
         <EmptyState
           title="Ще немає готових уроків"
-          description="Виберіть книгу, додайте сторінки — ШІ зробить інтерактивний урок, який можна відкрити на живому уроці або дати як домашку."
-          cta={{ label: "Створити урок", onClick: () => setWizard(true) }}
+          description="Киньте PDF підручника — ШІ прочитає його, визначить теми, поставить кілька питань і зробить інтерактивні уроки. Їх можна відкрити на живому уроці або дати як домашку."
+          cta={{ label: "Підручник цілком (ШІ)", onClick: () => setAutoWizard(true) }}
         />
       ) : (
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -328,7 +355,7 @@ function Wizard({
       if (audio) {
         setProgress("Завантажуємо аудіо…");
         const ext = audio.name.split(".").pop() || "mp3";
-        audioPath = `audio/kits/${kitId}/${Date.now()}.${ext}`;
+        audioPath = `kits/${kitId}/audio-${Date.now()}.${ext}`;
         const { error } = await supabase.storage.from("tutoring-materials").upload(audioPath, audio, { upsert: true });
         if (error) throw error;
       }
