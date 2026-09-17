@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import LibraryPagesPicker from "@/components/blocks/LibraryPagesPicker";
 import { toast } from "sonner";
 import PresenterMode from "@/components/tutoring/PresenterMode";
 import { Monitor } from "lucide-react";
@@ -524,6 +525,15 @@ const TutoringLesson = () => {
                   placeholder={t("Побажання: на що звернути увагу (напр. Perfekt, професії)", "Пожелания: на что обратить внимание")}
                   rows={2}
                 />
+                <LibraryPagesPicker
+                  disabled={readLoading}
+                  onPages={(files, book) => {
+                    setReadFiles(files);
+                    if (book.kind === "arbeitsbuch" || book.kind === "grammatik") setReadKind("grammar");
+                    toast.success(t(`Взято сторінок: ${files.length}`, `Взято страниц: ${files.length}`));
+                  }}
+                />
+
                 {readFiles.length > 0 && (
                   <p className="text-xs text-muted-foreground">{t("Обрано фото", "Выбрано фото")}: {readFiles.length}</p>
                 )}

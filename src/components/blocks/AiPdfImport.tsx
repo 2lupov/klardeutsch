@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { DEMO_LEKTION } from "./demoLesson";
+import LibraryBookPicker from "./LibraryBookPicker";
 import { cn } from "@/lib/utils";
 
 (pdfjsLib as any).GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
@@ -175,6 +176,19 @@ export default function AiPdfImport({ lessonId, onCreated }: Props) {
         <FileUp className="mx-auto mb-2 h-6 w-6 text-muted-foreground" />
         <p className="text-sm font-medium">{file ? file.name : "Перетягніть PDF підручника або натисніть, щоб вибрати"}</p>
         {total > 0 && <p className="text-xs text-muted-foreground">Сторінок у файлі: {total}</p>}
+      </div>
+
+      <div onClick={(e) => e.stopPropagation()}>
+        <LibraryBookPicker
+          theme="app"
+          disabled={busy}
+          label="Взяти з бібліотеки книг"
+          onPick={(f, b) => {
+            pick(f);
+            if (b.level) setLevel(b.level);
+            if (b.kind === "arbeitsbuch" || b.kind === "grammatik") setFocus("arbeitsbuch");
+          }}
+        />
       </div>
 
       <div className="grid gap-3 sm:grid-cols-4">
