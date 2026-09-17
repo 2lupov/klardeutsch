@@ -15,7 +15,10 @@ export const jsonResponse = (body: unknown, status = 200) =>
 export const SYSTEM_BLOCKS = `Ти — методист німецької мови (DaF) і асистент викладача. На зображеннях — сторінки підручника Kursbuch або робочого зошита Arbeitsbuch.
 Перетвори сторінки в послідовність ІНТЕРАКТИВНИХ БЛОКІВ уроку. Поверни ЛИШЕ JSON:
 
-{ "blocks": [ { "type": "...", "title": "...", "payload": { ... } } ] }
+{ "topics": ["Genitiv", "Adjektivendungen"], "summary": "Один рядок українською: про що цей урок", "blocks": [ { "type": "...", "title": "...", "payload": { ... } } ] }
+
+"topics" — 1–5 коротких назв тем (граматика або лексичне поле), як їх шукав би викладач. "summary" — до 160 символів.
+
 
 Дозволені типи і форма payload:
 
@@ -186,7 +189,8 @@ export async function askForBlocks(
   apiKey: string,
   dataUrls: string[],
   userText: string,
-): Promise<{ blocks: RawBlock[]; status: number; error?: string }> {
+): Promise<{ blocks: RawBlock[]; topics: string[]; summary: string | null; status: number; error?: string }> {
+
   const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: { "Lovable-API-Key": apiKey, "Content-Type": "application/json" },
