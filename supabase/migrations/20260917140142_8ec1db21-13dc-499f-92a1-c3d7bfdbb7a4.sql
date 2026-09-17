@@ -1,0 +1,7 @@
+ALTER TABLE public.lesson_kits
+  ADD COLUMN IF NOT EXISTS topics TEXT[] NOT NULL DEFAULT '{}',
+  ADD COLUMN IF NOT EXISTS tags TEXT[] NOT NULL DEFAULT '{}',
+  ADD COLUMN IF NOT EXISTS summary TEXT,
+  ADD COLUMN IF NOT EXISTS last_assigned_at TIMESTAMP WITH TIME ZONE;
+
+CREATE INDEX IF NOT EXISTS idx_lesson_kits_topics ON public.lesson_kits USING GIN (topics);

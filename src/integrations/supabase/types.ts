@@ -1630,13 +1630,17 @@ export type Database = {
           created_at: string
           focus: string
           id: string
+          last_assigned_at: string | null
           lektion_id: string | null
           level: string | null
           notes: string | null
           owner_id: string
           page_paths: Json
           source: string
+          summary: string | null
+          tags: string[]
           title: string
+          topics: string[]
           updated_at: string
         }
         Insert: {
@@ -1645,13 +1649,17 @@ export type Database = {
           created_at?: string
           focus?: string
           id?: string
+          last_assigned_at?: string | null
           lektion_id?: string | null
           level?: string | null
           notes?: string | null
           owner_id: string
           page_paths?: Json
           source?: string
+          summary?: string | null
+          tags?: string[]
           title?: string
+          topics?: string[]
           updated_at?: string
         }
         Update: {
@@ -1660,13 +1668,17 @@ export type Database = {
           created_at?: string
           focus?: string
           id?: string
+          last_assigned_at?: string | null
           lektion_id?: string | null
           level?: string | null
           notes?: string | null
           owner_id?: string
           page_paths?: Json
           source?: string
+          summary?: string | null
+          tags?: string[]
           title?: string
+          topics?: string[]
           updated_at?: string
         }
         Relationships: [
