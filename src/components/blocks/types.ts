@@ -1,0 +1,169 @@
+/** Блочна система уроків (DaF): типи блоків, ключі, підрахунок балів. */
+
+export const BLOCK_TYPES = [
+  "hoer",
+  "lesen",
+  "luecke",
+  "paare",
+  "satzbau",
+  "schreiben",
+] as const;
+
+export type BlockType = (typeof BLOCK_TYPES)[number];
+
+export const BLOCK_META: Record<BlockType, { label: string; de: string; icon: string; hint: string }> = {
+  hoer: { label: "Аудіювання", de: "Hörverstehen", icon: "headphones", hint: "Аудіо + транскрипт" },
+  lesen: { label: "Читання і лексика", de: "Leseverstehen & Wortschatz", icon: "book-open", hint: "Текст із клікабельними словами" },
+  luecke: { label: "Пропуски", de: "Lückentext", icon: "pencil-line", hint: "Відмінки, прийменники, закінчення" },
+  paare: { label: "Пари", de: "Wortpaare / Zuordnung", icon: "link", hint: "З'єднати ліве з правим" },
+  satzbau: { label: "Порядок слів", de: "Satzbau", icon: "list-ordered", hint: "Скласти речення зі слів" },
+  schreiben: { label: "Письмо і мовлення", de: "Schreiben & Sprechen", icon: "mic", hint: "Есе + голосова відповідь" },
+};
+
+export type Artikel = "der" | "die" | "das" | "plural";
+
+export interface VocabWord {
+  de: string;
+  uk: string;
+  artikel?: Artikel | null;
+  plural?: string | null;
+}
+
+export interface TranscriptLine {
+  t?: number | null;
+  de: string;
+  uk?: string | null;
+}
+
+export interface LueckeItem {
+  /** Речення з одним `___` на місці пропуску. */
+  sentence: string;
+  answer: string;
+  options?: string[];
+  synonyms?: string[];
+  hint?: string | null;
+}
+
+export interface SatzItem {
+  /** Слова у правильному порядку. */
+  words: string[];
+  hint?: string | null;
+}
+
+export interface BlockPayload {
+  instructions?: string | null;
+  /** hoer */
+  audio_path?: string | null;
+  transcript?: TranscriptLine[];
+  /** lesen */
+  text?: string;
+  words?: VocabWord[];
+  /** luecke */
+  mode?: "select" | "input";
+  items?: LueckeItem[];
+  /** paare */
+  pairs?: Array<{ left: string; right: string }>;
+  /** satzbau */
+  sentences?: SatzItem[];
+  /** schreiben */
+  prompt?: string;
+  redemittel?: string[];
+  min_words?: number;
+  allow_voice?: boolean;
+}
+
+export interface LessonBlock {
+  id: string;
+  lesson_id: string;
+  type: BlockType | string;
+  title: string | null;
+  sort_order: number;
+  visible_to_student: boolean;
+  payload: BlockPayload;
+  source: string;
+  book_page_id: string | null;
+}
+
+/** Кольори роду артикля — однакові по всій платформі. */
+export const ARTIKEL_CLASS: Record<Artikel, string> = {
+  der: "bg-blue-100 text-blue-700 border-blue-300 dark:bg-blue-950 dark:text-blue-200 dark:border-blue-800",
+  die: "bg-pink-100 text-pink-700 border-pink-300 dark:bg-pink-950 dark:text-pink-200 dark:border-pink-800",
+  das: "bg-emerald-100 text-emerald-700 border-emerald-300 dark:bg-emerald-950 dark:text-emerald-200 dark:border-emerald-800",
+  plural: "bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950 dark:text-amber-200 dark:border-amber-800",
+};
+
+export const norm = (v: unknown) =>
+  String(v ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ");
+
+export function isCorrectText(given: unknown, answer: string, synonyms?: string[]): boolean {
+  const g = norm(given);
+  if (!g) return false;
+  if (g === norm(answer)) return true;
+  return (synonyms ?? []).some((s) => norm(s) === g);
+}
+
+/** Скільки балів дає блок і скільки набрано відповідями учня. */
+export function scoreBlock(block: LessonBlock, value: any): { score: number; max: number } {
+  const p = block.payload || {};
+  switch (block.type) {
+    case "luecke": {
+      const items = p.items ?? [];
+      let score = 0;
+      items.forEach((it, i) => {
+        if (isCorrectText(value?.[i], it.answer, it.synonyms)) score++;
+      });
+      return { score, max: items.length };
+    }
+    case "paare": {
+      const pairs = p.pairs ?? [];
+      let score = 0;
+      pairs.forEach((pr, i) => {
+        if (norm(value?.[i]) === norm(pr.right)) score++;
+      });
+      return { score, max: pairs.length };
+    }
+    case "satzbau": {
+      const sentences = p.sentences ?? [];
+      let score = 0;
+      sentences.forEach((s, i) => {
+        const given: string[] = value?.[i] ?? [];
+        if (given.length === s.words.length && given.every((w, j) => norm(w) === norm(s.words[j]))) score++;
+      });
+      return { score, max: sentences.length };
+    }
+    case "schreiben": {
+      const text = String(value?.text ?? "").trim();
+      const min = p.min_words ?? 20;
+      const words = text ? text.split(/\s+/).length : 0;
+      return { score: words >= min ? 1 : 0, max: 1 };
+    }
+    default:
+      return { score: 0, max: 0 };
+  }
+}
+
+export function emptyPayload(type: BlockType): BlockPayload {
+  switch (type) {
+    case "hoer":
+      return { instructions: "Послухайте запис і виконайте завдання.", transcript: [{ t: 0, de: "" }] };
+    case "lesen":
+      return { instructions: "Прочитайте текст.", text: "", words: [] };
+    case "luecke":
+      return { instructions: "Вставте правильне слово.", mode: "select", items: [{ sentence: "Das Buch liegt ___ dem Tisch.", answer: "auf", options: ["auf", "an", "in", "unter"], synonyms: [], hint: "Dativ — Wo?" }] };
+    case "paare":
+      return { instructions: "З'єднайте пари.", pairs: [{ left: "warten", right: "auf + Akk." }] };
+    case "satzbau":
+      return { instructions: "Складіть речення.", sentences: [{ words: ["Ich", "gehe", "heute", "ins", "Kino"], hint: "Дієслово на 2 місці" }] };
+    case "schreiben":
+      return {
+        instructions: "Напишіть відповідь і запишіть її голосом.",
+        prompt: "Beschreiben Sie Ihr Zimmer.",
+        redemittel: ["Mein Zimmer ist ...", "In der Ecke steht ...", "An der Wand hängt ..."],
+        min_words: 30,
+        allow_voice: true,
+      };
+  }
+}
