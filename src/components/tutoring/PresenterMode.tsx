@@ -21,6 +21,7 @@ import { blockLabel } from "@/components/blocks/BlockRenderer";
 import type { LessonBlock } from "@/components/blocks/types";
 import PresentationView from "./PresentationView";
 import { listPresentations, uploadPresentation, type Presentation as Pres } from "@/lib/presentations";
+import { PandaLookupDialog } from "@/components/dictionary/PandaLookup";
 
 
 interface Props {
@@ -53,6 +54,7 @@ const PresenterMode = ({ lesson, words, exercises, readingTasks = [], studentNam
   const [presentations, setPresentations] = useState<Pres[]>([]);
   const [presBusy, setPresBusy] = useState<string | null>(null);
   const presFileRef = useRef<HTMLInputElement>(null);
+  const [dictOpen, setDictOpen] = useState(false);
 
   // Презентації викладача
   useEffect(() => {
@@ -254,6 +256,9 @@ const PresenterMode = ({ lesson, words, exercises, readingTasks = [], studentNam
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <Button size="sm" variant="outline" onClick={() => setDictOpen(true)} className="gap-1.5">
+            🐼 Словник
+          </Button>
           <Button size="sm" variant="outline" onClick={copyStudentLink} className="gap-1.5">
             <Copy className="w-3.5 h-3.5" /> Ссылка
           </Button>
@@ -530,6 +535,9 @@ const PresenterMode = ({ lesson, words, exercises, readingTasks = [], studentNam
           studentName={studentName}
         />
       )}
+
+      {/* Панда-словник учителя — открывается поверх урока */}
+      <PandaLookupDialog open={dictOpen} onOpenChange={setDictOpen} />
     </motion.div>
   );
 };

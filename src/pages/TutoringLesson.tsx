@@ -16,6 +16,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import LibraryPagesPicker from "@/components/blocks/LibraryPagesPicker";
 import { toast } from "sonner";
 import PresenterMode from "@/components/tutoring/PresenterMode";
+import { PandaLookupDialog } from "@/components/dictionary/PandaLookup";
 import { Monitor } from "lucide-react";
 import LessonTheoryRenderer from "@/components/tutoring/LessonTheoryRenderer";
 import RichExercise from "@/components/exercises/RichExercise";
@@ -143,6 +144,7 @@ const TutoringLesson = () => {
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
   const [hwSubmissions, setHwSubmissions] = useState<Record<string, string>>({});
   const [presenterOpen, setPresenterOpen] = useState(false);
+  const [dictOpen, setDictOpen] = useState(false);
   const [studentProfile, setStudentProfile] = useState<any>(null);
 
   // Reading / grammar from photos
@@ -449,11 +451,15 @@ const TutoringLesson = () => {
                 <Button size="sm" onClick={() => setPresenterOpen(true)} className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg">
                   <Monitor className="w-4 h-4" /> {t("Провести урок", "Провести урок")}
                 </Button>
+                <Button size="sm" variant="outline" onClick={() => setDictOpen(true)} className="gap-2">
+                  🐼 {t("Словник", "Словарь")}
+                </Button>
                 <Button size="sm" variant="outline" onClick={completeLesson} className="gap-2">
                   <Check className="w-4 h-4" /> {t("Завершити", "Завершить")}
                 </Button>
               </>
             )}
+            <PandaLookupDialog open={dictOpen} onOpenChange={setDictOpen} />
           </div>
         </motion.div>
 

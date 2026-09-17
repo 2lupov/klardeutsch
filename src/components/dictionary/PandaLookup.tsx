@@ -246,32 +246,26 @@ export function PandaLookupPanel({ onSaved }: { onSaved?: (w: MyWord) => void })
   );
 }
 
-/** Плаваюча кнопка з панда-словником — працює і на живому уроці, і в словнику учня. */
-export default function PandaLookupFab({
+/** Вікно словника поверх уроку — нікуди не переходить, лише пошук + «додати у мій словник». */
+export function PandaLookupDialog({
+  open,
+  onOpenChange,
   onSaved,
-  label = "Панда-словник",
 }: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
   onSaved?: (w: MyWord) => void;
-  label?: string;
 }) {
-  const [open, setOpen] = useState(false);
+  const setOpen = onOpenChange;
   return (
     <>
-      <button
-        onClick={() => setOpen(true)}
-        className="fixed bottom-24 right-5 z-40 flex items-center gap-2 px-4 py-3 rounded-2xl bg-primary text-primary-foreground shadow-lg font-display font-semibold text-sm"
-      >
-        <span className="text-base">🐼</span>
-        <span className="hidden sm:inline">{label}</span>
-      </button>
-
       <AnimatePresence>
         {open && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-background/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-6"
+            className="fixed inset-0 z-[70] bg-background/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-6"
             onClick={() => setOpen(false)}
           >
             <motion.div
@@ -295,6 +289,28 @@ export default function PandaLookupFab({
           </motion.div>
         )}
       </AnimatePresence>
+    </>
+  );
+}
+
+/** Плаваюча кнопка з панда-словником — відкривається поверх уроку, без переходів. */
+export default function PandaLookupFab({
+  onSaved,
+  label = "Панда-словник",
+  className = "fixed bottom-24 right-5 z-[60] flex items-center gap-2 px-4 py-3 rounded-2xl bg-primary text-primary-foreground shadow-lg font-display font-semibold text-sm",
+}: {
+  onSaved?: (w: MyWord) => void;
+  label?: string;
+  className?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button onClick={() => setOpen(true)} className={className}>
+        <span className="text-base">🐼</span>
+        <span className="hidden sm:inline">{label}</span>
+      </button>
+      <PandaLookupDialog open={open} onOpenChange={setOpen} onSaved={onSaved} />
     </>
   );
 }

@@ -11,6 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import pandaCelebrating from "@/assets/mascot/panda-celebrating.png";
 import pandaSleeping from "@/assets/mascot/panda-sleeping.png";
+import { PandaLookupDialog } from "@/components/dictionary/PandaLookup";
 
 type AssignmentItem =
   | {
@@ -76,6 +77,7 @@ const StudentAssignments = () => {
 const [items, setItems] = useState<AssignmentItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<Filter>("active");
+  const [dictOpen, setDictOpen] = useState(false);
 
   // Live-session auto-join is handled globally in AppLayout (useStudentLiveSync).
 
@@ -346,11 +348,12 @@ return (
               </p>
             </div>
             <button
-              onClick={() => navigate("/vocabulary")}
+              onClick={() => setDictOpen(true)}
               className="ml-auto px-3 py-2 rounded-xl border border-border text-xs font-display font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition"
             >
-              🗂 {t("Словник", "Словарь")}
+              🐼 {t("Словник", "Словарь")}
             </button>
+            <PandaLookupDialog open={dictOpen} onOpenChange={setDictOpen} />
           </div>
 
 
