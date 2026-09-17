@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import StudentBlocks from "@/components/blocks/StudentBlocks";
+import PandaLookupFab from "@/components/dictionary/PandaLookup";
 import { kitBlocksToLessonBlocks, type KitBlock } from "@/lib/lesson-kits";
 
 /** Домашка-набір блоків: учень виконує і здає результат. */
@@ -78,6 +79,8 @@ export default function StudentBlocksTask() {
       <main className="mx-auto max-w-3xl p-4">
         <StudentBlocks blocks={blocks} persist={false} readOnly={done} showActions={!done} onSubmitted={submit} />
       </main>
+
+      <PandaLookupFab label="Словник" />
     </div>
   );
 }
