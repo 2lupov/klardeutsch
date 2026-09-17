@@ -30,6 +30,7 @@ import ContentPage from "./pages/ContentPage";
 import StudentsPage from "./pages/StudentsPage";
 import LiveClassPage from "./pages/LiveClassPage";
 import MaterialsPage from "./pages/MaterialsPage";
+import BookLibraryPage from "./pages/BookLibraryPage";
 import SettingsPage from "./pages/SettingsPage";
 import { AdminLangProvider } from "./LanguageContext";
 
@@ -37,6 +38,7 @@ type NavKey =
   | "dashboard"
   | "courses"
   | "books"
+  | "library"
   | "generator"
   | "live"
   | "assignments"
@@ -60,6 +62,7 @@ const NAV: { key: NavKey; label: string; icon: any }[] = [
   { key: "dashboard", label: "Головна", icon: LayoutDashboard },
   { key: "courses", label: "Курси", icon: BookOpen },
   { key: "books", label: "Підручники", icon: BookMarked },
+  { key: "library", label: "Бібліотека книг", icon: Library },
   { key: "generator", label: "Генератор уроку", icon: Wand2 },
   { key: "live", label: "Живий клас", icon: Radio },
   { key: "assignments", label: "Завдання", icon: ClipboardList },
@@ -247,6 +250,8 @@ function PageRouter({ active }: { active: NavKey }) {
       return <CoursesSection />;
     case "books":
       return <BooksSection />;
+    case "library":
+      return <BookLibraryPage />;
     case "generator":
       return <LessonGeneratorPage />;
     case "live":
