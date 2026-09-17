@@ -213,7 +213,7 @@ export async function askForBlocks(
   if (!res.ok) {
     const details = await res.text();
     console.error(`AI gateway error [${res.status}]: ${details.slice(0, 500)}`);
-    return { blocks: [], status: res.status, error: details.slice(0, 300) };
+    return { blocks: [], topics: [], summary: null, status: res.status, error: details.slice(0, 300) };
   }
 
   const data = await res.json();
@@ -225,7 +225,11 @@ export async function askForBlocks(
     const m = String(raw).match(/\{[\s\S]*\}/);
     parsed = m ? JSON.parse(m[0]) : {};
   }
-  return { blocks: Array.isArray(parsed?.blocks) ? parsed.blocks : [], status: 200 };
+  const topics = Array.isArray(parsed?.topics)
+    ? parsed.topics.slice(0, 5).map((t: any) => String(t).slice(0, 60)).filter(Boolean)
+    : [];
+  const summary = parsed?.summary ? String(parsed.summary).slice(0, 300) : null;
+  return { blocks: Array.isArray(parsed?.blocks) ? parsed.blocks : [], topics, summary, status: 200 };
 }
 
 /** Перевіряє, що користувач — викладач цього уроку або адмін. */
