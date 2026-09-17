@@ -1,15 +1,27 @@
 import { supabase } from "@/integrations/supabase/client";
 
-export type LiveSection = "board" | "grammar" | "listening" | "reading" | "tasks" | "vocab";
+/** Активні розділи уроку — лише три. Старі значення залишені для сумісності з давніми записами. */
+export type LiveSection =
+  | "board"
+  | "slides"
+  | "blocks"
+  | "grammar"
+  | "listening"
+  | "reading"
+  | "tasks"
+  | "vocab";
 
 export const LIVE_SECTIONS: { key: LiveSection; label: string; icon: string }[] = [
   { key: "board", label: "Дошка", icon: "✍️" },
-  { key: "grammar", label: "Граматика", icon: "📐" },
-  { key: "listening", label: "Слухання", icon: "🎧" },
-  { key: "reading", label: "Читання", icon: "📖" },
-  { key: "tasks", label: "Завдання", icon: "✅" },
-  { key: "vocab", label: "Словник", icon: "🗂" },
+  { key: "slides", label: "Презентація", icon: "🖼" },
+  { key: "blocks", label: "Блок-завдання", icon: "🧩" },
 ];
+
+/** Що саме показано учню в розділі «Презентація» / «Блок-завдання». */
+export type LiveView =
+  | { type: "slide"; presentation_id: string; page: number }
+  | { type: "blocks"; kit_id: string; title?: string; blocks: any[] };
+
 
 export interface LiveClass {
   id: string;
