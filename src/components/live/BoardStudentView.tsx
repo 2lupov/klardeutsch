@@ -86,10 +86,18 @@ export default function BoardStudentView({
     input.setSelectionRange(input.value.length, input.value.length);
   }, [editing]);
 
-  useLayoutEffect(() => {
+  /** Обчислює масштаб/зсув: viewBox масштабується "cover", тому центрується й обрізається. */
+  const measure = () => {
     const svg = svgRef.current;
-    if (svg) setPxW(svg.getBoundingClientRect().width || BOARD_W);
-  }, []);
+    if (!svg) return;
+    const r = svg.getBoundingClientRect();
+    if (!r.width || !r.height) return;
+    const s = Math.max(r.width / BOARD_W, r.height / BOARD_H);
+    setView({ s, dx: (r.width - BOARD_W * s) / 2, dy: (r.height - BOARD_H * s) / 2 });
+  };
+
+  useLayoutEffect(() => { measure(); }, []);
+
 
   const serverIds = useMemo(() => new Set(content.map((e) => e.id)), [content]);
   const pending = mine.filter((e) => !serverIds.has(e.id));
