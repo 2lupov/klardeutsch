@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import * as pdfjsLib from "pdfjs-dist";
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
-import { ExternalLink, FileUp, Loader2, Trash2 } from "lucide-react";
+import { ExternalLink, FileUp, Loader2, Send, Sparkles, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
@@ -16,6 +16,7 @@ import {
   type LibraryBook,
 } from "@/lib/book-library";
 import { Btn, Card, EmptyState, SectionHeader } from "./_ui";
+import BookLessonDialog from "./BookLessonDialog";
 
 (pdfjsLib as any).GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
@@ -28,6 +29,7 @@ export default function BookLibraryPage() {
   const [uploading, setUploading] = useState("");
   const [search, setSearch] = useState("");
   const [kind, setKind] = useState("all");
+  const [lessonFor, setLessonFor] = useState<{ book: LibraryBook; assign: boolean } | null>(null);
 
   const load = async () => {
     try {
@@ -202,6 +204,19 @@ export default function BookLibraryPage() {
                   {b.total_pages ? `${b.total_pages} стор.` : "—"} · {prettySize(b.size_bytes)}
                 </span>
               </div>
+              <div className="flex flex-wrap gap-2">
+                <Btn onClick={() => setLessonFor({ book: b, assign: false })}>
+                  <span className="inline-flex items-center gap-1.5">
+                    <Sparkles className="h-4 w-4" /> Створити урок із книги
+                  </span>
+                </Btn>
+                <Btn variant="ghost" onClick={() => setLessonFor({ book: b, assign: true })}>
+                  <span className="inline-flex items-center gap-1.5">
+                    <Send className="h-4 w-4" /> Дати як домашку
+                  </span>
+                </Btn>
+              </div>
+
               <div className="flex items-center justify-between">
                 <span className="rounded-full bg-admin-accent/20 px-2 py-0.5 text-[11px] font-medium text-admin-fg">
                   {kindLabel(b.kind)}
@@ -226,6 +241,15 @@ export default function BookLibraryPage() {
             </Card>
           ))}
         </div>
+      )}
+
+      {lessonFor && (
+        <BookLessonDialog
+          book={lessonFor.book}
+          ownerId={user?.id ?? ""}
+          autoAssign={lessonFor.assign}
+          onClose={() => setLessonFor(null)}
+        />
       )}
     </div>
   );
