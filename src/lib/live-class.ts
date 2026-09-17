@@ -32,9 +32,20 @@ export interface LiveClass {
   current_section: LiveSection;
   board: any[];
   book_page?: LiveBookPage | null;
+  live_view?: LiveView | null;
   started_at: string;
   ended_at: string | null;
 }
+
+/** Переносить учня на потрібний розділ і показує йому вибраний матеріал. */
+export async function setLiveView(classId: string, section: LiveSection, view: LiveView | null) {
+  const { error } = await supabase
+    .from("live_classes")
+    .update({ current_section: section, live_view: view } as any)
+    .eq("id", classId);
+  if (error) throw error;
+}
+
 
 export interface LiveItem {
   id: string;
