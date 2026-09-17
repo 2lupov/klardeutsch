@@ -12,6 +12,7 @@ import { isRichType, hasRichPayload } from "@/components/exercises/richExercises
 import ReadingTaskView from "@/components/tutoring/ReadingTaskView";
 import StudentBlocks from "@/components/blocks/StudentBlocks";
 import PandaLookupFab from "@/components/dictionary/PandaLookup";
+import PresentationView from "@/components/tutoring/PresentationView";
 
 
 
@@ -314,6 +315,12 @@ const StudentView = () => {
                     {currentExercise.explanation && <div className="text-sm mt-2 opacity-80">{currentExercise.explanation}</div>}
                   </motion.div>
                 )}
+              </div>
+            )}
+
+            {v.type === "slide" && (
+              <div className="h-[75vh]">
+                <PresentationView presentationId={v.presentationId} page={v.page} />
               </div>
             )}
 
