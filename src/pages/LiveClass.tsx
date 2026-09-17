@@ -23,6 +23,7 @@ import { fetchInteractivePage, type SceneBlock } from "@/lib/interactivePages";
 import PresentationView from "@/components/tutoring/PresentationView";
 import StudentBlocks from "@/components/blocks/StudentBlocks";
 import { kitBlocksToLessonBlocks } from "@/lib/lesson-kits";
+import { LaserSurface, useLaserReceiver } from "@/components/live/LaserPointer";
 
 
 export default function LiveClass() {
@@ -39,6 +40,7 @@ export default function LiveClass() {
   const [boardFull, setBoardFull] = useState(false);
   const [bookPageUrl, setBookPageUrl] = useState<string | null>(null);
   const boardChanRef = useRef<any>(null);
+  const laser = useLaserReceiver(id);
 
   const reportCam = (cam: BoardCam) => {
     boardChanRef.current?.send({ type: "broadcast", event: "studentcam", payload: { cam } });
@@ -264,7 +266,9 @@ export default function LiveClass() {
                 </div>
               )}
               <div className={boardFull ? "flex-1 min-h-0 p-2" : "w-full h-full"}>
-              <BoardStudentView elements={cls.board || []} className="w-full h-full" onCamChange={reportCam} onDraw={sendDraw} onErase={sendErase} />
+              <LaserSurface point={laser} className="w-full h-full">
+                <BoardStudentView elements={cls.board || []} className="w-full h-full" onCamChange={reportCam} onDraw={sendDraw} onErase={sendErase} />
+              </LaserSurface>
               </div>
             </div>
             {cls.book_page && (
@@ -286,7 +290,9 @@ export default function LiveClass() {
         ) : section === "slides" ? (
           <div className="p-4">
             {cls.live_view?.type === "slide" ? (
-              <PresentationView presentationId={cls.live_view.presentation_id} page={cls.live_view.page} />
+              <LaserSurface point={laser}>
+                <PresentationView presentationId={cls.live_view.presentation_id} page={cls.live_view.page} />
+              </LaserSurface>
             ) : (
               <p className="text-sm text-muted-foreground">Викладач ще не відкрив презентацію.</p>
             )}
@@ -294,12 +300,14 @@ export default function LiveClass() {
         ) : (
           <div className="p-4">
             {cls.live_view?.type === "blocks" ? (
-              <StudentBlocks
-                blocks={kitBlocksToLessonBlocks(cls.live_view.blocks || [], `live-${cls.live_view.kit_id}`)}
-                studentId={user?.id}
-                persist={false}
-                onSubmitted={(score, max) => toast.success(`Готово: ${score} / ${max}`)}
-              />
+              <LaserSurface point={laser}>
+                <StudentBlocks
+                  blocks={kitBlocksToLessonBlocks(cls.live_view.blocks || [], `live-${cls.live_view.kit_id}`)}
+                  studentId={user?.id}
+                  persist={false}
+                  onSubmitted={(score, max) => toast.success(`Готово: ${score} / ${max}`)}
+                />
+              </LaserSurface>
             ) : (
               <p className="text-sm text-muted-foreground">Викладач ще не відкрив блок-завдання.</p>
             )}
