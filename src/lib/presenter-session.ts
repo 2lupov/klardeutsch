@@ -7,7 +7,9 @@ export type ViewType =
   | { type: "word"; wordId: string; revealTranslation?: boolean }
   | { type: "text"; title?: string; body: string }
   | { type: "reading"; taskId: string }
+  | { type: "block"; blockId: string }
   | { type: "whiteboard" };
+
 
 export interface LiveSession {
   id: string;
