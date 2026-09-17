@@ -10,6 +10,8 @@ import LessonTheoryRenderer from "@/components/tutoring/LessonTheoryRenderer";
 import RichExercise from "@/components/exercises/RichExercise";
 import { isRichType, hasRichPayload } from "@/components/exercises/richExercises";
 import ReadingTaskView from "@/components/tutoring/ReadingTaskView";
+import StudentBlocks from "@/components/blocks/StudentBlocks";
+
 
 
 /**
@@ -198,6 +200,20 @@ const StudentView = () => {
                 />
               );
             })()}
+
+            {v.type === "block" && (() => {
+              const bl = lessonData?.blocks.find((x: any) => x.id === (v as any).blockId);
+              if (!bl) return <div className="text-muted-foreground">Блок не найден</div>;
+              return (
+                <StudentBlocks
+                  blocks={[bl]}
+                  studentId={session?.student_id || null}
+                  showActions
+                  onSubmitted={(score, max) => submitAnswer(`Блок готов: ${score}/${max}`)}
+                />
+              );
+            })()}
+
 
             {v.type === "theory" && (
               <div className="max-w-none">
