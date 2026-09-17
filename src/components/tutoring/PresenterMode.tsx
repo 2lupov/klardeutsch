@@ -5,6 +5,7 @@ import {
   ChevronLeft, ChevronRight, Sparkles, Clock, FileText, BookOpen,
   ListChecks, MessageSquare, ExternalLink, StickyNote, Trash2, Play,
   Hand, ThumbsUp, HelpCircle, Flame, MessageCircle,
+  Presentation as PresIcon, Upload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,6 +19,8 @@ import ReadingTaskView from "./ReadingTaskView";
 import StudentBlocks from "@/components/blocks/StudentBlocks";
 import { blockLabel } from "@/components/blocks/BlockRenderer";
 import type { LessonBlock } from "@/components/blocks/types";
+import PresentationView from "./PresentationView";
+import { listPresentations, uploadPresentation, type Presentation as Pres } from "@/lib/presentations";
 
 
 interface Props {
