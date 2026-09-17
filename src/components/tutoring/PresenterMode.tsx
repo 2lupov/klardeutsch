@@ -50,6 +50,15 @@ const PresenterMode = ({ lesson, words, exercises, readingTasks = [], studentNam
   const previewRef = useRef<HTMLDivElement>(null);
   const currentPath = useRef<string>("");
   const [blocks, setBlocks] = useState<LessonBlock[]>([]);
+  const [presentations, setPresentations] = useState<Pres[]>([]);
+  const [presBusy, setPresBusy] = useState<string | null>(null);
+  const presFileRef = useRef<HTMLInputElement>(null);
+
+  // Презентації викладача
+  useEffect(() => {
+    listPresentations().then(setPresentations).catch(() => {});
+  }, []);
+
 
   // Блоки урока (конструктор)
   useEffect(() => {
