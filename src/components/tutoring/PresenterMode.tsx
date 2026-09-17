@@ -1,10 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
-  Monitor, X, Copy, Crosshair, Pencil, Eraser, Eye, EyeOff,
-  ChevronLeft, ChevronRight, Sparkles, Clock, FileText, BookOpen,
-  ListChecks, MessageSquare, ExternalLink, StickyNote, Trash2, Play,
-  Hand, ThumbsUp, HelpCircle, Flame, MessageCircle,
+  Monitor, X, Copy, Crosshair, Pencil, ChevronLeft, ChevronRight, Sparkles, Clock,
+  ListChecks, MessageCircle, ExternalLink, StickyNote, Trash2, Send,
   Presentation as PresIcon, Upload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,9 +11,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { startOrResumeSession, updateSession, endSession, type LiveSession, type ViewType } from "@/lib/presenter-session";
 import TeacherAIAssistant from "./TeacherAIAssistant";
-import LessonTimeline from "./LessonTimeline";
 import SessionChat from "./SessionChat";
-import ReadingTaskView from "./ReadingTaskView";
 import StudentBlocks from "@/components/blocks/StudentBlocks";
 import { blockLabel } from "@/components/blocks/BlockRenderer";
 import type { LessonBlock } from "@/components/blocks/types";
@@ -23,20 +19,22 @@ import PresentationView from "./PresentationView";
 import { listPresentations, uploadPresentation, type Presentation as Pres } from "@/lib/presentations";
 import { PandaLookupDialog } from "@/components/dictionary/PandaLookup";
 
-
 interface Props {
   lesson: any;
-  words: any[];
-  exercises: any[];
+  words?: any[];
+  exercises?: any[];
   readingTasks?: any[];
   studentName: string;
   studentProfile: any;
   onClose: () => void;
 }
 
-const PresenterMode = ({ lesson, words, exercises, readingTasks = [], studentName, studentProfile, onClose }: Props) => {
+type Tab = "board" | "slides" | "blocks";
+
+const PresenterMode = ({ lesson, exercises = [], studentName, studentProfile, onClose }: Props) => {
   const [session, setSession] = useState<LiveSession | null>(null);
-  const [view, setView] = useState<ViewType>({ type: "welcome" });
+  const [view, setView] = useState<ViewType>({ type: "whiteboard" });
+  const [tab, setTab] = useState<Tab>("board");
   const [highlightOn, setHighlightOn] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
   const [notes, setNotes] = useState("");
@@ -44,9 +42,6 @@ const PresenterMode = ({ lesson, words, exercises, readingTasks = [], studentNam
   const [strokes, setStrokes] = useState<any[]>([]);
   const [drawing, setDrawing] = useState(false);
   const [studentWindow, setStudentWindow] = useState<Window | null>(null);
-  const [liveTextOpen, setLiveTextOpen] = useState(false);
-  const [liveTitle, setLiveTitle] = useState("");
-  const [liveBody, setLiveBody] = useState("");
   const startedAt = useRef(Date.now());
   const previewRef = useRef<HTMLDivElement>(null);
   const currentPath = useRef<string>("");
@@ -56,13 +51,15 @@ const PresenterMode = ({ lesson, words, exercises, readingTasks = [], studentNam
   const presFileRef = useRef<HTMLInputElement>(null);
   const [dictOpen, setDictOpen] = useState(false);
 
-  // Презентації викладача
+  // Локальний вибір викладача (учень бачить лише після «Перенести учня сюди»)
+  const [presId, setPresId] = useState<string | null>(null);
+  const [presPage, setPresPage] = useState(1);
+  const [blockId, setBlockId] = useState<string | null>(null);
+
   useEffect(() => {
     listPresentations().then(setPresentations).catch(() => {});
   }, []);
 
-
-  // Блоки урока (конструктор)
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -80,24 +77,24 @@ const PresenterMode = ({ lesson, words, exercises, readingTasks = [], studentNam
   // Init session
   useEffect(() => {
     (async () => {
-
       try {
         const s = await startOrResumeSession({
           id: lesson.id, teacher_id: lesson.teacher_id, student_id: lesson.student_id,
         });
         setSession(s);
-        setView(s.current_view || { type: "welcome" });
+        const cv = (s.current_view as any) || { type: "whiteboard" };
+        setView(cv);
         setStrokes(s.whiteboard || []);
+        if (cv.type === "slide") { setTab("slides"); setPresId(cv.presentationId); setPresPage(cv.page || 1); }
+        else if (cv.type === "block") { setTab("blocks"); setBlockId(cv.blockId); }
       } catch (e: any) {
-        toast.error("Не удалось открыть сессию: " + e.message);
+        toast.error("Не вдалося відкрити сесію: " + e.message);
       }
     })();
-    // Load saved notes from localStorage
     const saved = localStorage.getItem(`presenter-notes-${lesson.id}`);
     if (saved) setNotes(saved);
   }, [lesson.id]);
 
-  // Realtime: live student response + reaction
   useEffect(() => {
     if (!session?.id) return;
     const ch = supabase
@@ -111,18 +108,15 @@ const PresenterMode = ({ lesson, words, exercises, readingTasks = [], studentNam
     return () => { supabase.removeChannel(ch); };
   }, [session?.id]);
 
-  // Timer
   useEffect(() => {
     const t = setInterval(() => setElapsed(Math.floor((Date.now() - startedAt.current) / 1000)), 1000);
     return () => clearInterval(t);
   }, []);
 
-  // Save notes locally
   useEffect(() => {
     if (notes) localStorage.setItem(`presenter-notes-${lesson.id}`, notes);
   }, [notes, lesson.id]);
 
-  // Push view changes
   const pushView = async (v: ViewType) => {
     setView(v);
     if (session) await updateSession(session.id, { current_view: v });
@@ -132,14 +126,37 @@ const PresenterMode = ({ lesson, words, exercises, readingTasks = [], studentNam
     if (session) await updateSession(session.id, { highlight: { x, y, visible, label } as any });
   };
 
-  // Презентації: показати слайд / перегорнути / завантажити новий PDF
-  const slideView = view.type === "slide" ? (view as any) : null;
-  const activePres = slideView ? presentations.find((p) => p.id === slideView.presentationId) : null;
+  const activePres = presentations.find((p) => p.id === presId) || null;
+  const activeBlock = blocks.find((b) => b.id === blockId) || null;
+
+  // Чи учень уже дивиться те саме
+  const studentHere =
+    (tab === "board" && view.type === "whiteboard") ||
+    (tab === "slides" && view.type === "slide" && (view as any).presentationId === presId) ||
+    (tab === "blocks" && view.type === "block" && (view as any).blockId === blockId);
+
+  const moveStudentHere = async () => {
+    if (tab === "board") { await pushView({ type: "whiteboard" }); toast.success("Учень на дошці"); return; }
+    if (tab === "slides") {
+      if (!activePres) { toast.error("Виберіть презентацію"); return; }
+      await pushView({ type: "slide", presentationId: activePres.id, page: presPage });
+      toast.success("Учень бачить презентацію 📊");
+      return;
+    }
+    if (!activeBlock) { toast.error("Виберіть блок-завдання"); return; }
+    await pushView({ type: "block", blockId: activeBlock.id });
+    toast.success("Учень бачить блок-завдання ✍️");
+  };
 
   const stepSlide = (delta: number) => {
-    if (!slideView || !activePres) return;
-    const next = Math.min(Math.max(1, slideView.page + delta), activePres.page_count || 1);
-    if (next !== slideView.page) pushView({ type: "slide", presentationId: activePres.id, page: next });
+    if (!activePres) return;
+    const next = Math.min(Math.max(1, presPage + delta), activePres.page_count || 1);
+    if (next === presPage) return;
+    setPresPage(next);
+    // якщо учень уже на цій презентації — гортаємо і в нього
+    if (view.type === "slide" && (view as any).presentationId === activePres.id) {
+      pushView({ type: "slide", presentationId: activePres.id, page: next });
+    }
   };
 
   const uploadPres = async (files: FileList | null) => {
@@ -151,14 +168,12 @@ const PresenterMode = ({ lesson, words, exercises, readingTasks = [], studentNam
     }
     try {
       setPresBusy("Готуємо слайди…");
-      const p = await uploadPresentation({
-        ownerId: lesson.teacher_id,
-        file,
-        onProgress: (t) => setPresBusy(t),
-      });
+      const p = await uploadPresentation({ ownerId: lesson.teacher_id, file, onProgress: (t) => setPresBusy(t) });
       setPresentations((prev) => [p, ...prev]);
-      toast.success("Презентацію додано 🐼");
-      pushView({ type: "slide", presentationId: p.id, page: 1 });
+      setPresId(p.id);
+      setPresPage(1);
+      setTab("slides");
+      toast.success("Презентацію додано 🐼 Тепер «Перенести учня сюди»");
     } catch (e: any) {
       toast.error(e.message);
     } finally {
@@ -166,18 +181,16 @@ const PresenterMode = ({ lesson, words, exercises, readingTasks = [], studentNam
     }
   };
 
-  // Open student window
   const openStudentWindow = () => {
     if (!session) return;
     const url = `${window.location.origin}/student-view/${session.id}`;
-    const w = window.open(url, `student-view-${session.id}`, "width=1280,height=800");
-    setStudentWindow(w);
+    setStudentWindow(window.open(url, `student-view-${session.id}`, "width=1280,height=800"));
   };
 
   const copyStudentLink = () => {
     if (!session) return;
     navigator.clipboard.writeText(`${window.location.origin}/student-view/${session.id}`);
-    toast.success("Ссылка скопирована — отправьте ученику");
+    toast.success("Посилання скопійовано — надішліть учню");
   };
 
   const closePresenter = async () => {
@@ -186,28 +199,27 @@ const PresenterMode = ({ lesson, words, exercises, readingTasks = [], studentNam
     onClose();
   };
 
-  // Highlight handler on preview area
   const handlePreviewMove = (e: React.MouseEvent) => {
     if (!highlightOn || !previewRef.current) return;
     const r = previewRef.current.getBoundingClientRect();
-    const x = ((e.clientX - r.left) / r.width) * 100;
-    const y = ((e.clientY - r.top) / r.height) * 100;
-    pushHighlight(x, y, true);
+    pushHighlight(((e.clientX - r.left) / r.width) * 100, ((e.clientY - r.top) / r.height) * 100, true);
   };
   const handlePreviewLeave = () => { if (highlightOn) pushHighlight(0, 0, false); };
 
-  // Whiteboard drawing (only when view = whiteboard)
+  // Дошка
+  const svgPoint = (e: React.PointerEvent<SVGSVGElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    return { x: ((e.clientX - r.left) / r.width) * 1600, y: ((e.clientY - r.top) / r.height) * 1000 };
+  };
   const wbStart = (e: React.PointerEvent<SVGSVGElement>) => {
-    if (view.type !== "whiteboard") return;
     setDrawing(true);
     const { x, y } = svgPoint(e);
     currentPath.current = `M ${x} ${y}`;
   };
   const wbMove = (e: React.PointerEvent<SVGSVGElement>) => {
-    if (!drawing || view.type !== "whiteboard") return;
+    if (!drawing) return;
     const { x, y } = svgPoint(e);
     currentPath.current += ` L ${x} ${y}`;
-    // local immediate
     setStrokes((prev) => {
       const last = prev[prev.length - 1];
       if (last?.tmp) return [...prev.slice(0, -1), { ...last, d: currentPath.current }];
@@ -217,7 +229,7 @@ const PresenterMode = ({ lesson, words, exercises, readingTasks = [], studentNam
   const wbEnd = async () => {
     if (!drawing) return;
     setDrawing(false);
-    const newStrokes = strokes.map((s) => s.tmp ? { ...s, tmp: false } : s);
+    const newStrokes = strokes.map((s) => (s.tmp ? { ...s, tmp: false } : s));
     setStrokes(newStrokes);
     if (session) await updateSession(session.id, { whiteboard: newStrokes as any });
   };
@@ -225,13 +237,14 @@ const PresenterMode = ({ lesson, words, exercises, readingTasks = [], studentNam
     setStrokes([]);
     if (session) await updateSession(session.id, { whiteboard: [] as any });
   };
-  const svgPoint = (e: React.PointerEvent<SVGSVGElement>) => {
-    const svg = e.currentTarget;
-    const r = svg.getBoundingClientRect();
-    return { x: ((e.clientX - r.left) / r.width) * 1600, y: ((e.clientY - r.top) / r.height) * 1000 };
-  };
 
   const fmtTime = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, "0")}`;
+
+  const TABS: { key: Tab; label: string; icon: any }[] = [
+    { key: "board", label: "Дошка", icon: Pencil },
+    { key: "slides", label: "Презентація", icon: PresIcon },
+    { key: "blocks", label: "Блок-завдання", icon: ListChecks },
+  ];
 
   return (
     <motion.div
@@ -245,7 +258,7 @@ const PresenterMode = ({ lesson, words, exercises, readingTasks = [], studentNam
             <Monitor className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <div className="font-display font-black text-base leading-none">Presenter Mode</div>
+            <div className="font-display font-black text-base leading-none">Живий урок</div>
             <div className="text-xs text-muted-foreground mt-0.5">{lesson.title} • {studentName}</div>
           </div>
           <div className="ml-4 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-500/10 text-red-600 text-xs font-bold">
@@ -256,227 +269,141 @@ const PresenterMode = ({ lesson, words, exercises, readingTasks = [], studentNam
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button size="sm" variant="outline" onClick={() => setDictOpen(true)} className="gap-1.5">
-            🐼 Словник
-          </Button>
+          <Button size="sm" variant="outline" onClick={() => setDictOpen(true)} className="gap-1.5">🐼 Словник</Button>
           <Button size="sm" variant="outline" onClick={copyStudentLink} className="gap-1.5">
-            <Copy className="w-3.5 h-3.5" /> Ссылка
+            <Copy className="w-3.5 h-3.5" /> Посилання
           </Button>
           <Button size="sm" variant="outline" onClick={openStudentWindow} className="gap-1.5">
-            <ExternalLink className="w-3.5 h-3.5" /> Окно ученика
+            <ExternalLink className="w-3.5 h-3.5" /> Вікно учня
           </Button>
           <Button size="sm" variant="ghost" onClick={closePresenter} className="gap-1.5 text-destructive">
-            <X className="w-4 h-4" /> Завершить
+            <X className="w-4 h-4" /> Завершити
           </Button>
         </div>
       </div>
 
-      {/* Timeline strip */}
-      <div className="px-4 pt-2 pb-1 border-b border-border bg-card/60">
-        <LessonTimeline view={view} words={words} exercises={exercises} interactive onJump={pushView} />
+      {/* Tabs */}
+      <div className="flex items-center gap-2 px-4 py-2 border-b border-border bg-card/60">
+        {TABS.map(({ key, label, icon: Icon }) => (
+          <button
+            key={key}
+            onClick={() => setTab(key)}
+            className={`px-3.5 py-2 rounded-xl text-sm font-bold flex items-center gap-1.5 transition ${
+              tab === key ? "bg-primary text-primary-foreground" : "bg-muted/60 hover:bg-muted text-foreground"
+            }`}
+          >
+            <Icon className="w-4 h-4" /> {label}
+          </button>
+        ))}
+        <div className="ml-auto flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">
+            Учень зараз: <strong>{view.type === "whiteboard" ? "Дошка" : view.type === "slide" ? "Презентація" : view.type === "block" ? "Блок-завдання" : "Очікує"}</strong>
+          </span>
+          <Button size="sm" onClick={moveStudentHere} disabled={studentHere} className="gap-1.5">
+            <Send className="w-3.5 h-3.5" /> {studentHere ? "Учень уже тут" : "Перенести учня сюди"}
+          </Button>
+        </div>
       </div>
 
-      {/* Body: 3 panels */}
+      {/* Body */}
       <div className="flex-1 grid grid-cols-12 gap-3 p-3 overflow-hidden">
-
-        {/* LEFT: navigation of content */}
+        {/* LEFT: content of active tab */}
         <div className="col-span-3 flex flex-col gap-3 overflow-hidden">
-          <PanelCard title="Что показать" icon={<ListChecks className="w-4 h-4" />}>
-            <div className="space-y-1">
-              <NavBtn active={view.type === "welcome"} onClick={() => pushView({ type: "welcome" })}>
-                👋 Приветствие
-              </NavBtn>
-              <NavBtn active={view.type === "theory"} onClick={() => pushView({ type: "theory" })}>
-                <FileText className="w-3.5 h-3.5" /> Теория
-              </NavBtn>
-              <NavBtn active={view.type === "whiteboard"} onClick={() => pushView({ type: "whiteboard" })}>
-                <Pencil className="w-3.5 h-3.5" /> Доска
-              </NavBtn>
-              <NavBtn active={view.type === "text"} onClick={() => setLiveTextOpen((v) => !v)}>
-                <MessageSquare className="w-3.5 h-3.5" /> Свой текст
-              </NavBtn>
-            </div>
-            {liveTextOpen && (
-              <div className="mt-2 space-y-2 border-t border-border pt-2">
-                <input
-                  value={liveTitle}
-                  onChange={(e) => setLiveTitle(e.target.value)}
-                  placeholder="Заголовок (опц.)"
-                  className="w-full text-xs px-2 py-1.5 rounded-md border border-input bg-background"
-                />
-                <Textarea
-                  value={liveBody}
-                  onChange={(e) => setLiveBody(e.target.value)}
-                  placeholder="Напишите текст, пример, объяснение… Ученик увидит сразу."
-                  className="text-sm min-h-[100px] resize-none bg-background"
-                />
-                <div className="flex gap-1.5">
-                  <Button size="sm" className="flex-1 h-7 text-xs gap-1" onClick={() => {
-                    if (!liveBody.trim()) { toast.error("Пусто"); return; }
-                    pushView({ type: "text", title: liveTitle.trim() || undefined, body: liveBody });
-                  }}>
-                    <Play className="w-3 h-3" /> Показать
+          {tab === "board" && (
+            <PanelCard title="Дошка" icon={<Pencil className="w-4 h-4" />}>
+              <p className="text-xs text-muted-foreground p-1">
+                Малюйте прямо у вікні праворуч — учень бачить те саме одразу.
+              </p>
+              <Button size="sm" variant="outline" className="w-full mt-2 gap-1.5" onClick={clearWB}>
+                <Trash2 className="w-3.5 h-3.5" /> Очистити дошку
+              </Button>
+            </PanelCard>
+          )}
+
+          {tab === "slides" && (
+            <PanelCard
+              title={`Презентації (${presentations.length})`}
+              icon={<PresIcon className="w-4 h-4" />}
+              actions={
+                <>
+                  <input ref={presFileRef} type="file" accept="application/pdf" className="hidden"
+                    onChange={(e) => uploadPres(e.target.files)} />
+                  <Button size="sm" variant="outline" className="h-7 gap-1.5 text-xs" disabled={!!presBusy}
+                    onClick={() => presFileRef.current?.click()}>
+                    <Upload className="w-3.5 h-3.5" /> PDF
                   </Button>
-                  <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => { setLiveTitle(""); setLiveBody(""); }}>
-                    Очистить
-                  </Button>
-                </div>
-                <p className="text-[10px] text-muted-foreground">💡 Можно править на лету — каждое изменение шлите кнопкой «Показать».</p>
-              </div>
-            )}
-          </PanelCard>
-
-          <PanelCard title={`Слова (${words.length})`} icon={<BookOpen className="w-4 h-4" />} scroll>
-            <div className="space-y-1">
-              {words.map((w) => {
-                const active = view.type === "word" && view.wordId === w.id;
-                return (
-                  <div key={w.id} className={`group rounded-lg border ${active ? "border-primary bg-primary/5" : "border-border bg-card hover:border-primary/40"} px-2.5 py-2 text-sm`}>
-                    <button className="w-full text-left" onClick={() => pushView({ type: "word", wordId: w.id, revealTranslation: false })}>
-                      <span className="font-bold">{w.german}</span>
-                      <span className="text-muted-foreground text-xs ml-2">{w.russian}</span>
-                    </button>
-                    {active && (
-                      <Button size="sm" variant="ghost" className="h-6 px-2 mt-1 text-xs gap-1"
-                        onClick={() => pushView({ type: "word", wordId: w.id, revealTranslation: !(view as any).revealTranslation })}>
-                        {(view as any).revealTranslation ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                        {(view as any).revealTranslation ? "Скрыть перевод" : "Показать перевод"}
-                      </Button>
-                    )}
-                  </div>
-                );
-              })}
-              {words.length === 0 && <div className="text-xs text-muted-foreground p-2">Нет слов</div>}
-            </div>
-          </PanelCard>
-
-          <PanelCard title={`Упражнения (${exercises.length})`} icon={<ListChecks className="w-4 h-4" />} scroll>
-            <div className="space-y-1">
-              {exercises.map((ex, i) => {
-                const active = view.type === "exercise" && view.exerciseId === ex.id;
-                return (
-                  <div key={ex.id} className={`rounded-lg border ${active ? "border-primary bg-primary/5" : "border-border bg-card hover:border-primary/40"} px-2.5 py-2 text-sm`}>
-                    <button className="w-full text-left" onClick={() => pushView({ type: "exercise", exerciseId: ex.id, revealAnswer: false })}>
-                      <span className="text-xs text-muted-foreground">#{i + 1}</span> {ex.question || ex.prompt}
-                    </button>
-                    {active && (
-                      <Button size="sm" variant="ghost" className="h-6 px-2 mt-1 text-xs gap-1"
-                        onClick={() => pushView({ type: "exercise", exerciseId: ex.id, revealAnswer: !(view as any).revealAnswer })}>
-                        {(view as any).revealAnswer ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                        {(view as any).revealAnswer ? "Скрыть ответ" : "Показать ответ"}
-                      </Button>
-                    )}
-                  </div>
-                );
-              })}
-              {exercises.length === 0 && <div className="text-xs text-muted-foreground p-2">Нет упражнений</div>}
-            </div>
-          </PanelCard>
-
-          <PanelCard title={`Чтение / грамматика (${readingTasks.length})`} icon={<BookOpen className="w-4 h-4" />} scroll>
-            <div className="space-y-1">
-              {readingTasks.map((rt) => {
-                const active = view.type === "reading" && (view as any).taskId === rt.id;
-                return (
-                  <button
-                    key={rt.id}
-                    onClick={() => pushView({ type: "reading", taskId: rt.id })}
-                    className={`w-full text-left rounded-lg border ${active ? "border-primary bg-primary/5" : "border-border bg-card hover:border-primary/40"} px-2.5 py-2 text-sm`}
-                  >
-                    <span className="text-xs text-muted-foreground">{rt.kind === "grammar" ? "✍️" : "📖"}</span> {rt.title}
-                  </button>
-                );
-              })}
-              {readingTasks.length === 0 && <div className="text-xs text-muted-foreground p-2">Нет заданий с фото</div>}
-            </div>
-          </PanelCard>
-
-          <PanelCard title={`Блоки урока (${blocks.length})`} icon={<ListChecks className="w-4 h-4" />} scroll>
-            <div className="space-y-1">
-              {blocks.map((b) => {
-                const active = view.type === "block" && (view as any).blockId === b.id;
-                return (
-                  <button
-                    key={b.id}
-                    onClick={() => pushView({ type: "block", blockId: b.id })}
-                    className={`w-full text-left rounded-lg border ${active ? "border-primary bg-primary/5" : "border-border bg-card hover:border-primary/40"} px-2.5 py-2 text-sm`}
-                  >
-                    {blockLabel(b)}
-                  </button>
-                );
-              })}
-              {blocks.length === 0 && <div className="text-xs text-muted-foreground p-2">Нет блоков</div>}
-            </div>
-          </PanelCard>
-
-          <PanelCard
-            title={`Презентації (${presentations.length})`}
-            icon={<PresIcon className="w-4 h-4" />}
-            actions={
-              <>
-                <input ref={presFileRef} type="file" accept="application/pdf" className="hidden"
-                  onChange={(e) => uploadPres(e.target.files)} />
-                <Button size="sm" variant="outline" className="h-7 gap-1.5 text-xs" disabled={!!presBusy}
-                  onClick={() => presFileRef.current?.click()}>
-                  <Upload className="w-3.5 h-3.5" /> PDF
-                </Button>
-              </>
-            }
-            scroll
-          >
-            {presBusy && <div className="text-xs text-primary font-bold px-2 pb-1">{presBusy}</div>}
-            <div className="space-y-1">
-              {presentations.map((p) => {
-                const active = slideView?.presentationId === p.id;
-                return (
+                </>
+              }
+              grow scroll
+            >
+              {presBusy && <div className="text-xs text-primary font-bold px-2 pb-1">{presBusy}</div>}
+              <div className="space-y-1">
+                {presentations.map((p) => (
                   <button
                     key={p.id}
-                    onClick={() => pushView({ type: "slide", presentationId: p.id, page: 1 })}
-                    className={`w-full text-left rounded-lg border ${active ? "border-primary bg-primary/5" : "border-border bg-card hover:border-primary/40"} px-2.5 py-2 text-sm`}
+                    onClick={() => { setPresId(p.id); setPresPage(1); }}
+                    className={`w-full text-left rounded-lg border px-2.5 py-2 text-sm ${
+                      presId === p.id ? "border-primary bg-primary/5" : "border-border bg-card hover:border-primary/40"
+                    }`}
                   >
                     📊 {p.title}
                     <span className="text-xs text-muted-foreground ml-1.5">{p.page_count} сл.</span>
                   </button>
-                );
-              })}
-              {presentations.length === 0 && (
-                <div className="text-xs text-muted-foreground p-2">
-                  Немає презентацій. Додайте PDF кнопкою вище або в розділі «Презентації».
-                </div>
-              )}
-            </div>
-          </PanelCard>
+                ))}
+                {presentations.length === 0 && (
+                  <div className="text-xs text-muted-foreground p-2">
+                    Немає презентацій. Додайте PDF кнопкою вище або в розділі «Презентації».
+                  </div>
+                )}
+              </div>
+            </PanelCard>
+          )}
 
-
+          {tab === "blocks" && (
+            <PanelCard title={`Блок-завдання (${blocks.length})`} icon={<ListChecks className="w-4 h-4" />} grow scroll>
+              <div className="space-y-1">
+                {blocks.map((b) => (
+                  <button
+                    key={b.id}
+                    onClick={() => setBlockId(b.id)}
+                    className={`w-full text-left rounded-lg border px-2.5 py-2 text-sm ${
+                      blockId === b.id ? "border-primary bg-primary/5" : "border-border bg-card hover:border-primary/40"
+                    }`}
+                  >
+                    {blockLabel(b)}
+                  </button>
+                ))}
+                {blocks.length === 0 && (
+                  <div className="text-xs text-muted-foreground p-2">
+                    Немає блоків. Додайте їх у вкладці «Блоки» уроку або з бібліотеки уроків.
+                  </div>
+                )}
+              </div>
+            </PanelCard>
+          )}
         </div>
 
-        {/* CENTER: preview = что видит ученик */}
+        {/* CENTER */}
         <div className="col-span-6 flex flex-col gap-3 overflow-hidden">
           <PanelCard
-            title="То, что видит ученик"
+            title={tab === "board" ? "Дошка" : tab === "slides" ? "Презентація" : "Блок-завдання"}
             icon={<Monitor className="w-4 h-4" />}
             actions={
               <div className="flex items-center gap-1.5">
-                <Button size="sm" variant={highlightOn ? "default" : "outline"} className="h-7 gap-1.5" onClick={() => { setHighlightOn((v) => !v); if (highlightOn) pushHighlight(0, 0, false); }}>
-                  <Crosshair className="w-3.5 h-3.5" /> Лазерна указка
+                <Button size="sm" variant={highlightOn ? "default" : "outline"} className="h-7 gap-1.5"
+                  onClick={() => { setHighlightOn((v) => !v); if (highlightOn) pushHighlight(0, 0, false); }}>
+                  <Crosshair className="w-3.5 h-3.5" /> Указка
                 </Button>
-                {slideView && activePres && (
+                {tab === "slides" && activePres && (
                   <div className="flex items-center gap-1">
                     <Button size="sm" variant="outline" className="h-7 px-2" onClick={() => stepSlide(-1)}>
                       <ChevronLeft className="w-3.5 h-3.5" />
                     </Button>
-                    <span className="text-xs font-bold text-muted-foreground">
-                      {slideView.page} / {activePres.page_count}
-                    </span>
+                    <span className="text-xs font-bold text-muted-foreground">{presPage} / {activePres.page_count}</span>
                     <Button size="sm" variant="outline" className="h-7 px-2" onClick={() => stepSlide(1)}>
                       <ChevronRight className="w-3.5 h-3.5" />
                     </Button>
                   </div>
-                )}
-                {view.type === "whiteboard" && (
-                  <Button size="sm" variant="outline" className="h-7 gap-1.5" onClick={clearWB}>
-                    <Trash2 className="w-3.5 h-3.5" /> Очистить
-                  </Button>
                 )}
               </div>
             }
@@ -488,59 +415,63 @@ const PresenterMode = ({ lesson, words, exercises, readingTasks = [], studentNam
               onMouseLeave={handlePreviewLeave}
               className={`w-full h-full rounded-xl bg-background border-2 border-dashed border-border relative overflow-auto ${highlightOn ? "cursor-crosshair" : ""}`}
             >
-              <PreviewContent view={view} words={words} exercises={exercises} readingTasks={readingTasks} blocks={blocks} theory={lesson.theory || ""}
-                strokes={strokes} drawing={drawing}
-                onWBStart={wbStart} onWBMove={wbMove} onWBEnd={wbEnd}
-              />
+              {tab === "board" && (
+                <svg viewBox="0 0 1600 1000" className="w-full h-full bg-background touch-none"
+                  onPointerDown={wbStart} onPointerMove={wbMove} onPointerUp={wbEnd} onPointerLeave={wbEnd}>
+                  {strokes.map((s: any, i: number) => s.type === "path" && (
+                    <path key={i} d={s.d} stroke={s.color || "hsl(var(--primary))"} strokeWidth={s.width || 4}
+                      fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                  ))}
+                </svg>
+              )}
+              {tab === "slides" && (activePres
+                ? <PresentationView presentationId={activePres.id} page={presPage} compact />
+                : <EmptyHint text="Виберіть презентацію або додайте PDF" />)}
+              {tab === "blocks" && (activeBlock
+                ? <div className="p-4"><StudentBlocks blocks={[activeBlock]} persist={false} showActions /></div>
+                : <EmptyHint text="Виберіть блок-завдання" />)}
             </div>
           </PanelCard>
         </div>
 
-        {/* RIGHT: AI + notes + student */}
+        {/* RIGHT */}
         <div className="col-span-3 flex flex-col gap-3 overflow-hidden">
-          <PanelCard title="Профиль ученика" icon={<Sparkles className="w-4 h-4" />}>
+          <PanelCard title="Профіль учня" icon={<Sparkles className="w-4 h-4" />}>
             <div className="text-xs space-y-1">
               <div><strong>{studentProfile?.display_name || studentName}</strong></div>
-              <div className="text-muted-foreground">Уровень: <strong>{studentProfile?.recommended_level || "A1"}</strong></div>
-              {studentProfile?.age && <div className="text-muted-foreground">Возраст: <strong>{studentProfile.age} л.</strong></div>}
-              {studentProfile?.is_kid && <div className="px-2 py-0.5 rounded bg-yellow-500/10 text-yellow-700 inline-block text-[10px] font-bold">🧒 Kid Mode</div>}
+              <div className="text-muted-foreground">Рівень: <strong>{studentProfile?.recommended_level || "A1"}</strong></div>
             </div>
           </PanelCard>
 
           <LiveFeedbackPanel session={session} exercises={exercises} />
 
-          <PanelCard title="Чат с учеником" icon={<MessageCircle className="w-4 h-4" />}>
+          <PanelCard title="Чат з учнем" icon={<MessageCircle className="w-4 h-4" />}>
             <SessionChat sessionId={session?.id} role="teacher" compact />
           </PanelCard>
 
-          <PanelCard title="Заметки (приватно)" icon={<StickyNote className="w-4 h-4" />} grow>
+          <PanelCard title="Замітки (приватно)" icon={<StickyNote className="w-4 h-4" />} grow>
             <Textarea value={notes} onChange={(e) => setNotes(e.target.value)}
-              placeholder="План урока, что спросить, домашка…"
-              className="resize-none h-full min-h-[120px] text-sm bg-background" />
+              placeholder="План уроку, що спитати, домашка…"
+              className="resize-none h-full min-h-[100px] text-sm bg-background" />
           </PanelCard>
 
           <Button onClick={() => setAiOpen(true)} className="gap-2 w-full">
-            <Sparkles className="w-4 h-4" /> AI-ассистент
+            <Sparkles className="w-4 h-4" /> AI-асистент
           </Button>
-
         </div>
       </div>
 
-      {/* AI dialog */}
       {aiOpen && (
-        <TeacherAIAssistant
-          open={aiOpen}
-          onOpenChange={setAiOpen}
-          studentId={lesson.student_id}
-          studentName={studentName}
-        />
+        <TeacherAIAssistant open={aiOpen} onOpenChange={setAiOpen} studentId={lesson.student_id} studentName={studentName} />
       )}
-
-      {/* Панда-словник учителя — открывается поверх урока */}
       <PandaLookupDialog open={dictOpen} onOpenChange={setDictOpen} />
     </motion.div>
   );
 };
+
+const EmptyHint = ({ text }: { text: string }) => (
+  <div className="h-full flex items-center justify-center text-sm text-muted-foreground p-6 text-center">{text}</div>
+);
 
 const PanelCard = ({ title, icon, children, actions, scroll, grow }: any) => (
   <div className={`rounded-2xl bg-card border border-border flex flex-col overflow-hidden ${grow ? "flex-1" : ""}`}>
@@ -550,134 +481,28 @@ const PanelCard = ({ title, icon, children, actions, scroll, grow }: any) => (
       </div>
       {actions}
     </div>
-    <div className={`p-2 ${scroll || grow ? "overflow-auto" : ""} ${grow ? "flex-1" : ""}`}>
-      {children}
-    </div>
+    <div className={`p-2 ${scroll || grow ? "overflow-auto" : ""} ${grow ? "flex-1" : ""}`}>{children}</div>
   </div>
 );
 
-const NavBtn = ({ active, onClick, children }: any) => (
-  <button onClick={onClick}
-    className={`w-full text-left px-2.5 py-2 rounded-lg text-sm flex items-center gap-1.5 transition ${active ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}>
-    {children}
-  </button>
-);
-
-const PreviewContent = ({ view, words, exercises, readingTasks, blocks, theory, strokes, onWBStart, onWBMove, onWBEnd }: any) => {
-  if (view.type === "welcome") {
-    return <div className="h-full flex items-center justify-center text-center p-8 text-muted-foreground">
-      <div><Sparkles className="w-10 h-10 mx-auto mb-3 text-primary" /><div className="font-display font-bold text-lg">Готовы начать?</div></div>
-    </div>;
-  }
-  if (view.type === "theory") return <div className="p-6 whitespace-pre-wrap text-base">{theory || "Теория не задана"}</div>;
-  if (view.type === "word") {
-    const w = words.find((x: any) => x.id === view.wordId);
-    if (!w) return <div className="p-4 text-muted-foreground">Слово не найдено</div>;
-    const ac = w.article === "der" ? "text-blue-500" : w.article === "die" ? "text-pink-500" : "text-green-500";
-    return <div className="h-full flex flex-col items-center justify-center text-center p-6 gap-4">
-      {w.article && <div className={`text-xl font-bold ${ac}`}>{w.article}</div>}
-      <div className="text-4xl font-display font-black">{w.german}</div>
-      {view.revealTranslation && <div className="text-2xl text-muted-foreground">{w.russian}</div>}
-    </div>;
-  }
-  if (view.type === "exercise") {
-    const ex = exercises.find((x: any) => x.id === view.exerciseId);
-    if (!ex) return <div className="p-4 text-muted-foreground">Упражнение не найдено</div>;
-    return <div className="p-6 space-y-4">
-      <div className="text-xs font-bold text-primary uppercase">Упражнение</div>
-      <h3 className="text-xl font-bold">{ex.question || ex.prompt}</h3>
-      {Array.isArray(ex.options) && ex.options.map((o: string, i: number) => (
-        <div key={i} className="px-4 py-2 rounded-lg border border-border">{String.fromCharCode(65 + i)}. {o}</div>
-      ))}
-      {view.revealAnswer && ex.correct_answer && (
-        <div className="px-4 py-2 rounded-lg bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/30">✓ {ex.correct_answer}</div>
-      )}
-    </div>;
-  }
-  if (view.type === "reading") {
-    const rt = (readingTasks || []).find((x: any) => x.id === view.taskId);
-    if (!rt) return <div className="p-4 text-muted-foreground">Задание не найдено</div>;
-    return <div className="p-4"><ReadingTaskView task={rt} canAnswer showPhotos persist={false} /></div>;
-  }
-  if (view.type === "slide") {
-    return <PresentationView presentationId={view.presentationId} page={view.page} compact />;
-  }
-  if (view.type === "block") {
-    const bl = (blocks || []).find((x: any) => x.id === view.blockId);
-    if (!bl) return <div className="p-4 text-muted-foreground">Блок не найден</div>;
-    return <div className="p-4"><StudentBlocks blocks={[bl]} persist={false} showActions /></div>;
-  }
-
-  if (view.type === "whiteboard") {
-    return (
-      <svg viewBox="0 0 1600 1000" className="w-full h-full bg-background touch-none"
-        onPointerDown={onWBStart} onPointerMove={onWBMove} onPointerUp={onWBEnd} onPointerLeave={onWBEnd}>
-        {strokes.map((s: any, i: number) => s.type === "path" && (
-          <path key={i} d={s.d} stroke={s.color || "hsl(var(--primary))"} strokeWidth={s.width || 4} fill="none" strokeLinecap="round" strokeLinejoin="round" />
-        ))}
-      </svg>
-    );
-  }
-  return null;
-};
-
-const REACTION_META: Record<string, { Icon: any; label: string; color: string }> = {
-  hand: { Icon: Hand, label: "Поднял руку", color: "bg-yellow-500/15 text-yellow-700 dark:text-yellow-300 border-yellow-500/40" },
-  thumbs_up: { Icon: ThumbsUp, label: "Всё понятно", color: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/40" },
-  confused: { Icon: HelpCircle, label: "Не понял", color: "bg-orange-500/15 text-orange-700 dark:text-orange-300 border-orange-500/40" },
-  fire: { Icon: Flame, label: "Огонь", color: "bg-pink-500/15 text-pink-700 dark:text-pink-300 border-pink-500/40" },
-};
-
 const LiveFeedbackPanel = ({ session, exercises }: { session: any; exercises: any[] }) => {
-  const reaction = session?.student_reaction as { type: string; at: string } | null;
   const response = session?.student_response as { view?: any; answer?: string; at?: string } | null;
   const exId = response?.view?.exerciseId;
   const ex = exId ? exercises.find((e) => e.id === exId) : null;
-  const isCorrect =
-    ex && response?.answer && ex.correct_answer
-      ? String(response.answer).trim().toLowerCase() === String(ex.correct_answer).trim().toLowerCase()
-      : null;
-
-  const reactionFresh =
-    reaction?.at && Date.now() - new Date(reaction.at).getTime() < 30_000;
-  const meta = reaction && REACTION_META[reaction.type];
 
   return (
-    <PanelCard title="Live ученика" icon={<MessageCircle className="w-4 h-4" />}>
+    <PanelCard title="Live учня" icon={<MessageCircle className="w-4 h-4" />}>
       <div className="space-y-2 text-xs">
-        {reactionFresh && meta ? (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg border ${meta.color}`}
-          >
-            <meta.Icon className="w-4 h-4" />
-            <span className="font-bold">{meta.label}</span>
-          </motion.div>
-        ) : (
-          <div className="text-muted-foreground italic">Ждём реакции…</div>
-        )}
-
         {response?.answer ? (
           <div className="rounded-lg border border-border bg-background p-2.5 space-y-1.5">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              Ответ ученика
-            </div>
+            <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Відповідь учня</div>
             <div className="text-sm font-medium break-words">{response.answer}</div>
             {ex?.correct_answer && (
-              <div
-                className={`text-[10px] font-bold inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${
-                  isCorrect
-                    ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
-                    : "bg-red-500/15 text-red-700 dark:text-red-300"
-                }`}
-              >
-                {isCorrect ? "✓ Верно" : `✗ Должен быть: ${ex.correct_answer}`}
-              </div>
+              <div className="text-[10px] text-muted-foreground">Правильно: {ex.correct_answer}</div>
             )}
           </div>
         ) : (
-          <div className="text-muted-foreground italic">Ученик ещё не ответил</div>
+          <div className="text-muted-foreground italic">Учень ще не відповідав</div>
         )}
       </div>
     </PanelCard>
