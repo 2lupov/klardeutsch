@@ -246,25 +246,19 @@ export function PandaLookupPanel({ onSaved }: { onSaved?: (w: MyWord) => void })
   );
 }
 
-/** Плаваюча кнопка з панда-словником — працює і на живому уроці, і в словнику учня. */
-export default function PandaLookupFab({
+/** Вікно словника поверх уроку — нікуди не переходить, лише пошук + «додати у мій словник». */
+export function PandaLookupDialog({
+  open,
+  onOpenChange,
   onSaved,
-  label = "Панда-словник",
 }: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
   onSaved?: (w: MyWord) => void;
-  label?: string;
 }) {
-  const [open, setOpen] = useState(false);
+  const setOpen = onOpenChange;
   return (
     <>
-      <button
-        onClick={() => setOpen(true)}
-        className="fixed bottom-24 right-5 z-40 flex items-center gap-2 px-4 py-3 rounded-2xl bg-primary text-primary-foreground shadow-lg font-display font-semibold text-sm"
-      >
-        <span className="text-base">🐼</span>
-        <span className="hidden sm:inline">{label}</span>
-      </button>
-
       <AnimatePresence>
         {open && (
           <motion.div
