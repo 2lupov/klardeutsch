@@ -16,10 +16,14 @@ import BoardStudentView from "@/components/live/BoardStudentView";
 import type { BoardCam } from "@/components/live/BoardRender";
 import { signedPageUrl } from "@/lib/books";
 import AddMyWordForm, { addMyWord } from "@/components/dictionary/AddMyWordForm";
-import PandaLookupFab, { PandaLookupPanel } from "@/components/dictionary/PandaLookup";
+import PandaLookupFab from "@/components/dictionary/PandaLookup";
 import { BookmarkPlus } from "lucide-react";
 import InteractiveScene from "@/components/interactive/InteractiveScene";
 import { fetchInteractivePage, type SceneBlock } from "@/lib/interactivePages";
+import PresentationView from "@/components/tutoring/PresentationView";
+import StudentBlocks from "@/components/blocks/StudentBlocks";
+import { kitBlocksToLessonBlocks } from "@/lib/lesson-kits";
+
 
 export default function LiveClass() {
   const { id } = useParams<{ id: string }>();
@@ -137,8 +141,15 @@ export default function LiveClass() {
   }, [id, navigate]);
 
 
-  // Учень сам вибирає розділ — вчитель його не перекидає.
-  // Про новий матеріал повідомляє червоний індикатор у сайдбарі.
+  // Учитель кнопкою «Перенести учня сюди» переносить учня у потрібний розділ
+  const teacherSection = cls?.current_section;
+  useEffect(() => {
+    if (!teacherSection) return;
+    if (!LIVE_SECTIONS.some((s) => s.key === teacherSection)) return;
+    setSection(teacherSection);
+  }, [teacherSection, (cls as any)?.live_view?.type, (cls as any)?.live_view?.kit_id]);
+
+
 
 
   // mark current section as seen
@@ -272,31 +283,29 @@ export default function LiveClass() {
               </div>
             )}
           </div>
-        ) : (
-          <div className="p-5 max-w-3xl space-y-5">
-            {section === "vocab" && (
-              <div className="space-y-5">
-                <div className="rounded-2xl border border-border bg-card p-4">
-                  <h3 className="font-display font-semibold text-foreground mb-3">🐼 Панда-словник</h3>
-                  <PandaLookupPanel />
-                </div>
-                <div className="rounded-2xl border border-border bg-card p-4">
-                  <h3 className="font-display font-semibold text-foreground mb-3">Додати своє слово</h3>
-                  <AddMyWordForm compact />
-                </div>
-              </div>
-            )}
-            {sectionItems.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Викладач ще нічого не додав у цей розділ.</p>
+        ) : section === "slides" ? (
+          <div className="p-4">
+            {cls.live_view?.type === "slide" ? (
+              <PresentationView presentationId={cls.live_view.presentation_id} page={cls.live_view.page} />
             ) : (
-              <div className="space-y-4">
-                {sectionItems.map((it) => (
-                  <ItemCard key={it.id} item={it} answer={answers[it.id]} onAnswer={submitAnswer} userId={user?.id} />
-                ))}
-              </div>
+              <p className="text-sm text-muted-foreground">Викладач ще не відкрив презентацію.</p>
+            )}
+          </div>
+        ) : (
+          <div className="p-4">
+            {cls.live_view?.type === "blocks" ? (
+              <StudentBlocks
+                blocks={kitBlocksToLessonBlocks(cls.live_view.blocks || [], `live-${cls.live_view.kit_id}`)}
+                studentId={user?.id}
+                persist={false}
+                onSubmitted={(score, max) => toast.success(`Готово: ${score} / ${max}`)}
+              />
+            ) : (
+              <p className="text-sm text-muted-foreground">Викладач ще не відкрив блок-завдання.</p>
             )}
           </div>
         )}
+
       </main>
 
       <PandaLookupFab label="Словник" />

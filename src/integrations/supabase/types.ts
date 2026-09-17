@@ -2030,6 +2030,7 @@ export type Database = {
           current_section: string
           ended_at: string | null
           id: string
+          live_view: Json | null
           started_at: string
           status: string
           student_id: string
@@ -2044,6 +2045,7 @@ export type Database = {
           current_section?: string
           ended_at?: string | null
           id?: string
+          live_view?: Json | null
           started_at?: string
           status?: string
           student_id: string
@@ -2058,6 +2060,7 @@ export type Database = {
           current_section?: string
           ended_at?: string | null
           id?: string
+          live_view?: Json | null
           started_at?: string
           status?: string
           student_id?: string
