@@ -18,6 +18,7 @@ import BoardEditor, { type BoardApi } from "@/components/live/BoardEditor";
 import MaterialPicker from "@/components/live/MaterialPicker";
 import LiveBookPagePicker from "@/components/books/LiveBookPagePicker";
 import { listPublishedInteractivePages } from "@/lib/interactivePages";
+import { PandaLookupDialog } from "@/components/dictionary/PandaLookup";
 
 interface StudentRow { user_id: string; display_name: string | null; email: string | null }
 
@@ -144,6 +145,7 @@ export default function LiveClassPage() {
 function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentName: string; onExit: () => void }) {
   const [section, setSection] = useState<LiveSection>(cls.current_section || "board");
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [dictOpen, setDictOpen] = useState(false);
   const [items, setItems] = useState<LiveItem[]>([]);
   const [answers, setAnswers] = useState<any[]>([]);
   const [ended, setEnded] = useState(cls.status === "ended");
@@ -197,6 +199,9 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
           <h2 className="text-base font-semibold text-slate-900">{cls.title}</h2>
         </div>
         <div className="flex items-center gap-2">
+          <button onClick={() => setDictOpen(true)} className="px-3 py-2 rounded-xl border border-slate-200 text-sm text-slate-700 hover:bg-slate-50">
+            🐼 Словник
+          </button>
           <button onClick={onExit} className="px-3 py-2 rounded-xl border border-slate-200 text-sm text-slate-700 hover:bg-slate-50">
             ← До списку
           </button>
@@ -303,6 +308,7 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
           )}
         </Card>
       )}
+      <PandaLookupDialog open={dictOpen} onOpenChange={setDictOpen} />
     </div>
   );
 }
