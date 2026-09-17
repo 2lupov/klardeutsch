@@ -59,12 +59,14 @@ export default function BoardStudentView({
   const [ownCam, setOwnCam] = useState<BoardCam>(teacherCam);
   const cam = follow ? teacherCam : ownCam;
 
-  const [tool, setTool] = useState<Tool>("pen");
+  const [tool, setTool] = useState<Tool>("pan");
   const [color, setColor] = useState(COLORS[0]);
   /** Локальні елементи учня — доки вчитель не поверне їх у спільній дошці. */
   const [mine, setMine] = useState<BoardEl[]>([]);
   const [editing, setEditing] = useState<string | null>(null);
-  const [pxW, setPxW] = useState(BOARD_W);
+  /** Геометрія SVG: масштаб і зсуви через preserveAspectRatio="slice". */
+  const [view, setView] = useState({ s: 1, dx: 0, dy: 0 });
+
 
   const svgRef = useRef<SVGSVGElement | null>(null);
   const textInputRef = useRef<HTMLTextAreaElement | null>(null);
