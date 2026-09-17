@@ -17,6 +17,7 @@ import {
   ChevronLeft,
   Moon,
   Sun,
+  Library,
   Wand2,
 } from "lucide-react";
 
