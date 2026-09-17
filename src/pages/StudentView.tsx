@@ -1,26 +1,17 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Sparkles, Hand, ThumbsUp, HelpCircle, Flame, Send, Check } from "lucide-react";
-import { toast } from "sonner";
-import LessonTimeline from "@/components/tutoring/LessonTimeline";
+import { Loader2, Sparkles, Hand, ThumbsUp, HelpCircle, Flame, Pencil, ListChecks, Presentation as PresIcon } from "lucide-react";
 import SessionChat from "@/components/tutoring/SessionChat";
-import LessonTheoryRenderer from "@/components/tutoring/LessonTheoryRenderer";
-import RichExercise from "@/components/exercises/RichExercise";
-import { isRichType, hasRichPayload } from "@/components/exercises/richExercises";
-import ReadingTaskView from "@/components/tutoring/ReadingTaskView";
 import StudentBlocks from "@/components/blocks/StudentBlocks";
 import PandaLookupFab from "@/components/dictionary/PandaLookup";
 import PresentationView from "@/components/tutoring/PresentationView";
-
-
+import { toast } from "sonner";
 
 /**
- * Полноэкранная "чистая" страница для ученика во время демонстрации.
- * Не содержит навигации, AI-чатов, заметок учителя.
- * Подписана на live session через Supabase Realtime.
- * Ученик может отвечать на упражнения и слать реакции учителю в реальном времени.
+ * Чиста сторінка учня під час живого уроку.
+ * Три види: дошка, презентація, блок-завдання — перемикає викладач.
  */
 
 type Reaction = { type: "hand" | "thumbs_up" | "confused" | "fire"; at: string };
@@ -28,29 +19,21 @@ type Reaction = { type: "hand" | "thumbs_up" | "confused" | "fire"; at: string }
 const REACTIONS: { type: Reaction["type"]; Icon: any; label: string; color: string }[] = [
   { type: "hand", Icon: Hand, label: "Рука", color: "bg-yellow-500" },
   { type: "thumbs_up", Icon: ThumbsUp, label: "Ясно", color: "bg-emerald-500" },
-  { type: "confused", Icon: HelpCircle, label: "Не понял", color: "bg-orange-500" },
-  { type: "fire", Icon: Flame, label: "Огонь", color: "bg-pink-500" },
+  { type: "confused", Icon: HelpCircle, label: "Не зрозумів", color: "bg-orange-500" },
+  { type: "fire", Icon: Flame, label: "Вогонь", color: "bg-pink-500" },
 ];
 
 const StudentView = () => {
   const { sessionId } = useParams();
   const [session, setSession] = useState<any>(null);
-  const [lessonData, setLessonData] = useState<{ words: any[]; exercises: any[]; theory: string; reading: any[]; blocks: any[] } | null>(null);
+  const [blocks, setBlocks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [answer, setAnswer] = useState<string>("");
-  const [submitted, setSubmitted] = useState(false);
   const [activeReaction, setActiveReaction] = useState<Reaction["type"] | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Reset answer when teacher switches view
   const viewKey = useMemo(
     () => (session?.current_view ? JSON.stringify(session.current_view) : ""),
     [session?.current_view],
   );
-  useEffect(() => {
-    setAnswer("");
-    setSubmitted(false);
-  }, [viewKey]);
 
   useEffect(() => {
     if (!sessionId) return;
@@ -65,16 +48,14 @@ const StudentView = () => {
       if (!mounted || !s) { setLoading(false); return; }
       setSession(s);
 
-      const [{ data: l }, { data: w }, { data: e }, { data: r }, { data: bl }] = await Promise.all([
-        supabase.from("tutoring_lessons").select("theory").eq("id", s.lesson_id).maybeSingle(),
-        supabase.from("tutoring_lesson_words").select("*").eq("lesson_id", s.lesson_id).order("sort_order"),
-        supabase.from("tutoring_lesson_exercises").select("*").eq("lesson_id", s.lesson_id).order("sort_order"),
-        supabase.from("tutoring_reading_tasks").select("*").eq("lesson_id", s.lesson_id).order("sort_order"),
-        supabase.from("tutoring_lesson_blocks").select("*").eq("lesson_id", s.lesson_id).eq("visible_to_student", true).order("sort_order"),
-      ]);
+      const { data: bl } = await supabase
+        .from("tutoring_lesson_blocks")
+        .select("*")
+        .eq("lesson_id", s.lesson_id)
+        .eq("visible_to_student", true)
+        .order("sort_order");
       if (!mounted) return;
-      setLessonData({ theory: l?.theory || "", words: w || [], exercises: e || [], reading: r || [], blocks: bl || [] });
-
+      setBlocks(bl || []);
       setLoading(false);
     };
     load();
@@ -101,22 +82,13 @@ const StudentView = () => {
       .eq("id", sessionId);
   };
 
-  const submitAnswer = async (value?: string) => {
+  const report = async (text: string) => {
     if (!sessionId) return;
-    const final = (value ?? answer).trim();
-    if (!final) return;
     const { error } = await supabase
       .from("tutoring_live_sessions")
-      .update({
-        student_response: {
-          view: session?.current_view,
-          answer: final,
-          at: new Date().toISOString(),
-        } as any,
-      })
+      .update({ student_response: { view: session?.current_view, answer: text, at: new Date().toISOString() } as any })
       .eq("id", sessionId);
-    if (error) { toast.error(error.message); return; }
-    setSubmitted(true);
+    if (error) toast.error(error.message);
   };
 
   if (loading) {
@@ -130,208 +102,72 @@ const StudentView = () => {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4 p-6 text-center">
         <Sparkles className="w-12 h-12 text-primary" />
-        <h1 className="text-2xl font-display font-black">Урок завершён</h1>
-        <p className="text-muted-foreground">Спасибо за работу!</p>
+        <h1 className="text-2xl font-display font-black">Урок завершено</h1>
+        <p className="text-muted-foreground">Дякуємо за роботу!</p>
         <button
           onClick={() => (window.location.href = "/assignments")}
           className="mt-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-bold"
         >
-          К моим заданиям
+          До моїх завдань
         </button>
       </div>
     );
   }
 
-  const v = session.current_view || { type: "welcome" };
+  const raw = session.current_view || { type: "whiteboard" };
+  const v = raw.type === "slide" || raw.type === "block" ? raw : { type: "whiteboard" as const };
   const highlight = session.highlight;
-  const currentExercise =
-    v.type === "exercise" ? lessonData?.exercises.find((x) => x.id === (v as any).exerciseId) : null;
-  const hasOptions = currentExercise && Array.isArray(currentExercise.options) && currentExercise.options.length > 0;
+
+  const label = v.type === "slide" ? "Презентація" : v.type === "block" ? "Завдання" : "Дошка";
+  const LabelIcon = v.type === "slide" ? PresIcon : v.type === "block" ? ListChecks : Pencil;
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-background relative overflow-hidden">
-      {/* Top bar — minimal, only "LIVE" indicator + timeline */}
-      <div className="fixed top-0 left-0 right-0 z-20 px-6 py-2.5 bg-background/80 backdrop-blur-md border-b border-border">
-        <div className="flex items-center justify-between mb-1.5">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
-            <span className="text-sm font-bold text-foreground">LIVE • Урок</span>
-          </div>
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Top bar */}
+      <div className="fixed top-0 left-0 right-0 z-20 px-6 py-3 bg-background/80 backdrop-blur-md border-b border-border">
+        <div className="flex items-center gap-3">
+          <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
+          <span className="text-sm font-bold text-foreground">LIVE • Урок</span>
+          <span className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold">
+            <LabelIcon className="w-3.5 h-3.5" /> {label}
+          </span>
         </div>
-        <LessonTimeline
-          view={v}
-          words={lessonData?.words || []}
-          exercises={lessonData?.exercises || []}
-        />
       </div>
 
-
-      <div className="pt-28 pb-40 px-6 lg:px-16 max-w-5xl mx-auto">
+      <div className="pt-20 pb-40 px-4 lg:px-12 max-w-5xl mx-auto">
         <AnimatePresence mode="wait">
           <motion.div
             key={viewKey}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.35 }}
+            transition={{ duration: 0.3 }}
           >
-            {v.type === "welcome" && (
-              <div className="min-h-[60vh] flex flex-col items-center justify-center text-center gap-6">
-                <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Sparkles className="w-12 h-12 text-primary" />
-                </div>
-                <h1 className="text-4xl lg:text-6xl font-display font-black">Готовы начать?</h1>
-                <p className="text-lg text-muted-foreground">Учитель сейчас покажет первое задание</p>
+            {v.type === "whiteboard" && <WhiteboardView strokes={session.whiteboard || []} />}
+
+            {v.type === "slide" && (
+              <div className="h-[75vh]">
+                <PresentationView presentationId={(v as any).presentationId} page={(v as any).page} />
               </div>
             )}
-
-            {v.type === "text" && (
-              <div className="prose prose-lg max-w-none">
-                {v.title && <h1 className="text-3xl lg:text-5xl font-display font-black mb-6">{v.title}</h1>}
-                <div className="text-xl lg:text-2xl leading-relaxed whitespace-pre-wrap">{v.body}</div>
-              </div>
-            )}
-
-            {v.type === "reading" && (() => {
-              const rt = lessonData?.reading.find((x: any) => x.id === (v as any).taskId);
-              if (!rt) return <div className="text-muted-foreground">Задание не найдено</div>;
-              return (
-                <ReadingTaskView
-                  task={rt}
-                  canAnswer
-                  showPhotos
-                  onQuizFinished={(got, total) => submitAnswer(`Gelesen! Тест: ${got}/${total}`)}
-                />
-              );
-            })()}
 
             {v.type === "block" && (() => {
-              const bl = lessonData?.blocks.find((x: any) => x.id === (v as any).blockId);
-              if (!bl) return <div className="text-muted-foreground">Блок не найден</div>;
+              const bl = blocks.find((x: any) => x.id === (v as any).blockId);
+              if (!bl) return <div className="text-muted-foreground">Завдання ще готується…</div>;
               return (
                 <StudentBlocks
                   blocks={[bl]}
                   studentId={session?.student_id || null}
                   showActions
-                  onSubmitted={(score, max) => submitAnswer(`Блок готов: ${score}/${max}`)}
+                  onSubmitted={(score, max) => report(`Блок готовий: ${score}/${max}`)}
                 />
               );
             })()}
-
-
-            {v.type === "theory" && (
-              <div className="max-w-none">
-                <h2 className="text-2xl font-display font-bold mb-4">Теория</h2>
-                <LessonTheoryRenderer content={lessonData?.theory || ""} />
-              </div>
-            )}
-
-
-            {v.type === "word" && (() => {
-              const w = lessonData?.words.find((x) => x.id === (v as any).wordId);
-              if (!w) return null;
-              const articleColor = w.article === "der" ? "text-blue-500" : w.article === "die" ? "text-pink-500" : "text-green-500";
-              return (
-                <div className="min-h-[60vh] flex flex-col items-center justify-center text-center gap-8">
-                  <div>
-                    {w.article && <div className={`text-3xl lg:text-5xl font-display font-bold mb-3 ${articleColor}`}>{w.article}</div>}
-                    <div className="text-6xl lg:text-8xl font-display font-black">{w.german}</div>
-                  </div>
-                  {(v as any).revealTranslation && (
-                    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-3xl lg:text-4xl text-muted-foreground">
-                      {w.russian}
-                    </motion.div>
-                  )}
-                  {w.example && (v as any).revealTranslation && (
-                    <p className="text-xl italic text-muted-foreground max-w-2xl">{w.example}</p>
-                  )}
-                </div>
-              );
-            })()}
-
-            {v.type === "exercise" && currentExercise && (
-              <div className="space-y-6">
-                <div className="text-sm font-bold text-primary uppercase tracking-wider">Упражнение</div>
-                <h2 className="text-2xl lg:text-4xl font-display font-black">
-                  {currentExercise.question || currentExercise.prompt}
-                </h2>
-
-                {isRichType(currentExercise.exercise_type) && hasRichPayload(currentExercise.exercise_type, currentExercise.payload) ? (
-                  <RichExercise
-                    type={currentExercise.exercise_type}
-                    payload={currentExercise.payload}
-                    onResult={(ok, done) => {
-                      if (done && !submitted) submitAnswer(ok ? "✅ виконано правильно" : "⚠️ виконано з помилками");
-                    }}
-                  />
-                ) : hasOptions ? (
-
-                  <div className="grid gap-3">
-                    {currentExercise.options.map((opt: string, i: number) => {
-                      const selected = answer === opt;
-                      return (
-                        <button
-                          key={i}
-                          disabled={submitted}
-                          onClick={() => { setAnswer(opt); submitAnswer(opt); }}
-                          className={`px-6 py-4 rounded-2xl border-2 text-xl text-left transition flex items-center gap-3 ${
-                            selected
-                              ? "border-primary bg-primary/10"
-                              : "border-border bg-card hover:border-primary/40"
-                          } ${submitted && !selected ? "opacity-40" : ""}`}
-                        >
-                          <span className="font-bold text-muted-foreground">
-                            {String.fromCharCode(65 + i)}.
-                          </span>
-                          <span className="flex-1">{opt}</span>
-                          {selected && submitted && <Check className="w-5 h-5 text-primary" />}
-                        </button>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    <textarea
-                      value={answer}
-                      onChange={(e) => setAnswer(e.target.value)}
-                      disabled={submitted}
-                      placeholder="Введите ваш ответ…"
-                      rows={3}
-                      className="w-full px-5 py-4 rounded-2xl border-2 border-border bg-card text-xl resize-none focus:outline-none focus:border-primary transition disabled:opacity-60"
-                    />
-                    <button
-                      onClick={() => submitAnswer()}
-                      disabled={submitted || !answer.trim()}
-                      className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-primary text-primary-foreground font-bold disabled:opacity-50 hover:bg-primary/90 transition"
-                    >
-                      {submitted ? <><Check className="w-5 h-5" /> Отправлено</> : <><Send className="w-5 h-5" /> Отправить</>}
-                    </button>
-                  </div>
-                )}
-
-                {(v as any).revealAnswer && currentExercise.correct_answer && (
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="px-6 py-4 rounded-2xl bg-green-500/10 border-2 border-green-500/30 text-green-700 dark:text-green-400">
-                    <strong>Правильный ответ:</strong> {currentExercise.correct_answer}
-                    {currentExercise.explanation && <div className="text-sm mt-2 opacity-80">{currentExercise.explanation}</div>}
-                  </motion.div>
-                )}
-              </div>
-            )}
-
-            {v.type === "slide" && (
-              <div className="h-[75vh]">
-                <PresentationView presentationId={v.presentationId} page={v.page} />
-              </div>
-            )}
-
-            {v.type === "whiteboard" && (
-              <WhiteboardView strokes={session.whiteboard || []} />
-            )}
           </motion.div>
         </AnimatePresence>
       </div>
 
-      {/* Highlight cursor / pointer from teacher */}
+      {/* Лазерна указка вчителя */}
       {highlight?.visible && (
         <motion.div
           className="fixed pointer-events-none z-50"
@@ -339,48 +175,32 @@ const StudentView = () => {
           transition={{ type: "spring", stiffness: 400, damping: 30, mass: 0.3 }}
           style={{ transform: "translate(-50%, -50%)" }}
         >
-          {/* Лазерна указка вчителя */}
           <div className="relative w-6 h-6 flex items-center justify-center">
             <div className="absolute w-10 h-10 rounded-full bg-red-500/25 blur-md animate-pulse" />
             <div
               className="relative w-3.5 h-3.5 rounded-full bg-red-600"
               style={{ boxShadow: "0 0 10px 4px rgba(239,68,68,0.75), 0 0 24px 10px rgba(239,68,68,0.35)" }}
             />
-            {highlight.label && (
-              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-lg bg-red-600 text-white text-sm font-bold whitespace-nowrap">
-                {highlight.label}
-              </div>
-            )}
           </div>
         </motion.div>
       )}
 
-      {/* Floating reaction bar */}
+      {/* Реакції */}
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-30">
         <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-card/95 backdrop-blur-md border border-border shadow-lg">
-          {REACTIONS.map(({ type, Icon, label, color }) => {
+          {REACTIONS.map(({ type, Icon, label: rl, color }) => {
             const active = activeReaction === type;
             return (
               <button
                 key={type}
                 onClick={() => sendReaction(type)}
-                aria-label={label}
-                title={label}
+                aria-label={rl}
+                title={rl}
                 className={`relative w-12 h-12 rounded-full flex items-center justify-center transition active:scale-90 ${
                   active ? `${color} text-white shadow-md` : "bg-background hover:bg-muted text-foreground"
                 }`}
               >
                 <Icon className="w-5 h-5" />
-                {active && (
-                  <motion.span
-                    initial={{ opacity: 0, y: 0, scale: 0.5 }}
-                    animate={{ opacity: [0, 1, 0], y: -32, scale: 1 }}
-                    transition={{ duration: 1.2 }}
-                    className="absolute text-2xl"
-                  >
-                    {type === "hand" ? "🙋" : type === "thumbs_up" ? "👍" : type === "confused" ? "🤔" : "🔥"}
-                  </motion.span>
-                )}
               </button>
             );
           })}
@@ -388,10 +208,8 @@ const StudentView = () => {
       </div>
 
       <PandaLookupFab label="Словник" />
-
       <SessionChat sessionId={sessionId} role="student" />
     </div>
-
   );
 };
 
