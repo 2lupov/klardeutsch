@@ -308,6 +308,7 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
           )}
         </Card>
       )}
+      <PandaLookupDialog open={dictOpen} onOpenChange={setDictOpen} />
     </div>
   );
 }
