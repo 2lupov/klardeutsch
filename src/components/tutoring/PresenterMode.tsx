@@ -535,6 +535,9 @@ const PresenterMode = ({ lesson, words, exercises, readingTasks = [], studentNam
           studentName={studentName}
         />
       )}
+
+      {/* Панда-словник учителя — открывается поверх урока */}
+      <PandaLookupDialog open={dictOpen} onOpenChange={setDictOpen} />
     </motion.div>
   );
 };
