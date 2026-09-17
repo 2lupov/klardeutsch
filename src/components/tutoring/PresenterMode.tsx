@@ -256,6 +256,9 @@ const PresenterMode = ({ lesson, words, exercises, readingTasks = [], studentNam
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <Button size="sm" variant="outline" onClick={() => setDictOpen(true)} className="gap-1.5">
+            🐼 Словник
+          </Button>
           <Button size="sm" variant="outline" onClick={copyStudentLink} className="gap-1.5">
             <Copy className="w-3.5 h-3.5" /> Ссылка
           </Button>
