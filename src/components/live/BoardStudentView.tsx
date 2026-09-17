@@ -276,7 +276,9 @@ export default function BoardStudentView({
     upsertMine({ ...el, text }, true);
   };
 
-  const cursor = tool === "pan" ? "grab" : tool === "erase" ? "cell" : "crosshair";
+  const cursor =
+    tool === "pan" ? "grab" : tool === "erase" ? ERASER_CURSOR : tool === "pen" ? PEN_CURSOR : "text";
+
 
   return (
     <div className={`relative ${className || ""}`}>
@@ -288,8 +290,9 @@ export default function BoardStudentView({
         style={{
           cursor,
           backgroundImage: "radial-gradient(hsl(var(--border)) 1px, transparent 1px)",
-          backgroundSize: `${24 / cam.w}px ${24 / cam.w}px`,
-          backgroundPosition: `${(-cam.x / cam.w) * 100}% ${(-cam.y / cam.w) * 100}%`,
+          backgroundSize: `${(24 * view.s) / cam.w}px ${(24 * view.s) / cam.w}px`,
+          backgroundPosition: `${view.dx - (cam.x / cam.w) * BOARD_W * view.s}px ${view.dy - (cam.y / cam.w) * BOARD_H * view.s}px`,
+
         }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
@@ -309,9 +312,11 @@ export default function BoardStudentView({
       </svg>
 
       {editingEl && (() => {
-        const fs = ((editingEl.size || 0.045) * BOARD_H * (pxW / BOARD_W)) / cam.w;
-        const leftPx = (((editingEl.x || 0) - cam.x) / cam.w) * pxW;
-        const topPx = (((editingEl.y || 0) - cam.y) / cam.w) * pxW * (BOARD_H / BOARD_W) - fs * 0.93;
+        const fs = ((editingEl.size || 0.045) * BOARD_H * view.s) / cam.w;
+        const leftPx = view.dx + (((editingEl.x || 0) - cam.x) / cam.w) * BOARD_W * view.s;
+        const topPx = view.dy + (((editingEl.y || 0) - cam.y) / cam.w) * BOARD_H * view.s - fs * 0.93;
+        const boxW = BOARD_W * view.s + 2 * view.dx;
+
         const lines = Math.max(1, String(editingEl.text || "").split("\n").length);
         const cols = Math.max(6, ...String(editingEl.text || "").split("\n").map((l) => l.length + 2));
         return (
@@ -340,7 +345,7 @@ export default function BoardStudentView({
                 fontSize: `${fs}px`,
                 lineHeight: 1.25,
                 caretColor: editingEl.color || "#0F172A",
-                width: `${Math.max(fs * 4, Math.min(pxW - leftPx - 4, fs * 0.62 * cols))}px`,
+                width: `${Math.max(fs * 4, Math.min(boxW - leftPx - 4, fs * 0.62 * cols))}px`,
                 height: `${fs * 1.25 * lines + 2}px`,
                 fontFamily: "Space Grotesk, system-ui, sans-serif",
               }}
