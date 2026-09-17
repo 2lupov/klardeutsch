@@ -8,6 +8,7 @@ import { toast } from "@/hooks/use-toast";
 import StudentBlocks from "@/components/blocks/StudentBlocks";
 import { kitBlocksToLessonBlocks, normalizeKit, type LessonKit } from "@/lib/lesson-kits";
 import { Btn, Card, EmptyState, SectionHeader } from "./_ui";
+import LibraryBookPicker from "@/components/blocks/LibraryBookPicker";
 import BookAutoWizard from "./BookAutoWizard";
 
 (pdfjsLib as any).GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
