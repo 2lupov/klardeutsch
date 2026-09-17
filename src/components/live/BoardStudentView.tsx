@@ -357,11 +357,12 @@ export default function BoardStudentView({
       {/* панель інструментів учня */}
       <div className="absolute top-3 left-3 flex items-center gap-1.5 rounded-2xl bg-card/90 backdrop-blur border border-border p-1.5 shadow-sm">
         {([
+          { k: "pan", icon: Hand, title: "Рухати полотно" },
           { k: "pen", icon: Pencil, title: "Малювати" },
           { k: "text", icon: Type, title: "Писати текст" },
           { k: "erase", icon: Eraser, title: "Стерти своє" },
-          { k: "pan", icon: Hand, title: "Рухати полотно" },
         ] as { k: Tool; icon: any; title: string }[]).map(({ k, icon: Icon, title }) => (
+
           <button
             key={k}
             onClick={() => setTool(k)}
