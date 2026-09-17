@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Search, Trash2 } from "lucide-react";
 import AddMyWordForm, { MyWord } from "@/components/dictionary/AddMyWordForm";
+import { PandaLookupPanel } from "@/components/dictionary/PandaLookup";
 import { toast } from "sonner";
 
 interface Row {
@@ -120,6 +121,14 @@ export default function StudentDictionary() {
       </div>
 
       <div className="mb-8 space-y-4">
+        <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
+          <div>
+            <p className="font-display font-semibold text-foreground text-sm">🐼 Панда-словник</p>
+            <p className="text-xs text-muted-foreground">Не знаєте слово? Спитайте панду — і збережіть його одним кліком.</p>
+          </div>
+          <PandaLookupPanel onSaved={(w) => setMine((m) => [w, ...m])} />
+        </div>
+
         <AddMyWordForm onAdded={(w) => setMine((m) => [w, ...m])} />
 
         {myFiltered.length > 0 && (
