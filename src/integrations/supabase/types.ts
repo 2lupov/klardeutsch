@@ -2296,6 +2296,36 @@ export type Database = {
           },
         ]
       }
+      presentations: {
+        Row: {
+          created_at: string
+          id: string
+          owner_id: string
+          page_count: number
+          slide_paths: string[]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          owner_id: string
+          page_count?: number
+          slide_paths?: string[]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          owner_id?: string
+          page_count?: number
+          slide_paths?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           barcode: string | null
