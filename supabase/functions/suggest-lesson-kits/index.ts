@@ -63,7 +63,7 @@ serve(async (req) => {
     if (studentId) {
       const { data: p } = await admin
         .from("profiles")
-        .select("display_name, nickname, level")
+        .select("display_name, nickname, recommended_level")
         .eq("user_id", studentId)
         .maybeSingle();
       const { data: answers } = await admin
@@ -86,7 +86,7 @@ serve(async (req) => {
 
       student = {
         name: p?.display_name || p?.nickname || "Учень",
-        level: p?.level ?? null,
+        level: p?.recommended_level ?? null,
         recent_results: (answers ?? []).map((a: any) => ({
           block: byId.get(a.block_id)?.title ?? byId.get(a.block_id)?.type ?? "блок",
           type: byId.get(a.block_id)?.type ?? null,
