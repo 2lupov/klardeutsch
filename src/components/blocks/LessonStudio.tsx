@@ -25,6 +25,7 @@ import AiPdfImport from "./AiPdfImport";
 import BlockEditor from "./BlockEditor";
 import BlockRenderer, { BLOCK_ICON, blockLabel } from "./BlockRenderer";
 import BookDrawer from "./BookDrawer";
+import KitPicker from "./KitPicker";
 import StudentBlocks from "./StudentBlocks";
 import { BLOCK_META, BLOCK_TYPES, emptyPayload, type BlockType, type LessonBlock } from "./types";
 
@@ -272,6 +273,8 @@ export default function LessonStudio({ lessonId, studentId }: Props) {
           {busy === "notify-lesson-report" ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Send className="mr-1 h-4 w-4" />}
           Звіт у Telegram
         </Button>
+
+        <KitPicker lessonId={lessonId} startSortOrder={blocks.length} onInserted={load} />
 
         <BookDrawer imagePaths={pagePaths} />
       </div>
