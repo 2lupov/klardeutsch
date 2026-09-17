@@ -591,6 +591,9 @@ const PreviewContent = ({ view, words, exercises, readingTasks, blocks, theory, 
     if (!rt) return <div className="p-4 text-muted-foreground">Задание не найдено</div>;
     return <div className="p-4"><ReadingTaskView task={rt} canAnswer showPhotos persist={false} /></div>;
   }
+  if (view.type === "slide") {
+    return <PresentationView presentationId={view.presentationId} page={view.page} compact />;
+  }
   if (view.type === "block") {
     const bl = (blocks || []).find((x: any) => x.id === view.blockId);
     if (!bl) return <div className="p-4 text-muted-foreground">Блок не найден</div>;
