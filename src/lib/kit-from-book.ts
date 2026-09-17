@@ -122,4 +122,5 @@ export async function assignKitToStudent(teacherId: string, kit: LessonKit, stud
     status: "assigned",
   });
   if (error) throw error;
+  await supabase.from("lesson_kits").update({ last_assigned_at: new Date().toISOString() }).eq("id", kit.id);
 }
