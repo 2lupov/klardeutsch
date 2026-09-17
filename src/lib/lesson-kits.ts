@@ -49,6 +49,9 @@ export function normalizeKit(row: any): LessonKit {
     page_paths: Array.isArray(row.page_paths) ? row.page_paths : [],
     blocks: Array.isArray(row.blocks) ? row.blocks : [],
     notes: row.notes ?? null,
+    topics: Array.isArray(row.topics) ? row.topics : [],
+    summary: row.summary ?? null,
+    last_assigned_at: row.last_assigned_at ?? null,
     created_at: row.created_at,
   };
 }
