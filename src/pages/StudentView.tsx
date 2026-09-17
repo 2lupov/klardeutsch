@@ -10,6 +10,8 @@ import LessonTheoryRenderer from "@/components/tutoring/LessonTheoryRenderer";
 import RichExercise from "@/components/exercises/RichExercise";
 import { isRichType, hasRichPayload } from "@/components/exercises/richExercises";
 import ReadingTaskView from "@/components/tutoring/ReadingTaskView";
+import StudentBlocks from "@/components/blocks/StudentBlocks";
+
 
 
 /**
@@ -31,7 +33,7 @@ const REACTIONS: { type: Reaction["type"]; Icon: any; label: string; color: stri
 const StudentView = () => {
   const { sessionId } = useParams();
   const [session, setSession] = useState<any>(null);
-  const [lessonData, setLessonData] = useState<{ words: any[]; exercises: any[]; theory: string; reading: any[] } | null>(null);
+  const [lessonData, setLessonData] = useState<{ words: any[]; exercises: any[]; theory: string; reading: any[]; blocks: any[] } | null>(null);
   const [loading, setLoading] = useState(true);
   const [answer, setAnswer] = useState<string>("");
   const [submitted, setSubmitted] = useState(false);
@@ -61,14 +63,16 @@ const StudentView = () => {
       if (!mounted || !s) { setLoading(false); return; }
       setSession(s);
 
-      const [{ data: l }, { data: w }, { data: e }, { data: r }] = await Promise.all([
+      const [{ data: l }, { data: w }, { data: e }, { data: r }, { data: bl }] = await Promise.all([
         supabase.from("tutoring_lessons").select("theory").eq("id", s.lesson_id).maybeSingle(),
         supabase.from("tutoring_lesson_words").select("*").eq("lesson_id", s.lesson_id).order("sort_order"),
         supabase.from("tutoring_lesson_exercises").select("*").eq("lesson_id", s.lesson_id).order("sort_order"),
         supabase.from("tutoring_reading_tasks").select("*").eq("lesson_id", s.lesson_id).order("sort_order"),
+        supabase.from("tutoring_lesson_blocks").select("*").eq("lesson_id", s.lesson_id).eq("visible_to_student", true).order("sort_order"),
       ]);
       if (!mounted) return;
-      setLessonData({ theory: l?.theory || "", words: w || [], exercises: e || [], reading: r || [] });
+      setLessonData({ theory: l?.theory || "", words: w || [], exercises: e || [], reading: r || [], blocks: bl || [] });
+
       setLoading(false);
     };
     load();
@@ -198,6 +202,20 @@ const StudentView = () => {
                 />
               );
             })()}
+
+            {v.type === "block" && (() => {
+              const bl = lessonData?.blocks.find((x: any) => x.id === (v as any).blockId);
+              if (!bl) return <div className="text-muted-foreground">Блок не найден</div>;
+              return (
+                <StudentBlocks
+                  blocks={[bl]}
+                  studentId={session?.student_id || null}
+                  showActions
+                  onSubmitted={(score, max) => submitAnswer(`Блок готов: ${score}/${max}`)}
+                />
+              );
+            })()}
+
 
             {v.type === "theory" && (
               <div className="max-w-none">

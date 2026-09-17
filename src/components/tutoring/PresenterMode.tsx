@@ -15,6 +15,10 @@ import TeacherAIAssistant from "./TeacherAIAssistant";
 import LessonTimeline from "./LessonTimeline";
 import SessionChat from "./SessionChat";
 import ReadingTaskView from "./ReadingTaskView";
+import StudentBlocks from "@/components/blocks/StudentBlocks";
+import { blockLabel } from "@/components/blocks/BlockRenderer";
+import type { LessonBlock } from "@/components/blocks/types";
+
 
 interface Props {
   lesson: any;
@@ -42,10 +46,27 @@ const PresenterMode = ({ lesson, words, exercises, readingTasks = [], studentNam
   const startedAt = useRef(Date.now());
   const previewRef = useRef<HTMLDivElement>(null);
   const currentPath = useRef<string>("");
+  const [blocks, setBlocks] = useState<LessonBlock[]>([]);
+
+  // Блоки урока (конструктор)
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      const { data } = await supabase
+        .from("tutoring_lesson_blocks")
+        .select("*")
+        .eq("lesson_id", lesson.id)
+        .eq("visible_to_student", true)
+        .order("sort_order");
+      if (alive) setBlocks(((data ?? []) as any[]).map((b) => ({ ...b, payload: b.payload ?? {} })) as LessonBlock[]);
+    })();
+    return () => { alive = false; };
+  }, [lesson.id]);
 
   // Init session
   useEffect(() => {
     (async () => {
+
       try {
         const s = await startOrResumeSession({
           id: lesson.id, teacher_id: lesson.teacher_id, student_id: lesson.student_id,
@@ -318,6 +339,25 @@ const PresenterMode = ({ lesson, words, exercises, readingTasks = [], studentNam
               {readingTasks.length === 0 && <div className="text-xs text-muted-foreground p-2">Нет заданий с фото</div>}
             </div>
           </PanelCard>
+
+          <PanelCard title={`Блоки урока (${blocks.length})`} icon={<ListChecks className="w-4 h-4" />} scroll>
+            <div className="space-y-1">
+              {blocks.map((b) => {
+                const active = view.type === "block" && (view as any).blockId === b.id;
+                return (
+                  <button
+                    key={b.id}
+                    onClick={() => pushView({ type: "block", blockId: b.id })}
+                    className={`w-full text-left rounded-lg border ${active ? "border-primary bg-primary/5" : "border-border bg-card hover:border-primary/40"} px-2.5 py-2 text-sm`}
+                  >
+                    {blockLabel(b)}
+                  </button>
+                );
+              })}
+              {blocks.length === 0 && <div className="text-xs text-muted-foreground p-2">Нет блоков</div>}
+            </div>
+          </PanelCard>
+
         </div>
 
         {/* CENTER: preview = что видит ученик */}
@@ -345,7 +385,7 @@ const PresenterMode = ({ lesson, words, exercises, readingTasks = [], studentNam
               onMouseLeave={handlePreviewLeave}
               className={`w-full h-full rounded-xl bg-background border-2 border-dashed border-border relative overflow-auto ${highlightOn ? "cursor-crosshair" : ""}`}
             >
-              <PreviewContent view={view} words={words} exercises={exercises} readingTasks={readingTasks} theory={lesson.theory || ""}
+              <PreviewContent view={view} words={words} exercises={exercises} readingTasks={readingTasks} blocks={blocks} theory={lesson.theory || ""}
                 strokes={strokes} drawing={drawing}
                 onWBStart={wbStart} onWBMove={wbMove} onWBEnd={wbEnd}
               />
@@ -417,7 +457,7 @@ const NavBtn = ({ active, onClick, children }: any) => (
   </button>
 );
 
-const PreviewContent = ({ view, words, exercises, readingTasks, theory, strokes, onWBStart, onWBMove, onWBEnd }: any) => {
+const PreviewContent = ({ view, words, exercises, readingTasks, blocks, theory, strokes, onWBStart, onWBMove, onWBEnd }: any) => {
   if (view.type === "welcome") {
     return <div className="h-full flex items-center justify-center text-center p-8 text-muted-foreground">
       <div><Sparkles className="w-10 h-10 mx-auto mb-3 text-primary" /><div className="font-display font-bold text-lg">Готовы начать?</div></div>
@@ -453,6 +493,12 @@ const PreviewContent = ({ view, words, exercises, readingTasks, theory, strokes,
     if (!rt) return <div className="p-4 text-muted-foreground">Задание не найдено</div>;
     return <div className="p-4"><ReadingTaskView task={rt} canAnswer showPhotos persist={false} /></div>;
   }
+  if (view.type === "block") {
+    const bl = (blocks || []).find((x: any) => x.id === view.blockId);
+    if (!bl) return <div className="p-4 text-muted-foreground">Блок не найден</div>;
+    return <div className="p-4"><StudentBlocks blocks={[bl]} persist={false} showActions /></div>;
+  }
+
   if (view.type === "whiteboard") {
     return (
       <svg viewBox="0 0 1600 1000" className="w-full h-full bg-background touch-none"
