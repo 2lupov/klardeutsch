@@ -83,9 +83,13 @@ serve(async (req) => {
     const existing = Array.isArray(kit.blocks) ? (kit.blocks as any[]) : [];
     const merged = body?.replace === false ? [...existing, ...blocks] : blocks;
 
+    const patch: Record<string, unknown> = { blocks: merged, level, focus, page_paths: imagePaths };
+    if (ai.topics.length > 0) patch.topics = ai.topics;
+    if (ai.summary) patch.summary = ai.summary;
+
     const { error: updErr } = await admin
       .from("lesson_kits")
-      .update({ blocks: merged, level, focus, page_paths: imagePaths })
+      .update(patch)
       .eq("id", kitId);
     if (updErr) return jsonResponse({ error: updErr.message }, 500);
 
