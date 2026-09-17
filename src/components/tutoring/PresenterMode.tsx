@@ -130,6 +130,40 @@ const PresenterMode = ({ lesson, words, exercises, readingTasks = [], studentNam
     if (session) await updateSession(session.id, { highlight: { x, y, visible, label } as any });
   };
 
+  // Презентації: показати слайд / перегорнути / завантажити новий PDF
+  const slideView = view.type === "slide" ? (view as any) : null;
+  const activePres = slideView ? presentations.find((p) => p.id === slideView.presentationId) : null;
+
+  const stepSlide = (delta: number) => {
+    if (!slideView || !activePres) return;
+    const next = Math.min(Math.max(1, slideView.page + delta), activePres.page_count || 1);
+    if (next !== slideView.page) pushView({ type: "slide", presentationId: activePres.id, page: next });
+  };
+
+  const uploadPres = async (files: FileList | null) => {
+    if (!files?.length) return;
+    const file = files[0];
+    if (!/\.pdf$/i.test(file.name)) {
+      toast.error("Підтримуємо PDF — збережіть презентацію як PDF");
+      return;
+    }
+    try {
+      setPresBusy("Готуємо слайди…");
+      const p = await uploadPresentation({
+        ownerId: lesson.teacher_id,
+        file,
+        onProgress: (t) => setPresBusy(t),
+      });
+      setPresentations((prev) => [p, ...prev]);
+      toast.success("Презентацію додано 🐼");
+      pushView({ type: "slide", presentationId: p.id, page: 1 });
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setPresBusy(null);
+    }
+  };
+
   // Open student window
   const openStudentWindow = () => {
     if (!session) return;
