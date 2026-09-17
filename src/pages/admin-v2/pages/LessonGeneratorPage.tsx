@@ -355,7 +355,7 @@ function Wizard({
       if (audio) {
         setProgress("Завантажуємо аудіо…");
         const ext = audio.name.split(".").pop() || "mp3";
-        audioPath = `audio/kits/${kitId}/${Date.now()}.${ext}`;
+        audioPath = `kits/${kitId}/audio-${Date.now()}.${ext}`;
         const { error } = await supabase.storage.from("tutoring-materials").upload(audioPath, audio, { upsert: true });
         if (error) throw error;
       }
