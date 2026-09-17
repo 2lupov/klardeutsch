@@ -121,10 +121,21 @@ export default function BoardStudentView({
     report(c);
   };
 
+  /**
+   * Частки всередині viewBox (0..1 по 1000x750). Враховує "cover"-обрізання,
+   * інакше малюнок зʼїжджав вище/нижче за мишку.
+   */
   const frac = (clientX: number, clientY: number) => {
     const r = svgRef.current!.getBoundingClientRect();
-    return { fx: (clientX - r.left) / r.width, fy: (clientY - r.top) / r.height };
+    const s = Math.max(r.width / BOARD_W, r.height / BOARD_H) || 1;
+    const dx = (r.width - BOARD_W * s) / 2;
+    const dy = (r.height - BOARD_H * s) / 2;
+    return {
+      fx: (clientX - r.left - dx) / (BOARD_W * s),
+      fy: (clientY - r.top - dy) / (BOARD_H * s),
+    };
   };
+
 
   const world = (clientX: number, clientY: number) => {
     const { fx, fy } = frac(clientX, clientY);
@@ -149,7 +160,7 @@ export default function BoardStudentView({
   const eraseAtPoint = (p: { x: number; y: number }) => {
     const own = allRef.current.filter(isMine);
     if (own.length === 0) return;
-    const radius = (12 / BOARD_W) * camRef.current.w;
+    const radius = (14 * camRef.current.w) / (BOARD_W * (view.s || 1));
     const r = eraseAt(own, p, radius, undefined);
     if (!r.changed) return;
     setMine(r.next);
@@ -188,11 +199,12 @@ export default function BoardStudentView({
   useEffect(() => {
     const el = svgRef.current;
     if (!el || typeof ResizeObserver === "undefined") return;
-    const ro = new ResizeObserver(() => setPxW(el.getBoundingClientRect().width || BOARD_W));
+    const ro = new ResizeObserver(() => measure());
     ro.observe(el);
-    setPxW(el.getBoundingClientRect().width || BOARD_W);
+    measure();
     return () => ro.disconnect();
   }, []);
+
 
   /* ─────────── малювання ─────────── */
 
