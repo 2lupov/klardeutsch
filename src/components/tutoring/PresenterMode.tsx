@@ -21,6 +21,7 @@ import { blockLabel } from "@/components/blocks/BlockRenderer";
 import type { LessonBlock } from "@/components/blocks/types";
 import PresentationView from "./PresentationView";
 import { listPresentations, uploadPresentation, type Presentation as Pres } from "@/lib/presentations";
+import { PandaLookupDialog } from "@/components/dictionary/PandaLookup";
 
 
 interface Props {
@@ -53,6 +54,7 @@ const PresenterMode = ({ lesson, words, exercises, readingTasks = [], studentNam
   const [presentations, setPresentations] = useState<Pres[]>([]);
   const [presBusy, setPresBusy] = useState<string | null>(null);
   const presFileRef = useRef<HTMLInputElement>(null);
+  const [dictOpen, setDictOpen] = useState(false);
 
   // Презентації викладача
   useEffect(() => {
