@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, SectionHeader, EmptyState } from "./_ui";
@@ -7,18 +7,19 @@ import {
   LIVE_SECTIONS,
   LiveSection,
   LiveClass,
-  LiveItem,
+  LiveView,
   startLiveClass,
   endLiveClass,
-  addLiveItem,
-  fetchLiveItems,
+  setLiveView,
 } from "@/lib/live-class";
-import { Play, Square, Trash2 } from "lucide-react";
+import { Play, Square, ChevronLeft, ChevronRight, Loader2, Upload } from "lucide-react";
 import BoardEditor, { type BoardApi } from "@/components/live/BoardEditor";
-import MaterialPicker from "@/components/live/MaterialPicker";
 import LiveBookPagePicker from "@/components/books/LiveBookPagePicker";
-import { listPublishedInteractivePages } from "@/lib/interactivePages";
 import { PandaLookupDialog } from "@/components/dictionary/PandaLookup";
+import { listPresentations, uploadPresentation, type Presentation } from "@/lib/presentations";
+import PresentationView from "@/components/tutoring/PresentationView";
+import { normalizeKit, kitBlocksToLessonBlocks, type LessonKit } from "@/lib/lesson-kits";
+import StudentBlocks from "@/components/blocks/StudentBlocks";
 
 interface StudentRow { user_id: string; display_name: string | null; email: string | null }
 
@@ -143,39 +144,16 @@ export default function LiveClassPage() {
 }
 
 function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentName: string; onExit: () => void }) {
-  const [section, setSection] = useState<LiveSection>(cls.current_section || "board");
-  const [pickerOpen, setPickerOpen] = useState(false);
+  const [section, setSection] = useState<LiveSection>(
+    LIVE_SECTIONS.some((s) => s.key === cls.current_section) ? cls.current_section : "board",
+  );
   const [dictOpen, setDictOpen] = useState(false);
-  const [items, setItems] = useState<LiveItem[]>([]);
-  const [answers, setAnswers] = useState<any[]>([]);
   const [ended, setEnded] = useState(cls.status === "ended");
+  const [studentView, setStudentView] = useState<{ section: LiveSection; view: LiveView | null }>({
+    section: cls.current_section,
+    view: (cls as any).live_view ?? null,
+  });
   const boardApi = useRef<BoardApi | null>(null);
-
-  const reloadItems = async () => setItems(await fetchLiveItems(cls.id));
-
-  useEffect(() => { reloadItems(); }, [cls.id]);
-
-  useEffect(() => {
-    const ch = supabase
-      .channel(`live-class-teacher:${cls.id}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "live_class_answers", filter: `class_id=eq.${cls.id}` },
-        () => loadAnswers())
-      .subscribe();
-    const loadAnswers = async () => {
-      const { data } = await supabase
-        .from("live_class_answers")
-        .select("item_id, answer, is_correct, updated_at")
-        .eq("class_id", cls.id);
-      setAnswers(data || []);
-    };
-    loadAnswers();
-    return () => { supabase.removeChannel(ch); };
-  }, [cls.id]);
-
-  const pushSection = async (s: LiveSection) => {
-    setSection(s);
-    await supabase.from("live_classes").update({ current_section: s }).eq("id", cls.id);
-  };
 
   const finish = async () => {
     await endLiveClass(cls.id);
@@ -184,12 +162,22 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
     onExit();
   };
 
-  const remove = async (id: string) => {
-    await supabase.from("live_class_items").delete().eq("id", id);
-    setItems((p) => p.filter((i) => i.id !== id));
+  const transfer = async (s: LiveSection, view: LiveView | null) => {
+    try {
+      await setLiveView(cls.id, s, view);
+      setStudentView({ section: s, view });
+      toast({ title: "Учня перенесено", description: LIVE_SECTIONS.find((x) => x.key === s)?.label });
+    } catch (e: any) {
+      toast({ title: "Не вдалося перенести", description: e.message, variant: "destructive" });
+    }
   };
 
-  const sectionItems = items.filter((i) => i.section === section);
+  const whereIsStudent = () => {
+    const label = LIVE_SECTIONS.find((s) => s.key === studentView.section)?.label || "Дошка";
+    if (studentView.view?.type === "slide") return `${label} · слайд ${studentView.view.page + 1}`;
+    if (studentView.view?.type === "blocks") return `${label} · ${studentView.view.title || "урок"}`;
+    return label;
+  };
 
   return (
     <div className="space-y-5">
@@ -197,6 +185,7 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
         <div>
           <p className="text-xs text-slate-500">Живий урок · {studentName}</p>
           <h2 className="text-base font-semibold text-slate-900">{cls.title}</h2>
+          <p className="text-[11px] text-indigo-600 mt-0.5">Учень зараз бачить: {whereIsStudent()}</p>
         </div>
         <div className="flex items-center gap-2">
           <button onClick={() => setDictOpen(true)} className="px-3 py-2 rounded-xl border border-slate-200 text-sm text-slate-700 hover:bg-slate-50">
@@ -221,7 +210,7 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
         {LIVE_SECTIONS.map((s) => (
           <button
             key={s.key}
-            onClick={() => pushSection(s.key)}
+            onClick={() => setSection(s.key)}
             className={`px-3 py-2 rounded-xl text-sm font-medium border transition ${
               s.key === section ? "text-white border-transparent" : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
             }`}
@@ -233,223 +222,212 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
       </div>
 
       {/* Дошка завжди змонтована — перехід між розділами нічого не стирає */}
-      <div className={section === "board" ? "" : "hidden"}>
+      <div className={section === "board" ? "space-y-5" : "hidden"}>
         <BoardEditor classId={cls.id} initial={cls.board || []} apiRef={boardApi} />
+        <button
+          onClick={() => transfer("board", null)}
+          className="px-4 py-2 rounded-xl text-white text-sm font-medium"
+          style={{ background: "#0F172A" }}
+        >
+          Перенести учня сюди
+        </button>
+        <LiveBookPagePicker classId={cls.id} onToBoard={(url) => boardApi.current?.insertImage(url)} />
       </div>
 
-      {section !== "board" && (
-        <Card className="p-5">
-          <SectionHeader title="Додати матеріал" subtitle="Учень побачить це одразу" />
-          <>
-            <button
-              onClick={() => setPickerOpen(true)}
-              className="mb-4 px-4 py-2 rounded-xl text-sm font-medium border border-indigo-200 bg-indigo-50 text-indigo-700"
-            >
-              📂 Додати з банку матеріалів
-            </button>
-            <AddForm section={section} classId={cls.id} onAdded={(it) => setItems((p) => [...p, it])} />
-          </>
-        </Card>
-      )}
-
-
-      {section === "board" ? (
-        <LiveBookPagePicker
-          classId={cls.id}
-          onToBoard={(url) => boardApi.current?.insertImage(url)}
-        />
-      ) : (
-        <LiveBookPagePicker classId={cls.id} current={(cls as any).book_page ?? null} />
-      )}
-
-
-
-      {pickerOpen && section !== "board" && (
-        <MaterialPicker
-          classId={cls.id}
-          section={section}
-          onAdded={(added) => setItems((p) => [...p, ...added])}
-          onClose={() => setPickerOpen(false)}
+      {section === "slides" && (
+        <SlidesPanel
+          teacherId={cls.teacher_id}
+          current={studentView.view?.type === "slide" ? studentView.view : null}
+          onTransfer={(presentationId, page) => transfer("slides", { type: "slide", presentation_id: presentationId, page })}
         />
       )}
 
-      {section !== "board" && (
-        <Card className="p-5">
-          <SectionHeader title="Уже в розділі" subtitle={`${sectionItems.length} елементів`} />
-          {sectionItems.length === 0 ? (
-            <p className="text-sm text-slate-500">Порожньо.</p>
-          ) : (
-            <div className="divide-y divide-slate-100">
-              {sectionItems.map((it) => {
-                const a = answers.find((x) => x.item_id === it.id);
-                return (
-                  <div key={it.id} className="py-3 flex items-start justify-between gap-4">
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-slate-900">
-                        {it.title || it.content?.term || it.content?.question || it.kind}
-                      </p>
-                      <p className="text-xs text-slate-500 truncate">
-                        {it.content?.body || it.content?.translation || it.content?.url || ""}
-                      </p>
-                      {a && (
-                        <p className="text-xs mt-1">
-                          <span className="text-slate-500">Відповідь учня: </span>
-                          <span className={a.is_correct === false ? "text-red-600" : "text-green-700"}>{a.answer}</span>
-                        </p>
-                      )}
-                    </div>
-                    <button onClick={() => remove(it.id)} className="p-2 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </Card>
+      {section === "blocks" && (
+        <BlocksPanel
+          onTransfer={(kit) =>
+            transfer("blocks", { type: "blocks", kit_id: kit.id, title: kit.title, blocks: kit.blocks })
+          }
+        />
       )}
+
       <PandaLookupDialog open={dictOpen} onOpenChange={setDictOpen} />
     </div>
   );
 }
 
-function AddForm({
-  section,
-  classId,
-  onAdded,
+/* ───────── Презентація ───────── */
+
+function SlidesPanel({
+  teacherId,
+  current,
+  onTransfer,
 }: {
-  section: LiveSection;
-  classId: string;
-  onAdded: (it: LiveItem) => void;
+  teacherId: string;
+  current: { presentation_id: string; page: number } | null;
+  onTransfer: (presentationId: string, page: number) => void;
 }) {
-  const kinds: LiveItem["kind"][] =
-    section === "vocab" ? ["word"] :
-    section === "listening" ? ["audio", "question", "text"] :
-    section === "tasks" ? ["question", "text", "interactive"] : ["text", "question", "interactive"];
+  const [list, setList] = useState<Presentation[]>([]);
+  const [selected, setSelected] = useState<Presentation | null>(null);
+  const [page, setPage] = useState(current?.page ?? 0);
+  const [busy, setBusy] = useState<string | null>(null);
 
-  const [pages, setPages] = useState<{ id: string; title: string; level: string | null }[]>([]);
-  const [interactiveId, setInteractiveId] = useState("");
-
-  useEffect(() => {
-    listPublishedInteractivePages()
-      .then((p) => setPages(p as any))
-      .catch(() => {});
-  }, []);
-
-  const [kind, setKind] = useState<LiveItem["kind"]>(kinds[0]);
-  const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
-  const [url, setUrl] = useState("");
-  const [question, setQuestion] = useState("");
-  const [options, setOptions] = useState("");
-  const [correct, setCorrect] = useState("");
-  const [term, setTerm] = useState("");
-  const [article, setArticle] = useState("");
-  const [translation, setTranslation] = useState("");
-  const [example, setExample] = useState("");
-  const [busy, setBusy] = useState(false);
-
-  useEffect(() => { setKind(kinds[0]); }, [section]);
-
-  const submit = async () => {
-    let content: any = {};
-    if (kind === "text") {
-      if (!body.trim()) return toast({ title: "Введіть текст" });
-      content = { body };
-    } else if (kind === "audio") {
-      if (!url.trim()) return toast({ title: "Вкажіть посилання на аудіо" });
-      content = { url };
-    } else if (kind === "question") {
-      if (!question.trim()) return toast({ title: "Введіть питання" });
-      content = {
-        question,
-        options: options.split("\n").map((o) => o.trim()).filter(Boolean),
-        correct: correct.trim() || null,
-      };
-    } else if (kind === "word") {
-      if (!term.trim()) return toast({ title: "Введіть слово" });
-      content = { term, article, translation, example };
-    } else if (kind === "interactive") {
-      if (!interactiveId) return toast({ title: "Виберіть інтерактивну сторінку" });
-      content = { page_id: interactiveId };
-    }
-    setBusy(true);
+  const load = async () => {
     try {
-      const it = await addLiveItem(classId, section, kind, title.trim() || null, content);
-      onAdded(it);
-      toast({ title: "Додано — учень уже бачить" });
-      setTitle(""); setBody(""); setUrl(""); setQuestion(""); setOptions(""); setCorrect("");
-      setTerm(""); setArticle(""); setTranslation(""); setExample("");
+      const rows = await listPresentations();
+      setList(rows);
+      if (current) setSelected(rows.find((p) => p.id === current.presentation_id) ?? null);
     } catch (e: any) {
-      toast({ title: "Помилка", description: e.message, variant: "destructive" });
-    } finally {
-      setBusy(false);
+      toast({ title: "Не вдалося завантажити презентації", description: e.message, variant: "destructive" });
     }
   };
 
-  const input = "w-full px-3 py-2 rounded-xl border border-slate-200 text-sm";
+  useEffect(() => { load(); }, []);
+
+  const upload = async (file: File) => {
+    setBusy("Читаємо PDF…");
+    try {
+      const p = await uploadPresentation({ ownerId: teacherId, file, onProgress: setBusy });
+      setList((prev) => [p, ...prev]);
+      setSelected(p);
+      setPage(0);
+      toast({ title: "Презентацію додано", description: `Слайдів: ${p.page_count}` });
+    } catch (e: any) {
+      toast({ title: "Помилка", description: e.message, variant: "destructive" });
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const step = (d: number) => {
+    if (!selected) return;
+    const next = Math.min(Math.max(page + d, 0), Math.max(selected.page_count - 1, 0));
+    setPage(next);
+    if (current?.presentation_id === selected.id) onTransfer(selected.id, next);
+  };
 
   return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap gap-2">
-        {kinds.map((k) => (
-          <button
-            key={k}
-            onClick={() => setKind(k)}
-            className={`px-3 py-1.5 rounded-xl text-xs font-medium border ${
-              k === kind ? "border-indigo-300 bg-indigo-50 text-indigo-700" : "border-slate-200 text-slate-600"
-            }`}
-          >
-            {k === "text" ? "Текст / теорія" : k === "audio" ? "Аудіо" : k === "question" ? "Питання" : k === "interactive" ? "Інтерактивна сторінка" : "Слово"}
-          </button>
-        ))}
-      </div>
+    <Card className="p-5 space-y-4">
+      <SectionHeader title="Презентація" subtitle="Виберіть, перегляньте — і перенесіть учня" />
 
-      <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Заголовок (необов’язково)" className={input} />
+      <label className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-indigo-200 bg-indigo-50 text-indigo-700 text-sm font-medium cursor-pointer">
+        {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+        {busy || "Додати PDF"}
+        <input
+          type="file"
+          accept="application/pdf"
+          className="hidden"
+          onChange={(e) => { const f = e.target.files?.[0]; if (f) upload(f); e.currentTarget.value = ""; }}
+        />
+      </label>
 
-      {kind === "text" && (
-        <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={5} placeholder="Текст, правило, приклади…" className={input} />
-      )}
-      {kind === "audio" && (
-        <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="URL аудіофайлу" className={input} />
-      )}
-      {kind === "question" && (
-        <>
-          <input value={question} onChange={(e) => setQuestion(e.target.value)} placeholder="Питання" className={input} />
-          <textarea value={options} onChange={(e) => setOptions(e.target.value)} rows={3}
-            placeholder="Варіанти — по одному в рядку (порожньо = відкрита відповідь)" className={input} />
-          <input value={correct} onChange={(e) => setCorrect(e.target.value)} placeholder="Правильна відповідь" className={input} />
-        </>
-      )}
-      {kind === "interactive" && (
-        <select value={interactiveId} onChange={(e) => setInteractiveId(e.target.value)} className={input}>
-          <option value="">— виберіть опубліковану сторінку —</option>
-          {pages.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.title}
-              {p.level ? ` · ${p.level}` : ""}
-            </option>
+      {list.length === 0 ? (
+        <p className="text-sm text-slate-500">Ще немає презентацій — додайте PDF.</p>
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          {list.map((p) => (
+            <button
+              key={p.id}
+              onClick={() => { setSelected(p); setPage(0); }}
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium border ${
+                selected?.id === p.id ? "border-indigo-300 bg-indigo-50 text-indigo-700" : "border-slate-200 text-slate-600 hover:bg-slate-50"
+              }`}
+            >
+              {p.title} · {p.page_count}
+            </button>
           ))}
-        </select>
-      )}
-      {kind === "word" && (
-        <div className="grid gap-3 md:grid-cols-2">
-          <input value={article} onChange={(e) => setArticle(e.target.value)} placeholder="Артикль (der / die / das)" className={input} />
-          <input value={term} onChange={(e) => setTerm(e.target.value)} placeholder="Слово або фраза" className={input} />
-          <input value={translation} onChange={(e) => setTranslation(e.target.value)} placeholder="Переклад" className={input} />
-          <input value={example} onChange={(e) => setExample(e.target.value)} placeholder="Приклад" className={input} />
         </div>
       )}
 
-      <button
-        onClick={submit}
-        disabled={busy}
-        className="px-4 py-2 rounded-xl text-white text-sm font-medium disabled:opacity-50"
-        style={{ background: "#4F46E5" }}
-      >
-        {busy ? "Додаю…" : "Додати учню"}
-      </button>
-    </div>
+      {selected && (
+        <div className="space-y-3">
+          <PresentationView presentationId={selected.id} page={page} />
+          <div className="flex flex-wrap items-center gap-2">
+            <button onClick={() => step(-1)} className="p-2 rounded-xl border border-slate-200 hover:bg-slate-50">
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <span className="text-xs text-slate-500">
+              {page + 1} / {selected.page_count}
+            </span>
+            <button onClick={() => step(1)} className="p-2 rounded-xl border border-slate-200 hover:bg-slate-50">
+              <ChevronRight className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => onTransfer(selected.id, page)}
+              className="px-4 py-2 rounded-xl text-white text-sm font-medium"
+              style={{ background: "#0F172A" }}
+            >
+              Перенести учня сюди
+            </button>
+          </div>
+        </div>
+      )}
+    </Card>
   );
 }
 
+/* ───────── Блок-завдання ───────── */
+
+function BlocksPanel({ onTransfer }: { onTransfer: (kit: LessonKit) => void }) {
+  const [kits, setKits] = useState<LessonKit[]>([]);
+  const [selected, setSelected] = useState<LessonKit | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("lesson_kits")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(50);
+      setKits(((data ?? []) as any[]).map(normalizeKit));
+      setLoading(false);
+    })();
+  }, []);
+
+  return (
+    <Card className="p-5 space-y-4">
+      <SectionHeader title="Блок-завдання" subtitle="Готові уроки з бібліотеки уроків" />
+      {loading ? (
+        <p className="text-sm text-slate-500 animate-pulse">Завантаження…</p>
+      ) : kits.length === 0 ? (
+        <EmptyState title="Бібліотека уроків порожня" description="Створіть урок у розділі «Генератор уроку»." />
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          {kits.map((k) => (
+            <button
+              key={k.id}
+              onClick={() => setSelected(k)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium border text-left ${
+                selected?.id === k.id ? "border-indigo-300 bg-indigo-50 text-indigo-700" : "border-slate-200 text-slate-600 hover:bg-slate-50"
+              }`}
+            >
+              {k.title}
+              {k.level ? ` · ${k.level}` : ""} · {k.blocks.length} завдань
+            </button>
+          ))}
+        </div>
+      )}
+
+      {selected && (
+        <div className="space-y-3">
+          <button
+            onClick={() => onTransfer(selected)}
+            className="px-4 py-2 rounded-xl text-white text-sm font-medium"
+            style={{ background: "#0F172A" }}
+          >
+            Перенести учня сюди
+          </button>
+          <div className="rounded-2xl border border-slate-200 p-3">
+            <p className="text-xs text-slate-500 mb-2">Так це бачить учень</p>
+            <StudentBlocks
+              blocks={kitBlocksToLessonBlocks(selected.blocks, `live-${selected.id}`)}
+              showActions={false}
+              persist={false}
+              readOnly
+            />
+          </div>
+        </div>
+      )}
+    </Card>
+  );
+}
