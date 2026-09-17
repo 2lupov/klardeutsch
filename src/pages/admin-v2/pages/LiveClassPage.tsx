@@ -20,6 +20,7 @@ import { listPresentations, uploadPresentation, type Presentation } from "@/lib/
 import PresentationView from "@/components/tutoring/PresentationView";
 import { normalizeKit, kitBlocksToLessonBlocks, type LessonKit } from "@/lib/lesson-kits";
 import StudentBlocks from "@/components/blocks/StudentBlocks";
+import { LaserSurface, useLaserSender, type LaserPoint } from "@/components/live/LaserPointer";
 
 interface StudentRow { user_id: string; display_name: string | null; email: string | null }
 
@@ -154,6 +155,9 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
     view: (cls as any).live_view ?? null,
   });
   const boardApi = useRef<BoardApi | null>(null);
+  const [laser, setLaser] = useState(false);
+  const sendLaser = useLaserSender(cls.id);
+  const onLaserMove = (p: LaserPoint) => sendLaser(p);
 
   const finish = async () => {
     await endLiveClass(cls.id);
@@ -188,6 +192,15 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
           <p className="text-[11px] text-indigo-600 mt-0.5">Учень зараз бачить: {whereIsStudent()}</p>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => { const next = !laser; setLaser(next); if (!next) sendLaser(null); }}
+            className={`px-3 py-2 rounded-xl text-sm font-medium border ${
+              laser ? "border-red-300 bg-red-50 text-red-700" : "border-slate-200 text-slate-700 hover:bg-slate-50"
+            }`}
+            title="Червона цяточка на екрані учня"
+          >
+            🔴 Вказівка
+          </button>
           <button onClick={() => setDictOpen(true)} className="px-3 py-2 rounded-xl border border-slate-200 text-sm text-slate-700 hover:bg-slate-50">
             🐼 Словник
           </button>
@@ -223,7 +236,9 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
 
       {/* Дошка завжди змонтована — перехід між розділами нічого не стирає */}
       <div className={section === "board" ? "space-y-5" : "hidden"}>
-        <BoardEditor classId={cls.id} initial={cls.board || []} apiRef={boardApi} />
+        <LaserSurface active={laser} onMove={onLaserMove}>
+          <BoardEditor classId={cls.id} initial={cls.board || []} apiRef={boardApi} />
+        </LaserSurface>
         <button
           onClick={() => transfer("board", null)}
           className="px-4 py-2 rounded-xl text-white text-sm font-medium"
@@ -235,19 +250,23 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
       </div>
 
       {section === "slides" && (
+        <LaserSurface active={laser} onMove={onLaserMove}>
         <SlidesPanel
           teacherId={cls.teacher_id}
           current={studentView.view?.type === "slide" ? studentView.view : null}
           onTransfer={(presentationId, page) => transfer("slides", { type: "slide", presentation_id: presentationId, page })}
         />
+        </LaserSurface>
       )}
 
       {section === "blocks" && (
+        <LaserSurface active={laser} onMove={onLaserMove}>
         <BlocksPanel
           onTransfer={(kit) =>
             transfer("blocks", { type: "blocks", kit_id: kit.id, title: kit.title, blocks: kit.blocks })
           }
         />
+        </LaserSurface>
       )}
 
       <PandaLookupDialog open={dictOpen} onOpenChange={setDictOpen} />
