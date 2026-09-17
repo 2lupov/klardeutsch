@@ -20,6 +20,7 @@ import {
   Library,
   Wand2,
   Sparkles,
+  Presentation,
 } from "lucide-react";
 
 import DashboardPage from "./pages/DashboardPage";
@@ -34,6 +35,7 @@ import LiveClassPage from "./pages/LiveClassPage";
 import MaterialsPage from "./pages/MaterialsPage";
 import BookLibraryPage from "./pages/BookLibraryPage";
 import LessonLibraryPage from "./pages/LessonLibraryPage";
+import PresentationsPage from "./pages/PresentationsPage";
 import SettingsPage from "./pages/SettingsPage";
 import { AdminLangProvider } from "./LanguageContext";
 
@@ -44,6 +46,7 @@ type NavKey =
   | "library"
   | "generator"
   | "kits"
+  | "slides"
   | "live"
   | "assignments"
   | "students"
@@ -69,6 +72,7 @@ const NAV: { key: NavKey; label: string; icon: any }[] = [
   { key: "library", label: "Бібліотека книг", icon: Library },
   { key: "generator", label: "Генератор уроку", icon: Wand2 },
   { key: "kits", label: "Бібліотека уроків", icon: Sparkles },
+  { key: "slides", label: "Презентації", icon: Presentation },
   { key: "live", label: "Живий клас", icon: Radio },
   { key: "assignments", label: "Завдання", icon: ClipboardList },
   { key: "students", label: "Учні", icon: Users },
@@ -261,6 +265,8 @@ function PageRouter({ active }: { active: NavKey }) {
       return <LessonGeneratorPage />;
     case "kits":
       return <LessonLibraryPage />;
+    case "slides":
+      return <PresentationsPage />;
     case "live":
       return <LiveClassPage />;
     case "assignments":

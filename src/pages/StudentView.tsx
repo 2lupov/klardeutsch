@@ -12,6 +12,7 @@ import { isRichType, hasRichPayload } from "@/components/exercises/richExercises
 import ReadingTaskView from "@/components/tutoring/ReadingTaskView";
 import StudentBlocks from "@/components/blocks/StudentBlocks";
 import PandaLookupFab from "@/components/dictionary/PandaLookup";
+import PresentationView from "@/components/tutoring/PresentationView";
 
 
 
@@ -317,6 +318,12 @@ const StudentView = () => {
               </div>
             )}
 
+            {v.type === "slide" && (
+              <div className="h-[75vh]">
+                <PresentationView presentationId={v.presentationId} page={v.page} />
+              </div>
+            )}
+
             {v.type === "whiteboard" && (
               <WhiteboardView strokes={session.whiteboard || []} />
             )}
@@ -329,14 +336,18 @@ const StudentView = () => {
         <motion.div
           className="fixed pointer-events-none z-50"
           animate={{ left: `${highlight.x}%`, top: `${highlight.y}%` }}
-          transition={{ type: "spring", stiffness: 200, damping: 25 }}
+          transition={{ type: "spring", stiffness: 400, damping: 30, mass: 0.3 }}
           style={{ transform: "translate(-50%, -50%)" }}
         >
-          <div className="relative">
-            <div className="w-12 h-12 rounded-full bg-primary/30 animate-ping absolute" />
-            <div className="w-12 h-12 rounded-full bg-primary border-4 border-background relative" />
+          {/* Лазерна указка вчителя */}
+          <div className="relative w-6 h-6 flex items-center justify-center">
+            <div className="absolute w-10 h-10 rounded-full bg-red-500/25 blur-md animate-pulse" />
+            <div
+              className="relative w-3.5 h-3.5 rounded-full bg-red-600"
+              style={{ boxShadow: "0 0 10px 4px rgba(239,68,68,0.75), 0 0 24px 10px rgba(239,68,68,0.35)" }}
+            />
             {highlight.label && (
-              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-sm font-bold whitespace-nowrap">
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-lg bg-red-600 text-white text-sm font-bold whitespace-nowrap">
                 {highlight.label}
               </div>
             )}

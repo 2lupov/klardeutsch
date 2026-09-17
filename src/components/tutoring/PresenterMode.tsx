@@ -5,6 +5,7 @@ import {
   ChevronLeft, ChevronRight, Sparkles, Clock, FileText, BookOpen,
   ListChecks, MessageSquare, ExternalLink, StickyNote, Trash2, Play,
   Hand, ThumbsUp, HelpCircle, Flame, MessageCircle,
+  Presentation as PresIcon, Upload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,6 +19,8 @@ import ReadingTaskView from "./ReadingTaskView";
 import StudentBlocks from "@/components/blocks/StudentBlocks";
 import { blockLabel } from "@/components/blocks/BlockRenderer";
 import type { LessonBlock } from "@/components/blocks/types";
+import PresentationView from "./PresentationView";
+import { listPresentations, uploadPresentation, type Presentation as Pres } from "@/lib/presentations";
 
 
 interface Props {
@@ -47,6 +50,15 @@ const PresenterMode = ({ lesson, words, exercises, readingTasks = [], studentNam
   const previewRef = useRef<HTMLDivElement>(null);
   const currentPath = useRef<string>("");
   const [blocks, setBlocks] = useState<LessonBlock[]>([]);
+  const [presentations, setPresentations] = useState<Pres[]>([]);
+  const [presBusy, setPresBusy] = useState<string | null>(null);
+  const presFileRef = useRef<HTMLInputElement>(null);
+
+  // Презентації викладача
+  useEffect(() => {
+    listPresentations().then(setPresentations).catch(() => {});
+  }, []);
+
 
   // Блоки урока (конструктор)
   useEffect(() => {
@@ -116,6 +128,40 @@ const PresenterMode = ({ lesson, words, exercises, readingTasks = [], studentNam
 
   const pushHighlight = async (x: number, y: number, visible: boolean, label?: string) => {
     if (session) await updateSession(session.id, { highlight: { x, y, visible, label } as any });
+  };
+
+  // Презентації: показати слайд / перегорнути / завантажити новий PDF
+  const slideView = view.type === "slide" ? (view as any) : null;
+  const activePres = slideView ? presentations.find((p) => p.id === slideView.presentationId) : null;
+
+  const stepSlide = (delta: number) => {
+    if (!slideView || !activePres) return;
+    const next = Math.min(Math.max(1, slideView.page + delta), activePres.page_count || 1);
+    if (next !== slideView.page) pushView({ type: "slide", presentationId: activePres.id, page: next });
+  };
+
+  const uploadPres = async (files: FileList | null) => {
+    if (!files?.length) return;
+    const file = files[0];
+    if (!/\.pdf$/i.test(file.name)) {
+      toast.error("Підтримуємо PDF — збережіть презентацію як PDF");
+      return;
+    }
+    try {
+      setPresBusy("Готуємо слайди…");
+      const p = await uploadPresentation({
+        ownerId: lesson.teacher_id,
+        file,
+        onProgress: (t) => setPresBusy(t),
+      });
+      setPresentations((prev) => [p, ...prev]);
+      toast.success("Презентацію додано 🐼");
+      pushView({ type: "slide", presentationId: p.id, page: 1 });
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setPresBusy(null);
+    }
   };
 
   // Open student window
@@ -358,6 +404,45 @@ const PresenterMode = ({ lesson, words, exercises, readingTasks = [], studentNam
             </div>
           </PanelCard>
 
+          <PanelCard
+            title={`Презентації (${presentations.length})`}
+            icon={<PresIcon className="w-4 h-4" />}
+            actions={
+              <>
+                <input ref={presFileRef} type="file" accept="application/pdf" className="hidden"
+                  onChange={(e) => uploadPres(e.target.files)} />
+                <Button size="sm" variant="outline" className="h-7 gap-1.5 text-xs" disabled={!!presBusy}
+                  onClick={() => presFileRef.current?.click()}>
+                  <Upload className="w-3.5 h-3.5" /> PDF
+                </Button>
+              </>
+            }
+            scroll
+          >
+            {presBusy && <div className="text-xs text-primary font-bold px-2 pb-1">{presBusy}</div>}
+            <div className="space-y-1">
+              {presentations.map((p) => {
+                const active = slideView?.presentationId === p.id;
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => pushView({ type: "slide", presentationId: p.id, page: 1 })}
+                    className={`w-full text-left rounded-lg border ${active ? "border-primary bg-primary/5" : "border-border bg-card hover:border-primary/40"} px-2.5 py-2 text-sm`}
+                  >
+                    📊 {p.title}
+                    <span className="text-xs text-muted-foreground ml-1.5">{p.page_count} сл.</span>
+                  </button>
+                );
+              })}
+              {presentations.length === 0 && (
+                <div className="text-xs text-muted-foreground p-2">
+                  Немає презентацій. Додайте PDF кнопкою вище або в розділі «Презентації».
+                </div>
+              )}
+            </div>
+          </PanelCard>
+
+
         </div>
 
         {/* CENTER: preview = что видит ученик */}
@@ -368,8 +453,21 @@ const PresenterMode = ({ lesson, words, exercises, readingTasks = [], studentNam
             actions={
               <div className="flex items-center gap-1.5">
                 <Button size="sm" variant={highlightOn ? "default" : "outline"} className="h-7 gap-1.5" onClick={() => { setHighlightOn((v) => !v); if (highlightOn) pushHighlight(0, 0, false); }}>
-                  <Crosshair className="w-3.5 h-3.5" /> Указка
+                  <Crosshair className="w-3.5 h-3.5" /> Лазерна указка
                 </Button>
+                {slideView && activePres && (
+                  <div className="flex items-center gap-1">
+                    <Button size="sm" variant="outline" className="h-7 px-2" onClick={() => stepSlide(-1)}>
+                      <ChevronLeft className="w-3.5 h-3.5" />
+                    </Button>
+                    <span className="text-xs font-bold text-muted-foreground">
+                      {slideView.page} / {activePres.page_count}
+                    </span>
+                    <Button size="sm" variant="outline" className="h-7 px-2" onClick={() => stepSlide(1)}>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                )}
                 {view.type === "whiteboard" && (
                   <Button size="sm" variant="outline" className="h-7 gap-1.5" onClick={clearWB}>
                     <Trash2 className="w-3.5 h-3.5" /> Очистить
@@ -492,6 +590,9 @@ const PreviewContent = ({ view, words, exercises, readingTasks, blocks, theory, 
     const rt = (readingTasks || []).find((x: any) => x.id === view.taskId);
     if (!rt) return <div className="p-4 text-muted-foreground">Задание не найдено</div>;
     return <div className="p-4"><ReadingTaskView task={rt} canAnswer showPhotos persist={false} /></div>;
+  }
+  if (view.type === "slide") {
+    return <PresentationView presentationId={view.presentationId} page={view.page} compact />;
   }
   if (view.type === "block") {
     const bl = (blocks || []).find((x: any) => x.id === view.blockId);
