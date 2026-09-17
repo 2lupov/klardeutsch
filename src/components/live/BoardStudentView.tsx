@@ -19,6 +19,21 @@ const uid = () => "s" + Math.random().toString(36).slice(2, 10);
 
 type Tool = "pan" | "pen" | "text" | "erase";
 
+/** Стікер-курсори: олівець і гумка їдуть точно за мишкою (кінчик = гаряча точка). */
+const PEN_CURSOR =
+  "url(\"data:image/svg+xml;utf8," +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><g transform="translate(2,2)"><path d="M2 30l1.6-6.2L21.4 6l4.6 4.6L8.2 28.4z" fill="%23FACC15" stroke="%230F172A" stroke-width="1.6" stroke-linejoin="round"/><path d="M21.4 6l3-3a2.2 2.2 0 013.2 0l1.4 1.4a2.2 2.2 0 010 3.2l-3 3z" fill="%230F172A"/><path d="M2 30l5.2-1.4L3.6 25z" fill="%230F172A"/></g></svg>`,
+  ) +
+  "\") 2 34, crosshair";
+const ERASER_CURSOR =
+  "url(\"data:image/svg+xml;utf8," +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><g transform="translate(3,3)"><rect x="4" y="14" width="20" height="12" rx="3" transform="rotate(-35 14 20)" fill="%23F9A8D4" stroke="%230F172A" stroke-width="1.6"/><rect x="14" y="6" width="12" height="12" rx="2.5" transform="rotate(-35 20 12)" fill="%23E5E7EB" stroke="%230F172A" stroke-width="1.6"/></g></svg>`,
+  ) +
+  "\") 6 30, cell";
+
+
 /**
  * Нескінченна дошка для учня: він може сам рухати полотно, зумити,
  * а також писати й малювати — все летить вчителю в реальному часі.
@@ -44,12 +59,14 @@ export default function BoardStudentView({
   const [ownCam, setOwnCam] = useState<BoardCam>(teacherCam);
   const cam = follow ? teacherCam : ownCam;
 
-  const [tool, setTool] = useState<Tool>("pen");
+  const [tool, setTool] = useState<Tool>("pan");
   const [color, setColor] = useState(COLORS[0]);
   /** Локальні елементи учня — доки вчитель не поверне їх у спільній дошці. */
   const [mine, setMine] = useState<BoardEl[]>([]);
   const [editing, setEditing] = useState<string | null>(null);
-  const [pxW, setPxW] = useState(BOARD_W);
+  /** Геометрія SVG: масштаб і зсуви через preserveAspectRatio="slice". */
+  const [view, setView] = useState({ s: 1, dx: 0, dy: 0 });
+
 
   const svgRef = useRef<SVGSVGElement | null>(null);
   const textInputRef = useRef<HTMLTextAreaElement | null>(null);
@@ -69,10 +86,18 @@ export default function BoardStudentView({
     input.setSelectionRange(input.value.length, input.value.length);
   }, [editing]);
 
-  useLayoutEffect(() => {
+  /** Обчислює масштаб/зсув: viewBox масштабується "cover", тому центрується й обрізається. */
+  const measure = () => {
     const svg = svgRef.current;
-    if (svg) setPxW(svg.getBoundingClientRect().width || BOARD_W);
-  }, []);
+    if (!svg) return;
+    const r = svg.getBoundingClientRect();
+    if (!r.width || !r.height) return;
+    const s = Math.max(r.width / BOARD_W, r.height / BOARD_H);
+    setView({ s, dx: (r.width - BOARD_W * s) / 2, dy: (r.height - BOARD_H * s) / 2 });
+  };
+
+  useLayoutEffect(() => { measure(); }, []);
+
 
   const serverIds = useMemo(() => new Set(content.map((e) => e.id)), [content]);
   const pending = mine.filter((e) => !serverIds.has(e.id));
@@ -96,10 +121,21 @@ export default function BoardStudentView({
     report(c);
   };
 
+  /**
+   * Частки всередині viewBox (0..1 по 1000x750). Враховує "cover"-обрізання,
+   * інакше малюнок зʼїжджав вище/нижче за мишку.
+   */
   const frac = (clientX: number, clientY: number) => {
     const r = svgRef.current!.getBoundingClientRect();
-    return { fx: (clientX - r.left) / r.width, fy: (clientY - r.top) / r.height };
+    const s = Math.max(r.width / BOARD_W, r.height / BOARD_H) || 1;
+    const dx = (r.width - BOARD_W * s) / 2;
+    const dy = (r.height - BOARD_H * s) / 2;
+    return {
+      fx: (clientX - r.left - dx) / (BOARD_W * s),
+      fy: (clientY - r.top - dy) / (BOARD_H * s),
+    };
   };
+
 
   const world = (clientX: number, clientY: number) => {
     const { fx, fy } = frac(clientX, clientY);
@@ -124,7 +160,7 @@ export default function BoardStudentView({
   const eraseAtPoint = (p: { x: number; y: number }) => {
     const own = allRef.current.filter(isMine);
     if (own.length === 0) return;
-    const radius = (12 / BOARD_W) * camRef.current.w;
+    const radius = (14 * camRef.current.w) / (BOARD_W * (view.s || 1));
     const r = eraseAt(own, p, radius, undefined);
     if (!r.changed) return;
     setMine(r.next);
@@ -163,11 +199,12 @@ export default function BoardStudentView({
   useEffect(() => {
     const el = svgRef.current;
     if (!el || typeof ResizeObserver === "undefined") return;
-    const ro = new ResizeObserver(() => setPxW(el.getBoundingClientRect().width || BOARD_W));
+    const ro = new ResizeObserver(() => measure());
     ro.observe(el);
-    setPxW(el.getBoundingClientRect().width || BOARD_W);
+    measure();
     return () => ro.disconnect();
   }, []);
+
 
   /* ─────────── малювання ─────────── */
 
@@ -239,7 +276,9 @@ export default function BoardStudentView({
     upsertMine({ ...el, text }, true);
   };
 
-  const cursor = tool === "pan" ? "grab" : tool === "erase" ? "cell" : "crosshair";
+  const cursor =
+    tool === "pan" ? "grab" : tool === "erase" ? ERASER_CURSOR : tool === "pen" ? PEN_CURSOR : "text";
+
 
   return (
     <div className={`relative ${className || ""}`}>
@@ -251,8 +290,9 @@ export default function BoardStudentView({
         style={{
           cursor,
           backgroundImage: "radial-gradient(hsl(var(--border)) 1px, transparent 1px)",
-          backgroundSize: `${24 / cam.w}px ${24 / cam.w}px`,
-          backgroundPosition: `${(-cam.x / cam.w) * 100}% ${(-cam.y / cam.w) * 100}%`,
+          backgroundSize: `${(24 * view.s) / cam.w}px ${(24 * view.s) / cam.w}px`,
+          backgroundPosition: `${view.dx - (cam.x / cam.w) * BOARD_W * view.s}px ${view.dy - (cam.y / cam.w) * BOARD_H * view.s}px`,
+
         }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
@@ -272,9 +312,11 @@ export default function BoardStudentView({
       </svg>
 
       {editingEl && (() => {
-        const fs = ((editingEl.size || 0.045) * BOARD_H * (pxW / BOARD_W)) / cam.w;
-        const leftPx = (((editingEl.x || 0) - cam.x) / cam.w) * pxW;
-        const topPx = (((editingEl.y || 0) - cam.y) / cam.w) * pxW * (BOARD_H / BOARD_W) - fs * 0.93;
+        const fs = ((editingEl.size || 0.045) * BOARD_H * view.s) / cam.w;
+        const leftPx = view.dx + (((editingEl.x || 0) - cam.x) / cam.w) * BOARD_W * view.s;
+        const topPx = view.dy + (((editingEl.y || 0) - cam.y) / cam.w) * BOARD_H * view.s - fs * 0.93;
+        const boxW = BOARD_W * view.s + 2 * view.dx;
+
         const lines = Math.max(1, String(editingEl.text || "").split("\n").length);
         const cols = Math.max(6, ...String(editingEl.text || "").split("\n").map((l) => l.length + 2));
         return (
@@ -303,7 +345,7 @@ export default function BoardStudentView({
                 fontSize: `${fs}px`,
                 lineHeight: 1.25,
                 caretColor: editingEl.color || "#0F172A",
-                width: `${Math.max(fs * 4, Math.min(pxW - leftPx - 4, fs * 0.62 * cols))}px`,
+                width: `${Math.max(fs * 4, Math.min(boxW - leftPx - 4, fs * 0.62 * cols))}px`,
                 height: `${fs * 1.25 * lines + 2}px`,
                 fontFamily: "Space Grotesk, system-ui, sans-serif",
               }}
@@ -315,11 +357,12 @@ export default function BoardStudentView({
       {/* панель інструментів учня */}
       <div className="absolute top-3 left-3 flex items-center gap-1.5 rounded-2xl bg-card/90 backdrop-blur border border-border p-1.5 shadow-sm">
         {([
+          { k: "pan", icon: Hand, title: "Рухати полотно" },
           { k: "pen", icon: Pencil, title: "Малювати" },
           { k: "text", icon: Type, title: "Писати текст" },
           { k: "erase", icon: Eraser, title: "Стерти своє" },
-          { k: "pan", icon: Hand, title: "Рухати полотно" },
         ] as { k: Tool; icon: any; title: string }[]).map(({ k, icon: Icon, title }) => (
+
           <button
             key={k}
             onClick={() => setTool(k)}
