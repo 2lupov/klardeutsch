@@ -11,6 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import pandaCelebrating from "@/assets/mascot/panda-celebrating.png";
 import pandaSleeping from "@/assets/mascot/panda-sleeping.png";
+import { PandaLookupDialog } from "@/components/dictionary/PandaLookup";
 
 type AssignmentItem =
   | {
@@ -76,6 +77,7 @@ const StudentAssignments = () => {
 const [items, setItems] = useState<AssignmentItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<Filter>("active");
+  const [dictOpen, setDictOpen] = useState(false);
 
   // Live-session auto-join is handled globally in AppLayout (useStudentLiveSync).
 
