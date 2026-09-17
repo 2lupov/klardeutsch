@@ -453,8 +453,21 @@ const PresenterMode = ({ lesson, words, exercises, readingTasks = [], studentNam
             actions={
               <div className="flex items-center gap-1.5">
                 <Button size="sm" variant={highlightOn ? "default" : "outline"} className="h-7 gap-1.5" onClick={() => { setHighlightOn((v) => !v); if (highlightOn) pushHighlight(0, 0, false); }}>
-                  <Crosshair className="w-3.5 h-3.5" /> Указка
+                  <Crosshair className="w-3.5 h-3.5" /> Лазерна указка
                 </Button>
+                {slideView && activePres && (
+                  <div className="flex items-center gap-1">
+                    <Button size="sm" variant="outline" className="h-7 px-2" onClick={() => stepSlide(-1)}>
+                      <ChevronLeft className="w-3.5 h-3.5" />
+                    </Button>
+                    <span className="text-xs font-bold text-muted-foreground">
+                      {slideView.page} / {activePres.page_count}
+                    </span>
+                    <Button size="sm" variant="outline" className="h-7 px-2" onClick={() => stepSlide(1)}>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                )}
                 {view.type === "whiteboard" && (
                   <Button size="sm" variant="outline" className="h-7 gap-1.5" onClick={clearWB}>
                     <Trash2 className="w-3.5 h-3.5" /> Очистить
