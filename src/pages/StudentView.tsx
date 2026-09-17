@@ -11,6 +11,7 @@ import RichExercise from "@/components/exercises/RichExercise";
 import { isRichType, hasRichPayload } from "@/components/exercises/richExercises";
 import ReadingTaskView from "@/components/tutoring/ReadingTaskView";
 import StudentBlocks from "@/components/blocks/StudentBlocks";
+import PandaLookupFab from "@/components/dictionary/PandaLookup";
 
 
 
@@ -374,6 +375,8 @@ const StudentView = () => {
           })}
         </div>
       </div>
+
+      <PandaLookupFab label="Словник" />
 
       <SessionChat sessionId={sessionId} role="student" />
     </div>
