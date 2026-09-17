@@ -15,6 +15,10 @@ import TeacherAIAssistant from "./TeacherAIAssistant";
 import LessonTimeline from "./LessonTimeline";
 import SessionChat from "./SessionChat";
 import ReadingTaskView from "./ReadingTaskView";
+import StudentBlocks from "@/components/blocks/StudentBlocks";
+import { blockLabel } from "@/components/blocks/BlockRenderer";
+import type { LessonBlock } from "@/components/blocks/types";
+
 
 interface Props {
   lesson: any;
@@ -364,7 +368,7 @@ const PresenterMode = ({ lesson, words, exercises, readingTasks = [], studentNam
               onMouseLeave={handlePreviewLeave}
               className={`w-full h-full rounded-xl bg-background border-2 border-dashed border-border relative overflow-auto ${highlightOn ? "cursor-crosshair" : ""}`}
             >
-              <PreviewContent view={view} words={words} exercises={exercises} readingTasks={readingTasks} theory={lesson.theory || ""}
+              <PreviewContent view={view} words={words} exercises={exercises} readingTasks={readingTasks} blocks={blocks} theory={lesson.theory || ""}
                 strokes={strokes} drawing={drawing}
                 onWBStart={wbStart} onWBMove={wbMove} onWBEnd={wbEnd}
               />
@@ -436,7 +440,7 @@ const NavBtn = ({ active, onClick, children }: any) => (
   </button>
 );
 
-const PreviewContent = ({ view, words, exercises, readingTasks, theory, strokes, onWBStart, onWBMove, onWBEnd }: any) => {
+const PreviewContent = ({ view, words, exercises, readingTasks, blocks, theory, strokes, onWBStart, onWBMove, onWBEnd }: any) => {
   if (view.type === "welcome") {
     return <div className="h-full flex items-center justify-center text-center p-8 text-muted-foreground">
       <div><Sparkles className="w-10 h-10 mx-auto mb-3 text-primary" /><div className="font-display font-bold text-lg">Готовы начать?</div></div>
