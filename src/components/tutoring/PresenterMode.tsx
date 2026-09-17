@@ -46,10 +46,27 @@ const PresenterMode = ({ lesson, words, exercises, readingTasks = [], studentNam
   const startedAt = useRef(Date.now());
   const previewRef = useRef<HTMLDivElement>(null);
   const currentPath = useRef<string>("");
+  const [blocks, setBlocks] = useState<LessonBlock[]>([]);
+
+  // Блоки урока (конструктор)
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      const { data } = await supabase
+        .from("tutoring_lesson_blocks")
+        .select("*")
+        .eq("lesson_id", lesson.id)
+        .eq("visible_to_student", true)
+        .order("sort_order");
+      if (alive) setBlocks(((data ?? []) as any[]).map((b) => ({ ...b, payload: b.payload ?? {} })) as LessonBlock[]);
+    })();
+    return () => { alive = false; };
+  }, [lesson.id]);
 
   // Init session
   useEffect(() => {
     (async () => {
+
       try {
         const s = await startOrResumeSession({
           id: lesson.id, teacher_id: lesson.teacher_id, student_id: lesson.student_id,
