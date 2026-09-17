@@ -16,6 +16,7 @@ import BoardStudentView from "@/components/live/BoardStudentView";
 import type { BoardCam } from "@/components/live/BoardRender";
 import { signedPageUrl } from "@/lib/books";
 import AddMyWordForm, { addMyWord } from "@/components/dictionary/AddMyWordForm";
+import PandaLookupFab, { PandaLookupPanel } from "@/components/dictionary/PandaLookup";
 import { BookmarkPlus } from "lucide-react";
 import InteractiveScene from "@/components/interactive/InteractiveScene";
 import { fetchInteractivePage, type SceneBlock } from "@/lib/interactivePages";
@@ -274,11 +275,15 @@ export default function LiveClass() {
         ) : (
           <div className="p-5 max-w-3xl space-y-5">
             {section === "vocab" && (
-              <div className="space-y-2">
-                <AddMyWordForm compact />
-                <a href="/vocabulary" className="inline-block text-xs text-primary underline">
-                  Відкрити мій словник →
-                </a>
+              <div className="space-y-5">
+                <div className="rounded-2xl border border-border bg-card p-4">
+                  <h3 className="font-display font-semibold text-foreground mb-3">🐼 Панда-словник</h3>
+                  <PandaLookupPanel />
+                </div>
+                <div className="rounded-2xl border border-border bg-card p-4">
+                  <h3 className="font-display font-semibold text-foreground mb-3">Додати своє слово</h3>
+                  <AddMyWordForm compact />
+                </div>
               </div>
             )}
             {sectionItems.length === 0 ? (
@@ -294,6 +299,7 @@ export default function LiveClass() {
         )}
       </main>
 
+      <PandaLookupFab label="Словник" />
     </div>
   );
 }
