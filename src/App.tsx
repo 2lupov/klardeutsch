@@ -141,10 +141,6 @@ const AppRoutes = () => {
         <Route path="/chat" element={<RequireAuth><Chat /></RequireAuth>} />
         <Route path="/assignments" element={<RequireAuth><StudentAssignments /></RequireAuth>} />
         <Route path="/vocabulary" element={<RequireAuth><StudentDictionary /></RequireAuth>} />
-        <Route path="/task/:id" element={<RequireAuth><StudentTask /></RequireAuth>} />
-        <Route path="/book-task/:id" element={<RequireAuth><StudentBookHomework /></RequireAuth>} />
-        <Route path="/blocks-task/:id" element={<RequireAuth><StudentBlocksTask /></RequireAuth>} />
-        <Route path="/minicourse/:id" element={<RequireAuth><StudentMiniCourse /></RequireAuth>} />
 
         <Route path="/interactive/:id" element={<RequireAuth><InteractivePage /></RequireAuth>} />
         <Route path="/course/:id" element={<RequireAuth><Course /></RequireAuth>} />
