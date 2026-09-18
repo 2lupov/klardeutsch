@@ -145,6 +145,11 @@ const StudentTask = () => {
         navigate(`/blocks-task/${id}`, { replace: true });
         return;
       }
+      if ((data as any).type === "minicourse") {
+        navigate(`/minicourse/${id}`, { replace: true });
+        return;
+      }
+
       if ((data as any).type === "book" || (data as any).type === "book_plan") {
         navigate(`/book-task/${id}`, { replace: true });
         return;
