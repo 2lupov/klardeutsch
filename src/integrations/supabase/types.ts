@@ -1630,12 +1630,15 @@ export type Database = {
           created_at: string
           focus: string
           id: string
+          kind: string
           last_assigned_at: string | null
           lektion_id: string | null
           level: string | null
           notes: string | null
           owner_id: string
           page_paths: Json
+          presentation_id: string | null
+          sections: Json
           source: string
           summary: string | null
           tags: string[]
@@ -1649,12 +1652,15 @@ export type Database = {
           created_at?: string
           focus?: string
           id?: string
+          kind?: string
           last_assigned_at?: string | null
           lektion_id?: string | null
           level?: string | null
           notes?: string | null
           owner_id: string
           page_paths?: Json
+          presentation_id?: string | null
+          sections?: Json
           source?: string
           summary?: string | null
           tags?: string[]
@@ -1668,12 +1674,15 @@ export type Database = {
           created_at?: string
           focus?: string
           id?: string
+          kind?: string
           last_assigned_at?: string | null
           lektion_id?: string | null
           level?: string | null
           notes?: string | null
           owner_id?: string
           page_paths?: Json
+          presentation_id?: string | null
+          sections?: Json
           source?: string
           summary?: string | null
           tags?: string[]

@@ -216,7 +216,10 @@ lessonTitle: lessonTitleMap.get(h.lesson_id),
                 ? `/book-task/${tk.id}`
                 : tk.type === "blocks"
                   ? `/blocks-task/${tk.id}`
-                  : `/task/${tk.id}`,
+                  : tk.type === "minicourse"
+                    ? `/minicourse/${tk.id}`
+                    : `/task/${tk.id}`,
+
             taskType: tk.type,
 due_at: tk.due_at,
             grade: sub?.grade ?? sub?.auto_score ?? null,

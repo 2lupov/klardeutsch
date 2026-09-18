@@ -6,6 +6,14 @@ export interface KitBlock {
   payload?: any;
 }
 
+export interface KitSection {
+  id: string;
+  title: string;
+  emoji: string;
+  summary: string | null;
+  blocks: KitBlock[];
+}
+
 export interface LessonKit {
   id: string;
   title: string;
@@ -20,7 +28,11 @@ export interface LessonKit {
   summary: string | null;
   last_assigned_at: string | null;
   created_at: string;
+  kind: string;
+  presentation_id: string | null;
+  sections: KitSection[];
 }
+
 
 
 /** Перетворює блоки набору в LessonBlock для рендера (без записів у базі). */
@@ -53,5 +65,17 @@ export function normalizeKit(row: any): LessonKit {
     summary: row.summary ?? null,
     last_assigned_at: row.last_assigned_at ?? null,
     created_at: row.created_at,
+    kind: row.kind ?? "lesson",
+    presentation_id: row.presentation_id ?? null,
+    sections: Array.isArray(row.sections)
+      ? (row.sections as any[]).map((s, i) => ({
+          id: String(s?.id ?? `s-${i}`),
+          title: String(s?.title ?? `Тема ${i + 1}`),
+          emoji: String(s?.emoji ?? "📘"),
+          summary: s?.summary ?? null,
+          blocks: Array.isArray(s?.blocks) ? s.blocks : [],
+        }))
+      : [],
   };
 }
+
