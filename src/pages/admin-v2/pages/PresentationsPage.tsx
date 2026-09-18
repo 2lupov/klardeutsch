@@ -142,11 +142,18 @@ export default function PresentationsPage() {
               </div>
               <div className="flex flex-wrap gap-2">
                 <button
+                  onClick={() => setCourseFor(p)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-bold"
+                >
+                  <Sparkles className="w-3.5 h-3.5" /> Зробити мінікурс (ШІ)
+                </button>
+                <button
                   onClick={() => openPreview(p)}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-bold hover:border-primary/50"
                 >
                   <Eye className="w-3.5 h-3.5" /> Подивитись
                 </button>
+
                 <button
                   onClick={async () => {
                     const title = window.prompt("Нова назва", p.title);
