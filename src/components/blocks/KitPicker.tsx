@@ -21,7 +21,7 @@ export default function KitPicker({ lessonId, startSortOrder, onInserted }: Prop
   useEffect(() => {
     if (!open) return;
     (async () => {
-      const { data } = await supabase.from("lesson_kits").select("*").order("created_at", { ascending: false }).limit(50);
+      const { data } = await supabase.from("lesson_kits").select("*").neq("kind", "minicourse").order("created_at", { ascending: false }).limit(50);
       setKits(((data ?? []) as any[]).map(normalizeKit));
     })();
   }, [open]);

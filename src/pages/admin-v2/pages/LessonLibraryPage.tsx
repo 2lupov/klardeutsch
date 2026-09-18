@@ -39,8 +39,10 @@ export default function LessonLibraryPage() {
     const { data, error } = await supabase
       .from("lesson_kits")
       .select("*")
+      .neq("kind", "minicourse")
       .order("created_at", { ascending: false })
       .limit(200);
+
     if (error) {
       toast({ title: "Не вдалося завантажити", description: error.message, variant: "destructive" });
       setKits([]);
