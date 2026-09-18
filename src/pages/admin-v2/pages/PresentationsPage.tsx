@@ -43,7 +43,21 @@ export default function PresentationsPage() {
 
   useEffect(() => {
     load();
+    loadCourses();
+    listAssignableStudents().then(setStudents).catch(() => {});
   }, []);
+
+  const giveCourse = async (course: MiniCourse, studentId: string) => {
+    if (!user) return;
+    try {
+      await assignMiniCourse(user.id, course, studentId);
+      setGiven((s) => [...s, `${course.id}:${studentId}`]);
+      toast.success("Курс у акаунті учня 🎉");
+    } catch (e: any) {
+      toast.error(e.message);
+    }
+  };
+
 
   const onFiles = async (files: FileList | null) => {
     if (!files?.length || !user) return;
