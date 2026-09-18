@@ -65,5 +65,17 @@ export function normalizeKit(row: any): LessonKit {
     summary: row.summary ?? null,
     last_assigned_at: row.last_assigned_at ?? null,
     created_at: row.created_at,
+    kind: row.kind ?? "lesson",
+    presentation_id: row.presentation_id ?? null,
+    sections: Array.isArray(row.sections)
+      ? (row.sections as any[]).map((s, i) => ({
+          id: String(s?.id ?? `s-${i}`),
+          title: String(s?.title ?? `Тема ${i + 1}`),
+          emoji: String(s?.emoji ?? "📘"),
+          summary: s?.summary ?? null,
+          blocks: Array.isArray(s?.blocks) ? s.blocks : [],
+        }))
+      : [],
   };
 }
+
