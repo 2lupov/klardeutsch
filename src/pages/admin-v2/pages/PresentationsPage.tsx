@@ -182,6 +182,69 @@ export default function PresentationsPage() {
         </div>
       )}
 
+      {courses.length > 0 && (
+        <section className="space-y-3">
+          <h2 className="text-lg font-display font-black flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-primary" /> Мінікурси з презентацій
+          </h2>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {courses.map((c) => (
+              <div key={c.id} className="rounded-2xl border border-border bg-card p-4 space-y-3">
+                <div className="font-bold leading-snug">{c.title}</div>
+                <div className="text-xs text-muted-foreground">
+                  {c.sections.length} тем · {c.level ?? "—"} · {new Date(c.created_at).toLocaleDateString("uk-UA")}
+                </div>
+                {c.summary && <p className="text-xs text-muted-foreground">{c.summary}</p>}
+                <div className="flex flex-wrap gap-1.5">
+                  {c.sections.map((s) => (
+                    <span key={s.id} className="px-2 py-1 rounded-lg bg-muted text-[11px] font-bold">
+                      {s.emoji} {s.title}
+                    </span>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setGiveFor(giveFor === c.id ? null : c.id)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-bold hover:border-primary/50"
+                >
+                  <UserPlus className="w-3.5 h-3.5" /> Додати учню
+                </button>
+                {giveFor === c.id && (
+                  <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto">
+                    {students.map((st) => {
+                      const done = given.includes(`${c.id}:${st.id}`);
+                      return (
+                        <button
+                          key={st.id}
+                          onClick={() => giveCourse(c, st.id)}
+                          className={`px-2.5 py-1.5 rounded-lg border text-[11px] font-bold ${
+                            done ? "border-emerald-500 text-emerald-600" : "border-border hover:border-primary/50"
+                          }`}
+                        >
+                          {done && <Check className="w-3 h-3 inline mr-1" />}
+                          {st.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {courseFor && (
+        <MiniCourseBuilder
+          presentation={courseFor}
+          onClose={() => {
+            setCourseFor(null);
+            loadCourses();
+          }}
+        />
+      )}
+
+
+
       {preview && (
         <div
           className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
