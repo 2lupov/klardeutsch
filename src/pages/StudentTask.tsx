@@ -141,7 +141,16 @@ const StudentTask = () => {
         navigate("/assignments");
         return;
       }
+      if ((data as any).type === "blocks") {
+        navigate(`/blocks-task/${id}`, { replace: true });
+        return;
+      }
+      if ((data as any).type === "book" || (data as any).type === "book_plan") {
+        navigate(`/book-task/${id}`, { replace: true });
+        return;
+      }
       let previewMode = false;
+
       if ((data as any).student_id !== user.id) {
         const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: user.id, _role: "admin" as any });
         const { data: isTeacher } = await supabase.rpc("has_role", { _user_id: user.id, _role: "teacher" as any });
