@@ -64,6 +64,8 @@ import StudentHomework from "./pages/StudentHomework";
 import StudentTask from "./pages/StudentTask";
 import StudentBookHomework from "./pages/StudentBookHomework";
 import StudentBlocksTask from "./pages/StudentBlocksTask";
+import StudentMiniCourse from "./pages/StudentMiniCourse";
+
 import StudentView from "./pages/StudentView";
 import LiveClass from "./pages/LiveClass";
 import StudentDictionary from "./pages/StudentDictionary";
