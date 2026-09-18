@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Loader2, Upload, Trash2, Pencil, Presentation as PresIcon, ChevronLeft, ChevronRight, Eye } from "lucide-react";
+import { Loader2, Upload, Trash2, Pencil, Presentation as PresIcon, ChevronLeft, ChevronRight, Eye, Sparkles, UserPlus, Check } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -10,6 +10,9 @@ import {
   slideUrls,
   type Presentation,
 } from "@/lib/presentations";
+import MiniCourseBuilder from "@/components/minicourse/MiniCourseBuilder";
+import { assignMiniCourse, listMiniCourses, type MiniCourse } from "@/lib/minicourse";
+import { listAssignableStudents, type AssignableStudent } from "@/lib/kit-from-book";
 
 export default function PresentationsPage() {
   const { user } = useAuth();
@@ -17,7 +20,15 @@ export default function PresentationsPage() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [preview, setPreview] = useState<{ p: Presentation; urls: string[]; page: number } | null>(null);
+  const [courseFor, setCourseFor] = useState<Presentation | null>(null);
+  const [courses, setCourses] = useState<MiniCourse[]>([]);
+  const [students, setStudents] = useState<AssignableStudent[]>([]);
+  const [giveFor, setGiveFor] = useState<string | null>(null);
+  const [given, setGiven] = useState<string[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const loadCourses = () => listMiniCourses().then(setCourses).catch(() => {});
+
 
   const load = async (silent = false) => {
     if (!silent) setLoading(true);
