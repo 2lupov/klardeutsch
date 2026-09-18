@@ -99,6 +99,11 @@ const AppRoutes = () => {
 
       <Route path="/student-view/:sessionId" element={<StudentView />} />
       <Route path="/live/:id" element={<LiveClass />} />
+      {/* Standalone student task pages — no app shell, no student redirects */}
+      <Route path="/task/:id" element={<RequireAuth><StudentTask /></RequireAuth>} />
+      <Route path="/blocks-task/:id" element={<RequireAuth><StudentBlocksTask /></RequireAuth>} />
+      <Route path="/book-task/:id" element={<RequireAuth><StudentBookHomework /></RequireAuth>} />
+      <Route path="/minicourse/:id" element={<RequireAuth><StudentMiniCourse /></RequireAuth>} />
       {/* Web-only routes — redirect to home in Telegram */}
       <Route path="/admin" element={isTelegram ? <Navigate to="/" replace /> : <AdminV2 />} />
       <Route path="/method" element={isTelegram ? <Navigate to="/" replace /> : <Method />} />
