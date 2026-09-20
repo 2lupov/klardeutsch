@@ -421,7 +421,7 @@ const rows = tab === "tests" ? tests : tab === "homework" ? homework : tab === "
         ) : (
           <div className="space-y-4">
             {/* Next-up priority card */}
-            {nextUp && (
+            {tab !== "dictionary" && nextUp && (
               <button
                 onClick={() => navigate(nextUp.route)}
                 className="w-full text-left flex items-center gap-3 p-4 rounded-2xl border border-primary/30 bg-primary/[0.04] hover:border-primary/60 hover:shadow-sm transition group"
