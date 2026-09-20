@@ -8,10 +8,11 @@ import {
   Loader2, CheckCircle2, Clock, Layers, Mic, PenLine,
 } from "lucide-react";
 import NextLessonsCard from "@/components/schedule/NextLessonsCard";
+import StudentDictionary from "@/pages/StudentDictionary";
 import pandaCelebrating from "@/assets/mascot/panda-celebrating.png";
 import pandaSleeping from "@/assets/mascot/panda-sleeping.png";
 
-type Tab = "tests" | "homework" | "reading" | "courses";
+type Tab = "tests" | "homework" | "reading" | "courses" | "dictionary";
 
 interface Row {
   id: string;
@@ -347,6 +348,7 @@ const nextUp = useMemo(() => {
     { key: "homework", label: "Домашка", count: pending.homework },
     { key: "reading", label: "Читання", count: pending.reading },
     { key: "courses", label: "Курси", count: pending.courses },
+    { key: "dictionary", label: "Словник", count: 0 },
   ];
 
 const rows = tab === "tests" ? tests : tab === "homework" ? homework : tab === "reading" ? reading : courses;
