@@ -408,6 +408,10 @@ const rows = tab === "tests" ? tests : tab === "homework" ? homework : tab === "
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-5">
+        <div className="mb-5">
+          <NextLessonsCard />
+        </div>
+
         {loading ? (
           <div className="flex justify-center py-20">
             <Loader2 className="w-6 h-6 animate-spin text-primary" />
