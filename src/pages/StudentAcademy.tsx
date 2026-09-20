@@ -446,7 +446,9 @@ const rows = tab === "tests" ? tests : tab === "homework" ? homework : tab === "
               </button>
             )}
 
-{rows.length === 0 ? (
+            {tab === "dictionary" ? (
+              <StudentDictionary />
+            ) : rows.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-border p-8 text-center">
                 <img
                   src={allClear ? pandaCelebrating : pandaSleeping}
