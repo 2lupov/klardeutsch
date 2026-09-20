@@ -7,6 +7,7 @@ import {
   ListChecks, FileText, BookOpen, GraduationCap, ChevronRight,
   Loader2, CheckCircle2, Clock, Layers, Mic, PenLine,
 } from "lucide-react";
+import NextLessonsCard from "@/components/schedule/NextLessonsCard";
 import pandaCelebrating from "@/assets/mascot/panda-celebrating.png";
 import pandaSleeping from "@/assets/mascot/panda-sleeping.png";
 
@@ -87,12 +88,24 @@ const StudentAcademy = () => {
         .eq("student_id", user.id)
         .order("created_at", { ascending: false });
 
+      // Placement tests assigned by the teacher
+      const { data: placements } = await supabase
+        .from("tutoring_placement_assignments")
+        .select("id, status, created_at, recommended_level, selected_levels")
+        .eq("student_id", user.id)
+        .order("created_at", { ascending: false });
+
       // Lesson homework
       const { data: lessons } = await supabase
         .from("tutoring_lessons")
-        .select("id, title")
+        .select("id, title, status, topic, level, created_at")
         .eq("student_id", user.id);
       const lessonIds = (lessons ?? []).map((l) => l.id);
+      const { data: lessonExs } = lessonIds.length
+        ? await supabase.from("tutoring_lesson_exercises").select("lesson_id").in("lesson_id", lessonIds)
+        : { data: [] as any[] };
+      const exCount = new Map<string, number>();
+      (lessonExs ?? []).forEach((e: any) => exCount.set(e.lesson_id, (exCount.get(e.lesson_id) ?? 0) + 1));
       const lessonTitle = new Map((lessons ?? []).map((l) => [l.id, l.title]));
       const { data: hw } = lessonIds.length
         ? await supabase
@@ -248,7 +261,36 @@ const StudentAcademy = () => {
         icon: GraduationCap,
       }));
 
-      setTests(testRows);
+      const placementRows: Row[] = (placements ?? []).map((p: any) => ({
+        id: p.id,
+        title: "Тест на визначення рівня",
+        subtitle:
+          p.status === "completed"
+            ? `Рівень: ${p.recommended_level ?? "?"}`
+            : `Рівні: ${(p.selected_levels as any[])?.join(", ") ?? "—"}`,
+        route: `/tutoring/placement/${p.id}`,
+        done: p.status === "completed",
+        graded: p.status === "completed",
+        chip: "Рівень",
+        created_at: p.created_at,
+        icon: ListChecks,
+      }));
+
+      const lessonRows: Row[] = (lessons ?? [])
+        .filter((l: any) => (exCount.get(l.id) ?? 0) > 0 && l.status !== "completed")
+        .map((l: any) => ({
+          id: l.id,
+          title: l.title,
+          subtitle: [l.topic, l.level].filter(Boolean).join(" · ") || "Урок з викладачем",
+          route: `/tutoring/lesson/${l.id}`,
+          done: false,
+          graded: false,
+          chip: "Урок",
+          created_at: l.created_at ?? new Date().toISOString(),
+          icon: Layers,
+        }));
+
+      setTests([...placementRows, ...testRows, ...lessonRows]);
       setHomework(hwRows);
       setReading(readRows);
       setCourses(courseRowsArr);
@@ -366,6 +408,10 @@ const rows = tab === "tests" ? tests : tab === "homework" ? homework : tab === "
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-5">
+        <div className="mb-5">
+          <NextLessonsCard />
+        </div>
+
         {loading ? (
           <div className="flex justify-center py-20">
             <Loader2 className="w-6 h-6 animate-spin text-primary" />

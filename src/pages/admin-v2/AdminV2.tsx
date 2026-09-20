@@ -21,6 +21,7 @@ import {
   Wand2,
   Sparkles,
   Presentation,
+  CalendarClock,
 } from "lucide-react";
 
 import DashboardPage from "./pages/DashboardPage";
@@ -36,6 +37,7 @@ import MaterialsPage from "./pages/MaterialsPage";
 import BookLibraryPage from "./pages/BookLibraryPage";
 import LessonLibraryPage from "./pages/LessonLibraryPage";
 import PresentationsPage from "./pages/PresentationsPage";
+import SchedulePage from "./pages/SchedulePage";
 import SettingsPage from "./pages/SettingsPage";
 import { AdminLangProvider } from "./LanguageContext";
 
@@ -49,6 +51,7 @@ type NavKey =
   | "slides"
   | "live"
   | "assignments"
+  | "schedule"
   | "students"
   | "materials"
   | "content"
@@ -75,6 +78,7 @@ const NAV: { key: NavKey; label: string; icon: any }[] = [
   { key: "slides", label: "Презентації", icon: Presentation },
   { key: "live", label: "Живий клас", icon: Radio },
   { key: "assignments", label: "Завдання", icon: ClipboardList },
+  { key: "schedule", label: "Графік занять", icon: CalendarClock },
   { key: "students", label: "Учні", icon: Users },
   { key: "materials", label: "Банк матеріалів", icon: FolderOpen },
   { key: "content", label: "Контент", icon: Layers },
@@ -271,6 +275,8 @@ function PageRouter({ active }: { active: NavKey }) {
       return <LiveClassPage />;
     case "assignments":
       return <AssignmentsSection />;
+    case "schedule":
+      return <SchedulePage />;
     case "students":
       return <StudentsPage />;
     case "materials":

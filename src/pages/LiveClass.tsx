@@ -81,7 +81,7 @@ export default function LiveClass() {
     (async () => {
       const { data } = await supabase.from("live_classes").select("*").eq("id", id).maybeSingle();
       if (cancelled) return;
-      if (!data || (data as any).status === "ended") { navigate("/assignments", { replace: true }); return; }
+      if (!data || (data as any).status === "ended") { navigate("/academy", { replace: true }); return; }
       setCls(data as unknown as LiveClassRow);
       setItems(await fetchLiveItems(id));
       const { data: seenRows } = await supabase
@@ -116,7 +116,7 @@ export default function LiveClass() {
           setCls(c as LiveClassRow);
           if (c?.status === "ended") {
             toast.success("Урок завершено");
-            navigate("/assignments", { replace: true });
+            navigate("/academy", { replace: true });
           }
         })
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "live_class_items", filter: `class_id=eq.${id}` },

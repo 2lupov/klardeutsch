@@ -105,7 +105,7 @@ const StudentView = () => {
         <h1 className="text-2xl font-display font-black">Урок завершено</h1>
         <p className="text-muted-foreground">Дякуємо за роботу!</p>
         <button
-          onClick={() => (window.location.href = "/assignments")}
+          onClick={() => (window.location.href = "/academy")}
           className="mt-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-bold"
         >
           До моїх завдань

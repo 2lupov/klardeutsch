@@ -60,13 +60,13 @@ const StudentHomework = () => {
       if (!active) return;
       if (error || !data) {
         toast.error(t("Не вдалося завантажити завдання", "Не удалось загрузить задание"));
-        navigate("/assignments");
+        navigate("/academy");
         return;
       }
       const lesson = (data as any).tutoring_lessons;
       if (lesson?.student_id !== user.id) {
         toast.error(t("Немає доступу", "Нет доступа"));
-        navigate("/assignments");
+        navigate("/academy");
         return;
       }
       const row: Homework = {

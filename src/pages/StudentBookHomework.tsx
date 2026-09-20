@@ -199,7 +199,7 @@ export default function StudentBookHomework() {
     return (
       <div className="p-6 text-center text-muted-foreground">
         Завдання недоступне.
-        <button onClick={() => navigate("/assignments")} className="ml-2 underline">До завдань</button>
+        <button onClick={() => navigate("/academy")} className="ml-2 underline">До завдань</button>
       </div>
     );
   }
@@ -207,7 +207,7 @@ export default function StudentBookHomework() {
   return (
     <div className="max-w-5xl mx-auto px-4 pb-28 pt-4">
       <button
-        onClick={() => navigate("/assignments")}
+        onClick={() => navigate("/academy")}
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="w-4 h-4" /> Завдання

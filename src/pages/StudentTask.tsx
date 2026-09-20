@@ -138,7 +138,7 @@ const StudentTask = () => {
       if (!active) return;
       if (error || !data) {
         toast.error(t("Не вдалося завантажити завдання", "Не удалось загрузить задание"));
-        navigate("/assignments");
+        navigate("/academy");
         return;
       }
       if ((data as any).type === "blocks") {
@@ -161,7 +161,7 @@ const StudentTask = () => {
         const { data: isTeacher } = await supabase.rpc("has_role", { _user_id: user.id, _role: "teacher" as any });
         if (!isAdmin && !isTeacher) {
           toast.error(t("Немає доступу", "Нет доступа"));
-          navigate("/assignments");
+          navigate("/academy");
           return;
         }
         previewMode = true;
@@ -462,7 +462,7 @@ const uploadFiles = async (list: FileList | null) => {
 
       <div className="max-w-2xl mx-auto px-4 lg:px-8 pt-6 space-y-5">
         <button
-          onClick={() => { if (preview) { window.close(); navigate(-1); } else navigate("/assignments"); }}
+          onClick={() => { if (preview) { window.close(); navigate(-1); } else navigate("/academy"); }}
           className="group inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
           <span className="w-8 h-8 rounded-xl border border-border/70 bg-card/60 backdrop-blur flex items-center justify-center transition-transform group-hover:-translate-x-0.5">
