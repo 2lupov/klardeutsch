@@ -1707,6 +1707,42 @@ export type Database = {
           },
         ]
       }
+      lesson_slot_requests: {
+        Row: {
+          created_at: string
+          id: string
+          note: string | null
+          slots: Json
+          status: string
+          student_id: string
+          teacher_id: string | null
+          updated_at: string
+          week_start: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          slots?: Json
+          status?: string
+          student_id: string
+          teacher_id?: string | null
+          updated_at?: string
+          week_start: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          slots?: Json
+          status?: string
+          student_id?: string
+          teacher_id?: string | null
+          updated_at?: string
+          week_start?: string
+        }
+        Relationships: []
+      }
       library_items: {
         Row: {
           cover_url: string | null
