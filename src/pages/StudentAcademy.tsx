@@ -8,10 +8,11 @@ import {
   Loader2, CheckCircle2, Clock, Layers, Mic, PenLine,
 } from "lucide-react";
 import NextLessonsCard from "@/components/schedule/NextLessonsCard";
+import StudentDictionary from "@/pages/StudentDictionary";
 import pandaCelebrating from "@/assets/mascot/panda-celebrating.png";
 import pandaSleeping from "@/assets/mascot/panda-sleeping.png";
 
-type Tab = "tests" | "homework" | "reading" | "courses";
+type Tab = "tests" | "homework" | "reading" | "courses" | "dictionary";
 
 interface Row {
   id: string;
@@ -347,6 +348,7 @@ const nextUp = useMemo(() => {
     { key: "homework", label: "Домашка", count: pending.homework },
     { key: "reading", label: "Читання", count: pending.reading },
     { key: "courses", label: "Курси", count: pending.courses },
+    { key: "dictionary", label: "Словник", count: 0 },
   ];
 
 const rows = tab === "tests" ? tests : tab === "homework" ? homework : tab === "reading" ? reading : courses;
@@ -419,7 +421,7 @@ const rows = tab === "tests" ? tests : tab === "homework" ? homework : tab === "
         ) : (
           <div className="space-y-4">
             {/* Next-up priority card */}
-            {nextUp && (
+            {tab !== "dictionary" && nextUp && (
               <button
                 onClick={() => navigate(nextUp.route)}
                 className="w-full text-left flex items-center gap-3 p-4 rounded-2xl border border-primary/30 bg-primary/[0.04] hover:border-primary/60 hover:shadow-sm transition group"
@@ -444,7 +446,9 @@ const rows = tab === "tests" ? tests : tab === "homework" ? homework : tab === "
               </button>
             )}
 
-{rows.length === 0 ? (
+            {tab === "dictionary" ? (
+              <StudentDictionary />
+            ) : rows.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-border p-8 text-center">
                 <img
                   src={allClear ? pandaCelebrating : pandaSleeping}
