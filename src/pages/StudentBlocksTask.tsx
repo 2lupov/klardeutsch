@@ -60,8 +60,8 @@ export default function StudentBlocksTask() {
   const blocks = kitBlocksToLessonBlocks((task.payload?.blocks ?? []) as KitBlock[], task.id);
 
   return (
-    <div className="min-h-[100dvh] bg-background">
-      <header className="sticky top-0 z-20 flex items-center gap-3 border-b bg-card/95 px-4 py-3 backdrop-blur">
+    <div className="flex h-[100dvh] min-h-0 flex-col overflow-hidden bg-background">
+      <header className="z-20 flex shrink-0 items-center gap-3 border-b bg-card/95 px-4 py-3 backdrop-blur">
         <button onClick={() => navigate("/assignments")} className="text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-5 w-5" />
         </button>
@@ -76,8 +76,10 @@ export default function StudentBlocksTask() {
         )}
       </header>
 
-      <main className="mx-auto max-w-3xl p-4">
-        <StudentBlocks blocks={blocks} persist={false} readOnly={done} showActions={!done} onSubmitted={submit} />
+      <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain">
+        <div className="mx-auto max-w-3xl p-4">
+          <StudentBlocks blocks={blocks} persist={false} readOnly={done} showActions={!done} onSubmitted={submit} />
+        </div>
       </main>
 
       <PandaLookupFab label="Словник" />
