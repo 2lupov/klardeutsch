@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Search, Trash2 } from "lucide-react";
+import { Search, Trash2, Layers } from "lucide-react";
 import AddMyWordForm, { MyWord } from "@/components/dictionary/AddMyWordForm";
 import { PandaLookupPanel } from "@/components/dictionary/PandaLookup";
+import MyWordsTrainer from "@/components/dictionary/MyWordsTrainer";
 import { toast } from "sonner";
 
 interface Row {
@@ -15,12 +16,25 @@ interface Row {
   classDate: string;
 }
 
+const dayKey = (iso: string) => new Date(iso).toISOString().slice(0, 10);
+
+const dayLabel = (key: string) => {
+  const today = new Date().toISOString().slice(0, 10);
+  const y = new Date();
+  y.setDate(y.getDate() - 1);
+  const yesterday = y.toISOString().slice(0, 10);
+  if (key === today) return "Сьогодні";
+  if (key === yesterday) return "Вчора";
+  return new Date(`${key}T00:00:00`).toLocaleDateString("uk-UA", { day: "numeric", month: "long", year: "numeric" });
+};
+
 export default function StudentDictionary() {
   const { user } = useAuth();
   const [rows, setRows] = useState<Row[]>([]);
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(true);
   const [mine, setMine] = useState<MyWord[]>([]);
+  const [trainer, setTrainer] = useState<{ words: MyWord[]; title: string } | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -97,17 +111,29 @@ export default function StudentDictionary() {
 
   const myFiltered = useMemo(() => {
     const s = q.trim().toLowerCase();
-    if (!s) return mine;
-    return mine.filter((w) =>
+    const base = [...mine].sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at));
+    if (!s) return base;
+    return base.filter((w) =>
       [w.german, w.russian, w.example].filter(Boolean).some((v) => String(v).toLowerCase().includes(s)));
   }, [mine, q]);
+
+  /** Мої слова, згруповані за датою додавання (найновіші вгорі). */
+  const myByDay = useMemo(() => {
+    const map = new Map<string, MyWord[]>();
+    for (const w of myFiltered) {
+      const key = dayKey(w.created_at);
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(w);
+    }
+    return Array.from(map.entries()).sort((a, b) => (a[0] < b[0] ? 1 : -1));
+  }, [myFiltered]);
 
   return (
     <div className="max-w-2xl mx-auto px-5 py-8">
       <header className="mb-6">
         <p className="text-[11px] uppercase tracking-widest text-primary font-bold">KLAR</p>
         <h1 className="font-display text-2xl font-bold text-foreground">Словник</h1>
-        <p className="text-sm text-muted-foreground mt-1">Слова та фрази з ваших уроків</p>
+        <p className="text-sm text-muted-foreground mt-1">Ваші слова за датами та слова з уроків</p>
       </header>
 
       <div className="relative mb-6">
@@ -133,33 +159,56 @@ export default function StudentDictionary() {
 
         {myFiltered.length > 0 && (
           <section>
-            <div className="flex items-baseline justify-between mb-3 border-b border-border pb-2">
-              <h2 className="font-display font-semibold text-foreground text-sm">Мої слова</h2>
-              <span className="text-xs text-muted-foreground">{myFiltered.length}</span>
+            <div className="flex items-center justify-between mb-3 border-b border-border pb-2 gap-3">
+              <h2 className="font-display font-semibold text-foreground text-sm">Мої слова · {myFiltered.length}</h2>
+              <button
+                onClick={() => setTrainer({ words: myFiltered, title: "Мої слова" })}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-bold"
+              >
+                <Layers className="w-3.5 h-3.5" /> Вчити карточками
+              </button>
             </div>
-            <ul className="divide-y divide-border/60">
-              {myFiltered.map((w) => (
-                <li key={w.id} className="py-3 flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="font-display text-foreground">
-                      {w.article && <span className="text-primary mr-1">{w.article}</span>}
-                      {w.german}
+
+            <div className="space-y-6">
+              {myByDay.map(([key, words]) => (
+                <div key={key}>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                      {dayLabel(key)} · {words.length}
                     </p>
-                    {w.example && <p className="text-xs italic text-muted-foreground/80 mt-1">{w.example}</p>}
-                  </div>
-                  <div className="flex items-center gap-3 shrink-0">
-                    <span className="text-sm text-muted-foreground text-right">{w.russian}</span>
                     <button
-                      onClick={() => removeMine(w.id)}
-                      className="text-muted-foreground hover:text-red-500"
-                      title="Видалити"
+                      onClick={() => setTrainer({ words, title: dayLabel(key) })}
+                      className="text-xs font-bold text-primary hover:underline"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      Карточки
                     </button>
                   </div>
-                </li>
+                  <ul className="divide-y divide-border/60">
+                    {words.map((w) => (
+                      <li key={w.id} className="py-3 flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="font-display text-foreground">
+                            {w.article && <span className="text-primary mr-1">{w.article}</span>}
+                            {w.german}
+                          </p>
+                          {w.example && <p className="text-xs italic text-muted-foreground/80 mt-1">{w.example}</p>}
+                        </div>
+                        <div className="flex items-center gap-3 shrink-0">
+                          <span className="text-sm text-muted-foreground text-right">{w.russian}</span>
+                          <button
+                            onClick={() => removeMine(w.id)}
+                            className="text-muted-foreground hover:text-red-500"
+                            title="Видалити"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               ))}
-            </ul>
+            </div>
           </section>
         )}
       </div>
@@ -197,6 +246,10 @@ export default function StudentDictionary() {
             </section>
           ))}
         </div>
+      )}
+
+      {trainer && trainer.words.length > 0 && (
+        <MyWordsTrainer words={trainer.words} title={trainer.title} onClose={() => setTrainer(null)} />
       )}
     </div>
   );
