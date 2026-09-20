@@ -424,7 +424,7 @@ const TeacherStudentDashboard = () => {
                 variant="outline"
                 size="sm"
                 disabled={!isOnline || sendingPush}
-                onClick={() => pushNavigate("/assignments", t("Відкрий завдання", "Открой задания"))}
+                onClick={() => pushNavigate("/academy", t("Відкрий завдання", "Открой задания"))}
                 className="justify-start gap-2"
               >
                 <ClipboardCheck className="w-4 h-4" /> {t("До завдань", "К заданиям")}

@@ -62,7 +62,7 @@ export default function StudentBlocksTask() {
   return (
     <div className="flex h-[100dvh] min-h-0 flex-col overflow-hidden bg-background">
       <header className="z-20 flex shrink-0 items-center gap-3 border-b bg-card/95 px-4 py-3 backdrop-blur">
-        <button onClick={() => navigate("/assignments")} className="text-muted-foreground hover:text-foreground">
+        <button onClick={() => navigate("/academy")} className="text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div className="min-w-0">

@@ -62,7 +62,6 @@ const MobileBurgerMenu = () => {
     { to: "/", icon: Home, label: t("navHome") },
     { to: "/academy", icon: GraduationCap, label: lang === "uk" ? "Академія" : "Академия" },
     { to: "/assistant", icon: Sparkles, label: lang === "uk" ? "Асистент" : "Ассистент" },
-    { to: "/academy", icon: ClipboardList, label: lang === "uk" ? "Моє навчання" : "Моя учёба" },
     { to: "/dictionary", icon: BookOpen, label: t("navDictionary") },
     { to: "/games", icon: Gamepad2, label: lang === "uk" ? "Ігри" : "Игры" },
   ];
