@@ -1,5 +1,6 @@
-import { BookOpen, GraduationCap, Headphones, Link2, ListOrdered, Mic, PencilLine, Heading, Table2, Info, Image, Tags, Repeat2 } from "lucide-react";
+import { BookOpen, GraduationCap, Headphones, Link2, ListOrdered, Mic, PencilLine, Heading, Table2, Info, Image, Tags, Repeat2, MousePointerClick } from "lucide-react";
 import EditorialBlock from "./EditorialBlock";
+import InteractiveModel from "./InteractiveModel";
 import HoerBlock from "./HoerBlock";
 import TheorieBlock from "./TheorieBlock";
 import LesenBlock from "./LesenBlock";
