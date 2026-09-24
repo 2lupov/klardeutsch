@@ -257,10 +257,15 @@ export default function LessonWorkshopPage() {
     setSelectedBlock(null);
   };
 
-  return <div className="mx-auto max-w-[1600px] space-y-6 pb-12 text-admin-fg">
-    <div className="flex flex-wrap items-end justify-between gap-4 border-b border-admin-border pb-5">
-      <div><p className="mb-2 text-xs font-bold uppercase tracking-[.22em] text-admin-muted">KLAR / Unterricht</p><h2 className="font-display text-3xl font-semibold">Майстерня уроків</h2><p className="mt-2 max-w-2xl text-sm text-admin-muted">Одна бібліотека уроків. Зберіть сторінки вручну або перетворіть книгу, PDF, фото чи презентацію на редаговану чернетку.</p></div>
-      <div className="flex flex-wrap gap-2"><button className={quietClass} onClick={() => changeMode("library")}><BookOpen size={16} />Бібліотека</button><button className={buttonClass} onClick={create}><Plus size={16} />Новий урок</button><button className={quietClass} onClick={() => changeMode("ai")}><Sparkles size={16} />Із джерела (ШІ)</button></div>
+  return <div className="mx-auto max-w-[1600px] space-y-3 pb-12 text-admin-fg">
+    <div className="flex h-14 items-center gap-3 overflow-x-auto border-b border-admin-border">
+      <span className="shrink-0 text-[11px] font-bold uppercase tracking-[.2em] text-admin-muted">KLAR / Майстерня</span>
+      {mode === "manual" && <input aria-label="Назва уроку" value={draft.title} onChange={(e) => update({ title: e.target.value })} className="min-w-[180px] max-w-sm flex-1 rounded-lg bg-transparent px-2 py-1.5 font-display text-base font-semibold outline-none focus:bg-admin-fg/5" placeholder="Назва уроку" />}
+      <div className="ml-auto flex shrink-0 gap-1.5">
+        <button className={quietClass} onClick={() => changeMode("library")}><BookOpen size={15} />Бібліотека</button>
+        <button className={buttonClass} onClick={create}><Plus size={15} />Новий урок</button>
+        <button className={quietClass} onClick={() => changeMode("ai")}><Sparkles size={15} />Із джерела (ШІ)</button>
+      </div>
     </div>
 
     {mode === "library" && <div className="space-y-5">
