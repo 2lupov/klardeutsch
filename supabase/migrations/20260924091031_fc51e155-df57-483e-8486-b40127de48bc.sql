@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.can_access_student_book(uuid) FROM PUBLIC, anon;
