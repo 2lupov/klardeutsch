@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import type { Artikel, BlockPayload, LessonBlock } from "./types";
+import { MODEL_KEYS, modelLabel, modelParts } from "./InteractiveModel";
 
 interface Props {
   block: LessonBlock;
