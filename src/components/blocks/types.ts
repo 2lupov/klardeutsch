@@ -76,6 +76,7 @@ export interface BlockPayload {
   image_path?: string;
   caption?: string;
   context?: string;
+  hotspots?: Array<{ x: number; y: number; label: string; text?: string }>;
   article_items?: Array<{ word: string; article: Artikel; hint?: string }>;
   transformations?: Array<{ source: string; answer: string; hint?: string }>;
   example?: { source: string; answer: string };

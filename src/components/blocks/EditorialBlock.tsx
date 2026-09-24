@@ -66,12 +66,7 @@ export default function EditorialBlock({ block, value, onChange, checked, readOn
     </div>
   );
 
-  if (block.type === "image") return (
-    <figure className="space-y-2">
-      {imageUrl ? <img src={imageUrl} alt={p.caption || block.title || "Ілюстрація уроку"} className="max-h-[560px] w-full object-contain" /> : <div className="flex aspect-video items-center justify-center border border-dashed border-border bg-muted/30 text-sm text-muted-foreground">Ілюстрацію не додано або немає доступу</div>}
-      {(p.caption || p.context) && <figcaption className="text-sm leading-6 text-muted-foreground">{p.caption}{p.context && <span className="block">{p.context}</span>}</figcaption>}
-    </figure>
-  );
+  if (block.type === "image") return <ImageHotspots url={imageUrl} p={p} alt={p.caption || block.title || "Ілюстрація уроку"} />;
 
   if (block.type === "artikel") return (
     <div className="space-y-4">
