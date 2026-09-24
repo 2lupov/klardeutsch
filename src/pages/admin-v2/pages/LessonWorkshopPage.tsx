@@ -363,3 +363,17 @@ export default function LessonWorkshopPage() {
     {assignOpen && kit && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setAssignOpen(false)}><div className="max-h-[80vh] w-full max-w-sm overflow-y-auto rounded-2xl bg-admin-card p-5" onClick={(e) => e.stopPropagation()}><h3 className="font-display text-lg font-semibold">Кому призначити урок?</h3><p className="mt-1 text-xs text-admin-muted">Учень отримає копію поточного збереженого уроку.</p><div className="mt-4 space-y-1">{students.map((s) => <button key={s.id} disabled={given.includes(s.id) || !!busy} className={`${quietClass} w-full justify-between`} onClick={() => assign(s.id)}>{s.name}{given.includes(s.id) ? " ✓" : " →"}</button>)}{students.length === 0 && <p className="text-sm text-admin-muted">Учнів поки немає.</p>}</div><button className={`${quietClass} mt-4`} onClick={() => setAssignOpen(false)}>Закрити</button></div></div>}
   </div>;
 }
+
+function AddHere({ onPick }: { onPick: (t: BlockType) => void }) {
+  const [open, setOpen] = useState(false);
+  return <div className="group relative -my-1 flex h-6 items-center justify-center">
+    <span className={`h-px w-full bg-primary/30 transition-opacity ${open ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`} />
+    <button aria-label="Додати блок тут" onClick={() => setOpen((v) => !v)} className={`absolute flex h-6 w-6 items-center justify-center rounded-full border border-primary/40 bg-background text-primary transition-opacity ${open ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}><Plus size={14} /></button>
+    {open && <>
+      <button className="fixed inset-0 z-40 cursor-default" aria-label="Закрити" onClick={() => setOpen(false)} />
+      <div className="absolute top-7 z-50 grid max-h-64 w-64 grid-cols-2 gap-1 overflow-y-auto rounded-xl border border-border bg-popover p-2 shadow-xl">
+        {BLOCK_TYPES.map((t) => <button key={t} className="rounded-lg px-2 py-1.5 text-left text-[11px] font-semibold text-popover-foreground hover:bg-primary/10" onClick={() => { onPick(t); setOpen(false); }}>{BLOCK_META[t].label}</button>)}
+      </div>
+    </>}
+  </div>;
+}
