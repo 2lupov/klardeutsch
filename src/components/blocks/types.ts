@@ -204,6 +204,16 @@ export function scoreBlock(block: LessonBlock, value: any): { score: number; max
       if (!parts.length) return { score: 0, max: 0 };
       return { score: parts.filter((part) => value?.[part.id]).length, max: parts.length };
     }
+    case "bild": {
+      const items = p.picture_items ?? [];
+      const needArtikel = (p.bild_mode ?? "artikel") === "artikel";
+      const score = items.filter((item, i) => {
+        const given = value?.[i] ?? {};
+        const wordOk = isCorrectText(given.word, item.word);
+        return needArtikel ? wordOk && given.artikel === (item.artikel ?? null) : wordOk;
+      }).length;
+      return { score, max: items.length };
+    }
     default:
       return { score: 0, max: 0 };
   }
