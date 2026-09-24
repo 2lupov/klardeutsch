@@ -284,7 +284,7 @@ export default function LessonWorkshopPage() {
               <p className="text-[11px] font-bold uppercase tracking-[.2em] text-primary">KLAR / {draft.level} · Thema {String(active + 1).padStart(2, "0")}</p>
               <h3 className="mt-3 font-display text-2xl font-semibold leading-tight text-foreground">{current.title}</h3>
               {current.summary && <p className="mt-2 text-sm leading-7 text-muted-foreground">{current.summary}</p>}
-              {draft.pagePaths.length > 0 && <details className="mt-6 rounded-lg border border-border p-3"><summary className="cursor-pointer text-xs font-semibold text-primary">Оригінальні сторінки / слайди</summary><KitPageImages paths={draft.pagePaths} bucket={kit?.presentation_id ? "presentation-slides" : "tutoring-materials"} /></details>}
+              {draft.pagePaths.length > 0 && <div className="mt-6"><KitPageImages paths={draft.pagePaths} bucket={kit?.presentation_id ? "presentation-slides" : "tutoring-materials"} /></div>}
               {current.blocks.length === 0 && <div className="mt-8 rounded-xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">Порожня сторінка. Додайте перший блок нижче.</div>}
               <div className={`lesson-layout-${current.layout ?? "grammar"} mt-7`}>
                 {current.blocks.map((b, i) => <section key={b.id} className={`lesson-workshop-block border-b border-border/70 py-6 last:border-0 ${selectedBlock === b.id ? "lesson-workshop-block-selected" : ""}`}>
