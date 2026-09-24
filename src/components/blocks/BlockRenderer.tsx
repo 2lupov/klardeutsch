@@ -1,5 +1,6 @@
-import { BookOpen, GraduationCap, Headphones, Link2, ListOrdered, Mic, PencilLine, Heading, Table2, Info, Image, Tags, Repeat2 } from "lucide-react";
+import { BookOpen, GraduationCap, Headphones, Link2, ListOrdered, Mic, PencilLine, Heading, Table2, Info, Image, Tags, Repeat2, MousePointerClick } from "lucide-react";
 import EditorialBlock from "./EditorialBlock";
+import InteractiveModel from "./InteractiveModel";
 import HoerBlock from "./HoerBlock";
 import TheorieBlock from "./TheorieBlock";
 import LesenBlock from "./LesenBlock";
@@ -23,6 +24,7 @@ export const BLOCK_ICON: Record<BlockType, any> = {
   schreiben: Mic,
   artikel: Tags,
   transformation: Repeat2,
+  modell: MousePointerClick,
 };
 
 interface Props {
@@ -43,6 +45,8 @@ export default function BlockRenderer({ block, value, onChange, checked, readOnl
     case "artikel":
     case "transformation":
       return <EditorialBlock block={block} value={value ?? {}} onChange={onChange} checked={checked} readOnly={readOnly} />;
+    case "modell":
+      return <InteractiveModel payload={block.payload || {}} title={block.title} value={value ?? {}} onChange={onChange} readOnly={readOnly} />;
     case "theorie":
       return <TheorieBlock block={block} />;
     case "hoer":
