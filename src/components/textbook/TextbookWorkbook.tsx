@@ -259,6 +259,12 @@ export default function TextbookWorkbook({
   };
 
   const onMove = (e: React.PointerEvent) => {
+    const m = moving.current;
+    if (m) {
+      const [mx, my] = pt(e);
+      setStrokes((s) => s.map((st) => (st.id === m.id && st.type === "text" ? { ...st, x: mx - m.dx, y: my - m.dy } : st)));
+      return;
+    }
     const d = drawing.current;
     if (!d) return;
     const [x, y] = pt(e);
@@ -271,6 +277,11 @@ export default function TextbookWorkbook({
   };
 
   const onUp = () => {
+    if (moving.current) {
+      moving.current = null;
+      setStrokes((s) => { persist(s); return s; });
+      return;
+    }
     if (!drawing.current) return;
     const wasPen = tool === "pen";
     drawing.current = null;
