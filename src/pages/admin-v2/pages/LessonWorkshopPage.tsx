@@ -131,9 +131,10 @@ export default function LessonWorkshopPage() {
     if (j >= 0 && j < items.length) [out[i], out[j]] = [out[j], out[i]];
     return out;
   };
-  const addBlock = (type: BlockType) => {
+  const addBlock = (type: BlockType, at?: number) => {
     const id = crypto.randomUUID();
-    updateSection(active, (s) => ({ ...s, blocks: [...s.blocks, { id, type, title: BLOCK_META[type].de, payload: emptyPayload(type) }] }));
+    const item = { id, type, title: BLOCK_META[type].de, payload: emptyPayload(type) };
+    updateSection(active, (s) => ({ ...s, blocks: at === undefined ? [...s.blocks, item] : [...s.blocks.slice(0, at), item, ...s.blocks.slice(at)] }));
     setSelectedBlock(id);
   };
   const save = async () => {
@@ -152,6 +153,13 @@ export default function LessonWorkshopPage() {
     } catch (e: any) { toast({ title: "Не вдалося зберегти", description: e.message, variant: "destructive" }); }
     finally { setBusy(""); }
   };
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "s" && mode === "manual") { e.preventDefault(); save(); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
   const changeMode = (next: typeof mode) => {
     if (dirty && !window.confirm("Незбережені зміни буде втрачено. Продовжити?")) return;
     setDirty(false); setMode(next); setPreview(false);
@@ -257,10 +265,15 @@ export default function LessonWorkshopPage() {
     setSelectedBlock(null);
   };
 
-  return <div className="mx-auto max-w-[1600px] space-y-6 pb-12 text-admin-fg">
-    <div className="flex flex-wrap items-end justify-between gap-4 border-b border-admin-border pb-5">
-      <div><p className="mb-2 text-xs font-bold uppercase tracking-[.22em] text-admin-muted">KLAR / Unterricht</p><h2 className="font-display text-3xl font-semibold">Майстерня уроків</h2><p className="mt-2 max-w-2xl text-sm text-admin-muted">Одна бібліотека уроків. Зберіть сторінки вручну або перетворіть книгу, PDF, фото чи презентацію на редаговану чернетку.</p></div>
-      <div className="flex flex-wrap gap-2"><button className={quietClass} onClick={() => changeMode("library")}><BookOpen size={16} />Бібліотека</button><button className={buttonClass} onClick={create}><Plus size={16} />Новий урок</button><button className={quietClass} onClick={() => changeMode("ai")}><Sparkles size={16} />Із джерела (ШІ)</button></div>
+  return <div className="mx-auto max-w-[1600px] space-y-3 pb-12 text-admin-fg">
+    <div className="flex h-14 items-center gap-3 overflow-x-auto border-b border-admin-border">
+      <span className="shrink-0 text-[11px] font-bold uppercase tracking-[.2em] text-admin-muted">KLAR / Майстерня</span>
+      {mode === "manual" && <input aria-label="Назва уроку" value={draft.title} onChange={(e) => update({ title: e.target.value })} className="min-w-[180px] max-w-sm flex-1 rounded-lg bg-transparent px-2 py-1.5 font-display text-base font-semibold outline-none focus:bg-admin-fg/5" placeholder="Назва уроку" />}
+      <div className="ml-auto flex shrink-0 gap-1.5">
+        <button className={quietClass} onClick={() => changeMode("library")}><BookOpen size={15} />Бібліотека</button>
+        <button className={buttonClass} onClick={create}><Plus size={15} />Новий урок</button>
+        <button className={quietClass} onClick={() => changeMode("ai")}><Sparkles size={15} />Із джерела (ШІ)</button>
+      </div>
     </div>
 
     {mode === "library" && <div className="space-y-5">
@@ -287,13 +300,24 @@ export default function LessonWorkshopPage() {
       {!canGenerate && <p className="text-sm text-admin-muted">Виберіть джерело та правильний діапазон: до 12 сторінок, фото чи слайдів.</p>}
     </div>}
 
-    {mode === "manual" && <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-admin-border bg-admin-card px-4 py-3"><div className="flex flex-wrap gap-2"><button className={quietClass} onClick={() => changeMode("library")}><ArrowLeft size={15} />До бібліотеки</button><button className={quietClass} onClick={() => setPreview((x) => !x)}><Eye size={15} />{preview ? "До редактора" : "Очима учня"}</button><button className={quietClass} onClick={exportJson}><Download size={15} />JSON</button><label className={`${quietClass} cursor-pointer`}><Upload size={15} />Імпорт JSON<input className="hidden" type="file" accept="application/json,.json" onChange={(e) => { if (e.target.files?.[0]) importJson(e.target.files[0]); e.target.value = ""; }} /></label></div><div className="flex gap-2"><button disabled={!kit || dirty || !!busy} className={quietClass} onClick={() => { setGiven([]); setAssignOpen(true); }}><Send size={15} />Дати учню</button><button disabled={!!busy || !dirty && !!kit} onClick={save} className={buttonClass}>{busy ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}{dirty ? "Зберегти зміни" : kit ? "Збережено" : "Зберегти урок"}</button></div></div>
+    {mode === "manual" && <div className="space-y-3">
+      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-admin-border bg-admin-card px-3 py-2">
+        <button className={quietClass} onClick={() => changeMode("library")} title="До бібліотеки" aria-label="До бібліотеки"><ArrowLeft size={15} /></button>
+        <div className="flex overflow-hidden rounded-lg border border-admin-border">
+          {LAYOUTS.map((l) => <button key={l.value} title={l.hint} onClick={() => updateSection(active, (s) => ({ ...s, layout: l.value }))} className={`px-2.5 py-1.5 text-xs font-semibold ${current.layout === l.value ? "bg-admin-accent/25 text-admin-fg" : "text-admin-muted hover:bg-admin-fg/5"}`}>{l.label}</button>)}
+        </div>
+        <span className="text-xs text-admin-muted">{busy || (dirty ? "Є незбережені зміни" : kit ? "Усе збережено" : "Чернетка")}</span>
+        <div className="ml-auto flex flex-wrap items-center gap-1.5">
+          <button className={quietClass} onClick={exportJson} title="Експорт JSON" aria-label="Експорт JSON"><Download size={15} /></button>
+          <label className={`${quietClass} cursor-pointer`} title="Імпорт JSON"><Upload size={15} /><input className="hidden" type="file" accept="application/json,.json" onChange={(e) => { if (e.target.files?.[0]) importJson(e.target.files[0]); e.target.value = ""; }} /></label>
+          <button className={quietClass} onClick={() => setPreview((x) => !x)}><Eye size={15} />{preview ? "До редактора" : "Очима учня"}</button>
+          <button disabled={!kit || dirty || !!busy} className={quietClass} onClick={() => { setGiven([]); setAssignOpen(true); }}><Send size={15} />Дати учню</button>
+          <button disabled={!!busy || !dirty && !!kit} onClick={save} className={buttonClass}>{busy ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}{dirty ? "Зберегти" : kit ? "Збережено" : "Зберегти урок"}</button>
+        </div>
+      </div>
       {preview ? <LessonReader title={draft.title} level={draft.level} sections={draft.sections} pagePaths={draft.pagePaths} imageBucket={kit?.presentation_id ? "presentation-slides" : "tutoring-materials"} showActions={false} /> : <div className="grid min-h-[70vh] gap-4 xl:grid-cols-[210px_minmax(0,1fr)_300px]">
-        <aside className="rounded-2xl border border-admin-border bg-admin-card p-4"><span className="text-[11px] font-bold uppercase tracking-widest text-admin-muted">Структура уроку</span><input aria-label="Назва уроку" value={draft.title} onChange={(e) => update({ title: e.target.value })} className={`${inputClass} mt-4 font-semibold`} /><select aria-label="Рівень" className={`${inputClass} mt-2`} value={draft.level} onChange={(e) => update({ level: e.target.value })}>{LEVELS.map((l) => <option key={l}>{l}</option>)}</select><div className="mt-6 space-y-2">{draft.sections.map((s, i) => <button key={s.id} onClick={() => { setActive(i); setSelectedBlock(null); }} className={`w-full rounded-xl border px-3 py-3 text-left text-sm ${active === i ? "border-admin-fg bg-admin-accent/20" : "border-admin-border"}`}><span className="block text-[10px] font-bold text-admin-muted">ТЕМА {String(i + 1).padStart(2, "0")}</span><strong className="mt-1 block truncate">{s.title}</strong><span className="text-xs text-admin-muted">{s.blocks.length} блоків · {LAYOUTS.find((l) => l.value === s.layout)?.label}</span></button>)}</div><button className={`${quietClass} mt-4 w-full`} onClick={() => { update({ sections: [...draft.sections, section()] }); setActive(draft.sections.length); setSelectedBlock(null); }}><Plus size={15} />Додати тему</button></aside>
-         <div className="min-w-0 rounded-2xl border border-admin-border bg-admin-card p-4 sm:p-7"><div className="mb-6 flex flex-wrap items-start justify-between gap-3 border-b border-admin-border pb-5"><div className="min-w-0 flex-1 space-y-2"><span className="text-[11px] font-bold uppercase tracking-widest text-admin-muted">Розворот {active + 1} / {draft.sections.length}</span><input aria-label="Назва теми" className={`${inputClass} font-display text-lg font-semibold`} value={current.title} onChange={(e) => updateSection(active, (s) => ({ ...s, title: e.target.value }))} /><input aria-label="Опис теми" className={inputClass} placeholder="Короткий опис теми" value={current.summary ?? ""} onChange={(e) => updateSection(active, (s) => ({ ...s, summary: e.target.value }))} /></div><div className="flex shrink-0 flex-wrap gap-1"><button className={quietClass} disabled={active === 0} onClick={() => moveSection(-1)} title="Тема вгору" aria-label="Тема вгору"><ArrowUp size={15} /></button><button className={quietClass} disabled={active === draft.sections.length - 1} onClick={() => moveSection(1)} title="Тема вниз" aria-label="Тема вниз"><ArrowDown size={15} /></button><button className={quietClass} onClick={duplicateSection} title="Дублювати тему" aria-label="Дублювати тему"><Copy size={15} /></button><button className={quietClass} disabled={draft.sections.length === 1} onClick={() => { if (!window.confirm("Видалити тему та всі її блоки?")) return; update({ sections: draft.sections.filter((_, i) => i !== active) }); setActive(Math.max(0, active - 1)); setSelectedBlock(null); }} title="Видалити тему" aria-label="Видалити тему"><Trash2 size={15} /></button></div></div>
-          <div className="mb-7 grid gap-2 sm:grid-cols-2">{LAYOUTS.map((l) => <button key={l.value} onClick={() => updateSection(active, (s) => ({ ...s, layout: l.value }))} className={`rounded-xl border px-3 py-3 text-left ${current.layout === l.value ? "border-admin-fg bg-admin-accent/15" : "border-admin-border"}`}><strong className="block text-xs">{l.label}</strong><span className="text-[11px] text-admin-muted">{l.hint}</span></button>)}</div>
-          <div className="mt-6 flex items-center justify-between"><span className="text-xs font-bold uppercase tracking-widest text-admin-muted">Сторінка уроку</span><button className={quietClass} onClick={() => setShowStructure((v) => !v)}><Layers3 size={14} />{showStructure ? "Сховати структуру" : "Показати структуру"}</button></div>
+        <aside className="rounded-2xl border border-admin-border bg-admin-card p-3"><div className="flex items-center gap-2"><span className="text-[11px] font-bold uppercase tracking-widest text-admin-muted">Теми</span><select aria-label="Рівень" className="ml-auto rounded-lg border border-admin-border bg-admin-card px-2 py-1 text-xs" value={draft.level} onChange={(e) => update({ level: e.target.value })}>{LEVELS.map((l) => <option key={l}>{l}</option>)}</select></div><div className="mt-3 space-y-1.5">{draft.sections.map((s, i) => <button key={s.id} onClick={() => { setActive(i); setSelectedBlock(null); }} className={`w-full rounded-xl border px-2.5 py-2 text-left text-sm ${active === i ? "border-admin-fg bg-admin-accent/20" : "border-admin-border"}`}><span className="block text-[10px] font-bold text-admin-muted">ТЕМА {String(i + 1).padStart(2, "0")}</span><strong className="block truncate">{s.title}</strong><span className="text-[11px] text-admin-muted">{s.blocks.length} блоків</span></button>)}</div><button className={`${quietClass} mt-3 w-full`} onClick={() => { update({ sections: [...draft.sections, section()] }); setActive(draft.sections.length); setSelectedBlock(null); }}><Plus size={15} />Тема</button></aside>
+         <div className="min-w-0 rounded-2xl border border-admin-border bg-admin-card p-3 sm:p-5"><div className="mb-3 flex flex-wrap items-center justify-between gap-2"><div className="flex min-w-0 flex-1 flex-col gap-1"><input aria-label="Назва теми" className="w-full rounded-lg bg-transparent px-1 font-display text-lg font-semibold outline-none focus:bg-admin-fg/5" placeholder="Назва теми" value={current.title} onChange={(e) => updateSection(active, (s) => ({ ...s, title: e.target.value }))} /><input aria-label="Опис теми" className="w-full rounded-lg bg-transparent px-1 text-xs text-admin-muted outline-none focus:bg-admin-fg/5" placeholder="Короткий опис теми" value={current.summary ?? ""} onChange={(e) => updateSection(active, (s) => ({ ...s, summary: e.target.value }))} /></div><div className="flex shrink-0 flex-wrap gap-1"><button className={quietClass} disabled={active === 0} onClick={() => moveSection(-1)} title="Тема вгору" aria-label="Тема вгору"><ArrowUp size={15} /></button><button className={quietClass} disabled={active === draft.sections.length - 1} onClick={() => moveSection(1)} title="Тема вниз" aria-label="Тема вниз"><ArrowDown size={15} /></button><button className={quietClass} onClick={duplicateSection} title="Дублювати тему" aria-label="Дублювати тему"><Copy size={15} /></button><button className={quietClass} disabled={draft.sections.length === 1} onClick={() => { if (!window.confirm("Видалити тему та всі її блоки?")) return; update({ sections: draft.sections.filter((_, i) => i !== active) }); setActive(Math.max(0, active - 1)); setSelectedBlock(null); }} title="Видалити тему" aria-label="Видалити тему"><Trash2 size={15} /></button><button className={quietClass} onClick={() => setShowStructure((v) => !v)} title="Структура сторінки" aria-label="Структура сторінки"><Layers3 size={15} /></button></div></div>
           {showStructure && <div className="mt-3 space-y-2">{current.blocks.map((b, i) => <div key={b.id} className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-xs ${selectedBlock === b.id ? "border-admin-fg bg-admin-accent/10" : "border-admin-border"}`}><span className="text-admin-muted">{i + 1}</span><button className="min-w-0 flex-1 truncate text-left font-semibold" onClick={() => setSelectedBlock(b.id!)}>{b.title || BLOCK_META[b.type as BlockType]?.label || b.type}</button>{b.visible_to_student === false && <EyeOff size={14} />}</div>)}</div>}
           <div className="lesson-reader lesson-workshop-canvas mt-4 overflow-hidden rounded-2xl border shadow-sm">
             <div className="flex items-center justify-between border-b border-border bg-muted/30 px-5 py-3 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
@@ -305,10 +329,12 @@ export default function LessonWorkshopPage() {
               <h3 className="mt-3 font-display text-2xl font-semibold leading-tight text-foreground">{current.title}</h3>
               {current.summary && <p className="mt-2 text-sm leading-7 text-muted-foreground">{current.summary}</p>}
               {draft.pagePaths.length > 0 && <div className="mt-6"><KitPageImages paths={draft.pagePaths} bucket={kit?.presentation_id ? "presentation-slides" : "tutoring-materials"} /></div>}
-              {current.blocks.length === 0 && <div className="mt-8 rounded-xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">Порожня сторінка. Додайте перший блок нижче.</div>}
+              {current.blocks.length === 0 && <div className="mt-8 rounded-xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">Порожня сторінка. Наведіть на лінію нижче та натисніть «+».</div>}
               <div className={`lesson-layout-${current.layout ?? "grammar"} mt-7`}>
-                {current.blocks.map((b, i) => <section key={b.id} className={`lesson-workshop-block border-b border-border/70 py-6 last:border-0 ${selectedBlock === b.id ? "lesson-workshop-block-selected" : ""}`}>
-                  <div className="mb-4 flex flex-wrap items-center gap-1.5">
+                <AddHere onPick={(t) => addBlock(t, 0)} />
+                {current.blocks.map((b, i) => <div key={b.id}>
+                  <section className={`lesson-workshop-block border-b border-border/70 py-6 ${selectedBlock === b.id ? "lesson-workshop-block-selected" : ""}`}>
+                   <div className="mb-4 flex flex-wrap items-center gap-1.5">
                     <button className="mr-auto min-w-0 text-left text-xs font-bold text-primary hover:underline" onClick={() => setSelectedBlock(b.id!)} aria-label={`Редагувати блок ${i + 1}: ${b.title || BLOCK_META[b.type as BlockType]?.label || b.type}`}>
                       {String(i + 1).padStart(2, "0")} · {b.title || BLOCK_META[b.type as BlockType]?.label || b.type}
                     </button>
@@ -317,21 +343,37 @@ export default function LessonWorkshopPage() {
                     <button className="lesson-workshop-tool" aria-label="Вниз" disabled={i === current.blocks.length - 1} onClick={() => moveBlock(i, 1)}><ArrowDown size={15} /></button>
                     <button className="lesson-workshop-tool" aria-label="Дублювати" onClick={() => duplicateBlock(b, i)}><Copy size={15} /></button>
                     <button className="lesson-workshop-tool" aria-label="Видалити блок" onClick={() => removeBlock(b)}><Trash2 size={15} /></button>
-                  </div>
-                  {b.visible_to_student === false && <p className="mb-3 text-xs font-semibold text-muted-foreground">Приховано від учня</p>}
-                  <div className={b.visible_to_student === false ? "opacity-50" : ""}>
+                   </div>
+                   {b.visible_to_student === false && <p className="mb-3 text-xs font-semibold text-muted-foreground">Приховано від учня</p>}
+                   <div className={b.visible_to_student === false ? "opacity-50" : ""}>
                     <BlockRenderer block={{ id: b.id!, lesson_id: kit?.id ?? "draft", type: b.type, title: b.title ?? null, payload: b.payload ?? {}, sort_order: i, visible_to_student: b.visible_to_student !== false, source: "kit", book_page_id: null }} value={{}} onChange={() => {}} checked={false} readOnly />
-                  </div>
-                </section>)}
+                   </div>
+                  </section>
+                  <AddHere onPick={(t) => addBlock(t, i + 1)} />
+                </div>)}
               </div>
             </div>
           </div>
-          <div className="mt-7 border-t border-admin-border pt-5"><span className="text-xs font-bold text-admin-muted">ДОДАТИ БЛОК</span><div className="mt-3 flex flex-wrap gap-2">{BLOCK_TYPES.filter((t) => t !== "hoer").map((t) => <button key={t} className={quietClass} onClick={() => addBlock(t)}><Plus size={13} />{BLOCK_META[t].label}</button>)}</div><p className="mt-3 text-xs text-admin-muted">Аудіо необовʼязкове; його можна додати окремим блоком.</p><button className={`${quietClass} mt-2`} onClick={() => addBlock("hoer")}>+ Аудіювання</button></div>
+          <div className="mt-4 flex flex-wrap gap-1.5 border-t border-admin-border pt-4">{BLOCK_TYPES.map((t) => <button key={t} className="rounded-lg border border-admin-border px-2.5 py-1 text-[11px] text-admin-fg hover:bg-admin-fg/5" onClick={() => addBlock(t)}><Plus size={11} className="mr-1 inline" />{BLOCK_META[t].label}</button>)}</div>
         </div>
         <aside className="min-w-0 rounded-2xl border border-admin-border bg-admin-card p-4"><span className="text-[11px] font-bold uppercase tracking-widest text-admin-muted">Налаштування блока</span>{editorBlock ? <div className="mt-4 max-h-[75vh] overflow-y-auto pr-1"><BlockEditor block={editorBlock} onChange={(patch) => updateSection(active, (s) => ({ ...s, blocks: s.blocks.map((b) => b.id === selectedBlock ? { ...b, title: patch.title === undefined ? b.title : patch.title, payload: patch.payload ?? b.payload, visible_to_student: patch.visible_to_student ?? b.visible_to_student } : b) }))} /></div> : <div className="mt-6 rounded-xl bg-admin-bg p-5 text-sm leading-6 text-admin-muted"><Layers3 className="mb-3" size={22} />Виберіть блок на сторінці, щоб редагувати його зміст і правильні відповіді.</div>}</aside>
       </div>}
     </div>}
 
     {assignOpen && kit && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setAssignOpen(false)}><div className="max-h-[80vh] w-full max-w-sm overflow-y-auto rounded-2xl bg-admin-card p-5" onClick={(e) => e.stopPropagation()}><h3 className="font-display text-lg font-semibold">Кому призначити урок?</h3><p className="mt-1 text-xs text-admin-muted">Учень отримає копію поточного збереженого уроку.</p><div className="mt-4 space-y-1">{students.map((s) => <button key={s.id} disabled={given.includes(s.id) || !!busy} className={`${quietClass} w-full justify-between`} onClick={() => assign(s.id)}>{s.name}{given.includes(s.id) ? " ✓" : " →"}</button>)}{students.length === 0 && <p className="text-sm text-admin-muted">Учнів поки немає.</p>}</div><button className={`${quietClass} mt-4`} onClick={() => setAssignOpen(false)}>Закрити</button></div></div>}
+  </div>;
+}
+
+function AddHere({ onPick }: { onPick: (t: BlockType) => void }) {
+  const [open, setOpen] = useState(false);
+  return <div className="group relative -my-1 flex h-6 items-center justify-center">
+    <span className={`h-px w-full bg-primary/30 transition-opacity ${open ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`} />
+    <button aria-label="Додати блок тут" onClick={() => setOpen((v) => !v)} className={`absolute flex h-6 w-6 items-center justify-center rounded-full border border-primary/40 bg-background text-primary transition-opacity ${open ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}><Plus size={14} /></button>
+    {open && <>
+      <button className="fixed inset-0 z-40 cursor-default" aria-label="Закрити" onClick={() => setOpen(false)} />
+      <div className="absolute top-7 z-50 grid max-h-64 w-64 grid-cols-2 gap-1 overflow-y-auto rounded-xl border border-border bg-popover p-2 shadow-xl">
+        {BLOCK_TYPES.map((t) => <button key={t} className="rounded-lg px-2 py-1.5 text-left text-[11px] font-semibold text-popover-foreground hover:bg-primary/10" onClick={() => { onPick(t); setOpen(false); }}>{BLOCK_META[t].label}</button>)}
+      </div>
+    </>}
   </div>;
 }

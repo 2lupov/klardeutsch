@@ -15,6 +15,7 @@ export const BLOCK_TYPES = [
   "artikel",
   "transformation",
   "modell",
+  "bild",
 ] as const;
 
 export type BlockType = (typeof BLOCK_TYPES)[number];
@@ -34,6 +35,7 @@ export const BLOCK_META: Record<BlockType, { label: string; de: string; icon: st
   artikel: { label: "Артиклі", de: "Artikeltraining", icon: "tags", hint: "Вибір der / die / das / Plural" },
   transformation: { label: "Перетворення речень", de: "Satzumformung", icon: "repeat", hint: "Зразок і відповідь" },
   modell: { label: "Інтерактивна модель", de: "Interaktives Modell", icon: "mouse-pointer", hint: "Око, вухо, серце, клітина або власний SVG" },
+  bild: { label: "Слово за картинкою", de: "Bild-Wortschatz", icon: "image-plus", hint: "Картинка + артикль і слово" },
 };
 
 export type Artikel = "der" | "die" | "das" | "plural";
@@ -107,6 +109,18 @@ export interface BlockPayload {
   redemittel?: string[];
   min_words?: number;
   allow_voice?: boolean;
+  /** bild: вгадати слово за картинкою */
+  bild_mode?: "artikel" | "choice" | "input";
+  picture_items?: PictureItem[];
+}
+
+export interface PictureItem {
+  /** URL або шлях у сховищі. */
+  image: string;
+  word: string;
+  artikel?: Artikel | null;
+  uk?: string | null;
+  options?: string[];
 }
 
 export interface LessonBlock {
@@ -190,6 +204,16 @@ export function scoreBlock(block: LessonBlock, value: any): { score: number; max
       if (!parts.length) return { score: 0, max: 0 };
       return { score: parts.filter((part) => value?.[part.id]).length, max: parts.length };
     }
+    case "bild": {
+      const items = p.picture_items ?? [];
+      const needArtikel = (p.bild_mode ?? "artikel") === "artikel";
+      const score = items.filter((item, i) => {
+        const given = value?.[i] ?? {};
+        const wordOk = isCorrectText(given.word, item.word);
+        return needArtikel ? wordOk && given.artikel === (item.artikel ?? null) : wordOk;
+      }).length;
+      return { score, max: items.length };
+    }
     default:
       return { score: 0, max: 0 };
   }
@@ -227,6 +251,12 @@ export function emptyPayload(type: BlockType): BlockPayload {
         redemittel: ["Mein Zimmer ist ...", "In der Ecke steht ...", "An der Wand hängt ..."],
         min_words: 30,
         allow_voice: true,
+      };
+    case "bild":
+      return {
+        instructions: "Подивіться на картинку та впишіть слово з артиклем.",
+        bild_mode: "artikel",
+        picture_items: [{ image: "", word: "Apfel", artikel: "der", uk: "яблуко", options: [] }],
       };
   }
 }
