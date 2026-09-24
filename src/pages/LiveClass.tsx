@@ -250,14 +250,22 @@ export default function LiveClass() {
             <p className="text-[11px] uppercase tracking-widest text-primary font-bold">Живий урок</p>
             <h1 className="font-display text-xl font-bold text-foreground truncate">{cls.title}</h1>
           </div>
-          {section === "board" && (
+          <div className="flex items-center gap-2 shrink-0">
+            {section === "board" && (
+              <button
+                onClick={() => setBoardFull(true)}
+                className="px-3 py-2 rounded-xl border border-border text-xs font-medium text-foreground hover:bg-muted/60"
+              >
+                На весь екран
+              </button>
+            )}
             <button
-              onClick={() => setBoardFull(true)}
-              className="shrink-0 px-3 py-2 rounded-xl border border-border text-xs font-medium text-foreground hover:bg-muted/60"
+              onClick={() => navigate("/academy?tab=profile")}
+              className="px-3 py-2 rounded-xl border border-border text-xs font-medium text-foreground hover:bg-muted/60"
             >
-              На весь екран
+              Профіль
             </button>
-          )}
+          </div>
         </header>
 
         {section === "board" ? (
