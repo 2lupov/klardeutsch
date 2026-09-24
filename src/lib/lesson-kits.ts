@@ -4,6 +4,8 @@ export interface KitBlock {
   type: string;
   title?: string | null;
   payload?: any;
+  id?: string;
+  visible_to_student?: boolean;
 }
 
 export interface KitSection {
@@ -12,6 +14,7 @@ export interface KitSection {
   emoji: string;
   summary: string | null;
   blocks: KitBlock[];
+  layout?: "grammar" | "reading" | "illustrated" | "practice";
 }
 
 export interface LessonKit {
@@ -38,12 +41,12 @@ export interface LessonKit {
 /** Перетворює блоки набору в LessonBlock для рендера (без записів у базі). */
 export function kitBlocksToLessonBlocks(blocks: KitBlock[], prefix = "kit"): LessonBlock[] {
   return (blocks ?? []).map((b, i) => ({
-    id: `${prefix}-${i}`,
+    id: `${prefix}-${b.id ?? i}`,
     lesson_id: prefix,
     type: b.type,
     title: b.title ?? null,
     sort_order: i,
-    visible_to_student: true,
+    visible_to_student: b.visible_to_student !== false,
     payload: b.payload ?? {},
     source: "kit",
     book_page_id: null,
@@ -74,8 +77,14 @@ export function normalizeKit(row: any): LessonKit {
           emoji: String(s?.emoji ?? "📘"),
           summary: s?.summary ?? null,
           blocks: Array.isArray(s?.blocks) ? s.blocks : [],
+          layout: ["grammar", "reading", "illustrated", "practice"].includes(s?.layout) ? s.layout : "grammar",
         }))
       : [],
   };
+}
+
+/** Older kits contain a single flat lesson. New lessons keep the same snapshot-friendly blocks inside sections. */
+export function kitSections(kit: LessonKit): KitSection[] {
+  return kit.sections.length ? kit.sections : [{ id: "main", title: kit.title, emoji: "", summary: kit.summary, layout: kit.focus === "arbeitsbuch" ? "grammar" : "reading", blocks: kit.blocks }];
 }
 

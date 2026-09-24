@@ -1,4 +1,5 @@
-import { BookOpen, GraduationCap, Headphones, Link2, ListOrdered, Mic, PencilLine } from "lucide-react";
+import { BookOpen, GraduationCap, Headphones, Link2, ListOrdered, Mic, PencilLine, Heading, Table2, Info, Image, Tags, Repeat2 } from "lucide-react";
+import EditorialBlock from "./EditorialBlock";
 import HoerBlock from "./HoerBlock";
 import TheorieBlock from "./TheorieBlock";
 import LesenBlock from "./LesenBlock";
@@ -9,6 +10,10 @@ import SchreibenBlock from "./SchreibenBlock";
 import { BLOCK_META, type BlockType, type LessonBlock } from "./types";
 
 export const BLOCK_ICON: Record<BlockType, any> = {
+  topic: Heading,
+  table: Table2,
+  callout: Info,
+  image: Image,
   theorie: GraduationCap,
   hoer: Headphones,
   lesen: BookOpen,
@@ -16,6 +21,8 @@ export const BLOCK_ICON: Record<BlockType, any> = {
   paare: Link2,
   satzbau: ListOrdered,
   schreiben: Mic,
+  artikel: Tags,
+  transformation: Repeat2,
 };
 
 interface Props {
@@ -29,6 +36,13 @@ interface Props {
 /** Рендерить будь-який блок уроку — і для учня, і для викладача. */
 export default function BlockRenderer({ block, value, onChange, checked, readOnly }: Props) {
   switch (block.type) {
+    case "topic":
+    case "table":
+    case "callout":
+    case "image":
+    case "artikel":
+    case "transformation":
+      return <EditorialBlock block={block} value={value ?? {}} onChange={onChange} checked={checked} readOnly={readOnly} />;
     case "theorie":
       return <TheorieBlock block={block} />;
     case "hoer":

@@ -304,7 +304,7 @@ export default function BookCoursePage() {
                 }
                 className="px-3 py-2 rounded-lg text-sm border border-slate-200 hover:bg-slate-50"
               >
-                Відкрити в конструкторі →
+                До каталогу курсів →
               </button>
             </div>
           )}

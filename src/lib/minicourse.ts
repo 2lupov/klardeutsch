@@ -40,6 +40,8 @@ export async function listMiniCourses(): Promise<MiniCourse[]> {
 
 /** Видає мінікурс учню в його акаунт. */
 export async function assignMiniCourse(teacherId: string, course: MiniCourse, studentId: string): Promise<void> {
+  const images = [...course.blocks, ...course.sections.flatMap((s) => s.blocks)].map((b) => b.payload?.image_path).filter((p): p is string => typeof p === "string" && p.startsWith(`kits/${course.id}/`));
+  const audio = [...course.blocks, ...course.sections.flatMap((s) => s.blocks)].map((b) => b.payload?.audio_path).filter((p): p is string => typeof p === "string" && p.startsWith(`kits/${course.id}/`));
   const { error } = await supabase.from("student_assignments").insert({
     teacher_id: teacherId,
     student_id: studentId,
@@ -47,7 +49,7 @@ export async function assignMiniCourse(teacherId: string, course: MiniCourse, st
     title: course.title,
     instructions: "Проходь тему за темою: спочатку теорія, потім завдання.",
     level: course.level,
-    payload: { kit_id: course.id, sections: course.sections } as any,
+    payload: { kit_id: course.id, sections: course.sections, page_paths: course.page_paths, presentation_id: course.presentation_id, image_paths: [...new Set(images)], audio_paths: [...new Set(audio)] } as any,
     status: "assigned",
   });
   if (error) throw error;
@@ -61,6 +63,8 @@ export interface MiniCourseTask {
   level: string | null;
   status: string;
   sections: MiniSection[];
+  pagePaths: string[];
+  presentationId: string | null;
 }
 
 export async function loadMiniCourseTask(assignmentId: string): Promise<MiniCourseTask | null> {
@@ -77,12 +81,15 @@ export async function loadMiniCourseTask(assignmentId: string): Promise<MiniCour
     instructions: (data as any).instructions ?? null,
     level: (data as any).level ?? null,
     status: (data as any).status ?? "assigned",
+    pagePaths: Array.isArray((data as any).payload?.page_paths) ? (data as any).payload.page_paths : [],
+    presentationId: (data as any).payload?.presentation_id ?? null,
     sections: raw.map((s, i) => ({
       id: String(s?.id ?? `s-${i}`),
       title: String(s?.title ?? `Тема ${i + 1}`),
       emoji: String(s?.emoji ?? "📘"),
       summary: s?.summary ?? null,
       blocks: Array.isArray(s?.blocks) ? s.blocks : [],
+      layout: ["grammar", "reading", "illustrated", "practice"].includes(s?.layout) ? s.layout : "grammar",
     })),
   };
 }

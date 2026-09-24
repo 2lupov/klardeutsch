@@ -1,64 +1,19 @@
-import { useEffect, useRef, useState } from "react";
-import { BookOpen, Sparkles, Camera } from "lucide-react";
-import { SubTabs } from "./_ui";
+import { useEffect } from "react";
 import CoursesPage from "./CoursesPage";
-import CourseBuilderPage from "./CourseBuilderPage";
-import BookCoursePage from "./BookCoursePage";
-
-type Tab = "catalog" | "builder" | "book";
-
-const TABS: { key: Tab; label: string; icon: any }[] = [
-  { key: "catalog", label: "Каталог", icon: BookOpen },
-  { key: "builder", label: "AI-конструктор", icon: Sparkles },
-  { key: "book", label: "Із книги (фото)", icon: Camera },
-];
-
-const KEY = "klar-admin-courses-tab";
 
 export default function CoursesSection() {
-  const [tab, setTab] = useState<Tab>(() => (localStorage.getItem(KEY) as Tab) || "catalog");
-  const [pendingCourse, setPendingCourse] = useState<string | null>(null);
-  const replaying = useRef(false);
-
-  const change = (key: Tab) => {
-    setTab(key);
-    localStorage.setItem(KEY, key);
-  };
-
-  // Opening the builder from the catalog / students page: switch tab first, then
-  // replay the event so the freshly mounted builder receives it.
+  // Keep older course-builder events in the course catalogue: existing course
+  // lessons are not lesson kits and cannot be edited by the new workshop.
   useEffect(() => {
     const h = (e: Event) => {
-      if (replaying.current) {
-        replaying.current = false;
-        return;
-      }
-      const courseId = (e as CustomEvent).detail?.courseId as string | undefined;
-      if (!courseId) return;
-      change("builder");
-      setPendingCourse(courseId);
+      if (!(e as CustomEvent).detail?.courseId) return;
+      // Existing courses use course_lessons, while the workshop stores lesson_kits.
+      // Keep the course in the catalogue rather than pretending the kit editor edits it.
+      window.dispatchEvent(new CustomEvent("admin-v2:navigate", { detail: { key: "courses" } }));
     };
     window.addEventListener("admin-v2:open-builder", h);
     return () => window.removeEventListener("admin-v2:open-builder", h);
   }, []);
 
-  useEffect(() => {
-    if (tab !== "builder" || !pendingCourse) return;
-    const courseId = pendingCourse;
-    setPendingCourse(null);
-    const id = requestAnimationFrame(() => {
-      replaying.current = true;
-      window.dispatchEvent(new CustomEvent("admin-v2:open-builder", { detail: { courseId } }));
-    });
-    return () => cancelAnimationFrame(id);
-  }, [tab, pendingCourse]);
-
-  return (
-    <div>
-      <SubTabs tabs={TABS} active={tab} onChange={change} />
-      {tab === "catalog" && <CoursesPage />}
-      {tab === "builder" && <CourseBuilderPage />}
-      {tab === "book" && <BookCoursePage />}
-    </div>
-  );
+  return <CoursesPage />;
 }

@@ -16,7 +16,6 @@ import {
   type LibraryBook,
 } from "@/lib/book-library";
 import { Btn, Card, EmptyState, SectionHeader } from "./_ui";
-import BookLessonDialog from "./BookLessonDialog";
 
 (pdfjsLib as any).GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
@@ -29,7 +28,10 @@ export default function BookLibraryPage() {
   const [uploading, setUploading] = useState("");
   const [search, setSearch] = useState("");
   const [kind, setKind] = useState("all");
-  const [lessonFor, setLessonFor] = useState<{ book: LibraryBook; assign: boolean } | null>(null);
+  const openWorkshop = (book: LibraryBook, assign = false) => {
+    sessionStorage.setItem("klar-workshop-source", JSON.stringify({ source: "book", id: book.id, assign }));
+    window.dispatchEvent(new CustomEvent("admin-v2:navigate", { detail: { key: "workshop" } }));
+  };
 
   const load = async () => {
     try {
@@ -205,12 +207,12 @@ export default function BookLibraryPage() {
                 </span>
               </div>
               <div className="flex flex-wrap gap-2">
-                <Btn onClick={() => setLessonFor({ book: b, assign: false })}>
+                <Btn onClick={() => openWorkshop(b)}>
                   <span className="inline-flex items-center gap-1.5">
                     <Sparkles className="h-4 w-4" /> Створити урок із книги
                   </span>
                 </Btn>
-                <Btn variant="ghost" onClick={() => setLessonFor({ book: b, assign: true })}>
+                <Btn variant="ghost" onClick={() => openWorkshop(b, true)}>
                   <span className="inline-flex items-center gap-1.5">
                     <Send className="h-4 w-4" /> Дати як домашку
                   </span>
@@ -243,14 +245,6 @@ export default function BookLibraryPage() {
         </div>
       )}
 
-      {lessonFor && (
-        <BookLessonDialog
-          book={lessonFor.book}
-          ownerId={user?.id ?? ""}
-          autoAssign={lessonFor.assign}
-          onClose={() => setLessonFor(null)}
-        />
-      )}
     </div>
   );
 }

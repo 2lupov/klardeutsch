@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
 import { CheckCircle2, Loader2, Send } from "lucide-react";
@@ -16,26 +16,41 @@ interface Props {
   showActions?: boolean;
   readOnly?: boolean;
   /** Викликається після здачі: сумарні бали. */
-  onSubmitted?: (score: number, max: number) => void;
+  onSubmitted?: (score: number, max: number) => void | Promise<void>;
   /** Зберігати відповіді в базу (у превʼю викладача — ні). */
   persist?: boolean;
+  editorial?: boolean;
+  /** Local draft per assignment and topic; never used for teacher previews. */
+  draftKey?: string;
 }
 
 /** Екран учня: блоки один за одним + закріплена панель дій. */
-export default function StudentBlocks({ blocks, studentId, showActions = true, readOnly, onSubmitted, persist = true }: Props) {
-  const [values, setValues] = useState<Record<string, any>>({});
+export default function StudentBlocks({ blocks, studentId, showActions = true, readOnly, onSubmitted, persist = true, editorial = false, draftKey }: Props) {
+  const [values, setValues] = useState<Record<string, any>>(() => {
+    if (!draftKey) return {};
+    try { return JSON.parse(localStorage.getItem(draftKey) || "{}"); } catch { return {}; }
+  });
   const [checked, setChecked] = useState(false);
   const [saving, setSaving] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const submittingRef = useRef(false);
+  const blockIds = blocks.map((b) => b.id).join("\u001f");
 
   useEffect(() => {
-    if (!persist || !studentId || blocks.length === 0) return;
+    if (!draftKey || readOnly || submitted) return;
+    try { localStorage.setItem(draftKey, JSON.stringify(values)); } catch { /* storage may be unavailable */ }
+  }, [draftKey, values, readOnly, submitted]);
+
+  useEffect(() => {
+    if (!persist || !studentId || !blockIds) return;
+    let live = true;
     (async () => {
       const { data } = await supabase
         .from("tutoring_block_answers")
         .select("block_id, answers, submitted_at")
-        .in("block_id", blocks.map((b) => b.id))
+        .in("block_id", blockIds.split("\u001f"))
         .eq("student_id", studentId);
+      if (!live) return;
       const next: Record<string, any> = {};
       (data ?? []).forEach((r: any) => {
         next[r.block_id] = r.answers;
@@ -43,7 +58,8 @@ export default function StudentBlocks({ blocks, studentId, showActions = true, r
       });
       if (Object.keys(next).length) setValues(next);
     })();
-  }, [persist, studentId, blocks]);
+    return () => { live = false; };
+  }, [persist, studentId, blockIds]);
 
   const totals = useMemo(() => {
     let score = 0;
@@ -56,8 +72,8 @@ export default function StudentBlocks({ blocks, studentId, showActions = true, r
     return { score, max };
   }, [blocks, values]);
 
-  const save = async (markSubmitted: boolean) => {
-    if (!persist || !studentId) return;
+  const save = async (markSubmitted: boolean): Promise<boolean> => {
+    if (!persist || !studentId) return true;
     setSaving(true);
     try {
       const rows = blocks.map((b) => {
@@ -73,8 +89,10 @@ export default function StudentBlocks({ blocks, studentId, showActions = true, r
       });
       const { error } = await supabase.from("tutoring_block_answers").upsert(rows, { onConflict: "block_id,student_id" });
       if (error) throw error;
+      return true;
     } catch (e: any) {
       toast({ title: "Не вдалося зберегти відповіді", description: e?.message, variant: "destructive" });
+      return false;
     } finally {
       setSaving(false);
     }
@@ -86,12 +104,24 @@ export default function StudentBlocks({ blocks, studentId, showActions = true, r
   };
 
   const submit = async () => {
-    setChecked(true);
-    await save(true);
-    setSubmitted(true);
-    confetti({ particleCount: 140, spread: 80, origin: { y: 0.75 } });
-    toast({ title: "Домашку здано! 🐼", description: `Результат: ${totals.score} / ${totals.max}` });
-    onSubmitted?.(totals.score, totals.max);
+    if (saving || submitted || submittingRef.current) return;
+    submittingRef.current = true;
+    setSaving(true);
+    try {
+      if (onSubmitted) {
+        // The assignment callback owns submission; only lock this reader on success.
+        await onSubmitted(totals.score, totals.max);
+      } else if (!(await save(true))) return;
+      setChecked(true);
+      setSubmitted(true);
+      confetti({ particleCount: 140, spread: 80, origin: { y: 0.75 } });
+      toast({ title: "Відповіді здано", description: `Результат: ${totals.score} / ${totals.max}` });
+    } catch (e: any) {
+      toast({ title: "Не вдалося здати відповіді", description: e?.message, variant: "destructive" });
+    } finally {
+      submittingRef.current = false;
+      setSaving(false);
+    }
   };
 
   if (blocks.length === 0) {
@@ -99,7 +129,7 @@ export default function StudentBlocks({ blocks, studentId, showActions = true, r
   }
 
   return (
-    <div className="space-y-4 pb-28">
+    <div className={editorial ? "space-y-0 pb-28" : "space-y-4 pb-28"}>
       {blocks.map((b, i) => {
         const Icon = BLOCK_ICON[b.type as BlockType] ?? CheckCircle2;
         return (
@@ -108,9 +138,9 @@ export default function StudentBlocks({ blocks, studentId, showActions = true, r
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: Math.min(i * 0.05, 0.3) }}
-            className="rounded-2xl border bg-card p-4 shadow-sm"
+            className={editorial ? "border-b border-border/70 px-1 py-7 last:border-0 sm:px-4" : "rounded-2xl border bg-card p-4 shadow-sm"}
           >
-            <header className="mb-3 flex items-center gap-2">
+            {b.type !== "topic" && <header className="mb-4 flex items-center gap-2">
               <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <Icon className="h-4 w-4" />
               </span>
@@ -118,7 +148,7 @@ export default function StudentBlocks({ blocks, studentId, showActions = true, r
                 <h3 className="text-sm font-semibold leading-tight">{blockLabel(b)}</h3>
                 <p className="text-[11px] text-muted-foreground">{BLOCK_META[b.type as BlockType]?.de}</p>
               </div>
-            </header>
+            </header>}
             <BlockRenderer
               block={b}
               value={values[b.id]}

@@ -17,7 +17,7 @@ export default function LesenBlock({ block }: { block: LessonBlock }) {
     <div className="space-y-4">
       {p.instructions && <p className="text-sm text-muted-foreground">{p.instructions}</p>}
 
-      <p className="text-[15px] leading-8">
+      <p className="lesson-reading-text whitespace-pre-line text-[15px] leading-8">
         {tokens.map((tok, i) => {
           const bare = tok.replace(/[^\p{L}\p{N}ÄÖÜäöüß-]/gu, "");
           const hit = bare ? map.get(bare.toLowerCase()) : undefined;

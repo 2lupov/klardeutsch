@@ -18,8 +18,8 @@ import LiveBookPagePicker from "@/components/books/LiveBookPagePicker";
 import { PandaLookupDialog } from "@/components/dictionary/PandaLookup";
 import { listPresentations, uploadPresentation, type Presentation } from "@/lib/presentations";
 import PresentationView from "@/components/tutoring/PresentationView";
-import { normalizeKit, kitBlocksToLessonBlocks, type LessonKit } from "@/lib/lesson-kits";
-import StudentBlocks from "@/components/blocks/StudentBlocks";
+import { normalizeKit, kitSections, type LessonKit } from "@/lib/lesson-kits";
+import LessonReader from "@/components/blocks/LessonReader";
 import { LaserSurface, useLaserSender, type LaserPoint } from "@/components/live/LaserPointer";
 
 interface StudentRow { user_id: string; display_name: string | null; email: string | null }
@@ -263,7 +263,7 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
         <LaserSurface active={laser} onMove={onLaserMove}>
         <BlocksPanel
           onTransfer={(kit) =>
-            transfer("blocks", { type: "blocks", kit_id: kit.id, title: kit.title, blocks: kit.blocks })
+            transfer("blocks", { type: "blocks", kit_id: kit.id, title: kit.title, level: kit.level, blocks: kit.blocks, sections: kitSections(kit), page_paths: kit.page_paths, presentation_id: kit.presentation_id })
           }
         />
         </LaserSurface>
@@ -409,7 +409,7 @@ function BlocksPanel({ onTransfer }: { onTransfer: (kit: LessonKit) => void }) {
       {loading ? (
         <p className="text-sm text-slate-500 animate-pulse">Завантаження…</p>
       ) : kits.length === 0 ? (
-        <EmptyState title="Бібліотека уроків порожня" description="Створіть урок у розділі «Генератор уроку»." />
+        <EmptyState title="Бібліотека уроків порожня" description="Створіть урок у розділі «Майстерня уроків»." />
       ) : (
         <div className="flex flex-wrap gap-2">
           {kits.map((k) => (
@@ -421,7 +421,7 @@ function BlocksPanel({ onTransfer }: { onTransfer: (kit: LessonKit) => void }) {
               }`}
             >
               {k.title}
-              {k.level ? ` · ${k.level}` : ""} · {k.blocks.length} завдань
+               {k.level ? ` · ${k.level}` : ""} · {kitSections(k).length} тем · {kitSections(k).reduce((n, s) => n + s.blocks.length, 0)} блоків
             </button>
           ))}
         </div>
@@ -438,12 +438,7 @@ function BlocksPanel({ onTransfer }: { onTransfer: (kit: LessonKit) => void }) {
           </button>
           <div className="rounded-2xl border border-slate-200 p-3">
             <p className="text-xs text-slate-500 mb-2">Так це бачить учень</p>
-            <StudentBlocks
-              blocks={kitBlocksToLessonBlocks(selected.blocks, `live-${selected.id}`)}
-              showActions={false}
-              persist={false}
-              readOnly
-            />
+             <LessonReader title={selected.title} level={selected.level} sections={kitSections(selected)} pagePaths={selected.page_paths} imageBucket={selected.presentation_id ? "presentation-slides" : "tutoring-materials"} showActions={false} />
           </div>
         </div>
       )}

@@ -17,7 +17,8 @@ const SYSTEM_MINI = `${SYSTEM_BLOCKS}
 
 Правила мінікурсу:
 - 2–6 тем, кожна тема — логічно завершений крок (одна граматика чи одне лексичне поле).
-- Кожна тема ПОЧИНАЄТЬСЯ блоком "theorie" (правило зі слайдів, українською, приклади німецькою), далі 2–4 блоки завдань ("luecke", "paare", "satzbau", "lesen", "schreiben").
+- Кожна тема ПОЧИНАЄТЬСЯ блоком "theorie" (правило зі слайдів, українською, приклади німецькою); за потреби додай "topic", "table" чи "callout", далі 2–4 блоки завдань ("luecke", "artikel", "transformation", "paare", "satzbau", "lesen", "schreiben").
+- У презентації немає аудіофайлу: НЕ створюй "hoer" і не вигадуй транскрипт. Не генеруй нові картинки замість оригінальних слайдів.
 - Використовуй зміст слайдів; можеш складати додаткові приклади того ж типу, щоб завдань було достатньо.
 - emoji — один доречний емодзі темі.
 - Без пояснень поза JSON.`;
@@ -41,7 +42,7 @@ async function askForSections(apiKey: string, dataUrls: string[], userText: stri
     method: "POST",
     headers: { "Lovable-API-Key": apiKey, "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "google/gemini-3.7-flash",
+      model: "openai/gpt-6-astra",
       messages: [
         { role: "system", content: SYSTEM_MINI },
         {
@@ -109,16 +110,20 @@ serve(async (req) => {
 
     const { data: pres } = await admin
       .from("presentations")
-      .select("id, title, slide_paths")
+      .select("id, owner_id, title, slide_paths")
       .eq("id", presentationId)
       .maybeSingle();
     if (!pres) return jsonResponse({ error: "Презентацію не знайдено" }, 404);
+    if (pres.owner_id !== userId && !(roles ?? []).some((r: any) => r.role === "admin")) {
+      return jsonResponse({ error: "Доступ лише власнику презентації" }, 403);
+    }
 
     const all: string[] = Array.isArray(pres.slide_paths) ? pres.slide_paths.map(String) : [];
     if (all.length === 0) return jsonResponse({ error: "У презентації немає слайдів" }, 400);
 
-    const from = Math.max(1, Number(body?.from ?? 1));
-    const to = Math.min(all.length, Number(body?.to ?? all.length));
+    const from = Math.max(1, Math.floor(Number(body?.from ?? 1)));
+    const to = Math.min(all.length, Math.floor(Number(body?.to ?? all.length)));
+    if (!Number.isFinite(from) || !Number.isFinite(to) || to < from) return jsonResponse({ error: "Невірний діапазон слайдів" }, 400);
     const paths = all.slice(from - 1, Math.max(from, to)).slice(0, 24);
     if (paths.length === 0) return jsonResponse({ error: "Невірний діапазон слайдів" }, 400);
 
@@ -159,7 +164,7 @@ serve(async (req) => {
       if (!summary && ai.summary) summary = ai.summary;
 
       for (const s of ai.sections.slice(0, 6)) {
-        const blocks = (Array.isArray(s?.blocks) ? s.blocks : []).map(normalizeBlock).filter(Boolean) as any[];
+        const blocks = (Array.isArray(s?.blocks) ? s.blocks : []).map(normalizeBlock).filter((block) => block && block.type !== "hoer") as any[];
         if (blocks.length === 0) continue;
         sections.push({
           id: crypto.randomUUID(),
@@ -186,6 +191,7 @@ serve(async (req) => {
         notes: notes || null,
         blocks: flat,
         sections,
+         page_paths: paths,
         topics: Array.from(topics),
         summary,
       })

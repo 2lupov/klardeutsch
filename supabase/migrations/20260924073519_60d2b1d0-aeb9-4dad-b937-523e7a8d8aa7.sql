@@ -1,0 +1,1 @@
+CREATE POLICY "Students mark their assignments submitted" ON public.student_assignments FOR UPDATE TO authenticated USING (student_id = auth.uid() AND status IN ('assigned', 'in_progress')) WITH CHECK (student_id = auth.uid() AND status = 'submitted' AND teacher_id = (SELECT old.teacher_id FROM public.student_assignments old WHERE old.id = id));

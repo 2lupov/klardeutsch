@@ -15,20 +15,26 @@ export const jsonResponse = (body: unknown, status = 200) =>
 export const SYSTEM_BLOCKS = `Ти — методист німецької мови (DaF) і асистент викладача. На зображеннях — сторінки підручника Kursbuch або робочого зошита Arbeitsbuch.
 Перетвори сторінки в послідовність ІНТЕРАКТИВНИХ БЛОКІВ уроку. Поверни ЛИШЕ JSON:
 
-{ "topics": ["Genitiv", "Adjektivendungen"], "summary": "Один рядок українською: про що цей урок", "blocks": [ { "type": "...", "title": "...", "payload": { ... } } ] }
+{ "topics": ["Genitiv", "Adjektivendungen"], "summary": "Один рядок українською: про що цей урок", "sections": [ { "title": "Genitiv", "summary": "Коротко про тему", "layout": "grammar", "blocks": [ { "type": "...", "title": "...", "payload": { ... } } ] } ], "blocks": [ { "type": "...", "title": "...", "payload": { ... } } ] }
 
-"topics" — 1–5 коротких назв тем (граматика або лексичне поле), як їх шукав би викладач. "summary" — до 160 символів.
+"topics" — 1–5 коротких назв тем (граматика або лексичне поле), як їх шукав би викладач. "summary" — до 160 символів. Якщо на сторінках більше однієї теми, розділи матеріал на sections у тому самому порядку. Для однієї теми також поверни одну section. Кожна section має короткий заголовок і власні blocks. layout: grammar, reading, illustrated або practice. "blocks" на верхньому рівні — усі блоки у порядку секцій (для старих читачів).
 
 
 Дозволені типи і форма payload:
+
+"topic" — заголовок параграфа: { "chapter": "§ 1", "subtitle": "...", "intro": "..." }. title — назва теми німецькою.
+"table" — граматична таблиця з правильними формами з джерела: { "columns": ["Form", "Beispiel"], "rows": [["ich", "hätte"]], "caption": "..." }. Виділяй закінчення **подвійними зірочками**.
+"callout" — примітка або правило: { "tone": "note|warning|example", "markdown": "Коротке пояснення з **акцентами**" }.
+"artikel" — тренування роду, тільки коли рід слів можна визначити з джерела: { "instructions": "укр", "article_items": [{ "word": "Haus", "article": "das" }] }. article: der, die, das або plural.
+"transformation" — перетворення речення: { "instructions": "укр", "example": { "source": "...", "answer": "..." }, "transformations": [{ "source": "...", "answer": "...", "hint": "..." }] }.
 
 0) "theorie" — коротке ПРАВИЛО перед вправами (граматика, лексичне поле, вживання).
 payload: { "instructions": "укр", "markdown": "## Заголовок\n\nпояснення українською\n\n- пункт\n- пункт", "examples": [ { "de": "Ich gehe ins Kino.", "uk": "переклад" } ] }
 Markdown: лише ## заголовки, абзаци, - списки та **жирне**. Пояснення українською, приклади німецькою. Додавай блок теорії перед вправами на нове правило.
 
-1) "hoer" — якщо біля завдання є значок аудіо / номер треку.
+1) "hoer" — тільки якщо в запиті підтверджено наявність доступного аудіофайлу й на сторінці є транскрипт.
 payload: { "instructions": "укр", "transcript": [ { "t": 0, "de": "речення", "uk": "переклад" } ] }
-Транскрипт відтвори з книги; якщо тексту запису немає — склади правдоподібний діалог на 5–8 реплік за темою сторінки. t — приблизна секунда (крок 4–6 с).
+Транскрипт відтвори лише з книги; не вигадуй діалог і не обіцяй відтворення відсутнього запису. t — приблизна секунда (крок 4–6 с).
 
 2) "lesen" — якщо є текст для читання чи список лексики.
 payload: { "instructions": "укр", "text": "німецький текст", "words": [ { "de": "Schrank", "uk": "шафа", "artikel": "der|die|das|plural", "plural": "die Schränke" } ] }
@@ -48,7 +54,7 @@ payload: { "instructions": "укр", "sentences": [ { "words": ["Ich","gehe","he
 6) "schreiben" — якщо є завдання на письмо або усну відповідь.
 payload: { "instructions": "укр", "prompt": "німецьке завдання", "redemittel": ["фраза-клише"], "min_words": 30, "allow_voice": true }
 
-Правила: інструкції та підказки — українською, увесь навчальний матеріал — німецькою. Не вигадуй вправ, яких немає на сторінці (виняток — транскрипт аудіо). Починай тему блоком "theorie", якщо на сторінках є правило або нова граматика. Мінімум 3 блоки, максимум 12. Без пояснень поза JSON.`;
+Правила: інструкції та підказки — українською, увесь навчальний матеріал — німецькою. Не вигадуй вправ, яких немає на сторінці. Не генеруй ілюстрацій замість сторінок книги. Для нової теми використай "topic", за наявності правила додай "theorie", "table" або "callout". Не вигадуй текст аудіо. Поверни стільки блоків, скільки реально підтверджує джерело (до 12). Без пояснень поза JSON.`;
 
 export interface RawBlock {
   type?: string;
@@ -56,7 +62,7 @@ export interface RawBlock {
   payload?: Record<string, unknown>;
 }
 
-const ALLOWED = ["theorie", "hoer", "lesen", "luecke", "paare", "satzbau", "schreiben"];
+const ALLOWED = ["topic", "table", "callout", "artikel", "transformation", "theorie", "hoer", "lesen", "luecke", "paare", "satzbau", "schreiben"];
 const str = (v: unknown, max: number) => (v === null || v === undefined ? null : String(v).slice(0, max));
 
 /** Валідує блок і повертає нормалізований payload або null. */
@@ -67,6 +73,40 @@ export function normalizeBlock(raw: RawBlock): { type: string; title: string | n
   const payload: any = { instructions: str(p.instructions, 800) };
 
   switch (type) {
+    case "topic": {
+      payload.chapter = str(p.chapter, 50) ?? "";
+      payload.subtitle = str(p.subtitle, 200) ?? "";
+      payload.intro = str(p.intro, 1200) ?? "";
+      break;
+    }
+    case "table": {
+      const columns = Array.isArray(p.columns) ? p.columns.slice(0, 8).map((x: unknown) => str(x, 100) ?? "") : [];
+      const rows = Array.isArray(p.rows) ? p.rows.slice(0, 30).filter(Array.isArray).map((row: unknown[]) => columns.map((_, i) => str(row[i], 300) ?? "")) : [];
+      if (!columns.length || !rows.length) return null;
+      payload.columns = columns;
+      payload.rows = rows;
+      payload.caption = str(p.caption, 250) ?? "";
+      break;
+    }
+    case "callout": {
+      if (!p.markdown) return null;
+      payload.markdown = str(p.markdown, 1800);
+      payload.tone = ["note", "warning", "example"].includes(String(p.tone)) ? p.tone : "note";
+      break;
+    }
+    case "artikel": {
+      const items = Array.isArray(p.article_items) ? p.article_items.slice(0, 25).map((x: any) => ({ word: str(x?.word, 100) ?? "", article: String(x?.article ?? ""), hint: str(x?.hint, 200) })).filter((x: any) => x.word && ["der", "die", "das", "plural"].includes(x.article)) : [];
+      if (!items.length) return null;
+      payload.article_items = items;
+      break;
+    }
+    case "transformation": {
+      const items = Array.isArray(p.transformations) ? p.transformations.slice(0, 20).map((x: any) => ({ source: str(x?.source, 300) ?? "", answer: str(x?.answer, 300) ?? "", hint: str(x?.hint, 200) })).filter((x: any) => x.source && x.answer) : [];
+      if (!items.length) return null;
+      payload.transformations = items;
+      payload.example = { source: str(p.example?.source, 300) ?? "", answer: str(p.example?.answer, 300) ?? "" };
+      break;
+    }
     case "theorie": {
       const markdown = str(p.markdown, 6000);
       if (!markdown) return null;
@@ -122,9 +162,10 @@ export function normalizeBlock(raw: RawBlock): { type: string; title: string | n
         : [];
       if (items.length === 0) return null;
       items.forEach((it: any) => {
-        if (!it.options.includes(it.answer)) it.options = [it.answer, ...it.options].slice(0, 4);
+        it.options = [it.answer, ...new Set(it.options.filter((option: string) => option !== it.answer))].slice(0, 4);
       });
-      payload.mode = p.mode === "input" ? "input" : "select";
+      // Never present a one-option multiple-choice question as a four-option exercise.
+      payload.mode = p.mode === "input" || items.some((it: any) => it.options.length < 4) ? "input" : "select";
       payload.items = items;
       break;
     }
@@ -189,13 +230,13 @@ export async function askForBlocks(
   apiKey: string,
   dataUrls: string[],
   userText: string,
-): Promise<{ blocks: RawBlock[]; topics: string[]; summary: string | null; status: number; error?: string }> {
+): Promise<{ blocks: RawBlock[]; sections: Array<{ title?: string; summary?: string; layout?: string; blocks?: RawBlock[] }>; topics: string[]; summary: string | null; status: number; error?: string }> {
 
   const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: { "Lovable-API-Key": apiKey, "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "google/gemini-3.7-flash",
+      model: "openai/gpt-6-astra",
       messages: [
         { role: "system", content: SYSTEM_BLOCKS },
         {
@@ -213,7 +254,7 @@ export async function askForBlocks(
   if (!res.ok) {
     const details = await res.text();
     console.error(`AI gateway error [${res.status}]: ${details.slice(0, 500)}`);
-    return { blocks: [], topics: [], summary: null, status: res.status, error: details.slice(0, 300) };
+    return { blocks: [], sections: [], topics: [], summary: null, status: res.status, error: details.slice(0, 300) };
   }
 
   const data = await res.json();
@@ -229,7 +270,11 @@ export async function askForBlocks(
     ? parsed.topics.slice(0, 5).map((t: any) => String(t).slice(0, 60)).filter(Boolean)
     : [];
   const summary = parsed?.summary ? String(parsed.summary).slice(0, 300) : null;
-  return { blocks: Array.isArray(parsed?.blocks) ? parsed.blocks : [], topics, summary, status: 200 };
+  const sections = Array.isArray(parsed?.sections) ? parsed.sections.slice(0, 8) : [];
+  const blocks = Array.isArray(parsed?.blocks) && parsed.blocks.length
+    ? parsed.blocks
+    : sections.flatMap((s: any) => Array.isArray(s?.blocks) ? s.blocks : []);
+  return { blocks, sections, topics, summary, status: 200 };
 }
 
 /** Перевіряє, що користувач — викладач цього уроку або адмін. */
