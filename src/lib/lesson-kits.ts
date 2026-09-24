@@ -14,7 +14,7 @@ export interface KitSection {
   emoji: string;
   summary: string | null;
   blocks: KitBlock[];
-  layout?: "grammar" | "reading" | "illustrated" | "practice";
+  layout?: "grammar" | "reading" | "illustrated" | "practice" | "labor";
 }
 
 export interface LessonKit {
@@ -77,7 +77,7 @@ export function normalizeKit(row: any): LessonKit {
           emoji: String(s?.emoji ?? "📘"),
           summary: s?.summary ?? null,
           blocks: Array.isArray(s?.blocks) ? s.blocks : [],
-          layout: ["grammar", "reading", "illustrated", "practice"].includes(s?.layout) ? s.layout : "grammar",
+          layout: ["grammar", "reading", "illustrated", "practice", "labor"].includes(s?.layout) ? s.layout : "grammar",
         }))
       : [],
   };
