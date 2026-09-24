@@ -4,7 +4,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useCoins } from "@/hooks/useCoins";
 import AvatarPicker from "@/components/AvatarPicker";
 import GiftShelf from "@/components/gifts/GiftShelf";
-import StudentDictionary from "@/pages/StudentDictionary";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Coins } from "lucide-react";
 import { toast } from "sonner";
@@ -73,10 +72,6 @@ export default function StudentProfilePanel({ bg, onBg }: { bg: string | null; o
         </div>
       </section>
 
-      <section>
-        <h3 className="font-display font-bold mb-2">📖 Мій словник</h3>
-        <StudentDictionary />
-      </section>
     </div>
   );
 }
