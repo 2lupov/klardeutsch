@@ -153,6 +153,13 @@ export default function LessonWorkshopPage() {
     } catch (e: any) { toast({ title: "Не вдалося зберегти", description: e.message, variant: "destructive" }); }
     finally { setBusy(""); }
   };
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "s" && mode === "manual") { e.preventDefault(); save(); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
   const changeMode = (next: typeof mode) => {
     if (dirty && !window.confirm("Незбережені зміни буде втрачено. Продовжити?")) return;
     setDirty(false); setMode(next); setPreview(false);
