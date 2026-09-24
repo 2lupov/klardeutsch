@@ -210,11 +210,11 @@ export default function InteractiveModel({ payload, title, value, onChange, read
       <div className="model-stage overflow-hidden rounded-2xl border border-border bg-card p-3">
         {activeId && <style>{`.model-svg [data-part="${activeId}"]{fill:hsl(var(--primary)/.85);stroke:hsl(var(--primary));filter:drop-shadow(0 0 14px hsl(var(--primary)/.6));}`}</style>}
         {builtIn ? (
-          <svg viewBox={builtIn.viewBox} role="img" aria-label={builtIn.label} className="model-svg h-auto w-full" onClick={readOnly ? undefined : onSvgClick}>
+          <svg viewBox={builtIn.viewBox} role="img" aria-label={builtIn.label} className="model-svg h-auto w-full" onClick={onSvgClick}>
             {builtIn.svg}
           </svg>
         ) : payload.svg ? (
-          <div className="model-svg [&_svg]:h-auto [&_svg]:w-full" onClick={readOnly ? undefined : onSvgClick} dangerouslySetInnerHTML={{ __html: safeSvg(payload.svg) }} />
+          <div className="model-svg [&_svg]:h-auto [&_svg]:w-full" onClick={onSvgClick} dangerouslySetInnerHTML={{ __html: safeSvg(payload.svg) }} />
         ) : (
           <p className="p-6 text-center text-sm text-muted-foreground">Вставте SVG-код моделі або виберіть готову.</p>
         )}
@@ -241,7 +241,7 @@ export default function InteractiveModel({ payload, title, value, onChange, read
       </div>
 
       <div className="flex flex-wrap gap-1.5">
-        {parts.map((p) => <button key={p.id} type="button" onClick={() => click(p.id)} disabled={readOnly} className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${found[p.id] ? "border-primary bg-primary/15 text-foreground" : "border-border text-muted-foreground"}`}>{found[p.id] || !quiz ? p.label : "???"}</button>)}
+        {parts.map((p) => <button key={p.id} type="button" onClick={() => click(p.id)} className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${found[p.id] ? "border-primary bg-primary/15 text-foreground" : "border-border text-muted-foreground"}`}>{found[p.id] || !quiz ? p.label : "???"}</button>)}
       </div>
     </div>
   );
