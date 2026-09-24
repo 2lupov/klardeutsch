@@ -353,6 +353,21 @@ const StudentAcademy = () => {
     load();
   }, [user]);
 
+  // Tick every 15s so the lesson timer stays fresh
+  useEffect(() => {
+    if (!liveCls) return;
+    const t = setInterval(() => setNowTs(Date.now()), 15000);
+    return () => clearInterval(t);
+  }, [liveCls]);
+
+  const liveElapsed = useMemo(() => {
+    if (!liveCls) return "";
+    const mins = Math.max(0, Math.floor((nowTs - new Date(liveCls.created_at).getTime()) / 60000));
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return h > 0 ? `${h} год ${m} хв` : `${m} хв`;
+  }, [liveCls, nowTs]);
+
   const pending = useMemo(
     () => ({
       tests: tests.filter((r) => !r.done).length,
