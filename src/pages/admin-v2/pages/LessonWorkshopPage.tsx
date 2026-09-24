@@ -66,6 +66,11 @@ export default function LessonWorkshopPage() {
   const [requestedKit, setRequestedKit] = useState("");
   const [intentVersion, setIntentVersion] = useState(0);
 
+  useEffect(() => {
+    const total = source === "book" ? books.find((b) => b.id === bookId)?.total_pages : source === "presentation" ? presentations.find((p) => p.id === presentationId)?.page_count : null;
+    if (total && from === 1 && to > total) setTo(Math.min(3, total));
+  }, [source, bookId, presentationId, books, presentations, from, to]);
+
   const refresh = async () => {
     const { data, error } = await supabase.from("lesson_kits").select("*").order("created_at", { ascending: false }).limit(250);
     if (error) toast({ title: "Не вдалося відкрити уроки", description: error.message, variant: "destructive" });
@@ -149,8 +154,8 @@ export default function LessonWorkshopPage() {
   };
   const chooseFile = async (f: File) => {
     if (!/\.pdf$/i.test(f.name) && f.type !== "application/pdf") return toast({ title: "Потрібен PDF", variant: "destructive" });
-    setFile(f); setApproved(false);
-    try { const pdf = await (pdfjs as any).getDocument({ data: await f.arrayBuffer() }).promise; setPages(pdf.numPages); setFrom(1); setTo(Math.min(3, pdf.numPages)); }
+    setFile(null); setPages(0); setApproved(false);
+    try { const pdf = await (pdfjs as any).getDocument({ data: await f.arrayBuffer() }).promise; setFile(f); setPages(pdf.numPages); setFrom(1); setTo(Math.min(3, pdf.numPages)); }
     catch { setPages(0); toast({ title: "PDF не відкривається", variant: "destructive" }); }
   };
   const chooseSource = (next: Source) => {
@@ -240,7 +245,7 @@ export default function LessonWorkshopPage() {
         <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{(["book", "pdf", "photo", "presentation"] as Source[]).map((s) => <button key={s} className={`rounded-xl border px-4 py-4 text-left text-sm font-semibold ${source === s ? "border-admin-fg bg-admin-accent/15" : "border-admin-border"}`} onClick={() => chooseSource(s)}>{s === "book" ? "Бібліотека книг" : s === "pdf" ? "PDF з компʼютера" : s === "photo" ? "Фото сторінок" : "Презентація"}</button>)}</div>
         <div className="mt-5 space-y-4">
           {source === "book" && <label className="block space-y-1 text-xs font-semibold">Книга<select className={inputClass} value={bookId} onChange={(e) => { setBookId(e.target.value); setApproved(false); const b = books.find((x) => x.id === e.target.value); if (b) { setTo(Math.min(3, b.total_pages || 3)); setDraft((d) => ({ ...d, level: b.level || d.level })); setFocus(b.kind === "grammatik" || b.kind === "arbeitsbuch" ? "arbeitsbuch" : "kursbuch"); } }}><option value="">Виберіть книгу</option>{books.map((b) => <option key={b.id} value={b.id}>{b.title} · {b.total_pages} стор.</option>)}</select></label>}
-          {source === "presentation" && <label className="block space-y-1 text-xs font-semibold">Презентація<select className={inputClass} value={presentationId} onChange={(e) => { setPresentationId(e.target.value); setApproved(false); setTo(Math.min(12, presentations.find((p) => p.id === e.target.value)?.page_count ?? 12)); }}><option value="">Виберіть презентацію</option>{presentations.map((p) => <option key={p.id} value={p.id}>{p.title} · {p.page_count} слайдів</option>)}</select></label>}
+          {source === "presentation" && <label className="block space-y-1 text-xs font-semibold">Презентація<select className={inputClass} value={presentationId} onChange={(e) => { setPresentationId(e.target.value); setApproved(false); setTo(Math.min(12, presentations.find((p) => p.id === e.target.value)?.page_count ?? 0)); }}><option value="">Виберіть презентацію</option>{presentations.map((p) => <option key={p.id} value={p.id}>{p.title} · {p.page_count} слайдів</option>)}</select></label>}
           {source === "pdf" && <label className="block space-y-1 text-xs font-semibold">Ваш PDF<input type="file" accept="application/pdf,.pdf" className={inputClass} onChange={(e) => e.target.files?.[0] && chooseFile(e.target.files[0])} />{file && <span className="text-admin-muted">{file.name} · {pages} стор.</span>}</label>}
           {source === "photo" && <label className="block space-y-1 text-xs font-semibold">Фото сторінок у порядку читання (JPG, PNG, WebP; до 8 за один запуск)<input type="file" accept="image/jpeg,image/png,image/webp" multiple className={inputClass} onChange={(e) => { const selected = Array.from(e.target.files ?? []); if (selected.some((f) => !["image/jpeg", "image/png", "image/webp"].includes(f.type) || f.size > 12 * 1024 * 1024)) { toast({ title: "Потрібні JPG, PNG чи WebP до 12 МБ", variant: "destructive" }); setPhotos([]); } else { setPhotos(selected); setFrom(1); setTo(Math.min(3, selected.length)); } setApproved(false); }} />{photos.length > 0 && <span className="text-admin-muted">{photos.map((f, i) => `${i + 1}. ${f.name}`).join(" · ")}</span>}</label>}
           <div className="grid gap-4 sm:grid-cols-3"><label className="text-xs font-semibold">З<input type="number" min={1} value={from} onChange={(e) => { setFrom(Number(e.target.value)); setApproved(false); }} className={inputClass} /></label><label className="text-xs font-semibold">До<input type="number" min={1} value={to} onChange={(e) => { setTo(Number(e.target.value)); setApproved(false); }} className={inputClass} /></label><label className="text-xs font-semibold">Рівень<select value={draft.level} onChange={(e) => { setDraft((d) => ({ ...d, level: e.target.value })); setApproved(false); }} className={inputClass}>{LEVELS.map((l) => <option key={l}>{l}</option>)}</select></label></div>
