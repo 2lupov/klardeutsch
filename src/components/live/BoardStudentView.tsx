@@ -65,6 +65,8 @@ export default function BoardStudentView({
   /** Локальні елементи учня — доки вчитель не поверне їх у спільній дошці. */
   const [mine, setMine] = useState<BoardEl[]>([]);
   const [editing, setEditing] = useState<string | null>(null);
+  /** Стерті учнем елементи — ховаємо одразу, не чекаючи вчителя. */
+  const [hidden, setHidden] = useState<Set<string>>(new Set());
   /** Геометрія SVG: масштаб і зсуви через preserveAspectRatio="slice". */
   const [view, setView] = useState({ s: 1, dx: 0, dy: 0 });
 
@@ -108,8 +110,12 @@ export default function BoardStudentView({
 
 
   const serverIds = useMemo(() => new Set(content.map((e) => e.id)), [content]);
-  const pending = mine.filter((e) => !serverIds.has(e.id));
-  const all = [...content, ...pending];
+  const mineById = new Map(mine.map((e) => [e.id, e]));
+  const pending = mine.filter((e) => !serverIds.has(e.id) && !hidden.has(e.id!));
+  const all = [
+    ...content.filter((e) => !hidden.has(e.id!)).map((e) => mineById.get(e.id) || e),
+    ...pending,
+  ];
   allRef.current = all;
   const editingEl = all.find((e) => e.id === editing && e.type === "text");
 
@@ -186,9 +192,9 @@ export default function BoardStudentView({
       if (p.x >= x0 - radius && p.x <= x0 + wN + radius && p.y >= y0 - radius && p.y <= y1 + radius) removed.add(el.id);
     }
     if (!r.changed && removed.size === 0) return;
-    const next = r.next.filter((el) => !removed.has(el.id!));
-    allRef.current = next;
-    setMine(next);
+    allRef.current = r.next.filter((el) => !removed.has(el.id!));
+    setHidden((h) => { const n = new Set(h); removed.forEach((id) => n.add(id)); return n; });
+    setMine((m) => [...m.filter((x) => !removed.has(x.id!) && !r.upserted.some((u) => u.id === x.id)), ...r.upserted]);
     removed.forEach((id) => onErase?.(id));
     r.upserted.forEach((el) => { if (el.id) touchedByErase.current.add(el.id); onDraw?.(el, true); });
   };
