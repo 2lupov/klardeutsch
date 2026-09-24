@@ -130,12 +130,6 @@ export default function StudentDictionary() {
 
   return (
     <div className="max-w-2xl mx-auto px-5 py-8">
-      <header className="mb-6">
-        <p className="text-[11px] uppercase tracking-widest text-primary font-bold">KLAR</p>
-        <h1 className="font-display text-2xl font-bold text-foreground">Словник</h1>
-        <p className="text-sm text-muted-foreground mt-1">Ваші слова за датами та слова з уроків</p>
-      </header>
-
       <div className="relative mb-6">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <input
