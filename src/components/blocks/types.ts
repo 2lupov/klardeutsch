@@ -14,6 +14,7 @@ export const BLOCK_TYPES = [
   "schreiben",
   "artikel",
   "transformation",
+  "modell",
 ] as const;
 
 export type BlockType = (typeof BLOCK_TYPES)[number];
