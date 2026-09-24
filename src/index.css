@@ -514,6 +514,19 @@
 }
 .lesson-workshop-paper { max-width: 860px; margin-inline: auto; }
 
+/* Активний текст на сторінці підручника: повністю прозорий, текст лягає прямо на аркуш */
+.workbook-text-input,
+.workbook-text-input:hover,
+.workbook-text-input:focus,
+.workbook-text-input:focus-visible {
+  background-color: transparent !important;
+  background-image: none !important;
+  border: none !important;
+  border-left: 2px dashed currentColor !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 /* Interactive anatomy models */
 .model-svg { cursor: pointer; }
 .model-svg .model-shape {
