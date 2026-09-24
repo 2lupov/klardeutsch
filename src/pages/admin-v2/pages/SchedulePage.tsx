@@ -22,6 +22,13 @@ export default function SchedulePage() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
 
+  // Manual lesson scheduling (admin only)
+  const [studentId, setStudentId] = useState("");
+  const [lessonDate, setLessonDate] = useState("");
+  const [lessonTime, setLessonTime] = useState("17:00");
+  const [durationMin, setDurationMin] = useState(60);
+  const [adding, setAdding] = useState(false);
+
   const names = useMemo(() => new Map(students.map((s) => [s.id, s.name])), [students]);
 
   const load = async () => {
@@ -70,6 +77,30 @@ export default function SchedulePage() {
     }
   };
 
+  const addLesson = async () => {
+    if (!user || !studentId || !lessonDate || !lessonTime) return;
+    setAdding(true);
+    try {
+      const { error } = await supabase.from("school_schedule").insert({
+        teacher_id: user.id,
+        student_id: studentId,
+        title: `Заняття · ${names.get(studentId) ?? "Учень"}`,
+        starts_at: new Date(`${lessonDate}T${lessonTime}:00`).toISOString(),
+        duration_min: durationMin,
+        status: "planned",
+      });
+      if (error) throw error;
+      toast.success("Заняття додано в графік");
+      setLessonDate("");
+      setStudentId("");
+      await load();
+    } catch (e: any) {
+      toast.error(e.message ?? "Не вдалося додати заняття");
+    } finally {
+      setAdding(false);
+    }
+  };
+
   const pending = requests.filter((r) => r.status === "pending");
   const handled = requests.filter((r) => r.status !== "pending").slice(0, 12);
 
@@ -79,8 +110,56 @@ export default function SchedulePage() {
         <h1 className="font-display text-2xl font-black flex items-center gap-2">
           <CalendarClock className="w-6 h-6 text-primary" /> Графік занять
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Учні надсилають зручні часи — ви підтверджуєте або відхиляєте.</p>
+        <p className="text-sm text-muted-foreground mt-1">Додавайте заняття в графік — учень побачить їх у своєму кабінеті.</p>
       </header>
+
+      <section className="rounded-2xl border border-border bg-card p-4 space-y-3">
+        <h2 className="text-lg font-display font-black flex items-center gap-2">
+          <CalendarDays className="w-5 h-5 text-primary" /> Призначити заняття
+        </h2>
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          <select
+            value={studentId}
+            onChange={(e) => setStudentId(e.target.value)}
+            className="px-3 py-2 rounded-xl border border-border bg-background text-sm"
+          >
+            <option value="">Учень…</option>
+            {students.map((s) => (
+              <option key={s.id} value={s.id}>{s.name}</option>
+            ))}
+          </select>
+          <input
+            type="date"
+            value={lessonDate}
+            onChange={(e) => setLessonDate(e.target.value)}
+            className="px-3 py-2 rounded-xl border border-border bg-background text-sm"
+          />
+          <input
+            type="time"
+            value={lessonTime}
+            onChange={(e) => setLessonTime(e.target.value)}
+            className="px-3 py-2 rounded-xl border border-border bg-background text-sm"
+          />
+          <select
+            value={durationMin}
+            onChange={(e) => setDurationMin(Number(e.target.value))}
+            className="px-3 py-2 rounded-xl border border-border bg-background text-sm"
+          >
+            <option value={45}>45 хв</option>
+            <option value={60}>60 хв</option>
+            <option value={90}>90 хв</option>
+          </select>
+        </div>
+        <button
+          onClick={addLesson}
+          disabled={adding || !studentId || !lessonDate || !lessonTime}
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold disabled:opacity-50"
+        >
+          {adding ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+          Додати в графік
+        </button>
+      </section>
+
 
       {loading ? (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
