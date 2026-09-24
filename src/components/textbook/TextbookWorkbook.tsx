@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import * as pdfjsLib from "pdfjs-dist";
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { supabase } from "@/integrations/supabase/client";
-import { ChevronLeft, ChevronRight, Hand, Pen, Eraser, Type, Undo2, Loader2, MousePointer2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Hand, Pen, Eraser, Type, Undo2, Loader2, MousePointer2, Plus, Minus } from "lucide-react";
 
 (pdfjsLib as any).GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
@@ -72,6 +72,7 @@ export default function TextbookWorkbook({
   const [aspect, setAspect] = useState(1.414);
   const [strokes, setStrokes] = useState<Stroke[]>([]);
   const [tool, setTool] = useState<Tool>("hand");
+  const [zoom, setZoom] = useState(1);
   const [color, setColor] = useState(COLORS[0]);
   const [draftText, setDraftText] = useState<{ x: number; y: number; text: string } | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -242,7 +243,9 @@ export default function TextbookWorkbook({
       return;
     }
     if (tool === "text") {
-      if (draftText?.text.trim()) finishText();
+      // Якщо вже щось друкували — цей клік лише завершує напис
+      // і перемикає на «Стрілку», а не створює новий текст.
+      if (draftText) { finishText(); return; }
       setDraftText({ x, y, text: "" });
       window.setTimeout(() => textRef.current?.focus(), 30);
       return;
@@ -295,7 +298,10 @@ export default function TextbookWorkbook({
   const finishText = () => {
     const d = draftText;
     setDraftText(null);
-    if (!d || !d.text.trim()) return;
+    if (!d) return;
+    // після введення переходимо на «Стрілку», щоб наступний клік не створював новий напис
+    setTool("move");
+    if (!d.text.trim()) return;
     commit([...strokes, { id: uid(), type: "text", x: d.x, y: d.y, text: d.text, color, size: 22 }]);
   };
 
@@ -332,6 +338,11 @@ export default function TextbookWorkbook({
           <ToolBtn t="text" icon={Type} label="Текст" />
           <ToolBtn t="erase" icon={Eraser} label="Гумка" />
           <button type="button" onClick={undo} title="Назад" className="h-9 w-9 rounded-lg border border-border bg-card flex items-center justify-center hover:bg-muted"><Undo2 className="w-4 h-4" /></button>
+          <div className="flex items-center gap-1 pl-1">
+            <button type="button" title="Зменшити" onClick={() => setZoom((z) => Math.max(0.6, Math.round((z - 0.2) * 10) / 10))} className="h-9 w-9 rounded-lg border border-border bg-card flex items-center justify-center hover:bg-muted"><Minus className="w-4 h-4" /></button>
+            <button type="button" title="Звичайний розмір" onClick={() => setZoom(1)} className="h-9 min-w-[3.25rem] px-1 rounded-lg border border-border bg-card text-xs text-foreground hover:bg-muted">{Math.round(zoom * 100)}%</button>
+            <button type="button" title="Збільшити" onClick={() => setZoom((z) => Math.min(3, Math.round((z + 0.2) * 10) / 10))} className="h-9 w-9 rounded-lg border border-border bg-card flex items-center justify-center hover:bg-muted"><Plus className="w-4 h-4" /></button>
+          </div>
         </div>
         <div className="flex items-center gap-1">
           {COLORS.map((c) => (
@@ -356,7 +367,7 @@ export default function TextbookWorkbook({
       </div>
 
       <div className={`overflow-auto rounded-xl border border-border bg-muted/30 max-h-[78vh] ${tool === "hand" ? "" : "touch-none"}`}>
-        <div className="relative mx-auto w-full max-w-[900px]">
+        <div className="relative mx-auto w-full" style={{ maxWidth: `${Math.round(900 * zoom)}px` }}>
           <canvas ref={canvasRef} className="block w-full h-auto bg-white" />
           {rendering && <div className="absolute inset-0 flex items-center justify-center bg-background/40"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>}
           <svg
