@@ -12,6 +12,7 @@ import {
 } from "@/lib/live-class";
 import { toast } from "sonner";
 import { BoardView } from "@/components/live/BoardRender";
+import TextbookWorkbook from "@/components/textbook/TextbookWorkbook";
 import BoardStudentView from "@/components/live/BoardStudentView";
 import type { BoardCam } from "@/components/live/BoardRender";
 import { signedPageUrl } from "@/lib/books";
@@ -285,6 +286,16 @@ export default function LiveClass() {
                   </div>
                 )}
               </div>
+            )}
+          </div>
+        ) : section === "textbook" ? (
+          <div className="p-4">
+            {cls.live_view?.type === "textbook" ? (
+              <LaserSurface point={laser}>
+                <TextbookWorkbook studentBookId={cls.live_view.student_book_id} page={cls.live_view.page} allowNavigate={false} />
+              </LaserSurface>
+            ) : (
+              <p className="text-sm text-muted-foreground">Викладач ще не відкрив підручник.</p>
             )}
           </div>
         ) : section === "slides" ? (
