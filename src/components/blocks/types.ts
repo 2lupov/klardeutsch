@@ -35,6 +35,7 @@ export const BLOCK_META: Record<BlockType, { label: string; de: string; icon: st
   artikel: { label: "Артиклі", de: "Artikeltraining", icon: "tags", hint: "Вибір der / die / das / Plural" },
   transformation: { label: "Перетворення речень", de: "Satzumformung", icon: "repeat", hint: "Зразок і відповідь" },
   modell: { label: "Інтерактивна модель", de: "Interaktives Modell", icon: "mouse-pointer", hint: "Око, вухо, серце, клітина або власний SVG" },
+  bild: { label: "Слово за картинкою", de: "Bild-Wortschatz", icon: "image-plus", hint: "Картинка + артикль і слово" },
 };
 
 export type Artikel = "der" | "die" | "das" | "plural";
