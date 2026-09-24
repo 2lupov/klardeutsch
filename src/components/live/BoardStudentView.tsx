@@ -11,6 +11,7 @@ import {
 } from "./BoardRender";
 import { eraseAt } from "./board-erase";
 import { ZoomIn, ZoomOut, Crosshair, Eye, Pencil, Hand, Type, Eraser, MousePointer2, Highlighter } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const MIN_W = 0.05;
 const MAX_W = 8;
@@ -430,7 +431,7 @@ export default function BoardStudentView({
       })()}
 
       {/* панель інструментів учня */}
-      <div className="absolute top-3 left-3 flex items-center gap-1.5 rounded-2xl bg-card/90 backdrop-blur border border-border p-1.5 shadow-sm">
+        <div className="absolute top-3 left-3 right-12 sm:right-auto flex flex-wrap items-center gap-1.5 rounded-md bg-card/90 backdrop-blur border border-border p-1.5 shadow-sm sm:max-w-[calc(100%-1.5rem)]">
         {([
           { k: "select", icon: MousePointer2, title: "Стрілка — перемістити текст" },
           { k: "pan", icon: Hand, title: "Рухати полотно" },
@@ -440,16 +441,17 @@ export default function BoardStudentView({
           { k: "erase", icon: Eraser, title: "Гумка" },
         ] as { k: Tool; icon: any; title: string }[]).map(({ k, icon: Icon, title }) => (
 
-          <button
+          <Button
+            animated={false}
+            variant={tool === k ? "default" : "ghost"}
+            size="icon"
             key={k}
             onClick={() => setTool(k)}
             title={title}
-            className={`w-8 h-8 rounded-xl grid place-items-center ${
-              tool === k ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"
-            }`}
+            className="w-8 h-8 rounded-md"
           >
             <Icon className="w-4 h-4" />
-          </button>
+          </Button>
         ))}
         <span className="w-px h-6 bg-border mx-0.5" />
         {COLORS.map((c) => (
@@ -463,38 +465,36 @@ export default function BoardStudentView({
         ))}
       </div>
 
-      <div className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-2xl bg-card/90 backdrop-blur border border-border p-1.5 shadow-sm">
-        <button
+       <div className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-md bg-card/90 backdrop-blur border border-border p-1.5 shadow-sm max-w-[calc(100%-1.5rem)]">
+         <Button animated={false} variant="ghost" size="icon"
           onClick={() => zoomTo(cam.w / 1.25)}
-          className="w-8 h-8 rounded-xl grid place-items-center text-muted-foreground hover:bg-muted"
+           className="w-8 h-8"
           title="Збільшити"
         >
           <ZoomIn className="w-4 h-4" />
-        </button>
-        <button
+         </Button>
+         <Button animated={false} variant="ghost" size="icon"
           onClick={() => zoomTo(cam.w * 1.25)}
-          className="w-8 h-8 rounded-xl grid place-items-center text-muted-foreground hover:bg-muted"
+           className="w-8 h-8"
           title="Зменшити"
         >
           <ZoomOut className="w-4 h-4" />
-        </button>
-        <button
+         </Button>
+         <Button animated={false} variant="ghost" size="icon"
           onClick={() => { setOwnCam({ x: 0, y: 0, w: 1 }); setFollow(false); report({ x: 0, y: 0, w: 1 }, false); }}
-          className="w-8 h-8 rounded-xl grid place-items-center text-muted-foreground hover:bg-muted"
+           className="w-8 h-8"
           title="До центру"
         >
           <Crosshair className="w-4 h-4" />
-        </button>
-        <button
+         </Button>
+         <Button animated={false} variant={follow ? "default" : "ghost"}
           onClick={() => setFollow((f) => !f)}
-          className={`h-8 px-2.5 rounded-xl flex items-center gap-1.5 text-xs font-medium ${
-            follow ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"
-          }`}
+           className="h-8 px-2.5 rounded-md text-xs font-medium"
           title="Слідувати за вчителем"
         >
           <Eye className="w-3.5 h-3.5" />
           {follow ? "За вчителем" : "Вільно"}
-        </button>
+         </Button>
       </div>
     </div>
   );

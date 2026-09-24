@@ -3,6 +3,7 @@ import * as pdfjsLib from "pdfjs-dist";
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { supabase } from "@/integrations/supabase/client";
 import { ChevronLeft, ChevronRight, Hand, Pen, Eraser, Type, Undo2, Loader2, MousePointer2, Plus, Minus, Highlighter, AArrowDown, AArrowUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 (pdfjsLib as any).GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
@@ -57,6 +58,7 @@ export default function TextbookWorkbook({
   onPageChange,
   syncPage = false,
   allowNavigate = true,
+  continuous = false,
 }: {
   studentBookId: string;
   page?: number;
@@ -64,6 +66,8 @@ export default function TextbookWorkbook({
   /** Записувати номер сторінки в спільний стан (учитель на живому уроці). */
   syncPage?: boolean;
   allowNavigate?: boolean;
+  /** Let the academy page scroll naturally instead of nesting a short PDF scroll area. */
+  continuous?: boolean;
 }) {
   const [info, setInfo] = useState<StudentBookInfo | null>(null);
   const [page, setPageState] = useState(controlledPage ?? 1);
@@ -332,63 +336,71 @@ export default function TextbookWorkbook({
 
   const cursor = tool === "hand" ? "grab" : tool === "move" ? "move" : tool === "text" ? "text" : "crosshair";
   const ToolBtn = ({ t, icon: I, label }: { t: Tool; icon: any; label: string }) => (
-    <button
+    <Button
+      animated={false}
+      variant={tool === t ? "default" : "outline"}
       type="button"
       onClick={() => setTool(t)}
       title={label}
-      className={`h-9 px-3 rounded-lg flex items-center gap-1.5 text-xs font-medium border transition ${tool === t ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-foreground hover:bg-muted"}`}
+      className="h-8 px-2 rounded-md flex items-center gap-1.5 text-xs font-medium"
     >
-      <I className="w-4 h-4" /> <span className="hidden sm:inline">{label}</span>
-    </button>
+      <I className="w-4 h-4" /> <span className="hidden md:inline">{label}</span>
+    </Button>
   );
 
   return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card p-2">
-        <span className="font-display font-bold text-sm text-foreground truncate max-w-[220px]">📖 {info.book.title}</span>
-        <div className="flex items-center gap-1 ml-auto">
+    <div className="space-y-3 min-w-0">
+      <div className="border-b border-border pb-3 space-y-2.5 min-w-0">
+        <div className="flex items-center justify-between gap-3 min-w-0">
+          <span className="font-display font-bold text-sm text-foreground truncate min-w-0" title={info.book.title}>📖 {info.book.title}</span>
+          {allowNavigate && <span className="text-xs text-muted-foreground shrink-0">{page} / {total || "…"}</span>}
+        </div>
+        <div className="flex flex-wrap items-center gap-1.5 min-w-0">
           <ToolBtn t="hand" icon={Hand} label="Рука" />
           <ToolBtn t="move" icon={MousePointer2} label="Стрілка" />
           <ToolBtn t="pen" icon={Pen} label="Олівець" />
           <ToolBtn t="marker" icon={Highlighter} label="Маркер" />
           <ToolBtn t="text" icon={Type} label="Текст" />
-          <div className="flex items-center gap-1 pl-1" title="Розмір тексту (новий напис або вибраний стрілкою)">
-            <button type="button" title="Менший текст" onClick={() => changeTextSize(-4)} className="h-9 w-9 rounded-lg border border-border bg-card flex items-center justify-center hover:bg-muted"><AArrowDown className="w-4 h-4" /></button>
-            <span className="text-xs text-muted-foreground w-6 text-center">{selectedTextSize}</span>
-            <button type="button" title="Більший текст" onClick={() => changeTextSize(4)} className="h-9 w-9 rounded-lg border border-border bg-card flex items-center justify-center hover:bg-muted"><AArrowUp className="w-4 h-4" /></button>
-          </div>
           <ToolBtn t="erase" icon={Eraser} label="Гумка" />
-          <button type="button" onClick={undo} title="Назад" className="h-9 w-9 rounded-lg border border-border bg-card flex items-center justify-center hover:bg-muted"><Undo2 className="w-4 h-4" /></button>
-          <div className="flex items-center gap-1 pl-1">
-            <button type="button" title="Зменшити" onClick={() => setZoom((z) => Math.max(0.6, Math.round((z - 0.2) * 10) / 10))} className="h-9 w-9 rounded-lg border border-border bg-card flex items-center justify-center hover:bg-muted"><Minus className="w-4 h-4" /></button>
-            <button type="button" title="Звичайний розмір" onClick={() => setZoom(1)} className="h-9 min-w-[3.25rem] px-1 rounded-lg border border-border bg-card text-xs text-foreground hover:bg-muted">{Math.round(zoom * 100)}%</button>
-            <button type="button" title="Збільшити" onClick={() => setZoom((z) => Math.min(3, Math.round((z + 0.2) * 10) / 10))} className="h-9 w-9 rounded-lg border border-border bg-card flex items-center justify-center hover:bg-muted"><Plus className="w-4 h-4" /></button>
+          <div className="flex items-center gap-1 border-l border-border pl-2" title="Розмір тексту (новий напис або вибраний стрілкою)">
+            <Button animated={false} variant="outline" size="icon" type="button" title="Менший текст" onClick={() => changeTextSize(-4)} className="h-8 w-8"><AArrowDown /></Button>
+            <span className="text-xs text-muted-foreground w-6 text-center">{selectedTextSize}</span>
+            <Button animated={false} variant="outline" size="icon" type="button" title="Більший текст" onClick={() => changeTextSize(4)} className="h-8 w-8"><AArrowUp /></Button>
           </div>
+          <Button animated={false} variant="outline" size="icon" type="button" onClick={undo} title="Скасувати" className="h-8 w-8"><Undo2 /></Button>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex flex-wrap items-center gap-2 min-w-0">
+          <div className="flex items-center gap-1.5 shrink-0">
           {COLORS.map((c) => (
             <button key={c} type="button" onClick={() => setColor(c)} aria-label={c} className={`w-6 h-6 rounded-full border-2 ${color === c ? "border-primary scale-110" : "border-border"}`} style={{ background: c }} />
           ))}
-        </div>
+          </div>
+          <div className="flex items-center gap-1 sm:ml-auto">
+            <Button animated={false} variant="outline" size="icon" type="button" title="Зменшити" onClick={() => setZoom((z) => Math.max(0.6, Math.round((z - 0.2) * 10) / 10))} className="h-8 w-8"><Minus /></Button>
+            <Button animated={false} variant="outline" type="button" title="Звичайний розмір" onClick={() => setZoom(1)} className="h-8 min-w-[3.25rem] px-1 text-xs">{Math.round(zoom * 100)}%</Button>
+            <Button animated={false} variant="outline" size="icon" type="button" title="Збільшити" onClick={() => setZoom((z) => Math.min(3, Math.round((z + 0.2) * 10) / 10))} className="h-8 w-8"><Plus /></Button>
+          </div>
         {allowNavigate && (
-          <div className="flex items-center gap-1">
-            <button type="button" onClick={() => goto(page - 1)} disabled={page <= 1} className="h-9 w-9 rounded-lg border border-border bg-card flex items-center justify-center disabled:opacity-40"><ChevronLeft className="w-4 h-4" /></button>
+          <div className="flex items-center gap-1 sm:ml-2">
+            <Button animated={false} variant="outline" size="icon" type="button" onClick={() => goto(page - 1)} disabled={page <= 1} title="Попередня сторінка" className="h-8 w-8"><ChevronLeft /></Button>
             <input
               type="number"
               value={page}
               min={1}
               onChange={(e) => goto(Number(e.target.value) || 1)}
-              className="w-16 h-9 rounded-lg border border-border bg-background text-center text-sm text-foreground"
+              aria-label="Номер сторінки"
+              className="w-14 h-8 rounded-md border border-border bg-background text-center text-sm text-foreground"
             />
             <span className="text-xs text-muted-foreground">/ {total || "…"}</span>
-            <button type="button" onClick={() => goto(page + 1)} disabled={!!total && page >= total} className="h-9 w-9 rounded-lg border border-border bg-card flex items-center justify-center disabled:opacity-40"><ChevronRight className="w-4 h-4" /></button>
+            <Button animated={false} variant="outline" size="icon" type="button" onClick={() => goto(page + 1)} disabled={!!total && page >= total} title="Наступна сторінка" className="h-8 w-8"><ChevronRight /></Button>
           </div>
         )}
         {!allowNavigate && <span className="text-xs text-muted-foreground">Сторінка {page}</span>}
+        </div>
       </div>
 
-      <div className={`overflow-auto rounded-xl border border-border bg-muted/30 max-h-[78vh] ${tool === "hand" ? "" : "touch-none"}`}>
-        <div className="relative mx-auto w-full" style={{ maxWidth: `${Math.round(900 * zoom)}px` }}>
+      <div className={`${continuous ? "overflow-x-auto" : "overflow-auto max-h-[78vh]"} rounded-md border border-border bg-muted/30 ${tool === "hand" ? "" : "touch-none"}`}>
+        <div className="relative mx-auto w-full" style={{ maxWidth: `${Math.round(900 * zoom)}px`, minWidth: zoom > 1 ? `${Math.round(900 * zoom)}px` : undefined }}>
           <canvas ref={canvasRef} className="block w-full h-auto bg-white" />
           {rendering && <div className="absolute inset-0 flex items-center justify-center bg-background/40"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>}
           <svg

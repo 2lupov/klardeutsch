@@ -32,7 +32,7 @@ export default function StudentBoard({ className = "h-[70vh]" }: { className?: s
   if (!initial) return <div className={`${className} flex items-center justify-center`}><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
 
   return (
-    <div className={`${className} rounded-2xl border border-border bg-card overflow-hidden`}>
+    <div className={`${className} min-w-0 rounded-md border border-border bg-card overflow-hidden`}>
       <BoardStudentView
         elements={initial}
         className="w-full h-full"
