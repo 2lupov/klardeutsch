@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, SectionHeader, EmptyState } from "./_ui";
 import { BookOpen, Sparkles, Edit3, Trash2, Eye, EyeOff } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { useAdminLang, applyLangFilter, ADMIN_LANGS } from "../LanguageContext";
+import { useAdminLang } from "../LanguageContext";
 
 interface Course {
   id: string;
@@ -18,11 +18,10 @@ interface Course {
 const LEVELS = ["A1", "A2", "B1", "B2", "C1"];
 
 export default function CoursesPage() {
-  const { lang, createLang, isAll, meta } = useAdminLang();
+  const { lang, createLang } = useAdminLang();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [choosing, setChoosing] = useState(false);
-  const [mode, setMode] = useState<"manual" | "ai">("ai");
   const [showNew, setShowNew] = useState(false);
   const [editing, setEditing] = useState<Course | null>(null);
 
@@ -55,10 +54,6 @@ export default function CoursesPage() {
 
   useEffect(() => { load(); }, [lang]);
 
-  const openBuilder = (courseId: string) => {
-    window.dispatchEvent(new CustomEvent("admin-v2:open-builder", { detail: { courseId } }));
-  };
-
   const goTo = (key: string) => {
     window.dispatchEvent(new CustomEvent("admin-v2:navigate", { detail: { key } }));
   };
@@ -76,12 +71,11 @@ export default function CoursesPage() {
     if (error) { toast({ title: "Помилка", description: error.message }); return; }
     toast({
       title: "Курс створено",
-      description: mode === "ai" ? "Відкриваю AI-конструктор" : "Наповнюйте уроки вручну в конструкторі",
+      description: "Курс збережено. Майстерня створює уроки в окремій бібліотеці уроків.",
     });
     setShowNew(false);
     setForm({ title: "", description: "", level: "A1", target_language: createLang, price: 200 });
     await load();
-    if (data?.id) openBuilder(data.id);
   };
 
 
@@ -139,7 +133,7 @@ export default function CoursesPage() {
       ) : courses.length === 0 ? (
         <EmptyState
           title="Ще немає курсів"
-          description="Створи перший курс — далі AI-конструктор згенерує модулі й уроки."
+          description="Створіть курс у каталозі або окремий блоковий урок у Майстерні. Це різні бібліотеки."
           cta={{ label: "+ Новий курс", onClick: () => setChoosing(true) }}
         />
       ) : (
@@ -168,10 +162,10 @@ export default function CoursesPage() {
                 </div>
               </div>
               <div className="mt-4 flex items-center gap-1.5 flex-wrap">
-                <button onClick={() => openBuilder(c.id)}
+                <button onClick={() => goTo("workshop")}
                   className="flex-1 min-w-[110px] px-3 py-1.5 rounded-lg text-xs font-medium text-white flex items-center justify-center gap-1"
                   style={{ background: "#4F46E5" }}>
-                  <Sparkles className="w-3.5 h-3.5" /> AI Builder
+                  <Sparkles className="w-3.5 h-3.5" /> Відкрити бібліотеку уроків
                 </button>
                 <button onClick={() => setEditing(c)}
                   className="px-2 py-1.5 rounded-lg text-slate-600 hover:bg-slate-100" title="Редагувати">
@@ -195,36 +189,35 @@ export default function CoursesPage() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
           onClick={() => setChoosing(false)}>
           <div className="bg-white rounded-2xl p-6 max-w-lg w-full" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-lg font-semibold text-slate-900">Як створюємо курс?</h3>
-            <p className="text-xs text-slate-500 mt-1">Виберіть спосіб наповнення</p>
+            <h3 className="text-lg font-semibold text-slate-900">Що хочете створити?</h3>
+            <p className="text-xs text-slate-500 mt-1">Курси каталогу та уроки Майстерні зберігаються окремо.</p>
             <div className="mt-4 space-y-2">
               {[
                 {
                   key: "manual" as const,
                   emoji: "✍️",
-                  title: "Створити все вручну",
-                  desc: "Порожній курс — модулі й уроки додаєте самі в конструкторі",
+                  title: "Новий курс у каталозі",
+                  desc: "Назва, рівень і публікація курсу; уроки Майстерні не прив'язуються автоматично",
                 },
                 {
                   key: "ai" as const,
                   emoji: "✨",
-                  title: "Створити все з AI",
-                  desc: "AI-конструктор генерує програму, уроки та завдання за вашим промптом",
+                  title: "Створити урок у Майстерні",
+                  desc: "Ручне або AI-наповнення в бібліотеці уроків, окремій від каталогу курсів",
                 },
                 {
                   key: "pdf" as const,
                   emoji: "📚",
-                  title: "З PDF / ZIP (підручники + аудіо)",
-                  desc: "Завантажте архів із Kursbuch, Arbeitsbuch і аудіо Hören — усе піде в банк підручників",
+                  title: "Із книги або PDF",
+                  desc: "Оберіть матеріал у бібліотеці або завантажте PDF у Майстерні уроків",
                 },
               ].map((o) => (
                 <button
                   key={o.key}
                   onClick={() => {
                     setChoosing(false);
-                    if (o.key === "pdf") { goTo("books"); return; }
-                    setMode(o.key);
-                    setShowNew(true);
+                    if (o.key === "manual") setShowNew(true);
+                    else goTo("workshop");
                   }}
                   className="w-full text-left p-4 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/40 transition-colors"
                 >

@@ -21,8 +21,8 @@ import { BookmarkPlus } from "lucide-react";
 import InteractiveScene from "@/components/interactive/InteractiveScene";
 import { fetchInteractivePage, type SceneBlock } from "@/lib/interactivePages";
 import PresentationView from "@/components/tutoring/PresentationView";
-import StudentBlocks from "@/components/blocks/StudentBlocks";
-import { kitBlocksToLessonBlocks } from "@/lib/lesson-kits";
+import LessonReader from "@/components/blocks/LessonReader";
+import { kitSections, normalizeKit } from "@/lib/lesson-kits";
 import { LaserSurface, useLaserReceiver } from "@/components/live/LaserPointer";
 
 
@@ -301,12 +301,17 @@ export default function LiveClass() {
           <div className="p-4">
             {cls.live_view?.type === "blocks" ? (
               <LaserSurface point={laser}>
-                <StudentBlocks
-                  blocks={kitBlocksToLessonBlocks(cls.live_view.blocks || [], `live-${cls.live_view.kit_id}`)}
-                  studentId={user?.id}
-                  persist={false}
-                  onSubmitted={(score, max) => toast.success(`Готово: ${score} / ${max}`)}
-                />
+                 <LessonReader
+                   key={cls.live_view.kit_id}
+                   title={cls.live_view.title || "Блок-завдання"}
+                   level={cls.live_view.level}
+                   sections={cls.live_view.sections?.length ? cls.live_view.sections : kitSections(normalizeKit({ title: cls.live_view.title, blocks: cls.live_view.blocks || [], sections: [] }))}
+                   pagePaths={cls.live_view.page_paths ?? []}
+                   imageBucket={cls.live_view.presentation_id ? "presentation-slides" : "tutoring-materials"}
+                   showActions
+                   draftKey={`klar:live:${user?.id}:${id}:${cls.live_view.kit_id}`}
+                   onSubmitted={(score, max) => { toast.success(`Готово: ${score} / ${max}`); }}
+                 />
               </LaserSurface>
             ) : (
               <p className="text-sm text-muted-foreground">Викладач ще не відкрив блок-завдання.</p>

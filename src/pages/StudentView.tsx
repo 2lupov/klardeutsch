@@ -72,6 +72,21 @@ const StudentView = () => {
     return () => { mounted = false; supabase.removeChannel(ch); };
   }, [sessionId]);
 
+  useEffect(() => {
+    const lessonId = session?.lesson_id;
+    if (!lessonId) return;
+    let active = true;
+    const refreshBlocks = async () => {
+      const { data, error } = await supabase.from("tutoring_lesson_blocks")
+        .select("*").eq("lesson_id", lessonId).eq("visible_to_student", true).order("sort_order");
+      if (active && !error) setBlocks(data ?? []);
+    };
+    const channel = supabase.channel(`student-blocks-${sessionId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "tutoring_lesson_blocks", filter: `lesson_id=eq.${lessonId}` }, () => { void refreshBlocks(); })
+      .subscribe((status) => { if (status === "SUBSCRIBED") void refreshBlocks(); });
+    return () => { active = false; supabase.removeChannel(channel); };
+  }, [session?.lesson_id, sessionId]);
+
   const sendReaction = async (type: Reaction["type"]) => {
     if (!sessionId) return;
     setActiveReaction(type);

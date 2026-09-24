@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { normalizeKit, type LessonKit } from "@/lib/lesson-kits";
+import { kitSections, normalizeKit, type LessonKit } from "@/lib/lesson-kits";
 
 interface Props {
   lessonId: string;
@@ -27,9 +27,10 @@ export default function KitPicker({ lessonId, startSortOrder, onInserted }: Prop
   }, [open]);
 
   const insert = async (kit: LessonKit) => {
-    if (kit.blocks.length === 0) return toast({ title: "У цьому уроці немає блоків", variant: "destructive" });
+    const blocks = kitSections(kit).flatMap((s) => s.blocks.filter((b) => b.visible_to_student !== false));
+    if (!blocks.length) return toast({ title: "У цьому уроці немає блоків", variant: "destructive" });
     setBusy(kit.id);
-    const rows = kit.blocks.map((b, i) => ({
+    const rows = blocks.map((b, i) => ({
       lesson_id: lessonId,
       type: b.type,
       title: b.title ?? null,
@@ -56,11 +57,11 @@ export default function KitPicker({ lessonId, startSortOrder, onInserted }: Prop
       </DialogTrigger>
       <DialogContent className="max-h-[80vh] max-w-lg overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Готові уроки з книги</DialogTitle>
+           <DialogTitle>Уроки з бібліотеки</DialogTitle>
         </DialogHeader>
         {kits.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            Порожньо. Створіть урок в адмінці → «Генератор уроку з книги».
+             Порожньо. Створіть урок в адмінці → «Майстерня уроків».
           </p>
         ) : (
           <div className="space-y-2">
@@ -74,7 +75,7 @@ export default function KitPicker({ lessonId, startSortOrder, onInserted }: Prop
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{k.title}</p>
                   <p className="text-[11px] text-muted-foreground">
-                    {k.level ?? "—"} · {k.focus === "arbeitsbuch" ? "Arbeitsbuch" : "Kursbuch"} · {k.blocks.length} блоків
+                     {k.level ?? "—"} · {kitSections(k).length} тем · {kitSections(k).reduce((n, s) => n + s.blocks.length, 0)} блоків
                   </p>
                 </div>
                 {busy === k.id && <Loader2 className="h-4 w-4 animate-spin" />}

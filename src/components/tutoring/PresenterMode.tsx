@@ -62,16 +62,20 @@ const PresenterMode = ({ lesson, exercises = [], studentName, studentProfile, on
 
   useEffect(() => {
     let alive = true;
-    (async () => {
-      const { data } = await supabase
+    const refreshBlocks = async () => {
+      const { data, error } = await supabase
         .from("tutoring_lesson_blocks")
         .select("*")
         .eq("lesson_id", lesson.id)
         .eq("visible_to_student", true)
         .order("sort_order");
-      if (alive) setBlocks(((data ?? []) as any[]).map((b) => ({ ...b, payload: b.payload ?? {} })) as LessonBlock[]);
-    })();
-    return () => { alive = false; };
+      if (alive && !error) setBlocks(((data ?? []) as any[]).map((b) => ({ ...b, payload: b.payload ?? {} })) as LessonBlock[]);
+    };
+    const channel = supabase.channel(`presenter-blocks-${lesson.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "tutoring_lesson_blocks", filter: `lesson_id=eq.${lesson.id}` }, () => { void refreshBlocks(); })
+      .subscribe((status) => { if (status === "SUBSCRIBED") void refreshBlocks(); });
+    void refreshBlocks();
+    return () => { alive = false; supabase.removeChannel(channel); };
   }, [lesson.id]);
 
   // Init session

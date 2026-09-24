@@ -19,7 +19,6 @@ import {
   Sun,
   Library,
   Wand2,
-  Sparkles,
   Presentation,
   CalendarClock,
 } from "lucide-react";
@@ -27,7 +26,6 @@ import {
 import DashboardPage from "./pages/DashboardPage";
 import CoursesSection from "./pages/CoursesSection";
 import BooksSection from "./pages/BooksSection";
-import LessonGeneratorPage from "./pages/LessonGeneratorPage";
 import AssignmentsSection from "./pages/AssignmentsSection";
 import AnalyticsSection from "./pages/AnalyticsSection";
 import ContentPage from "./pages/ContentPage";
@@ -35,7 +33,7 @@ import StudentsPage from "./pages/StudentsPage";
 import LiveClassPage from "./pages/LiveClassPage";
 import MaterialsPage from "./pages/MaterialsPage";
 import BookLibraryPage from "./pages/BookLibraryPage";
-import LessonLibraryPage from "./pages/LessonLibraryPage";
+import LessonWorkshopPage from "./pages/LessonWorkshopPage";
 import PresentationsPage from "./pages/PresentationsPage";
 import SchedulePage from "./pages/SchedulePage";
 import SettingsPage from "./pages/SettingsPage";
@@ -48,6 +46,7 @@ type NavKey =
   | "library"
   | "generator"
   | "kits"
+  | "workshop"
   | "slides"
   | "live"
   | "assignments"
@@ -60,9 +59,9 @@ type NavKey =
 
 /** Old flat nav keys still dispatched from inner pages → new section keys. */
 const LEGACY_KEYS: Record<string, NavKey> = {
-  builder: "courses",
-  studio: "assignments",
-  book: "courses",
+  builder: "workshop",
+  studio: "workshop",
+  book: "workshop",
   standalone: "assignments",
   interactive: "books",
   tutor: "analytics",
@@ -73,8 +72,7 @@ const NAV: { key: NavKey; label: string; icon: any }[] = [
   { key: "courses", label: "Курси", icon: BookOpen },
   { key: "books", label: "Підручники", icon: BookMarked },
   { key: "library", label: "Бібліотека книг", icon: Library },
-  { key: "generator", label: "Генератор уроку", icon: Wand2 },
-  { key: "kits", label: "Бібліотека уроків", icon: Sparkles },
+  { key: "workshop", label: "Майстерня уроків", icon: Wand2 },
   { key: "slides", label: "Презентації", icon: Presentation },
   { key: "live", label: "Живий клас", icon: Radio },
   { key: "assignments", label: "Завдання", icon: ClipboardList },
@@ -266,9 +264,11 @@ function PageRouter({ active }: { active: NavKey }) {
     case "library":
       return <BookLibraryPage />;
     case "generator":
-      return <LessonGeneratorPage />;
+      return <LessonWorkshopPage />;
     case "kits":
-      return <LessonLibraryPage />;
+      return <LessonWorkshopPage />;
+    case "workshop":
+      return <LessonWorkshopPage />;
     case "slides":
       return <PresentationsPage />;
     case "live":

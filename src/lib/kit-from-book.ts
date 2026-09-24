@@ -47,8 +47,16 @@ export interface KitFromPdfInput {
 
 /** Сторінки PDF → інтерактивний урок (набір блоків) у бібліотеці уроків. */
 export async function createKitFromPdf(input: KitFromPdfInput): Promise<LessonKit> {
-  const { ownerId, file, title, level, focus, from, to, notes = "", onProgress } = input;
+  const { file, from, to } = input;
+  const blobs = await renderPdfPages(file, from, to);
+  return createKitFromImages({ ...input, images: blobs, source: "pdf" });
+}
+
+/** Фото сторінок використовують той самий kit/AI pipeline, що й відрендерений PDF. */
+export async function createKitFromImages(input: Omit<KitFromPdfInput, "file" | "from" | "to"> & { images: Blob[]; source?: "pdf" | "photo" }): Promise<LessonKit> {
+  const { ownerId, title, level, focus, notes = "", onProgress, images, source = "photo" } = input;
   const say = (t: string) => onProgress?.(t);
+  if (!images.length || images.length > 8) throw new Error("Виберіть від 1 до 8 сторінок");
 
   say("Створюємо урок…");
   const { data: created, error: insErr } = await supabase
@@ -58,7 +66,7 @@ export async function createKitFromPdf(input: KitFromPdfInput): Promise<LessonKi
       title: title.trim() || "Урок з книги",
       level,
       focus,
-      source: "pdf",
+      source,
       notes: notes.trim() || null,
     })
     .select("id")
@@ -67,15 +75,15 @@ export async function createKitFromPdf(input: KitFromPdfInput): Promise<LessonKi
   const kitId = (created as any).id as string;
 
   say("Готуємо сторінки книги…");
-  const blobs = await renderPdfPages(file, from, to);
-  if (blobs.length === 0) throw new Error("Виберіть сторінки");
-
   const paths: string[] = [];
-  for (const [i, blob] of blobs.entries()) {
-    const path = `kits/${kitId}/page-${Date.now()}-${i}.jpg`;
+  for (const [i, blob] of images.entries()) {
+    if (!blob.type.startsWith("image/")) throw new Error("Виберіть зображення сторінок");
+    if (blob.size > 12 * 1024 * 1024) throw new Error("Зображення завелике (максимум 12 МБ на сторінку)");
+    const ext = blob.type === "image/png" ? "png" : blob.type === "image/webp" ? "webp" : "jpg";
+    const path = `kits/${kitId}/page-${Date.now()}-${i}.${ext}`;
     const { error } = await supabase.storage
       .from("tutoring-materials")
-      .upload(path, blob, { contentType: "image/jpeg", upsert: true });
+      .upload(path, blob, { contentType: blob.type, upsert: true });
     if (error) throw error;
     paths.push(path);
   }
@@ -111,6 +119,8 @@ export async function listAssignableStudents(limit = 200): Promise<AssignableStu
 
 /** Дає готовий урок учню як домашнє завдання. */
 export async function assignKitToStudent(teacherId: string, kit: LessonKit, studentId: string): Promise<void> {
+  const images = [...kit.blocks, ...kit.sections.flatMap((s) => s.blocks)].map((b) => b.payload?.image_path).filter((p): p is string => typeof p === "string" && p.startsWith(`kits/${kit.id}/`));
+  const audio = [...kit.blocks, ...kit.sections.flatMap((s) => s.blocks)].map((b) => b.payload?.audio_path).filter((p): p is string => typeof p === "string" && p.startsWith(`kits/${kit.id}/`));
   const { error } = await supabase.from("student_assignments").insert({
     teacher_id: teacherId,
     student_id: studentId,
@@ -118,7 +128,7 @@ export async function assignKitToStudent(teacherId: string, kit: LessonKit, stud
     title: kit.title,
     instructions: "Виконай усі блоки та натисни «Здати».",
     level: kit.level,
-    payload: { kit_id: kit.id, blocks: kit.blocks } as any,
+    payload: { kit_id: kit.id, blocks: kit.blocks, sections: kit.sections, page_paths: kit.page_paths, presentation_id: kit.presentation_id, image_paths: [...new Set(images)], audio_paths: [...new Set(audio)] } as any,
     status: "assigned",
   });
   if (error) throw error;

@@ -1,6 +1,10 @@
 /** Блочна система уроків (DaF): типи блоків, ключі, підрахунок балів. */
 
 export const BLOCK_TYPES = [
+  "topic",
+  "table",
+  "callout",
+  "image",
   "theorie",
   "hoer",
   "lesen",
@@ -8,11 +12,17 @@ export const BLOCK_TYPES = [
   "paare",
   "satzbau",
   "schreiben",
+  "artikel",
+  "transformation",
 ] as const;
 
 export type BlockType = (typeof BLOCK_TYPES)[number];
 
 export const BLOCK_META: Record<BlockType, { label: string; de: string; icon: string; hint: string }> = {
+  topic: { label: "Заголовок теми", de: "Thema", icon: "heading", hint: "Параграф, заголовок та вступ" },
+  table: { label: "Таблиця", de: "Grammatik-Tabelle", icon: "table", hint: "Колонки й закінчення" },
+  callout: { label: "Правило / примітка", de: "Merke!", icon: "info", hint: "Виділене пояснення" },
+  image: { label: "Ілюстрація", de: "Abbildung", icon: "image", hint: "Фото книги з підписом" },
   theorie: { label: "Теорія", de: "Grammatik & Theorie", icon: "graduation-cap", hint: "Правило з прикладами" },
   hoer: { label: "Аудіювання", de: "Hörverstehen", icon: "headphones", hint: "Аудіо + транскрипт" },
   lesen: { label: "Читання і лексика", de: "Leseverstehen & Wortschatz", icon: "book-open", hint: "Текст із клікабельними словами" },
@@ -20,6 +30,8 @@ export const BLOCK_META: Record<BlockType, { label: string; de: string; icon: st
   paare: { label: "Пари", de: "Wortpaare / Zuordnung", icon: "link", hint: "З'єднати ліве з правим" },
   satzbau: { label: "Порядок слів", de: "Satzbau", icon: "list-ordered", hint: "Скласти речення зі слів" },
   schreiben: { label: "Письмо і мовлення", de: "Schreiben & Sprechen", icon: "mic", hint: "Есе + голосова відповідь" },
+  artikel: { label: "Артиклі", de: "Artikeltraining", icon: "tags", hint: "Вибір der / die / das / Plural" },
+  transformation: { label: "Перетворення речень", de: "Satzumformung", icon: "repeat", hint: "Зразок і відповідь" },
 };
 
 export type Artikel = "der" | "die" | "das" | "plural";
@@ -54,6 +66,19 @@ export interface SatzItem {
 
 export interface BlockPayload {
   instructions?: string | null;
+  /** editorial blocks */
+  chapter?: string;
+  subtitle?: string;
+  intro?: string;
+  columns?: string[];
+  rows?: string[][];
+  tone?: "note" | "warning" | "example";
+  image_path?: string;
+  caption?: string;
+  context?: string;
+  article_items?: Array<{ word: string; article: Artikel; hint?: string }>;
+  transformations?: Array<{ source: string; answer: string; hint?: string }>;
+  example?: { source: string; answer: string };
   /** theorie */
   markdown?: string;
   examples?: Array<{ de: string; uk?: string | null }>;
@@ -145,6 +170,14 @@ export function scoreBlock(block: LessonBlock, value: any): { score: number; max
       const words = text ? text.split(/\s+/).length : 0;
       return { score: words >= min ? 1 : 0, max: 1 };
     }
+    case "artikel": {
+      const items = p.article_items ?? [];
+      return { score: items.filter((item, i) => value?.[i] === item.article).length, max: items.length };
+    }
+    case "transformation": {
+      const items = p.transformations ?? [];
+      return { score: items.filter((item, i) => isCorrectText(value?.[i], item.answer)).length, max: items.length };
+    }
     default:
       return { score: 0, max: 0 };
   }
@@ -152,6 +185,12 @@ export function scoreBlock(block: LessonBlock, value: any): { score: number; max
 
 export function emptyPayload(type: BlockType): BlockPayload {
   switch (type) {
+    case "topic": return { chapter: "§ 1", subtitle: "", intro: "" };
+    case "table": return { columns: ["Form", "Beispiel", "Bedeutung"], rows: [["ich", "hätte", "я мав би"]] };
+    case "callout": return { tone: "note", markdown: "Важливе правило та приклад." };
+    case "image": return { image_path: "", caption: "", context: "" };
+    case "artikel": return { instructions: "Wählen Sie den richtigen Artikel.", article_items: [{ word: "Buch", article: "das" }] };
+    case "transformation": return { instructions: "Formen Sie die Sätze um.", example: { source: "Ich habe Zeit.", answer: "Wenn ich Zeit hätte, ..." }, transformations: [{ source: "Ich bin reich.", answer: "Wenn ich reich wäre." }] };
     case "theorie":
       return {
         instructions: "Прочитайте правило.",

@@ -1,14 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
 import { ArrowLeft, ArrowRight, Check, Loader2, Trophy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import StudentBlocks from "@/components/blocks/StudentBlocks";
+import LessonReader from "@/components/blocks/LessonReader";
 import PandaLookupFab from "@/components/dictionary/PandaLookup";
-import { kitBlocksToLessonBlocks } from "@/lib/lesson-kits";
 import { loadMiniCourseTask, type MiniCourseTask } from "@/lib/minicourse";
 
 interface Result {
@@ -26,11 +24,13 @@ export default function StudentMiniCourse() {
   const [active, setActive] = useState(0);
   const [results, setResults] = useState<Record<string, Result>>({});
   const [finished, setFinished] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const submittingRef = useRef(false);
 
-  const storageKey = `minicourse:${id}`;
+  const storageKey = `minicourse:${user?.id ?? "guest"}:${id}`;
 
   useEffect(() => {
-    if (!id) return;
+    if (!id || !user) return;
     (async () => {
       const t = await loadMiniCourseTask(id);
       setTask(t);
@@ -44,7 +44,7 @@ export default function StudentMiniCourse() {
       }
       setLoading(false);
     })();
-  }, [id, storageKey]);
+  }, [id, user, storageKey]);
 
   const sections = task?.sections ?? [];
   const section = sections[active];
@@ -65,7 +65,9 @@ export default function StudentMiniCourse() {
   };
 
   const finishCourse = async (all: Record<string, Result>) => {
-    if (!user || !task) return;
+    if (!user || !task || submittingRef.current || finished) throw new Error("Курс уже здається або завершений");
+    submittingRef.current = true;
+    setSubmitting(true);
     let score = 0;
     let max = 0;
     Object.values(all).forEach((r) => {
@@ -73,31 +75,42 @@ export default function StudentMiniCourse() {
       max += r.max;
     });
     const percent = max > 0 ? Math.round((score / max) * 100) : 0;
-    const { error } = await supabase.from("student_submissions").insert({
-      assignment_id: task.id,
-      student_id: user.id,
-      answers: { score, max, sections: all } as any,
-      auto_score: percent,
-      status: "submitted",
-      submitted_at: new Date().toISOString(),
-    });
-    if (error) return toast.error(error.message);
-    await supabase.from("student_assignments").update({ status: "submitted" }).eq("id", task.id);
-    setFinished(true);
-    confetti({ particleCount: 180, spread: 90, origin: { y: 0.7 } });
-    toast.success(`Курс пройдено! Результат ${percent}%`);
+    try {
+      const { data: existing, error: lookupError } = await supabase.from("student_submissions").select("id").eq("assignment_id", task.id).eq("student_id", user.id).limit(1);
+      if (lookupError) throw lookupError;
+      if (!existing?.length) {
+        const { error } = await supabase.from("student_submissions").insert({
+          assignment_id: task.id,
+          student_id: user.id,
+          answers: { score, max, sections: all } as any,
+          auto_score: percent,
+          status: "submitted",
+          submitted_at: new Date().toISOString(),
+        });
+        if (error) throw error;
+      }
+      const { error: statusError } = await supabase.from("student_assignments").update({ status: "submitted" }).eq("id", task.id);
+      if (statusError) throw statusError;
+      setFinished(true);
+      confetti({ particleCount: 180, spread: 90, origin: { y: 0.7 } });
+      toast.success(`Курс пройдено! Результат ${percent}%`);
+    } finally {
+      submittingRef.current = false;
+      setSubmitting(false);
+    }
   };
 
   const completeSection = async (score: number, max: number) => {
-    if (!section) return;
+    if (!section || submitting || finished) throw new Error("Зачекайте на завершення здачі");
     const next = { ...results, [section.id]: { score, max } };
-    setResults(next);
     const isLast = active >= sections.length - 1;
     const nextActive = isLast ? active : active + 1;
-    persist(next, nextActive);
     if (Object.keys(next).length >= sections.length) {
       await finishCourse(next);
-    } else {
+    }
+    setResults(next);
+    persist(next, nextActive);
+    if (Object.keys(next).length < sections.length) {
       setActive(nextActive);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -174,30 +187,11 @@ export default function StudentMiniCourse() {
             </div>
           )}
 
-          <AnimatePresence mode="wait">
             {section && (
-              <motion.div
+              <div
                 key={section.id}
-                initial={{ opacity: 0, x: 18 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -18 }}
-                transition={{ duration: 0.22 }}
               >
-                <div className="mb-4 rounded-2xl border-l-4 border-l-primary border border-border bg-card p-4">
-                  <h2 className="text-base font-display font-black">
-                    <span className="mr-2">{section.emoji}</span>
-                    {section.title}
-                  </h2>
-                  {section.summary && <p className="mt-1 text-xs text-muted-foreground">{section.summary}</p>}
-                </div>
-
-                <StudentBlocks
-                  blocks={kitBlocksToLessonBlocks(section.blocks, `mc-${section.id}`)}
-                  persist={false}
-                  readOnly={finished}
-                  showActions={!finished}
-                  onSubmitted={completeSection}
-                />
+              <LessonReader title={task.title} level={task.level} sections={[section]} pagePaths={task.pagePaths} imageBucket={task.presentationId ? "presentation-slides" : "tutoring-materials"} readOnly={finished || !!results[section.id]} showActions={!finished && !results[section.id]} onSubmitted={completeSection} draftKey={`klar:minicourse:${user?.id}:${id}`} />
 
                 {(finished || results[section.id]) && active < sections.length - 1 && (
                   <button
@@ -210,9 +204,8 @@ export default function StudentMiniCourse() {
                     Наступна тема <ArrowRight className="h-4 w-4" />
                   </button>
                 )}
-              </motion.div>
+              </div>
             )}
-          </AnimatePresence>
         </section>
       </main>
 

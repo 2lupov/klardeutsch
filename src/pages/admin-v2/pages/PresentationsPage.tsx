@@ -10,7 +10,6 @@ import {
   slideUrls,
   type Presentation,
 } from "@/lib/presentations";
-import MiniCourseBuilder from "@/components/minicourse/MiniCourseBuilder";
 import { assignMiniCourse, listMiniCourses, type MiniCourse } from "@/lib/minicourse";
 import { listAssignableStudents, type AssignableStudent } from "@/lib/kit-from-book";
 
@@ -20,7 +19,6 @@ export default function PresentationsPage() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [preview, setPreview] = useState<{ p: Presentation; urls: string[]; page: number } | null>(null);
-  const [courseFor, setCourseFor] = useState<Presentation | null>(null);
   const [courses, setCourses] = useState<MiniCourse[]>([]);
   const [students, setStudents] = useState<AssignableStudent[]>([]);
   const [giveFor, setGiveFor] = useState<string | null>(null);
@@ -142,7 +140,7 @@ export default function PresentationsPage() {
               </div>
               <div className="flex flex-wrap gap-2">
                 <button
-                  onClick={() => setCourseFor(p)}
+                  onClick={() => { sessionStorage.setItem("klar-workshop-source", JSON.stringify({ source: "presentation", id: p.id })); window.dispatchEvent(new CustomEvent("admin-v2:navigate", { detail: { key: "workshop" } })); }}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-bold"
                 >
                   <Sparkles className="w-3.5 h-3.5" /> Зробити мінікурс (ШІ)
@@ -195,6 +193,7 @@ export default function PresentationsPage() {
                   {c.sections.length} тем · {c.level ?? "—"} · {new Date(c.created_at).toLocaleDateString("uk-UA")}
                 </div>
                 {c.summary && <p className="text-xs text-muted-foreground">{c.summary}</p>}
+                <button onClick={() => { sessionStorage.setItem("klar-workshop-kit", c.id); window.dispatchEvent(new CustomEvent("admin-v2:navigate", { detail: { key: "workshop" } })); }} className="rounded-lg border border-border px-3 py-1.5 text-xs font-bold hover:border-primary/50">Редагувати в майстерні</button>
                 <div className="flex flex-wrap gap-1.5">
                   {c.sections.map((s) => (
                     <span key={s.id} className="px-2 py-1 rounded-lg bg-muted text-[11px] font-bold">
@@ -233,15 +232,6 @@ export default function PresentationsPage() {
         </section>
       )}
 
-      {courseFor && (
-        <MiniCourseBuilder
-          presentation={courseFor}
-          onClose={() => {
-            setCourseFor(null);
-            loadCourses();
-          }}
-        />
-      )}
 
 
 

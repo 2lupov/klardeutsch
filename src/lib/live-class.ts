@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import type { KitSection } from "@/lib/lesson-kits";
 
 /** Активні розділи уроку — лише три. Старі значення залишені для сумісності з давніми записами. */
 export type LiveSection =
@@ -20,7 +21,7 @@ export const LIVE_SECTIONS: { key: LiveSection; label: string; icon: string }[] 
 /** Що саме показано учню в розділі «Презентація» / «Блок-завдання». */
 export type LiveView =
   | { type: "slide"; presentation_id: string; page: number }
-  | { type: "blocks"; kit_id: string; title?: string; blocks: any[] };
+  | { type: "blocks"; kit_id: string; title?: string; level?: string | null; blocks: any[]; sections?: KitSection[]; page_paths?: string[]; presentation_id?: string | null };
 
 
 export interface LiveClass {

@@ -459,6 +459,70 @@
   --admin-danger: 0 72% 51%;
   font-family: Manrope, system-ui, sans-serif;
 }
+
+/* Editorial page palette is scoped to the reader, independent of the app shell. */
+.lesson-reader {
+  --background: 0 0% 100%;
+  --foreground: 222 47% 14%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 14%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 14%;
+  --muted: 210 28% 95%;
+  --muted-foreground: 218 15% 40%;
+  --primary: 222 47% 17%;
+  --primary-foreground: 0 0% 100%;
+  --border: 219 22% 83%;
+  --input: 219 22% 83%;
+  --ring: 222 47% 17%;
+  --success: 152 60% 32%;
+  --destructive: 0 72% 44%;
+  color-scheme: light;
+  font-family: Manrope, system-ui, sans-serif;
+}
+.lesson-layout-reading .lesson-reading-text { columns: 2; column-gap: 2.5rem; }
+.lesson-layout-practice > section { padding-top: 1.1rem; padding-bottom: 1.1rem; }
+.lesson-layout-illustrated figure img { max-height: 740px; }
+@media (max-width: 700px) { .lesson-layout-reading .lesson-reading-text { columns: 1; } }
+/* The editor canvas is the same light page as the student reader, even in dark admin mode. */
+.klar-admin .lesson-workshop-canvas {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--border));
+  color-scheme: light;
+}
+.klar-admin .lesson-workshop-canvas h2,
+.klar-admin .lesson-workshop-canvas h3,
+.klar-admin .lesson-workshop-canvas .text-foreground { color: hsl(var(--foreground)); }
+.klar-admin .lesson-workshop-canvas .text-muted-foreground { color: hsl(var(--muted-foreground)); }
+.klar-admin .lesson-workshop-canvas input,
+.klar-admin .lesson-workshop-canvas textarea,
+.klar-admin .lesson-workshop-canvas select {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--border));
+}
+.klar-admin .lesson-workshop-canvas table thead {
+  background-color: hsl(var(--primary) / 0.1);
+  position: static;
+}
+.lesson-workshop-paper { max-width: 860px; margin-inline: auto; }
+.lesson-workshop-block-selected {
+  outline: 2px solid hsl(44 90% 55% / 0.8);
+  outline-offset: 7px;
+  border-radius: 3px;
+}
+.lesson-workshop-tool {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  color: hsl(var(--muted-foreground));
+}
+.lesson-workshop-tool:hover { background: hsl(var(--muted)); color: hsl(var(--foreground)); }
+.lesson-workshop-tool:disabled { opacity: 0.3; cursor: not-allowed; }
 .klar-admin.dark {
   color-scheme: dark;
   --admin-bg: 222 47% 9%;
