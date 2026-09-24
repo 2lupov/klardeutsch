@@ -185,6 +185,11 @@ export function scoreBlock(block: LessonBlock, value: any): { score: number; max
       const items = p.transformations ?? [];
       return { score: items.filter((item, i) => isCorrectText(value?.[i], item.answer)).length, max: items.length };
     }
+    case "modell": {
+      const parts = p.parts ?? [];
+      if (!parts.length) return { score: 0, max: 0 };
+      return { score: parts.filter((part) => value?.[part.id]).length, max: parts.length };
+    }
     default:
       return { score: 0, max: 0 };
   }
@@ -196,6 +201,7 @@ export function emptyPayload(type: BlockType): BlockPayload {
     case "table": return { columns: ["Form", "Beispiel", "Bedeutung"], rows: [["ich", "hätte", "я мав би"]] };
     case "callout": return { tone: "note", markdown: "Важливе правило та приклад." };
     case "image": return { image_path: "", caption: "", context: "" };
+    case "modell": return { instructions: "Натисніть на частину моделі та вивчіть слово з артиклем.", model: "auge", parts: [] };
     case "artikel": return { instructions: "Wählen Sie den richtigen Artikel.", article_items: [{ word: "Buch", article: "das" }] };
     case "transformation": return { instructions: "Formen Sie die Sätze um.", example: { source: "Ich habe Zeit.", answer: "Wenn ich Zeit hätte, ..." }, transformations: [{ source: "Ich bin reich.", answer: "Wenn ich reich wäre." }] };
     case "theorie":
