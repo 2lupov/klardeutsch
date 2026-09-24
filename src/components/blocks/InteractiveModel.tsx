@@ -211,10 +211,6 @@ export default function InteractiveModel({ payload, title, value, onChange, read
         {builtIn ? (
           <svg viewBox={builtIn.viewBox} role="img" aria-label={builtIn.label} className="model-svg h-auto w-full" onClick={readOnly ? undefined : onSvgClick}>
             {builtIn.svg}
-            {parts.map((p) => {
-              if (!found[p.id] && activeId !== p.id) return null;
-              return null;
-            })}
           </svg>
         ) : payload.svg ? (
           <div className="model-svg [&_svg]:h-auto [&_svg]:w-full" onClick={readOnly ? undefined : onSvgClick} dangerouslySetInnerHTML={{ __html: safeSvg(payload.svg) }} />
