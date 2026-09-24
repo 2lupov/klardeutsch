@@ -53,7 +53,7 @@ export default function StudentTextbooks() {
             <Button size="sm" onClick={() => { if (open.hwId) markDone(open.hwId); }}><Check /> Здати сторінку</Button>
           )}
         </div>
-        <TextbookWorkbook studentBookId={open.id} page={open.page} onPageChange={(p) => setOpen({ ...open, page: p })} />
+        <TextbookWorkbook studentBookId={open.id} page={open.page} onPageChange={(p) => setOpen({ ...open, page: p })} continuous />
       </div>
     );
   }
