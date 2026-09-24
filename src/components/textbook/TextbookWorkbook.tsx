@@ -242,7 +242,9 @@ export default function TextbookWorkbook({
       return;
     }
     if (tool === "text") {
-      if (draftText?.text.trim()) finishText();
+      // Якщо вже щось друкували — цей клік лише завершує напис
+      // і перемикає на «Стрілку», а не створює новий текст.
+      if (draftText) { finishText(); return; }
       setDraftText({ x, y, text: "" });
       window.setTimeout(() => textRef.current?.focus(), 30);
       return;
