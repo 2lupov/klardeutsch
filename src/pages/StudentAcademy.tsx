@@ -463,6 +463,16 @@ const rows = tab === "tests" ? tests : homework;
             )}
           </div>
 
+          {liveCls && (
+            <button
+              onClick={() => navigate(`/live/${liveCls.id}`)}
+              className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-red-500 text-white font-display font-bold text-sm hover:bg-red-600 transition"
+            >
+              <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+              Повернутись на урок · триває {liveElapsed}
+            </button>
+          )}
+
           {showStats && (
             <div className="mt-4 grid grid-cols-3 divide-x divide-border rounded-2xl border border-border bg-card">
               <Stat value={stats.active} label="Активні" />
