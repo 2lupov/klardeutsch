@@ -309,7 +309,7 @@ export default function TextbookWorkbook({
   if (!info) return <div className="p-6 text-sm text-muted-foreground flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Відкриваю підручник…</div>;
   if (!info.book) return <p className="p-6 text-sm text-muted-foreground">Підручник недоступний.</p>;
 
-  const cursor = tool === "hand" ? "grab" : tool === "text" ? "text" : "crosshair";
+  const cursor = tool === "hand" ? "grab" : tool === "move" ? "move" : tool === "text" ? "text" : "crosshair";
   const ToolBtn = ({ t, icon: I, label }: { t: Tool; icon: any; label: string }) => (
     <button
       type="button"
