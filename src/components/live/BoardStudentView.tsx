@@ -10,14 +10,15 @@ import {
   camTransform,
 } from "./BoardRender";
 import { eraseAt } from "./board-erase";
-import { ZoomIn, ZoomOut, Crosshair, Eye, Pencil, Hand, Type, Eraser } from "lucide-react";
+import { ZoomIn, ZoomOut, Crosshair, Eye, Pencil, Hand, Type, Eraser, MousePointer2, Highlighter } from "lucide-react";
 
 const MIN_W = 0.05;
 const MAX_W = 8;
 const COLORS = ["#4F46E5", "#DC2626", "#059669", "#F59E0B", "#0F172A"];
+const MARKER_COLOR = "#FACC15";
 const uid = () => "s" + Math.random().toString(36).slice(2, 10);
 
-type Tool = "pan" | "pen" | "text" | "erase";
+type Tool = "select" | "pan" | "pen" | "marker" | "text" | "erase";
 
 /** Стікер-курсори: олівець і гумка їдуть точно за мишкою (кінчик = гаряча точка). */
 const PEN_CURSOR =
@@ -64,6 +65,8 @@ export default function BoardStudentView({
   /** Локальні елементи учня — доки вчитель не поверне їх у спільній дошці. */
   const [mine, setMine] = useState<BoardEl[]>([]);
   const [editing, setEditing] = useState<string | null>(null);
+  /** Стерті учнем елементи — ховаємо одразу, не чекаючи вчителя. */
+  const [hidden, setHidden] = useState<Set<string>>(new Set());
   /** Геометрія SVG: масштаб і зсуви через preserveAspectRatio="slice". */
   const [view, setView] = useState({ s: 1, dx: 0, dy: 0 });
 
@@ -107,8 +110,12 @@ export default function BoardStudentView({
 
 
   const serverIds = useMemo(() => new Set(content.map((e) => e.id)), [content]);
-  const pending = mine.filter((e) => !serverIds.has(e.id));
-  const all = [...content, ...pending];
+  const mineById = new Map(mine.map((e) => [e.id, e]));
+  const pending = mine.filter((e) => !serverIds.has(e.id) && !hidden.has(e.id!));
+  const all = [
+    ...content.filter((e) => !hidden.has(e.id!)).map((e) => mineById.get(e.id) || e),
+    ...pending,
+  ];
   allRef.current = all;
   const editingEl = all.find((e) => e.id === editing && e.type === "text");
 
@@ -161,18 +168,35 @@ export default function BoardStudentView({
     onDraw?.(el, live);
   };
 
-  const isMine = (el: BoardEl) => /^[sk]/.test(String(el.id));
+  const moving = useRef<{ id: string; dx: number; dy: number; moved: boolean } | null>(null);
+  const touchedByErase = useRef<Set<string>>(new Set());
 
-  /** Справжня гумка: стирає частину свого штриха, а не весь елемент. */
+  /**
+   * Гумка учня: стирає частину будь-якого штриха на дошці (і свого, і вчителя),
+   * а надпис під гумкою прибирає цілим словом.
+   */
   const eraseAtPoint = (p: { x: number; y: number }) => {
-    const own = allRef.current.filter(isMine);
-    if (own.length === 0) return;
+    const cur = allRef.current;
+    if (cur.length === 0) return;
     const radius = (14 * camRef.current.w) / (BOARD_W * (view.s || 1));
-    const r = eraseAt(own, p, radius, undefined);
-    if (!r.changed) return;
-    setMine(r.next);
-    r.removed.forEach((id) => onErase?.(id));
-    r.upserted.forEach((el) => onDraw?.(el, true));
+    const r = eraseAt(cur, p, radius, undefined);
+    const removed = new Set(r.removed);
+    // тексти під гумкою
+    for (const el of r.next) {
+      if (el.type !== "text" || !el.id) continue;
+      const size = el.size || 0.045;
+      const lines = String(el.text || " ").split("\n");
+      const wN = (Math.max(2, ...lines.map((l) => l.length)) * size * 0.6 * BOARD_H) / BOARD_W;
+      const x0 = el.x || 0, y0 = (el.y || 0) - size;
+      const y1 = y0 + size * 1.35 * lines.length;
+      if (p.x >= x0 - radius && p.x <= x0 + wN + radius && p.y >= y0 - radius && p.y <= y1 + radius) removed.add(el.id);
+    }
+    if (!r.changed && removed.size === 0) return;
+    allRef.current = r.next.filter((el) => !removed.has(el.id!));
+    setHidden((h) => { const n = new Set(h); removed.forEach((id) => n.add(id)); return n; });
+    setMine((m) => [...m.filter((x) => !removed.has(x.id!) && !r.upserted.some((u) => u.id === x.id)), ...r.upserted]);
+    removed.forEach((id) => onErase?.(id));
+    r.upserted.forEach((el) => { if (el.id) touchedByErase.current.add(el.id); onDraw?.(el, true); });
   };
 
   const zoomTo = (nextW: number, fx = 0.5, fy = 0.5) => {
@@ -219,14 +243,35 @@ export default function BoardStudentView({
     const f = frac(e.clientX, e.clientY);
     const p = world(e.clientX, e.clientY);
 
+    // Після введення тексту клік деінде лише завершує напис і дає «Стрілку»
+    if (editing) {
+      setEditing(null);
+      setTool("select");
+      return;
+    }
+
+    if (tool === "select") {
+      const idAttr = ((e.target as Element).closest?.("[data-el-id]") as Element | null)?.getAttribute("data-el-id");
+      const el = idAttr ? allRef.current.find((x) => x.id === idAttr) : null;
+      if (el && el.type === "text") {
+        (e.target as Element).setPointerCapture?.(e.pointerId);
+        moving.current = { id: el.id!, dx: p.x - (el.x || 0), dy: p.y - (el.y || 0), moved: false };
+        return;
+      }
+      panning.current = { fx: f.fx, fy: f.fy, cam: camRef.current };
+      return;
+    }
+
     if (tool === "pan") {
       panning.current = { fx: f.fx, fy: f.fy, cam: camRef.current };
       return;
     }
 
-    if (tool === "pen") {
+    if (tool === "pen" || tool === "marker") {
       (e.target as Element).setPointerCapture?.(e.pointerId);
-      const el: BoardEl = { id: uid(), type: "stroke", color, width: 4 * cam.w, points: [p] };
+      const el: BoardEl = tool === "marker"
+        ? { id: uid(), type: "stroke", color: MARKER_COLOR, width: 18 * cam.w, opacity: 0.4, points: [p] }
+        : { id: uid(), type: "stroke", color, width: 4 * cam.w, points: [p] };
       drafting.current = el;
       upsertMine(el, true);
       return;
@@ -255,9 +300,18 @@ export default function BoardStudentView({
       setCam({ x: s.cam.x - (f.fx - s.fx) * s.cam.w, y: s.cam.y - (f.fy - s.fy) * s.cam.w, w: s.cam.w });
       return;
     }
+    const mv = moving.current;
+    if (mv) {
+      const el = allRef.current.find((x) => x.id === mv.id);
+      if (!el) return;
+      const p = world(e.clientX, e.clientY);
+      mv.moved = true;
+      upsertMine({ ...el, x: p.x - mv.dx, y: p.y - mv.dy }, true);
+      return;
+    }
     if (erasing.current) { eraseAtPoint(world(e.clientX, e.clientY)); return; }
     const d = drafting.current;
-    if (d && tool === "pen") {
+    if (d && (tool === "pen" || tool === "marker")) {
       const p = world(e.clientX, e.clientY);
       const next = { ...d, points: [...(d.points || []), p] };
       drafting.current = next;
@@ -267,9 +321,18 @@ export default function BoardStudentView({
 
   const endPointer = () => {
     panning.current = null;
+    const mv = moving.current;
+    if (mv) {
+      moving.current = null;
+      const el = allRef.current.find((x) => x.id === mv.id);
+      if (el && mv.moved) onDraw?.(el, false);
+      else if (el) setEditing(el.id!); // клік без руху — редагувати текст
+    }
     if (erasing.current) {
       erasing.current = false;
-      allRef.current.filter(isMine).forEach((el) => onDraw?.(el, false));
+      allRef.current.filter((el) => (el.type || "stroke") === "stroke" || el.type === "text")
+        .forEach((el) => { if (touchedByErase.current.has(el.id!)) onDraw?.(el, false); });
+      touchedByErase.current.clear();
     }
     if (drafting.current) {
       onDraw?.(drafting.current, false);
@@ -285,7 +348,7 @@ export default function BoardStudentView({
   };
 
   const cursor =
-    tool === "pan" ? "grab" : tool === "erase" ? ERASER_CURSOR : tool === "pen" ? PEN_CURSOR : "text";
+    tool === "pan" ? "grab" : tool === "select" ? "default" : tool === "erase" ? ERASER_CURSOR : tool === "pen" || tool === "marker" ? PEN_CURSOR : "text";
 
 
   return (
@@ -314,7 +377,11 @@ export default function BoardStudentView({
             <line x1={0} y1={-30 * cam.w} x2={0} y2={30 * cam.w} />
           </g>
           {all.map((el, i) => (
-            editing === el.id ? null : <BoardElement key={el.id || i} el={el} />
+            editing === el.id ? null : (
+              <g key={el.id || i} data-el-id={el.id}>
+                <BoardElement el={el} />
+              </g>
+            )
           ))}
         </g>
       </svg>
@@ -343,7 +410,7 @@ export default function BoardStudentView({
                 const id = editingEl.id;
                 if (id) setText(id, e.target.value);
               }}
-              onBlur={(e) => { if (Date.now() - (editStartRef.current || 0) < 300) { e.currentTarget.focus(); return; } setEditing(null); }}
+              onBlur={(e) => { if (Date.now() - (editStartRef.current || 0) < 300) { e.currentTarget.focus(); return; } setEditing(null); setTool("select"); }}
               onKeyDown={(e) => { if (e.key === "Escape") setEditing(null); }}
               placeholder="Пишіть…"
               spellCheck={false}
@@ -365,10 +432,12 @@ export default function BoardStudentView({
       {/* панель інструментів учня */}
       <div className="absolute top-3 left-3 flex items-center gap-1.5 rounded-2xl bg-card/90 backdrop-blur border border-border p-1.5 shadow-sm">
         {([
+          { k: "select", icon: MousePointer2, title: "Стрілка — перемістити текст" },
           { k: "pan", icon: Hand, title: "Рухати полотно" },
           { k: "pen", icon: Pencil, title: "Малювати" },
+          { k: "marker", icon: Highlighter, title: "Жовтий маркер — виділити слова" },
           { k: "text", icon: Type, title: "Писати текст" },
-          { k: "erase", icon: Eraser, title: "Стерти своє" },
+          { k: "erase", icon: Eraser, title: "Гумка" },
         ] as { k: Tool; icon: any; title: string }[]).map(({ k, icon: Icon, title }) => (
 
           <button

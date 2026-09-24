@@ -15,6 +15,8 @@ export interface BoardEl {
   url?: string;
   shape?: "rect" | "ellipse" | "line" | "arrow";
   fill?: string;
+  /** Прозорість штриха (маркер-виділювач). */
+  opacity?: number;
 }
 
 export const BOARD_W = 1000;
@@ -64,6 +66,7 @@ export function BoardElement({ el }: { el: BoardEl }) {
         strokeWidth={el.width || 4}
         strokeLinecap="round"
         strokeLinejoin="round"
+        strokeOpacity={el.opacity ?? 1}
         points={(el.points || []).map((p) => `${p.x * BOARD_W},${p.y * BOARD_H}`).join(" ")}
       />
     );

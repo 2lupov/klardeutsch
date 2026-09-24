@@ -26,6 +26,7 @@ import {
   Minus,
   Image as ImageIcon,
   Eraser,
+  Highlighter,
   Undo2,
   Trash2,
   ZoomIn,
@@ -35,7 +36,7 @@ import {
   Eye,
 } from "lucide-react";
 
-type Tool = "select" | "pan" | "pen" | "text" | "rect" | "ellipse" | "arrow" | "line" | "erase";
+type Tool = "select" | "pan" | "pen" | "marker" | "text" | "rect" | "ellipse" | "arrow" | "line" | "erase";
 
 const COLORS = ["#0F172A", "#4F46E5", "#DC2626", "#059669", "#F59E0B", "#DB2777"];
 const uid = () => Math.random().toString(36).slice(2, 10);
@@ -419,8 +420,10 @@ export default function BoardEditor({
       return;
     }
 
-    if (tool === "pen") {
-      drafting.current = { id: uid(), type: "stroke", color, width: width * camRef.current.w, points: [p] };
+    if (tool === "pen" || tool === "marker") {
+      drafting.current = tool === "marker"
+        ? { id: uid(), type: "stroke", color: "#FACC15", width: 18 * camRef.current.w, opacity: 0.4, points: [p] }
+        : { id: uid(), type: "stroke", color, width: width * camRef.current.w, points: [p] };
       setEls((prev) => [...prev, drafting.current!]);
       return;
     }
@@ -643,6 +646,9 @@ export default function BoardEditor({
         </Btn>
         <Btn active={tool === "pen"} onClick={() => setTool("pen")} title="Малювати">
           <Pen className="w-4 h-4" />
+        </Btn>
+        <Btn active={tool === "marker"} onClick={() => setTool("marker")} title="Жовтий маркер — виділити слова">
+          <Highlighter className="w-4 h-4" />
         </Btn>
         <Btn active={tool === "text"} onClick={() => setTool("text")} title="Текст (пишеться в реальному часі)">
           <Type className="w-4 h-4" />
