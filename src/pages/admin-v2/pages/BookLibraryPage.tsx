@@ -261,7 +261,37 @@ export default function BookLibraryPage() {
                     <Send className="h-4 w-4" /> Дати як домашку
                   </span>
                 </Btn>
+                <Btn variant="ghost" onClick={() => toggleHomework(b)}>
+                  <span className="inline-flex items-center gap-1.5">
+                    📄 {hwFor === b.id ? "Сховати домашку" : "Домашка по сторінках"}
+                  </span>
+                </Btn>
               </div>
+
+              {hwFor === b.id && (
+                <div className="rounded-xl border border-admin-border bg-admin-fg/[0.03] p-3 space-y-2">
+                  {hwLoading ? (
+                    <p className="text-xs text-admin-muted flex items-center gap-2"><Loader2 className="h-3 w-3 animate-spin" /> Завантажую…</p>
+                  ) : hwRows.length === 0 ? (
+                    <p className="text-xs text-admin-muted">По цій книзі ще нікому не задано сторінок.</p>
+                  ) : (
+                    hwRows.map((h) => (
+                      <div key={h.id} className="flex items-center justify-between gap-2 text-xs">
+                        <div className="min-w-0">
+                          <span className="font-semibold text-admin-fg">{h.student_name}</span>
+                          <span className="text-admin-muted"> · стор. {h.page_number}</span>
+                          {h.homework_note && <span className="text-admin-muted"> — {h.homework_note}</span>}
+                        </div>
+                        <span className={`shrink-0 rounded-full px-2 py-0.5 font-medium ${
+                          h.homework_status === "done" ? "bg-green-500/15 text-green-600" : "bg-amber-400/20 text-amber-600"
+                        }`}>
+                          {h.homework_status === "done" ? "Виконано" : "Задано"}
+                        </span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
 
               <div className="flex items-center justify-between">
                 <span className="rounded-full bg-admin-accent/20 px-2 py-0.5 text-[11px] font-medium text-admin-fg">
