@@ -71,6 +71,7 @@ const StudentAcademy = () => {
   const [searchParams] = useSearchParams();
   const initialTab = (searchParams.get("tab") || "homework") as Tab;
   const [tab, setTab] = useState<Tab>(initialTab);
+  const [navCollapsed, setNavCollapsed] = useState(() => localStorage.getItem("academy_nav_collapsed") === "1");
   const [bg, setBg] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [tests, setTests] = useState<Row[]>([]);
@@ -370,13 +371,13 @@ const nextUp = useMemo(() => {
     )[0];
   }, [tests, homework]);
 
-  const tabs: Array<{ key: Tab; label: string; count: number }> = [
-    { key: "homework", label: "Домашка", count: pending.homework },
-    { key: "tests", label: "Тести", count: pending.tests },
-    { key: "board", label: "Дошка", count: 0 },
-    { key: "textbook", label: "Підручники", count: 0 },
-    { key: "dict", label: "Словник", count: 0 },
-    { key: "profile", label: "Профіль", count: 0 },
+  const tabs: Array<{ key: Tab; label: string; count: number; icon: string }> = [
+    { key: "homework", label: "Домашка", count: pending.homework, icon: "📝" },
+    { key: "tests", label: "Тести", count: pending.tests, icon: "✅" },
+    { key: "board", label: "Дошка", count: 0, icon: "🎨" },
+    { key: "textbook", label: "Підручники", count: 0, icon: "📖" },
+    { key: "dict", label: "Словник", count: 0, icon: "📚" },
+    { key: "profile", label: "Профіль", count: 0, icon: "👤" },
   ];
 
 const rows = tab === "tests" ? tests : homework;
@@ -384,10 +385,48 @@ const rows = tab === "tests" ? tests : homework;
   const allClear = totalTodo === 0 && hasAnyContent && (tab === "tests" || tab === "homework");
 
   return (
-    <div className="min-h-full bg-background bg-fixed bg-cover" style={bgCss(bg) ? { backgroundImage: bgCss(bg) } : undefined}>
+    <div className="min-h-full bg-background bg-fixed bg-cover flex" style={bgCss(bg) ? { backgroundImage: bgCss(bg) } : undefined}>
+      {/* Collapsible sidebar */}
+      <aside className={`sticky top-0 h-screen shrink-0 border-r border-border bg-background/90 backdrop-blur flex flex-col transition-all ${navCollapsed ? "w-14" : "w-14 md:w-52"}`}>
+        <div className={`flex items-center gap-2 px-3 py-4 ${navCollapsed ? "justify-center" : ""}`}>
+          <span className="font-display font-black text-lg text-foreground">{navCollapsed ? "K" : "KLAR"}</span>
+        </div>
+        <nav className="flex-1 px-2 space-y-1">
+          {tabs.map((tb) => {
+            const active = tab === tb.key;
+            return (
+              <button
+                key={tb.key}
+                title={tb.label}
+                onClick={() => setTab(tb.key)}
+                className={`relative w-full flex items-center ${navCollapsed ? "justify-center" : ""} gap-3 px-3 py-2.5 rounded-xl text-sm font-display font-medium transition ${
+                  active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                }`}
+              >
+                <span className="text-base">{tb.icon}</span>
+                {!navCollapsed && <span className="hidden md:inline truncate">{tb.label}</span>}
+                {tb.count > 0 && (
+                  <span className="absolute right-2 top-1.5 md:static md:ml-auto min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+                    {tb.count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </nav>
+        <button
+          onClick={() => setNavCollapsed((v) => { localStorage.setItem("academy_nav_collapsed", v ? "0" : "1"); return !v; })}
+          title={navCollapsed ? "Розгорнути" : "Згорнути"}
+          className="hidden md:flex m-2 h-9 items-center justify-center rounded-xl text-muted-foreground hover:bg-muted/50 hover:text-foreground text-sm"
+        >
+          {navCollapsed ? "»" : "« Згорнути"}
+        </button>
+      </aside>
+
+      <div className="flex-1 min-w-0">
       {/* Sticky header with todo counter + stats */}
       <div className="sticky top-0 z-20 bg-background/90 backdrop-blur border-b border-border">
-        <div className="max-w-2xl mx-auto px-4 pt-5 pb-3">
+        <div className={`${tab === "board" ? "max-w-5xl" : "max-w-2xl"} mx-auto px-4 pt-5 pb-3`}>
           <div className="flex items-end justify-between gap-4">
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Моє навчання</p>
@@ -409,35 +448,10 @@ const rows = tab === "tests" ? tests : homework;
               <Stat value={stats.avg ?? "—"} label="Середній бал" />
             </div>
           )}
-
-          <div className="flex gap-2 mt-4 overflow-x-auto no-scrollbar -mx-1 px-1">
-            {tabs.map((tb) => (
-              <button
-                key={tb.key}
-                onClick={() => setTab(tb.key)}
-                className={`shrink-0 px-4 py-2 rounded-full text-sm font-bold transition flex items-center gap-2 ${
-                  tab === tb.key
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-card border border-border text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {tb.label}
-                {tb.count > 0 && (
-                  <span
-                    className={`text-[10px] px-1.5 py-0.5 rounded-full ${
-                      tab === tb.key ? "bg-primary-foreground/20" : "bg-muted"
-                    }`}
-                  >
-                    {tb.count}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-4 py-5">
+      <div className={`${tab === "board" ? "max-w-5xl" : "max-w-2xl"} mx-auto px-4 py-5`}>
 
 
         {loading ? (
@@ -551,6 +565,7 @@ const rows = tab === "tests" ? tests : homework;
             )}
           </div>
         )}
+      </div>
       </div>
     </div>
   );
