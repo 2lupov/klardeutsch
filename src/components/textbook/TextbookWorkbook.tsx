@@ -297,7 +297,10 @@ export default function TextbookWorkbook({
   const finishText = () => {
     const d = draftText;
     setDraftText(null);
-    if (!d || !d.text.trim()) return;
+    if (!d) return;
+    // після введення переходимо на «Стрілку», щоб наступний клік не створював новий напис
+    setTool("move");
+    if (!d.text.trim()) return;
     commit([...strokes, { id: uid(), type: "text", x: d.x, y: d.y, text: d.text, color, size: 22 }]);
   };
 
