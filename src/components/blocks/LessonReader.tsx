@@ -14,7 +14,7 @@ interface Props {
   onActiveChange?: (index: number) => void;
   readOnly?: boolean;
   showActions?: boolean;
-  onSubmitted?: (score: number, max: number) => void | Promise<void>;
+  onSubmitted?: (score: number, max: number, values?: Record<string, any>) => void | Promise<void>;
   progress?: Record<string, { score: number; max: number }>;
   pagePaths?: string[];
   imageBucket?: "tutoring-materials" | "presentation-slides";

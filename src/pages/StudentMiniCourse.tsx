@@ -100,9 +100,9 @@ export default function StudentMiniCourse() {
     }
   };
 
-  const completeSection = async (score: number, max: number) => {
+  const completeSection = async (score: number, max: number, values?: Record<string, any>) => {
     if (!section || submitting || finished) throw new Error("Зачекайте на завершення здачі");
-    const next = { ...results, [section.id]: { score, max } };
+    const next = { ...results, [section.id]: { score, max, values: values ?? {} } as any };
     const isLast = active >= sections.length - 1;
     const nextActive = isLast ? active : active + 1;
     if (Object.keys(next).length >= sections.length) {
