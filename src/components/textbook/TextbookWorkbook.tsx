@@ -2,15 +2,15 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import * as pdfjsLib from "pdfjs-dist";
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { supabase } from "@/integrations/supabase/client";
-import { ChevronLeft, ChevronRight, Hand, Pen, Eraser, Type, Undo2, Loader2, MousePointer2, Plus, Minus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Hand, Pen, Eraser, Type, Undo2, Loader2, MousePointer2, Plus, Minus, Highlighter, AArrowDown, AArrowUp } from "lucide-react";
 
 (pdfjsLib as any).GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
 type Stroke =
-  | { id: string; type: "path"; pts: [number, number][]; color: string; w: number }
+  | { id: string; type: "path"; pts: [number, number][]; color: string; w: number; op?: number }
   | { id: string; type: "text"; x: number; y: number; text: string; color: string; size: number };
 
-type Tool = "hand" | "move" | "pen" | "erase" | "text";
+type Tool = "hand" | "move" | "pen" | "marker" | "erase" | "text";
 const COLORS = ["#2563EB", "#DC2626", "#059669", "#0F172A", "#F59E0B"];
 const W = 1000;
 const uid = () => Math.random().toString(36).slice(2, 10);
@@ -74,6 +74,8 @@ export default function TextbookWorkbook({
   const [tool, setTool] = useState<Tool>("hand");
   const [zoom, setZoom] = useState(1);
   const [color, setColor] = useState(COLORS[0]);
+  const [textSize, setTextSize] = useState(22);
+  const [selText, setSelText] = useState<string | null>(null);
   const [draftText, setDraftText] = useState<{ x: number; y: number; text: string } | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -236,7 +238,8 @@ export default function TextbookWorkbook({
     const [x, y] = pt(e);
     if (tool === "move") {
       const t = textAt(x, y);
-      if (!t || t.type !== "text") return;
+      if (!t || t.type !== "text") { setSelText(null); return; }
+      setSelText(t.id);
       (e.target as Element).setPointerCapture?.(e.pointerId);
       history.current.push(strokes);
       moving.current = { id: t.id, dx: x - t.x, dy: y - t.y };
@@ -251,8 +254,10 @@ export default function TextbookWorkbook({
       return;
     }
     (e.target as Element).setPointerCapture?.(e.pointerId);
-    if (tool === "pen") {
-      drawing.current = { id: uid(), type: "path", pts: [[x, y]], color, w: 3 };
+    if (tool === "pen" || tool === "marker") {
+      drawing.current = tool === "marker"
+        ? { id: uid(), type: "path", pts: [[x, y]], color: "#FACC15", w: 16, op: 0.4 }
+        : { id: uid(), type: "path", pts: [[x, y]], color, w: 3 };
       setStrokes((s) => [...s, drawing.current!]);
     } else if (tool === "erase") {
       history.current.push(strokes);
@@ -271,7 +276,7 @@ export default function TextbookWorkbook({
     const d = drawing.current;
     if (!d) return;
     const [x, y] = pt(e);
-    if (tool === "pen" && d.type === "path") {
+    if ((tool === "pen" || tool === "marker") && d.type === "path") {
       d.pts.push([Math.round(x * 10) / 10, Math.round(y * 10) / 10]);
       setStrokes((s) => s.map((st) => (st.id === d.id ? { ...d, pts: [...d.pts] } : st)));
     } else if (tool === "erase") {
@@ -286,7 +291,7 @@ export default function TextbookWorkbook({
       return;
     }
     if (!drawing.current) return;
-    const wasPen = tool === "pen";
+    const wasPen = tool === "pen" || tool === "marker";
     drawing.current = null;
     setStrokes((s) => {
       if (wasPen) history.current.push(s.slice(0, -1));
@@ -302,7 +307,17 @@ export default function TextbookWorkbook({
     // після введення переходимо на «Стрілку», щоб наступний клік не створював новий напис
     setTool("move");
     if (!d.text.trim()) return;
-    commit([...strokes, { id: uid(), type: "text", x: d.x, y: d.y, text: d.text, color, size: 22 }]);
+    commit([...strokes, { id: uid(), type: "text", x: d.x, y: d.y, text: d.text, color, size: textSize }]);
+  };
+
+  const selectedStroke = selText ? strokes.find((s) => s.id === selText && s.type === "text") : null;
+  const selectedTextSize = selectedStroke && selectedStroke.type === "text" ? selectedStroke.size : textSize;
+  const changeTextSize = (delta: number) => {
+    const next = Math.max(10, Math.min(96, selectedTextSize + delta));
+    if (selectedStroke) {
+      commit(strokes.map((s) => (s.id === selectedStroke.id && s.type === "text" ? { ...s, size: next } : s)));
+    }
+    setTextSize(next);
   };
 
   const undo = () => {
@@ -335,7 +350,13 @@ export default function TextbookWorkbook({
           <ToolBtn t="hand" icon={Hand} label="Рука" />
           <ToolBtn t="move" icon={MousePointer2} label="Стрілка" />
           <ToolBtn t="pen" icon={Pen} label="Олівець" />
+          <ToolBtn t="marker" icon={Highlighter} label="Маркер" />
           <ToolBtn t="text" icon={Type} label="Текст" />
+          <div className="flex items-center gap-1 pl-1" title="Розмір тексту (новий напис або вибраний стрілкою)">
+            <button type="button" title="Менший текст" onClick={() => changeTextSize(-4)} className="h-9 w-9 rounded-lg border border-border bg-card flex items-center justify-center hover:bg-muted"><AArrowDown className="w-4 h-4" /></button>
+            <span className="text-xs text-muted-foreground w-6 text-center">{selectedTextSize}</span>
+            <button type="button" title="Більший текст" onClick={() => changeTextSize(4)} className="h-9 w-9 rounded-lg border border-border bg-card flex items-center justify-center hover:bg-muted"><AArrowUp className="w-4 h-4" /></button>
+          </div>
           <ToolBtn t="erase" icon={Eraser} label="Гумка" />
           <button type="button" onClick={undo} title="Назад" className="h-9 w-9 rounded-lg border border-border bg-card flex items-center justify-center hover:bg-muted"><Undo2 className="w-4 h-4" /></button>
           <div className="flex items-center gap-1 pl-1">
@@ -382,7 +403,7 @@ export default function TextbookWorkbook({
           >
             {strokes.map((s) =>
               s.type === "path" ? (
-                <polyline key={s.id} points={s.pts.map((p) => p.join(",")).join(" ")} fill="none" stroke={s.color} strokeWidth={s.w} strokeLinecap="round" strokeLinejoin="round" />
+                <polyline key={s.id} points={s.pts.map((p) => p.join(",")).join(" ")} fill="none" stroke={s.color} strokeWidth={s.w} strokeOpacity={s.op ?? 1} strokeLinecap="round" strokeLinejoin="round" />
               ) : (
                 <text key={s.id} x={s.x} y={s.y} fontSize={s.size} fill={s.color} fontFamily="Space Grotesk, sans-serif" fontWeight={600}>
                   {s.text.split("\n").map((line, i) => <tspan key={i} x={s.x} dy={i ? s.size * 1.2 : 0}>{line}</tspan>)}
@@ -404,7 +425,7 @@ export default function TextbookWorkbook({
               className="workbook-text-input absolute z-10 min-w-[40%] resize-none overflow-hidden bg-transparent p-0 ring-0 shadow-none focus:ring-0 focus:outline-none focus-visible:ring-0 placeholder:opacity-50"
               style={(() => {
                 const scale = (svgRef.current?.getBoundingClientRect().width || W) / W;
-                const fs = 22 * scale;
+                const fs = textSize * scale;
                 return {
                   left: `${(draftText.x / W) * 100}%`,
                   top: `calc(${(draftText.y / H) * 100}% - ${fs * 0.95}px)`,
