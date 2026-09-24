@@ -217,10 +217,30 @@ export default function TextbookWorkbook({
     return out;
   };
 
+  /** Знайти надпис під курсором (для перетягування). */
+  const textAt = (x: number, y: number) => {
+    for (let i = strokes.length - 1; i >= 0; i--) {
+      const s = strokes[i];
+      if (s.type !== "text") continue;
+      const lines = s.text.split("\n");
+      const wMax = Math.max(...lines.map((l) => l.length)) * s.size * 0.62;
+      if (x >= s.x - 10 && x <= s.x + wMax + 10 && y >= s.y - s.size && y <= s.y + (lines.length - 1) * s.size * 1.2 + 8) return s;
+    }
+    return null;
+  };
+
   const onDown = (e: React.PointerEvent) => {
     if (tool === "hand") return;
     e.preventDefault();
     const [x, y] = pt(e);
+    if (tool === "move") {
+      const t = textAt(x, y);
+      if (!t || t.type !== "text") return;
+      (e.target as Element).setPointerCapture?.(e.pointerId);
+      history.current.push(strokes);
+      moving.current = { id: t.id, dx: x - t.x, dy: y - t.y };
+      return;
+    }
     if (tool === "text") {
       if (draftText?.text.trim()) finishText();
       setDraftText({ x, y, text: "" });
