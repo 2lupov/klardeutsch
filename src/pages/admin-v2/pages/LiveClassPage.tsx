@@ -239,7 +239,7 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
       {/* Дошка завжди змонтована — перехід між розділами нічого не стирає */}
       <div className={section === "board" ? "space-y-5" : "hidden"}>
         <LaserSurface active={laser} onMove={onLaserMove}>
-          <BoardEditor classId={cls.id} initial={cls.board || []} apiRef={boardApi} />
+          <BoardEditor classId={cls.id} initial={cls.board || []} apiRef={boardApi} studentId={cls.student_id} />
         </LaserSurface>
         <button
           onClick={() => transfer("board", null)}
