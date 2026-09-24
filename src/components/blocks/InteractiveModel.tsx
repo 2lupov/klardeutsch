@@ -213,6 +213,14 @@ export default function InteractiveModel({ payload, title, value, onChange, read
           <svg viewBox={builtIn.viewBox} role="img" aria-label={builtIn.label} className="model-svg h-auto w-full" onClick={onSvgClick}>
             {builtIn.svg}
           </svg>
+        ) : payload.svg && /<!doctype|<html|<script|<body/i.test(payload.svg) ? (
+          <iframe
+            title={title || "Interaktives Modell"}
+            srcDoc={payload.svg}
+            sandbox="allow-scripts allow-popups allow-modals"
+            className="block w-full rounded-xl border-0 bg-background"
+            style={{ height: "min(85dvh, 900px)" }}
+          />
         ) : payload.svg ? (
           <div className="model-svg [&_svg]:h-auto [&_svg]:w-full" onClick={onSvgClick} dangerouslySetInnerHTML={{ __html: safeSvg(payload.svg) }} />
         ) : (
