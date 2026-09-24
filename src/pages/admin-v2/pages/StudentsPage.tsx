@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, SectionHeader, EmptyState } from "./_ui";
-import { Search, Trophy, BookOpen, Swords, Coins, UserPlus, X, GraduationCap, Check, Plus, Copy } from "lucide-react";
+import { Gift, Search, Trophy, BookOpen, Swords, Coins, UserPlus, X, GraduationCap, Check, Plus, Copy } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useAdminLang } from "../LanguageContext";
 
@@ -43,6 +43,7 @@ export default function StudentsPage() {
 
   // per-student courses
   const [coursesFor, setCoursesFor] = useState<AdminUser | null>(null);
+  const [rewardFor, setRewardFor] = useState<AdminUser | null>(null);
 
   const load = async () => {
     const { data, error } = await supabase.rpc("get_admin_users");
@@ -163,6 +164,12 @@ export default function StudentsPage() {
                   >
                     <GraduationCap className="w-3.5 h-3.5" /> Курси учня
                   </button>
+                  <button
+                    onClick={() => setRewardFor(u)}
+                    className="mt-2 w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold border border-amber-200 text-amber-700 hover:bg-amber-50"
+                  >
+                    <Gift className="w-3.5 h-3.5" /> Монети й подарунки
+                  </button>
                 </div>
               </div>
             </Card>
@@ -237,6 +244,10 @@ export default function StudentsPage() {
             </button>
           </div>
         </Modal>
+      )}
+
+      {rewardFor && (
+        <RewardModal student={rewardFor} onClose={() => setRewardFor(null)} onDone={load} />
       )}
 
       {coursesFor && (
@@ -402,6 +413,73 @@ function StudentCoursesModal({
               })}
             </div>
           )}
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+function RewardModal({ student, onClose, onDone }: { student: AdminUser; onClose: () => void; onDone: () => void }) {
+  const [amount, setAmount] = useState("20");
+  const [reason, setReason] = useState("Нагорода від викладача");
+  const [gifts, setGifts] = useState<any[]>([]);
+  const [message, setMessage] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    supabase.from("gift_items").select("id,name,emoji,image_url,rarity").order("sort_order").then(({ data }) => setGifts(data || []));
+  }, []);
+
+  const giveCoins = async (sign: 1 | -1) => {
+    const n = Math.abs(parseInt(amount) || 0);
+    if (!n) return;
+    setBusy(true);
+    const { error } = await supabase.rpc("award_coins", { p_user_id: student.user_id, p_amount: n * sign, p_reason: reason || "admin" });
+    setBusy(false);
+    if (error) return toast({ title: "Помилка", description: error.message, variant: "destructive" });
+    toast({ title: sign > 0 ? `+${n} монет видано` : `−${n} монет знято` });
+    onDone();
+  };
+
+  const giveGift = async (g: any) => {
+    setBusy(true);
+    const { error } = await (supabase.rpc as any)("admin_give_gift", { p_receiver_id: student.user_id, p_gift_id: g.id, p_message: message || null });
+    setBusy(false);
+    if (error) return toast({ title: "Помилка", description: error.message, variant: "destructive" });
+    toast({ title: `Подарунок ${g.emoji || ""} ${g.name} видано` });
+  };
+
+  return (
+    <Modal title={`Нагорода: ${student.display_name || student.email}`} onClose={onClose}>
+      <div className="space-y-5">
+        <div className="space-y-2">
+          <p className="text-sm font-semibold text-slate-800 flex items-center gap-2"><Coins className="w-4 h-4 text-yellow-500" /> Монети (зараз: {student.coin_balance})</p>
+          <div className="flex gap-2">
+            {[10, 20, 50, 100].map((v) => (
+              <button key={v} onClick={() => setAmount(String(v))}
+                className={`flex-1 py-1.5 rounded-lg text-xs font-semibold border ${amount === String(v) ? "border-amber-400 bg-amber-50 text-amber-700" : "border-slate-200 text-slate-600"}`}>{v}</button>
+            ))}
+          </div>
+          <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} className={inputCls} />
+          <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="За що" className={inputCls} />
+          <div className="flex gap-2">
+            <button disabled={busy} onClick={() => giveCoins(1)} className="flex-1 py-2 rounded-xl text-sm font-semibold text-white disabled:opacity-60" style={{ background: "#16A34A" }}>Видати</button>
+            <button disabled={busy} onClick={() => giveCoins(-1)} className="px-4 py-2 rounded-xl text-sm font-semibold border border-slate-200 text-slate-600 disabled:opacity-60">Зняти</button>
+          </div>
+        </div>
+        <div className="space-y-2">
+          <p className="text-sm font-semibold text-slate-800 flex items-center gap-2"><Gift className="w-4 h-4 text-pink-500" /> Подарунок</p>
+          <input value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Повідомлення (необов'язково)" className={inputCls} />
+          <div className="grid grid-cols-3 gap-2">
+            {gifts.map((g) => (
+              <button key={g.id} disabled={busy} onClick={() => giveGift(g)}
+                className="p-2 rounded-xl border border-slate-200 hover:bg-amber-50 hover:border-amber-300 text-center disabled:opacity-60">
+                {g.image_url ? <img src={g.image_url} className="w-10 h-10 mx-auto object-contain" /> : <div className="text-2xl">{g.emoji}</div>}
+                <div className="text-[11px] text-slate-700 truncate mt-1">{g.name}</div>
+              </button>
+            ))}
+            {gifts.length === 0 && <p className="col-span-3 text-xs text-slate-500">Подарунків ще немає</p>}
+          </div>
         </div>
       </div>
     </Modal>
