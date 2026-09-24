@@ -219,7 +219,7 @@ export default function InteractiveModel({ payload, title, value, onChange, read
             srcDoc={payload.svg}
             sandbox="allow-scripts allow-popups allow-modals"
             className="block w-full rounded-xl border-0 bg-background"
-            style={{ height: "min(85dvh, 900px)" }}
+            style={{ height: "var(--model-frame-h, min(85dvh, 900px))" }}
           />
         ) : payload.svg ? (
           <div className="model-svg [&_svg]:h-auto [&_svg]:w-full" onClick={onSvgClick} dangerouslySetInnerHTML={{ __html: safeSvg(payload.svg) }} />

@@ -23,6 +23,7 @@ const LAYOUTS: { value: NonNullable<KitSection["layout"]>; label: string; hint: 
   { value: "reading", label: "Lesen", hint: "Журнальний текст і лексика" },
   { value: "illustrated", label: "Bildwelt", hint: "Зображення й пояснення" },
   { value: "practice", label: "Übungsheft", hint: "Короткі інтерактивні вправи" },
+  { value: "labor", label: "🔬 Labor", hint: "Інтерактивна модель на весь екран + кнопка «До вправ»" },
 ];
 type Source = "pdf" | "photo" | "book" | "presentation";
 type Draft = { title: string; level: string; sections: KitSection[]; pagePaths: string[] };

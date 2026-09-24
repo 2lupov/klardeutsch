@@ -30,6 +30,24 @@ export default function LessonReader({ title, level, sections, active, onActiveC
     setInternalActive(next);
     onActiveChange?.(next);
   };
+  if (section?.layout === "labor") {
+    const hasNext = current < sections.length - 1;
+    return (
+      <div className="lesson-reader fixed inset-0 z-50 flex flex-col bg-background text-foreground" style={{ ["--model-frame-h" as string]: "calc(100dvh - 7.5rem)" }}>
+        <header className="flex shrink-0 items-center justify-between gap-3 border-b border-border px-4 py-2">
+          <div className="min-w-0">
+            <p className="text-[10px] font-semibold uppercase text-primary">KLAR · Labor · {current + 1} / {sections.length}</p>
+            <h2 className="truncate font-display text-base font-semibold">🔬 {section.title.replace(/^🔬\s*/, "")}</h2>
+          </div>
+          {current > 0 && <Button type="button" size="sm" variant="ghost" onClick={() => change(current - 1)}><ChevronLeft className="mr-1 h-4 w-4" />Назад</Button>}
+        </header>
+        <main className="min-h-0 flex-1 overflow-auto px-2 py-2">
+          <StudentBlocks key={`${draftKey ?? title}:${section.id}`} blocks={kitBlocksToLessonBlocks(section.blocks.filter((b) => b.visible_to_student !== false), section.id)} persist={false} readOnly={readOnly} showActions={false} editorial draftKey={draftKey ? `${draftKey}:${section.id}` : undefined} />
+        </main>
+        {hasNext && <Button type="button" size="lg" className="fixed bottom-4 right-4 z-10 shadow-lg" onClick={() => change(current + 1)}>Перейти до вправ<ChevronRight className="ml-1 h-4 w-4" /></Button>}
+      </div>
+    );
+  }
   return (
     <div className="lesson-reader min-h-full bg-background text-foreground">
       <div className="mx-auto w-full max-w-5xl px-4 py-7 sm:px-8 sm:py-12">
