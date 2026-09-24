@@ -10,17 +10,20 @@ export type LiveSection =
   | "listening"
   | "reading"
   | "tasks"
-  | "vocab";
+  | "vocab"
+  | "textbook";
 
 export const LIVE_SECTIONS: { key: LiveSection; label: string; icon: string }[] = [
   { key: "board", label: "Дошка", icon: "✍️" },
   { key: "slides", label: "Презентація", icon: "🖼" },
   { key: "blocks", label: "Блок-завдання", icon: "🧩" },
+  { key: "textbook", label: "Підручник", icon: "📖" },
 ];
 
 /** Що саме показано учню в розділі «Презентація» / «Блок-завдання». */
 export type LiveView =
   | { type: "slide"; presentation_id: string; page: number }
+  | { type: "textbook"; student_book_id: string; page: number }
   | { type: "blocks"; kit_id: string; title?: string; level?: string | null; blocks: any[]; sections?: KitSection[]; page_paths?: string[]; presentation_id?: string | null };
 
 

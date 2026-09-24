@@ -13,6 +13,7 @@ import {
   setLiveView,
 } from "@/lib/live-class";
 import { Play, Square, ChevronLeft, ChevronRight, Loader2, Upload } from "lucide-react";
+import TextbookPanel from "@/components/textbook/TextbookPanel";
 import BoardEditor, { type BoardApi } from "@/components/live/BoardEditor";
 import LiveBookPagePicker from "@/components/books/LiveBookPagePicker";
 import { PandaLookupDialog } from "@/components/dictionary/PandaLookup";
@@ -179,6 +180,7 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
   const whereIsStudent = () => {
     const label = LIVE_SECTIONS.find((s) => s.key === studentView.section)?.label || "Дошка";
     if (studentView.view?.type === "slide") return `${label} · слайд ${studentView.view.page + 1}`;
+    if (studentView.view?.type === "textbook") return `${label} · стор. ${studentView.view.page}`;
     if (studentView.view?.type === "blocks") return `${label} · ${studentView.view.title || "урок"}`;
     return label;
   };
@@ -256,6 +258,17 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
           current={studentView.view?.type === "slide" ? studentView.view : null}
           onTransfer={(presentationId, page) => transfer("slides", { type: "slide", presentation_id: presentationId, page })}
         />
+        </LaserSurface>
+      )}
+
+      {section === "textbook" && (
+        <LaserSurface active={laser} onMove={onLaserMove}>
+          <TextbookPanel
+            teacherId={cls.teacher_id}
+            studentId={cls.student_id}
+            current={studentView.view?.type === "textbook" ? studentView.view : null}
+            onTransfer={(sbId, page) => transfer("textbook", { type: "textbook", student_book_id: sbId, page })}
+          />
         </LaserSurface>
       )}
 
