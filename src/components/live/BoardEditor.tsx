@@ -51,10 +51,13 @@ export default function BoardEditor({
   classId,
   initial,
   apiRef,
+  studentId,
 }: {
   classId: string;
   initial: BoardEl[];
   apiRef?: React.MutableRefObject<BoardApi | null>;
+  /** Якщо передано — дошка зберігається в student_boards учня (спільна з кабінетом учня). */
+  studentId?: string | null;
 }) {
   const [els, setEls] = useState<BoardEl[]>(() => contentOfBoard(initial));
   const [cam, setCam] = useState<BoardCam>(() => camFromBoard(initial));
@@ -122,9 +125,16 @@ export default function BoardEditor({
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data } = await supabase.from("live_classes").select("board").eq("id", classId).maybeSingle();
-      if (cancelled || !data) return;
-      const board = ((data as any).board || []) as BoardEl[];
+      let board: BoardEl[] = [];
+      if (studentId) {
+        const { data } = await (supabase as any).from("student_boards").select("elements").eq("user_id", studentId).maybeSingle();
+        if (cancelled) return;
+        board = (data?.elements || []) as BoardEl[];
+      } else {
+        const { data } = await supabase.from("live_classes").select("board").eq("id", classId).maybeSingle();
+        if (cancelled || !data) return;
+        board = ((data as any).board || []) as BoardEl[];
+      }
       const content = contentOfBoard(board);
       const c = camFromBoard(board);
       setEls(content);
@@ -133,7 +143,7 @@ export default function BoardEditor({
       camRef.current = c;
     })();
     return () => { cancelled = true; };
-  }, [classId]);
+  }, [classId, studentId]);
 
   // Live broadcast channel — миттєва передача дошки учню
   const chanRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
@@ -177,9 +187,17 @@ export default function BoardEditor({
   const persist = (content: BoardEl[], c: BoardCam) => {
     clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
+      const full = fullBoard(content, c) as any;
+      if (studentId) {
+        void (supabase as any)
+          .from("student_boards")
+          .upsert({ user_id: studentId, elements: full })
+          .then(({ error }: any) => { if (error) console.error("board save failed", error); });
+        return;
+      }
       void supabase
         .from("live_classes")
-        .update({ board: fullBoard(content, c) as any })
+        .update({ board: full })
         .eq("id", classId)
         .then(({ error }) => { if (error) console.error("board save failed", error); });
     }, 400);

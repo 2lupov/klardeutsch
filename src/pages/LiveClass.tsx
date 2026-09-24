@@ -85,6 +85,11 @@ export default function LiveClass() {
       if (!data || (data as any).status === "ended") { navigate("/academy", { replace: true }); return; }
       setCls(data as unknown as LiveClassRow);
       setItems(await fetchLiveItems(id));
+      // Спільна нескінченна дошка учня (та сама, що й в кабінеті)
+      const { data: sb } = await (supabase as any).from("student_boards").select("elements").eq("user_id", user.id).maybeSingle();
+      if (!cancelled && Array.isArray(sb?.elements)) {
+        setCls((prev) => (prev ? ({ ...prev, board: sb.elements } as LiveClassRow) : prev));
+      }
       const { data: seenRows } = await supabase
         .from("live_class_seen")
         .select("section, last_seen_at")

@@ -1,0 +1,1 @@
+CREATE POLICY "Teachers can manage student boards" ON public.student_boards FOR ALL TO authenticated USING (public.has_role(auth.uid(), 'teacher') OR public.has_role(auth.uid(), 'admin')) WITH CHECK (public.has_role(auth.uid(), 'teacher') OR public.has_role(auth.uid(), 'admin'));
