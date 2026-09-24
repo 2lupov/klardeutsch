@@ -72,6 +72,8 @@ const StudentAcademy = () => {
   const initialTab = (searchParams.get("tab") || "homework") as Tab;
   const [tab, setTab] = useState<Tab>(initialTab);
   const [navCollapsed, setNavCollapsed] = useState(() => localStorage.getItem("academy_nav_collapsed") === "1");
+  const [liveCls, setLiveCls] = useState<{ id: string; created_at: string } | null>(null);
+  const [nowTs, setNowTs] = useState(Date.now());
   const [bg, setBg] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [tests, setTests] = useState<Row[]>([]);
@@ -89,6 +91,11 @@ const StudentAcademy = () => {
     const load = async () => {
       setLoading(true);
       supabase.from("profiles").select("academy_bg" as any).eq("user_id", user.id).maybeSingle().then(({ data }: any) => setBg(data?.academy_bg ?? null));
+
+      // Active live lesson (for the "back to lesson" button)
+      supabase.from("live_classes").select("id, created_at").eq("student_id", user.id).eq("status", "active")
+        .order("created_at", { ascending: false }).limit(1).maybeSingle()
+        .then(({ data }: any) => setLiveCls(data ?? null));
 
       // Textbook homework pages
       const { data: sbooks } = await (supabase as any).from("student_books").select("id, book:book_files(title)").eq("student_id", user.id);
@@ -346,6 +353,21 @@ const StudentAcademy = () => {
     load();
   }, [user]);
 
+  // Tick every 15s so the lesson timer stays fresh
+  useEffect(() => {
+    if (!liveCls) return;
+    const t = setInterval(() => setNowTs(Date.now()), 15000);
+    return () => clearInterval(t);
+  }, [liveCls]);
+
+  const liveElapsed = useMemo(() => {
+    if (!liveCls) return "";
+    const mins = Math.max(0, Math.floor((nowTs - new Date(liveCls.created_at).getTime()) / 60000));
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return h > 0 ? `${h} год ${m} хв` : `${m} хв`;
+  }, [liveCls, nowTs]);
+
   const pending = useMemo(
     () => ({
       tests: tests.filter((r) => !r.done).length,
@@ -440,6 +462,16 @@ const rows = tab === "tests" ? tests : homework;
               </div>
             )}
           </div>
+
+          {liveCls && (
+            <button
+              onClick={() => navigate(`/live/${liveCls.id}`)}
+              className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-red-500 text-white font-display font-bold text-sm hover:bg-red-600 transition"
+            >
+              <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+              Повернутись на урок · триває {liveElapsed}
+            </button>
+          )}
 
           {showStats && (
             <div className="mt-4 grid grid-cols-3 divide-x divide-border rounded-2xl border border-border bg-card">

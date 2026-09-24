@@ -19,6 +19,8 @@ export function useLiveClassLock(userId: string | undefined) {
     const goTo = (id: string) => {
       const target = `/live/${id}`;
       if (location.pathname === target) return;
+      // Allow the student to visit their cabinet (profile etc.) during a lesson
+      if (location.pathname.startsWith("/academy")) return;
       toast.info("👨‍🏫 Урок почався");
       navigate(target, { replace: true });
     };
