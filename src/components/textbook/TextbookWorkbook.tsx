@@ -338,6 +338,11 @@ export default function TextbookWorkbook({
           <ToolBtn t="text" icon={Type} label="Текст" />
           <ToolBtn t="erase" icon={Eraser} label="Гумка" />
           <button type="button" onClick={undo} title="Назад" className="h-9 w-9 rounded-lg border border-border bg-card flex items-center justify-center hover:bg-muted"><Undo2 className="w-4 h-4" /></button>
+          <div className="flex items-center gap-1 pl-1">
+            <button type="button" title="Зменшити" onClick={() => setZoom((z) => Math.max(0.6, Math.round((z - 0.2) * 10) / 10))} className="h-9 w-9 rounded-lg border border-border bg-card flex items-center justify-center hover:bg-muted"><Minus className="w-4 h-4" /></button>
+            <button type="button" title="Звичайний розмір" onClick={() => setZoom(1)} className="h-9 min-w-[3.25rem] px-1 rounded-lg border border-border bg-card text-xs text-foreground hover:bg-muted">{Math.round(zoom * 100)}%</button>
+            <button type="button" title="Збільшити" onClick={() => setZoom((z) => Math.min(3, Math.round((z + 0.2) * 10) / 10))} className="h-9 w-9 rounded-lg border border-border bg-card flex items-center justify-center hover:bg-muted"><Plus className="w-4 h-4" /></button>
+          </div>
         </div>
         <div className="flex items-center gap-1">
           {COLORS.map((c) => (
