@@ -453,7 +453,7 @@ const rows = tab === "tests" ? tests : homework;
 
       <div className="flex-1 min-w-0">
       {/* Progress is only relevant while choosing tasks, not while reading or drawing. */}
-      {isTaskTab && <div className="sticky top-0 z-20 bg-background/90 backdrop-blur border-b border-border">
+      {isTaskTab && <div className="border-b border-border bg-background/90">
         <div className="max-w-2xl mx-auto px-4 pt-5 pb-3">
           <div className="flex items-end justify-between gap-4">
             <div>
