@@ -28,6 +28,7 @@ import { LaserSurface, useLaserReceiver } from "@/components/live/LaserPointer";
 
 
 export default function LiveClass() {
+  const [navCollapsed, setNavCollapsed] = useState(() => typeof window !== "undefined" && localStorage.getItem("live_nav_collapsed") === "1");
   const { id } = useParams<{ id: string }>();
   const { user, loading } = useAuth();
   const navigate = useNavigate();
@@ -234,6 +235,13 @@ export default function LiveClass() {
             );
           })}
         </nav>
+        <button
+          onClick={() => setNavCollapsed((v) => { localStorage.setItem("live_nav_collapsed", v ? "0" : "1"); return !v; })}
+          title={navCollapsed ? "Розгорнути" : "Згорнути"}
+          className="hidden md:flex m-2 h-9 items-center justify-center rounded-xl text-muted-foreground hover:bg-muted/50 hover:text-foreground text-sm"
+        >
+          {navCollapsed ? "»" : "« Згорнути"}
+        </button>
       </aside>
 
       <main className={`flex-1 h-full ${section === "board" ? "overflow-hidden flex flex-col" : "overflow-y-auto"}`}>
