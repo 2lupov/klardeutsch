@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, SectionHeader, EmptyState } from "./_ui";
-import { Gift, Search, Trophy, BookOpen, Swords, Coins, UserPlus, X, GraduationCap, Check, Plus, Copy } from "lucide-react";
+import { Gift, Search, Trophy, BookOpen, Swords, Coins, UserPlus, X, GraduationCap, Check, Plus, Copy, Trash2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useAdminLang } from "../LanguageContext";
 
@@ -52,6 +52,18 @@ export default function StudentsPage() {
   };
 
   useEffect(() => { load(); }, []);
+
+  const deleteStudent = async (u: AdminUser) => {
+    const name = u.display_name || u.email || "учня";
+    if (!window.confirm(`Видалити «${name}» назавжди? Акаунт і всі його дані буде видалено. Це не можна скасувати.`)) return;
+    const { data, error } = await supabase.functions.invoke("admin-delete-student", { body: { user_id: u.user_id } });
+    if (error || (data as any)?.error) {
+      toast({ title: "Не вдалося видалити", description: String((data as any)?.error || error?.message || ""), variant: "destructive" });
+      return;
+    }
+    setUsers((prev) => prev.filter((x) => x.user_id !== u.user_id));
+    toast({ title: `«${name}» видалено` });
+  };
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
@@ -170,6 +182,14 @@ export default function StudentsPage() {
                   >
                     <Gift className="w-3.5 h-3.5" /> Монети й подарунки
                   </button>
+                  {!u.roles.includes("admin") && !u.roles.includes("teacher") && (
+                    <button
+                      onClick={() => deleteStudent(u)}
+                      className="mt-2 w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold border border-red-200 text-red-600 hover:bg-red-50"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" /> Видалити учня
+                    </button>
+                  )}
                 </div>
               </div>
             </Card>
