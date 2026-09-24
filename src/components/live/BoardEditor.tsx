@@ -26,6 +26,7 @@ import {
   Minus,
   Image as ImageIcon,
   Eraser,
+  Highlighter,
   Undo2,
   Trash2,
   ZoomIn,
