@@ -566,6 +566,7 @@ const rows = tab === "tests" ? tests : homework;
           </div>
         )}
       </div>
+      </div>
     </div>
   );
 };
