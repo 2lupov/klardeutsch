@@ -11,11 +11,12 @@ import NextLessonsCard from "@/components/schedule/NextLessonsCard";
 import StudentTextbooks from "@/components/textbook/StudentTextbooks";
 import StudentBoard from "@/components/student/StudentBoard";
 import StudentProfilePanel from "@/components/student/StudentProfilePanel";
+import StudentDictionary from "@/pages/StudentDictionary";
 import { bgCss } from "@/components/student/academyBackgrounds";
 import pandaCelebrating from "@/assets/mascot/panda-celebrating.png";
 import pandaSleeping from "@/assets/mascot/panda-sleeping.png";
 
-type Tab = "tests" | "homework" | "board" | "textbook" | "profile";
+type Tab = "tests" | "homework" | "board" | "textbook" | "dict" | "profile";
 
 interface Row {
   id: string;
@@ -373,6 +374,7 @@ const nextUp = useMemo(() => {
     { key: "tests", label: "Тести", count: pending.tests },
     { key: "board", label: "Дошка", count: 0 },
     { key: "textbook", label: "Підручники", count: 0 },
+    { key: "dict", label: "Словник", count: 0 },
     { key: "profile", label: "Профіль", count: 0 },
   ];
 
@@ -475,6 +477,8 @@ const rows = tab === "tests" ? tests : homework;
               <StudentTextbooks />
             ) : tab === "board" ? (
               <StudentBoard />
+            ) : tab === "dict" ? (
+              <StudentDictionary />
             ) : tab === "profile" ? (
               <StudentProfilePanel bg={bg} onBg={setBg} />
             ) : rows.length === 0 ? (
