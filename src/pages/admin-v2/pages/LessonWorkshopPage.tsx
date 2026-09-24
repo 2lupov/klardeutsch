@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowDown, ArrowLeft, ArrowUp, BookOpen, Copy, Download, Eye, Layers3, Loader2, Plus, Save, Send, Sparkles, Trash2, Upload } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowUp, BookOpen, Copy, Download, Eye, EyeOff, Layers3, Loader2, Plus, Save, Send, Sparkles, Trash2, Upload } from "lucide-react";
 import * as pdfjs from "pdfjs-dist";
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +12,7 @@ import { listPresentations, type Presentation } from "@/lib/presentations";
 import { kitSections, normalizeKit, type KitBlock, type KitSection, type LessonKit } from "@/lib/lesson-kits";
 import BlockEditor from "@/components/blocks/BlockEditor";
 import LessonReader from "@/components/blocks/LessonReader";
+import BlockRenderer from "@/components/blocks/BlockRenderer";
 import { BLOCK_META, BLOCK_TYPES, emptyPayload, type BlockType, type LessonBlock } from "@/components/blocks/types";
 
 (pdfjs as any).GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
