@@ -61,6 +61,8 @@ export default function BlockRenderer({ block, value, onChange, checked, readOnl
       return <PaareBlock block={block} value={value ?? {}} onChange={onChange} checked={checked} readOnly={readOnly} />;
     case "satzbau":
       return <SatzbauBlock block={block} value={value ?? {}} onChange={onChange} checked={checked} readOnly={readOnly} />;
+    case "bild":
+      return <BildBlock block={block} value={value ?? {}} onChange={onChange} checked={checked} readOnly={readOnly} />;
     case "schreiben":
       return <SchreibenBlock block={block} value={value ?? {}} onChange={onChange} checked={checked} readOnly={readOnly} />;
     default:
