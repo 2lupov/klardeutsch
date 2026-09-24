@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import ImageHotspots from "./ImageHotspots";
 import { Check, RotateCcw, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
