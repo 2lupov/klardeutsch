@@ -46,8 +46,14 @@ export default function StudentsPage() {
   const [rewardFor, setRewardFor] = useState<AdminUser | null>(null);
 
   const load = async () => {
-    const { data, error } = await supabase.rpc("get_admin_users");
-    if (!error) setUsers((data as any) || []);
+    const [{ data, error }, { data: rels }] = await Promise.all([
+      supabase.rpc("get_admin_users"),
+      supabase.from("tutoring_relationships").select("student_id"),
+    ]);
+    if (!error) {
+      const studentIds = new Set((rels || []).map((r: any) => r.student_id));
+      setUsers(((data as any) || []).filter((u: AdminUser) => studentIds.has(u.user_id)));
+    }
     setLoading(false);
   };
 
