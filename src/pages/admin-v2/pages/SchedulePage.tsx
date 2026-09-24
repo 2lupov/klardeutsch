@@ -22,6 +22,13 @@ export default function SchedulePage() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
 
+  // Manual lesson scheduling (admin only)
+  const [studentId, setStudentId] = useState("");
+  const [lessonDate, setLessonDate] = useState("");
+  const [lessonTime, setLessonTime] = useState("17:00");
+  const [durationMin, setDurationMin] = useState(60);
+  const [adding, setAdding] = useState(false);
+
   const names = useMemo(() => new Map(students.map((s) => [s.id, s.name])), [students]);
 
   const load = async () => {
