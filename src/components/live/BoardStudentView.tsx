@@ -70,6 +70,7 @@ export default function BoardStudentView({
 
   const svgRef = useRef<SVGSVGElement | null>(null);
   const textInputRef = useRef<HTMLTextAreaElement | null>(null);
+  const editStartRef = useRef(0);
   const camRef = useRef(cam);
   const panning = useRef<{ fx: number; fy: number; cam: BoardCam } | null>(null);
   const drafting = useRef<BoardEl | null>(null);
@@ -80,10 +81,16 @@ export default function BoardStudentView({
 
   useLayoutEffect(() => {
     if (!editing) return;
+    editStartRef.current = Date.now();
     const input = textInputRef.current;
     if (!input) return;
-    input.focus({ preventScroll: true });
-    input.setSelectionRange(input.value.length, input.value.length);
+    const focus = () => {
+      input.focus({ preventScroll: true });
+      input.setSelectionRange(input.value.length, input.value.length);
+    };
+    focus();
+    const t = window.setTimeout(focus, 30);
+    return () => window.clearTimeout(t);
   }, [editing]);
 
   /** Обчислює масштаб/зсув: viewBox масштабується "cover", тому центрується й обрізається. */
@@ -226,6 +233,7 @@ export default function BoardStudentView({
     }
 
     if (tool === "text") {
+      e.preventDefault(); // інакше клік забирає фокус і поле одразу закривається
       const el: BoardEl = { id: uid(), type: "text", x: p.x, y: p.y, text: "", color, size: 0.045 * cam.w };
       upsertMine(el);
       setEditing(el.id!);
@@ -335,7 +343,7 @@ export default function BoardStudentView({
                 const id = editingEl.id;
                 if (id) setText(id, e.target.value);
               }}
-              onBlur={() => setEditing(null)}
+              onBlur={(e) => { if (Date.now() - (editStartRef.current || 0) < 300) { e.currentTarget.focus(); return; } setEditing(null); }}
               onKeyDown={(e) => { if (e.key === "Escape") setEditing(null); }}
               placeholder="Пишіть…"
               spellCheck={false}
