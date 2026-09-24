@@ -178,11 +178,43 @@ export default function TextbookWorkbook({
     return [((e.clientX - r.left) / r.width) * W, ((e.clientY - r.top) / r.height) * H];
   };
 
-  const eraseAt = (x: number, y: number, list: Stroke[]) =>
-    list.filter((s) => {
-      if (s.type === "text") return !(x >= s.x - 10 && x <= s.x + s.text.length * s.size * 0.6 && y >= s.y - s.size && y <= s.y + 10);
-      return !s.pts.some(([px, py]) => Math.hypot(px - x, py - y) < 14);
-    });
+  /** Часткова гумка: вирізає лише шматок штриха під курсором. */
+  const eraseAt = (x: number, y: number, list: Stroke[]) => {
+    const R = 12;
+    const out: Stroke[] = [];
+    for (const s of list) {
+      if (s.type === "text") {
+        const lines = s.text.split("\n");
+        const wMax = Math.max(...lines.map((l) => l.length)) * s.size * 0.6;
+        const hit = x >= s.x - 6 && x <= s.x + wMax && y >= s.y - s.size && y <= s.y + (lines.length - 1) * s.size * 1.2 + 6;
+        if (!hit) out.push(s);
+        continue;
+      }
+      // densify so long segments can be cut in the middle
+      const dense: [number, number][] = [];
+      s.pts.forEach((p, i) => {
+        if (i > 0) {
+          const q = s.pts[i - 1];
+          const n = Math.floor(Math.hypot(p[0] - q[0], p[1] - q[1]) / 4);
+          for (let k = 1; k < n; k++) dense.push([q[0] + ((p[0] - q[0]) * k) / n, q[1] + ((p[1] - q[1]) * k) / n]);
+        }
+        dense.push(p);
+      });
+      if (!dense.some(([px, py]) => Math.hypot(px - x, py - y) < R)) { out.push(s); continue; }
+      let cur: [number, number][] = [];
+      let idx = 0;
+      const flush = () => {
+        if (cur.length > 1) out.push({ ...s, id: idx++ === 0 ? s.id : uid(), pts: cur });
+        cur = [];
+      };
+      for (const p of dense) {
+        if (Math.hypot(p[0] - x, p[1] - y) < R) flush();
+        else cur.push(p);
+      }
+      flush();
+    }
+    return out;
+  };
 
   const onDown = (e: React.PointerEvent) => {
     if (tool === "hand") return;
@@ -325,9 +357,19 @@ export default function TextbookWorkbook({
               }}
               onBlur={finishText}
               placeholder="Пишіть…"
-              className="absolute z-10 min-w-[160px] rounded-md border-2 border-primary bg-background/95 px-2 py-1 text-sm font-semibold outline-none"
-              style={{ left: `${(draftText.x / W) * 100}%`, top: `calc(${(draftText.y / H) * 100}% - 22px)`, color }}
-              rows={2}
+              className="absolute z-10 min-w-[40%] resize-none overflow-hidden border-0 border-l-2 border-dashed bg-transparent p-0 outline-none placeholder:opacity-50"
+              style={(() => {
+                const scale = (svgRef.current?.getBoundingClientRect().width || W) / W;
+                const fs = 22 * scale;
+                return {
+                  left: `${(draftText.x / W) * 100}%`,
+                  top: `calc(${(draftText.y / H) * 100}% - ${fs * 0.95}px)`,
+                  color, borderColor: color, caretColor: color,
+                  fontSize: fs, lineHeight: 1.2, fontWeight: 600,
+                  fontFamily: "Space Grotesk, sans-serif",
+                };
+              })()}
+              rows={Math.max(1, draftText.text.split("\n").length)}
             />
           )}
         </div>
