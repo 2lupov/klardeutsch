@@ -15,6 +15,7 @@ export const BLOCK_TYPES = [
   "artikel",
   "transformation",
   "modell",
+  "bild",
 ] as const;
 
 export type BlockType = (typeof BLOCK_TYPES)[number];
