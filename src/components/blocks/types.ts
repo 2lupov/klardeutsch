@@ -33,6 +33,7 @@ export const BLOCK_META: Record<BlockType, { label: string; de: string; icon: st
   schreiben: { label: "Письмо і мовлення", de: "Schreiben & Sprechen", icon: "mic", hint: "Есе + голосова відповідь" },
   artikel: { label: "Артиклі", de: "Artikeltraining", icon: "tags", hint: "Вибір der / die / das / Plural" },
   transformation: { label: "Перетворення речень", de: "Satzumformung", icon: "repeat", hint: "Зразок і відповідь" },
+  modell: { label: "Інтерактивна модель", de: "Interaktives Modell", icon: "mouse-pointer", hint: "Око, вухо, серце, клітина або власний SVG" },
 };
 
 export type Artikel = "der" | "die" | "das" | "plural";
@@ -81,6 +82,10 @@ export interface BlockPayload {
   article_items?: Array<{ word: string; article: Artikel; hint?: string }>;
   transformations?: Array<{ source: string; answer: string; hint?: string }>;
   example?: { source: string; answer: string };
+  /** modell: клікабельна модель (готова або власний SVG із data-part) */
+  model?: string;
+  svg?: string;
+  parts?: Array<{ id: string; label: string; article?: Artikel | null; text?: string }>;
   /** theorie */
   markdown?: string;
   examples?: Array<{ de: string; uk?: string | null }>;
