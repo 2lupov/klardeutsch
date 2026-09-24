@@ -72,6 +72,7 @@ export default function TextbookWorkbook({
   const [aspect, setAspect] = useState(1.414);
   const [strokes, setStrokes] = useState<Stroke[]>([]);
   const [tool, setTool] = useState<Tool>("hand");
+  const [zoom, setZoom] = useState(1);
   const [color, setColor] = useState(COLORS[0]);
   const [draftText, setDraftText] = useState<{ x: number; y: number; text: string } | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
