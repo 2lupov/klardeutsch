@@ -327,6 +327,7 @@ export default function TextbookWorkbook({
         <span className="font-display font-bold text-sm text-foreground truncate max-w-[220px]">📖 {info.book.title}</span>
         <div className="flex items-center gap-1 ml-auto">
           <ToolBtn t="hand" icon={Hand} label="Рука" />
+          <ToolBtn t="move" icon={MousePointer2} label="Стрілка" />
           <ToolBtn t="pen" icon={Pen} label="Олівець" />
           <ToolBtn t="text" icon={Type} label="Текст" />
           <ToolBtn t="erase" icon={Eraser} label="Гумка" />
