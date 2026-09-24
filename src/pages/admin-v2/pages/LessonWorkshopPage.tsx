@@ -131,9 +131,10 @@ export default function LessonWorkshopPage() {
     if (j >= 0 && j < items.length) [out[i], out[j]] = [out[j], out[i]];
     return out;
   };
-  const addBlock = (type: BlockType) => {
+  const addBlock = (type: BlockType, at?: number) => {
     const id = crypto.randomUUID();
-    updateSection(active, (s) => ({ ...s, blocks: [...s.blocks, { id, type, title: BLOCK_META[type].de, payload: emptyPayload(type) }] }));
+    const item = { id, type, title: BLOCK_META[type].de, payload: emptyPayload(type) };
+    updateSection(active, (s) => ({ ...s, blocks: at === undefined ? [...s.blocks, item] : [...s.blocks.slice(0, at), item, ...s.blocks.slice(at)] }));
     setSelectedBlock(id);
   };
   const save = async () => {
