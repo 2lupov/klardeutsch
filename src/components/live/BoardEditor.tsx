@@ -73,6 +73,7 @@ export default function BoardEditor({
   const svgRef = useRef<SVGSVGElement | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
   const textInputRef = useRef<HTMLTextAreaElement | null>(null);
+  const editStartRef = useRef(0);
   const drafting = useRef<BoardEl | null>(null);
   const dragging = useRef<{ id: string; dx: number; dy: number } | null>(null);
   const resizing = useRef<{
@@ -100,10 +101,16 @@ export default function BoardEditor({
 
   useLayoutEffect(() => {
     if (!editing) return;
+    editStartRef.current = Date.now();
     const input = textInputRef.current;
     if (!input) return;
-    input.focus({ preventScroll: true });
-    input.setSelectionRange(input.value.length, input.value.length);
+    const focus = () => {
+      input.focus({ preventScroll: true });
+      input.setSelectionRange(input.value.length, input.value.length);
+    };
+    focus();
+    const t = window.setTimeout(focus, 30);
+    return () => window.clearTimeout(t);
   }, [editing]);
 
   useLayoutEffect(() => {
@@ -385,6 +392,7 @@ export default function BoardEditor({
 
 
     if (tool === "text") {
+      e.preventDefault(); // інакше клік забирає фокус і поле одразу закривається
       const el: BoardEl = { id: uid(), type: "text", x: p.x, y: p.y, text: "", color, size: camRef.current.w * 0.05 };
       commit([...els, el]);
       setSelected(el.id!);
@@ -867,7 +875,7 @@ export default function BoardEditor({
                   const id = editingEl.id;
                   if (id) setText(id, e.target.value);
                 }}
-                onBlur={() => setEditing(null)}
+                onBlur={(e) => { if (Date.now() - (editStartRef.current || 0) < 300) { e.currentTarget.focus(); return; } setEditing(null); }}
                 onKeyDown={(e) => { if (e.key === "Escape") setEditing(null); }}
                 placeholder="Пишіть…"
                 spellCheck={false}
