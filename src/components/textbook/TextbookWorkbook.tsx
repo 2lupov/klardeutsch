@@ -367,7 +367,7 @@ export default function TextbookWorkbook({
       </div>
 
       <div className={`overflow-auto rounded-xl border border-border bg-muted/30 max-h-[78vh] ${tool === "hand" ? "" : "touch-none"}`}>
-        <div className="relative mx-auto w-full max-w-[900px]">
+        <div className="relative mx-auto w-full" style={{ maxWidth: `${Math.round(900 * zoom)}px` }}>
           <canvas ref={canvasRef} className="block w-full h-auto bg-white" />
           {rendering && <div className="absolute inset-0 flex items-center justify-center bg-background/40"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>}
           <svg
