@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import * as pdfjsLib from "pdfjs-dist";
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { supabase } from "@/integrations/supabase/client";
-import { ChevronLeft, ChevronRight, Hand, Pen, Eraser, Type, Undo2, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Hand, Pen, Eraser, Type, Undo2, Loader2, MousePointer2 } from "lucide-react";
 
 (pdfjsLib as any).GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
@@ -10,7 +10,7 @@ type Stroke =
   | { id: string; type: "path"; pts: [number, number][]; color: string; w: number }
   | { id: string; type: "text"; x: number; y: number; text: string; color: string; size: number };
 
-type Tool = "hand" | "pen" | "erase" | "text";
+type Tool = "hand" | "move" | "pen" | "erase" | "text";
 const COLORS = ["#2563EB", "#DC2626", "#059669", "#0F172A", "#F59E0B"];
 const W = 1000;
 const uid = () => Math.random().toString(36).slice(2, 10);
@@ -78,6 +78,7 @@ export default function TextbookWorkbook({
   const svgRef = useRef<SVGSVGElement | null>(null);
   const textRef = useRef<HTMLTextAreaElement | null>(null);
   const drawing = useRef<Stroke | null>(null);
+  const moving = useRef<{ id: string; dx: number; dy: number } | null>(null);
   const saveTimer = useRef<number | null>(null);
   const lastLocal = useRef(0);
   const history = useRef<Stroke[][]>([]);
@@ -216,10 +217,30 @@ export default function TextbookWorkbook({
     return out;
   };
 
+  /** Знайти надпис під курсором (для перетягування). */
+  const textAt = (x: number, y: number) => {
+    for (let i = strokes.length - 1; i >= 0; i--) {
+      const s = strokes[i];
+      if (s.type !== "text") continue;
+      const lines = s.text.split("\n");
+      const wMax = Math.max(...lines.map((l) => l.length)) * s.size * 0.62;
+      if (x >= s.x - 10 && x <= s.x + wMax + 10 && y >= s.y - s.size && y <= s.y + (lines.length - 1) * s.size * 1.2 + 8) return s;
+    }
+    return null;
+  };
+
   const onDown = (e: React.PointerEvent) => {
     if (tool === "hand") return;
     e.preventDefault();
     const [x, y] = pt(e);
+    if (tool === "move") {
+      const t = textAt(x, y);
+      if (!t || t.type !== "text") return;
+      (e.target as Element).setPointerCapture?.(e.pointerId);
+      history.current.push(strokes);
+      moving.current = { id: t.id, dx: x - t.x, dy: y - t.y };
+      return;
+    }
     if (tool === "text") {
       if (draftText?.text.trim()) finishText();
       setDraftText({ x, y, text: "" });
@@ -238,6 +259,12 @@ export default function TextbookWorkbook({
   };
 
   const onMove = (e: React.PointerEvent) => {
+    const m = moving.current;
+    if (m) {
+      const [mx, my] = pt(e);
+      setStrokes((s) => s.map((st) => (st.id === m.id && st.type === "text" ? { ...st, x: mx - m.dx, y: my - m.dy } : st)));
+      return;
+    }
     const d = drawing.current;
     if (!d) return;
     const [x, y] = pt(e);
@@ -250,6 +277,11 @@ export default function TextbookWorkbook({
   };
 
   const onUp = () => {
+    if (moving.current) {
+      moving.current = null;
+      setStrokes((s) => { persist(s); return s; });
+      return;
+    }
     if (!drawing.current) return;
     const wasPen = tool === "pen";
     drawing.current = null;
@@ -277,7 +309,7 @@ export default function TextbookWorkbook({
   if (!info) return <div className="p-6 text-sm text-muted-foreground flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Відкриваю підручник…</div>;
   if (!info.book) return <p className="p-6 text-sm text-muted-foreground">Підручник недоступний.</p>;
 
-  const cursor = tool === "hand" ? "grab" : tool === "text" ? "text" : "crosshair";
+  const cursor = tool === "hand" ? "grab" : tool === "move" ? "move" : tool === "text" ? "text" : "crosshair";
   const ToolBtn = ({ t, icon: I, label }: { t: Tool; icon: any; label: string }) => (
     <button
       type="button"
@@ -295,6 +327,7 @@ export default function TextbookWorkbook({
         <span className="font-display font-bold text-sm text-foreground truncate max-w-[220px]">📖 {info.book.title}</span>
         <div className="flex items-center gap-1 ml-auto">
           <ToolBtn t="hand" icon={Hand} label="Рука" />
+          <ToolBtn t="move" icon={MousePointer2} label="Стрілка" />
           <ToolBtn t="pen" icon={Pen} label="Олівець" />
           <ToolBtn t="text" icon={Type} label="Текст" />
           <ToolBtn t="erase" icon={Eraser} label="Гумка" />
