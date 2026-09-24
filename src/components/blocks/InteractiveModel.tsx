@@ -208,6 +208,7 @@ export default function InteractiveModel({ payload, title, value, onChange, read
       )}
 
       <div className="model-stage overflow-hidden rounded-2xl border border-border bg-card p-3">
+        {activeId && <style>{`.model-svg [data-part="${activeId}"]{fill:hsl(var(--primary)/.85);stroke:hsl(var(--primary));filter:drop-shadow(0 0 14px hsl(var(--primary)/.6));}`}</style>}
         {builtIn ? (
           <svg viewBox={builtIn.viewBox} role="img" aria-label={builtIn.label} className="model-svg h-auto w-full" onClick={readOnly ? undefined : onSvgClick}>
             {builtIn.svg}
