@@ -71,6 +71,7 @@ const StudentAcademy = () => {
   const [searchParams] = useSearchParams();
   const initialTab = (searchParams.get("tab") || "homework") as Tab;
   const [tab, setTab] = useState<Tab>(initialTab);
+  const [navCollapsed, setNavCollapsed] = useState(() => localStorage.getItem("academy_nav_collapsed") === "1");
   const [bg, setBg] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [tests, setTests] = useState<Row[]>([]);
@@ -370,13 +371,13 @@ const nextUp = useMemo(() => {
     )[0];
   }, [tests, homework]);
 
-  const tabs: Array<{ key: Tab; label: string; count: number }> = [
-    { key: "homework", label: "Домашка", count: pending.homework },
-    { key: "tests", label: "Тести", count: pending.tests },
-    { key: "board", label: "Дошка", count: 0 },
-    { key: "textbook", label: "Підручники", count: 0 },
-    { key: "dict", label: "Словник", count: 0 },
-    { key: "profile", label: "Профіль", count: 0 },
+  const tabs: Array<{ key: Tab; label: string; count: number; icon: string }> = [
+    { key: "homework", label: "Домашка", count: pending.homework, icon: "📝" },
+    { key: "tests", label: "Тести", count: pending.tests, icon: "✅" },
+    { key: "board", label: "Дошка", count: 0, icon: "🎨" },
+    { key: "textbook", label: "Підручники", count: 0, icon: "📖" },
+    { key: "dict", label: "Словник", count: 0, icon: "📚" },
+    { key: "profile", label: "Профіль", count: 0, icon: "👤" },
   ];
 
 const rows = tab === "tests" ? tests : homework;
