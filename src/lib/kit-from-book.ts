@@ -56,7 +56,7 @@ export async function createKitFromPdf(input: KitFromPdfInput): Promise<LessonKi
 export async function createKitFromImages(input: Omit<KitFromPdfInput, "file" | "from" | "to"> & { images: Blob[]; source?: "pdf" | "photo" }): Promise<LessonKit> {
   const { ownerId, title, level, focus, notes = "", onProgress, images, source = "photo" } = input;
   const say = (t: string) => onProgress?.(t);
-  if (!images.length || images.length > 8) throw new Error("Виберіть від 1 до 8 сторінок");
+  if (!images.length || images.length > 12) throw new Error("Виберіть від 1 до 12 сторінок");
 
   say("Створюємо урок…");
   const { data: created, error: insErr } = await supabase

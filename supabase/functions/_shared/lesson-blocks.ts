@@ -212,7 +212,7 @@ export function normalizeBlock(raw: RawBlock): { type: string; title: string | n
 /** Завантажує сторінки зі сховища і повертає data-URL для мультимодального запиту. */
 export async function imagesAsDataUrls(admin: any, paths: string[]): Promise<string[]> {
   const out: string[] = [];
-  for (const path of paths.slice(0, 8)) {
+  for (const path of paths.slice(0, 12)) {
     const { data: file, error } = await admin.storage.from("tutoring-materials").download(path);
     if (error || !file) continue;
     const bytes = new Uint8Array(await file.arrayBuffer());
