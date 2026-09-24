@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -68,7 +68,9 @@ const DueBadge = ({ due_at }: { due_at: string }) => {
 const StudentAcademy = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [tab, setTab] = useState<Tab>("homework");
+  const [searchParams] = useSearchParams();
+  const initialTab = (searchParams.get("tab") || "homework") as Tab;
+  const [tab, setTab] = useState<Tab>(initialTab);
   const [bg, setBg] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [tests, setTests] = useState<Row[]>([]);
