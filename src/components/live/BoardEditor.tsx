@@ -879,7 +879,7 @@ export default function BoardEditor({
                 onKeyDown={(e) => { if (e.key === "Escape") setEditing(null); }}
                 placeholder="Пишіть…"
                 spellCheck={false}
-                className="bg-transparent border-0 outline-none resize-none overflow-hidden font-display font-semibold p-0 m-0 placeholder:text-slate-300"
+                className="workbook-text-input bg-transparent border-0 outline-none resize-none overflow-hidden font-display font-semibold p-0 m-0 placeholder:text-slate-300"
                 style={{
                   color: editingEl.color || "#0F172A",
                   fontSize: `${fs}px`,
