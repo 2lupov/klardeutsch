@@ -43,7 +43,7 @@ serve(async (req) => {
       if (!isAdmin) return jsonResponse({ error: "Доступ лише власнику набору" }, 403);
     }
 
-    const imagePaths: string[] = Array.isArray(body?.image_paths) ? body.image_paths.slice(0, 8).map(String) : [];
+    const imagePaths: string[] = Array.isArray(body?.image_paths) ? body.image_paths.slice(0, 12).map(String) : [];
     if (imagePaths.length === 0) return jsonResponse({ error: "Потрібно хоча б одну сторінку або фото" }, 400);
     if (imagePaths.some((path) => !path.startsWith(`kits/${kitId}/`) || path.includes(".."))) {
       return jsonResponse({ error: "Сторінки мають належати цьому уроку" }, 403);
