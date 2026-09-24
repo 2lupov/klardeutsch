@@ -33,7 +33,7 @@ export default function StudentBlocksTask() {
     })();
   }, [id]);
 
-  const submit = async (score: number, max: number) => {
+  const submit = async (score: number, max: number, values?: Record<string, any>) => {
     if (!user || !task || submittingRef.current || done) throw new Error("Завдання вже здається або завершене");
     submittingRef.current = true;
     setSubmitting(true);
@@ -45,7 +45,7 @@ export default function StudentBlocksTask() {
         const { error } = await supabase.from("student_submissions").insert({
           assignment_id: task.id,
           student_id: user.id,
-          answers: { score, max } as any,
+          answers: { score, max, values: values ?? {} } as any,
           auto_score: percent,
           status: "submitted",
           submitted_at: new Date().toISOString(),

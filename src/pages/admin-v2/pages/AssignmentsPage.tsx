@@ -6,6 +6,8 @@ import {
   FileText, Mic, PenLine, ListChecks, Award,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import StudentBlocks from "@/components/blocks/StudentBlocks";
+import { kitBlocksToLessonBlocks } from "@/lib/lesson-kits";
 import { useAdminLang } from "../LanguageContext";
 
 type AssignmentType = "test" | "homework" | "writing" | "audio";
@@ -608,6 +610,8 @@ function ReviewModal({
           </p>
         </div>
 
+        <BlocksAnswersReview assignment={assignment} submission={submission} />
+
         {assignment.type === "test" && (
           <div className="space-y-2">
             <div className="text-sm font-semibold text-slate-900">
@@ -685,5 +689,44 @@ function ReviewModal({
         </button>
       </div>
     </Modal>
+  );
+}
+
+/** Shows exactly what the student chose in block-based homework / mini-courses, with right/wrong marks. */
+function BlocksAnswersReview({ assignment, submission }: { assignment: Assignment; submission: Submission }) {
+  const p: any = assignment.payload ?? {};
+  const ans: any = submission.answers ?? {};
+  const sections: any[] = Array.isArray(p.sections) && p.sections.length
+    ? p.sections
+    : Array.isArray(p.blocks) && p.blocks.length ? [{ id: "main", title: assignment.title, blocks: p.blocks }] : [];
+  if (!sections.length || Array.isArray(ans)) return null;
+  const valuesFor = (sid: string) => ans.sections?.[sid]?.values ?? (sections.length === 1 ? ans.values : undefined);
+  const hasAny = sections.some((s) => valuesFor(s.id));
+  return (
+    <div className="space-y-3">
+      <div className="text-sm font-semibold text-slate-900">
+        Відповіді учня {submission.auto_score != null && `· ${submission.auto_score}%`}
+      </div>
+      {!hasAny && (
+        <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2">
+          Це завдання здане до оновлення — збережено лише бал ({ans.score ?? "?"}/{ans.max ?? "?"}), без окремих відповідей.
+        </p>
+      )}
+      {hasAny && sections.map((s) => {
+        const v = valuesFor(s.id);
+        const r = ans.sections?.[s.id];
+        return (
+          <div key={s.id} className="rounded-xl border border-slate-200 bg-background text-foreground p-3">
+            <div className="text-xs font-semibold mb-2">{s.title} {r && `· ${r.score}/${r.max}`}</div>
+            {v ? (
+              <StudentBlocks
+                blocks={kitBlocksToLessonBlocks((s.blocks ?? []).filter((b: any) => b.visible_to_student !== false), s.id)}
+                persist={false} readOnly showActions={false} editorial review initialValues={v}
+              />
+            ) : <p className="text-xs text-muted-foreground">Немає відповідей</p>}
+          </div>
+        );
+      })}
+    </div>
   );
 }

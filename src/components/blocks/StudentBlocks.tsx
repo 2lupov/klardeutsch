@@ -16,7 +16,10 @@ interface Props {
   showActions?: boolean;
   readOnly?: boolean;
   /** Викликається після здачі: сумарні бали. */
-  onSubmitted?: (score: number, max: number) => void | Promise<void>;
+  onSubmitted?: (score: number, max: number, values?: Record<string, any>) => void | Promise<void>;
+  /** Teacher review: show saved answers with correct/wrong marks. */
+  initialValues?: Record<string, any>;
+  review?: boolean;
   /** Зберігати відповіді в базу (у превʼю викладача — ні). */
   persist?: boolean;
   editorial?: boolean;
@@ -25,12 +28,13 @@ interface Props {
 }
 
 /** Екран учня: блоки один за одним + закріплена панель дій. */
-export default function StudentBlocks({ blocks, studentId, showActions = true, readOnly, onSubmitted, persist = true, editorial = false, draftKey }: Props) {
+export default function StudentBlocks({ blocks, studentId, showActions = true, readOnly, onSubmitted, persist = true, editorial = false, draftKey, initialValues, review = false }: Props) {
   const [values, setValues] = useState<Record<string, any>>(() => {
+    if (initialValues) return initialValues;
     if (!draftKey) return {};
     try { return JSON.parse(localStorage.getItem(draftKey) || "{}"); } catch { return {}; }
   });
-  const [checked, setChecked] = useState(false);
+  const [checked, setChecked] = useState(review);
   const [saving, setSaving] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const submittingRef = useRef(false);
@@ -110,7 +114,7 @@ export default function StudentBlocks({ blocks, studentId, showActions = true, r
     try {
       if (onSubmitted) {
         // The assignment callback owns submission; only lock this reader on success.
-        await onSubmitted(totals.score, totals.max);
+        await onSubmitted(totals.score, totals.max, values);
       } else if (!(await save(true))) return;
       setChecked(true);
       setSubmitted(true);
