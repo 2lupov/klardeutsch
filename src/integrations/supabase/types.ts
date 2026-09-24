@@ -4574,6 +4574,10 @@ export type Database = {
     }
     Functions: {
       activate_referral: { Args: { p_referred_id: string }; Returns: undefined }
+      admin_give_gift: {
+        Args: { p_gift_id: string; p_message?: string; p_receiver_id: string }
+        Returns: undefined
+      }
       admin_set_xp: {
         Args: { p_user_id: string; p_xp: number }
         Returns: undefined
