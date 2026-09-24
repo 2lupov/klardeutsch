@@ -7,7 +7,6 @@ import {
   ListChecks, FileText, BookOpen, GraduationCap, ChevronRight,
   Loader2, CheckCircle2, Clock, Layers, Mic, PenLine,
 } from "lucide-react";
-import NextLessonsCard from "@/components/schedule/NextLessonsCard";
 import StudentTextbooks from "@/components/textbook/StudentTextbooks";
 import StudentBoard from "@/components/student/StudentBoard";
 import StudentProfilePanel from "@/components/student/StudentProfilePanel";
@@ -437,9 +436,7 @@ const rows = tab === "tests" ? tests : homework;
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-5">
-        <div className="mb-5">
-          <NextLessonsCard />
-        </div>
+
 
         {loading ? (
           <div className="flex justify-center py-20">
