@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import {
   ListChecks, FileText, BookOpen, GraduationCap, ChevronRight,
   Loader2, CheckCircle2, Clock, Layers, Mic, PenLine,
+  ClipboardList, Palette, LibraryBig, NotebookTabs, UserRound,
 } from "lucide-react";
 import StudentTextbooks from "@/components/textbook/StudentTextbooks";
 import StudentBoard from "@/components/student/StudentBoard";
@@ -395,13 +396,13 @@ const nextUp = useMemo(() => {
     )[0];
   }, [tests, homework]);
 
-  const tabs: Array<{ key: Tab; label: string; count: number; icon: string }> = [
-    { key: "homework", label: "Домашка", count: pending.homework, icon: "📝" },
-    { key: "tests", label: "Тести", count: pending.tests, icon: "✅" },
-    { key: "board", label: "Дошка", count: 0, icon: "🎨" },
-    { key: "textbook", label: "Підручники", count: 0, icon: "📖" },
-    { key: "dict", label: "Словник", count: 0, icon: "📚" },
-    { key: "profile", label: "Профіль", count: 0, icon: "👤" },
+  const tabs = [
+    { key: "homework", label: "Домашка", count: pending.homework, icon: ClipboardList },
+    { key: "tests", label: "Тести", count: pending.tests, icon: ListChecks },
+    { key: "board", label: "Дошка", count: 0, icon: Palette },
+    { key: "textbook", label: "Підручники", count: 0, icon: LibraryBig },
+    { key: "dict", label: "Словник", count: 0, icon: NotebookTabs },
+    { key: "profile", label: "Профіль", count: 0, icon: UserRound },
   ];
 
 const rows = tab === "tests" ? tests : homework;
@@ -418,18 +419,19 @@ const rows = tab === "tests" ? tests : homework;
         <nav className="flex-1 px-2 space-y-1">
           {tabs.map((tb) => {
             const active = tab === tb.key;
+            const Icon = tb.icon;
             return (
               <Button
                  animated={false}
                 key={tb.key}
                  variant="ghost"
                 title={tb.label}
-                onClick={() => setTab(tb.key)}
+                onClick={() => setTab(tb.key as Tab)}
                  className={`relative w-full flex items-center ${navCollapsed ? "justify-center" : ""} gap-3 px-3 py-2.5 rounded-md text-sm font-display font-medium transition ${
                   active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                 }`}
               >
-                <span className="text-base">{tb.icon}</span>
+                <Icon className="w-4 h-4 shrink-0" />
                 {!navCollapsed && <span className="hidden md:inline truncate">{tb.label}</span>}
                 {tb.count > 0 && (
                    <span className="absolute right-2 top-1.5 md:static md:ml-auto min-w-[18px] h-[18px] px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center">

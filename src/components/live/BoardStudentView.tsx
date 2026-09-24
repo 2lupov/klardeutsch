@@ -431,7 +431,7 @@ export default function BoardStudentView({
       })()}
 
       {/* панель інструментів учня */}
-       <div className="absolute top-3 left-3 right-3 sm:right-auto flex flex-wrap items-center gap-1.5 rounded-md bg-card/90 backdrop-blur border border-border p-1.5 shadow-sm sm:max-w-[calc(100%-1.5rem)]">
+        <div className="absolute top-3 left-3 right-12 sm:right-auto flex flex-wrap items-center gap-1.5 rounded-md bg-card/90 backdrop-blur border border-border p-1.5 shadow-sm sm:max-w-[calc(100%-1.5rem)]">
         {([
           { k: "select", icon: MousePointer2, title: "Стрілка — перемістити текст" },
           { k: "pan", icon: Hand, title: "Рухати полотно" },
