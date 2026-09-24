@@ -9,10 +9,11 @@ import {
 } from "lucide-react";
 import NextLessonsCard from "@/components/schedule/NextLessonsCard";
 import StudentDictionary from "@/pages/StudentDictionary";
+import StudentTextbooks from "@/components/textbook/StudentTextbooks";
 import pandaCelebrating from "@/assets/mascot/panda-celebrating.png";
 import pandaSleeping from "@/assets/mascot/panda-sleeping.png";
 
-type Tab = "tests" | "homework" | "reading" | "courses" | "dictionary";
+type Tab = "tests" | "homework" | "reading" | "courses" | "dictionary" | "textbook";
 
 interface Row {
   id: string;
@@ -348,12 +349,13 @@ const nextUp = useMemo(() => {
     { key: "homework", label: "Домашка", count: pending.homework },
     { key: "reading", label: "Читання", count: pending.reading },
     { key: "courses", label: "Курси", count: pending.courses },
+    { key: "textbook", label: "Підручник", count: 0 },
     { key: "dictionary", label: "Словник", count: 0 },
   ];
 
 const rows = tab === "tests" ? tests : tab === "homework" ? homework : tab === "reading" ? reading : courses;
   const hasAnyContent = tests.length + homework.length + reading.length > 0;
-  const allClear = totalTodo === 0 && hasAnyContent && tab !== "courses";
+  const allClear = totalTodo === 0 && hasAnyContent && tab !== "courses" && tab !== "textbook";
 
   return (
     <div className="min-h-full bg-background">
@@ -446,7 +448,9 @@ const rows = tab === "tests" ? tests : tab === "homework" ? homework : tab === "
               </button>
             )}
 
-            {tab === "dictionary" ? (
+            {tab === "textbook" ? (
+              <StudentTextbooks />
+            ) : tab === "dictionary" ? (
               <StudentDictionary />
             ) : rows.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-border p-8 text-center">
