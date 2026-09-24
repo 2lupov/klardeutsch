@@ -1,4 +1,4 @@
-import { BookOpen, GraduationCap, Headphones, Link2, ListOrdered, Mic, PencilLine, Heading, Table2, Info, Image, Tags, Repeat2, MousePointerClick } from "lucide-react";
+import { BookOpen, GraduationCap, Headphones, Link2, ListOrdered, Mic, PencilLine, Heading, Table2, Info, Image, ImagePlus, Tags, Repeat2, MousePointerClick } from "lucide-react";
 import EditorialBlock from "./EditorialBlock";
 import InteractiveModel from "./InteractiveModel";
 import HoerBlock from "./HoerBlock";
@@ -8,6 +8,7 @@ import LueckeBlock from "./LueckeBlock";
 import PaareBlock from "./PaareBlock";
 import SatzbauBlock from "./SatzbauBlock";
 import SchreibenBlock from "./SchreibenBlock";
+import BildBlock from "./BildBlock";
 import { BLOCK_META, type BlockType, type LessonBlock } from "./types";
 
 export const BLOCK_ICON: Record<BlockType, any> = {
@@ -25,6 +26,7 @@ export const BLOCK_ICON: Record<BlockType, any> = {
   artikel: Tags,
   transformation: Repeat2,
   modell: MousePointerClick,
+  bild: ImagePlus,
 };
 
 interface Props {
