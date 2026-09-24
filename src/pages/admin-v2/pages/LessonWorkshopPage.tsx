@@ -329,10 +329,12 @@ export default function LessonWorkshopPage() {
               <h3 className="mt-3 font-display text-2xl font-semibold leading-tight text-foreground">{current.title}</h3>
               {current.summary && <p className="mt-2 text-sm leading-7 text-muted-foreground">{current.summary}</p>}
               {draft.pagePaths.length > 0 && <div className="mt-6"><KitPageImages paths={draft.pagePaths} bucket={kit?.presentation_id ? "presentation-slides" : "tutoring-materials"} /></div>}
-              {current.blocks.length === 0 && <div className="mt-8 rounded-xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">Порожня сторінка. Додайте перший блок нижче.</div>}
+              {current.blocks.length === 0 && <div className="mt-8 rounded-xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">Порожня сторінка. Наведіть на лінію нижче та натисніть «+».</div>}
               <div className={`lesson-layout-${current.layout ?? "grammar"} mt-7`}>
-                {current.blocks.map((b, i) => <section key={b.id} className={`lesson-workshop-block border-b border-border/70 py-6 last:border-0 ${selectedBlock === b.id ? "lesson-workshop-block-selected" : ""}`}>
-                  <div className="mb-4 flex flex-wrap items-center gap-1.5">
+                <AddHere onPick={(t) => addBlock(t, 0)} />
+                {current.blocks.map((b, i) => <div key={b.id}>
+                  <section className={`lesson-workshop-block border-b border-border/70 py-6 ${selectedBlock === b.id ? "lesson-workshop-block-selected" : ""}`}>
+                   <div className="mb-4 flex flex-wrap items-center gap-1.5">
                     <button className="mr-auto min-w-0 text-left text-xs font-bold text-primary hover:underline" onClick={() => setSelectedBlock(b.id!)} aria-label={`Редагувати блок ${i + 1}: ${b.title || BLOCK_META[b.type as BlockType]?.label || b.type}`}>
                       {String(i + 1).padStart(2, "0")} · {b.title || BLOCK_META[b.type as BlockType]?.label || b.type}
                     </button>
@@ -341,12 +343,14 @@ export default function LessonWorkshopPage() {
                     <button className="lesson-workshop-tool" aria-label="Вниз" disabled={i === current.blocks.length - 1} onClick={() => moveBlock(i, 1)}><ArrowDown size={15} /></button>
                     <button className="lesson-workshop-tool" aria-label="Дублювати" onClick={() => duplicateBlock(b, i)}><Copy size={15} /></button>
                     <button className="lesson-workshop-tool" aria-label="Видалити блок" onClick={() => removeBlock(b)}><Trash2 size={15} /></button>
-                  </div>
-                  {b.visible_to_student === false && <p className="mb-3 text-xs font-semibold text-muted-foreground">Приховано від учня</p>}
-                  <div className={b.visible_to_student === false ? "opacity-50" : ""}>
+                   </div>
+                   {b.visible_to_student === false && <p className="mb-3 text-xs font-semibold text-muted-foreground">Приховано від учня</p>}
+                   <div className={b.visible_to_student === false ? "opacity-50" : ""}>
                     <BlockRenderer block={{ id: b.id!, lesson_id: kit?.id ?? "draft", type: b.type, title: b.title ?? null, payload: b.payload ?? {}, sort_order: i, visible_to_student: b.visible_to_student !== false, source: "kit", book_page_id: null }} value={{}} onChange={() => {}} checked={false} readOnly />
-                  </div>
-                </section>)}
+                   </div>
+                  </section>
+                  <AddHere onPick={(t) => addBlock(t, i + 1)} />
+                </div>)}
               </div>
             </div>
           </div>
