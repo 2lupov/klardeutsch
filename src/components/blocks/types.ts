@@ -252,5 +252,11 @@ export function emptyPayload(type: BlockType): BlockPayload {
         min_words: 30,
         allow_voice: true,
       };
+    case "bild":
+      return {
+        instructions: "Подивіться на картинку та впишіть слово з артиклем.",
+        bild_mode: "artikel",
+        picture_items: [{ image: "", word: "Apfel", artikel: "der", uk: "яблуко", options: [] }],
+      };
   }
 }
