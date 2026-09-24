@@ -203,6 +203,7 @@ export default function LiveClass() {
       <aside className="w-[76px] md:w-56 shrink-0 h-full border-r border-border bg-card/60 flex flex-col">
         <div className="h-16 px-3 md:px-4 flex items-center border-b border-border">
           <span className="font-display font-bold text-primary text-sm">KLAR</span>
+          <LiveClock />
         </div>
         <nav className="flex-1 overflow-y-auto p-2 space-y-1">
           {LIVE_SECTIONS.map((s) => {
@@ -227,10 +228,6 @@ export default function LiveClass() {
             );
           })}
         </nav>
-        <div className="p-3 border-t border-border">
-          <span className="text-[10px] text-muted-foreground hidden md:block">Урок триває</span>
-          <span className="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-        </div>
       </aside>
 
       <main className={`flex-1 h-full ${section === "board" ? "overflow-hidden flex flex-col" : "overflow-y-auto"}`}>
@@ -292,7 +289,7 @@ export default function LiveClass() {
           <div className="p-4">
             {cls.live_view?.type === "textbook" ? (
               <LaserSurface point={laser}>
-                <TextbookWorkbook studentBookId={cls.live_view.student_book_id} page={cls.live_view.page} allowNavigate={false} />
+                <TextbookWorkbook studentBookId={cls.live_view.student_book_id} page={cls.live_view.page} allowNavigate />
               </LaserSurface>
             ) : (
               <p className="text-sm text-muted-foreground">Викладач ще не відкрив підручник.</p>
@@ -334,6 +331,17 @@ export default function LiveClass() {
 
       <PandaLookupFab label="Словник" />
     </div>
+  );
+}
+
+function LiveClock() {
+  const [now, setNow] = useState(new Date());
+  useEffect(() => { const t = setInterval(() => setNow(new Date()), 30000); return () => clearInterval(t); }, []);
+  return (
+    <span className="ml-auto text-right leading-tight hidden md:block">
+      <span className="block text-xs font-bold text-foreground">{now.toLocaleTimeString("uk-UA", { hour: "2-digit", minute: "2-digit" })}</span>
+      <span className="block text-[10px] text-muted-foreground">{now.toLocaleDateString("uk-UA", { day: "numeric", month: "short" })}</span>
+    </span>
   );
 }
 

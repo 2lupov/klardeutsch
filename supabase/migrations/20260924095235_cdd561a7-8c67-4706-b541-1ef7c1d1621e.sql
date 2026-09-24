@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.reward_student_submission() FROM PUBLIC, anon, authenticated;

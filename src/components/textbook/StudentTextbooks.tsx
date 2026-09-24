@@ -36,6 +36,7 @@ export default function StudentTextbooks() {
 
   const markDone = async (hwId: string) => {
     await (supabase as any).from("student_book_pages").update({ homework_status: "done" }).eq("id", hwId);
+    if (user) await supabase.rpc("award_coins", { p_user_id: user.id, p_amount: 10, p_reason: "Домашка в підручнику" });
     toast.success("Домашку здано!");
     setOpen(null);
     load();

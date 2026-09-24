@@ -8,12 +8,14 @@ import {
   Loader2, CheckCircle2, Clock, Layers, Mic, PenLine,
 } from "lucide-react";
 import NextLessonsCard from "@/components/schedule/NextLessonsCard";
-import StudentDictionary from "@/pages/StudentDictionary";
 import StudentTextbooks from "@/components/textbook/StudentTextbooks";
+import StudentBoard from "@/components/student/StudentBoard";
+import StudentProfilePanel from "@/components/student/StudentProfilePanel";
+import { bgCss } from "@/components/student/academyBackgrounds";
 import pandaCelebrating from "@/assets/mascot/panda-celebrating.png";
 import pandaSleeping from "@/assets/mascot/panda-sleeping.png";
 
-type Tab = "tests" | "homework" | "reading" | "courses" | "dictionary" | "textbook";
+type Tab = "tests" | "homework" | "board" | "textbook" | "profile";
 
 interface Row {
   id: string;
@@ -66,7 +68,8 @@ const DueBadge = ({ due_at }: { due_at: string }) => {
 const StudentAcademy = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [tab, setTab] = useState<Tab>("tests");
+  const [tab, setTab] = useState<Tab>("homework");
+  const [bg, setBg] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [tests, setTests] = useState<Row[]>([]);
   const [homework, setHomework] = useState<Row[]>([]);
@@ -82,6 +85,15 @@ const StudentAcademy = () => {
     if (!user) return;
     const load = async () => {
       setLoading(true);
+      supabase.from("profiles").select("academy_bg" as any).eq("user_id", user.id).maybeSingle().then(({ data }: any) => setBg(data?.academy_bg ?? null));
+
+      // Textbook homework pages
+      const { data: sbooks } = await (supabase as any).from("student_books").select("id, book:book_files(title)").eq("student_id", user.id);
+      const sbIds = (sbooks ?? []).map((b: any) => b.id);
+      const sbTitle = new Map((sbooks ?? []).map((b: any) => [b.id, b.book?.title ?? "Підручник"]));
+      const { data: bookHw } = sbIds.length
+        ? await (supabase as any).from("student_book_pages").select("id, student_book_id, page_number, homework_note, homework_status, updated_at").in("student_book_id", sbIds).in("homework_status", ["assigned", "done"])
+        : { data: [] as any[] };
 
       // Assignments from teacher
       const { data: tasks } = await supabase
@@ -176,7 +188,7 @@ const StudentAcademy = () => {
       const allTasks = tasks ?? [];
 
       const testRows: Row[] = allTasks
-        .filter((tk: any) => tk.type !== "homework" && !hasReadingModule(tk.payload))
+        .filter((tk: any) => !["homework", "book", "book_plan"].includes(tk.type))
         .map((tk: any) => ({
           id: tk.id,
           title: tk.title,
@@ -193,7 +205,7 @@ const StudentAcademy = () => {
 
       const hwRows: Row[] = [
         ...allTasks
-          .filter((tk: any) => tk.type === "homework")
+          .filter((tk: any) => ["homework", "book", "book_plan"].includes(tk.type))
           .map((tk: any) => ({
             id: tk.id,
             title: tk.title,
@@ -220,7 +232,19 @@ const StudentAcademy = () => {
           created_at: h.created_at,
           icon: FileText,
         })),
-      ];
+        ...(bookHw ?? []).map((h: any) => ({
+          id: h.id,
+          title: `${sbTitle.get(h.student_book_id)} · с. ${h.page_number}`,
+          subtitle: h.homework_note ? String(h.homework_note).slice(0, 90) : "Сторінка підручника",
+          route: "#textbook",
+          done: h.homework_status === "done",
+          graded: false,
+          chip: "Підручник",
+          badge: h.homework_status === "done" ? "Здано" : undefined,
+          created_at: h.updated_at,
+          icon: BookOpen,
+        })),
+      ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
       const readRows: Row[] = [
         ...allTasks
@@ -345,20 +369,19 @@ const nextUp = useMemo(() => {
   }, [tests, homework]);
 
   const tabs: Array<{ key: Tab; label: string; count: number }> = [
-    { key: "tests", label: "Тести", count: pending.tests },
     { key: "homework", label: "Домашка", count: pending.homework },
-    { key: "reading", label: "Читання", count: pending.reading },
-    { key: "courses", label: "Курси", count: pending.courses },
-    { key: "textbook", label: "Підручник", count: 0 },
-    { key: "dictionary", label: "Словник", count: 0 },
+    { key: "tests", label: "Тести", count: pending.tests },
+    { key: "board", label: "Дошка", count: 0 },
+    { key: "textbook", label: "Підручники", count: 0 },
+    { key: "profile", label: "Профіль", count: 0 },
   ];
 
-const rows = tab === "tests" ? tests : tab === "homework" ? homework : tab === "reading" ? reading : courses;
+const rows = tab === "tests" ? tests : homework;
   const hasAnyContent = tests.length + homework.length + reading.length > 0;
-  const allClear = totalTodo === 0 && hasAnyContent && tab !== "courses" && tab !== "textbook";
+  const allClear = totalTodo === 0 && hasAnyContent && (tab === "tests" || tab === "homework");
 
   return (
-    <div className="min-h-full bg-background">
+    <div className="min-h-full bg-background bg-fixed bg-cover" style={bgCss(bg) ? { backgroundImage: bgCss(bg) } : undefined}>
       {/* Sticky header with todo counter + stats */}
       <div className="sticky top-0 z-20 bg-background/90 backdrop-blur border-b border-border">
         <div className="max-w-2xl mx-auto px-4 pt-5 pb-3">
@@ -423,9 +446,9 @@ const rows = tab === "tests" ? tests : tab === "homework" ? homework : tab === "
         ) : (
           <div className="space-y-4">
             {/* Next-up priority card */}
-            {tab !== "dictionary" && nextUp && (
+            {(tab === "tests" || tab === "homework") && nextUp && (
               <button
-                onClick={() => navigate(nextUp.route)}
+                onClick={() => (nextUp.route === "#textbook" ? setTab("textbook") : navigate(nextUp.route))}
                 className="w-full text-left flex items-center gap-3 p-4 rounded-2xl border border-primary/30 bg-primary/[0.04] hover:border-primary/60 hover:shadow-sm transition group"
               >
                 <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
@@ -450,8 +473,10 @@ const rows = tab === "tests" ? tests : tab === "homework" ? homework : tab === "
 
             {tab === "textbook" ? (
               <StudentTextbooks />
-            ) : tab === "dictionary" ? (
-              <StudentDictionary />
+            ) : tab === "board" ? (
+              <StudentBoard />
+            ) : tab === "profile" ? (
+              <StudentProfilePanel bg={bg} onBg={setBg} />
             ) : rows.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-border p-8 text-center">
                 <img
@@ -486,7 +511,7 @@ const rows = tab === "tests" ? tests : tab === "homework" ? homework : tab === "
                       initial={{ opacity: 0, y: 6 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: Math.min(idx * 0.03, 0.3) }}
-                      onClick={() => navigate(r.route)}
+                      onClick={() => (r.route === "#textbook" ? setTab("textbook") : navigate(r.route))}
                       className="w-full text-left flex items-center gap-3 p-4 rounded-2xl border border-border bg-card hover:border-primary/40 hover:-translate-y-0.5 transition group"
                     >
                       <div
@@ -511,6 +536,7 @@ const rows = tab === "tests" ? tests : tab === "homework" ? homework : tab === "
                               {r.badge}
                             </span>
                           )}
+                          <span className="text-[10px] text-muted-foreground">дано {new Date(r.created_at).toLocaleDateString("uk-UA", { day: "numeric", month: "short" })}</span>
                           {r.due_at && !r.done && <DueBadge due_at={r.due_at} />}
                         </div>
                       </div>
