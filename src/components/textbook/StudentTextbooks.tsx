@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import TextbookWorkbook from "./TextbookWorkbook";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, Check } from "lucide-react";
 
 interface Book { id: string; current_page: number; book: { title: string; level: string | null } | null }
 interface Hw { id: string; student_book_id: string; page_number: number; homework_note: string | null; homework_status: string }
@@ -44,11 +46,11 @@ export default function StudentTextbooks() {
 
   if (open) {
     return (
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <button onClick={() => { setOpen(null); load(); }} className="px-3 py-2 rounded-xl border border-border text-sm">← Назад</button>
+      <div className="space-y-3 min-w-0">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <Button variant="ghost" size="sm" onClick={() => { setOpen(null); load(); }}><ArrowLeft /> Назад до підручників</Button>
           {open.hwId && (
-            <button onClick={() => markDone(open.hwId!)} className="ml-auto px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold">Готово — здати</button>
+            <Button size="sm" onClick={() => { if (open.hwId) markDone(open.hwId); }}><Check /> Здати сторінку</Button>
           )}
         </div>
         <TextbookWorkbook studentBookId={open.id} page={open.page} onPageChange={(p) => setOpen({ ...open, page: p })} />

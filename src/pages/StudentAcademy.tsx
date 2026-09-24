@@ -12,6 +12,7 @@ import StudentBoard from "@/components/student/StudentBoard";
 import StudentProfilePanel from "@/components/student/StudentProfilePanel";
 import StudentDictionary from "@/pages/StudentDictionary";
 import { bgCss } from "@/components/student/academyBackgrounds";
+import { Button } from "@/components/ui/button";
 import pandaCelebrating from "@/assets/mascot/panda-celebrating.png";
 import pandaSleeping from "@/assets/mascot/panda-sleeping.png";
 
@@ -380,6 +381,7 @@ const StudentAcademy = () => {
 
   const totalTodo = pending.tests + pending.homework;
   const showStats = stats.active > 0 || stats.graded > 0 || stats.avg != null;
+  const isTaskTab = tab === "tests" || tab === "homework";
 
 const nextUp = useMemo(() => {
     const candidates = [...tests, ...homework, ...reading.filter((r) => r.route.startsWith("/task/"))].filter((r) => !r.done);
@@ -407,9 +409,9 @@ const rows = tab === "tests" ? tests : homework;
   const allClear = totalTodo === 0 && hasAnyContent && (tab === "tests" || tab === "homework");
 
   return (
-    <div className="min-h-full bg-background bg-fixed bg-cover flex" style={bgCss(bg) ? { backgroundImage: bgCss(bg) } : undefined}>
+    <div className="min-h-full bg-background bg-fixed bg-cover flex min-w-0" style={bgCss(bg) ? { backgroundImage: bgCss(bg) } : undefined}>
       {/* Collapsible sidebar */}
-      <aside className={`sticky top-0 h-screen shrink-0 border-r border-border bg-background/90 backdrop-blur flex flex-col transition-all ${navCollapsed ? "w-14" : "w-14 md:w-52"}`}>
+      <aside className={`sticky top-0 h-[100dvh] shrink-0 border-r border-border bg-background/90 backdrop-blur flex flex-col transition-all ${navCollapsed ? "w-14" : "w-14 md:w-52"}`}>
         <div className={`flex items-center gap-2 px-3 py-4 ${navCollapsed ? "justify-center" : ""}`}>
           <span className="font-display font-black text-lg text-foreground">{navCollapsed ? "K" : "KLAR"}</span>
         </div>
@@ -417,42 +419,44 @@ const rows = tab === "tests" ? tests : homework;
           {tabs.map((tb) => {
             const active = tab === tb.key;
             return (
-              <button
+              <Button
                 key={tb.key}
+                 variant="ghost"
                 title={tb.label}
                 onClick={() => setTab(tb.key)}
-                className={`relative w-full flex items-center ${navCollapsed ? "justify-center" : ""} gap-3 px-3 py-2.5 rounded-xl text-sm font-display font-medium transition ${
+                 className={`relative w-full flex items-center ${navCollapsed ? "justify-center" : ""} gap-3 px-3 py-2.5 rounded-md text-sm font-display font-medium transition ${
                   active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                 }`}
               >
                 <span className="text-base">{tb.icon}</span>
                 {!navCollapsed && <span className="hidden md:inline truncate">{tb.label}</span>}
                 {tb.count > 0 && (
-                  <span className="absolute right-2 top-1.5 md:static md:ml-auto min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+                   <span className="absolute right-2 top-1.5 md:static md:ml-auto min-w-[18px] h-[18px] px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center">
                     {tb.count}
                   </span>
                 )}
-              </button>
+              </Button>
             );
           })}
         </nav>
-        <button
+        <Button
+           variant="ghost"
           onClick={() => setNavCollapsed((v) => { localStorage.setItem("academy_nav_collapsed", v ? "0" : "1"); return !v; })}
           title={navCollapsed ? "Розгорнути" : "Згорнути"}
-          className="hidden md:flex m-2 h-9 items-center justify-center rounded-xl text-muted-foreground hover:bg-muted/50 hover:text-foreground text-sm"
+           className="hidden md:flex m-2 h-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted/50 hover:text-foreground text-sm"
         >
           {navCollapsed ? "»" : "« Згорнути"}
-        </button>
+        </Button>
       </aside>
 
       <div className="flex-1 min-w-0">
-      {/* Sticky header with todo counter + stats */}
-      <div className="sticky top-0 z-20 bg-background/90 backdrop-blur border-b border-border">
-        <div className={`${tab === "board" ? "max-w-5xl" : "max-w-2xl"} mx-auto px-4 pt-5 pb-3`}>
+      {/* Progress is only relevant while choosing tasks, not while reading or drawing. */}
+      {isTaskTab && <div className="sticky top-0 z-20 bg-background/90 backdrop-blur border-b border-border">
+        <div className="max-w-2xl mx-auto px-4 pt-5 pb-3">
           <div className="flex items-end justify-between gap-4">
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Моє навчання</p>
-<h1 className="font-display text-2xl font-black leading-tight">
+              <h1 className="font-display text-2xl font-black leading-tight">
                 {totalTodo > 0 ? `Треба зробити: ${totalTodo}` : hasAnyContent ? "Усе виконано 🎉" : "Ласкаво просимо 👋"}
               </h1>
             </div>
@@ -464,13 +468,13 @@ const rows = tab === "tests" ? tests : homework;
           </div>
 
           {liveCls && (
-            <button
+             <Button
               onClick={() => navigate(`/live/${liveCls.id}`)}
-              className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-red-500 text-white font-display font-bold text-sm hover:bg-red-600 transition"
+               className="mt-4 w-full flex items-center justify-center gap-2 bg-destructive text-destructive-foreground font-display font-bold text-sm hover:bg-destructive/90 transition"
             >
-              <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+               <span className="w-2 h-2 rounded-full bg-destructive-foreground animate-pulse" />
               Повернутись на урок · триває {liveElapsed}
-            </button>
+             </Button>
           )}
 
           {showStats && (
@@ -481,9 +485,9 @@ const rows = tab === "tests" ? tests : homework;
             </div>
           )}
         </div>
-      </div>
+      </div>}
 
-      <div className={`${tab === "board" ? "max-w-5xl" : "max-w-2xl"} mx-auto px-4 py-5`}>
+      <div className={`${tab === "board" || tab === "textbook" ? "max-w-[1200px]" : "max-w-2xl"} w-full mx-auto px-3 sm:px-6 ${isTaskTab ? "py-5" : "py-3 sm:py-5"}`}>
 
 
         {loading ? (
@@ -493,7 +497,7 @@ const rows = tab === "tests" ? tests : homework;
         ) : (
           <div className="space-y-4">
             {/* Next-up priority card */}
-            {(tab === "tests" || tab === "homework") && nextUp && (
+             {isTaskTab && nextUp && (
               <button
                 onClick={() => (nextUp.route === "#textbook" ? setTab("textbook") : navigate(nextUp.route))}
                 className="w-full text-left flex items-center gap-3 p-4 rounded-2xl border border-primary/30 bg-primary/[0.04] hover:border-primary/60 hover:shadow-sm transition group"
@@ -521,7 +525,7 @@ const rows = tab === "tests" ? tests : homework;
             {tab === "textbook" ? (
               <StudentTextbooks />
             ) : tab === "board" ? (
-              <StudentBoard />
+               <StudentBoard className="h-[calc(100dvh-6rem)] min-h-[420px]" />
             ) : tab === "dict" ? (
               <StudentDictionary />
             ) : tab === "profile" ? (
