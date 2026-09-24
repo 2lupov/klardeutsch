@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import * as pdfjsLib from "pdfjs-dist";
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { supabase } from "@/integrations/supabase/client";
-import { ChevronLeft, ChevronRight, Hand, Pen, Eraser, Type, Undo2, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Hand, Pen, Eraser, Type, Undo2, Loader2, MousePointer2 } from "lucide-react";
 
 (pdfjsLib as any).GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
@@ -10,7 +10,7 @@ type Stroke =
   | { id: string; type: "path"; pts: [number, number][]; color: string; w: number }
   | { id: string; type: "text"; x: number; y: number; text: string; color: string; size: number };
 
-type Tool = "hand" | "pen" | "erase" | "text";
+type Tool = "hand" | "move" | "pen" | "erase" | "text";
 const COLORS = ["#2563EB", "#DC2626", "#059669", "#0F172A", "#F59E0B"];
 const W = 1000;
 const uid = () => Math.random().toString(36).slice(2, 10);
@@ -78,6 +78,7 @@ export default function TextbookWorkbook({
   const svgRef = useRef<SVGSVGElement | null>(null);
   const textRef = useRef<HTMLTextAreaElement | null>(null);
   const drawing = useRef<Stroke | null>(null);
+  const moving = useRef<{ id: string; dx: number; dy: number } | null>(null);
   const saveTimer = useRef<number | null>(null);
   const lastLocal = useRef(0);
   const history = useRef<Stroke[][]>([]);
