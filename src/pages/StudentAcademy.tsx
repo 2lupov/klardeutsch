@@ -72,6 +72,8 @@ const StudentAcademy = () => {
   const initialTab = (searchParams.get("tab") || "homework") as Tab;
   const [tab, setTab] = useState<Tab>(initialTab);
   const [navCollapsed, setNavCollapsed] = useState(() => localStorage.getItem("academy_nav_collapsed") === "1");
+  const [liveCls, setLiveCls] = useState<{ id: string; created_at: string } | null>(null);
+  const [nowTs, setNowTs] = useState(Date.now());
   const [bg, setBg] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [tests, setTests] = useState<Row[]>([]);
@@ -89,6 +91,11 @@ const StudentAcademy = () => {
     const load = async () => {
       setLoading(true);
       supabase.from("profiles").select("academy_bg" as any).eq("user_id", user.id).maybeSingle().then(({ data }: any) => setBg(data?.academy_bg ?? null));
+
+      // Active live lesson (for the "back to lesson" button)
+      supabase.from("live_classes").select("id, created_at").eq("student_id", user.id).eq("status", "active")
+        .order("created_at", { ascending: false }).limit(1).maybeSingle()
+        .then(({ data }: any) => setLiveCls(data ?? null));
 
       // Textbook homework pages
       const { data: sbooks } = await (supabase as any).from("student_books").select("id, book:book_files(title)").eq("student_id", user.id);
