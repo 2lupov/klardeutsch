@@ -24,6 +24,7 @@ export const BLOCK_ICON: Record<BlockType, any> = {
   schreiben: Mic,
   artikel: Tags,
   transformation: Repeat2,
+  modell: MousePointerClick,
 };
 
 interface Props {
@@ -44,6 +45,8 @@ export default function BlockRenderer({ block, value, onChange, checked, readOnl
     case "artikel":
     case "transformation":
       return <EditorialBlock block={block} value={value ?? {}} onChange={onChange} checked={checked} readOnly={readOnly} />;
+    case "modell":
+      return <InteractiveModel payload={block.payload || {}} title={block.title} value={value ?? {}} onChange={onChange} readOnly={readOnly} />;
     case "theorie":
       return <TheorieBlock block={block} />;
     case "hoer":
