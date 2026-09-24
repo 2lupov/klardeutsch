@@ -3156,6 +3156,79 @@ export type Database = {
         }
         Relationships: []
       }
+      student_book_pages: {
+        Row: {
+          homework_note: string | null
+          homework_status: string
+          id: string
+          page_number: number
+          strokes: Json
+          student_book_id: string
+          updated_at: string
+        }
+        Insert: {
+          homework_note?: string | null
+          homework_status?: string
+          id?: string
+          page_number: number
+          strokes?: Json
+          student_book_id: string
+          updated_at?: string
+        }
+        Update: {
+          homework_note?: string | null
+          homework_status?: string
+          id?: string
+          page_number?: number
+          strokes?: Json
+          student_book_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_book_pages_student_book_id_fkey"
+            columns: ["student_book_id"]
+            isOneToOne: false
+            referencedRelation: "student_books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_books: {
+        Row: {
+          book_file_id: string
+          created_at: string
+          current_page: number
+          id: string
+          student_id: string
+          teacher_id: string
+        }
+        Insert: {
+          book_file_id: string
+          created_at?: string
+          current_page?: number
+          id?: string
+          student_id: string
+          teacher_id: string
+        }
+        Update: {
+          book_file_id?: string
+          created_at?: string
+          current_page?: number
+          id?: string
+          student_id?: string
+          teacher_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_books_book_file_id_fkey"
+            columns: ["book_file_id"]
+            isOneToOne: false
+            referencedRelation: "book_files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       student_login_attempts: {
         Row: {
           failed_count: number
@@ -4493,6 +4566,7 @@ export type Database = {
         Args: { p_amount: number; p_user_id: string }
         Returns: undefined
       }
+      can_access_student_book: { Args: { _sb: string }; Returns: boolean }
       check_admin_password: {
         Args: { input_password: string }
         Returns: boolean
