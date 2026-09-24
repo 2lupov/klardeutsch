@@ -48,9 +48,9 @@ export default function StudentTextbooks() {
     return (
       <div className="space-y-3 min-w-0">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <Button variant="ghost" size="sm" onClick={() => { setOpen(null); load(); }}><ArrowLeft /> Назад до підручників</Button>
+          <Button variant="ghost" size="sm" animated={false} onClick={() => { setOpen(null); load(); }}><ArrowLeft /> Назад до підручників</Button>
           {open.hwId && (
-            <Button size="sm" onClick={() => { if (open.hwId) markDone(open.hwId); }}><Check /> Здати сторінку</Button>
+            <Button size="sm" animated={false} onClick={() => { if (open.hwId) markDone(open.hwId); }}><Check /> Здати сторінку</Button>
           )}
         </div>
         <TextbookWorkbook studentBookId={open.id} page={open.page} onPageChange={(p) => setOpen({ ...open, page: p })} continuous />

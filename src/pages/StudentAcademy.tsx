@@ -420,6 +420,7 @@ const rows = tab === "tests" ? tests : homework;
             const active = tab === tb.key;
             return (
               <Button
+                 animated={false}
                 key={tb.key}
                  variant="ghost"
                 title={tb.label}
@@ -440,6 +441,7 @@ const rows = tab === "tests" ? tests : homework;
           })}
         </nav>
         <Button
+           animated={false}
            variant="ghost"
           onClick={() => setNavCollapsed((v) => { localStorage.setItem("academy_nav_collapsed", v ? "0" : "1"); return !v; })}
           title={navCollapsed ? "Розгорнути" : "Згорнути"}
@@ -469,6 +471,7 @@ const rows = tab === "tests" ? tests : homework;
 
           {liveCls && (
              <Button
+               animated={false}
               onClick={() => navigate(`/live/${liveCls.id}`)}
                className="mt-4 w-full flex items-center justify-center gap-2 bg-destructive text-destructive-foreground font-display font-bold text-sm hover:bg-destructive/90 transition"
             >
@@ -496,6 +499,11 @@ const rows = tab === "tests" ? tests : homework;
           </div>
         ) : (
           <div className="space-y-4">
+            {tab === "profile" && liveCls && (
+              <Button variant="outline" animated={false} onClick={() => navigate(`/live/${liveCls.id}`)}>
+                Повернутись на урок · {liveElapsed}
+              </Button>
+            )}
             {/* Next-up priority card */}
              {isTaskTab && nextUp && (
               <button
