@@ -2439,6 +2439,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          academy_bg: string | null
           active_target_language: string
           age: number | null
           avatar_url: string | null
@@ -2463,6 +2464,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          academy_bg?: string | null
           active_target_language?: string
           age?: number | null
           avatar_url?: string | null
@@ -2487,6 +2489,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          academy_bg?: string | null
           active_target_language?: string
           age?: number | null
           avatar_url?: string | null
@@ -3153,6 +3156,27 @@ export type Database = {
           title?: string
           type?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      student_boards: {
+        Row: {
+          created_at: string
+          elements: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          elements?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          elements?: Json
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
