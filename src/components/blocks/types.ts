@@ -109,6 +109,18 @@ export interface BlockPayload {
   redemittel?: string[];
   min_words?: number;
   allow_voice?: boolean;
+  /** bild: вгадати слово за картинкою */
+  bild_mode?: "artikel" | "choice" | "input";
+  picture_items?: PictureItem[];
+}
+
+export interface PictureItem {
+  /** URL або шлях у сховищі. */
+  image: string;
+  word: string;
+  artikel?: Artikel | null;
+  uk?: string | null;
+  options?: string[];
 }
 
 export interface LessonBlock {
