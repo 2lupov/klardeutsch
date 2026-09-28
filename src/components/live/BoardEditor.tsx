@@ -53,12 +53,16 @@ export default function BoardEditor({
   initial,
   apiRef,
   studentId,
+  compact = false,
+  className = "",
 }: {
   classId: string;
   initial: BoardEl[];
   apiRef?: React.MutableRefObject<BoardApi | null>;
   /** Якщо передано — дошка зберігається в student_boards учня (спільна з кабінетом учня). */
   studentId?: string | null;
+  compact?: boolean;
+  className?: string;
 }) {
   const [els, setEls] = useState<BoardEl[]>(() => contentOfBoard(initial));
   const [cam, setCam] = useState<BoardCam>(() => camFromBoard(initial));
@@ -636,8 +640,8 @@ export default function BoardEditor({
   };
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-3">
-      <div className="flex flex-wrap items-center gap-2">
+    <div className={`${compact ? "h-full min-h-0 flex flex-col rounded-md p-2" : "rounded-2xl p-4 space-y-3"} border border-slate-200 bg-white ${className}`}>
+      <div className={`flex flex-wrap items-center gap-1.5 ${compact ? "shrink-0 pb-2" : ""}`}>
         <Btn active={tool === "select"} onClick={() => setTool("select")} title="Виділити / перемістити">
           <MousePointer2 className="w-4 h-4" />
         </Btn>
@@ -770,11 +774,11 @@ export default function BoardEditor({
         onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadImage(f); e.target.value = ""; }}
       />
 
-      <div ref={wrapRef} className="relative">
+      <div ref={wrapRef} className={`relative ${compact ? "flex-1 min-h-0" : ""}`}>
         <svg
           ref={svgRef}
           viewBox={`0 0 ${BOARD_W} ${BOARD_H}`}
-          className={`w-full aspect-[4/3] rounded-xl border-2 bg-white touch-none select-none ${
+          className={`w-full ${compact ? "h-full" : "aspect-[4/3]"} rounded-xl border-2 bg-white touch-none select-none ${
             dropHint ? "border-indigo-400" : "border-slate-200"
           } ${
             tool === "pan"
@@ -922,12 +926,14 @@ export default function BoardEditor({
 
       </div>
 
-      <p className="text-xs text-slate-500">
-        Нескінченна дошка: колесо — прокрутка, Ctrl/⇧+колесо — зум, «рука» або порожнє місце — рух полотна. Хрестик
-        показує центр дошки, зелена рамка — що саме зараз бачить учень (кнопка «око» переносить вас туди). Перетягуйте
-        сторінки підручника прямо на дошку, змінюйте розмір за кутовий маркер або повзунком. Дошка зберігається для цього
-        учня і переноситься на наступний урок.
-      </p>
+      {!compact && (
+        <p className="text-xs text-slate-500">
+          Нескінченна дошка: колесо — прокрутка, Ctrl/⇧+колесо — зум, «рука» або порожнє місце — рух полотна. Хрестик
+          показує центр дошки, зелена рамка — що саме зараз бачить учень (кнопка «око» переносить вас туди). Перетягуйте
+          сторінки підручника прямо на дошку, змінюйте розмір за кутовий маркер або повзунком. Дошка зберігається для цього
+          учня і переноситься на наступний урок.
+        </p>
+      )}
     </div>
   );
 }

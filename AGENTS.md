@@ -1,0 +1,1 @@
+- Live classroom uses a dedicated viewport-height workspace inside admin; this prevents nested page scrolling during teaching.

@@ -217,7 +217,7 @@ export default function AdminV2() {
       {/* Main */}
       <main className="flex-1 h-full flex flex-col overflow-hidden">
         <AdminLangProvider>
-          <header className="h-16 shrink-0 border-b border-admin-border bg-admin-surface flex items-center justify-between px-6 gap-4">
+          {active !== "live" && <header className="h-16 shrink-0 border-b border-admin-border bg-admin-surface flex items-center justify-between px-6 gap-4">
             <div className="flex items-center gap-3 min-w-0">
               <activeItem.icon className="w-5 h-5 shrink-0 text-admin-muted" />
               <h1 className="text-lg font-semibold text-admin-fg truncate">{activeItem.label}</h1>
@@ -241,9 +241,9 @@ export default function AdminV2() {
                 До додатку →
               </Link>
             </div>
-          </header>
+          </header>}
 
-          <div id="admin-scroll" className="flex-1 overflow-y-auto p-6">
+          <div id="admin-scroll" className={`flex-1 min-h-0 ${active === "live" ? "overflow-hidden" : "overflow-y-auto p-6"}`}>
             <PageRouter active={active} />
           </div>
         </AdminLangProvider>
