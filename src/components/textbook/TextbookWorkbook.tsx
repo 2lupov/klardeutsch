@@ -2,8 +2,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import * as pdfjsLib from "pdfjs-dist";
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { supabase } from "@/integrations/supabase/client";
-import { ChevronLeft, ChevronRight, Hand, Pen, Eraser, Type, Undo2, Loader2, MousePointer2, Plus, Minus, Highlighter, AArrowDown, AArrowUp } from "lucide-react";
+import { ChevronLeft, ChevronRight, Hand, Pen, Eraser, Type, Undo2, Loader2, MousePointer2, Plus, Minus, Highlighter, AArrowDown, AArrowUp, LayoutGrid } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 (pdfjsLib as any).GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
@@ -48,6 +50,56 @@ async function getPdf(path: string) {
   return pdfCache.get(path)!;
 }
 
+function PageThumbnail({ filePath, pageNumber, active, onSelect }: {
+  filePath: string;
+  pageNumber: number;
+  active: boolean;
+  onSelect: () => void;
+}) {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const pdf = await getPdf(filePath);
+        const pdfPage = await pdf.getPage(pageNumber);
+        const base = pdfPage.getViewport({ scale: 1 });
+        const viewport = pdfPage.getViewport({ scale: 180 / base.width });
+        const canvas = canvasRef.current;
+        if (!alive || !canvas) return;
+        canvas.width = Math.floor(viewport.width);
+        canvas.height = Math.floor(viewport.height);
+        const context = canvas.getContext("2d");
+        if (!context) return;
+        await pdfPage.render({ canvasContext: context, viewport }).promise;
+        if (alive) setReady(true);
+      } catch {
+        if (alive) setReady(false);
+      }
+    })();
+    return () => { alive = false; };
+  }, [filePath, pageNumber]);
+
+  return (
+    <Button
+      animated={false}
+      type="button"
+      variant="outline"
+      onClick={onSelect}
+      aria-label={`Відкрити сторінку ${pageNumber}`}
+      className={`relative h-auto min-w-0 flex-col gap-1.5 overflow-hidden p-1.5 ${active ? "border-primary ring-2 ring-primary/30" : ""}`}
+    >
+      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-sm bg-muted">
+        {!ready && <Loader2 className="absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 animate-spin text-muted-foreground" />}
+        <canvas ref={canvasRef} className={`h-full w-full object-contain transition-opacity ${ready ? "opacity-100" : "opacity-0"}`} />
+      </div>
+      <span className="text-xs font-semibold">Стор. {pageNumber}</span>
+    </Button>
+  );
+}
+
 /**
  * Живий робочий зошит на сторінці PDF: олівець, гумка, текст.
  * Нотатки зберігаються для кожного учня й сторінки і синхронізуються наживо.
@@ -81,6 +133,9 @@ export default function TextbookWorkbook({
   const [textSize, setTextSize] = useState(22);
   const [selText, setSelText] = useState<string | null>(null);
   const [draftText, setDraftText] = useState<{ x: number; y: number; text: string } | null>(null);
+  const [pagesOpen, setPagesOpen] = useState(false);
+  const [pageGroup, setPageGroup] = useState(0);
+  const [pageInput, setPageInput] = useState(String(controlledPage ?? 1));
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const textRef = useRef<HTMLTextAreaElement | null>(null);
@@ -177,8 +232,31 @@ export default function TextbookWorkbook({
   const goto = (p: number) => {
     const n = Math.min(Math.max(1, p), total || info?.book?.total_pages || p);
     setPageState(n);
+    setPageInput(String(n));
     onPageChange?.(n);
     if (syncPage) (supabase as any).from("student_books").update({ current_page: n }).eq("id", studentBookId).then(() => {});
+  };
+
+  const pageCount = total || info?.book?.total_pages || 1;
+  const pagesPerGroup = 24;
+  const groupCount = Math.max(1, Math.ceil(pageCount / pagesPerGroup));
+  const visiblePages = Array.from(
+    { length: Math.min(pagesPerGroup, pageCount - pageGroup * pagesPerGroup) },
+    (_, index) => pageGroup * pagesPerGroup + index + 1,
+  );
+
+  const openPages = () => {
+    setPageGroup(Math.floor((page - 1) / pagesPerGroup));
+    setPageInput(String(page));
+    setPagesOpen(true);
+  };
+
+  const submitPage = (event: React.FormEvent) => {
+    event.preventDefault();
+    const requested = Number.parseInt(pageInput, 10);
+    if (!Number.isFinite(requested)) return;
+    goto(requested);
+    setPagesOpen(false);
   };
 
   const pt = (e: React.PointerEvent): [number, number] => {
@@ -376,6 +454,11 @@ export default function TextbookWorkbook({
           ))}
           </div>
           <div className="flex items-center gap-1 sm:ml-auto">
+            {allowNavigate && (
+              <Button animated={false} variant="outline" type="button" title="Вибрати сторінку" onClick={openPages} className="h-8 px-2 text-xs">
+                <LayoutGrid /> Сторінки
+              </Button>
+            )}
             <Button animated={false} variant="outline" size="icon" type="button" title="Зменшити" onClick={() => setZoom((z) => Math.max(0.6, Math.round((z - 0.2) * 10) / 10))} className="h-8 w-8"><Minus /></Button>
             <Button animated={false} variant="outline" type="button" title="Звичайний розмір" onClick={() => setZoom(1)} className="h-8 min-w-[3.25rem] px-1 text-xs">{Math.round(zoom * 100)}%</Button>
             <Button animated={false} variant="outline" size="icon" type="button" title="Збільшити" onClick={() => setZoom((z) => Math.min(3, Math.round((z + 0.2) * 10) / 10))} className="h-8 w-8"><Plus /></Button>
@@ -397,6 +480,53 @@ export default function TextbookWorkbook({
         )}
         {!allowNavigate && <span className="text-xs text-muted-foreground">Сторінка {page}</span>}
         </div>
+
+      <Dialog open={pagesOpen} onOpenChange={setPagesOpen}>
+        <DialogContent className="flex h-[85dvh] max-w-5xl flex-col gap-3 overflow-hidden p-4 sm:p-5">
+          <DialogHeader className="shrink-0 pr-8">
+            <DialogTitle className="truncate">Сторінки · {info.book.title}</DialogTitle>
+          </DialogHeader>
+          <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-border pb-3">
+            <form onSubmit={submitPage} className="flex items-center gap-2">
+              <Input
+                type="number"
+                min={1}
+                max={pageCount}
+                value={pageInput}
+                onChange={(event) => setPageInput(event.target.value)}
+                aria-label="Номер сторінки"
+                className="h-9 w-24"
+              />
+              <Button animated={false} type="submit" size="sm">Перейти</Button>
+            </form>
+            <span className="text-xs text-muted-foreground">Усього сторінок: {pageCount}</span>
+          </div>
+          <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
+              {visiblePages.map((pageNumber) => (
+                <PageThumbnail
+                  key={pageNumber}
+                  filePath={info.book.file_path}
+                  pageNumber={pageNumber}
+                  active={pageNumber === page}
+                  onSelect={() => { goto(pageNumber); setPagesOpen(false); }}
+                />
+              ))}
+            </div>
+          </div>
+          <div className="flex shrink-0 items-center justify-between gap-2 border-t border-border pt-3">
+            <Button animated={false} type="button" variant="outline" size="sm" disabled={pageGroup === 0} onClick={() => setPageGroup((value) => Math.max(0, value - 1))}>
+              <ChevronLeft /> Попередні
+            </Button>
+            <span className="text-xs text-muted-foreground">
+              {visiblePages[0]}–{visiblePages[visiblePages.length - 1]} з {pageCount}
+            </span>
+            <Button animated={false} type="button" variant="outline" size="sm" disabled={pageGroup >= groupCount - 1} onClick={() => setPageGroup((value) => Math.min(groupCount - 1, value + 1))}>
+              Наступні <ChevronRight />
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
       </div>
 
       <div className={`${continuous ? "overflow-x-auto" : "overflow-auto max-h-[78vh]"} rounded-md border border-border bg-muted/30 ${tool === "hand" ? "" : "touch-none"}`}>
