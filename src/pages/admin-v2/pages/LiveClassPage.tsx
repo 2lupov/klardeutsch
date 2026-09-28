@@ -12,7 +12,7 @@ import {
   endLiveClass,
   setLiveView,
 } from "@/lib/live-class";
-import { Play, Square, ChevronLeft, ChevronRight, Loader2, Upload, BookOpen, Crosshair, LogOut, Search } from "lucide-react";
+import { Play, Square, ChevronLeft, ChevronRight, Loader2, Upload, Crosshair, LogOut, Search } from "lucide-react";
 import TextbookPanel from "@/components/textbook/TextbookPanel";
 import BoardEditor, { type BoardApi } from "@/components/live/BoardEditor";
 import LiveBookPagePicker from "@/components/books/LiveBookPagePicker";
@@ -242,7 +242,7 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
       </div>
 
       {/* Дошка завжди змонтована — перехід між розділами нічого не стирає */}
-      <div className={section === "board" ? "flex-1 min-h-0 grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_240px] gap-2 p-2" : "hidden"}>
+      <div className={section === "board" ? "relative flex-1 min-h-0 grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_240px] gap-2 p-2" : "hidden"}>
         <LaserSurface active={laser} onMove={onLaserMove} className="min-h-0 h-full">
           <BoardEditor compact className="h-full" classId={cls.id} initial={cls.board || []} apiRef={boardApi} studentId={cls.student_id} />
         </LaserSurface>
