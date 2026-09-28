@@ -12,7 +12,7 @@ import {
   endLiveClass,
   setLiveView,
 } from "@/lib/live-class";
-import { Play, Square, ChevronLeft, ChevronRight, Loader2, Upload } from "lucide-react";
+import { Play, Square, ChevronLeft, ChevronRight, Loader2, Upload, BookOpen, Crosshair, LogOut, Search } from "lucide-react";
 import TextbookPanel from "@/components/textbook/TextbookPanel";
 import BoardEditor, { type BoardApi } from "@/components/live/BoardEditor";
 import LiveBookPagePicker from "@/components/books/LiveBookPagePicker";
@@ -22,6 +22,7 @@ import PresentationView from "@/components/tutoring/PresentationView";
 import { normalizeKit, kitSections, type LessonKit } from "@/lib/lesson-kits";
 import LessonReader from "@/components/blocks/LessonReader";
 import { LaserSurface, useLaserSender, type LaserPoint } from "@/components/live/LaserPointer";
+import { Button } from "@/components/ui/button";
 
 interface StudentRow { user_id: string; display_name: string | null; email: string | null }
 
@@ -73,7 +74,7 @@ export default function LiveClassPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="h-full overflow-y-auto p-6 space-y-6">
       <Card className="p-5">
         <SectionHeader title="Запустити живий урок" subtitle="Учень одразу потрапляє в клас — без демонстрації екрана" />
         <div className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
@@ -186,73 +187,82 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
   };
 
   return (
-    <div className="space-y-5">
-      <Card className="p-4 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="text-xs text-slate-500">Живий урок · {studentName}</p>
-          <h2 className="text-base font-semibold text-slate-900">{cls.title}</h2>
-          <p className="text-[11px] text-indigo-600 mt-0.5">Учень зараз бачить: {whereIsStudent()}</p>
+    <div className="h-full min-h-0 flex flex-col bg-admin-bg overflow-hidden">
+      <header className="h-14 shrink-0 border-b border-admin-border bg-admin-surface px-3 flex items-center gap-3">
+        <div className="min-w-0 mr-auto">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="size-2 rounded-full bg-emerald-500 shrink-0" />
+            <h2 className="text-sm font-semibold text-admin-fg truncate">{cls.title}</h2>
+            <span className="text-xs text-admin-muted truncate hidden sm:inline">· {studentName}</span>
+          </div>
+          <p className="text-[11px] text-admin-muted truncate">Учень бачить: {whereIsStudent()}</p>
         </div>
-        <div className="flex items-center gap-2">
-          <button
+        <div className="flex items-center gap-1.5 shrink-0">
+          <Button
+            animated={false}
+            size="sm"
+            variant={laser ? "destructive" : "outline"}
             onClick={() => { const next = !laser; setLaser(next); if (!next) sendLaser(null); }}
-            className={`px-3 py-2 rounded-xl text-sm font-medium border ${
-              laser ? "border-red-300 bg-red-50 text-red-700" : "border-slate-200 text-slate-700 hover:bg-slate-50"
-            }`}
             title="Червона цяточка на екрані учня"
           >
-            🔴 Вказівка
-          </button>
-          <button onClick={() => setDictOpen(true)} className="px-3 py-2 rounded-xl border border-slate-200 text-sm text-slate-700 hover:bg-slate-50">
-            🐼 Словник
-          </button>
-          <button onClick={onExit} className="px-3 py-2 rounded-xl border border-slate-200 text-sm text-slate-700 hover:bg-slate-50">
-            ← До списку
-          </button>
+            <Crosshair /> <span className="hidden lg:inline">Вказівка</span>
+          </Button>
+          <Button animated={false} size="sm" variant="outline" onClick={() => setDictOpen(true)} title="Словник">
+            <Search /> <span className="hidden lg:inline">Словник</span>
+          </Button>
+          <Button animated={false} size="sm" variant="outline" onClick={onExit} title="До списку уроків">
+            <LogOut /> <span className="hidden xl:inline">До списку</span>
+          </Button>
           {!ended && (
-            <button
+            <Button
+              animated={false}
+              size="sm"
+              variant="destructive"
               onClick={finish}
-              className="px-3 py-2 rounded-xl text-white text-sm font-medium flex items-center gap-2"
-              style={{ background: "#DC2626" }}
             >
-              <Square className="w-4 h-4" /> Завершити урок
-            </button>
+              <Square /> <span className="hidden md:inline">Завершити</span>
+            </Button>
           )}
         </div>
-      </Card>
+      </header>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="h-11 shrink-0 flex items-center gap-1 px-3 border-b border-admin-border bg-admin-surface overflow-x-auto">
         {LIVE_SECTIONS.map((s) => (
-          <button
+          <Button
+            animated={false}
+            size="sm"
+            variant={s.key === section ? "default" : "ghost"}
             key={s.key}
             onClick={() => setSection(s.key)}
-            className={`px-3 py-2 rounded-xl text-sm font-medium border transition ${
-              s.key === section ? "text-white border-transparent" : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
-            }`}
-            style={s.key === section ? { background: "#4F46E5" } : undefined}
+            className="h-8"
           >
             {s.icon} {s.label}
-          </button>
+          </Button>
         ))}
       </div>
 
       {/* Дошка завжди змонтована — перехід між розділами нічого не стирає */}
-      <div className={section === "board" ? "space-y-5" : "hidden"}>
-        <LaserSurface active={laser} onMove={onLaserMove}>
-          <BoardEditor classId={cls.id} initial={cls.board || []} apiRef={boardApi} studentId={cls.student_id} />
+      <div className={section === "board" ? "flex-1 min-h-0 grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_240px] gap-2 p-2" : "hidden"}>
+        <LaserSurface active={laser} onMove={onLaserMove} className="min-h-0 h-full">
+          <BoardEditor compact className="h-full" classId={cls.id} initial={cls.board || []} apiRef={boardApi} studentId={cls.student_id} />
         </LaserSurface>
-        <button
-          onClick={() => transfer("board", null)}
-          className="px-4 py-2 rounded-xl text-white text-sm font-medium"
-          style={{ background: "#0F172A" }}
-        >
-          Перенести учня сюди
-        </button>
-        <LiveBookPagePicker classId={cls.id} onToBoard={(url) => boardApi.current?.insertImage(url)} />
+        <aside className="hidden xl:flex min-h-0 flex-col gap-2 overflow-y-auto">
+          <Button animated={false} size="sm" onClick={() => transfer("board", null)} className="w-full shrink-0">
+            <Crosshair /> Показати дошку учню
+          </Button>
+          <div className="min-h-0 [&>div]:rounded-md [&>div]:p-3">
+            <LiveBookPagePicker classId={cls.id} onToBoard={(url) => boardApi.current?.insertImage(url)} />
+          </div>
+        </aside>
+        <div className="xl:hidden absolute bottom-3 right-3 z-20 flex gap-2">
+          <Button animated={false} size="sm" onClick={() => transfer("board", null)}>
+            <Crosshair /> Учню
+          </Button>
+        </div>
       </div>
 
       {section === "slides" && (
-        <LaserSurface active={laser} onMove={onLaserMove}>
+        <LaserSurface active={laser} onMove={onLaserMove} className="flex-1 min-h-0 overflow-y-auto p-3">
         <SlidesPanel
           teacherId={cls.teacher_id}
           current={studentView.view?.type === "slide" ? studentView.view : null}
@@ -262,7 +272,7 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
       )}
 
       {section === "textbook" && (
-        <LaserSurface active={laser} onMove={onLaserMove}>
+        <LaserSurface active={laser} onMove={onLaserMove} className="flex-1 min-h-0 overflow-y-auto p-3">
           <TextbookPanel
             teacherId={cls.teacher_id}
             studentId={cls.student_id}
@@ -273,7 +283,7 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
       )}
 
       {section === "blocks" && (
-        <LaserSurface active={laser} onMove={onLaserMove}>
+        <LaserSurface active={laser} onMove={onLaserMove} className="flex-1 min-h-0 overflow-y-auto p-3">
         <BlocksPanel
           onTransfer={(kit) =>
             transfer("blocks", { type: "blocks", kit_id: kit.id, title: kit.title, level: kit.level, blocks: kit.blocks, sections: kitSections(kit), page_paths: kit.page_paths, presentation_id: kit.presentation_id })
