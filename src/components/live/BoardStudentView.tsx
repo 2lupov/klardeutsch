@@ -141,14 +141,12 @@ export default function BoardStudentView({
    * інакше малюнок зʼїжджав вище/нижче за мишку.
    */
   const frac = (clientX: number, clientY: number) => {
-    const r = svgRef.current!.getBoundingClientRect();
-    const s = Math.max(r.width / BOARD_W, r.height / BOARD_H) || 1;
-    const dx = (r.width - BOARD_W * s) / 2;
-    const dy = (r.height - BOARD_H * s) / 2;
-    return {
-      fx: (clientX - r.left - dx) / (BOARD_W * s),
-      fy: (clientY - r.top - dy) / (BOARD_H * s),
-    };
+    const svg = svgRef.current;
+    if (!svg) return { fx: 0, fy: 0 };
+    const matrix = svg.getScreenCTM();
+    if (!matrix) return { fx: 0, fy: 0 };
+    const point = new DOMPoint(clientX, clientY).matrixTransform(matrix.inverse());
+    return { fx: point.x / BOARD_W, fy: point.y / BOARD_H };
   };
 
 
@@ -179,7 +177,9 @@ export default function BoardStudentView({
   const eraseAtPoint = (p: { x: number; y: number }) => {
     const cur = allRef.current;
     if (cur.length === 0) return;
-    const radius = (14 * camRef.current.w) / (BOARD_W * (view.s || 1));
+    const matrix = svgRef.current?.getScreenCTM();
+    const screenScale = matrix ? Math.hypot(matrix.a, matrix.b) : 1;
+    const radius = (14 / Math.max(screenScale, 0.001) / BOARD_W) * camRef.current.w;
     const r = eraseAt(cur, p, radius, undefined);
     const removed = new Set(r.removed);
     // тексти під гумкою
