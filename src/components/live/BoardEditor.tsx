@@ -226,10 +226,12 @@ export default function BoardEditor({
 
   /** Гумка стирає частину штриха під курсором (як у Miro). */
   const eraseAtPoint = (p: { x: number; y: number }) => {
-    // Перетворюємо екранний радіус гумки у координати нескінченної дошки.
-    // Раніше сюди потрапляло значення 10+ world units, тому весь штрих
-    // опинявся всередині гумки та зникав одним дотиком.
-    const radius = (Math.max(10, width * 1.8) / BOARD_W) * camRef.current.w;
+    // Тримаємо гумку однакового екранного розміру незалежно від розміру SVG,
+    // letterbox-відступів і масштабу камери.
+    const svg = svgRef.current;
+    const matrix = svg?.getScreenCTM();
+    const screenScale = matrix ? Math.hypot(matrix.a, matrix.b) : 1;
+    const radius = (Math.max(10, width * 1.8) / Math.max(screenScale, 0.001) / BOARD_W) * camRef.current.w;
     const r = eraseAt(elsRef.current, p, radius, undefined);
     if (!r.changed) return;
     commit(r.next, true);
@@ -245,8 +247,14 @@ export default function BoardEditor({
   /* ─────────── coordinates ─────────── */
 
   const frac = (clientX: number, clientY: number) => {
-    const r = svgRef.current!.getBoundingClientRect();
-    return { fx: (clientX - r.left) / r.width, fy: (clientY - r.top) / r.height };
+    const svg = svgRef.current;
+    if (!svg) return { fx: 0, fy: 0 };
+    const matrix = svg.getScreenCTM();
+    if (!matrix) return { fx: 0, fy: 0 };
+    // Browser SVG geometry is authoritative here: it includes the centered
+    // meet/slice offset used when the compact board is not exactly 4:3.
+    const point = new DOMPoint(clientX, clientY).matrixTransform(matrix.inverse());
+    return { fx: point.x / BOARD_W, fy: point.y / BOARD_H };
   };
 
   const world = (clientX: number, clientY: number) => {
