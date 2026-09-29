@@ -385,7 +385,11 @@ function NewAssignmentModal({
       instructions: instructions.trim() || null,
       level,
       due_at: dueAt ? new Date(dueAt).toISOString() : null,
-      payload: type === "test" ? { questions } : type === "writing" && writingTopic ? { topic: writingTopic } : {},
+      payload:
+        type === "test" ? { questions }
+        : type === "writing" && writingTopic ? { topic: writingTopic }
+        : type === "reading" && readingTopic ? { topic: readingTopic }
+        : {},
     }));
 
     const { error } = await supabase.from("student_assignments").insert(rows as any);
