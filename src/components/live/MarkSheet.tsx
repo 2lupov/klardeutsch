@@ -16,6 +16,7 @@ export default function MarkSheet({
   className,
   sheetClassName,
   readOnly,
+  highlightOnly,
   toolbarExtra,
 }: {
   value: string;
@@ -26,6 +27,8 @@ export default function MarkSheet({
   className?: string;
   sheetClassName?: string;
   readOnly?: boolean;
+  /** Текст не редагується — доступні лише жовтий маркер і гумка. */
+  highlightOnly?: boolean;
   toolbarExtra?: React.ReactNode;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -64,9 +67,13 @@ export default function MarkSheet({
             </span>
             Жовтим
           </Button>
-          <Button animated={false} size="icon" variant="ghost" className="h-7 w-7" onMouseDown={(e) => e.preventDefault()} onClick={() => format("underline")} title="Підкреслити"><Underline /></Button>
-          <Button animated={false} size="icon" variant="ghost" className="h-7 w-7" onMouseDown={(e) => e.preventDefault()} onClick={() => format("bold")} title="Жирний"><Bold /></Button>
-          <Button animated={false} size="icon" variant="ghost" className="h-7 w-7" onMouseDown={(e) => e.preventDefault()} onClick={() => format("strikeThrough")} title="Закреслити"><Strikethrough /></Button>
+          {!highlightOnly && (
+            <>
+              <Button animated={false} size="icon" variant="ghost" className="h-7 w-7" onMouseDown={(e) => e.preventDefault()} onClick={() => format("underline")} title="Підкреслити"><Underline /></Button>
+              <Button animated={false} size="icon" variant="ghost" className="h-7 w-7" onMouseDown={(e) => e.preventDefault()} onClick={() => format("bold")} title="Жирний"><Bold /></Button>
+              <Button animated={false} size="icon" variant="ghost" className="h-7 w-7" onMouseDown={(e) => e.preventDefault()} onClick={() => format("strikeThrough")} title="Закреслити"><Strikethrough /></Button>
+            </>
+          )}
           <Button animated={false} size="icon" variant="ghost" className="h-7 w-7" onMouseDown={(e) => e.preventDefault()}
             onClick={() => { format("removeFormat"); format("hiliteColor", "transparent"); }} title="Прибрати позначки"><Eraser /></Button>
           {toolbarExtra ? <div className="ml-auto flex items-center gap-1.5">{toolbarExtra}</div> : null}
@@ -78,6 +85,9 @@ export default function MarkSheet({
         suppressContentEditableWarning
         spellCheck={false}
         onInput={fromEditor}
+        onBeforeInput={highlightOnly ? (e) => e.preventDefault() : undefined}
+        onPaste={highlightOnly ? (e) => e.preventDefault() : undefined}
+        onKeyDown={highlightOnly ? (e) => { if (e.key.length === 1 || e.key === "Backspace" || e.key === "Delete" || e.key === "Enter") e.preventDefault(); } : undefined}
         data-placeholder={placeholder}
         className={cn(
           "live-writing-sheet min-h-0 flex-1 overflow-y-auto px-6 py-4 font-display text-lg leading-8 text-foreground outline-none",
