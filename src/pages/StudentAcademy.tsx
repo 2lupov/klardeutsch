@@ -7,18 +7,22 @@ import {
   ListChecks, FileText, BookOpen, GraduationCap, ChevronRight,
   Loader2, CheckCircle2, Clock, Layers, Mic, PenLine,
   ClipboardList, Palette, LibraryBig, NotebookTabs, UserRound,
+  NotebookPen, FolderOpen,
 } from "lucide-react";
 import StudentTextbooks from "@/components/textbook/StudentTextbooks";
 import StudentBoard from "@/components/student/StudentBoard";
 import StudentProfilePanel from "@/components/student/StudentProfilePanel";
 import StudentDictionary from "@/pages/StudentDictionary";
 import StudentWriting from "@/components/student/StudentWriting";
+import StudentReading from "@/components/student/StudentReading";
+import StudentNotes from "@/components/student/StudentNotes";
+import StudentFolders from "@/components/student/StudentFolders";
 import { bgCss } from "@/components/student/academyBackgrounds";
 import { Button } from "@/components/ui/button";
 import pandaCelebrating from "@/assets/mascot/panda-celebrating.png";
 import pandaSleeping from "@/assets/mascot/panda-sleeping.png";
 
-type Tab = "tests" | "homework" | "writing" | "board" | "textbook" | "dict" | "profile";
+type Tab = "tests" | "homework" | "writing" | "reading" | "notes" | "folders" | "board" | "textbook" | "dict" | "profile";
 
 interface Row {
   id: string;
