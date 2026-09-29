@@ -134,6 +134,7 @@ export default function LiveReading({
         value={text}
         onChange={(html) => push("text", html)}
         register={(set) => onRemote("text", set)}
+        highlightOnly
         placeholder="Тут з'явиться текст для читання…"
         toolbarExtra={
           <>
