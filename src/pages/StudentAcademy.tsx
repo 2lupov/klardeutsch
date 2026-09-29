@@ -86,6 +86,7 @@ const StudentAcademy = () => {
   const [tests, setTests] = useState<Row[]>([]);
   const [homework, setHomework] = useState<Row[]>([]);
   const [writingTodo, setWritingTodo] = useState(0);
+  const [readingTodo, setReadingTodo] = useState(0);
   const [reading, setReading] = useState<Row[]>([]);
   const [courses, setCourses] = useState<Row[]>([]);
   const [stats, setStats] = useState<{ active: number; graded: number; avg: number | null }>({
