@@ -192,8 +192,8 @@ function SaveReadingDialog({
   const date = new Date().toLocaleDateString("uk-UA");
   const title = `Читання · ${date}${topic?.title_de ? ` · ${topic.title_de}` : ""}`;
 
-  const load = () => { if (open) fetchFolders().then(setFolders).catch(() => setFolders([])); };
-  if (open && folders.length === 0 && busy === null) load();
+  useEffect(() => { if (open) fetchFolders().then(setFolders).catch(() => setFolders([])); }, [open]);
+
 
   const save = async (folderId?: string) => {
     setBusy(folderId ?? "new");
