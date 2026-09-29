@@ -12,6 +12,7 @@ import {
 } from "@/lib/live-class";
 import { toast } from "sonner";
 import { BoardView } from "@/components/live/BoardRender";
+import LiveWriting from "@/components/live/LiveWriting";
 import TextbookWorkbook from "@/components/textbook/TextbookWorkbook";
 import BoardStudentView from "@/components/live/BoardStudentView";
 import type { BoardCam } from "@/components/live/BoardRender";
@@ -49,13 +50,28 @@ export default function LiveClass() {
   };
 
   const lastDraw = useRef(0);
+  const pendingDraw = useRef<{ el: any; t: ReturnType<typeof setTimeout> | null }>({ el: null, t: null });
   const sendDraw = (el: any, live?: boolean) => {
+    const push = (e: any) => boardChanRef.current?.send({ type: "broadcast", event: "studentdraw", payload: { el: e } });
     if (live) {
       const now = Date.now();
-      if (now - lastDraw.current < 60) return;
+      if (now - lastDraw.current < 60) {
+        // Не губимо останню літеру / останню точку — відправимо з невеликою затримкою
+        pendingDraw.current.el = el;
+        if (!pendingDraw.current.t) {
+          pendingDraw.current.t = setTimeout(() => {
+            pendingDraw.current.t = null;
+            lastDraw.current = Date.now();
+            if (pendingDraw.current.el) push(pendingDraw.current.el);
+            pendingDraw.current.el = null;
+          }, 70);
+        }
+        return;
+      }
       lastDraw.current = now;
     }
-    boardChanRef.current?.send({ type: "broadcast", event: "studentdraw", payload: { el } });
+    if (pendingDraw.current.t) { clearTimeout(pendingDraw.current.t); pendingDraw.current.t = null; pendingDraw.current.el = null; }
+    push(el);
   };
   const sendErase = (elId: string) => {
     boardChanRef.current?.send({ type: "broadcast", event: "studenterase", payload: { id: elId } });
@@ -306,6 +322,10 @@ export default function LiveClass() {
                 )}
               </div>
             )}
+          </div>
+        ) : section === "writing" ? (
+          <div className="p-3 h-[calc(100dvh-5.5rem)]">
+            <LiveWriting classId={cls.id} role="student" />
           </div>
         ) : section === "textbook" ? (
           <div className="p-4">
