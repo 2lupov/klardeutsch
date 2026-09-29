@@ -333,6 +333,10 @@ export default function LiveClass() {
           <div className="p-3 h-[calc(100dvh-5.5rem)]">
             <LiveReading classId={cls.id} role="student" className="h-full" />
           </div>
+        ) : section === "grammar" ? (
+          <div className="p-3 h-[calc(100dvh-5.5rem)]">
+            <LiveGrammar classId={cls.id} role="student" className="h-full" />
+          </div>
         ) : section === "notes" ? (
           <div className="p-3 h-[calc(100dvh-5.5rem)]">
             <LiveNotes classId={cls.id} role="student" className="h-full" />

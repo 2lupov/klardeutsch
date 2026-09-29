@@ -297,6 +297,18 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
         </div>
       )}
 
+      {section === "grammar" && (
+        <div className="flex-1 min-h-0 flex flex-col gap-2 p-2">
+          <div className="flex justify-end shrink-0">
+            <Button animated={false} size="sm" onClick={() => transfer("grammar", null)}>
+              <Crosshair /> Показати граматику учню
+            </Button>
+          </div>
+          <LiveGrammar classId={cls.id} role="teacher" studentId={cls.student_id} teacherId={cls.teacher_id} className="flex-1" />
+        </div>
+      )}
+
+
       {section === "notes" && (
         <div className="flex-1 min-h-0 flex flex-col gap-2 p-2">
           <div className="flex justify-end shrink-0">
