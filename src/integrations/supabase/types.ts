@@ -1985,6 +1985,47 @@ export type Database = {
           },
         ]
       }
+      live_class_grammar: {
+        Row: {
+          class_id: string
+          created_at: string
+          lesson: Json | null
+          marks: string
+          notes: string
+          revealed: Json
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          class_id: string
+          created_at?: string
+          lesson?: Json | null
+          marks?: string
+          notes?: string
+          revealed?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          class_id?: string
+          created_at?: string
+          lesson?: Json | null
+          marks?: string
+          notes?: string
+          revealed?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_class_grammar_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: true
+            referencedRelation: "live_classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       live_class_items: {
         Row: {
           class_id: string
