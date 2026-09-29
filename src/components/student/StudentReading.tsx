@@ -125,7 +125,8 @@ function ReadingSheet({ task, onBack }: { task: Task; onBack: () => void }) {
       )}
 
       <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,320px)]">
-        <MarkSheet className="min-h-[50vh]" value={textHtml} onChange={onText} readOnly={locked} />
+        <MarkSheet className="min-h-[50vh]" value={textHtml} onChange={onText} readOnly={locked} highlightOnly
+          sheetClassName="font-display text-lg leading-9 [&_p]:mb-4 [&_p]:leading-9" />
         <div className="space-y-3">
           <div className="space-y-2">
             <div className="flex items-center gap-2 px-1 text-primary">
