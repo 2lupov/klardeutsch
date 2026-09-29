@@ -137,23 +137,6 @@ function ReadingSheet({ task, onBack }: { task: Task; onBack: () => void }) {
               readOnly={locked} placeholder="Нові слова, правила, приклади…" />
           </div>
 
-          {!!topic?.grammar_focus?.length && (
-            <div className="space-y-1.5 rounded-2xl border border-border bg-card p-3 text-sm">
-              <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Граматичні зв'язки</p>
-              {topic.grammar_focus.map((g, i) => <p key={i} className="text-foreground">{g}</p>)}
-            </div>
-          )}
-          {!!topic?.vocab?.length && (
-            <div className="space-y-1 rounded-2xl border border-border bg-card p-3 text-sm">
-              <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Слова</p>
-              {topic.vocab.map((v, i) => (
-                <p key={i} className="text-foreground">
-                  {v.article && <span className="mr-1 text-primary">{v.article}</span>}<b>{v.term}</b>
-                  <span className="text-muted-foreground"> — {v.translation}</span>
-                </p>
-              ))}
-            </div>
-          )}
           {!!topic?.questions?.length && (
             <div className="space-y-1 rounded-2xl border border-border bg-card p-3 text-sm">
               <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Питання</p>
