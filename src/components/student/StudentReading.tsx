@@ -120,7 +120,7 @@ function ReadingSheet({ task, onBack }: { task: Task; onBack: () => void }) {
         });
       }
       toast.success("Здано! +10 монет");
-      localStorage.removeItem(marksKey);
+      localStorage.removeItem(marksKey); localStorage.removeItem(answersKey);
       onBack();
     } catch (e: any) {
       toast.error(e?.message || "Не вдалося здати");
