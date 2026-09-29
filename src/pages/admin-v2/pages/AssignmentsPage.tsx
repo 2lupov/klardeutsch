@@ -10,7 +10,7 @@ import StudentBlocks from "@/components/blocks/StudentBlocks";
 import { kitBlocksToLessonBlocks } from "@/lib/lesson-kits";
 import { useAdminLang } from "../LanguageContext";
 
-type AssignmentType = "test" | "homework" | "writing" | "audio";
+type AssignmentType = "test" | "homework" | "writing" | "reading" | "audio";
 
 interface Question {
   question: string;
