@@ -9,6 +9,7 @@ export type LiveSection =
   | "grammar"
   | "listening"
   | "reading"
+  | "notes"
   | "tasks"
   | "vocab"
   | "textbook"
@@ -19,7 +20,9 @@ export const LIVE_SECTIONS: { key: LiveSection; label: string; icon: string }[] 
   { key: "slides", label: "Презентація", icon: "🖼" },
   { key: "blocks", label: "Блок-завдання", icon: "🧩" },
   { key: "textbook", label: "Підручник", icon: "📖" },
+  { key: "reading", label: "Читання", icon: "📚" },
   { key: "writing", label: "Письмо", icon: "✉️" },
+  { key: "notes", label: "Нотатки", icon: "📝" },
 ];
 
 /** Що саме показано учню в розділі «Презентація» / «Блок-завдання». */
