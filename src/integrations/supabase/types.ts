@@ -2067,6 +2067,41 @@ export type Database = {
           },
         ]
       }
+      live_class_writing: {
+        Row: {
+          class_id: string
+          created_at: string
+          text: string
+          topic: Json | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          class_id: string
+          created_at?: string
+          text?: string
+          topic?: Json | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          class_id?: string
+          created_at?: string
+          text?: string
+          topic?: Json | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_class_writing_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: true
+            referencedRelation: "live_classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       live_classes: {
         Row: {
           board: Json
