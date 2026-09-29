@@ -225,7 +225,7 @@ export default function LiveClass() {
   return (
     <div className="h-[100dvh] flex bg-background overflow-hidden">
       {/* Permanent sidebar */}
-      <aside className={`${navCollapsed ? "w-[76px]" : "w-[76px] md:w-56"} shrink-0 h-full border-r border-border bg-card/60 flex flex-col transition-all`}>
+      <aside className={`${navCollapsed ? "md:w-[76px]" : "md:w-56"} hidden md:flex shrink-0 h-full border-r border-border bg-card/60 flex flex-col transition-all`}>
         <div className={`h-16 px-3 ${navCollapsed ? "" : "md:px-4"} flex items-center justify-center gap-1 border-b border-border`}>
           <span className="font-display font-bold text-primary text-sm">KLAR</span>
           {!navCollapsed && <LiveClock />}
@@ -263,11 +263,25 @@ export default function LiveClass() {
         </button>
       </aside>
 
-      <main className={`flex-1 h-full ${section === "board" ? "overflow-hidden flex flex-col" : "overflow-y-auto"}`}>
-        <header className="sticky top-0 z-10 bg-background/90 backdrop-blur border-b border-border px-5 py-4 flex items-center justify-between gap-3">
+      <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 h-16 border-t border-border bg-card/95 backdrop-blur flex overflow-x-auto" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
+        {LIVE_SECTIONS.map((s) => {
+          const on = s.key === section;
+          const badge = newCounts[s.key];
+          return (
+            <button key={s.key} onClick={() => setSection(s.key)}
+              className={`relative flex-1 min-w-[64px] flex flex-col items-center justify-center gap-0.5 text-[10px] font-display font-medium ${on ? "text-primary" : "text-muted-foreground"}`}>
+              <span className={`text-lg leading-none rounded-full px-3 py-0.5 ${on ? "bg-primary/15" : ""}`}>{s.icon}</span>
+              <span className="truncate max-w-full">{s.label}</span>
+              {badge ? <span className="absolute top-1 right-2 min-w-[16px] h-4 px-1 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold grid place-items-center">{badge}</span> : null}
+            </button>
+          );
+        })}
+      </nav>
+      <main className={`flex-1 h-full pb-16 md:pb-0 ${section === "board" ? "overflow-hidden flex flex-col" : "overflow-y-auto"}`}>
+        <header className="sticky top-0 z-10 bg-background/90 backdrop-blur border-b border-border px-3 py-2 md:px-5 md:py-4 flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[11px] uppercase tracking-widest text-primary font-bold">Живий урок</p>
-            <h1 className="font-display text-xl font-bold text-foreground truncate">{cls.title}</h1>
+            <p className="text-[10px] md:text-[11px] uppercase tracking-widest text-primary font-bold">Живий урок</p>
+            <h1 className="font-display text-base md:text-xl font-bold text-foreground truncate">{cls.title}</h1>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             {section === "board" && (
@@ -327,19 +341,19 @@ export default function LiveClass() {
             )}
           </div>
         ) : section === "writing" ? (
-          <div className="p-3 h-[calc(100dvh-5.5rem)]">
+          <div className="p-3 h-[calc(100dvh-8rem)] md:h-[calc(100dvh-5.5rem)]">
             <LiveWriting classId={cls.id} role="student" />
           </div>
         ) : section === "reading" ? (
-          <div className="p-3 h-[calc(100dvh-5.5rem)]">
+          <div className="p-3 h-[calc(100dvh-8rem)] md:h-[calc(100dvh-5.5rem)]">
             <LiveReading classId={cls.id} role="student" className="h-full" />
           </div>
         ) : section === "grammar" ? (
-          <div className="p-3 h-[calc(100dvh-5.5rem)]">
+          <div className="p-3 h-[calc(100dvh-8rem)] md:h-[calc(100dvh-5.5rem)]">
             <LiveGrammar classId={cls.id} role="student" className="h-full" />
           </div>
         ) : section === "notes" ? (
-          <div className="p-3 h-[calc(100dvh-5.5rem)]">
+          <div className="p-3 h-[calc(100dvh-8rem)] md:h-[calc(100dvh-5.5rem)]">
             <LiveNotes classId={cls.id} role="student" className="h-full" />
           </div>
         ) : section === "textbook" ? (

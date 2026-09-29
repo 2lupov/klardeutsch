@@ -57,6 +57,18 @@ export default function LiveClassPage() {
 
   useEffect(() => { if (user) load(); }, [user]);
 
+  // Відкриття уроку з картки учня
+  useEffect(() => {
+    const raw = sessionStorage.getItem("klar-open-live");
+    if (!raw) return;
+    sessionStorage.removeItem("klar-open-live");
+    try {
+      const o = JSON.parse(raw);
+      if (o.classId) supabase.from("live_classes").select("*").eq("id", o.classId).maybeSingle().then(({ data }) => data && setActiveClass(data as any));
+      else if (o.studentId) setStudentId(o.studentId);
+    } catch { /* ignore */ }
+  }, []);
+
   const start = async () => {
     if (!user || !studentId) { toast({ title: "Виберіть учня" }); return; }
     try {
@@ -79,7 +91,7 @@ export default function LiveClassPage() {
   }
 
   return (
-    <div className="h-full overflow-y-auto p-6 space-y-6">
+    <div className="h-full overflow-y-auto p-3 md:p-6 space-y-4 md:space-y-6">
       <Card className="p-5">
         <SectionHeader title="Запустити живий урок" subtitle="Учень одразу потрапляє в клас — без демонстрації екрана" />
         <div className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
@@ -111,42 +123,22 @@ export default function LiveClassPage() {
         </div>
       </Card>
 
-      <Card className="p-5">
-        <SectionHeader title="Уроки" subtitle="Активні та завершені" />
-        {loading ? (
-          <p className="text-sm text-slate-500 animate-pulse">Завантаження…</p>
-        ) : classes.length === 0 ? (
-          <EmptyState title="Ще немає уроків" description="Запустіть перший живий урок вище." />
-        ) : (
+      {classes.filter((c) => c.status === "active").length > 0 && (
+        <Card className="p-5">
+          <SectionHeader title="Активні зараз" subtitle="Історія уроків — у картці учня (розділ «Учні»)" />
           <div className="divide-y divide-slate-100">
-            {classes.map((c) => (
+            {classes.filter((c) => c.status === "active").map((c) => (
               <div key={c.id} className="py-3 flex items-center justify-between gap-4">
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-slate-900 truncate">{c.title}</p>
-                  <p className="text-xs text-slate-500">
-                    {students.find((s) => s.user_id === c.student_id)?.display_name || "Учень"} ·{" "}
-                    {new Date(c.started_at).toLocaleString("uk-UA")}
-                  </p>
+                  <p className="text-xs text-slate-500">{students.find((s) => s.user_id === c.student_id)?.display_name || "Учень"}</p>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <span
-                    className="text-[11px] px-2 py-1 rounded-full font-medium"
-                    style={c.status === "active" ? { background: "#DCFCE7", color: "#166534" } : { background: "#F1F5F9", color: "#475569" }}
-                  >
-                    {c.status === "active" ? "Активний" : "Завершено"}
-                  </span>
-                  <button
-                    onClick={() => setActiveClass(c)}
-                    className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 hover:bg-slate-50"
-                  >
-                    Відкрити
-                  </button>
-                </div>
+                <button onClick={() => setActiveClass(c)} className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 hover:bg-slate-50">Продовжити</button>
               </div>
             ))}
           </div>
-        )}
-      </Card>
+        </Card>
+      )}
     </div>
   );
 }
@@ -192,8 +184,8 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
   };
 
   return (
-    <div className="h-full min-h-0 flex flex-col bg-admin-bg overflow-hidden">
-      <header className="h-14 shrink-0 border-b border-admin-border bg-admin-surface px-3 flex items-center gap-3">
+    <div className="h-full min-h-0 flex flex-col bg-admin-bg overflow-hidden pb-14 md:pb-0">
+      <header className="h-12 md:h-14 shrink-0 border-b border-admin-border bg-admin-surface px-2 md:px-3 flex items-center gap-3">
         <div className="min-w-0 mr-auto">
           <div className="flex items-center gap-2 min-w-0">
             <span className="size-2 rounded-full bg-emerald-500 shrink-0" />
@@ -231,7 +223,7 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
         </div>
       </header>
 
-      <div className="h-11 shrink-0 flex items-center gap-1 px-3 border-b border-admin-border bg-admin-surface overflow-x-auto">
+      <div className="hidden md:flex h-11 shrink-0 items-center gap-1 px-3 border-b border-admin-border bg-admin-surface overflow-x-auto">
         {LIVE_SECTIONS.map((s) => (
           <Button
             animated={false}
@@ -341,6 +333,16 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
         />
         </LaserSurface>
       )}
+
+      <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 h-14 border-t border-admin-border bg-admin-surface flex overflow-x-auto" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
+        {LIVE_SECTIONS.map((s) => (
+          <button key={s.key} onClick={() => setSection(s.key)}
+            className={`flex-1 min-w-[60px] flex flex-col items-center justify-center text-[10px] font-medium ${s.key === section ? "text-primary" : "text-admin-muted"}`}>
+            <span className="text-base leading-none">{s.icon}</span>
+            <span className="truncate max-w-full">{s.label}</span>
+          </button>
+        ))}
+      </nav>
 
       <PandaLookupDialog open={dictOpen} onOpenChange={setDictOpen} />
     </div>
