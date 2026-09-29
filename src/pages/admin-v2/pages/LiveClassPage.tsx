@@ -284,6 +284,28 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
         </div>
       )}
 
+      {section === "reading" && (
+        <div className="flex-1 min-h-0 flex flex-col gap-2 p-2">
+          <div className="flex justify-end shrink-0">
+            <Button animated={false} size="sm" onClick={() => transfer("reading", null)}>
+              <Crosshair /> Показати читання учню
+            </Button>
+          </div>
+          <LiveReading classId={cls.id} role="teacher" studentId={cls.student_id} teacherId={cls.teacher_id} className="flex-1" />
+        </div>
+      )}
+
+      {section === "notes" && (
+        <div className="flex-1 min-h-0 flex flex-col gap-2 p-2">
+          <div className="flex justify-end shrink-0">
+            <Button animated={false} size="sm" onClick={() => transfer("notes", null)}>
+              <Crosshair /> Показати нотатки учню
+            </Button>
+          </div>
+          <LiveNotes classId={cls.id} role="teacher" studentId={cls.student_id} teacherId={cls.teacher_id} className="flex-1" />
+        </div>
+      )}
+
       {section === "textbook" && (
         <LaserSurface active={laser} onMove={onLaserMove} className="flex-1 min-h-0 overflow-y-auto p-3">
           <TextbookPanel
