@@ -510,6 +510,11 @@
 @media (max-width: 700px) { .lesson-layout-reading .lesson-reading-text { columns: 1; } }
 /* The editor canvas shows the exact KLAR dark page the student sees. */
 .klar-admin .lesson-workshop-canvas {
+  /* the canvas shows the exact KLAR dark page the student sees — keep dark tokens here */
+  --background: 222 47% 10%;
+  --foreground: 43 27% 95%;
+  --muted-foreground: 215 22% 74%;
+  --border: 220 26% 27%;
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
   border-color: hsl(var(--border));
