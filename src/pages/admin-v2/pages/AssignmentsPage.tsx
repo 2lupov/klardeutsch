@@ -3,14 +3,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, SectionHeader, EmptyState } from "./_ui";
 import {
   ClipboardList, Plus, X, Sparkles, Loader2, Trash2, Check, Search,
-  FileText, Mic, PenLine, ListChecks, Award,
+  FileText, Mic, PenLine, ListChecks, Award, BookOpen,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import StudentBlocks from "@/components/blocks/StudentBlocks";
 import { kitBlocksToLessonBlocks } from "@/lib/lesson-kits";
 import { useAdminLang } from "../LanguageContext";
 
-type AssignmentType = "test" | "homework" | "writing" | "audio";
+type AssignmentType = "test" | "homework" | "writing" | "reading" | "audio";
 
 interface Question {
   question: string;
@@ -60,8 +60,11 @@ const TYPES: { key: AssignmentType; label: string; icon: any; hint: string }[] =
   { key: "test", label: "Тест", icon: ListChecks, hint: "Питання з варіантами, авто-перевірка" },
   { key: "homework", label: "Домашка", icon: FileText, hint: "Текст + фото/файли від учня" },
   { key: "writing", label: "Письмо (AI)", icon: PenLine, hint: "AI дає оцінку та фідбек" },
+  { key: "reading", label: "Читання (AI)", icon: BookOpen, hint: "Текст за рівнем і кількістю слів" },
   { key: "audio", label: "Аудіо / вимова", icon: Mic, hint: "Учень записує голос" },
 ];
+
+const READING_SIZES = [50, 100, 150, 200, 300];
 
 const inputCls =
   "w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm bg-white";
@@ -297,6 +300,21 @@ function NewAssignmentModal({
   const [generating, setGenerating] = useState(false);
   const [saving, setSaving] = useState(false);
   const [writingTopic, setWritingTopic] = useState<any>(null);
+  const [readingTopic, setReadingTopic] = useState<any>(null);
+  const [readingWords, setReadingWords] = useState(100);
+
+  const genReading = async () => {
+    setGenerating(true);
+    const { data, error } = await supabase.functions.invoke("generate-reading-text", {
+      body: { level, words: readingWords, topic: aiTopic.trim() || undefined },
+    });
+    setGenerating(false);
+    if (error || (data as any)?.error) return toast({ title: "Не вдалося згенерувати текст", description: String((data as any)?.error || error?.message || ""), variant: "destructive" });
+    const t = (data as any).topic;
+    setReadingTopic(t);
+    setTitle(`Читання: ${t.title_de ?? ""}`.trim());
+    if (!instructions.trim()) setInstructions("Прочитай текст, познач граматичні конструкції та запиши нотатки.");
+  };
 
   const genWriting = async () => {
     setGenerating(true);
@@ -350,6 +368,8 @@ function NewAssignmentModal({
     if (studentIds.length === 0) return toast({ title: "Оберіть хоча б одного учня", variant: "destructive" });
     if (type === "test" && questions.length === 0)
       return toast({ title: "Додайте питання до тесту", variant: "destructive" });
+    if (type === "reading" && !readingTopic)
+      return toast({ title: "Згенеруйте текст для читання", variant: "destructive" });
 
     setSaving(true);
     const { data: authData } = await supabase.auth.getUser();
@@ -367,7 +387,11 @@ function NewAssignmentModal({
       instructions: instructions.trim() || null,
       level,
       due_at: dueAt ? new Date(dueAt).toISOString() : null,
-      payload: type === "test" ? { questions } : type === "writing" && writingTopic ? { topic: writingTopic } : {},
+      payload:
+        type === "test" ? { questions }
+        : type === "writing" && writingTopic ? { topic: writingTopic }
+        : type === "reading" && readingTopic ? { topic: readingTopic }
+        : {},
     }));
 
     const { error } = await supabase.from("student_assignments").insert(rows as any);
@@ -450,6 +474,34 @@ function NewAssignmentModal({
             <input type="date" value={dueAt} onChange={(e) => setDueAt(e.target.value)} className={inputCls} />
           </Field>
         </div>
+
+        {type === "reading" && (
+          <div className="rounded-xl border border-slate-200 p-4 space-y-3">
+            <div className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+              <Sparkles className="w-4 h-4" style={{ color: "#4F46E5" }} /> Текст для читання ({level})
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <input value={aiTopic} onChange={(e) => setAiTopic(e.target.value)}
+                placeholder="Тема (напр. Wohnung, Arbeit) — необов'язково" className={`${inputCls} sm:col-span-2`} />
+              <select value={readingWords} onChange={(e) => setReadingWords(Number(e.target.value))} className={inputCls}>
+                {READING_SIZES.map((w) => <option key={w} value={w}>{w} слів</option>)}
+              </select>
+            </div>
+            <button disabled={generating} onClick={genReading}
+              className="w-full px-4 py-2.5 rounded-xl text-white text-sm font-semibold disabled:opacity-60 inline-flex items-center justify-center gap-2"
+              style={{ background: "#4F46E5" }}>
+              {generating ? <><Loader2 className="w-4 h-4 animate-spin" /> Генеруємо…</> : readingTopic ? "Інший текст" : "Згенерувати текст"}
+            </button>
+            {readingTopic && (
+              <div className="text-sm space-y-2 text-slate-700">
+                <p className="font-bold text-slate-900">{readingTopic.title_de} · {readingTopic.word_count ?? readingWords} слів</p>
+                {readingTopic.summary_uk && <p>{readingTopic.summary_uk}</p>}
+                <p className="whitespace-pre-wrap text-xs text-slate-600 max-h-40 overflow-auto">{readingTopic.text_de}</p>
+              </div>
+            )}
+            <p className="text-xs text-slate-500">Учень читає текст у розділі «Читання», підкреслює конструкції та веде нотатки.</p>
+          </div>
+        )}
 
         {type === "writing" && (
           <div className="rounded-xl border border-slate-200 p-4 space-y-3">

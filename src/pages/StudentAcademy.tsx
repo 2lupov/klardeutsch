@@ -7,18 +7,22 @@ import {
   ListChecks, FileText, BookOpen, GraduationCap, ChevronRight,
   Loader2, CheckCircle2, Clock, Layers, Mic, PenLine,
   ClipboardList, Palette, LibraryBig, NotebookTabs, UserRound,
+  NotebookPen, FolderOpen,
 } from "lucide-react";
 import StudentTextbooks from "@/components/textbook/StudentTextbooks";
 import StudentBoard from "@/components/student/StudentBoard";
 import StudentProfilePanel from "@/components/student/StudentProfilePanel";
 import StudentDictionary from "@/pages/StudentDictionary";
 import StudentWriting from "@/components/student/StudentWriting";
+import StudentReading from "@/components/student/StudentReading";
+import StudentNotes from "@/components/student/StudentNotes";
+import StudentFolders from "@/components/student/StudentFolders";
 import { bgCss } from "@/components/student/academyBackgrounds";
 import { Button } from "@/components/ui/button";
 import pandaCelebrating from "@/assets/mascot/panda-celebrating.png";
 import pandaSleeping from "@/assets/mascot/panda-sleeping.png";
 
-type Tab = "tests" | "homework" | "writing" | "board" | "textbook" | "dict" | "profile";
+type Tab = "tests" | "homework" | "writing" | "reading" | "notes" | "folders" | "board" | "textbook" | "dict" | "profile";
 
 interface Row {
   id: string;
@@ -82,6 +86,7 @@ const StudentAcademy = () => {
   const [tests, setTests] = useState<Row[]>([]);
   const [homework, setHomework] = useState<Row[]>([]);
   const [writingTodo, setWritingTodo] = useState(0);
+  const [readingTodo, setReadingTodo] = useState(0);
   const [reading, setReading] = useState<Row[]>([]);
   const [courses, setCourses] = useState<Row[]>([]);
   const [stats, setStats] = useState<{ active: number; graded: number; avg: number | null }>({
@@ -201,9 +206,10 @@ const StudentAcademy = () => {
 
       const allTasks = tasks ?? [];
       setWritingTodo(allTasks.filter((tk: any) => tk.type === "writing" && ["assigned", "in_progress"].includes(tk.status)).length);
+      setReadingTodo(allTasks.filter((tk: any) => tk.type === "reading" && ["assigned", "in_progress"].includes(tk.status)).length);
 
       const testRows: Row[] = allTasks
-        .filter((tk: any) => !["homework", "book", "book_plan", "writing"].includes(tk.type))
+        .filter((tk: any) => !["homework", "book", "book_plan", "writing", "reading"].includes(tk.type))
         .map((tk: any) => ({
           id: tk.id,
           title: tk.title,
@@ -403,7 +409,10 @@ const nextUp = useMemo(() => {
   const tabs = [
     { key: "homework", label: "Домашка", count: pending.homework, icon: ClipboardList },
     { key: "tests", label: "Тести", count: pending.tests, icon: ListChecks },
+    { key: "reading", label: "Читання", count: readingTodo, icon: BookOpen },
     { key: "writing", label: "Письмо", count: pending.writing, icon: PenLine },
+    { key: "notes", label: "Нотатки", count: 0, icon: NotebookPen },
+    { key: "folders", label: "Папки", count: 0, icon: FolderOpen },
     { key: "board", label: "Дошка", count: 0, icon: Palette },
     { key: "textbook", label: "Підручники", count: 0, icon: LibraryBig },
     { key: "dict", label: "Словник", count: 0, icon: NotebookTabs },
@@ -543,6 +552,12 @@ const rows = tab === "tests" ? tests : homework;
                <StudentBoard className="h-[calc(100dvh-6rem)] min-h-[420px]" />
             ) : tab === "writing" ? (
               <StudentWriting />
+            ) : tab === "reading" ? (
+              <StudentReading />
+            ) : tab === "notes" ? (
+              <StudentNotes />
+            ) : tab === "folders" ? (
+              <StudentFolders onOpenTab={(t) => setTab(t)} />
             ) : tab === "dict" ? (
               <StudentDictionary />
             ) : tab === "profile" ? (

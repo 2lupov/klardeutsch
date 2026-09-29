@@ -15,6 +15,8 @@ import {
 import { Play, Square, ChevronLeft, ChevronRight, Loader2, Upload, Crosshair, LogOut, Search } from "lucide-react";
 import TextbookPanel from "@/components/textbook/TextbookPanel";
 import LiveWriting from "@/components/live/LiveWriting";
+import LiveReading from "@/components/live/LiveReading";
+import LiveNotes from "@/components/live/LiveNotes";
 import LiveSlidesPanel from "@/components/live/LiveSlidesPanel";
 import BoardEditor, { type BoardApi } from "@/components/live/BoardEditor";
 import LiveBookPagePicker from "@/components/books/LiveBookPagePicker";
@@ -281,6 +283,28 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
             </Button>
           </div>
           <LiveWriting classId={cls.id} role="teacher" className="flex-1" />
+        </div>
+      )}
+
+      {section === "reading" && (
+        <div className="flex-1 min-h-0 flex flex-col gap-2 p-2">
+          <div className="flex justify-end shrink-0">
+            <Button animated={false} size="sm" onClick={() => transfer("reading", null)}>
+              <Crosshair /> Показати читання учню
+            </Button>
+          </div>
+          <LiveReading classId={cls.id} role="teacher" studentId={cls.student_id} teacherId={cls.teacher_id} className="flex-1" />
+        </div>
+      )}
+
+      {section === "notes" && (
+        <div className="flex-1 min-h-0 flex flex-col gap-2 p-2">
+          <div className="flex justify-end shrink-0">
+            <Button animated={false} size="sm" onClick={() => transfer("notes", null)}>
+              <Crosshair /> Показати нотатки учню
+            </Button>
+          </div>
+          <LiveNotes classId={cls.id} role="teacher" studentId={cls.student_id} teacherId={cls.teacher_id} className="flex-1" />
         </div>
       )}
 
