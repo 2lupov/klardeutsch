@@ -135,6 +135,8 @@ export default function LiveReading({
         onChange={(html) => push("text", html)}
         register={(set) => onRemote("text", set)}
         highlightOnly
+        noLines
+        sheetClassName="mx-auto w-full max-w-[72ch] px-2 py-6 font-display text-[1.22rem] leading-[2.1rem] [&_p]:mb-6 [&_p]:leading-[2.1rem]"
         placeholder="Тут з'явиться текст для читання…"
         toolbarExtra={
           <>
