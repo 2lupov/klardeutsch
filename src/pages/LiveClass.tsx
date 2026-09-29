@@ -12,6 +12,7 @@ import {
 } from "@/lib/live-class";
 import { toast } from "sonner";
 import { BoardView } from "@/components/live/BoardRender";
+import LiveWriting from "@/components/live/LiveWriting";
 import TextbookWorkbook from "@/components/textbook/TextbookWorkbook";
 import BoardStudentView from "@/components/live/BoardStudentView";
 import type { BoardCam } from "@/components/live/BoardRender";
@@ -321,6 +322,10 @@ export default function LiveClass() {
                 )}
               </div>
             )}
+          </div>
+        ) : section === "writing" ? (
+          <div className="p-3 h-[calc(100dvh-5.5rem)]">
+            <LiveWriting classId={cls.id} role="student" />
           </div>
         ) : section === "textbook" ? (
           <div className="p-4">
