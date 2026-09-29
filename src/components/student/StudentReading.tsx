@@ -128,7 +128,7 @@ function ReadingSheet({ task, onBack }: { task: Task; onBack: () => void }) {
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <div className="flex items-center gap-2">
         <Button animated={false} size="sm" variant="ghost" onClick={onBack}><ArrowLeft /> Назад</Button>
         <span className="truncate font-display text-lg font-bold">{topic?.title_de || task.title}</span>
@@ -139,42 +139,46 @@ function ReadingSheet({ task, onBack }: { task: Task; onBack: () => void }) {
         <p className="rounded-2xl bg-muted/50 p-3 text-sm text-foreground">{topic?.summary_uk || task.instructions}</p>
       )}
 
-      <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,320px)]">
-        <MarkSheet className="min-h-[50vh]" value={textHtml} onChange={onText} readOnly={locked} highlightOnly
-          sheetClassName="font-display text-lg leading-9 [&_p]:mb-4 [&_p]:leading-9" />
-        <div className="space-y-3">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 px-1 text-primary">
-              <NotebookPen className="h-4 w-4" />
-              <span className="text-xs font-bold uppercase tracking-widest">Мої нотатки</span>
-            </div>
-            <MarkSheet className="min-h-[220px]" sheetClassName="text-base leading-8" value={notes} onChange={onNotes}
-              readOnly={locked} placeholder="Нові слова, правила, приклади…" />
-          </div>
+      <MarkSheet
+        className="min-h-[60vh]"
+        value={textHtml}
+        onChange={onText}
+        readOnly={locked}
+        highlightOnly
+        noLines
+        sheetClassName="mx-auto w-full max-w-[72ch] px-2 py-6 font-display text-[1.28rem] leading-[2.15rem] tracking-[0.005em] [&_p]:mb-6 [&_p]:leading-[2.15rem]"
+      />
 
-          {!!topic?.questions?.length && (
-            <div className="space-y-3 rounded-2xl border border-border bg-card p-3 text-sm">
-              <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Питання</p>
-              {topic.questions.map((q, i) => (
-                <div key={i} className="space-y-1.5">
-                  <p className="font-medium text-foreground">{i + 1}. {q}</p>
-                  <textarea
-                    className="w-full resize-y rounded-xl border border-input bg-background p-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    rows={2} maxLength={2000} disabled={locked} placeholder="Ваша відповідь…"
-                    value={answers[i] || ""} onChange={(e) => onAnswer(i, e.target.value)} />
-                </div>
-              ))}
-            </div>
-          )}
-
-          {!locked && (
-            <Button animated={false} className="w-full" onClick={submit} disabled={sending}>
-              {sending ? <Loader2 className="animate-spin" /> : <Send />} Здати читання
-            </Button>
-          )}
-          {locked && <p className="text-center text-sm text-primary">Здано ✓</p>}
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 px-1 text-primary">
+          <NotebookPen className="h-4 w-4" />
+          <span className="text-xs font-bold uppercase tracking-widest">Мої нотатки</span>
         </div>
+        <MarkSheet className="min-h-[200px]" sheetClassName="text-base leading-8" value={notes} onChange={onNotes}
+          readOnly={locked} placeholder="Нові слова, правила, приклади…" noLines />
       </div>
+
+      {!!topic?.questions?.length && (
+        <div className="space-y-4 rounded-2xl border border-border bg-card p-4 text-sm">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Питання до тексту</p>
+          {topic.questions.map((q, i) => (
+            <div key={i} className="space-y-1.5">
+              <p className="font-medium text-foreground">{i + 1}. {q}</p>
+              <textarea
+                className="w-full resize-y rounded-xl border border-input bg-background p-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                rows={2} maxLength={2000} disabled={locked} placeholder="Ваша відповідь…"
+                value={answers[i] || ""} onChange={(e) => onAnswer(i, e.target.value)} />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!locked && (
+        <Button animated={false} className="w-full" onClick={submit} disabled={sending}>
+          {sending ? <Loader2 className="animate-spin" /> : <Send />} Здати читання
+        </Button>
+      )}
+      {locked && <p className="text-center text-sm text-primary">Здано ✓</p>}
     </div>
   );
 }
