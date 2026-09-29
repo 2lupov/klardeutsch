@@ -12,12 +12,13 @@ import StudentTextbooks from "@/components/textbook/StudentTextbooks";
 import StudentBoard from "@/components/student/StudentBoard";
 import StudentProfilePanel from "@/components/student/StudentProfilePanel";
 import StudentDictionary from "@/pages/StudentDictionary";
+import StudentWriting from "@/components/student/StudentWriting";
 import { bgCss } from "@/components/student/academyBackgrounds";
 import { Button } from "@/components/ui/button";
 import pandaCelebrating from "@/assets/mascot/panda-celebrating.png";
 import pandaSleeping from "@/assets/mascot/panda-sleeping.png";
 
-type Tab = "tests" | "homework" | "board" | "textbook" | "dict" | "profile";
+type Tab = "tests" | "homework" | "writing" | "board" | "textbook" | "dict" | "profile";
 
 interface Row {
   id: string;
@@ -80,6 +81,7 @@ const StudentAcademy = () => {
   const [loading, setLoading] = useState(true);
   const [tests, setTests] = useState<Row[]>([]);
   const [homework, setHomework] = useState<Row[]>([]);
+  const [writingTodo, setWritingTodo] = useState(0);
   const [reading, setReading] = useState<Row[]>([]);
   const [courses, setCourses] = useState<Row[]>([]);
   const [stats, setStats] = useState<{ active: number; graded: number; avg: number | null }>({
@@ -198,9 +200,10 @@ const StudentAcademy = () => {
 
 
       const allTasks = tasks ?? [];
+      setWritingTodo(allTasks.filter((tk: any) => tk.type === "writing" && ["assigned", "in_progress"].includes(tk.status)).length);
 
       const testRows: Row[] = allTasks
-        .filter((tk: any) => !["homework", "book", "book_plan"].includes(tk.type))
+        .filter((tk: any) => !["homework", "book", "book_plan", "writing"].includes(tk.type))
         .map((tk: any) => ({
           id: tk.id,
           title: tk.title,
@@ -376,8 +379,9 @@ const StudentAcademy = () => {
       homework: homework.filter((r) => !r.done).length,
       reading: reading.filter((r) => !r.done).length,
       courses: courses.length,
+      writing: writingTodo,
     }),
-    [tests, homework, reading, courses]
+    [tests, homework, reading, courses, writingTodo]
   );
 
   const totalTodo = pending.tests + pending.homework;
@@ -399,6 +403,7 @@ const nextUp = useMemo(() => {
   const tabs = [
     { key: "homework", label: "Домашка", count: pending.homework, icon: ClipboardList },
     { key: "tests", label: "Тести", count: pending.tests, icon: ListChecks },
+    { key: "writing", label: "Письмо", count: pending.writing, icon: PenLine },
     { key: "board", label: "Дошка", count: 0, icon: Palette },
     { key: "textbook", label: "Підручники", count: 0, icon: LibraryBig },
     { key: "dict", label: "Словник", count: 0, icon: NotebookTabs },
@@ -536,6 +541,8 @@ const rows = tab === "tests" ? tests : homework;
               <StudentTextbooks />
             ) : tab === "board" ? (
                <StudentBoard className="h-[calc(100dvh-6rem)] min-h-[420px]" />
+            ) : tab === "writing" ? (
+              <StudentWriting />
             ) : tab === "dict" ? (
               <StudentDictionary />
             ) : tab === "profile" ? (
