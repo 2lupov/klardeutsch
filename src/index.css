@@ -446,6 +446,24 @@
 
 /* ============ KLAR Admin theme (navy · white · yellow) ============ */
 .klar-admin {
+  /* shadcn tokens — light admin theme (root tokens are dark, so pin them here) */
+  --background: 0 0% 100%;
+  --foreground: 222 47% 11%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+  --primary: 246 96% 67%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 220 14% 96%;
+  --secondary-foreground: 222 47% 11%;
+  --muted: 220 14% 96%;
+  --muted-foreground: 218 15% 46%;
+  --accent: 220 14% 96%;
+  --accent-foreground: 222 47% 11%;
+  --border: 219 28% 89%;
+  --input: 219 28% 89%;
+  --ring: 246 96% 67%;
   --admin-bg: 220 33% 97%;
   --admin-surface: 0 0% 100%;
   --admin-card: 0 0% 100%;
@@ -492,6 +510,11 @@
 @media (max-width: 700px) { .lesson-layout-reading .lesson-reading-text { columns: 1; } }
 /* The editor canvas shows the exact KLAR dark page the student sees. */
 .klar-admin .lesson-workshop-canvas {
+  /* the canvas shows the exact KLAR dark page the student sees — keep dark tokens here */
+  --background: 222 47% 10%;
+  --foreground: 43 27% 95%;
+  --muted-foreground: 215 22% 74%;
+  --border: 220 26% 27%;
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
   border-color: hsl(var(--border));
@@ -559,6 +582,24 @@
 .lesson-workshop-tool:disabled { opacity: 0.3; cursor: not-allowed; }
 .klar-admin.dark {
   color-scheme: dark;
+  /* shadcn tokens — dark admin theme */
+  --background: 222 47% 9%;
+  --foreground: 210 40% 96%;
+  --card: 222 40% 13%;
+  --card-foreground: 210 40% 96%;
+  --popover: 222 40% 13%;
+  --popover-foreground: 210 40% 96%;
+  --primary: 45 96% 54%;
+  --primary-foreground: 222 47% 11%;
+  --secondary: 222 33% 20%;
+  --secondary-foreground: 210 40% 96%;
+  --muted: 222 33% 20%;
+  --muted-foreground: 215 20% 68%;
+  --accent: 222 33% 20%;
+  --accent-foreground: 210 40% 96%;
+  --border: 220 28% 24%;
+  --input: 220 28% 24%;
+  --ring: 45 96% 54%;
   --admin-bg: 222 47% 9%;
   --admin-surface: 222 40% 13%;
   --admin-card: 222 40% 13%;

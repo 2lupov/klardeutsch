@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, Hand, Pen, Eraser, Type, Undo2, Loader2, Mou
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 (pdfjsLib as any).GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
@@ -449,7 +450,10 @@ export default function TextbookWorkbook({
       type="button"
       onClick={() => setTool(t)}
       title={label}
-      className="h-8 px-2 rounded-md flex items-center gap-1.5 text-xs font-medium"
+      className={cn(
+        "h-8 px-2 rounded-md flex items-center gap-1.5 text-xs font-medium",
+        tool !== t && "bg-white text-slate-900 border-slate-200 hover:bg-slate-50",
+      )}
     >
       <I className="w-4 h-4" /> <span className="hidden md:inline">{label}</span>
     </Button>
