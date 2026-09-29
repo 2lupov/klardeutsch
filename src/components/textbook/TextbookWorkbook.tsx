@@ -511,11 +511,14 @@ export default function TextbookWorkbook({
         </div>
 
       <Dialog open={pagesOpen} onOpenChange={setPagesOpen}>
-        <DialogContent className="flex h-[85dvh] max-w-5xl flex-col gap-3 overflow-hidden p-4 sm:p-5">
-          <DialogHeader className="shrink-0 pr-8">
-            <DialogTitle className="truncate">Сторінки · {info.book.title}</DialogTitle>
-          </DialogHeader>
-          <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-border pb-3">
+        <DialogContent className="flex h-[88dvh] max-w-5xl flex-col gap-0 overflow-hidden border-white/10 bg-[#0F172A] p-0 text-slate-100 shadow-2xl">
+          <div className="flex shrink-0 flex-wrap items-center gap-3 border-b border-white/10 bg-white/5 px-4 py-3 sm:px-5">
+            <div className="min-w-0 flex-1">
+              <DialogTitle className="truncate text-base font-semibold text-white">
+                Сторінки · {info.book.title}
+              </DialogTitle>
+              <p className="text-xs text-slate-400">Усього {pageCount} сторінок · зараз відкрита {page}</p>
+            </div>
             <form onSubmit={submitPage} className="flex items-center gap-2">
               <Input
                 type="number"
@@ -524,15 +527,14 @@ export default function TextbookWorkbook({
                 value={pageInput}
                 onChange={(event) => setPageInput(event.target.value)}
                 aria-label="Номер сторінки"
-                className="h-9 w-24"
+                className="h-9 w-20 border-white/15 bg-white/10 text-center text-white placeholder:text-slate-500"
               />
-              <Button animated={false} type="submit" size="sm">Перейти</Button>
+              <Button animated={false} type="submit" size="sm" className="h-9">Перейти</Button>
             </form>
-            <span className="text-xs text-muted-foreground">Усього сторінок: {pageCount}</span>
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto pr-1">
-            <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
-              {visiblePages.map((pageNumber) => (
+          <div ref={pagesScrollRef} className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-5">
+            <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
+              {allPages.map((pageNumber) => (
                 <PageThumbnail
                   key={pageNumber}
                   filePath={info.book.file_path}
@@ -542,17 +544,6 @@ export default function TextbookWorkbook({
                 />
               ))}
             </div>
-          </div>
-          <div className="flex shrink-0 items-center justify-between gap-2 border-t border-border pt-3">
-            <Button animated={false} type="button" variant="outline" size="sm" disabled={pageGroup === 0} onClick={() => setPageGroup((value) => Math.max(0, value - 1))}>
-              <ChevronLeft /> Попередні
-            </Button>
-            <span className="text-xs text-muted-foreground">
-              {visiblePages[0]}–{visiblePages[visiblePages.length - 1]} з {pageCount}
-            </span>
-            <Button animated={false} type="button" variant="outline" size="sm" disabled={pageGroup >= groupCount - 1} onClick={() => setPageGroup((value) => Math.min(groupCount - 1, value + 1))}>
-              Наступні <ChevronRight />
-            </Button>
           </div>
         </DialogContent>
       </Dialog>
