@@ -223,7 +223,7 @@ export default function LiveWriting({ classId, role, className }: { classId: str
         </div>
         <div className="h-10 shrink-0 flex items-center gap-1 px-3 border-b border-border bg-muted/30">
           <Button animated={false} size="sm" variant="ghost" className="h-7 gap-1.5 px-2 text-xs" onMouseDown={(e) => e.preventDefault()} onClick={() => format("hiliteColor", HIGHLIGHT)} title="Виділити жовтим">
-            <span className="grid size-5 place-items-center rounded bg-[hsl(var(--highlight,50_97%_64%))]" style={{ background: HIGHLIGHT }}><Highlighter className="h-3.5 w-3.5 text-foreground" /></span> Жовтим
+            <span className="grid size-5 place-items-center rounded" style={{ background: HIGHLIGHT }}><Highlighter className="h-3.5 w-3.5 text-foreground" /></span> Жовтим
           </Button>
           <Button animated={false} size="icon" variant="ghost" className="h-7 w-7" onMouseDown={(e) => e.preventDefault()} onClick={() => format("underline")} title="Підкреслити"><Underline /></Button>
           <Button animated={false} size="icon" variant="ghost" className="h-7 w-7" onMouseDown={(e) => e.preventDefault()} onClick={() => format("bold")} title="Жирний"><Bold /></Button>
