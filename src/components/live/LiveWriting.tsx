@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { Loader2, Sparkles, PenLine, Dices } from "lucide-react";
+import { Loader2, Sparkles, PenLine, Dices, Highlighter, Underline, Bold, Strikethrough, Eraser, FolderDown } from "lucide-react";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { fetchFolders, createFolder, createItem, type MaterialFolder } from "@/lib/materials";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -17,6 +19,18 @@ export interface WritingTopic {
 
 const LEVELS = ["A1", "A2", "B1", "B2", "C1"];
 
+/** Старі листи — простий текст; перетворюємо на HTML і чистимо небезпечне. */
+function toHtml(v: string) {
+  if (!v) return "";
+  if (!/<[a-z][\s\S]*>/i.test(v)) return v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/\n/g, "<br>");
+  const doc = new DOMParser().parseFromString(v, "text/html");
+  doc.querySelectorAll("script,style,iframe,object,embed").forEach((n) => n.remove());
+  doc.querySelectorAll("*").forEach((el) => [...el.attributes].forEach((a) => { if (/^on/i.test(a.name) || /javascript:/i.test(a.value)) el.removeAttribute(a.name); }));
+  return doc.body.innerHTML;
+}
+const plain = (html: string) => { const d = document.createElement("div"); d.innerHTML = html.replace(/<br\s*\/?>/gi, "\n").replace(/<\/(div|p)>/gi, "\n"); return (d.textContent || "").trim(); };
+const HIGHLIGHT = "#FDE047";
+
 /**
  * «Письмо» у живому уроці: спільне поле, яке бачать і пишуть обоє в реальному часі.
  * Викладач може згенерувати тему листа ШІ під вибраний рівень.
@@ -32,6 +46,12 @@ export default function LiveWriting({ classId, role, className }: { classId: str
   const saveT = useRef<ReturnType<typeof setTimeout> | null>(null);
   const typingT = useRef<ReturnType<typeof setTimeout> | null>(null);
   const textRef = useRef("");
+  const editorRef = useRef<HTMLDivElement>(null);
+  const [saveOpen, setSaveOpen] = useState(false);
+  const setEditor = (html: string) => {
+    const el = editorRef.current;
+    if (el && el.innerHTML !== html) el.innerHTML = html;
+  };
 
   useEffect(() => {
     let alive = true;
@@ -41,8 +61,8 @@ export default function LiveWriting({ classId, role, className }: { classId: str
       const { data } = await (supabase as any).from("live_class_writing").select("*").eq("class_id", classId).maybeSingle();
       if (!alive) return;
       if (data) {
-        setText(data.text || "");
-        textRef.current = data.text || "";
+        const h = toHtml(data.text || "");
+        setText(h); textRef.current = h; setEditor(h);
         setTopic(data.topic || null);
         if (data.topic?.level) setLevel(data.topic.level);
       }
@@ -51,8 +71,8 @@ export default function LiveWriting({ classId, role, className }: { classId: str
     const ch = supabase.channel(`live-writing:${classId}`, { config: { broadcast: { self: false } } });
     ch.on("broadcast", { event: "text" }, ({ payload }: any) => {
       if (typeof payload?.text !== "string") return;
-      textRef.current = payload.text;
-      setText(payload.text);
+      const h = toHtml(payload.text);
+      textRef.current = h; setText(h); setEditor(h);
       setRemoteTyping(true);
       if (typingT.current) clearTimeout(typingT.current);
       typingT.current = setTimeout(() => setRemoteTyping(false), 1500);
@@ -61,7 +81,7 @@ export default function LiveWriting({ classId, role, className }: { classId: str
     ch.on("postgres_changes", { event: "*", schema: "public", table: "live_class_writing", filter: `class_id=eq.${classId}` }, (p: any) => {
       const row = p.new;
       if (!row || row.updated_by === me.current) return;
-      if (row.text !== textRef.current) { textRef.current = row.text; setText(row.text); }
+      const h = toHtml(row.text || ""); if (h !== textRef.current) { textRef.current = h; setText(h); setEditor(h); }
       setTopic(row.topic || null);
     });
     ch.subscribe();
@@ -101,10 +121,24 @@ export default function LiveWriting({ classId, role, className }: { classId: str
   };
 
   const clearAll = async () => {
+    setEditor("");
     onType("");
   };
 
-  const words = text.trim().split(/\s+/).filter(Boolean).length;
+  const fromEditor = () => onType(editorRef.current?.innerHTML ?? "");
+  const format = (cmd: string, value?: string) => {
+    editorRef.current?.focus();
+    document.execCommand("styleWithCSS", false, "true");
+    document.execCommand(cmd, false, value);
+    fromEditor();
+  };
+  const insertPhrase = (r: string) => {
+    const cur = plain(text);
+    const h = `${text}${cur && !/\s$/.test(cur) ? " " : ""}${r.replace(/</g, "&lt;")}`;
+    setEditor(h); onType(h);
+  };
+
+  const words = plain(text).split(/\s+/).filter(Boolean).length;
   const min = topic?.min_words ?? 0;
 
   return (
@@ -155,7 +189,7 @@ export default function LiveWriting({ classId, role, className }: { classId: str
                   {topic.redemittel.map((r, i) => (
                     <button
                       key={i}
-                      onClick={() => onType(`${text}${text && !/\s$/.test(text) ? " " : ""}${r}`)}
+                      onClick={() => insertPhrase(r)}
                       className="rounded-lg border border-dashed border-border px-2 py-1 text-xs text-foreground hover:bg-muted"
                     >
                       {r}
@@ -187,12 +221,28 @@ export default function LiveWriting({ classId, role, className }: { classId: str
             <Button animated={false} size="sm" variant="ghost" className="h-7 text-xs" onClick={clearAll}>Очистити</Button>
           )}
         </div>
-        <textarea
-          value={text}
-          onChange={(e) => onType(e.target.value)}
+        <div className="h-10 shrink-0 flex items-center gap-1 px-3 border-b border-border bg-muted/30">
+          <Button animated={false} size="sm" variant="ghost" className="h-7 gap-1.5 px-2 text-xs" onMouseDown={(e) => e.preventDefault()} onClick={() => format("hiliteColor", HIGHLIGHT)} title="Виділити жовтим">
+            <span className="grid size-5 place-items-center rounded" style={{ background: HIGHLIGHT }}><Highlighter className="h-3.5 w-3.5 text-foreground" /></span> Жовтим
+          </Button>
+          <Button animated={false} size="icon" variant="ghost" className="h-7 w-7" onMouseDown={(e) => e.preventDefault()} onClick={() => format("underline")} title="Підкреслити"><Underline /></Button>
+          <Button animated={false} size="icon" variant="ghost" className="h-7 w-7" onMouseDown={(e) => e.preventDefault()} onClick={() => format("bold")} title="Жирний"><Bold /></Button>
+          <Button animated={false} size="icon" variant="ghost" className="h-7 w-7" onMouseDown={(e) => e.preventDefault()} onClick={() => format("strikeThrough")} title="Закреслити помилку"><Strikethrough /></Button>
+          <Button animated={false} size="icon" variant="ghost" className="h-7 w-7" onMouseDown={(e) => e.preventDefault()} onClick={() => { format("removeFormat"); format("hiliteColor", "transparent"); }} title="Прибрати виділення"><Eraser /></Button>
+          {role === "teacher" && (
+            <Button animated={false} size="sm" variant="outline" className="ml-auto h-7 text-xs" onClick={() => setSaveOpen(true)} disabled={!plain(text)}>
+              <FolderDown /> Зберегти в папку
+            </Button>
+          )}
+        </div>
+        <div
+          ref={editorRef}
+          contentEditable
+          suppressContentEditableWarning
           spellCheck={false}
-          placeholder="Liebe Anna, …"
-          className="flex-1 min-h-0 w-full resize-none bg-transparent px-6 py-4 font-display text-lg leading-8 text-foreground outline-none placeholder:text-muted-foreground/40"
+          onInput={fromEditor}
+          data-placeholder="Liebe Anna, …"
+          className="live-writing-sheet flex-1 min-h-0 w-full overflow-y-auto px-6 py-4 font-display text-lg leading-8 text-foreground outline-none"
           style={{
             backgroundImage: "repeating-linear-gradient(to bottom, transparent 0, transparent 31px, hsl(var(--border)) 31px, hsl(var(--border)) 32px)",
             backgroundAttachment: "local",
@@ -200,6 +250,60 @@ export default function LiveWriting({ classId, role, className }: { classId: str
           }}
         />
       </section>
+      {role === "teacher" && (
+        <SaveToFolder open={saveOpen} onOpenChange={setSaveOpen} html={text} topic={topic} level={topic?.level ?? level} />
+      )}
     </div>
+  );
+}
+
+/** Збереження листа в «Файли» (банк матеріалів) з датою в назві. */
+function SaveToFolder({ open, onOpenChange, html, topic, level }: { open: boolean; onOpenChange: (v: boolean) => void; html: string; topic: WritingTopic | null; level: string }) {
+  const [folders, setFolders] = useState<MaterialFolder[]>([]);
+  const [busy, setBusy] = useState<string | null>(null);
+  useEffect(() => { if (open) fetchFolders().then(setFolders).catch(() => setFolders([])); }, [open]);
+
+  const date = new Date().toLocaleDateString("uk-UA");
+  const title = `Письмо · ${date}${topic?.title_de ? ` · ${topic.title_de}` : ""}`;
+
+  const save = async (folderId?: string) => {
+    setBusy(folderId ?? "new");
+    try {
+      const { data: u } = await supabase.auth.getUser();
+      const ownerId = u.user!.id;
+      let id = folderId;
+      if (!id) {
+        const existing = folders.find((f) => f.name === "Письма");
+        id = existing?.id ?? (await createFolder({ ownerId, name: "Письма", category: "tasks", level: null, description: "Листи з живих уроків" })).id;
+      }
+      await createItem({ folderId: id, ownerId, kind: "text", title, level, tags: ["письмо", date],
+        content: { body: plain(html), html, topic, date: new Date().toISOString() } });
+      toast.success(`Збережено: ${title}`);
+      onOpenChange(false);
+    } catch (e: any) {
+      toast.error(e?.message || "Не вдалося зберегти");
+    } finally { setBusy(null); }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogTitle>Зберегти лист у папку</DialogTitle>
+        <p className="text-sm text-muted-foreground">Назва: <b className="text-foreground">{title}</b></p>
+        <Button animated={false} onClick={() => save()} disabled={!!busy}>
+          {busy === "new" ? <Loader2 className="animate-spin" /> : <FolderDown />} У папку «Письма»
+        </Button>
+        {folders.filter((f) => f.name !== "Письма").length > 0 && (
+          <div className="max-h-64 space-y-1 overflow-y-auto">
+            <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Або в іншу папку</p>
+            {folders.filter((f) => f.name !== "Письма").map((f) => (
+              <Button key={f.id} animated={false} variant="outline" className="w-full justify-start" onClick={() => save(f.id)} disabled={!!busy}>
+                {busy === f.id && <Loader2 className="animate-spin" />} {f.name}{f.level ? ` · ${f.level}` : ""}
+              </Button>
+            ))}
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
