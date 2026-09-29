@@ -543,6 +543,12 @@ const rows = tab === "tests" ? tests : homework;
                <StudentBoard className="h-[calc(100dvh-6rem)] min-h-[420px]" />
             ) : tab === "writing" ? (
               <StudentWriting />
+            ) : tab === "reading" ? (
+              <StudentReading />
+            ) : tab === "notes" ? (
+              <StudentNotes />
+            ) : tab === "folders" ? (
+              <StudentFolders onOpenTab={(t) => setTab(t)} />
             ) : tab === "dict" ? (
               <StudentDictionary />
             ) : tab === "profile" ? (
