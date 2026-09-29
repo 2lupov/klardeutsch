@@ -97,20 +97,30 @@ function PageThumbnail({ filePath, pageNumber, active, onSelect }: {
   }, [filePath, pageNumber]);
 
   return (
-    <Button
-      animated={false}
+    <button
+      ref={wrapRef}
       type="button"
-      variant="outline"
       onClick={onSelect}
       aria-label={`Відкрити сторінку ${pageNumber}`}
-      className={`relative h-auto min-w-0 flex-col gap-1.5 overflow-hidden p-1.5 ${active ? "border-primary ring-2 ring-primary/30" : ""}`}
+      className={`group relative flex min-w-0 flex-col gap-1.5 overflow-hidden rounded-xl border p-1.5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg ${
+        active
+          ? "border-primary bg-primary/10 ring-2 ring-primary/40 shadow-[0_0_18px_-4px_hsl(var(--primary)/0.5)]"
+          : "border-white/10 bg-white/5 hover:border-primary/50 hover:bg-white/10"
+      }`}
     >
-      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-sm bg-muted">
-        {!ready && <Loader2 className="absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 animate-spin text-muted-foreground" />}
-        <canvas ref={canvasRef} className={`h-full w-full object-contain transition-opacity ${ready ? "opacity-100" : "opacity-0"}`} />
+      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-md bg-white/95">
+        {!ready && <Loader2 className="absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 animate-spin text-slate-400" />}
+        <canvas ref={canvasRef} className={`h-full w-full object-contain transition-opacity duration-300 ${ready ? "opacity-100" : "opacity-0"}`} />
+        {active && (
+          <span className="absolute right-1 top-1 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground shadow">
+            зараз
+          </span>
+        )}
       </div>
-      <span className="text-xs font-semibold">Стор. {pageNumber}</span>
-    </Button>
+      <span className={`text-center text-xs font-semibold ${active ? "text-primary" : "text-slate-300 group-hover:text-white"}`}>
+        {pageNumber}
+      </span>
+    </button>
   );
 }
 
