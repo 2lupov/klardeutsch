@@ -296,6 +296,18 @@ function NewAssignmentModal({
   const [aiCount, setAiCount] = useState(10);
   const [generating, setGenerating] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [writingTopic, setWritingTopic] = useState<any>(null);
+
+  const genWriting = async () => {
+    setGenerating(true);
+    const { data, error } = await supabase.functions.invoke("generate-writing-topic", { body: { level, avoid: writingTopic?.title_de ?? "" } });
+    setGenerating(false);
+    if (error || (data as any)?.error) return toast({ title: "Не вдалося згенерувати тему", description: String((data as any)?.error || error?.message || ""), variant: "destructive" });
+    const t = (data as any).topic;
+    setWritingTopic({ ...t, level });
+    setTitle(`Письмо: ${t.title_de ?? ""}`.trim());
+    setInstructions([t.task_de, t.min_words ? `(${t.min_words} Wörter)` : ""].filter(Boolean).join(" "));
+  };
 
   const generate = async () => {
     if (!aiTopic.trim()) {
@@ -355,7 +367,7 @@ function NewAssignmentModal({
       instructions: instructions.trim() || null,
       level,
       due_at: dueAt ? new Date(dueAt).toISOString() : null,
-      payload: type === "test" ? { questions } : {},
+      payload: type === "test" ? { questions } : type === "writing" && writingTopic ? { topic: writingTopic } : {},
     }));
 
     const { error } = await supabase.from("student_assignments").insert(rows as any);
@@ -438,6 +450,28 @@ function NewAssignmentModal({
             <input type="date" value={dueAt} onChange={(e) => setDueAt(e.target.value)} className={inputCls} />
           </Field>
         </div>
+
+        {type === "writing" && (
+          <div className="rounded-xl border border-slate-200 p-4 space-y-3">
+            <div className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+              <Sparkles className="w-4 h-4" style={{ color: "#4F46E5" }} /> Тема листа від ШІ (рівень {level})
+            </div>
+            <button disabled={generating} onClick={genWriting}
+              className="w-full px-4 py-2.5 rounded-xl text-white text-sm font-semibold disabled:opacity-60 inline-flex items-center justify-center gap-2"
+              style={{ background: "#4F46E5" }}>
+              {generating ? <><Loader2 className="w-4 h-4 animate-spin" /> Генеруємо…</> : writingTopic ? "Інша тема" : "Згенерувати тему"}
+            </button>
+            {writingTopic && (
+              <div className="text-sm space-y-2 text-slate-700">
+                <p className="font-bold text-slate-900">{writingTopic.title_de}</p>
+                {writingTopic.situation_uk && <p>{writingTopic.situation_uk}</p>}
+                {!!writingTopic.points?.length && <ul className="list-disc pl-5">{writingTopic.points.map((p: string, i: number) => <li key={i}>{p}</li>)}</ul>}
+                {!!writingTopic.redemittel?.length && <p className="text-xs text-slate-500">Фрази: {writingTopic.redemittel.join(" · ")}</p>}
+              </div>
+            )}
+            <p className="text-xs text-slate-500">Учень побачить лист у розділі «Письмо» в Академії.</p>
+          </div>
+        )}
 
         {type === "test" && (
           <div className="rounded-xl border border-slate-200 p-4 space-y-3">
