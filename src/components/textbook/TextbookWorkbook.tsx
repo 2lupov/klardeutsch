@@ -262,18 +262,23 @@ export default function TextbookWorkbook({
   };
 
   const pageCount = total || info?.book?.total_pages || 1;
-  const pagesPerGroup = 24;
-  const groupCount = Math.max(1, Math.ceil(pageCount / pagesPerGroup));
-  const visiblePages = Array.from(
-    { length: Math.min(pagesPerGroup, pageCount - pageGroup * pagesPerGroup) },
-    (_, index) => pageGroup * pagesPerGroup + index + 1,
-  );
+  const allPages = Array.from({ length: pageCount }, (_, index) => index + 1);
+  const pagesScrollRef = useRef<HTMLDivElement | null>(null);
 
   const openPages = () => {
-    setPageGroup(Math.floor((page - 1) / pagesPerGroup));
     setPageInput(String(page));
     setPagesOpen(true);
   };
+
+  useEffect(() => {
+    if (!pagesOpen) return;
+    const timer = window.setTimeout(() => {
+      pagesScrollRef.current
+        ?.querySelector(`[data-page="${page}"]`)
+        ?.scrollIntoView({ block: "center", behavior: "instant" as ScrollBehavior });
+    }, 60);
+    return () => window.clearTimeout(timer);
+  }, [pagesOpen, page]);
 
   const submitPage = (event: React.FormEvent) => {
     event.preventDefault();
