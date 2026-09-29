@@ -2029,6 +2029,44 @@ export type Database = {
           },
         ]
       }
+      live_class_reading: {
+        Row: {
+          class_id: string
+          created_at: string
+          notes: string
+          text: string
+          topic: Json | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          class_id: string
+          created_at?: string
+          notes?: string
+          text?: string
+          topic?: Json | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          class_id?: string
+          created_at?: string
+          notes?: string
+          text?: string
+          topic?: Json | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_class_reading_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: true
+            referencedRelation: "live_classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       live_class_seen: {
         Row: {
           class_id: string
@@ -3309,6 +3347,45 @@ export type Database = {
           last_attempt_at?: string
           locked_until?: string | null
           nickname?: string
+        }
+        Relationships: []
+      }
+      student_notes: {
+        Row: {
+          body: string
+          created_at: string
+          folder: string
+          id: string
+          level: string | null
+          source: Json | null
+          student_id: string
+          teacher_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body?: string
+          created_at?: string
+          folder?: string
+          id?: string
+          level?: string | null
+          source?: Json | null
+          student_id: string
+          teacher_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          folder?: string
+          id?: string
+          level?: string | null
+          source?: Json | null
+          student_id?: string
+          teacher_id?: string | null
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
