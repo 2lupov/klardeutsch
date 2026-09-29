@@ -23,7 +23,7 @@ const LEVELS = ["A1", "A2", "B1", "B2", "C1"];
 function toHtml(v: string) {
   if (!v) return "";
   if (!/<[a-z][\s\S]*>|&[a-z]+;|&#\d+;/i.test(v)) return v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/\n/g, "<br>");
-  const doc = new DOMParser().parseFromString(v, "text/html");
+  const doc = new DOMParser().parseFromString(v.replace(/&amp;(nbsp|amp|lt|gt);/g, "&$1;"), "text/html");
   doc.querySelectorAll("script,style,iframe,object,embed").forEach((n) => n.remove());
   doc.querySelectorAll("*").forEach((el) => [...el.attributes].forEach((a) => { if (/^on/i.test(a.name) || /javascript:/i.test(a.value)) el.removeAttribute(a.name); }));
   return doc.body.innerHTML;
