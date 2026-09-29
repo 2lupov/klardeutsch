@@ -88,12 +88,27 @@ function ReadingSheet({ task, onBack }: { task: Task; onBack: () => void }) {
 
   const onText = (html: string) => { setTextHtml(html); localStorage.setItem(marksKey, html); };
   const onNotes = (html: string) => { setNotes(html); localStorage.setItem(notesKey, html); };
+  const answersKey = `klar-reading-answers:${task.id}`;
+  const [answers, setAnswers] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem(answersKey) || "[]"); } catch { return []; }
+  });
+  const onAnswer = (i: number, v: string) => {
+    setAnswers((prev) => { const n = [...prev]; n[i] = v; localStorage.setItem(answersKey, JSON.stringify(n)); return n; });
+  };
 
   const submit = async () => {
+    const qs: string[] = topic?.questions || [];
+    if (qs.length && qs.some((_, i) => !(answers[i] || "").trim())) {
+      toast.error("Дайте відповідь на всі питання");
+      return;
+    }
+    const qa = qs.map((q, i) => `${i + 1}. ${q}\n→ ${(answers[i] || "").trim()}`).join("\n\n");
+    const noteText = plain(notes);
+    const text = [qa && `Відповіді:\n${qa}`, noteText && `Нотатки:\n${noteText}`].filter(Boolean).join("\n\n") || "Прочитано";
     setSending(true);
     try {
       const { data, error } = await supabase.functions.invoke("submit-student-assignment", {
-        body: { assignment_id: task.id, text: `${plain(notes) ? plain(notes) : "Прочитано"}`, files: [] },
+        body: { assignment_id: task.id, text, files: [] },
       });
       if (error || (data as any)?.error) throw new Error((data as any)?.error || error?.message);
       const { data: u } = await supabase.auth.getUser();
@@ -138,9 +153,17 @@ function ReadingSheet({ task, onBack }: { task: Task; onBack: () => void }) {
           </div>
 
           {!!topic?.questions?.length && (
-            <div className="space-y-1 rounded-2xl border border-border bg-card p-3 text-sm">
+            <div className="space-y-3 rounded-2xl border border-border bg-card p-3 text-sm">
               <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Питання</p>
-              <ul className="list-disc space-y-1 pl-5 text-foreground">{topic.questions.map((q, i) => <li key={i}>{q}</li>)}</ul>
+              {topic.questions.map((q, i) => (
+                <div key={i} className="space-y-1.5">
+                  <p className="font-medium text-foreground">{i + 1}. {q}</p>
+                  <textarea
+                    className="w-full resize-y rounded-xl border border-input bg-background p-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    rows={2} maxLength={2000} disabled={locked} placeholder="Ваша відповідь…"
+                    value={answers[i] || ""} onChange={(e) => onAnswer(i, e.target.value)} />
+                </div>
+              ))}
             </div>
           )}
 
