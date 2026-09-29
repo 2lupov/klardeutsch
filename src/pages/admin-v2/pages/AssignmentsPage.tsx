@@ -475,6 +475,34 @@ function NewAssignmentModal({
           </Field>
         </div>
 
+        {type === "reading" && (
+          <div className="rounded-xl border border-slate-200 p-4 space-y-3">
+            <div className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+              <Sparkles className="w-4 h-4" style={{ color: "#4F46E5" }} /> Текст для читання ({level})
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <input value={aiTopic} onChange={(e) => setAiTopic(e.target.value)}
+                placeholder="Тема (напр. Wohnung, Arbeit) — необов'язково" className={`${inputCls} sm:col-span-2`} />
+              <select value={readingWords} onChange={(e) => setReadingWords(Number(e.target.value))} className={inputCls}>
+                {READING_SIZES.map((w) => <option key={w} value={w}>{w} слів</option>)}
+              </select>
+            </div>
+            <button disabled={generating} onClick={genReading}
+              className="w-full px-4 py-2.5 rounded-xl text-white text-sm font-semibold disabled:opacity-60 inline-flex items-center justify-center gap-2"
+              style={{ background: "#4F46E5" }}>
+              {generating ? <><Loader2 className="w-4 h-4 animate-spin" /> Генеруємо…</> : readingTopic ? "Інший текст" : "Згенерувати текст"}
+            </button>
+            {readingTopic && (
+              <div className="text-sm space-y-2 text-slate-700">
+                <p className="font-bold text-slate-900">{readingTopic.title_de} · {readingTopic.word_count ?? readingWords} слів</p>
+                {readingTopic.summary_uk && <p>{readingTopic.summary_uk}</p>}
+                <p className="whitespace-pre-wrap text-xs text-slate-600 max-h-40 overflow-auto">{readingTopic.text_de}</p>
+              </div>
+            )}
+            <p className="text-xs text-slate-500">Учень читає текст у розділі «Читання», підкреслює конструкції та веде нотатки.</p>
+          </div>
+        )}
+
         {type === "writing" && (
           <div className="rounded-xl border border-slate-200 p-4 space-y-3">
             <div className="text-sm font-semibold text-slate-900 flex items-center gap-2">
