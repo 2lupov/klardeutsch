@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, SectionHeader, EmptyState } from "./_ui";
 import {
   ClipboardList, Plus, X, Sparkles, Loader2, Trash2, Check, Search,
-  FileText, Mic, PenLine, ListChecks, Award,
+  FileText, Mic, PenLine, ListChecks, Award, BookOpen,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import StudentBlocks from "@/components/blocks/StudentBlocks";
