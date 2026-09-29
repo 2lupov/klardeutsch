@@ -57,9 +57,23 @@ function PageThumbnail({ filePath, pageNumber, active, onSelect }: {
   onSelect: () => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const wrapRef = useRef<HTMLButtonElement | null>(null);
   const [ready, setReady] = useState(false);
+  const [inView, setInView] = useState(false);
 
   useEffect(() => {
+    const el = wrapRef.current;
+    if (!el || inView) return;
+    const observer = new IntersectionObserver(
+      (entries) => { if (entries.some((e) => e.isIntersecting)) { setInView(true); observer.disconnect(); } },
+      { rootMargin: "300px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [inView]);
+
+  useEffect(() => {
+    if (!inView) return;
     let alive = true;
     (async () => {
       try {
