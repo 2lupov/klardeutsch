@@ -577,6 +577,24 @@
 .lesson-workshop-tool:disabled { opacity: 0.3; cursor: not-allowed; }
 .klar-admin.dark {
   color-scheme: dark;
+  /* shadcn tokens — dark admin theme */
+  --background: 222 47% 9%;
+  --foreground: 210 40% 96%;
+  --card: 222 40% 13%;
+  --card-foreground: 210 40% 96%;
+  --popover: 222 40% 13%;
+  --popover-foreground: 210 40% 96%;
+  --primary: 45 96% 54%;
+  --primary-foreground: 222 47% 11%;
+  --secondary: 222 33% 20%;
+  --secondary-foreground: 210 40% 96%;
+  --muted: 222 33% 20%;
+  --muted-foreground: 215 20% 68%;
+  --accent: 222 33% 20%;
+  --accent-foreground: 210 40% 96%;
+  --border: 220 28% 24%;
+  --input: 220 28% 24%;
+  --ring: 45 96% 54%;
   --admin-bg: 222 47% 9%;
   --admin-surface: 222 40% 13%;
   --admin-card: 222 40% 13%;
