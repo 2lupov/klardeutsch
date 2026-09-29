@@ -60,8 +60,11 @@ const TYPES: { key: AssignmentType; label: string; icon: any; hint: string }[] =
   { key: "test", label: "Тест", icon: ListChecks, hint: "Питання з варіантами, авто-перевірка" },
   { key: "homework", label: "Домашка", icon: FileText, hint: "Текст + фото/файли від учня" },
   { key: "writing", label: "Письмо (AI)", icon: PenLine, hint: "AI дає оцінку та фідбек" },
+  { key: "reading", label: "Читання (AI)", icon: BookOpen, hint: "Текст за рівнем і кількістю слів" },
   { key: "audio", label: "Аудіо / вимова", icon: Mic, hint: "Учень записує голос" },
 ];
+
+const READING_SIZES = [50, 100, 150, 200, 300];
 
 const inputCls =
   "w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm bg-white";
