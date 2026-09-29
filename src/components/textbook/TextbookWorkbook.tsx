@@ -4,7 +4,7 @@ import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { supabase } from "@/integrations/supabase/client";
 import { ChevronLeft, ChevronRight, Hand, Pen, Eraser, Type, Undo2, Loader2, MousePointer2, Plus, Minus, Highlighter, AArrowDown, AArrowUp, LayoutGrid } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 
 (pdfjsLib as any).GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
@@ -57,9 +57,23 @@ function PageThumbnail({ filePath, pageNumber, active, onSelect }: {
   onSelect: () => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const wrapRef = useRef<HTMLButtonElement | null>(null);
   const [ready, setReady] = useState(false);
+  const [inView, setInView] = useState(false);
 
   useEffect(() => {
+    const el = wrapRef.current;
+    if (!el || inView) return;
+    const observer = new IntersectionObserver(
+      (entries) => { if (entries.some((e) => e.isIntersecting)) { setInView(true); observer.disconnect(); } },
+      { rootMargin: "300px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [inView]);
+
+  useEffect(() => {
+    if (!inView) return;
     let alive = true;
     (async () => {
       try {
@@ -83,20 +97,31 @@ function PageThumbnail({ filePath, pageNumber, active, onSelect }: {
   }, [filePath, pageNumber]);
 
   return (
-    <Button
-      animated={false}
+    <button
+      ref={wrapRef}
       type="button"
-      variant="outline"
+      data-page={pageNumber}
       onClick={onSelect}
       aria-label={`Відкрити сторінку ${pageNumber}`}
-      className={`relative h-auto min-w-0 flex-col gap-1.5 overflow-hidden p-1.5 ${active ? "border-primary ring-2 ring-primary/30" : ""}`}
+      className={`group relative flex min-w-0 flex-col gap-1.5 overflow-hidden rounded-xl border p-1.5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg ${
+        active
+          ? "border-primary bg-primary/10 ring-2 ring-primary/40 shadow-[0_0_18px_-4px_hsl(var(--primary)/0.5)]"
+          : "border-white/10 bg-white/5 hover:border-primary/50 hover:bg-white/10"
+      }`}
     >
-      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-sm bg-muted">
-        {!ready && <Loader2 className="absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 animate-spin text-muted-foreground" />}
-        <canvas ref={canvasRef} className={`h-full w-full object-contain transition-opacity ${ready ? "opacity-100" : "opacity-0"}`} />
+      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-md bg-white/95">
+        {!ready && <Loader2 className="absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 animate-spin text-slate-400" />}
+        <canvas ref={canvasRef} className={`h-full w-full object-contain transition-opacity duration-300 ${ready ? "opacity-100" : "opacity-0"}`} />
+        {active && (
+          <span className="absolute right-1 top-1 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground shadow">
+            зараз
+          </span>
+        )}
       </div>
-      <span className="text-xs font-semibold">Стор. {pageNumber}</span>
-    </Button>
+      <span className={`text-center text-xs font-semibold ${active ? "text-primary" : "text-slate-300 group-hover:text-white"}`}>
+        {pageNumber}
+      </span>
+    </button>
   );
 }
 
@@ -134,7 +159,6 @@ export default function TextbookWorkbook({
   const [selText, setSelText] = useState<string | null>(null);
   const [draftText, setDraftText] = useState<{ x: number; y: number; text: string } | null>(null);
   const [pagesOpen, setPagesOpen] = useState(false);
-  const [pageGroup, setPageGroup] = useState(0);
   const [pageInput, setPageInput] = useState(String(controlledPage ?? 1));
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -238,18 +262,23 @@ export default function TextbookWorkbook({
   };
 
   const pageCount = total || info?.book?.total_pages || 1;
-  const pagesPerGroup = 24;
-  const groupCount = Math.max(1, Math.ceil(pageCount / pagesPerGroup));
-  const visiblePages = Array.from(
-    { length: Math.min(pagesPerGroup, pageCount - pageGroup * pagesPerGroup) },
-    (_, index) => pageGroup * pagesPerGroup + index + 1,
-  );
+  const allPages = Array.from({ length: pageCount }, (_, index) => index + 1);
+  const pagesScrollRef = useRef<HTMLDivElement | null>(null);
 
   const openPages = () => {
-    setPageGroup(Math.floor((page - 1) / pagesPerGroup));
     setPageInput(String(page));
     setPagesOpen(true);
   };
+
+  useEffect(() => {
+    if (!pagesOpen) return;
+    const timer = window.setTimeout(() => {
+      pagesScrollRef.current
+        ?.querySelector(`[data-page="${page}"]`)
+        ?.scrollIntoView({ block: "center", behavior: "instant" as ScrollBehavior });
+    }, 60);
+    return () => window.clearTimeout(timer);
+  }, [pagesOpen, page]);
 
   const submitPage = (event: React.FormEvent) => {
     event.preventDefault();
@@ -482,11 +511,14 @@ export default function TextbookWorkbook({
         </div>
 
       <Dialog open={pagesOpen} onOpenChange={setPagesOpen}>
-        <DialogContent className="flex h-[85dvh] max-w-5xl flex-col gap-3 overflow-hidden p-4 sm:p-5">
-          <DialogHeader className="shrink-0 pr-8">
-            <DialogTitle className="truncate">Сторінки · {info.book.title}</DialogTitle>
-          </DialogHeader>
-          <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-border pb-3">
+        <DialogContent className="flex h-[88dvh] max-w-5xl flex-col gap-0 overflow-hidden border-white/10 bg-[#0F172A] p-0 text-slate-100 shadow-2xl">
+          <div className="flex shrink-0 flex-wrap items-center gap-3 border-b border-white/10 bg-white/5 px-4 py-3 sm:px-5">
+            <div className="min-w-0 flex-1">
+              <DialogTitle className="truncate text-base font-semibold text-white">
+                Сторінки · {info.book.title}
+              </DialogTitle>
+              <p className="text-xs text-slate-400">Усього {pageCount} сторінок · зараз відкрита {page}</p>
+            </div>
             <form onSubmit={submitPage} className="flex items-center gap-2">
               <Input
                 type="number"
@@ -495,15 +527,14 @@ export default function TextbookWorkbook({
                 value={pageInput}
                 onChange={(event) => setPageInput(event.target.value)}
                 aria-label="Номер сторінки"
-                className="h-9 w-24"
+                className="h-9 w-20 border-white/15 bg-white/10 text-center text-white placeholder:text-slate-500"
               />
-              <Button animated={false} type="submit" size="sm">Перейти</Button>
+              <Button animated={false} type="submit" size="sm" className="h-9">Перейти</Button>
             </form>
-            <span className="text-xs text-muted-foreground">Усього сторінок: {pageCount}</span>
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto pr-1">
-            <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
-              {visiblePages.map((pageNumber) => (
+          <div ref={pagesScrollRef} className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-5">
+            <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
+              {allPages.map((pageNumber) => (
                 <PageThumbnail
                   key={pageNumber}
                   filePath={info.book.file_path}
@@ -513,17 +544,6 @@ export default function TextbookWorkbook({
                 />
               ))}
             </div>
-          </div>
-          <div className="flex shrink-0 items-center justify-between gap-2 border-t border-border pt-3">
-            <Button animated={false} type="button" variant="outline" size="sm" disabled={pageGroup === 0} onClick={() => setPageGroup((value) => Math.max(0, value - 1))}>
-              <ChevronLeft /> Попередні
-            </Button>
-            <span className="text-xs text-muted-foreground">
-              {visiblePages[0]}–{visiblePages[visiblePages.length - 1]} з {pageCount}
-            </span>
-            <Button animated={false} type="button" variant="outline" size="sm" disabled={pageGroup >= groupCount - 1} onClick={() => setPageGroup((value) => Math.min(groupCount - 1, value + 1))}>
-              Наступні <ChevronRight />
-            </Button>
           </div>
         </DialogContent>
       </Dialog>
