@@ -403,7 +403,10 @@ const nextUp = useMemo(() => {
   const tabs = [
     { key: "homework", label: "Домашка", count: pending.homework, icon: ClipboardList },
     { key: "tests", label: "Тести", count: pending.tests, icon: ListChecks },
+    { key: "reading", label: "Читання", count: readingTodo, icon: BookOpen },
     { key: "writing", label: "Письмо", count: pending.writing, icon: PenLine },
+    { key: "notes", label: "Нотатки", count: 0, icon: NotebookPen },
+    { key: "folders", label: "Папки", count: 0, icon: FolderOpen },
     { key: "board", label: "Дошка", count: 0, icon: Palette },
     { key: "textbook", label: "Підручники", count: 0, icon: LibraryBig },
     { key: "dict", label: "Словник", count: 0, icon: NotebookTabs },
