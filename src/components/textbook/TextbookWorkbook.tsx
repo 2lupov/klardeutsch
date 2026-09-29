@@ -100,6 +100,7 @@ function PageThumbnail({ filePath, pageNumber, active, onSelect }: {
     <button
       ref={wrapRef}
       type="button"
+      data-page={pageNumber}
       onClick={onSelect}
       aria-label={`Відкрити сторінку ${pageNumber}`}
       className={`group relative flex min-w-0 flex-col gap-1.5 overflow-hidden rounded-xl border p-1.5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg ${
@@ -158,7 +159,6 @@ export default function TextbookWorkbook({
   const [selText, setSelText] = useState<string | null>(null);
   const [draftText, setDraftText] = useState<{ x: number; y: number; text: string } | null>(null);
   const [pagesOpen, setPagesOpen] = useState(false);
-  const [pageGroup, setPageGroup] = useState(0);
   const [pageInput, setPageInput] = useState(String(controlledPage ?? 1));
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
