@@ -15,6 +15,7 @@ import {
 import { Play, Square, ChevronLeft, ChevronRight, Loader2, Upload, Crosshair, LogOut, Search } from "lucide-react";
 import TextbookPanel from "@/components/textbook/TextbookPanel";
 import LiveWriting from "@/components/live/LiveWriting";
+import LiveSlidesPanel from "@/components/live/LiveSlidesPanel";
 import BoardEditor, { type BoardApi } from "@/components/live/BoardEditor";
 import LiveBookPagePicker from "@/components/books/LiveBookPagePicker";
 import { PandaLookupDialog } from "@/components/dictionary/PandaLookup";
@@ -263,8 +264,8 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
       </div>
 
       {section === "slides" && (
-        <LaserSurface active={laser} onMove={onLaserMove} className="flex-1 min-h-0 overflow-y-auto p-3">
-        <SlidesPanel
+        <LaserSurface active={laser} onMove={onLaserMove} className="flex-1 min-h-0 overflow-hidden p-2">
+        <LiveSlidesPanel
           teacherId={cls.teacher_id}
           current={studentView.view?.type === "slide" ? studentView.view : null}
           onTransfer={(presentationId, page) => transfer("slides", { type: "slide", presentation_id: presentationId, page })}
