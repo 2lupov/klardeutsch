@@ -16,6 +16,7 @@ export default function MarkSheet({
   className,
   sheetClassName,
   readOnly,
+  highlightOnly,
   toolbarExtra,
 }: {
   value: string;
@@ -26,6 +27,8 @@ export default function MarkSheet({
   className?: string;
   sheetClassName?: string;
   readOnly?: boolean;
+  /** Текст не редагується — доступні лише жовтий маркер і гумка. */
+  highlightOnly?: boolean;
   toolbarExtra?: React.ReactNode;
 }) {
   const ref = useRef<HTMLDivElement>(null);
