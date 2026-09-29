@@ -39,68 +39,66 @@ function translateAuthError(msg: string): string {
   return msg;
 }
 
-/** Injects the official Telegram Login Widget script */
+const TELEGRAM_BOT_ID = "8739617282";
+const TELEGRAM_BOT_USERNAME = "klar_deutsch_bot";
+
+/** Our own Ukrainian-labelled button that opens the Telegram login popup */
 const TelegramLoginButton = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [widgetRendered, setWidgetRendered] = useState(false);
+  const [scriptReady, setScriptReady] = useState(
+    () => typeof window !== "undefined" && !!(window as any).Telegram?.Login,
+  );
   const canonicalTelegramDomain = "klar.academy";
   const host = window.location.hostname.replace(/^www\./, "");
-  const isLocalHost = host === "localhost" || host === "127.0.0.1";
-  const canUseTelegramWidget = host === canonicalTelegramDomain;
+  const isCanonicalHost = host === canonicalTelegramDomain;
 
   useEffect(() => {
-    if (!canUseTelegramWidget) return;
-    if (!containerRef.current || containerRef.current.hasChildNodes()) return;
+    if (scriptReady) return;
+    const existing = document.querySelector<HTMLScriptElement>(
+      'script[src^="https://telegram.org/js/telegram-widget.js"]',
+    );
+    if (existing) {
+      existing.addEventListener("load", () => setScriptReady(true));
+      return;
+    }
     const script = document.createElement("script");
     script.src = "https://telegram.org/js/telegram-widget.js?22";
-    script.setAttribute("data-telegram-login", "klar_deutsch_bot");
-    script.setAttribute("data-size", "large");
-    script.setAttribute("data-radius", "12");
-    script.setAttribute("data-onauth", "onTelegramAuth(user)");
-    script.setAttribute("data-request-access", "write");
     script.async = true;
-    containerRef.current.appendChild(script);
+    script.onload = () => setScriptReady(true);
+    document.body.appendChild(script);
+  }, [scriptReady]);
 
-    // The widget renders an <iframe>. If it never appears (domain not linked
-    // to the bot, script blocked), keep showing the fallback button.
-    const check = window.setInterval(() => {
-      if (containerRef.current?.querySelector("iframe")) {
-        setWidgetRendered(true);
-        window.clearInterval(check);
-      }
-    }, 300);
-    const stop = window.setTimeout(() => window.clearInterval(check), 6000);
-    return () => {
-      window.clearInterval(check);
-      window.clearTimeout(stop);
-    };
-  }, [canUseTelegramWidget]);
-
-  const fallbackHref = isLocalHost
-    ? "https://t.me/klar_deutsch_bot?start=login"
-    : canUseTelegramWidget
-      ? "https://t.me/klar_deutsch_bot?start=login"
-      : `https://${canonicalTelegramDomain}${window.location.pathname}${window.location.search}${window.location.hash}`;
+  const handleClick = () => {
+    // On non-canonical hosts (preview / secondary domains) Telegram rejects the
+    // popup origin, so send the user to the canonical domain instead.
+    if (!isCanonicalHost) {
+      window.location.href = `https://${canonicalTelegramDomain}${window.location.pathname}${window.location.search}${window.location.hash}`;
+      return;
+    }
+    const login = (window as any).Telegram?.Login;
+    if (!login) {
+      window.open(`https://t.me/${TELEGRAM_BOT_USERNAME}?start=login`, "_blank", "noopener");
+      return;
+    }
+    login.auth(
+      { bot_id: TELEGRAM_BOT_ID, request_access: "write" },
+      (tgUser: any) => {
+        if (tgUser) (window as any).onTelegramAuth?.(tgUser);
+      },
+    );
+  };
 
   return (
-    <div className="flex flex-col items-center gap-2 w-full">
-      <div ref={containerRef} className="flex justify-center" />
-      {!widgetRendered && (
-        <a
-          href={fallbackHref}
-          {...(fallbackHref.startsWith("https://t.me")
-            ? { target: "_blank", rel: "noopener noreferrer" }
-            : {})}
-          className="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm transition-all hover:opacity-90"
-          style={{ backgroundColor: "#54a9eb", color: "#fff" }}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
-          </svg>
-          Увійти через Telegram
-        </a>
-      )}
-    </div>
+    <button
+      type="button"
+      onClick={handleClick}
+      className="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm transition-all hover:opacity-90"
+      style={{ backgroundColor: "#54a9eb", color: "#fff" }}
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+      </svg>
+      Увійти через Telegram
+    </button>
   );
 };
 
