@@ -206,9 +206,10 @@ const StudentAcademy = () => {
 
       const allTasks = tasks ?? [];
       setWritingTodo(allTasks.filter((tk: any) => tk.type === "writing" && ["assigned", "in_progress"].includes(tk.status)).length);
+      setReadingTodo(allTasks.filter((tk: any) => tk.type === "reading" && ["assigned", "in_progress"].includes(tk.status)).length);
 
       const testRows: Row[] = allTasks
-        .filter((tk: any) => !["homework", "book", "book_plan", "writing"].includes(tk.type))
+        .filter((tk: any) => !["homework", "book", "book_plan", "writing", "reading"].includes(tk.type))
         .map((tk: any) => ({
           id: tk.id,
           title: tk.title,
