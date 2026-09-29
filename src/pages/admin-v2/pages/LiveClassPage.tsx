@@ -16,6 +16,7 @@ import { Play, Square, ChevronLeft, ChevronRight, Loader2, Upload, Crosshair, Lo
 import TextbookPanel from "@/components/textbook/TextbookPanel";
 import LiveWriting from "@/components/live/LiveWriting";
 import LiveReading from "@/components/live/LiveReading";
+import LiveGrammar from "@/components/live/LiveGrammar";
 import LiveNotes from "@/components/live/LiveNotes";
 import LiveSlidesPanel from "@/components/live/LiveSlidesPanel";
 import BoardEditor, { type BoardApi } from "@/components/live/BoardEditor";

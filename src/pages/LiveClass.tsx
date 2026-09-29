@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { BoardView } from "@/components/live/BoardRender";
 import LiveWriting from "@/components/live/LiveWriting";
 import LiveReading from "@/components/live/LiveReading";
+import LiveGrammar from "@/components/live/LiveGrammar";
 import LiveNotes from "@/components/live/LiveNotes";
 import TextbookWorkbook from "@/components/textbook/TextbookWorkbook";
 import BoardStudentView from "@/components/live/BoardStudentView";
