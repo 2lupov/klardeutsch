@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, Hand, Pen, Eraser, Type, Undo2, Loader2, Mou
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 (pdfjsLib as any).GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
