@@ -300,6 +300,21 @@ function NewAssignmentModal({
   const [generating, setGenerating] = useState(false);
   const [saving, setSaving] = useState(false);
   const [writingTopic, setWritingTopic] = useState<any>(null);
+  const [readingTopic, setReadingTopic] = useState<any>(null);
+  const [readingWords, setReadingWords] = useState(100);
+
+  const genReading = async () => {
+    setGenerating(true);
+    const { data, error } = await supabase.functions.invoke("generate-reading-text", {
+      body: { level, words: readingWords, topic: aiTopic.trim() || undefined },
+    });
+    setGenerating(false);
+    if (error || (data as any)?.error) return toast({ title: "Не вдалося згенерувати текст", description: String((data as any)?.error || error?.message || ""), variant: "destructive" });
+    const t = (data as any).topic;
+    setReadingTopic(t);
+    setTitle(`Читання: ${t.title_de ?? ""}`.trim());
+    if (!instructions.trim()) setInstructions("Прочитай текст, познач граматичні конструкції та запиши нотатки.");
+  };
 
   const genWriting = async () => {
     setGenerating(true);
