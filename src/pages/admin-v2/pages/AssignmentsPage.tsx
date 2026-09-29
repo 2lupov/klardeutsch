@@ -368,6 +368,8 @@ function NewAssignmentModal({
     if (studentIds.length === 0) return toast({ title: "Оберіть хоча б одного учня", variant: "destructive" });
     if (type === "test" && questions.length === 0)
       return toast({ title: "Додайте питання до тесту", variant: "destructive" });
+    if (type === "reading" && !readingTopic)
+      return toast({ title: "Згенеруйте текст для читання", variant: "destructive" });
 
     setSaving(true);
     const { data: authData } = await supabase.auth.getUser();
