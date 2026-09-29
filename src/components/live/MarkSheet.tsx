@@ -17,6 +17,7 @@ export default function MarkSheet({
   sheetClassName,
   readOnly,
   highlightOnly,
+  noLines,
   toolbarExtra,
 }: {
   value: string;
@@ -29,6 +30,8 @@ export default function MarkSheet({
   readOnly?: boolean;
   /** Текст не редагується — доступні лише жовтий маркер і гумка. */
   highlightOnly?: boolean;
+  /** Без «зошитових» лінійок — чистий аркуш. */
+  noLines?: boolean;
   toolbarExtra?: React.ReactNode;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -93,7 +96,7 @@ export default function MarkSheet({
           "live-writing-sheet min-h-0 flex-1 overflow-y-auto px-6 py-4 font-display text-lg leading-8 text-foreground outline-none",
           sheetClassName,
         )}
-        style={SHEET_STYLE}
+        style={noLines ? undefined : SHEET_STYLE}
       />
     </section>
   );
