@@ -87,10 +87,11 @@ export default function StudentNotes({ folder }: { folder?: string }) {
   );
 }
 
-export function NoteEditor({ note, onBack }: { note: NoteRow; onBack: () => void }) {
+export function NoteEditor({ note, onBack, extraFolders = [] }: { note: NoteRow; onBack: () => void; extraFolders?: string[] }) {
   const [title, setTitle] = useState(note.title);
   const [body, setBody] = useState(note.body || "");
   const [folder, setFolder] = useState(note.folder);
+  const allFolders = [...new Set([...FOLDERS, ...extraFolders, note.folder])];
   const [saved, setSaved] = useState(true);
 
   useEffect(() => {
@@ -118,7 +119,7 @@ export function NoteEditor({ note, onBack }: { note: NoteRow; onBack: () => void
       <div className="flex flex-wrap gap-2">
         <Input value={title} onChange={(e) => setTitle(e.target.value)} className="h-9 max-w-sm" placeholder="Назва" />
         <div className="flex flex-wrap gap-1">
-          {FOLDERS.map((f) => (
+          {allFolders.map((f) => (
             <Button key={f} animated={false} size="sm" variant={f === folder ? "default" : "outline"} className="h-9" onClick={() => setFolder(f)}>{f}</Button>
           ))}
         </div>

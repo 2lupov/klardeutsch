@@ -474,7 +474,7 @@ const rows = tab === "tests" ? tests : homework;
       <div className="flex-1 min-w-0">
       {/* Progress is only relevant while choosing tasks, not while reading or drawing. */}
       {isTaskTab && <div className="border-b border-border bg-background/90">
-        <div className="max-w-2xl mx-auto px-4 pt-5 pb-3">
+        <div className="max-w-[1200px] mx-auto px-4 pt-5 pb-3">
           <div className="flex items-end justify-between gap-4">
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Моє навчання</p>
@@ -510,7 +510,7 @@ const rows = tab === "tests" ? tests : homework;
         </div>
       </div>}
 
-      <div className={`${tab === "board" || tab === "textbook" || tab === "grammar" ? "max-w-[1200px]" : "max-w-2xl"} w-full mx-auto px-3 sm:px-6 ${isTaskTab ? "py-5" : "py-3 sm:py-5"}`}>
+      <div className={`max-w-[1200px] w-full mx-auto px-3 sm:px-6 ${isTaskTab ? "py-5" : "py-3 sm:py-5"}`}>
 
 
         {loading ? (

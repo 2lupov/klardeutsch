@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   BookMarked, Plus, Trash2, Loader2, Sparkles, X, ChevronLeft, Send, Check,
-  Archive, Music, Upload,
+  Archive, Music, Upload, FolderOpen, FolderInput,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,7 +10,7 @@ import {
   Book, BookKind, BookLektion, BookPage, BookTask, BookAudio, BookLessonPlan, BOOK_KIND_LABEL,
   bookToBank, createBook, deleteAudio, deleteBook, deletePage, deleteTask, detectLektionen,
   insertAudio, linkPagesToLektion, listAudio, listBooks, listLektionen, listPages, listTasks,
-  recognisePage, signedAudioUrl, signedPageUrls, updateAudio, uploadAudioFile, upsertLektion,
+  recognisePage, setBookFolder, signedAudioUrl, signedPageUrls, updateAudio, uploadAudioFile, upsertLektion,
 } from "@/lib/books";
 
 import PdfUploader from "@/components/books/PdfUploader";
@@ -40,6 +40,17 @@ export default function BooksPage() {
   const [creating, setCreating] = useState(false);
   const [archive, setArchive] = useState(false);
   const [openBook, setOpenBook] = useState<Book | null>(null);
+  const [shelf, setShelf] = useState<string | null>(null);
+  const [moving, setMoving] = useState<Book | null>(null);
+
+  const shelves = useMemo(
+    () => [...new Set(books.map((b) => b.folder).filter(Boolean) as string[])].sort((a, b) => a.localeCompare(b, "uk")),
+    [books],
+  );
+  const visibleBooks = useMemo(
+    () => (shelf === null ? books : shelf === "__none__" ? books.filter((b) => !b.folder) : books.filter((b) => b.folder === shelf)),
+    [books, shelf],
+  );
 
   const load = async () => {
     try {
@@ -94,6 +105,29 @@ export default function BooksPage() {
       )}
 
 
+      {!loading && books.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          <FolderOpen className="w-4 h-4 text-slate-400" />
+          {[
+            { key: null as string | null, label: `Усі (${books.length})` },
+            ...shelves.map((s) => ({ key: s, label: `${s} (${books.filter((b) => b.folder === s).length})` })),
+            ...(books.some((b) => !b.folder)
+              ? [{ key: "__none__" as string | null, label: `Без полиці (${books.filter((b) => !b.folder).length})` }]
+              : []),
+          ].map((c) => (
+            <button
+              key={c.key ?? "all"}
+              onClick={() => setShelf(c.key)}
+              className={`px-3 py-1.5 rounded-xl border text-xs font-semibold ${
+                shelf === c.key ? "border-indigo-600 bg-indigo-50 text-indigo-700" : "border-slate-200 text-slate-600 hover:bg-slate-50"
+              }`}
+            >
+              {c.label}
+            </button>
+          ))}
+        </div>
+      )}
+
       {loading ? (
         <Card className="p-10 flex justify-center">
           <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
@@ -106,7 +140,7 @@ export default function BooksPage() {
         />
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {books.map((b) => (
+          {visibleBooks.map((b) => (
             <Card key={b.id} className="p-4">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
@@ -119,6 +153,11 @@ export default function BooksPage() {
                     {b.level ? ` · ${b.level}` : ""}
                     {b.publisher ? ` · ${b.publisher}` : ""}
                   </p>
+                  {b.folder && (
+                    <p className="mt-1 inline-flex items-center gap-1 rounded-lg bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">
+                      <FolderOpen className="w-3 h-3" /> {b.folder}
+                    </p>
+                  )}
                 </div>
                 <button
                   onClick={async () => {
@@ -136,15 +175,33 @@ export default function BooksPage() {
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
-              <button
-                onClick={() => setOpenBook(b)}
-                className="mt-4 w-full px-3 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50"
-              >
-                Відкрити
-              </button>
+              <div className="mt-4 flex gap-2">
+                <button
+                  onClick={() => setOpenBook(b)}
+                  className="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                >
+                  Відкрити
+                </button>
+                <button
+                  onClick={() => setMoving(b)}
+                  className="px-3 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                  title="Перенести в папку"
+                >
+                  <FolderInput className="w-4 h-4" />
+                </button>
+              </div>
             </Card>
           ))}
         </div>
+      )}
+
+      {moving && (
+        <MoveBookModal
+          book={moving}
+          shelves={shelves}
+          onClose={() => setMoving(null)}
+          onMoved={() => { setMoving(null); load(); }}
+        />
       )}
 
       {creating && (
@@ -1307,5 +1364,85 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <span className="text-xs font-medium text-slate-500">{label}</span>
       <div className="mt-1">{children}</div>
     </label>
+  );
+}
+
+/* ───────── move book to a shelf (folder) ───────── */
+
+function MoveBookModal({
+  book, shelves, onClose, onMoved,
+}: {
+  book: Book;
+  shelves: string[];
+  onClose: () => void;
+  onMoved: () => void;
+}) {
+  const [name, setName] = useState(book.folder ?? "");
+  const [saving, setSaving] = useState(false);
+
+  const save = async (value: string | null) => {
+    setSaving(true);
+    try {
+      await setBookFolder(book.id, value);
+      toast.success(value ? `Перенесено в «${value}»` : "Прибрано з полиці");
+      onMoved();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Помилка");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-slate-900/40 p-4" onClick={onClose}>
+      <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center gap-2">
+          <FolderInput className="w-4 h-4 text-indigo-600" />
+          <h3 className="text-sm font-semibold text-slate-900">Перенести «{book.title}»</h3>
+          <button onClick={onClose} className="ml-auto text-slate-400 hover:text-slate-700"><X className="w-4 h-4" /></button>
+        </div>
+
+        {shelves.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {shelves.map((s) => (
+              <button
+                key={s}
+                onClick={() => save(s)}
+                disabled={saving}
+                className={`px-3 py-1.5 rounded-xl border text-xs font-semibold ${
+                  s === book.folder ? "border-indigo-600 bg-indigo-50 text-indigo-700" : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                }`}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <p className="mt-4 text-xs font-medium text-slate-500">Нова полиця</p>
+        <div className="mt-1 flex gap-2">
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter" && name.trim()) save(name.trim()); }}
+            placeholder="напр. «Schritte A1» або «Prüfung B1»"
+            className="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-sm"
+          />
+          <button
+            onClick={() => name.trim() && save(name.trim())}
+            disabled={saving || !name.trim()}
+            className="px-3 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium disabled:opacity-50"
+          >
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+          </button>
+        </div>
+
+        {book.folder && (
+          <button onClick={() => save(null)} disabled={saving} className="mt-3 text-xs font-medium text-slate-500 hover:text-rose-600">
+            Прибрати з полиці
+          </button>
+        )}
+      </div>
+    </div>
   );
 }
