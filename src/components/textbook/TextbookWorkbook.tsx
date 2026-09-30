@@ -447,71 +447,75 @@ export default function TextbookWorkbook({
     <Button
       animated={false}
       variant={tool === t ? "default" : "outline"}
+      size="icon"
       type="button"
       onClick={() => setTool(t)}
       title={label}
+      aria-label={label}
       className={cn(
-        "h-8 px-2 rounded-md flex items-center gap-1.5 text-xs font-medium",
+        "h-9 w-9 rounded-md",
         tool !== t && "bg-white text-slate-900 border-slate-200 hover:bg-slate-50",
       )}
     >
-      <I className="w-4 h-4" /> <span className="hidden md:inline">{label}</span>
+      <I className="w-4 h-4" />
     </Button>
   );
 
+  const Divider = () => <div className="h-px w-6 bg-border" />;
+
   return (
     <div className="space-y-3 min-w-0">
-      <div className="border-b border-border pb-3 space-y-2.5 min-w-0">
-        <div className="flex items-center justify-between gap-3 min-w-0">
-          <span className="font-display font-bold text-sm text-foreground truncate min-w-0" title={info.book.title}>📖 {info.book.title}</span>
-          {allowNavigate && <span className="text-xs text-muted-foreground shrink-0">{page} / {total || "…"}</span>}
-        </div>
-        <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+      <div className="flex items-center justify-between gap-3 min-w-0">
+        <span className="font-display font-bold text-sm text-foreground truncate min-w-0" title={info.book.title}>📖 {info.book.title}</span>
+        {allowNavigate && <span className="text-xs text-muted-foreground shrink-0">{page} / {total || "…"}</span>}
+      </div>
+
+      <div className="flex items-start gap-2 min-w-0">
+        {/* Липка бічна рейка інструментів — завжди на екрані, скролити вгору не треба */}
+        <div className="sticky top-2 z-20 flex w-11 shrink-0 flex-col items-center gap-1.5 rounded-md border border-border bg-card/95 p-1 shadow-sm backdrop-blur">
           <ToolBtn t="hand" icon={Hand} label="Рука" />
           <ToolBtn t="move" icon={MousePointer2} label="Стрілка" />
           <ToolBtn t="pen" icon={Pen} label="Олівець" />
           <ToolBtn t="marker" icon={Highlighter} label="Маркер" />
           <ToolBtn t="text" icon={Type} label="Текст" />
           <ToolBtn t="erase" icon={Eraser} label="Гумка" />
-          <div className="flex items-center gap-1 border-l border-border pl-2" title="Розмір тексту (новий напис або вибраний стрілкою)">
-            <Button animated={false} variant="outline" size="icon" type="button" title="Менший текст" onClick={() => changeTextSize(-4)} className="h-8 w-8"><AArrowDown /></Button>
-            <span className="text-xs text-muted-foreground w-6 text-center">{selectedTextSize}</span>
-            <Button animated={false} variant="outline" size="icon" type="button" title="Більший текст" onClick={() => changeTextSize(4)} className="h-8 w-8"><AArrowUp /></Button>
+          <Divider />
+          <div className="flex flex-col items-center gap-1" title="Розмір тексту (новий напис або вибраний стрілкою)">
+            <Button animated={false} variant="outline" size="icon" type="button" title="Більший текст" onClick={() => changeTextSize(4)} className="h-7 w-9"><AArrowUp /></Button>
+            <span className="text-[11px] text-muted-foreground text-center leading-none">{selectedTextSize}</span>
+            <Button animated={false} variant="outline" size="icon" type="button" title="Менший текст" onClick={() => changeTextSize(-4)} className="h-7 w-9"><AArrowDown /></Button>
           </div>
-          <Button animated={false} variant="outline" size="icon" type="button" onClick={undo} title="Скасувати" className="h-8 w-8"><Undo2 /></Button>
-        </div>
-        <div className="flex flex-wrap items-center gap-2 min-w-0">
-          <div className="flex items-center gap-1.5 shrink-0">
-          {COLORS.map((c) => (
-            <button key={c} type="button" onClick={() => setColor(c)} aria-label={c} className={`w-6 h-6 rounded-full border-2 ${color === c ? "border-primary scale-110" : "border-border"}`} style={{ background: c }} />
-          ))}
+          <Button animated={false} variant="outline" size="icon" type="button" onClick={undo} title="Скасувати" className="h-9 w-9"><Undo2 /></Button>
+          <Divider />
+          <div className="flex flex-col items-center gap-1.5 py-0.5">
+            {COLORS.map((c) => (
+              <button key={c} type="button" onClick={() => setColor(c)} aria-label={c} className={`w-6 h-6 rounded-full border-2 ${color === c ? "border-primary scale-110" : "border-border"}`} style={{ background: c }} />
+            ))}
           </div>
-          <div className="flex items-center gap-1 sm:ml-auto">
-            {allowNavigate && (
-              <Button animated={false} variant="outline" type="button" title="Вибрати сторінку" onClick={openPages} className="h-8 px-2 text-xs">
-                <LayoutGrid /> Сторінки
-              </Button>
-            )}
-            <Button animated={false} variant="outline" size="icon" type="button" title="Зменшити" onClick={() => setZoom((z) => Math.max(0.6, Math.round((z - 0.2) * 10) / 10))} className="h-8 w-8"><Minus /></Button>
-            <Button animated={false} variant="outline" type="button" title="Звичайний розмір" onClick={() => setZoom(1)} className="h-8 min-w-[3.25rem] px-1 text-xs">{Math.round(zoom * 100)}%</Button>
-            <Button animated={false} variant="outline" size="icon" type="button" title="Збільшити" onClick={() => setZoom((z) => Math.min(3, Math.round((z + 0.2) * 10) / 10))} className="h-8 w-8"><Plus /></Button>
-          </div>
-        {allowNavigate && (
-          <div className="flex items-center gap-1 sm:ml-2">
-            <Button animated={false} variant="outline" size="icon" type="button" onClick={() => goto(page - 1)} disabled={page <= 1} title="Попередня сторінка" className="h-8 w-8"><ChevronLeft /></Button>
-            <input
-              type="number"
-              value={page}
-              min={1}
-              onChange={(e) => goto(Number(e.target.value) || 1)}
-              aria-label="Номер сторінки"
-              className="w-14 h-8 rounded-md border border-border bg-background text-center text-sm text-foreground"
-            />
-            <span className="text-xs text-muted-foreground">/ {total || "…"}</span>
-            <Button animated={false} variant="outline" size="icon" type="button" onClick={() => goto(page + 1)} disabled={!!total && page >= total} title="Наступна сторінка" className="h-8 w-8"><ChevronRight /></Button>
-          </div>
-        )}
-        {!allowNavigate && <span className="text-xs text-muted-foreground">Сторінка {page}</span>}
+          <Divider />
+          {allowNavigate && (
+            <Button animated={false} variant="outline" size="icon" type="button" title="Вибрати сторінку" onClick={openPages} className="h-9 w-9">
+              <LayoutGrid />
+            </Button>
+          )}
+          <Button animated={false} variant="outline" size="icon" type="button" title="Зменшити" onClick={() => setZoom((z) => Math.max(0.6, Math.round((z - 0.2) * 10) / 10))} className="h-7 w-9"><Minus /></Button>
+          <button type="button" title="Звичайний розмір" onClick={() => setZoom(1)} className="text-[10px] text-muted-foreground leading-none hover:text-foreground">{Math.round(zoom * 100)}%</button>
+          <Button animated={false} variant="outline" size="icon" type="button" title="Збільшити" onClick={() => setZoom((z) => Math.min(3, Math.round((z + 0.2) * 10) / 10))} className="h-7 w-9"><Plus /></Button>
+          {allowNavigate && (
+            <>
+              <Divider />
+              <Button animated={false} variant="outline" size="icon" type="button" onClick={() => goto(page - 1)} disabled={page <= 1} title="Попередня сторінка" className="h-9 w-9"><ChevronLeft /></Button>
+              <input
+                type="number"
+                value={page}
+                min={1}
+                onChange={(e) => goto(Number(e.target.value) || 1)}
+                aria-label="Номер сторінки"
+                className="w-9 h-8 rounded-md border border-border bg-background text-center text-xs text-foreground"
+              />
+              <Button animated={false} variant="outline" size="icon" type="button" onClick={() => goto(page + 1)} disabled={!!total && page >= total} title="Наступна сторінка" className="h-9 w-9"><ChevronRight /></Button>
+            </>
+          )}
         </div>
 
       <Dialog open={pagesOpen} onOpenChange={setPagesOpen}>
