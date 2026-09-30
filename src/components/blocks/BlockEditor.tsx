@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { ARTIKEL_CLASS, norm, type Artikel, type BlockPayload, type LessonBlock, type LueckeItem, type PictureItem } from "./types";
+import { ARTIKEL_CLASS, HIGHLIGHT_COLORS, HIGHLIGHT_META, norm, type Artikel, type BlockPayload, type LessonBlock, type LueckeItem, type PictureItem } from "./types";
 import { MODEL_KEYS, modelLabel, modelParts } from "./InteractiveModel";
 import SatzbauBlock from "./SatzbauBlock";
 import BildBlock from "./BildBlock";
