@@ -26,6 +26,7 @@ export default function LiveBookPagePicker({
   const [loading, setLoading] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [shown, setShown] = useState<LiveBookPage | null>(current ?? null);
+  const canAddToBoard = Boolean(onToBoard);
 
   useEffect(() => {
     (async () => {
@@ -56,7 +57,7 @@ export default function LiveBookPagePicker({
         setPages(nextPages);
         setSelectedId(nextPages[0]?.id ?? null);
         setUrls(await signedPageUrls(nextPages.map((page) => page.image_path)));
-        if (onToBoard) {
+        if (canAddToBoard) {
           const entries = await Promise.all(
             nextPages.map(async (page) => [page.image_path, await longSignedPageUrl(page.image_path)] as const),
           );
@@ -72,7 +73,7 @@ export default function LiveBookPagePicker({
       }
     })();
     return () => { active = false; };
-  }, [bookId, onToBoard]);
+  }, [bookId, canAddToBoard]);
 
   const selectedPage = useMemo(
     () => pages.find((page) => page.id === selectedId) ?? pages[0] ?? null,
@@ -172,7 +173,7 @@ export default function LiveBookPagePicker({
               <aside className="min-h-0 overflow-y-auto border-b border-border bg-muted/35 p-3 md:border-b-0 md:border-r">
                 <div className="mb-3 flex items-center justify-between px-1">
                   <p className="text-xs font-semibold text-foreground">{pages.length} сторінок</p>
-                  {onToBoard && (
+                  {canAddToBoard && (
                     <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
                       <GripVertical className="size-3" /> можна перетягувати
                     </span>
@@ -189,7 +190,7 @@ export default function LiveBookPagePicker({
                         type="button"
                         variant="ghost"
                         key={page.id}
-                        draggable={!!onToBoard}
+                        draggable={canAddToBoard}
                         onDragStart={(event) => {
                           const url = longUrls[page.image_path] || pageUrl;
                           if (!url) return;
@@ -200,7 +201,7 @@ export default function LiveBookPagePicker({
                         onClick={() => setSelectedId(page.id)}
                         className={`relative h-auto overflow-hidden rounded-md border-2 p-0 transition-colors ${
                           selected ? "border-primary bg-primary/5" : "border-border bg-background hover:border-primary/40"
-                        } ${onToBoard ? "cursor-grab active:cursor-grabbing" : ""}`}
+                        } ${canAddToBoard ? "cursor-grab active:cursor-grabbing" : ""}`}
                         aria-label={`Переглянути сторінку ${page.page_number ?? "без номера"}`}
                       >
                         {pageUrl ? (
@@ -237,7 +238,7 @@ export default function LiveBookPagePicker({
                     <p className="truncate text-sm font-semibold text-foreground">{selectedBook?.title}</p>
                     <p className="text-xs text-muted-foreground">Сторінка {selectedPage.page_number ?? "—"}</p>
                   </div>
-                  {onToBoard && (
+                  {canAddToBoard && (
                     <Button animated={false} variant="outline" onClick={toBoard}>
                       <ImagePlus className="size-4" /> На дошку
                     </Button>
