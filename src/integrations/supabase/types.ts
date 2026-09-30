@@ -280,6 +280,7 @@ export type Database = {
       books: {
         Row: {
           created_at: string
+          folder: string | null
           id: string
           kind: string
           language: string
@@ -292,6 +293,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          folder?: string | null
           id?: string
           kind?: string
           language?: string
@@ -304,6 +306,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          folder?: string | null
           id?: string
           kind?: string
           language?: string
@@ -3369,6 +3372,95 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      student_folder_pages: {
+        Row: {
+          book_id: string | null
+          book_title: string | null
+          caption: string | null
+          created_at: string
+          folder_id: string
+          id: string
+          image_path: string
+          page_number: number | null
+          sort_order: number
+          student_id: string
+          teacher_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          book_id?: string | null
+          book_title?: string | null
+          caption?: string | null
+          created_at?: string
+          folder_id: string
+          id?: string
+          image_path: string
+          page_number?: number | null
+          sort_order?: number
+          student_id: string
+          teacher_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          book_id?: string | null
+          book_title?: string | null
+          caption?: string | null
+          created_at?: string
+          folder_id?: string
+          id?: string
+          image_path?: string
+          page_number?: number | null
+          sort_order?: number
+          student_id?: string
+          teacher_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_folder_pages_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "student_folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_folders: {
+        Row: {
+          color: string | null
+          created_at: string
+          emoji: string | null
+          id: string
+          name: string
+          sort_order: number
+          student_id: string
+          teacher_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          emoji?: string | null
+          id?: string
+          name: string
+          sort_order?: number
+          student_id: string
+          teacher_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          emoji?: string | null
+          id?: string
+          name?: string
+          sort_order?: number
+          student_id?: string
+          teacher_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       student_login_attempts: {
         Row: {
