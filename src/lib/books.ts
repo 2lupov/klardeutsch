@@ -11,7 +11,18 @@ export interface Book {
   language: string | null;
   publisher: string | null;
   total_pages: number | null;
+  /** Довільна полиця (папка) викладача, куди перенесено підручник. */
+  folder: string | null;
   created_at: string;
+}
+
+/** Перенести підручник на полицю з довільною назвою (null — «Без полиці»). */
+export async function setBookFolder(bookId: string, folder: string | null) {
+  const { error } = await supabase
+    .from("books")
+    .update({ folder: folder?.trim() || null } as any)
+    .eq("id", bookId);
+  if (error) throw error;
 }
 
 export interface BookLektion {
