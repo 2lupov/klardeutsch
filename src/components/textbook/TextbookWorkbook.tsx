@@ -570,7 +570,46 @@ export default function TextbookWorkbook({
             />
           )}
         </div>
+        </div>
       </div>
+
+      <Dialog open={pagesOpen} onOpenChange={setPagesOpen}>
+        <DialogContent className="flex h-[88dvh] max-w-5xl flex-col gap-0 overflow-hidden border-white/10 bg-[#0F172A] p-0 text-slate-100 shadow-2xl">
+          <div className="flex shrink-0 flex-wrap items-center gap-3 border-b border-white/10 bg-white/5 px-4 py-3 sm:px-5">
+            <div className="min-w-0 flex-1">
+              <DialogTitle className="truncate text-base font-semibold text-white">
+                Сторінки · {info.book.title}
+              </DialogTitle>
+              <p className="text-xs text-slate-400">Усього {pageCount} сторінок · зараз відкрита {page}</p>
+            </div>
+            <form onSubmit={submitPage} className="flex items-center gap-2">
+              <Input
+                type="number"
+                min={1}
+                max={pageCount}
+                value={pageInput}
+                onChange={(event) => setPageInput(event.target.value)}
+                aria-label="Номер сторінки"
+                className="h-9 w-20 border-white/15 bg-white/10 text-center text-white placeholder:text-slate-500"
+              />
+              <Button animated={false} type="submit" size="sm" className="h-9">Перейти</Button>
+            </form>
+          </div>
+          <div ref={pagesScrollRef} className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-5">
+            <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
+              {allPages.map((pageNumber) => (
+                <PageThumbnail
+                  key={pageNumber}
+                  filePath={info.book.file_path}
+                  pageNumber={pageNumber}
+                  active={pageNumber === page}
+                  onSelect={() => { goto(pageNumber); setPagesOpen(false); }}
+                />
+              ))}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
