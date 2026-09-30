@@ -251,7 +251,10 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
             <LiveBookPagePicker classId={cls.id} onToBoard={(url) => boardApi.current?.insertImage(url)} />
           </div>
         </aside>
-        <div className="xl:hidden absolute bottom-3 right-3 z-20 flex gap-2">
+        <div className="xl:hidden absolute bottom-3 right-3 z-20 flex max-w-[calc(100%-1.5rem)] items-end gap-2">
+          <div className="w-52 max-w-[55vw] [&>div]:p-1">
+            <LiveBookPagePicker classId={cls.id} onToBoard={(url) => boardApi.current?.insertImage(url)} />
+          </div>
           <Button animated={false} size="sm" onClick={() => transfer("board", null)}>
             <Crosshair /> Учню
           </Button>
