@@ -36,7 +36,7 @@ describe("LesenBlock highlighter", () => {
         onChange={onChange}
       />,
     );
-    const painted = container.querySelectorAll(".hl-blue");
+    const painted = container.querySelectorAll("p.lesson-reading-text .hl-blue");
     expect(painted.length).toBeGreaterThan(0);
     expect(Array.from(painted).map((n) => n.textContent).join("")).toContain("dem Mann");
     fireEvent.click(painted[0]);
