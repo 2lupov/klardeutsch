@@ -1,1 +1,2 @@
 - Live classroom uses a dedicated viewport-height workspace inside admin; this prevents nested page scrolling during teaching.
+- Grammar homework uses the dedicated `grammar` assignment type and StudentGrammar workbook; this keeps it separate from reading.

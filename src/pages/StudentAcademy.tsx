@@ -15,6 +15,7 @@ import StudentProfilePanel from "@/components/student/StudentProfilePanel";
 import StudentDictionary from "@/pages/StudentDictionary";
 import StudentWriting from "@/components/student/StudentWriting";
 import StudentReading from "@/components/student/StudentReading";
+import StudentGrammar from "@/components/student/StudentGrammar";
 import StudentNotes from "@/components/student/StudentNotes";
 import StudentFolders from "@/components/student/StudentFolders";
 import { bgCss } from "@/components/student/academyBackgrounds";
@@ -22,7 +23,7 @@ import { Button } from "@/components/ui/button";
 import pandaCelebrating from "@/assets/mascot/panda-celebrating.png";
 import pandaSleeping from "@/assets/mascot/panda-sleeping.png";
 
-type Tab = "tests" | "homework" | "writing" | "reading" | "notes" | "folders" | "board" | "textbook" | "dict" | "profile";
+type Tab = "tests" | "homework" | "writing" | "reading" | "grammar" | "notes" | "folders" | "board" | "textbook" | "dict" | "profile";
 
 interface Row {
   id: string;
@@ -87,6 +88,7 @@ const StudentAcademy = () => {
   const [homework, setHomework] = useState<Row[]>([]);
   const [writingTodo, setWritingTodo] = useState(0);
   const [readingTodo, setReadingTodo] = useState(0);
+  const [grammarTodo, setGrammarTodo] = useState(0);
   const [reading, setReading] = useState<Row[]>([]);
   const [courses, setCourses] = useState<Row[]>([]);
   const [stats, setStats] = useState<{ active: number; graded: number; avg: number | null }>({
@@ -207,9 +209,10 @@ const StudentAcademy = () => {
       const allTasks = tasks ?? [];
       setWritingTodo(allTasks.filter((tk: any) => tk.type === "writing" && ["assigned", "in_progress"].includes(tk.status)).length);
       setReadingTodo(allTasks.filter((tk: any) => tk.type === "reading" && ["assigned", "in_progress"].includes(tk.status)).length);
+      setGrammarTodo(allTasks.filter((tk: any) => tk.type === "grammar" && ["assigned", "in_progress"].includes(tk.status)).length);
 
       const testRows: Row[] = allTasks
-        .filter((tk: any) => !["homework", "book", "book_plan", "writing", "reading"].includes(tk.type))
+        .filter((tk: any) => !["homework", "book", "book_plan", "writing", "reading", "grammar"].includes(tk.type))
         .map((tk: any) => ({
           id: tk.id,
           title: tk.title,
@@ -410,6 +413,7 @@ const nextUp = useMemo(() => {
     { key: "homework", label: "Домашка", count: pending.homework, icon: ClipboardList },
     { key: "tests", label: "Тести", count: pending.tests, icon: ListChecks },
     { key: "reading", label: "Читання", count: readingTodo, icon: BookOpen },
+    { key: "grammar", label: "Граматика", count: grammarTodo, icon: GraduationCap },
     { key: "writing", label: "Письмо", count: pending.writing, icon: PenLine },
     { key: "notes", label: "Нотатки", count: 0, icon: NotebookPen },
     { key: "folders", label: "Папки", count: 0, icon: FolderOpen },
@@ -554,6 +558,8 @@ const rows = tab === "tests" ? tests : homework;
               <StudentWriting />
             ) : tab === "reading" ? (
               <StudentReading />
+            ) : tab === "grammar" ? (
+              <StudentGrammar />
             ) : tab === "notes" ? (
               <StudentNotes />
             ) : tab === "folders" ? (

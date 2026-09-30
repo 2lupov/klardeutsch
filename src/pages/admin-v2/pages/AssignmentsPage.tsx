@@ -3,14 +3,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, SectionHeader, EmptyState } from "./_ui";
 import {
   ClipboardList, Plus, X, Sparkles, Loader2, Trash2, Check, Search,
-  FileText, Mic, PenLine, ListChecks, Award, BookOpen,
+  FileText, Mic, PenLine, ListChecks, Award, BookOpen, GraduationCap,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import StudentBlocks from "@/components/blocks/StudentBlocks";
 import { kitBlocksToLessonBlocks } from "@/lib/lesson-kits";
 import { useAdminLang } from "../LanguageContext";
 
-type AssignmentType = "test" | "homework" | "writing" | "reading" | "audio";
+type AssignmentType = "test" | "homework" | "writing" | "reading" | "grammar" | "audio";
 
 interface Question {
   question: string;
@@ -61,6 +61,7 @@ const TYPES: { key: AssignmentType; label: string; icon: any; hint: string }[] =
   { key: "homework", label: "Домашка", icon: FileText, hint: "Текст + фото/файли від учня" },
   { key: "writing", label: "Письмо (AI)", icon: PenLine, hint: "AI дає оцінку та фідбек" },
   { key: "reading", label: "Читання (AI)", icon: BookOpen, hint: "Текст за рівнем і кількістю слів" },
+  { key: "grammar", label: "Граматика", icon: GraduationCap, hint: "Повний урок граматики з живого класу" },
   { key: "audio", label: "Аудіо / вимова", icon: Mic, hint: "Учень записує голос" },
 ];
 
