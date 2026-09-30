@@ -322,7 +322,7 @@ function SaveGrammarDialog({
   );
 }
 
-/** Задає урок граматики як домашнє завдання (учень читає текст і працює з нотатками). */
+/** Задає повний урок граматики як окреме домашнє завдання. */
 function AssignGrammarDialog({
   open, onOpenChange, lesson, marksHtml, studentId, teacherId,
 }: {
@@ -341,7 +341,7 @@ function AssignGrammarDialog({
       const { error } = await (supabase as any).from("student_assignments").insert({
         teacher_id: teacherId || u.user!.id,
         student_id: studentId,
-        type: "reading",
+        type: "grammar",
         title: lesson.title || lesson.topic || "Граматика",
         instructions: lesson.summary_uk || "Повтори правила, зроби практику й познач граматику в тексті.",
         level: lesson.level ?? null,
