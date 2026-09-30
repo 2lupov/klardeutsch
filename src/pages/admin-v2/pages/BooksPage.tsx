@@ -40,6 +40,17 @@ export default function BooksPage() {
   const [creating, setCreating] = useState(false);
   const [archive, setArchive] = useState(false);
   const [openBook, setOpenBook] = useState<Book | null>(null);
+  const [shelf, setShelf] = useState<string | null>(null);
+  const [moving, setMoving] = useState<Book | null>(null);
+
+  const shelves = useMemo(
+    () => [...new Set(books.map((b) => b.folder).filter(Boolean) as string[])].sort((a, b) => a.localeCompare(b, "uk")),
+    [books],
+  );
+  const visibleBooks = useMemo(
+    () => (shelf === null ? books : shelf === "__none__" ? books.filter((b) => !b.folder) : books.filter((b) => b.folder === shelf)),
+    [books, shelf],
+  );
 
   const load = async () => {
     try {
