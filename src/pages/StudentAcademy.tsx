@@ -510,7 +510,7 @@ const rows = tab === "tests" ? tests : homework;
         </div>
       </div>}
 
-      <div className={`${tab === "board" || tab === "textbook" ? "max-w-[1200px]" : "max-w-2xl"} w-full mx-auto px-3 sm:px-6 ${isTaskTab ? "py-5" : "py-3 sm:py-5"}`}>
+      <div className={`${tab === "board" || tab === "textbook" || tab === "grammar" ? "max-w-[1200px]" : "max-w-2xl"} w-full mx-auto px-3 sm:px-6 ${isTaskTab ? "py-5" : "py-3 sm:py-5"}`}>
 
 
         {loading ? (
