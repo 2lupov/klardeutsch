@@ -41,7 +41,13 @@ export default function LueckeBlock({ block, value, onChange, checked, readOnly 
                     value={given}
                     disabled={readOnly}
                     onChange={(e) => set(i, e.target.value)}
-                    className={cn("h-9 w-32 text-center", checked && (ok ? "border-primary bg-primary/10" : "border-destructive bg-destructive/10"))}
+                    spellCheck={false}
+                    autoComplete="off"
+                    autoCorrect="off"
+                    className={cn(
+                      "h-9 w-32 rounded-none border-0 border-b-2 border-foreground/20 bg-transparent text-center shadow-none focus-visible:border-b-primary focus-visible:ring-0 focus-visible:ring-offset-0",
+                      checked && (ok ? "border-b-primary text-primary" : "border-b-destructive text-destructive"),
+                    )}
                     placeholder="…"
                   />
                 ) : (
