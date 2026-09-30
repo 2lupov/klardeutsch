@@ -291,9 +291,15 @@ export default function LiveBookPagePicker({
                     <p className="truncate text-sm font-semibold text-foreground">{selectedBook?.title}</p>
                     <p className="text-xs text-muted-foreground">Сторінка {selectedPage.page_number ?? "—"}</p>
                   </div>
+                  {canAddToBoard && picked.size > 0 && (
+                    <Button animated={false} variant="outline" onClick={() => setPicked(new Set())} disabled={adding}>
+                      Скинути ({picked.size})
+                    </Button>
+                  )}
                   {canAddToBoard && (
-                    <Button animated={false} variant="outline" onClick={toBoard}>
-                      <ImagePlus className="size-4" /> На дошку
+                    <Button animated={false} variant={picked.size > 0 ? "default" : "outline"} onClick={picked.size > 0 ? toBoardMany : toBoard} disabled={adding}>
+                      {adding ? <Loader2 className="size-4 animate-spin" /> : <ImagePlus className="size-4" />}
+                      {picked.size > 0 ? `На дошку (${picked.size})` : "На дошку"}
                     </Button>
                   )}
                   <Button animated={false} onClick={show}>
