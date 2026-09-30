@@ -105,6 +105,29 @@ export default function BooksPage() {
       )}
 
 
+      {!loading && books.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          <FolderOpen className="w-4 h-4 text-slate-400" />
+          {[
+            { key: null as string | null, label: `Усі (${books.length})` },
+            ...shelves.map((s) => ({ key: s, label: `${s} (${books.filter((b) => b.folder === s).length})` })),
+            ...(books.some((b) => !b.folder)
+              ? [{ key: "__none__" as string | null, label: `Без полиці (${books.filter((b) => !b.folder).length})` }]
+              : []),
+          ].map((c) => (
+            <button
+              key={c.key ?? "all"}
+              onClick={() => setShelf(c.key)}
+              className={`px-3 py-1.5 rounded-xl border text-xs font-semibold ${
+                shelf === c.key ? "border-indigo-600 bg-indigo-50 text-indigo-700" : "border-slate-200 text-slate-600 hover:bg-slate-50"
+              }`}
+            >
+              {c.label}
+            </button>
+          ))}
+        </div>
+      )}
+
       {loading ? (
         <Card className="p-10 flex justify-center">
           <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
@@ -117,7 +140,7 @@ export default function BooksPage() {
         />
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {books.map((b) => (
+          {visibleBooks.map((b) => (
             <Card key={b.id} className="p-4">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
@@ -130,6 +153,11 @@ export default function BooksPage() {
                     {b.level ? ` · ${b.level}` : ""}
                     {b.publisher ? ` · ${b.publisher}` : ""}
                   </p>
+                  {b.folder && (
+                    <p className="mt-1 inline-flex items-center gap-1 rounded-lg bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">
+                      <FolderOpen className="w-3 h-3" /> {b.folder}
+                    </p>
+                  )}
                 </div>
                 <button
                   onClick={async () => {
@@ -147,15 +175,33 @@ export default function BooksPage() {
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
-              <button
-                onClick={() => setOpenBook(b)}
-                className="mt-4 w-full px-3 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50"
-              >
-                Відкрити
-              </button>
+              <div className="mt-4 flex gap-2">
+                <button
+                  onClick={() => setOpenBook(b)}
+                  className="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                >
+                  Відкрити
+                </button>
+                <button
+                  onClick={() => setMoving(b)}
+                  className="px-3 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                  title="Перенести в папку"
+                >
+                  <FolderInput className="w-4 h-4" />
+                </button>
+              </div>
             </Card>
           ))}
         </div>
+      )}
+
+      {moving && (
+        <MoveBookModal
+          book={moving}
+          shelves={shelves}
+          onClose={() => setMoving(null)}
+          onMoved={() => { setMoving(null); load(); }}
+        />
       )}
 
       {creating && (
