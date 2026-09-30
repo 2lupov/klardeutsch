@@ -95,7 +95,7 @@ export default function StudentBlocksTask() {
       </header>
 
       <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain">
-        <div className="mx-auto max-w-3xl p-4">
+        <div className="mx-auto max-w-4xl p-4">
           <LessonReader title={task.title} level={task.level} sections={sections.length ? sections : [{ id: "main", title: task.title, emoji: "", summary: null, layout: "practice", blocks: (task.payload?.blocks ?? []) as KitBlock[] }]} pagePaths={task.payload?.page_paths ?? []} imageBucket={task.payload?.presentation_id ? "presentation-slides" : "tutoring-materials"} readOnly={done} showActions={!done && !submitting} onSubmitted={submit} draftKey={`klar:kit:${user?.id}:${id}`} />
         </div>
       </main>

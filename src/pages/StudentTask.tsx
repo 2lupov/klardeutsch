@@ -460,7 +460,7 @@ const uploadFiles = async (list: FileList | null) => {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/40 to-background" />
       </div>
 
-      <div className="max-w-2xl mx-auto px-4 lg:px-8 pt-6 space-y-5">
+      <div className="max-w-4xl mx-auto px-4 lg:px-8 pt-6 space-y-5">
         <button
           onClick={() => { if (preview) { window.close(); navigate(-1); } else navigate("/academy"); }}
           className="group inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"

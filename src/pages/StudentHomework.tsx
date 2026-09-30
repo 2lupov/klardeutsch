@@ -227,7 +227,7 @@ const StudentHomework = () => {
 
   return (
     <div className="min-h-[100dvh] bg-gradient-to-br from-background via-background to-primary/5 pb-32 lg:pb-12">
-      <div className="max-w-3xl mx-auto px-4 lg:px-8 pt-5 lg:pt-10">
+      <div className="max-w-4xl mx-auto px-4 lg:px-8 pt-5 lg:pt-10">
         {/* Top bar */}
         <button
           onClick={() => navigate(-1)}
