@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { ARTIKEL_CLASS, norm, type Artikel, type BlockPayload, type LessonBlock, type LueckeItem, type PictureItem } from "./types";
+import { ARTIKEL_CLASS, HIGHLIGHT_COLORS, HIGHLIGHT_META, norm, type Artikel, type BlockPayload, type LessonBlock, type LueckeItem, type PictureItem } from "./types";
 import { MODEL_KEYS, modelLabel, modelParts } from "./InteractiveModel";
 import SatzbauBlock from "./SatzbauBlock";
 import BildBlock from "./BildBlock";
@@ -482,6 +482,44 @@ export default function BlockEditor({ block, onChange }: Props) {
           <div>
             <Label className="text-xs">Текст</Label>
             <Textarea rows={6} value={line(p.text)} onChange={(e) => setPayload({ text: e.target.value })} />
+          </div>
+          <div className="space-y-3 rounded-xl border p-3">
+            <div className="flex items-center gap-2">
+              <Switch checked={!!p.enable_highlight} onCheckedChange={(v) => setPayload({ enable_highlight: v })} />
+              <span className="text-xs font-medium">Дозволити виділення тексту маркером</span>
+            </div>
+            {p.enable_highlight && (
+              <>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Доступні кольори</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {HIGHLIGHT_COLORS.map((color) => {
+                      const current = p.highlight_colors ?? [...HIGHLIGHT_COLORS];
+                      const on = current.includes(color);
+                      return (
+                        <button
+                          key={color}
+                          type="button"
+                          aria-pressed={on}
+                          onClick={() => {
+                            const next = on ? current.filter((c) => c !== color) : [...current, color];
+                            setPayload({ highlight_colors: next.length ? next : [color] });
+                          }}
+                          className={cn("flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium", on ? "border-primary" : "border-border text-muted-foreground")}
+                        >
+                          <span className={cn("h-4 w-4 rounded-full", HIGHLIGHT_META[color].className)} />
+                          {HIGHLIGHT_META[color].label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-xs">Інструкція для виділення</Label>
+                  <Textarea rows={2} className="mt-1" placeholder="Виділіть Dativ синім, а Akkusativ жовтим" value={line(p.highlight_instructions)} onChange={(e) => setPayload({ highlight_instructions: e.target.value })} />
+                </div>
+              </>
+            )}
           </div>
           <div className="space-y-3">
             <Label className="text-xs">Лексика</Label>

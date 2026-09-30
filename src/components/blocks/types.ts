@@ -40,6 +40,23 @@ export const BLOCK_META: Record<BlockType, { label: string; de: string; icon: st
 
 export type Artikel = "der" | "die" | "das" | "plural";
 
+/** Кольори маркера для підсвічування тексту учнем. */
+export const HIGHLIGHT_COLORS = ["yellow", "blue", "red"] as const;
+export type HighlightColor = (typeof HIGHLIGHT_COLORS)[number];
+export const HIGHLIGHT_META: Record<HighlightColor, { label: string; hex: string; className: string }> = {
+  yellow: { label: "Жовтий", hex: "#FACC15", className: "hl-yellow" },
+  blue: { label: "Синій", hex: "#60A5FA", className: "hl-blue" },
+  red: { label: "Червоний", hex: "#F87171", className: "hl-red" },
+};
+
+/** Виділення учня у тексті: зміщення символів і колір. */
+export interface TextHighlight {
+  start: number;
+  end: number;
+  color: HighlightColor;
+  text?: string;
+}
+
 export interface VocabWord {
   de: string;
   uk: string;
@@ -97,6 +114,10 @@ export interface BlockPayload {
   /** lesen */
   text?: string;
   words?: VocabWord[];
+  /** lesen: маркер для учня (аналіз граматичних зв'язків у тексті) */
+  enable_highlight?: boolean;
+  highlight_colors?: HighlightColor[];
+  highlight_instructions?: string | null;
   /** luecke */
   mode?: "select" | "input";
   items?: LueckeItem[];

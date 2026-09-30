@@ -54,7 +54,7 @@ export default function BlockRenderer({ block, value, onChange, checked, readOnl
     case "hoer":
       return <HoerBlock block={block} />;
     case "lesen":
-      return <LesenBlock block={block} />;
+      return <LesenBlock block={block} value={value ?? {}} onChange={onChange} readOnly={readOnly} />;
     case "luecke":
       return <LueckeBlock block={block} value={value ?? {}} onChange={onChange} checked={checked} readOnly={readOnly} />;
     case "paare":
