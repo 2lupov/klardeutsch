@@ -25,8 +25,18 @@ export default function LiveBookPagePicker({
   const [longUrls, setLongUrls] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [picked, setPicked] = useState<Set<string>>(new Set());
+  const [adding, setAdding] = useState(false);
   const [shown, setShown] = useState<LiveBookPage | null>(current ?? null);
   const canAddToBoard = Boolean(onToBoard);
+
+  const togglePick = (id: string) =>
+    setPicked((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
 
   useEffect(() => {
     (async () => {
