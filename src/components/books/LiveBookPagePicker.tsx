@@ -221,6 +221,7 @@ export default function LiveBookPagePicker({
                 <div className="grid grid-cols-3 gap-2 md:grid-cols-2">
                   {pages.map((page) => {
                     const selected = page.id === selectedPage.id;
+                    const isPicked = picked.has(page.id);
                     const visible = shown?.image_path === page.image_path;
                     const pageUrl = urls[page.image_path];
                     return (
@@ -239,10 +240,23 @@ export default function LiveBookPagePicker({
                         }}
                         onClick={() => setSelectedId(page.id)}
                         className={`relative h-auto overflow-hidden rounded-md border-2 p-0 transition-colors ${
-                          selected ? "border-primary bg-primary/5" : "border-border bg-background hover:border-primary/40"
+                          isPicked ? "border-primary bg-primary/10 ring-2 ring-primary/30" : selected ? "border-primary bg-primary/5" : "border-border bg-background hover:border-primary/40"
                         } ${canAddToBoard ? "cursor-grab active:cursor-grabbing" : ""}`}
                         aria-label={`Переглянути сторінку ${page.page_number ?? "без номера"}`}
                       >
+                        {canAddToBoard && (
+                          <span
+                            role="checkbox"
+                            aria-checked={isPicked}
+                            aria-label={`Вибрати сторінку ${page.page_number ?? ""}`}
+                            onClick={(event) => { event.stopPropagation(); togglePick(page.id); }}
+                            className={`absolute left-1 top-1 z-10 flex size-5 items-center justify-center rounded border shadow-sm transition-colors ${
+                              isPicked ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background/90 text-transparent hover:border-primary"
+                            }`}
+                          >
+                            <Check className="size-3.5" />
+                          </span>
+                        )}
                         {pageUrl ? (
                           <img src={pageUrl} alt={`Сторінка ${page.page_number ?? ""}`} loading="lazy" className="aspect-[3/4] w-full object-cover object-top" />
                         ) : (
