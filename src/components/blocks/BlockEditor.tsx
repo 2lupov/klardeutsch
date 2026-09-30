@@ -1,10 +1,11 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Loader2, Plus, Trash2, Upload, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -43,11 +44,36 @@ function parseBracket(text: string, prev: LueckeItem): LueckeItem {
   return { ...prev, sentence: text.replace(m[0], "___"), answer: alts[0] ?? "", options: alts.length > 1 ? alts : [] };
 }
 
+const LUECKE_PRESETS = [
+  "[der|die|das|den|dem|denen]",
+  "[ein|eine|einen|einem|einer]",
+  "[in|an|auf|vor|hinter|unter]",
+  "[weil|denn|deshalb|obwohl]",
+];
+
+const blankLuecke = (): LueckeItem => ({ sentence: "___", answer: "", options: [], synonyms: [], hint: null });
+
+function AutoGrowTextarea(props: React.ComponentProps<typeof Textarea>) {
+  const ref = useRef<HTMLTextAreaElement | null>(null);
+  const resize = () => {
+    const node = ref.current;
+    if (!node) return;
+    node.style.height = "auto";
+    node.style.height = `${node.scrollHeight}px`;
+  };
+
+  useEffect(resize, [props.value]);
+  return <Textarea {...props} ref={ref} rows={2} onInput={(event) => { resize(); props.onInput?.(event); }} />;
+}
+
 /** Редактор блока: швидкі рядкові форми, ключі, підказки. */
 export default function BlockEditor({ block, onChange }: Props) {
   const p: BlockPayload = block.payload || {};
   const [uploading, setUploading] = useState(false);
   const [voicing, setVoicing] = useState(false);
+  const [lueckeEditorMode, setLueckeEditorMode] = useState("builder");
+  const [lueckeBulk, setLueckeBulk] = useState("");
+  const [activeLueckeIndex, setActiveLueckeIndex] = useState<number | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
 
   const setPayload = (patch: Partial<BlockPayload>) => onChange({ payload: { ...p, ...patch } });
@@ -125,12 +151,40 @@ export default function BlockEditor({ block, onChange }: Props) {
     },
   });
 
-  const luecke = rows<LueckeItem>(p.items ?? [], (items) => setPayload({ items }), () => ({ sentence: "___", answer: "", options: [], synonyms: [], hint: null }));
+  const luecke = rows<LueckeItem>(p.items ?? [], (items) => setPayload({ items }), blankLuecke);
   const satz = rows(p.sentences ?? [], (sentences) => setPayload({ sentences }), () => ({ words: [], hint: null }));
   const paare = rows(p.pairs ?? [], (pairs) => setPayload({ pairs }), () => ({ left: "", right: "" }));
   const artikel = rows(p.article_items ?? [], (article_items) => setPayload({ article_items }), () => ({ word: "", article: "der" as Artikel }));
   const vocab = rows(p.words ?? [], (words) => setPayload({ words }), () => ({ de: "", uk: "", artikel: null, plural: null }));
   const bild = rows<PictureItem>(p.picture_items ?? [], (picture_items) => setPayload({ picture_items }), () => ({ image: "", word: "", artikel: null, uk: "", options: [] }));
+
+  const bulkLines = lueckeBulk.split("\n").map((value) => value.trim()).filter(Boolean);
+  const parsedBulk = bulkLines.map((value) => parseBracket(value, blankLuecke()));
+  const invalidBulkCount = parsedBulk.filter((item) => !item.answer).length;
+
+  const importLueckeBulk = () => {
+    if (!parsedBulk.length || invalidBulkCount > 0) {
+      toast({ title: "Перевірте масовий імпорт", description: "Кожен рядок має містити відповідь у квадратних дужках.", variant: "destructive" });
+      return;
+    }
+    setPayload({ items: [...(p.items ?? []), ...parsedBulk] });
+    setLueckeBulk("");
+    setLueckeEditorMode("builder");
+    toast({ title: `Додано речень: ${parsedBulk.length}` });
+  };
+
+  const applyLueckePreset = (preset: string) => {
+    const items = p.items ?? [];
+    const target = activeLueckeIndex !== null && items[activeLueckeIndex] ? activeLueckeIndex : items.length - 1;
+    if (target < 0) {
+      setPayload({ items: [parseBracket(preset, blankLuecke())] });
+      setActiveLueckeIndex(0);
+      return;
+    }
+    const item = items[target];
+    const nextText = item.sentence.includes("___") ? item.sentence.replace("___", preset) : `${bracketize(item)} ${preset}`.trim();
+    setPayload({ items: items.map((entry, index) => index === target ? parseBracket(nextText, entry) : entry) });
+  };
 
   return (
     <div className="space-y-4">
@@ -338,35 +392,46 @@ export default function BlockEditor({ block, onChange }: Props) {
       )}
 
       {block.type === "luecke" && (
-        <div className="space-y-2">
+        <div className="space-y-3">
           <div className="flex items-center gap-2">
             <Switch checked={(p.mode ?? "select") === "input"} onCheckedChange={(v) => setPayload({ mode: v ? "input" : "select" })} />
             <span className="text-xs text-muted-foreground">Ручний ввід замість вибору з варіантів</span>
           </div>
-          <Label className="text-xs">Речення з пропуском</Label>
-          <p className="text-[11px] text-muted-foreground">Пишіть речення, а відповідь беріть у квадратні дужки: <code>Ich warte [auf] den Bus</code>. Варіанти вибору — через «|»: <code>[auf|an|für]</code>. Enter — нове речення.</p>
-          {luecke.items.map((item, i) => <div key={i} className="space-y-1.5 rounded-xl border p-2">
-            <div className="flex gap-2">
-              <Input
-                className="flex-1"
-                aria-label={`Речення ${i + 1}`}
-                placeholder="Das Buch liegt [auf|an|in] dem Tisch."
-                value={bracketize(item)}
-                onKeyDown={luecke.keys(i)}
-                onPaste={luecke.paste(i, (text) => parseBracket(text, { sentence: "___", answer: "", options: [], synonyms: [], hint: null }))}
-                onChange={(e) => luecke.patch(i, parseBracket(e.target.value, item))}
-              />
-              <Button size="sm" variant="ghost" className="text-destructive" onClick={() => luecke.remove(i)} aria-label={`Видалити речення ${i + 1}`}><Trash2 className="h-4 w-4" /></Button>
+          <div className="space-y-1.5">
+            <Label className="text-xs">Швидкі варіанти</Label>
+            <div className="flex flex-wrap gap-1.5">
+              {LUECKE_PRESETS.map((preset) => <Button key={preset} type="button" size="sm" variant="outline" className="h-auto whitespace-normal px-2.5 py-1.5 font-mono text-[11px]" onClick={() => applyLueckePreset(preset)}>{preset}</Button>)}
             </div>
-            <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
-              <span className={cn("rounded-md border px-2 py-0.5 font-semibold", item.answer ? "border-emerald-500 text-emerald-700 dark:text-emerald-300" : "border-destructive text-destructive")}>
-                {item.answer ? `Відповідь: ${item.answer}` : "Додайте [відповідь] у дужках"}
-              </span>
-              {(item.options ?? []).length > 1 && <span>Варіанти: {(item.options ?? []).join(" · ")}</span>}
-            </div>
-            <Input className="h-8 text-xs" aria-label={`Підказка ${i + 1}`} placeholder="💡 підказка (необовʼязково)" value={line(item.hint)} onChange={(e) => luecke.patch(i, { ...item, hint: e.target.value || null })} />
-          </div>)}
-          <Button size="sm" variant="outline" onClick={luecke.add}><Plus className="mr-1 h-3.5 w-3.5" />Речення</Button>
+          </div>
+          <Tabs value={lueckeEditorMode} onValueChange={setLueckeEditorMode}>
+            <TabsList className="grid w-full grid-cols-2 sm:w-auto">
+              <TabsTrigger value="builder">Конструктор</TabsTrigger>
+              <TabsTrigger value="bulk">Масовий імпорт</TabsTrigger>
+            </TabsList>
+            <TabsContent value="builder" className="space-y-2">
+              <Label className="text-xs">Речення з пропуском</Label>
+              <p className="text-[11px] text-muted-foreground">Відповідь беріть у квадратні дужки: <code>Ich warte [auf] den Bus</code>. Варіанти — через «|»: <code>[auf|an|für]</code>.</p>
+              {luecke.items.map((item, i) => <div key={i} className="space-y-2 rounded-lg border p-3">
+                <div className="flex items-start gap-2">
+                  <AutoGrowTextarea className="min-h-[72px] flex-1 resize-none overflow-hidden leading-6" aria-label={`Речення ${i + 1}`} placeholder="Das Buch liegt [auf|an|in] dem Tisch." value={bracketize(item)} onFocus={() => setActiveLueckeIndex(i)} onChange={(e) => luecke.patch(i, parseBracket(e.target.value, item))} />
+                  <Button size="icon" variant="ghost" className="shrink-0 text-destructive" onClick={() => luecke.remove(i)} aria-label={`Видалити речення ${i + 1}`}><Trash2 className="h-4 w-4" /></Button>
+                </div>
+                <div className="flex flex-wrap gap-1.5" aria-label={`Варіанти речення ${i + 1}`}>
+                  {item.answer ? [item.answer, ...(item.options ?? []).filter((option) => norm(option) !== norm(item.answer))].map((option, optionIndex) => <span key={`${option}-${optionIndex}`} className={cn("rounded-full border px-2.5 py-1 text-xs font-medium", optionIndex === 0 ? "border-primary bg-primary/10 text-primary" : "border-border bg-muted text-muted-foreground")}>{option}</span>) : <span className="rounded-full border border-destructive px-2.5 py-1 text-xs font-medium text-destructive">Додайте [відповідь] у дужках</span>}
+                </div>
+                <Input className="h-8 text-xs" aria-label={`Підказка ${i + 1}`} placeholder="💡 підказка (необовʼязково)" value={line(item.hint)} onChange={(e) => luecke.patch(i, { ...item, hint: e.target.value || null })} />
+              </div>)}
+              <Button size="sm" variant="outline" onClick={() => { luecke.add(); setActiveLueckeIndex(luecke.items.length); }}><Plus className="mr-1 h-3.5 w-3.5" />Речення</Button>
+            </TabsContent>
+            <TabsContent value="bulk" className="space-y-3">
+              <div>
+                <Label className="text-xs" htmlFor={`luecke-bulk-${block.id}`}>По одному реченню на рядок</Label>
+                <Textarea id={`luecke-bulk-${block.id}`} className="mt-1 min-h-48 font-mono text-sm leading-6" maxLength={12000} placeholder={"Ich warte [auf|an|für] den Bus.\nDas ist [der|die|das] richtige Artikel."} value={lueckeBulk} onChange={(e) => setLueckeBulk(e.target.value)} />
+              </div>
+              {bulkLines.length > 0 && <div className="rounded-lg border bg-muted/40 p-3 text-xs"><span className="font-semibold">Розпізнано: {parsedBulk.length}</span>{invalidBulkCount > 0 && <span className="ml-2 text-destructive">Без відповіді в дужках: {invalidBulkCount}</span>}</div>}
+              <Button type="button" onClick={importLueckeBulk} disabled={!bulkLines.length || invalidBulkCount > 0}>Імпортувати {parsedBulk.length || ""} {parsedBulk.length === 1 ? "речення" : "речень"}</Button>
+            </TabsContent>
+          </Tabs>
         </div>
       )}
 
