@@ -8,8 +8,11 @@ import {
   deletePresentation,
   renamePresentation,
   slideUrls,
+  createHtmlPresentation,
+  isHtmlFile,
   type Presentation,
 } from "@/lib/presentations";
+import HtmlSlides from "@/components/live/HtmlSlides";
 import { assignMiniCourse, listMiniCourses, type MiniCourse } from "@/lib/minicourse";
 import { listAssignableStudents, type AssignableStudent } from "@/lib/kit-from-book";
 
@@ -60,8 +63,15 @@ export default function PresentationsPage() {
   const onFiles = async (files: FileList | null) => {
     if (!files?.length || !user) return;
     for (const file of Array.from(files)) {
+      if (isHtmlFile(file)) {
+        try {
+          await createHtmlPresentation(user.id, file.name.replace(/\.(html?|svg)$/i, ""), await file.text());
+          toast.success(`${file.name} — додано 🐼`);
+        } catch (e: any) { toast.error(e.message); }
+        continue;
+      }
       if (!/\.pdf$/i.test(file.name)) {
-        toast.error(`${file.name}: підтримуємо PDF. Збережіть презентацію як PDF.`);
+        toast.error(`${file.name}: підтримуємо PDF, HTML і SVG.`);
         continue;
       }
       try {
@@ -81,7 +91,18 @@ export default function PresentationsPage() {
     load(true);
   };
 
+  const [htmlPreview, setHtmlPreview] = useState<Presentation | null>(null);
+  const pasteCode = async () => {
+    if (!user) return;
+    const code = window.prompt("Вставте HTML або SVG код презентації");
+    if (!code?.trim()) return;
+    const title = window.prompt("Назва", "Інтерактивна презентація") || "Інтерактивна презентація";
+    try { await createHtmlPresentation(user.id, title, code); toast.success("Додано 🐼"); load(true); }
+    catch (e: any) { toast.error(e.message); }
+  };
+
   const openPreview = async (p: Presentation) => {
+    if (p.html) { setHtmlPreview(p); return; }
     try {
       const urls = await slideUrls(p.slide_paths);
       setPreview({ p, urls, page: 1 });
@@ -106,7 +127,7 @@ export default function PresentationsPage() {
           <input
             ref={fileRef}
             type="file"
-            accept="application/pdf"
+            accept="application/pdf,.html,.htm,.svg"
             multiple
             className="hidden"
             onChange={(e) => onFiles(e.target.files)}
@@ -117,8 +138,19 @@ export default function PresentationsPage() {
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground font-bold text-sm disabled:opacity-60"
           >
             {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-            {busy || "Додати презентацію (PDF)"}
+            {busy || "Додати презентацію (PDF / HTML / SVG)"}
           </button>
+          <button onClick={pasteCode} className="ml-2 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border font-bold text-sm hover:border-primary/50">
+            Вставити код
+          </button>
+          {htmlPreview && (
+            <div className="fixed inset-0 z-50 flex flex-col bg-background/95 p-4" onClick={() => setHtmlPreview(null)}>
+              <div className="mb-2 flex items-center justify-between font-bold"><span>{htmlPreview.title}</span><button className="rounded-lg border border-border px-3 py-1 text-sm">Закрити</button></div>
+              <div className="flex-1 min-h-0" onClick={(e) => e.stopPropagation()}>
+                <HtmlSlides html={htmlPreview.html || ""} />
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -136,7 +168,7 @@ export default function PresentationsPage() {
             <div key={p.id} className="rounded-2xl border border-border bg-card p-4 space-y-3">
               <div className="font-bold leading-snug">{p.title}</div>
               <div className="text-xs text-muted-foreground">
-                {p.page_count} слайд(ів) · {new Date(p.created_at).toLocaleDateString("uk-UA")}
+                {p.html ? "Інтерактивна (HTML/SVG)" : `${p.page_count} слайд(ів)`} · {new Date(p.created_at).toLocaleDateString("uk-UA")}
               </div>
               <div className="flex flex-wrap gap-2">
                 <button
