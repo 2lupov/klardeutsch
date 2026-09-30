@@ -60,29 +60,31 @@ export default function LiveGrammar({
   };
 
   return (
-    <div className={cn("grid min-h-0 gap-3 grid-cols-1 xl:grid-cols-[minmax(0,320px)_minmax(0,1fr)_minmax(0,320px)]", className)}>
+    <div className={cn("grid min-h-0 gap-3 grid-cols-1 xl:grid-cols-[minmax(0,300px)_minmax(0,1fr)_minmax(0,320px)]", className)}>
       {/* Правила й приклади */}
-      <aside className="min-h-0 space-y-3 overflow-y-auto rounded-2xl border border-border bg-card p-4">
-        <div className="flex items-center gap-2 text-primary">
-          <GraduationCap className="h-4 w-4" />
-          <span className="text-xs font-bold uppercase tracking-widest">Граматика</span>
-          {lesson?.level && <span className="ml-auto rounded-md bg-primary/10 px-2 py-0.5 text-xs font-bold">{lesson.level}</span>}
+      <aside className="min-h-0 space-y-4 overflow-y-auto rounded-md border border-border bg-muted/40 p-4">
+        <div className="flex items-center gap-2 text-foreground">
+          <span className="grid size-8 place-items-center rounded-md bg-accent text-accent-foreground"><GraduationCap className="h-4 w-4" /></span>
+          <span className="text-xs font-bold uppercase">Граматика</span>
+          {lesson?.level && <span className="ml-auto rounded-md bg-accent px-2 py-0.5 text-xs font-black text-accent-foreground">{lesson.level}</span>}
         </div>
 
         {role === "teacher" && (
           <div className="space-y-2">
+            <p className="text-[10px] font-bold uppercase text-muted-foreground">Рівень</p>
             <div className="grid grid-cols-5 gap-1">
               {LEVELS.map((l) => (
                 <Button key={l} animated={false} size="sm" variant={l === level ? "default" : "outline"} className="h-8 px-0" onClick={() => setLevel(l)}>{l}</Button>
               ))}
             </div>
+            <p className="pt-1 text-[10px] font-bold uppercase text-muted-foreground">Приклади</p>
             <div className="grid grid-cols-5 gap-1">
               {COUNTS.map((c) => (
                 <Button key={c} animated={false} size="sm" variant={c === count ? "default" : "outline"} className="h-8 px-0 text-xs" onClick={() => setCount(c)}>{c}</Button>
               ))}
             </div>
             <Input value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="Тема: Perfekt, Dativ, Nebensatz…" className="h-8 text-sm" />
-            <Button animated={false} className="w-full" onClick={generate} disabled={busy}>
+            <Button animated={false} className="w-full bg-foreground text-background hover:bg-foreground/90" onClick={generate} disabled={busy}>
               {busy ? <Loader2 className="animate-spin" /> : lesson ? <Dices /> : <Sparkles />}
               {busy ? "Готуємо урок…" : lesson ? "Ще один урок" : "Створити урок"}
             </Button>
@@ -98,7 +100,7 @@ export default function LiveGrammar({
               <div className="space-y-2">
                 <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Правила</p>
                 {lesson.rules.map((r, i) => (
-                  <div key={i} className="space-y-1 rounded-xl bg-muted/50 p-2.5">
+                  <div key={i} className="space-y-1 border-l-4 border-accent bg-card p-3">
                     {r.title && <p className="font-bold text-foreground">{r.title}</p>}
                     {r.explanation_uk && <p className="text-muted-foreground">{r.explanation_uk}</p>}
                     {!!r.table?.length && (
@@ -142,18 +144,21 @@ export default function LiveGrammar({
       {/* Приклади + спільний текст із позначками */}
       <div className="flex min-h-0 flex-col gap-3">
         {!!lesson?.examples?.length && (
-          <div className="max-h-[38%] shrink-0 space-y-1.5 overflow-y-auto rounded-2xl border border-border bg-card p-3">
+          <div className="max-h-[38%] shrink-0 space-y-1.5 overflow-y-auto rounded-md border border-border bg-card p-4 shadow-sm">
             <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Приклади</p>
             {lesson.examples.map((ex, i) => (
-              <div key={i} className="rounded-xl bg-muted/40 px-3 py-2 text-sm">
+              <div key={i} className="grid grid-cols-[2rem_1fr] gap-2 border-b border-border px-1 py-3 text-sm last:border-0">
+                <span className="font-mono text-xs text-muted-foreground">{String(i + 1).padStart(2, "0")}.</span>
+                <div>
                 <p className="text-foreground">{highlightFocus(ex.de || "", ex.focus)}</p>
                 {ex.uk && <p className="text-xs text-muted-foreground">{ex.uk}</p>}
+                </div>
               </div>
             ))}
           </div>
         )}
         <MarkSheet
-          className="min-h-[220px] flex-1"
+          className="min-h-[220px] flex-1 rounded-md"
           value={marks}
           onChange={(html) => push("marks", html)}
           register={(set) => onRemote("marks", set)}
@@ -161,7 +166,7 @@ export default function LiveGrammar({
           toolbarExtra={remote === "marks" ? <span className="text-xs text-primary">{role === "teacher" ? "учень працює…" : "викладач працює…"}</span> : null}
         />
         {!!lesson?.reading?.questions?.length && (
-          <ul className="shrink-0 list-disc space-y-0.5 rounded-2xl border border-border bg-card p-3 pl-7 text-sm text-foreground">
+          <ul className="shrink-0 list-disc space-y-0.5 rounded-md border border-border bg-card p-3 pl-7 text-sm text-foreground">
             {lesson.reading.questions.map((q, i) => <li key={i}>{q}</li>)}
           </ul>
         )}
@@ -170,19 +175,20 @@ export default function LiveGrammar({
       {/* Практика + нотатки */}
       <div className="flex min-h-0 flex-col gap-3">
         {!!lesson?.practice?.length && (
-          <div className="max-h-[45%] shrink-0 space-y-1.5 overflow-y-auto rounded-2xl border border-border bg-card p-3">
+          <div className="max-h-[45%] shrink-0 space-y-2 overflow-y-auto rounded-md border border-border bg-card p-4 shadow-sm">
             <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Практика</p>
             {lesson.practice.map((t, i) => (
-              <div key={i} className="space-y-1 rounded-xl bg-muted/40 px-3 py-2 text-sm">
+              <div key={i} className="space-y-2 border-b border-border py-3 text-sm last:border-0">
                 <div className="flex items-start gap-2">
-                  <p className="flex-1 text-foreground">{t.prompt}</p>
+                  <span className="font-mono text-xs text-muted-foreground">{String(i + 1).padStart(2, "0")}.</span>
+                  <p className="flex-1 font-medium text-foreground">{t.prompt}</p>
                   <Button animated={false} size="icon" variant="ghost" className="h-7 w-7 shrink-0" onClick={() => toggleReveal(i)}
                     title={revealed.includes(i) ? "Сховати відповідь" : "Показати відповідь"}>
                     {revealed.includes(i) ? <EyeOff /> : <Eye />}
                   </Button>
                 </div>
                 {revealed.includes(i) && (
-                  <div className="rounded-lg bg-primary/10 px-2 py-1">
+                  <div className="ml-7 border-l-4 border-accent bg-accent/10 px-3 py-2">
                     <p className="font-bold text-foreground">{t.answer}</p>
                     {t.hint_uk && <p className="text-xs text-muted-foreground">{t.hint_uk}</p>}
                   </div>
@@ -199,7 +205,7 @@ export default function LiveGrammar({
             {remote === "notes" && <span className="ml-auto text-xs">пишуть…</span>}
           </div>
           <MarkSheet
-            className="min-h-[160px] flex-1"
+            className="min-h-[160px] flex-1 rounded-md"
             sheetClassName="text-base leading-8"
             value={notes}
             onChange={(html) => push("notes", html)}
