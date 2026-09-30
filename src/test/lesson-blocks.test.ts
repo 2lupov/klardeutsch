@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { emptyPayload, scoreBlock, type LessonBlock } from "@/components/blocks/types";
+import { bracketize, parseBracket } from "@/components/blocks/BlockEditor";
 import { kitBlocksToLessonBlocks, kitSections, normalizeKit } from "@/lib/lesson-kits";
 
 const block = (type: string, payload: LessonBlock["payload"]): LessonBlock => ({
@@ -23,5 +24,11 @@ describe("German lesson canvas adapters", () => {
     expect(scoreBlock(block("artikel", { article_items: [{ word: "Haus", article: "das" }, { word: "Mann", article: "der" }] }), { 0: "das", 1: "die" })).toEqual({ score: 1, max: 2 });
     expect(scoreBlock(block("transformation", { transformations: [{ source: "Ich habe Zeit.", answer: "Wenn ich Zeit hätte." }] }), { 0: " wenn  ich Zeit hätte. " })).toEqual({ score: 1, max: 1 });
     expect(scoreBlock(block("table", emptyPayload("table")), {})).toEqual({ score: 0, max: 0 });
+  });
+
+  it("parses and restores Lückentext alternatives", () => {
+    const item = parseBracket("Ich warte [auf|an|für] den Bus.", { sentence: "___", answer: "", options: [] });
+    expect(item).toMatchObject({ sentence: "Ich warte ___ den Bus.", answer: "auf", options: ["auf", "an", "für"] });
+    expect(bracketize(item)).toBe("Ich warte [auf|an|für] den Bus.");
   });
 });

@@ -1,6 +1,5 @@
 import { Check, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { isCorrectText, type LessonBlock } from "./types";
@@ -32,65 +31,41 @@ export default function LueckeBlock({ block, value, onChange, checked, readOnly 
           const options = it.options?.length ? it.options : [it.answer];
 
           return (
-            <li key={i} className="flex flex-wrap items-center gap-2 rounded-xl border bg-card p-3 text-[15px]">
-              <span className="text-xs font-semibold text-muted-foreground">{i + 1}.</span>
-              <span>{before}</span>
+            <li key={i} className="space-y-3 rounded-lg border bg-card p-4 text-[15px]">
+              <div className="flex flex-wrap items-center gap-2 leading-7">
+                <span className="text-xs font-semibold text-muted-foreground">{i + 1}.</span>
+                <span>{before}</span>
 
-              {mode === "input" ? (
-                <Input
-                  value={given}
-                  disabled={readOnly}
-                  onChange={(e) => set(i, e.target.value)}
-                  className={cn(
-                    "h-9 w-32 text-center",
-                    checked && (ok ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950" : "border-destructive bg-destructive/10"),
-                  )}
-                  placeholder="…"
-                />
-              ) : (
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <button
-                      disabled={readOnly}
-                      className={cn(
-                        "min-w-[96px] rounded-lg border-2 border-dashed px-3 py-1 text-center font-medium",
-                        !given && "text-muted-foreground",
-                        checked && (ok ? "border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-200" : "border-destructive bg-destructive/10 text-destructive"),
-                      )}
-                    >
-                      {given || "___"}
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-44 p-1">
-                    <div className="flex flex-col">
-                      {options.map((o) => (
-                        <Button key={o} variant="ghost" className="justify-start" onClick={() => set(i, o)}>
-                          {o}
-                        </Button>
-                      ))}
-                    </div>
-                  </PopoverContent>
-                </Popover>
+                {mode === "input" ? (
+                  <Input
+                    value={given}
+                    disabled={readOnly}
+                    onChange={(e) => set(i, e.target.value)}
+                    className={cn("h-9 w-32 text-center", checked && (ok ? "border-primary bg-primary/10" : "border-destructive bg-destructive/10"))}
+                    placeholder="…"
+                  />
+                ) : (
+                  <span className={cn("min-w-20 border-b-2 border-dashed px-2 text-center font-semibold", !given && "text-muted-foreground", checked && (ok ? "border-primary text-primary" : "border-destructive text-destructive"))}>{given || "___"}</span>
+                )}
+
+                <span>{after}</span>
+
+                {checked && (
+                  <span className="ml-auto flex items-center gap-2 text-xs">
+                    {ok ? <Check className="h-4 w-4 text-primary" /> : <><X className="h-4 w-4 text-destructive" /><span className="font-medium text-primary">{it.answer}</span></>}
+                  </span>
+                )}
+              </div>
+
+              {mode === "select" && (
+                <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap" role="group" aria-label={`Варіанти відповіді до речення ${i + 1}`}>
+                  {options.map((option) => (
+                    <Button key={option} type="button" size="sm" variant={given === option ? "default" : "outline"} className="min-h-10 min-w-0 whitespace-normal px-3" disabled={readOnly || checked} onClick={() => set(i, option)} aria-pressed={given === option}>{option}</Button>
+                  ))}
+                </div>
               )}
 
-              <span>{after}</span>
-
-              {checked && (
-                <span className="ml-auto flex items-center gap-2 text-xs">
-                  {ok ? (
-                    <Check className="h-4 w-4 text-emerald-600" />
-                  ) : (
-                    <>
-                      <X className="h-4 w-4 text-destructive" />
-                      <span className="font-medium text-emerald-700 dark:text-emerald-300">{it.answer}</span>
-                    </>
-                  )}
-                </span>
-              )}
-
-              {it.hint && (
-                <span className="w-full text-xs text-muted-foreground">💡 {it.hint}</span>
-              )}
+              {it.hint && <p className="text-xs text-muted-foreground">💡 {it.hint}</p>}
             </li>
           );
         })}
