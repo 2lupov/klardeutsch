@@ -2461,6 +2461,7 @@ export type Database = {
       presentations: {
         Row: {
           created_at: string
+          html: string | null
           id: string
           owner_id: string
           page_count: number
@@ -2470,6 +2471,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          html?: string | null
           id?: string
           owner_id: string
           page_count?: number
@@ -2479,6 +2481,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          html?: string | null
           id?: string
           owner_id?: string
           page_count?: number

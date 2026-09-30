@@ -261,6 +261,7 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
       {section === "slides" && (
         <LaserSurface active={laser} onMove={onLaserMove} className="flex-1 min-h-0 overflow-hidden p-2">
         <LiveSlidesPanel
+          classId={cls.id}
           teacherId={cls.teacher_id}
           current={studentView.view?.type === "slide" ? studentView.view : null}
           onTransfer={(presentationId, page) => transfer("slides", { type: "slide", presentation_id: presentationId, page })}

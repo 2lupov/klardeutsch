@@ -370,7 +370,7 @@ export default function LiveClass() {
           <div className="p-4">
             {cls.live_view?.type === "slide" ? (
               <LaserSurface point={laser}>
-                <PresentationView presentationId={cls.live_view.presentation_id} page={cls.live_view.page} />
+                <PresentationView presentationId={cls.live_view.presentation_id} page={cls.live_view.page} syncKey={cls.id} />
               </LaserSurface>
             ) : (
               <p className="text-sm text-muted-foreground">Викладач ще не відкрив презентацію.</p>

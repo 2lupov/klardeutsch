@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Loader2, Upload, Crosshair, Link2, Link2Off } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
-import { listPresentations, uploadPresentation, slideUrls, type Presentation } from "@/lib/presentations";
+import { listPresentations, uploadPresentation, slideUrls, createHtmlPresentation, isHtmlFile, type Presentation } from "@/lib/presentations";
+import HtmlSlides from "./HtmlSlides";
+import { Code2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -11,10 +13,12 @@ import { cn } from "@/lib/utils";
  * page — 1-based (як у PresentationView учня).
  */
 export default function LiveSlidesPanel({
+  classId,
   teacherId,
   current,
   onTransfer,
 }: {
+  classId?: string;
   teacherId: string;
   current: { presentation_id: string; page: number } | null;
   onTransfer: (presentationId: string, page: number) => void;
@@ -67,7 +71,26 @@ export default function LiveSlidesPanel({
     stripRef.current?.querySelector(`[data-slide="${page}"]`)?.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }, [page, urls.length]);
 
+  const addHtml = (p: Presentation) => {
+    setList((prev) => [p, ...prev]);
+    setSelected(p);
+    setPage(1);
+    toast({ title: "Інтерактивну презентацію додано" });
+  };
+  const pasteCode = async () => {
+    const code = window.prompt("Вставте HTML або SVG код презентації");
+    if (!code?.trim()) return;
+    const title = window.prompt("Назва", "Інтерактивна презентація") || "Інтерактивна презентація";
+    try { addHtml(await createHtmlPresentation(teacherId, title, code)); }
+    catch (e: any) { toast({ title: "Помилка", description: e.message, variant: "destructive" }); }
+  };
+
   const upload = async (file: File) => {
+    if (isHtmlFile(file)) {
+      try { addHtml(await createHtmlPresentation(teacherId, file.name.replace(/\.(html?|svg)$/i, ""), await file.text())); }
+      catch (e: any) { toast({ title: "Помилка", description: e.message, variant: "destructive" }); }
+      return;
+    }
     setBusy("Читаємо PDF…");
     try {
       const p = await uploadPresentation({ ownerId: teacherId, file, onProgress: setBusy });
@@ -87,13 +110,16 @@ export default function LiveSlidesPanel({
       {/* Верхня смуга: вибір презентації */}
       <div className="shrink-0 flex items-center gap-2 overflow-x-auto pb-0.5">
         <label className="shrink-0">
-          <input type="file" accept="application/pdf" className="hidden"
+          <input type="file" accept="application/pdf,.html,.htm,.svg" className="hidden"
             onChange={(e) => { const f = e.target.files?.[0]; if (f) upload(f); e.currentTarget.value = ""; }} />
           <span className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-md border border-dashed border-primary/50 px-3 text-xs font-semibold text-primary hover:bg-primary/10">
             {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
-            {busy || "PDF"}
+            {busy || "PDF / HTML / SVG"}
           </span>
         </label>
+        <button onClick={pasteCode} className="shrink-0 inline-flex h-8 items-center gap-1.5 rounded-md border border-dashed border-primary/50 px-3 text-xs font-semibold text-primary hover:bg-primary/10">
+          <Code2 className="h-3.5 w-3.5" /> Код
+        </button>
         {list.map((p) => (
           <button key={p.id} onClick={() => { setSelected(p); setPage(1); }}
             className={cn("shrink-0 h-8 rounded-md border px-3 text-xs font-medium transition-colors",
@@ -106,6 +132,23 @@ export default function LiveSlidesPanel({
       {!selected ? (
         <div className="flex-1 grid place-items-center rounded-xl border border-dashed border-border text-sm text-muted-foreground">
           Додайте PDF — і він стане презентацією.
+        </div>
+      ) : selected.html ? (
+        <div className="flex-1 min-h-0 flex flex-col rounded-xl bg-secondary/60 overflow-hidden">
+          <div className="flex-1 min-h-0 p-2">
+            <HtmlSlides html={selected.html} syncKey={live && sync && classId ? `${classId}:${selected.id}` : undefined} />
+          </div>
+          <div className="h-12 shrink-0 flex items-center gap-2 border-t border-border bg-card px-3">
+            <span className="text-xs font-medium text-muted-foreground">Інтерактивна · кнопки й анімації працюють</span>
+            {live ? <span className="text-xs text-emerald-600 font-medium">● учень бачить</span> : <span className="text-xs text-muted-foreground">учень ще не тут</span>}
+            <Button animated={false} size="sm" variant={sync ? "default" : "outline"} className="ml-auto" onClick={() => setSync((s) => !s)}
+              title="Коли увімкнено — ваші натискання повторюються в учня">
+              {sync ? <Link2 /> : <Link2Off />} {sync ? "Разом" : "Окремо"}
+            </Button>
+            <Button animated={false} size="sm" onClick={() => onTransfer(selected.id, 1)}>
+              <Crosshair /> Показати учню
+            </Button>
+          </div>
         </div>
       ) : (
         <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-[132px_minmax(0,1fr)] gap-2">

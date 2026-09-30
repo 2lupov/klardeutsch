@@ -12,6 +12,7 @@ export interface Presentation {
   title: string;
   slide_paths: string[];
   page_count: number;
+  html?: string | null;
   created_at: string;
 }
 
@@ -22,6 +23,7 @@ function normalize(row: any): Presentation {
     title: row.title,
     slide_paths: row.slide_paths ?? [],
     page_count: row.page_count ?? (row.slide_paths ?? []).length,
+    html: row.html ?? null,
     created_at: row.created_at,
   };
 }
@@ -118,3 +120,16 @@ export async function deletePresentation(p: Presentation) {
   const { error } = await supabase.from("presentations").delete().eq("id", p.id);
   if (error) throw error;
 }
+
+/** Інтерактивна презентація з HTML/SVG-коду (кнопки, анімації працюють). */
+export async function createHtmlPresentation(ownerId: string, title: string, html: string): Promise<Presentation> {
+  const { data, error } = await supabase
+    .from("presentations")
+    .insert({ owner_id: ownerId, title: title.trim() || "Інтерактивна презентація", slide_paths: [], page_count: 1, html } as any)
+    .select("*")
+    .single();
+  if (error) throw error;
+  return normalize(data);
+}
+
+export const isHtmlFile = (f: File) => /\.(html?|svg)$/i.test(f.name);
