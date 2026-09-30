@@ -1366,3 +1366,83 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     </label>
   );
 }
+
+/* ───────── move book to a shelf (folder) ───────── */
+
+function MoveBookModal({
+  book, shelves, onClose, onMoved,
+}: {
+  book: Book;
+  shelves: string[];
+  onClose: () => void;
+  onMoved: () => void;
+}) {
+  const [name, setName] = useState(book.folder ?? "");
+  const [saving, setSaving] = useState(false);
+
+  const save = async (value: string | null) => {
+    setSaving(true);
+    try {
+      await setBookFolder(book.id, value);
+      toast.success(value ? `Перенесено в «${value}»` : "Прибрано з полиці");
+      onMoved();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Помилка");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-slate-900/40 p-4" onClick={onClose}>
+      <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center gap-2">
+          <FolderInput className="w-4 h-4 text-indigo-600" />
+          <h3 className="text-sm font-semibold text-slate-900">Перенести «{book.title}»</h3>
+          <button onClick={onClose} className="ml-auto text-slate-400 hover:text-slate-700"><X className="w-4 h-4" /></button>
+        </div>
+
+        {shelves.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {shelves.map((s) => (
+              <button
+                key={s}
+                onClick={() => save(s)}
+                disabled={saving}
+                className={`px-3 py-1.5 rounded-xl border text-xs font-semibold ${
+                  s === book.folder ? "border-indigo-600 bg-indigo-50 text-indigo-700" : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                }`}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <p className="mt-4 text-xs font-medium text-slate-500">Нова полиця</p>
+        <div className="mt-1 flex gap-2">
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter" && name.trim()) save(name.trim()); }}
+            placeholder="напр. «Schritte A1» або «Prüfung B1»"
+            className="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-sm"
+          />
+          <button
+            onClick={() => name.trim() && save(name.trim())}
+            disabled={saving || !name.trim()}
+            className="px-3 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium disabled:opacity-50"
+          >
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+          </button>
+        </div>
+
+        {book.folder && (
+          <button onClick={() => save(null)} disabled={saving} className="mt-3 text-xs font-medium text-slate-500 hover:text-rose-600">
+            Прибрати з полиці
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
