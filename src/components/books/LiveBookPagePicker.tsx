@@ -54,8 +54,10 @@ export default function LiveBookPagePicker({
     if (!bookId) {
       setPages([]);
       setSelectedId(null);
+      setPicked(new Set());
       return;
     }
+    setPicked(new Set());
     let active = true;
     setLoading(true);
     setUrls({});
@@ -98,6 +100,33 @@ export default function LiveBookPagePicker({
     onToBoard(url, selectedPage, selectedBook?.title ?? "Підручник");
     toast.success(`Сторінка ${selectedPage.page_number ?? ""} на дошці`);
     setOpen(false);
+  };
+
+  /** Додає всі відмічені сторінки на дошку одна за одною. */
+  const toBoardMany = async () => {
+    if (!onToBoard || picked.size === 0) return;
+    const chosen = pages.filter((page) => picked.has(page.id));
+    setAdding(true);
+    try {
+      let added = 0;
+      for (const page of chosen) {
+        const url = longUrls[page.image_path] || await longSignedPageUrl(page.image_path);
+        if (!url) continue;
+        onToBoard(url, page, selectedBook?.title ?? "Підручник");
+        added += 1;
+        // Невелика пауза, щоб дошка встигла обробити кожну сторінку.
+        await new Promise((resolve) => setTimeout(resolve, 250));
+      }
+      if (added === 0) {
+        toast.error("Не вдалося отримати сторінки");
+        return;
+      }
+      toast.success(added === 1 ? "Сторінка на дошці" : `На дошці ${added} сторінки`);
+      setPicked(new Set());
+      setOpen(false);
+    } finally {
+      setAdding(false);
+    }
   };
 
   const show = async () => {
