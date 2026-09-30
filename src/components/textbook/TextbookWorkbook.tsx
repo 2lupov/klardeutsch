@@ -554,6 +554,10 @@ export default function TextbookWorkbook({
               }}
               onBlur={finishText}
               placeholder="Пишіть…"
+              spellCheck={false}
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
               className="workbook-text-input absolute z-10 min-w-[40%] resize-none overflow-hidden bg-transparent p-0 ring-0 shadow-none focus:ring-0 focus:outline-none focus-visible:ring-0 placeholder:opacity-50"
               style={(() => {
                 const scale = (svgRef.current?.getBoundingClientRect().width || W) / W;

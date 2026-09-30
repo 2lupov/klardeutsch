@@ -45,7 +45,7 @@ export default function LueckeBlock({ block, value, onChange, checked, readOnly 
                     placeholder="…"
                   />
                 ) : (
-                  <span className={cn("min-w-20 border-b-2 border-dashed px-2 text-center font-semibold", !given && "text-muted-foreground", checked && (ok ? "border-primary text-primary" : "border-destructive text-destructive"))}>{given || "___"}</span>
+                  <span className={cn("min-w-20 border-b-2 border-solid border-foreground/20 px-2 text-center font-semibold", !given && "text-muted-foreground", checked && (ok ? "border-primary text-primary" : "border-destructive text-destructive"))}>{given || "___"}</span>
                 )}
 
                 <span>{after}</span>
