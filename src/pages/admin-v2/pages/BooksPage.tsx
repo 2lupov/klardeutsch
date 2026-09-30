@@ -10,7 +10,7 @@ import {
   Book, BookKind, BookLektion, BookPage, BookTask, BookAudio, BookLessonPlan, BOOK_KIND_LABEL,
   bookToBank, createBook, deleteAudio, deleteBook, deletePage, deleteTask, detectLektionen,
   insertAudio, linkPagesToLektion, listAudio, listBooks, listLektionen, listPages, listTasks,
-  recognisePage, signedAudioUrl, signedPageUrls, updateAudio, uploadAudioFile, upsertLektion,
+  recognisePage, setBookFolder, signedAudioUrl, signedPageUrls, updateAudio, uploadAudioFile, upsertLektion,
 } from "@/lib/books";
 
 import PdfUploader from "@/components/books/PdfUploader";
