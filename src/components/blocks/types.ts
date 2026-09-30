@@ -97,6 +97,10 @@ export interface BlockPayload {
   /** lesen */
   text?: string;
   words?: VocabWord[];
+  /** lesen: маркер для учня (аналіз граматичних зв'язків у тексті) */
+  enable_highlight?: boolean;
+  highlight_colors?: HighlightColor[];
+  highlight_instructions?: string | null;
   /** luecke */
   mode?: "select" | "input";
   items?: LueckeItem[];
