@@ -51,6 +51,34 @@ const LUECKE_PRESETS = [
   "[weil|denn|deshalb|obwohl]",
 ];
 
+/** Швидкі граматичні шаблони для інших типів вправ. */
+const SATZ_PRESETS: { label: string; hint: string }[] = [
+  { label: "Subjekt + Verb + Objekt", hint: "Дієслово на 2 місці" },
+  { label: "Inversion: Gestern + Verb + Subjekt", hint: "Обставина спереду — дієслово одразу після неї" },
+  { label: "Nebensatz: weil / dass … Verb am Ende", hint: "У підрядному дієслово в кінці" },
+  { label: "Perfekt: haben/sein … Partizip II", hint: "Partizip II у кінці речення" },
+  { label: "Modalverb: Modalverb … Infinitiv", hint: "Infinitiv у кінці речення" },
+];
+
+const PAARE_PRESETS: { label: string; pairs: { left: string; right: string }[] }[] = [
+  { label: "Verben mit Präpositionen", pairs: [{ left: "warten", right: "auf + Akk." }, { left: "denken", right: "an + Akk." }, { left: "sich interessieren", right: "für + Akk." }, { left: "träumen", right: "von + Dat." }] },
+  { label: "Gegenteile", pairs: [{ left: "groß", right: "klein" }, { left: "hell", right: "dunkel" }, { left: "schnell", right: "langsam" }, { left: "reich", right: "arm" }] },
+  { label: "Nomen-Verb-Verbindungen", pairs: [{ left: "eine Rolle", right: "spielen" }, { left: "eine Frage", right: "stellen" }, { left: "Bescheid", right: "geben" }] },
+];
+
+const ARTIKEL_PRESETS: { label: string; words: string[] }[] = [
+  { label: "die: -ung / -heit / -keit / -schaft / -tion", words: ["die Wohnung", "die Freiheit", "die Möglichkeit", "die Mannschaft", "die Situation"] },
+  { label: "der: -ling / -or / -ismus / -er / -ist", words: ["der Lehrling", "der Motor", "der Kapitalismus", "der Fahrer", "der Journalist"] },
+  { label: "das: -chen / -lein / -ment / -um / -nis", words: ["das Mädchen", "das Fräulein", "das Dokument", "das Museum", "das Ergebnis"] },
+];
+
+const TRANS_PRESETS = [
+  "Aktiv → Passiv (wurde / ist … worden)",
+  "Hauptsatz → Nebensatz mit weil / obwohl",
+  "Indikativ → Konjunktiv II (hätte / wäre / würde)",
+  "Direkte Rede → Indirekte Rede",
+];
+
 const blankLuecke = (): LueckeItem => ({ sentence: "___", answer: "", options: [], synonyms: [], hint: null });
 
 function AutoGrowTextarea(props: React.ComponentProps<typeof Textarea>) {
@@ -221,34 +249,98 @@ export default function BlockEditor({ block, onChange }: Props) {
 
       {block.type === "image" && <div className="space-y-3"><Field label="URL зображення (фото зі сторінки, без ШІ-підміни)" value={p.image_path} onChange={(v) => setPayload({ image_path: v })} /><label className="block space-y-1 text-xs">Або завантажити власне фото<input type="file" accept="image/jpeg,image/png,image/webp" className="w-full text-xs" disabled={uploading || block.lesson_id === "draft"} onChange={async (e) => { const file = e.target.files?.[0]; if (file) { const path = await uploadImage(file); if (path) { setPayload({ image_path: path }); toast({ title: "Фото додано; збережіть урок" }); } } e.target.value = ""; }} />{block.lesson_id === "draft" && <span className="text-muted-foreground">Спершу збережіть урок, тоді завантажте фото.</span>}</label><Field label="Підпис" value={p.caption} onChange={(v) => setPayload({ caption: v })} /><Field label="Контекст / сторінка джерела" value={p.context} onChange={(v) => setPayload({ context: v })} /></div>}
 
-      {block.type === "artikel" && <div className="space-y-2">
+      {block.type === "artikel" && <div className="space-y-3">
         <Label className="text-xs">Слова та правильні артиклі</Label>
-        <p className="text-[11px] text-muted-foreground">Впишіть «der Tisch» — артикль підставиться сам. Alt+1/2/3/4 — der/die/das/Plural. Enter — новий рядок.</p>
-        {artikel.items.map((item, i) => <div key={i} className="space-y-1.5 rounded-xl border p-2">
-          <div className="flex gap-2">
-            <Input
-              className="flex-1"
-              aria-label={`Слово ${i + 1}`}
-              placeholder="Tisch або der Tisch"
-              value={item.word}
-              onKeyDown={(e) => {
-                const digit = ["1", "2", "3", "4"].indexOf(e.key);
-                if (e.altKey && digit >= 0) { e.preventDefault(); artikel.patch(i, { ...item, article: ARTIKEL[digit] }); return; }
-                artikel.keys(i)(e);
-              }}
-              onPaste={artikel.paste(i, (text) => { const s = splitArtikel(text); return { word: s.word, article: s.artikel ?? "der" }; })}
-              onChange={(e) => { const s = splitArtikel(e.target.value); artikel.patch(i, s.artikel ? { ...item, word: s.word, article: s.artikel } : { ...item, word: e.target.value }); }}
-            />
-            <Button size="sm" variant="ghost" className="text-destructive" onClick={() => artikel.remove(i)} aria-label={`Видалити слово ${i + 1}`}><Trash2 className="h-4 w-4" /></Button>
-          </div>
-          <div className="flex flex-wrap gap-1.5">
-            {ARTIKEL.map((a) => <button key={a} type="button" onClick={() => artikel.patch(i, { ...item, article: a })} className={cn("rounded-lg border px-2.5 py-1 text-xs font-semibold", item.article === a ? ARTIKEL_CLASS[a] : "text-muted-foreground")}>{a === "plural" ? "Pl." : a}</button>)}
-          </div>
-        </div>)}
-        <Button size="sm" variant="outline" onClick={artikel.add}><Plus className="mr-1 h-3.5 w-3.5" />Слово</Button>
+        <PresetRow
+          label="Швидкі шаблони за суфіксами"
+          presets={ARTIKEL_PRESETS.map((preset) => preset.label)}
+          onPick={(label) => {
+            const preset = ARTIKEL_PRESETS.find((entry) => entry.label === label);
+            if (!preset) return;
+            setPayload({ article_items: [...(p.article_items ?? []), ...preset.words.map((raw) => { const s = splitArtikel(raw); return { word: s.word, article: s.artikel ?? "der" as Artikel }; })] });
+          }}
+        />
+        <ModeTabs
+          builder={<>
+            <p className="text-[11px] text-muted-foreground">Впишіть «der Tisch» — артикль підставиться сам. Alt+1/2/3/4 — der/die/das/Plural. Enter — новий рядок.</p>
+            {artikel.items.map((item, i) => <div key={i} className="space-y-1.5 rounded-xl border p-2">
+              <div className="flex items-start gap-2">
+                <AutoGrowTextarea
+                  className="min-h-[44px] flex-1 resize-none overflow-hidden leading-6"
+                  aria-label={`Слово ${i + 1}`}
+                  placeholder="Tisch або der Tisch"
+                  value={item.word}
+                  onKeyDown={(e) => {
+                    const digit = ["1", "2", "3", "4"].indexOf(e.key);
+                    if (e.altKey && digit >= 0) { e.preventDefault(); artikel.patch(i, { ...item, article: ARTIKEL[digit] }); return; }
+                    artikel.keys(i)(e);
+                  }}
+                  onPaste={artikel.paste(i, (text) => { const s = splitArtikel(text); return { word: s.word, article: s.artikel ?? "der" }; })}
+                  onChange={(e) => { const s = splitArtikel(e.target.value); artikel.patch(i, s.artikel ? { ...item, word: s.word, article: s.artikel } : { ...item, word: e.target.value }); }}
+                />
+                <Button size="icon" variant="ghost" className="shrink-0 text-destructive" onClick={() => artikel.remove(i)} aria-label={`Видалити слово ${i + 1}`}><Trash2 className="h-4 w-4" /></Button>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {ARTIKEL.map((a) => <button key={a} type="button" onClick={() => artikel.patch(i, { ...item, article: a })} className={cn("rounded-lg border px-2.5 py-1 text-xs font-semibold", item.article === a ? ARTIKEL_CLASS[a] : "text-muted-foreground")}>{a === "plural" ? "Pl." : a}</button>)}
+              </div>
+            </div>)}
+            <Button size="sm" variant="outline" onClick={artikel.add}><Plus className="mr-1 h-3.5 w-3.5" />Слово</Button>
+          </>}
+          bulk={<BulkPanel
+            label="По одному слову на рядок: «der Tisch» або «Tisch | der»"
+            placeholder={"der Tisch\ndie Lampe\ndas Buch\nKinder | plural"}
+            parse={(row) => {
+              const [first, second] = row.split("|").map((x) => x.trim());
+              const s = splitArtikel(first ?? "");
+              const explicit = (second ?? "").toLowerCase();
+              const article = ARTIKEL.includes(explicit as Artikel) ? (explicit as Artikel) : s.artikel;
+              if (!s.word) return null;
+              return { word: s.word, article: article ?? ("der" as Artikel) };
+            }}
+            onImport={(items) => setPayload({ article_items: [...(p.article_items ?? []), ...items] })}
+            unit={["слово", "слів"]}
+          />}
+        />
       </div>}
 
-      {block.type === "transformation" && <div className="space-y-3"><p className="text-xs font-semibold">Зразок</p><div className="grid gap-2 sm:grid-cols-2"><Field label="Початкове речення" value={p.example?.source} onChange={(v) => setPayload({ example: { source: v, answer: p.example?.answer ?? "" } })} /><Field label="Перетворення" value={p.example?.answer} onChange={(v) => setPayload({ example: { source: p.example?.source ?? "", answer: v } })} /></div><p className="text-xs font-semibold">Завдання</p>{(p.transformations ?? []).map((item, i) => <div key={i} className="flex items-end gap-2"><div className="grid flex-1 gap-2 sm:grid-cols-2"><Field label={`Речення ${i + 1}`} value={item.source} onChange={(v) => setPayload({ transformations: (p.transformations ?? []).map((x, j) => j === i ? { ...x, source: v } : x) })} /><Field label="Правильна відповідь" value={item.answer} onChange={(v) => setPayload({ transformations: (p.transformations ?? []).map((x, j) => j === i ? { ...x, answer: v } : x) })} /></div><Button size="sm" variant="outline" onClick={() => setPayload({ transformations: (p.transformations ?? []).filter((_, j) => j !== i) })}>−</Button></div>)}<Button size="sm" variant="outline" onClick={() => setPayload({ transformations: [...(p.transformations ?? []), { source: "", answer: "" }] })}>+ Речення</Button></div>}
+      {block.type === "transformation" && <div className="space-y-3">
+        <p className="text-xs font-semibold">Зразок</p>
+        <div className="grid gap-2 sm:grid-cols-2">
+          <Field label="Початкове речення" value={p.example?.source} onChange={(v) => setPayload({ example: { source: v, answer: p.example?.answer ?? "" } })} />
+          <Field label="Перетворення" value={p.example?.answer} onChange={(v) => setPayload({ example: { source: p.example?.source ?? "", answer: v } })} />
+        </div>
+        <PresetRow
+          label="Швидкі шаблони перетворення"
+          presets={TRANS_PRESETS}
+          onPick={(hint) => setPayload({ transformations: [...(p.transformations ?? []), { source: "", answer: "", hint }] })}
+        />
+        <ModeTabs
+          builder={<>
+            <p className="text-[11px] text-muted-foreground">Ліве — вихідне речення, праве — правильне перетворення.</p>
+            {(p.transformations ?? []).map((item, i) => <div key={i} className="space-y-2 rounded-lg border p-3">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-muted-foreground">Речення {i + 1}</span>
+                {item.hint && <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">{item.hint}</span>}
+                <Button size="icon" variant="ghost" className="ml-auto shrink-0 text-destructive" onClick={() => setPayload({ transformations: (p.transformations ?? []).filter((_, j) => j !== i) })} aria-label={`Видалити речення ${i + 1}`}><Trash2 className="h-4 w-4" /></Button>
+              </div>
+              <AutoGrowTextarea className="min-h-[56px] resize-none overflow-hidden leading-6" aria-label={`Вихідне речення ${i + 1}`} placeholder="Der Techniker reparierte den Aufzug." value={line(item.source)} onChange={(e) => setPayload({ transformations: (p.transformations ?? []).map((x, j) => j === i ? { ...x, source: e.target.value } : x) })} />
+              <AutoGrowTextarea className="min-h-[56px] resize-none overflow-hidden leading-6" aria-label={`Відповідь ${i + 1}`} placeholder="Der Aufzug wurde vom Techniker repariert." value={line(item.answer)} onChange={(e) => setPayload({ transformations: (p.transformations ?? []).map((x, j) => j === i ? { ...x, answer: e.target.value } : x) })} />
+            </div>)}
+            <Button size="sm" variant="outline" onClick={() => setPayload({ transformations: [...(p.transformations ?? []), { source: "", answer: "" }] })}><Plus className="mr-1 h-3.5 w-3.5" />Речення</Button>
+          </>}
+          bulk={<BulkPanel
+            label="По одній парі на рядок: «вихідне -> відповідь» або через «|»"
+            placeholder={"Der Techniker reparierte den Aufzug. -> Der Aufzug wurde vom Techniker repariert.\nIch komme nicht, ich bin krank. -> Ich komme nicht, weil ich krank bin."}
+            parse={(row) => {
+              const [source, answer] = row.split(/->|→|\|/).map((x) => x.trim());
+              if (!source || !answer) return null;
+              return { source, answer };
+            }}
+            onImport={(items) => setPayload({ transformations: [...(p.transformations ?? []), ...items] })}
+            unit={["речення", "речень"]}
+          />}
+        />
+      </div>}
 
       {block.type === "modell" && <div className="space-y-3">
         <label className="block space-y-1"><Label className="text-xs">Модель</Label><select className="w-full rounded-md border p-2 text-sm" value={p.model ?? "auge"} onChange={(e) => setPayload({ model: e.target.value, parts: e.target.value === "custom" ? (p.parts ?? []) : [] })}>{MODEL_KEYS.map((k) => <option key={k} value={k}>{modelLabel(k)}</option>)}<option value="custom">Власний SVG-код</option></select></label>
