@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 
+
 export type BookKind = "kursbuch" | "arbeitsbuch" | "other";
 
 export interface Book {

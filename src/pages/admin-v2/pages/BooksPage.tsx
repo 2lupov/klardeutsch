@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   BookMarked, Plus, Trash2, Loader2, Sparkles, X, ChevronLeft, Send, Check,
-  Archive, Music, Upload,
+  Archive, Music, Upload, FolderOpen, FolderInput,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
