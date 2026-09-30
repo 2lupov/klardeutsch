@@ -331,14 +331,18 @@ export default function BoardEditor({
 
   /* ─────────── imperative API ─────────── */
 
+  const placeCount = useRef(0);
+
   const placeImage = (url: string, at?: { x: number; y: number }) => {
     const c = camRef.current;
     const put = (ratio: number) => {
       let w = c.w * 0.7;
       let h = (w * BOARD_W * ratio) / BOARD_H;
       if (h > c.w * 0.9) { h = c.w * 0.9; w = (h * BOARD_H) / ratio / BOARD_W; }
-      const x = at ? at.x - w / 2 : c.x + (c.w - w) / 2;
-      const y = at ? at.y - h / 2 : c.y + (c.w - h) / 2;
+      // Кілька картинок поспіль не лягають одна на одну — кожна трохи збоку.
+      const step = at ? 0 : (placeCount.current++ % 8) * 48;
+      const x = at ? at.x - w / 2 : c.x + (c.w - w) / 2 + step;
+      const y = at ? at.y - h / 2 : c.y + (c.w - h) / 2 + step;
       const el: BoardEl = { id: uid(), type: "image", url, x, y, w, h };
       // images go behind strokes / text
       commit([el, ...elsRef.current]);
