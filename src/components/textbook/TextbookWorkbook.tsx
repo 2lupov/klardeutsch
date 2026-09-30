@@ -518,8 +518,8 @@ export default function TextbookWorkbook({
           )}
         </div>
 
-      <Dialog open={pagesOpen} onOpenChange={setPagesOpen}>
-        <DialogContent className="flex h-[88dvh] max-w-5xl flex-col gap-0 overflow-hidden border-white/10 bg-[#0F172A] p-0 text-slate-100 shadow-2xl">
+        {/* Сторінка підручника — скролиться окремо, рейка лишається на місці */}
+        <div className={`${continuous ? "overflow-x-auto" : "overflow-auto max-h-[78vh]"} min-w-0 flex-1 rounded-md border border-border bg-muted/30 ${tool === "hand" ? "" : "touch-none"}`}>
           <div className="flex shrink-0 flex-wrap items-center gap-3 border-b border-white/10 bg-white/5 px-4 py-3 sm:px-5">
             <div className="min-w-0 flex-1">
               <DialogTitle className="truncate text-base font-semibold text-white">
