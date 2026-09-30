@@ -30,14 +30,14 @@ function splitArtikel(raw: string): { artikel: Artikel | null; word: string } {
 }
 
 /** Пропуск у квадратних дужках: «Ich warte [auf|an] den Bus». */
-function bracketize(item: LueckeItem) {
+export function bracketize(item: LueckeItem) {
   const alts = [item.answer, ...(item.options ?? []).filter((o) => norm(o) !== norm(item.answer))].filter(Boolean);
   const inner = alts.join("|") || item.answer;
   const sentence = item.sentence || "";
   return sentence.includes("___") ? sentence.replace("___", `[${inner}]`) : sentence;
 }
 
-function parseBracket(text: string, prev: LueckeItem): LueckeItem {
+export function parseBracket(text: string, prev: LueckeItem): LueckeItem {
   const m = text.match(/\[([^\]]*)\]/);
   if (!m) return { ...prev, sentence: text };
   const alts = m[1].split("|").map((s) => s.trim()).filter(Boolean);
