@@ -198,6 +198,9 @@ export default function LiveClass() {
     return counts;
   }, [items, seen, section]);
 
+  const [lastSlide, setLastSlide] = useState<any>(null);
+  const lv: any = (cls as any)?.live_view;
+  useEffect(() => { if (lv?.type === "slide") setLastSlide({ presentation_id: lv.presentation_id, page: lv.page }); }, [lv?.type, lv?.presentation_id, lv?.page]);
   const sectionItems = items.filter((i) => i.section === section);
 
   const submitAnswer = async (item: LiveItem, value: string) => {
@@ -278,6 +281,13 @@ export default function LiveClass() {
         })}
       </nav>
       <main className={`flex-1 h-full pb-16 md:pb-0 ${section === "board" ? "overflow-hidden flex flex-col" : "overflow-y-auto"}`}>
+        {lastSlide && (
+          <div className={section === "slides" ? "p-2 sm:p-4 h-[calc(100dvh-7rem)] md:h-[calc(100dvh-6rem)]" : "hidden"}>
+            <LaserSurface point={laser} className="h-full">
+              <PresentationView presentationId={lastSlide.presentation_id} page={lastSlide.page} syncKey={cls.id} />
+            </LaserSurface>
+          </div>
+        )}
         <header className="sticky top-0 z-10 bg-background/90 backdrop-blur border-b border-border px-3 py-2 md:px-5 md:py-4 flex items-center justify-between gap-3">
           <div className="min-w-0">
             <p className="text-[10px] md:text-[11px] uppercase tracking-widest text-primary font-bold">Живий урок</p>
@@ -367,15 +377,7 @@ export default function LiveClass() {
             )}
           </div>
         ) : section === "slides" ? (
-          <div className="p-2 sm:p-4 h-[calc(100dvh-7rem)] md:h-[calc(100dvh-6rem)]">
-            {cls.live_view?.type === "slide" ? (
-              <LaserSurface point={laser} className="h-full">
-                <PresentationView presentationId={cls.live_view.presentation_id} page={cls.live_view.page} syncKey={cls.id} />
-              </LaserSurface>
-            ) : (
-              <p className="text-sm text-muted-foreground">Викладач ще не відкрив презентацію.</p>
-            )}
-          </div>
+          !lastSlide ? <p className="p-4 text-sm text-muted-foreground">Викладач ще не відкрив презентацію.</p> : null
         ) : (
           <div className="p-4">
             {cls.live_view?.type === "blocks" ? (
