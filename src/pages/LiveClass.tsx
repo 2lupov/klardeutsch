@@ -284,7 +284,7 @@ export default function LiveClass() {
         {lastSlide && (
           <div className={section === "slides" ? "p-2 sm:p-4 h-[calc(100dvh-7rem)] md:h-[calc(100dvh-6rem)]" : "hidden"}>
             <LaserSurface point={laser} className="h-full">
-              <PresentationView presentationId={lastSlide.presentation_id} page={lastSlide.page} syncKey={cls.id} />
+              <PresentationView presentationId={lastSlide.presentation_id} page={lastSlide.page} syncKey={cls.id} progressStudentId={user?.id} />
             </LaserSurface>
           </div>
         )}

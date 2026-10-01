@@ -12,8 +12,10 @@ export default function PresentationView({
   page,
   compact,
   syncKey,
+  progressStudentId,
 }: {
   syncKey?: string;
+  progressStudentId?: string;
   presentationId: string;
   page: number;
   compact?: boolean;
@@ -64,7 +66,7 @@ export default function PresentationView({
   if (data.html)
     return (
       <div className="h-full w-full flex flex-col">
-        <HtmlSlides html={data.html} syncKey={syncKey ? `${syncKey}:${presentationId}` : undefined} className="flex-1 min-h-0 w-full rounded-xl shadow-lg" />
+        <HtmlSlides html={data.html} syncKey={syncKey ? `${syncKey}:${presentationId}` : undefined} className="flex-1 min-h-0 w-full rounded-xl shadow-lg" progress={progressStudentId ? { studentId: progressStudentId, presentationId } : undefined} />
       </div>
     );
 
