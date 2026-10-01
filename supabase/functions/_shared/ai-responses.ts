@@ -2,7 +2,7 @@ import { createOpenAI } from "npm:@ai-sdk/openai";
 import { streamText, type ModelMessage } from "npm:ai";
 import { createLovableAiGatewayRunIdFetch, getLovableAiGatewayRunId } from "./ai-run-id.ts";
 
-export function createResponsesCall(request: Request, apiKey: string, messages: ModelMessage[]) {
+export function createResponsesCall(request: Request, apiKey: string, instructions: string, messages: ModelMessage[]) {
   const runIdFetch = createLovableAiGatewayRunIdFetch(getLovableAiGatewayRunId(request));
   const provider = createOpenAI({
     baseURL: "https://ai.gateway.lovable.dev/v1",
@@ -12,6 +12,7 @@ export function createResponsesCall(request: Request, apiKey: string, messages: 
   });
   return streamText({
     model: provider.responses("openai/gpt-6-astra"),
+    instructions,
     messages,
     abortSignal: request.signal,
     providerOptions: {

@@ -101,7 +101,7 @@ Deno.serve(async (req) => {
     const user = `${wishes ? `Побажання викладача: ${wishes}\n\n` : ""}Транскрипт:\n${transcript}`;
     const apiKey = Deno.env.get("LOVABLE_API_KEY");
     if (!apiKey) return json({ error: "Lovable AI не налаштовано" }, 500);
-    const result = createResponsesCall(req, apiKey, [{ role: "system", content: system }, { role: "user", content: user }]);
+    const result = createResponsesCall(req, apiKey, system, [{ role: "user", content: user }]);
     const text = await result.text;
     let parsed: any;
     try { parsed = JSON.parse(text); } catch {
