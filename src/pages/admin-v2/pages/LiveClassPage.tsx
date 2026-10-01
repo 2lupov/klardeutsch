@@ -261,8 +261,8 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
         </div>
       </div>
 
-      {section === "slides" && (
-        <LaserSurface active={laser} onMove={onLaserMove} className="flex-1 min-h-0 overflow-hidden p-2">
+      {(
+        <LaserSurface active={laser} onMove={onLaserMove} className={section === "slides" ? "flex-1 min-h-0 overflow-hidden p-2" : "hidden"}>
         <LiveSlidesPanel
           classId={cls.id}
           teacherId={cls.teacher_id}
