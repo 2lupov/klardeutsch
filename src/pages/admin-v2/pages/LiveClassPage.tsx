@@ -143,6 +143,20 @@ export default function LiveClassPage() {
   );
 }
 
+/** Інтерактивна презентація з уроку автоматично стає ДЗ учня (один раз на презентацію). */
+async function ensurePresentationHomework(teacherId: string, studentId: string, presentationId: string) {
+  const db = supabase as any;
+  const { data: pres } = await db.from("presentations").select("title, html").eq("id", presentationId).maybeSingle();
+  if (!pres?.html) return;
+  const { data: ex } = await db.from("student_assignments").select("id").eq("student_id", studentId)
+    .eq("type", "presentation").eq("payload->>presentation_id", presentationId).limit(1);
+  if (ex?.length) return;
+  await db.from("student_assignments").insert({
+    teacher_id: teacherId, student_id: studentId, type: "presentation", title: pres.title || "Інтерактивний урок",
+    instructions: "Урок із заняття: доробіть те, що не встигли, і здайте.", payload: { presentation_id: presentationId, folder: "Уроки" },
+  });
+}
+
 function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentName: string; onExit: () => void }) {
   const [section, setSection] = useState<LiveSection>(
     LIVE_SECTIONS.some((s) => s.key === cls.current_section) ? cls.current_section : "board",
@@ -169,6 +183,7 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
     try {
       await setLiveView(cls.id, s, view);
       setStudentView({ section: s, view });
+      if (view?.type === "slide") void ensurePresentationHomework(cls.teacher_id, cls.student_id, view.presentation_id);
       toast({ title: "Учня перенесено", description: LIVE_SECTIONS.find((x) => x.key === s)?.label });
     } catch (e: any) {
       toast({ title: "Не вдалося перенести", description: e.message, variant: "destructive" });

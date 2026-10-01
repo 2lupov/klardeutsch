@@ -193,13 +193,15 @@ const StudentAcademy = () => {
       };
       const typeLabel: Record<string, string> = {
         test: "Тест", homework: "ДЗ", writing: "Письмо", audio: "Аудіо", modular: "Модуль",
-        book: "Підручник", book_plan: "Урок", blocks: "Урок", minicourse: "Мінікурс",
+        book: "Підручник", book_plan: "Урок", blocks: "Урок", presentation: "Інтерактивний урок", minicourse: "Мінікурс",
       };
       const taskRoute = (tk: any) =>
         tk.type === "book" || tk.type === "book_plan"
           ? `/book-task/${tk.id}`
           : tk.type === "blocks"
             ? `/blocks-task/${tk.id}`
+            : tk.type === "presentation"
+            ? `/presentation-task/${tk.id}`
             : tk.type === "minicourse"
               ? `/minicourse/${tk.id}`
               : `/task/${tk.id}`;

@@ -1,3 +1,4 @@
+import StudentPresentationTask from "@/pages/StudentPresentationTask";
 import RuStudentTranslator from "@/components/RuStudentTranslator";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -101,6 +102,7 @@ const AppRoutes = () => {
       <Route path="/live/:id" element={<LiveClass />} />
       {/* Standalone student task pages — no app shell, no student redirects */}
       <Route path="/task/:id" element={<RequireAuth><StudentTask /></RequireAuth>} />
+      <Route path="/presentation-task/:id" element={<RequireAuth><StudentPresentationTask /></RequireAuth>} />
       <Route path="/blocks-task/:id" element={<RequireAuth><StudentBlocksTask /></RequireAuth>} />
       <Route path="/book-task/:id" element={<RequireAuth><StudentBookHomework /></RequireAuth>} />
       <Route path="/minicourse/:id" element={<RequireAuth><StudentMiniCourse /></RequireAuth>} />
