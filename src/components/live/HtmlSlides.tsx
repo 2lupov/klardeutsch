@@ -37,7 +37,7 @@ export function cleanHtml(src: string): string {
   return code.replace(/```[\s\S]*$/, "").trim();
 }
 
-const BASE_W = 1024;
+const BASE_W = 640;
 
 export function wrapHtml(src: string): string {
   const code = cleanHtml(src);
@@ -84,7 +84,7 @@ export default function HtmlSlides({ html, syncKey, className }: { html: string;
     if (document.fullscreenElement) document.exitFullscreen?.();
     else wrap.current?.requestFullscreen?.().catch(() => {});
   };
-  // На вузьких екранах рендеримо як десктоп (1024px) і пропорційно зменшуємо.
+  // На вузьких екранах рендеримо як десктоп (640px) і пропорційно зменшуємо.
   const scale = box.w > 0 && box.w < BASE_W ? box.w / BASE_W : 1;
 
   return (
