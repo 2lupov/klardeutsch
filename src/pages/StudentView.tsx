@@ -162,7 +162,7 @@ const StudentView = () => {
 
             {v.type === "slide" && (
               <div className="h-[75vh]">
-                <PresentationView presentationId={(v as any).presentationId} page={(v as any).page} />
+                <PresentationView presentationId={(v as any).presentationId} page={(v as any).page} syncKey={(session as any)?.id} />
               </div>
             )}
 

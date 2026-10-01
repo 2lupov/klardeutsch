@@ -63,9 +63,8 @@ export default function PresentationView({
 
   if (data.html)
     return (
-      <div className="h-full w-full min-h-[60vh] flex flex-col gap-2 p-2">
-        <HtmlSlides html={data.html} syncKey={syncKey ? `${syncKey}:${presentationId}` : undefined} className="flex-1 min-h-[55vh] w-full rounded-xl border-0 bg-white shadow-lg" />
-        <div className={`text-center text-muted-foreground ${compact ? "text-[11px]" : "text-sm"} font-bold`}>{data.title}</div>
+      <div className="h-full w-full flex flex-col">
+        <HtmlSlides html={data.html} syncKey={syncKey ? `${syncKey}:${presentationId}` : undefined} className="flex-1 min-h-0 w-full rounded-xl shadow-lg" />
       </div>
     );
 

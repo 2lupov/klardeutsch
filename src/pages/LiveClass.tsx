@@ -367,9 +367,9 @@ export default function LiveClass() {
             )}
           </div>
         ) : section === "slides" ? (
-          <div className="p-4">
+          <div className="p-2 sm:p-4 h-[calc(100dvh-7rem)] md:h-[calc(100dvh-6rem)]">
             {cls.live_view?.type === "slide" ? (
-              <LaserSurface point={laser}>
+              <LaserSurface point={laser} className="h-full">
                 <PresentationView presentationId={cls.live_view.presentation_id} page={cls.live_view.page} syncKey={cls.id} />
               </LaserSurface>
             ) : (
