@@ -2149,6 +2149,44 @@ export type Database = {
           },
         ]
       }
+      live_class_video: {
+        Row: {
+          class_id: string
+          created_at: string
+          notes: string
+          updated_at: string
+          updated_by: string | null
+          video_id: string | null
+          video_url: string
+        }
+        Insert: {
+          class_id: string
+          created_at?: string
+          notes?: string
+          updated_at?: string
+          updated_by?: string | null
+          video_id?: string | null
+          video_url?: string
+        }
+        Update: {
+          class_id?: string
+          created_at?: string
+          notes?: string
+          updated_at?: string
+          updated_by?: string | null
+          video_id?: string | null
+          video_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_class_video_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: true
+            referencedRelation: "live_classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       live_class_writing: {
         Row: {
           class_id: string
