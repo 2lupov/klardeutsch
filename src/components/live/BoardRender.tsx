@@ -52,6 +52,29 @@ export function camTransform(cam: BoardCam) {
   return `translate(${-cam.x * BOARD_W * k} ${-cam.y * BOARD_H * k}) scale(${k})`;
 }
 
+/** Converts raw pointer samples into a soft handwritten curve. */
+function smoothStroke(points: { x: number; y: number }[]) {
+  if (!points.length) return "";
+  const scaled = points.map((point) => ({ x: point.x * BOARD_W, y: point.y * BOARD_H }));
+  if (scaled.length === 1) {
+    const point = scaled[0];
+    return `M ${point.x} ${point.y} L ${point.x + 0.01} ${point.y + 0.01}`;
+  }
+  if (scaled.length === 2) {
+    return `M ${scaled[0].x} ${scaled[0].y} L ${scaled[1].x} ${scaled[1].y}`;
+  }
+
+  let d = `M ${scaled[0].x} ${scaled[0].y}`;
+  for (let index = 1; index < scaled.length - 1; index += 1) {
+    const point = scaled[index];
+    const next = scaled[index + 1];
+    d += ` Q ${point.x} ${point.y} ${(point.x + next.x) / 2} ${(point.y + next.y) / 2}`;
+  }
+  const last = scaled[scaled.length - 1];
+  d += ` L ${last.x} ${last.y}`;
+  return d;
+}
+
 /** Renders one board element inside a 1000x750 SVG (coords are normalized 0..1). */
 export function BoardElement({ el }: { el: BoardEl }) {
   const type = el.type || "stroke";
@@ -60,14 +83,14 @@ export function BoardElement({ el }: { el: BoardEl }) {
 
   if (type === "stroke") {
     return (
-      <polyline
+      <path
         fill="none"
         stroke={el.color || "#4F46E5"}
         strokeWidth={el.width || 4}
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeOpacity={el.opacity ?? 1}
-        points={(el.points || []).map((p) => `${p.x * BOARD_W},${p.y * BOARD_H}`).join(" ")}
+        d={smoothStroke(el.points || [])}
       />
     );
   }
