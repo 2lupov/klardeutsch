@@ -1,3 +1,4 @@
+import { assignPresentationHomework } from "@/lib/presentations";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -143,18 +144,8 @@ export default function LiveClassPage() {
   );
 }
 
-/** Інтерактивна презентація з уроку автоматично стає ДЗ учня (один раз на презентацію). */
 async function ensurePresentationHomework(teacherId: string, studentId: string, presentationId: string) {
-  const db = supabase as any;
-  const { data: pres } = await db.from("presentations").select("title, html").eq("id", presentationId).maybeSingle();
-  if (!pres?.html) return;
-  const { data: ex } = await db.from("student_assignments").select("id").eq("student_id", studentId)
-    .eq("type", "presentation").eq("payload->>presentation_id", presentationId).limit(1);
-  if (ex?.length) return;
-  await db.from("student_assignments").insert({
-    teacher_id: teacherId, student_id: studentId, type: "presentation", title: pres.title || "Інтерактивний урок",
-    instructions: "Урок із заняття: доробіть те, що не встигли, і здайте.", payload: { presentation_id: presentationId, folder: "Уроки" },
-  });
+  try { await assignPresentationHomework(teacherId, studentId, presentationId); } catch { /* не інтерактивна */ }
 }
 
 function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentName: string; onExit: () => void }) {
@@ -281,6 +272,7 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
         <LiveSlidesPanel
           classId={cls.id}
           teacherId={cls.teacher_id}
+          studentId={cls.student_id}
           current={studentView.view?.type === "slide" ? studentView.view : null}
           onTransfer={(presentationId, page) => transfer("slides", { type: "slide", presentation_id: presentationId, page })}
         />

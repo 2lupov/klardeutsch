@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Loader2, Upload, Crosshair, Link2, Link2Off } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
-import { listPresentations, uploadPresentation, slideUrls, createHtmlPresentation, isHtmlFile, type Presentation } from "@/lib/presentations";
+import { listPresentations, uploadPresentation, slideUrls, createHtmlPresentation, isHtmlFile, assignPresentationHomework, type Presentation } from "@/lib/presentations";
 import HtmlSlides from "./HtmlSlides";
 import { Code2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -15,9 +15,11 @@ import { cn } from "@/lib/utils";
 export default function LiveSlidesPanel({
   classId,
   teacherId,
+  studentId,
   current,
   onTransfer,
 }: {
+  studentId?: string;
   classId?: string;
   teacherId: string;
   current: { presentation_id: string; page: number } | null;
@@ -145,6 +147,16 @@ export default function LiveSlidesPanel({
               title="Коли увімкнено — ваші натискання повторюються в учня">
               {sync ? <Link2 /> : <Link2Off />} {sync ? "Разом" : "Окремо"}
             </Button>
+            {studentId && (
+              <Button animated={false} size="sm" variant="outline" onClick={async () => {
+                try {
+                  const fresh = await assignPresentationHomework(teacherId, studentId, selected.id);
+                  toast({ title: fresh ? "Видано як ДЗ" : "Це ДЗ учень уже має" });
+                } catch (e: any) { toast({ title: "Помилка", description: e.message, variant: "destructive" }); }
+              }}>
+                Дати як ДЗ
+              </Button>
+            )}
             <Button animated={false} size="sm" onClick={() => onTransfer(selected.id, 1)}>
               <Crosshair /> Показати учню
             </Button>
