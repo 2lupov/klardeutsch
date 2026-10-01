@@ -11,7 +11,8 @@ import {
   createHtmlPresentation,
   isHtmlFile,
   type Presentation,
-, assignPresentationHomework } from "@/lib/presentations";
+  assignPresentationHomework,
+} from "@/lib/presentations";
 import HtmlSlides from "@/components/live/HtmlSlides";
 import { assignMiniCourse, listMiniCourses, type MiniCourse } from "@/lib/minicourse";
 import { listAssignableStudents, type AssignableStudent } from "@/lib/kit-from-book";
