@@ -2461,6 +2461,33 @@ export type Database = {
           },
         ]
       }
+      presentation_progress: {
+        Row: {
+          created_at: string
+          id: string
+          log: Json
+          presentation_id: string
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          log?: Json
+          presentation_id: string
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          log?: Json
+          presentation_id?: string
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       presentations: {
         Row: {
           created_at: string
