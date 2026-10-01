@@ -16,6 +16,7 @@ import LiveWriting from "@/components/live/LiveWriting";
 import LiveReading from "@/components/live/LiveReading";
 import LiveGrammar from "@/components/live/LiveGrammar";
 import LiveNotes from "@/components/live/LiveNotes";
+import LiveVideo from "@/components/live/LiveVideo";
 import TextbookWorkbook from "@/components/textbook/TextbookWorkbook";
 import BoardStudentView from "@/components/live/BoardStudentView";
 import type { BoardCam } from "@/components/live/BoardRender";
@@ -365,6 +366,10 @@ export default function LiveClass() {
         ) : section === "notes" ? (
           <div className="p-3 h-[calc(100dvh-8rem)] md:h-[calc(100dvh-5.5rem)]">
             <LiveNotes classId={cls.id} role="student" className="h-full" />
+          </div>
+        ) : section === "video" ? (
+          <div className="p-3 h-[calc(100dvh-8rem)] md:h-[calc(100dvh-5.5rem)] overflow-y-auto">
+            <LiveVideo classId={cls.id} role="student" className="min-h-full" />
           </div>
         ) : section === "textbook" ? (
           <div className="p-4">

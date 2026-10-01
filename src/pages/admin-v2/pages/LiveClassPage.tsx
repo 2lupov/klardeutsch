@@ -19,6 +19,7 @@ import LiveWriting from "@/components/live/LiveWriting";
 import LiveReading from "@/components/live/LiveReading";
 import LiveGrammar from "@/components/live/LiveGrammar";
 import LiveNotes from "@/components/live/LiveNotes";
+import LiveVideo from "@/components/live/LiveVideo";
 import LiveSlidesPanel from "@/components/live/LiveSlidesPanel";
 import BoardEditor, { type BoardApi } from "@/components/live/BoardEditor";
 import LiveBookPagePicker from "@/components/books/LiveBookPagePicker";
@@ -321,6 +322,17 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
             </Button>
           </div>
           <LiveNotes classId={cls.id} role="teacher" studentId={cls.student_id} teacherId={cls.teacher_id} className="flex-1" />
+        </div>
+      )}
+
+      {section === "video" && (
+        <div className="flex-1 min-h-0 flex flex-col gap-2 p-2 overflow-y-auto">
+          <div className="flex justify-end shrink-0">
+            <Button animated={false} size="sm" onClick={() => transfer("video", null)}>
+              <Crosshair /> Показати відео учню
+            </Button>
+          </div>
+          <LiveVideo classId={cls.id} role="teacher" className="flex-1" />
         </div>
       )}
 
