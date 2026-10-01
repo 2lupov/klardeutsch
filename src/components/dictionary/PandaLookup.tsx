@@ -56,8 +56,9 @@ const Forms = ({ title, data }: { title: string; data: Record<string, string> })
 };
 
 /** ШІ-словник панди: учень вводить незнайоме слово і одразу може зберегти його у свій словник. */
-export function PandaLookupPanel({ onSaved }: { onSaved?: (w: MyWord) => void }) {
-  const { user } = useAuth();
+export function PandaLookupPanel({ onSaved, targetUserId }: { onSaved?: (w: MyWord) => void; targetUserId?: string }) {
+  const { user: me } = useAuth();
+  const user = targetUserId ? { id: targetUserId } : me;
   const [word, setWord] = useState("");
   const [data, setData] = useState<WordData | null>(null);
   const [plain, setPlain] = useState("");
@@ -110,7 +111,7 @@ export function PandaLookupPanel({ onSaved }: { onSaved?: (w: MyWord) => void })
       });
       setSaved(true);
       onSaved?.(w);
-      toast.success("Додано у словник 🐼");
+      toast.success(targetUserId ? "Додано у словник учня 🐼" : "Додано у словник 🐼");
     } catch (e: any) {
       toast.error(e?.message || "Не вдалося зберегти");
     } finally {
@@ -251,10 +252,12 @@ export function PandaLookupDialog({
   open,
   onOpenChange,
   onSaved,
+  targetUserId,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   onSaved?: (w: MyWord) => void;
+  targetUserId?: string;
 }) {
   const setOpen = onOpenChange;
   return (
@@ -284,7 +287,7 @@ export function PandaLookupDialog({
                   <X className="w-4 h-4" />
                 </button>
               </div>
-              <PandaLookupPanel onSaved={onSaved} />
+              <PandaLookupPanel onSaved={onSaved} targetUserId={targetUserId} />
             </motion.div>
           </motion.div>
         )}

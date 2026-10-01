@@ -348,7 +348,7 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
         ))}
       </nav>
 
-      <PandaLookupDialog open={dictOpen} onOpenChange={setDictOpen} />
+      <PandaLookupDialog open={dictOpen} onOpenChange={setDictOpen} targetUserId={cls.student_id} />
     </div>
   );
 }
