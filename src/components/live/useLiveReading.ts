@@ -47,9 +47,16 @@ export function useLiveReading(classId: string) {
       const { data: u } = await supabase.auth.getUser();
       me.current = u.user?.id ?? null;
       const { data } = await (supabase as any).from("live_class_reading").select("*").eq("class_id", classId).maybeSingle();
-      if (!alive || !data) return;
+      if (!alive) return;
+      const draft = localStorage.getItem(`live-notes:${classId}`);
+      if (!data) {
+        if (draft) apply("notes", draft, true);
+        return;
+      }
       apply("text", toHtml(data.text || ""), true);
-      apply("notes", toHtml(data.notes || ""), true);
+      const dbNotes = toHtml(data.notes || "");
+      // Якщо локальна чернетка новіша (не встигла зберегтися) — відновлюємо її.
+      apply("notes", draft && draft !== dbNotes && draft.length > dbNotes.length ? draft : dbNotes, true);
       cur.current.topic = data.topic || null;
       setTopic(data.topic || null);
     })();
@@ -87,10 +94,9 @@ export function useLiveReading(classId: string) {
     };
   }, [classId]);
 
-  const persist = useCallback(() => {
-    if (saveT.current) clearTimeout(saveT.current);
-    saveT.current = setTimeout(() => {
-      void (supabase as any).from("live_class_reading").upsert(
+  const save = useCallback(async () => {
+    if (saveT.current) { clearTimeout(saveT.current); saveT.current = null; }
+    const { error } = await (supabase as any).from("live_class_reading").upsert(
         {
           class_id: classId,
           text: cur.current.text,
@@ -100,8 +106,17 @@ export function useLiveReading(classId: string) {
         },
         { onConflict: "class_id" },
       );
-    }, 600);
+    if (!error) localStorage.removeItem(`live-notes:${classId}`);
   }, [classId]);
+
+  const persist = useCallback(() => {
+    if (cur.current.notes) localStorage.setItem(`live-notes:${classId}`, cur.current.notes);
+    if (saveT.current) clearTimeout(saveT.current);
+    saveT.current = setTimeout(() => { void save(); }, 600);
+  }, [classId, save]);
+
+  // Виходячи з розділу — миттєво дозберігаємо все, що не встигло записатись.
+  useEffect(() => () => { if (saveT.current) void save(); }, [save]);
 
   /** Локальна зміна поля: одразу летить іншій стороні і зберігається. */
   const push = useCallback(
