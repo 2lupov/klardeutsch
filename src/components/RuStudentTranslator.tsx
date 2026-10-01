@@ -24,7 +24,7 @@ function walk(root: Node) {
       if (r !== null) n.nodeValue = r;
     } else if (n.nodeType === 1) {
       const el = n as Element;
-      if (el.tagName === "IFRAME" || el.isContentEditable) { n = w.nextSibling() || w.nextNode(); continue; }
+      if (el.tagName === "IFRAME" || (el as HTMLElement).isContentEditable) { n = w.nextSibling() || w.nextNode(); continue; }
       for (const a of ATTRS) {
         const v = el.getAttribute(a);
         if (v) { const r = tr(v); if (r !== null) el.setAttribute(a, r); }
