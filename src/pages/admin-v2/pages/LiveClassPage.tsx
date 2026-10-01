@@ -332,7 +332,12 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
               <Crosshair /> Показати відео учню
             </Button>
           </div>
-          <LiveVideo classId={cls.id} role="teacher" className="flex-1" />
+          <LiveVideo
+            classId={cls.id}
+            role="teacher"
+            className="flex-1"
+            onUseLesson={(kit) => transfer("blocks", { type: "blocks", kit_id: kit.id, title: kit.title, level: kit.level, blocks: kit.blocks, sections: kitSections(kit), page_paths: kit.page_paths, presentation_id: kit.presentation_id })}
+          />
         </div>
       )}
 

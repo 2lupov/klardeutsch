@@ -1,3 +1,4 @@
 - Live classroom uses a dedicated viewport-height workspace inside admin; this prevents nested page scrolling during teaching.
 - Grammar homework uses the dedicated `grammar` assignment type and StudentGrammar workbook; this keeps it separate from reading.
 - Live video uses a dedicated per-class synchronized record for the YouTube source and video notes; this keeps video notes separate from general lesson notes.
+- AI-generated video lessons reuse lesson kits and the existing live block view; this keeps one renderer for previews, live lessons, and the library.

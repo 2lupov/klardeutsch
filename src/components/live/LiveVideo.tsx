@@ -5,15 +5,19 @@ import { Input } from "@/components/ui/input";
 import MarkSheet from "@/components/live/MarkSheet";
 import { cn } from "@/lib/utils";
 import { useLiveVideo, youtubeVideoId } from "@/components/live/useLiveVideo";
+import VideoLessonGenerator from "@/components/live/VideoLessonGenerator";
+import type { LessonKit } from "@/lib/lesson-kits";
 
 export default function LiveVideo({
   classId,
   role,
   className,
+  onUseLesson,
 }: {
   classId: string;
   role: "teacher" | "student";
   className?: string;
+  onUseLesson?: (kit: LessonKit) => Promise<void> | void;
 }) {
   const { state, update, remoteTyping, registerEditor } = useLiveVideo(classId);
   const [url, setUrl] = useState(state.video_url);
@@ -43,6 +47,7 @@ export default function LiveVideo({
             />
           </div>
           <Button animated={false} onClick={openVideo}><Clapperboard /> Відкрити відео</Button>
+          {onUseLesson && <VideoLessonGenerator classId={classId} videoUrl={state.video_url || url} onUseLesson={onUseLesson} />}
           {invalid && <p className="self-center text-xs text-destructive">Перевірте посилання YouTube</p>}
         </div>
       )}
