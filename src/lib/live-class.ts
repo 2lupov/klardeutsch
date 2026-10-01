@@ -13,7 +13,7 @@ export type LiveSection =
   | "tasks"
   | "vocab"
   | "textbook"
-  | "writing";
+  | "writing"
   | "video";
 
 export const LIVE_SECTIONS: { key: LiveSection; label: string; icon: string }[] = [
