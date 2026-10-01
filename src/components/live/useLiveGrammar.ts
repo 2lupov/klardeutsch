@@ -142,9 +142,18 @@ export function useLiveGrammar(classId: string) {
       listeners.current.marks?.(marksHtml);
       chan.current?.send({ type: "broadcast", event: "lesson", payload: { lesson: l } });
       chan.current?.send({ type: "broadcast", event: "marks", payload: { value: marksHtml } });
-      persist();
+      if (saveT.current) clearTimeout(saveT.current);
+      void (async () => {
+        const { error } = await (supabase as any).from("live_class_grammar").upsert(
+          { class_id: classId, lesson: l, marks: marksHtml, notes: cur.current.notes, revealed: [], updated_by: me.current },
+          { onConflict: "class_id" },
+        );
+        if (error) console.error("grammar save", error);
+        // Одразу переносимо учня на вкладку «Граматика»
+        if (l) await supabase.from("live_classes").update({ current_section: "grammar" } as any).eq("id", classId);
+      })();
     },
-    [persist],
+    [classId],
   );
 
   const toggleReveal = useCallback(

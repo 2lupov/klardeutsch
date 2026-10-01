@@ -12,7 +12,7 @@ import MarkSheet from "@/components/live/MarkSheet";
 import { useLiveGrammar, type GrammarLesson } from "@/components/live/useLiveGrammar";
 
 const LEVELS = ["A1", "A2", "B1", "B2", "C1"];
-const COUNTS = [4, 6, 8, 10, 12];
+const COUNTS = [5, 10, 20, 30, 50];
 
 const lessonHtml = (l: GrammarLesson) =>
   `${l.reading?.title_de ? `<p><b>${l.reading.title_de}</b></p>` : ""}${paragraphsToHtml(l.reading?.text_de || "")}`;
@@ -77,12 +77,13 @@ export default function LiveGrammar({
                 <Button key={l} animated={false} size="sm" variant={l === level ? "default" : "outline"} className="h-8 px-0" onClick={() => setLevel(l)}>{l}</Button>
               ))}
             </div>
-            <p className="pt-1 text-[10px] font-bold uppercase text-muted-foreground">Приклади</p>
+            <p className="pt-1 text-[10px] font-bold uppercase text-muted-foreground">Приклади і вправи (до 50)</p>
             <div className="grid grid-cols-5 gap-1">
               {COUNTS.map((c) => (
                 <Button key={c} animated={false} size="sm" variant={c === count ? "default" : "outline"} className="h-8 px-0 text-xs" onClick={() => setCount(c)}>{c}</Button>
               ))}
             </div>
+            <Input type="number" min={3} max={50} value={count} onChange={(e) => setCount(Math.min(50, Math.max(1, Number(e.target.value) || 1)))} className="h-8 text-sm" aria-label="Кількість вправ" />
             <Input value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="Тема: Perfekt, Dativ, Nebensatz…" className="h-8 text-sm" />
             <Button animated={false} className="w-full bg-foreground text-background hover:bg-foreground/90" onClick={generate} disabled={busy}>
               {busy ? <Loader2 className="animate-spin" /> : lesson ? <Dices /> : <Sparkles />}
@@ -145,7 +146,7 @@ export default function LiveGrammar({
       <div className="flex min-h-0 flex-col gap-3">
         {!!lesson?.examples?.length && (
           <div className="max-h-[38%] shrink-0 space-y-1.5 overflow-y-auto rounded-md border border-border bg-card p-4 shadow-sm">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Приклади</p>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Приклади і вправи (до 50)</p>
             {lesson.examples.map((ex, i) => (
               <div key={i} className="grid grid-cols-[2rem_1fr] gap-2 border-b border-border px-1 py-3 text-sm last:border-0">
                 <span className="font-mono text-xs text-muted-foreground">{String(i + 1).padStart(2, "0")}.</span>
