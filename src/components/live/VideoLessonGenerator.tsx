@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { FunctionsHttpError } from "@supabase/supabase-js";
 import { BookOpenCheck, Loader2, Sparkles, Square, WandSparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database, Json } from "@/integrations/supabase/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -86,7 +87,7 @@ export default function VideoLessonGenerator({ classId, videoUrl, onUseLesson }:
     if (!user || !preview || !preview.sections.length) return;
     setStatus("saving");
     const blocks = preview.sections.flatMap((section) => section.blocks);
-    const { data, error } = await supabase.from("lesson_kits").insert({
+    const insert: Database["public"]["Tables"]["lesson_kits"]["Insert"] = {
       owner_id: user.id,
       title: preview.title,
       level: preview.level,
@@ -94,12 +95,13 @@ export default function VideoLessonGenerator({ classId, videoUrl, onUseLesson }:
       focus: preview.focus,
       notes: videoUrl,
       page_paths: [],
-      blocks,
-      sections: preview.sections,
+      blocks: blocks as Json,
+      sections: preview.sections as Json,
       topics: preview.topics,
       summary: preview.summary,
       kind: "lesson",
-    }).select("*").single();
+    };
+    const { data, error } = await supabase.from("lesson_kits").insert(insert).select("*").single();
     if (error || !data) { toast({ title: "Не вдалося зберегти урок", description: error?.message, variant: "destructive" }); setStatus("ready"); return; }
     const kit = normalizeKit(data);
     await onUseLesson(kit);
@@ -134,7 +136,7 @@ export default function VideoLessonGenerator({ classId, videoUrl, onUseLesson }:
             </div>}
           </div>
           <DialogFooter className="shrink-0 border-t border-border px-6 py-4">
-            {status === "generating" ? <Button variant="destructive" onClick={() => abortRef.current?.abort()}><Square /> Зупинити</Button> : draft ? <Button onClick={save} disabled={status === "saving" || !enabled.length}>{status === "saving" ? <Loader2 className="animate-spin" /> : <BookOpenCheck />} Зберегти й показати учневі</Button> : <Button onClick={generate} disabled={status === "captions" || status === "generating"}>{status === "generating" ? <Loader2 className="animate-spin" /> : <Sparkles />} Створити матеріали</Button>}
+            {status === "generating" ? <Button variant="destructive" onClick={() => abortRef.current?.abort()}><Square /> Зупинити</Button> : draft ? <Button onClick={save} disabled={status === "saving" || !enabled.length}>{status === "saving" ? <Loader2 className="animate-spin" /> : <BookOpenCheck />} Зберегти й показати учневі</Button> : <Button onClick={generate} disabled={status === "captions"}><Sparkles /> Створити матеріали</Button>}
           </DialogFooter>
         </DialogContent>
       </Dialog>
