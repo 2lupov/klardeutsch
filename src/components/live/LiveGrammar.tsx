@@ -125,7 +125,20 @@ export default function LiveGrammar({
 
             {!!lesson.vocab?.length && (
               <div className="space-y-1.5">
-                <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Слова</p>
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Слова</p>
+                  {role === "teacher" && studentId && (
+                    <Button animated={false} size="sm" variant="outline" className="h-7 text-xs" onClick={async () => {
+                      const rows = (lesson.vocab ?? []).filter((v) => v.term).map((v) => ({ user_id: studentId, german: v.term, russian: v.translation || "", article: v.article || null }));
+                      const { data: ex } = await supabase.from("custom_words").select("german").eq("user_id", studentId);
+                      const have = new Set((ex || []).map((r: any) => r.german));
+                      const fresh = rows.filter((r) => !have.has(r.german));
+                      if (!fresh.length) { toast.success("Усі слова вже у словнику учня"); return; }
+                      const { error } = await supabase.from("custom_words").insert(fresh);
+                      error ? toast.error("Не вдалося додати слова") : toast.success(`Додано учню: ${fresh.length}`);
+                    }}>+ У словник учня</Button>
+                  )}
+                </div>
                 {lesson.vocab.map((v, i) => (
                   <p key={i} className="text-foreground">
                     {v.article && <span className="mr-1 text-primary">{v.article}</span>}

@@ -101,6 +101,22 @@ export function LaserSurface({
     onMove?.(p);
   };
 
+  // Прокрутка під указкою: передаємо коліщатко найближчому прокручуваному блоку
+  const wheel = (e: React.WheelEvent) => {
+    const layer = e.currentTarget as HTMLElement;
+    layer.style.pointerEvents = "none";
+    let el = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null;
+    layer.style.pointerEvents = "";
+    while (el && el !== document.body) {
+      const st = getComputedStyle(el);
+      const canY = /(auto|scroll)/.test(st.overflowY) && el.scrollHeight > el.clientHeight;
+      const canX = /(auto|scroll)/.test(st.overflowX) && el.scrollWidth > el.clientWidth;
+      if (canY || canX) { el.scrollBy({ top: e.deltaY, left: e.deltaX }); return; }
+      el = el.parentElement;
+    }
+    window.scrollBy({ top: e.deltaY });
+  };
+
   const clear = () => { setOwn(null); onMove?.(null); };
 
   return (
@@ -113,6 +129,7 @@ export function LaserSurface({
           onPointerMove={handle}
           onPointerDown={handle}
           onPointerLeave={clear}
+          onWheel={wheel}
         />
       )}
       <LaserDot point={shown} />
