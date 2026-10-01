@@ -23,7 +23,8 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const level = LEVELS.includes(body?.level) ? body.level : "A2";
     const topic = String(body?.topic ?? "").slice(0, 200).trim();
-    const examples = Math.min(Math.max(Number(body?.examples) || 6, 3), 16);
+    const examples = Math.min(Math.max(Number(body?.examples) || 6, 3), 50);
+    const practiceN = Math.min(Math.max(Number(body?.practice) || examples, 5), 50);
     const readingWords = Math.min(Math.max(Number(body?.reading_words) || 90, 40), 300);
     if (!topic) return json({ error: "Вкажіть тему граматики" }, 400);
 
@@ -36,7 +37,7 @@ Deno.serve(async (req) => {
 - Пояснення українською, приклади німецькою з перекладом.
 - 2-4 короткі правила: кожне = одна думка + за потреби маленька таблиця форм (масив рядків).
 - РІВНО ${examples} прикладів речень із теми. У кожному прикладі познач ключову частину у полі "focus" (точний фрагмент із речення німецькою).
-- 5-8 завдань на практику: коротке речення з пропуском "___" та правильна відповідь і мікро-пояснення.
+- РІВНО ${practiceN} завдань на практику: коротке речення з пропуском "___" та правильна відповідь і мікро-пояснення.
 - Один зв'язний текст для читання (~${readingWords} слів) рівня ${level}, у якому ця граматика зустрічається багато разів, плюс 3 питання на розуміння німецькою.
 - Ніякої води, жодних вступів.
 

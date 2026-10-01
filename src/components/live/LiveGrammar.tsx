@@ -12,7 +12,7 @@ import MarkSheet from "@/components/live/MarkSheet";
 import { useLiveGrammar, type GrammarLesson } from "@/components/live/useLiveGrammar";
 
 const LEVELS = ["A1", "A2", "B1", "B2", "C1"];
-const COUNTS = [4, 6, 8, 10, 12];
+const COUNTS = [5, 10, 20, 30, 50];
 
 const lessonHtml = (l: GrammarLesson) =>
   `${l.reading?.title_de ? `<p><b>${l.reading.title_de}</b></p>` : ""}${paragraphsToHtml(l.reading?.text_de || "")}`;
