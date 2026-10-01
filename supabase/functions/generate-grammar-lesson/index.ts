@@ -28,6 +28,11 @@ Deno.serve(async (req) => {
     const readingWords = Math.min(Math.max(Number(body?.reading_words) || 90, 40), 300);
     if (!topic) return json({ error: "Вкажіть тему граматики" }, 400);
 
+    let ru = false;
+    if (body?.student_id) {
+      const { data: pr } = await sb.from("profiles").select("preferred_lang").eq("user_id", String(body.student_id)).maybeSingle();
+      ru = (pr as any)?.preferred_lang === "ru";
+    }
     const apiKey = Deno.env.get("LOVABLE_API_KEY");
     if (!apiKey) return json({ error: "AI не налаштовано" }, 500);
 
@@ -39,7 +44,7 @@ Deno.serve(async (req) => {
 - РІВНО ${examples} прикладів речень із теми. У кожному прикладі познач ключову частину у полі "focus" (точний фрагмент із речення німецькою).
 - РІВНО ${practiceN} завдань на практику: коротке речення з пропуском "___" та правильна відповідь і мікро-пояснення.
 - Один зв'язний текст для читання (~${readingWords} слів) рівня ${level}, у якому ця граматика зустрічається багато разів, плюс 3 питання на розуміння німецькою.
-- Ніякої води, жодних вступів.
+- Ніякої води, жодних вступів.${ru ? "\n- ВАЖЛИВО: усі пояснення, назви, переклади, підказки й поля *_uk пиши РОСІЙСЬКОЮ мовою (учень не розуміє українську)." : ""}
 
 Поверни СТРОГО JSON без markdown:
 {"title":"назва уроку українською","title_de":"назва німецькою","level":"${level}","summary_uk":"1-2 речення, про що тема","rules":[{"title":"заголовок","explanation_uk":"пояснення","table":["рядок таблиці у форматі 'ich | gehe'"]}],"examples":[{"de":"речення німецькою","uk":"переклад","focus":"фрагмент із речення"}],"practice":[{"prompt":"речення з ___","answer":"правильна відповідь","hint_uk":"мікро-пояснення"}],"mistakes":["2-3 типові помилки учнів"],"vocab":[{"term":"слово","article":"der|die|das або null","translation":"переклад"}],"reading":{"title_de":"назва тексту","text_de":"текст з абзацами","questions":["питання німецькою"]}}`;

@@ -59,6 +59,12 @@ const Forms = ({ title, data }: { title: string; data: Record<string, string> })
 export function PandaLookupPanel({ onSaved, targetUserId }: { onSaved?: (w: MyWord) => void; targetUserId?: string }) {
   const { user: me } = useAuth();
   const user = targetUserId ? { id: targetUserId } : me;
+  const [wLang, setWLang] = useState<"uk" | "ru">("uk");
+  useEffect(() => {
+    if (!user?.id) return;
+    supabase.from("profiles").select("preferred_lang").eq("user_id", user.id).maybeSingle()
+      .then(({ data }) => setWLang((data as any)?.preferred_lang === "ru" ? "ru" : "uk"));
+  }, [user?.id]);
   const [word, setWord] = useState("");
   const [data, setData] = useState<WordData | null>(null);
   const [plain, setPlain] = useState("");
@@ -76,7 +82,7 @@ export function PandaLookupPanel({ onSaved, targetUserId }: { onSaved?: (w: MyWo
     setSaved(false);
     try {
       const { data: res, error } = await supabase.functions.invoke("lookup-word", {
-        body: { word: q, lang: "uk" },
+        body: { word: q, lang: wLang },
       });
       if (error) throw error;
       if (res?.structured) setData(res.structured as WordData);

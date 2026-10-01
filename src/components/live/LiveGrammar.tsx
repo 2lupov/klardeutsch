@@ -47,7 +47,7 @@ export default function LiveGrammar({
     setBusy(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-grammar-lesson", {
-        body: { level, topic: topic.trim(), examples: count, reading_words: level === "A1" ? 70 : 110 },
+        body: { level, topic: topic.trim(), examples: count, student_id: studentId, reading_words: level === "A1" ? 70 : 110 },
       });
       if (error || (data as any)?.error) throw new Error((data as any)?.error || error?.message);
       const l = (data as any).lesson as GrammarLesson;

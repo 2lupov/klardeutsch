@@ -1,6 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import MAP from "@/lib/ru-ui-map.json";
-import { useLanguage } from "@/contexts/LanguageContext";
 import { useIsManagedStudent } from "@/hooks/useIsManagedStudent";
 
 /** Для учнів із російською мовою профілю перекладає українські написи кабінету на льоту. */
@@ -34,9 +35,15 @@ function walk(root: Node) {
 }
 
 export default function RuStudentTranslator() {
-  const { lang } = useLanguage();
-  const isStudent = useIsManagedStudent();
-  const on = lang === "ru" && !!isStudent;
+  const { user } = useAuth();
+  const { isStudent } = useIsManagedStudent();
+  const [ru, setRu] = useState(false);
+  useEffect(() => {
+    if (!user || !isStudent) { setRu(false); return; }
+    supabase.from("profiles").select("preferred_lang").eq("user_id", user.id).maybeSingle()
+      .then(({ data }) => setRu((data as any)?.preferred_lang === "ru"));
+  }, [user, isStudent]);
+  const on = ru;
   useEffect(() => {
     if (!on) return;
     walk(document.body);
