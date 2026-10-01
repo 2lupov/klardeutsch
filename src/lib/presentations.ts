@@ -133,3 +133,19 @@ export async function createHtmlPresentation(ownerId: string, title: string, htm
 }
 
 export const isHtmlFile = (f: File) => /\.(html?|svg)$/i.test(f.name);
+
+/** Інтерактивна презентація як ДЗ учня (один запис на учня й презентацію). Повертає false, якщо вже видано. */
+export async function assignPresentationHomework(teacherId: string, studentId: string, presentationId: string): Promise<boolean> {
+  const db = supabase as any;
+  const { data: pres } = await db.from("presentations").select("title, html").eq("id", presentationId).maybeSingle();
+  if (!pres?.html) throw new Error("Це не інтерактивна презентація");
+  const { data: ex } = await db.from("student_assignments").select("id").eq("student_id", studentId)
+    .eq("type", "presentation").eq("payload->>presentation_id", presentationId).limit(1);
+  if (ex?.length) return false;
+  const { error } = await db.from("student_assignments").insert({
+    teacher_id: teacherId, student_id: studentId, type: "presentation", title: pres.title || "Інтерактивний урок",
+    instructions: "Пройдіть інтерактивну презентацію і здайте.", payload: { presentation_id: presentationId, folder: "Уроки" },
+  });
+  if (error) throw error;
+  return true;
+}

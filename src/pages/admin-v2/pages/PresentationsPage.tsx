@@ -11,7 +11,7 @@ import {
   createHtmlPresentation,
   isHtmlFile,
   type Presentation,
-} from "@/lib/presentations";
+, assignPresentationHomework } from "@/lib/presentations";
 import HtmlSlides from "@/components/live/HtmlSlides";
 import { assignMiniCourse, listMiniCourses, type MiniCourse } from "@/lib/minicourse";
 import { listAssignableStudents, type AssignableStudent } from "@/lib/kit-from-book";
@@ -206,7 +206,42 @@ export default function PresentationsPage() {
                 >
                   <Trash2 className="w-3.5 h-3.5" /> Видалити
                 </button>
+                {p.html && (
+                  <button
+                    onClick={() => setGiveFor(giveFor === `pres:${p.id}` ? null : `pres:${p.id}`)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-primary/50 text-primary text-xs font-bold hover:bg-primary/10"
+                  >
+                    <UserPlus className="w-3.5 h-3.5" /> Дати як ДЗ
+                  </button>
+                )}
               </div>
+              {giveFor === `pres:${p.id}` && (
+                <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto">
+                  {students.length === 0 && <span className="text-xs text-muted-foreground">Немає учнів</span>}
+                  {students.map((st) => {
+                    const k = `pres:${p.id}:${st.id}`;
+                    const done = given.includes(k);
+                    return (
+                      <button
+                        key={st.id}
+                        disabled={done}
+                        onClick={async () => {
+                          if (!user) return;
+                          try {
+                            const fresh = await assignPresentationHomework(user.id, st.id, p.id);
+                            setGiven((g) => [...g, k]);
+                            toast.success(fresh ? `Видано: ${st.name}` : `${st.name} вже має це ДЗ`);
+                          } catch (e: any) { toast.error(e.message); }
+                        }}
+                        className={`px-2.5 py-1.5 rounded-lg border text-[11px] font-bold ${done ? "border-primary text-primary" : "border-border hover:border-primary/50"}`}
+                      >
+                        {done && <Check className="w-3 h-3 inline mr-1" />}
+                        {st.name}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           ))}
         </div>
