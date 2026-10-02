@@ -801,11 +801,6 @@ export default function BoardEditor({
               ? "cursor-cell"
               : "cursor-crosshair"
           }`}
-          style={{
-            backgroundImage: "radial-gradient(#E2E8F0 1px, transparent 1px)",
-            backgroundSize: `${24 / cam.w}px ${24 / cam.w}px`,
-            backgroundPosition: `${(-cam.x / cam.w) * 100}% ${(-cam.y / cam.w) * 100}%`,
-          }}
           onPointerDown={onDown}
           onPointerMove={onMove}
           onPointerUp={onUp}
