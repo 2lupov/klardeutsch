@@ -87,7 +87,7 @@ export default function SyncedYouTube({ classId, videoId, role }: { classId: str
         playerVars: { rel: 0, playsinline: 1, modestbranding: 1 },
         events: {
           onReady: () => {
-            ready = true; playerRef.current = player; (window as any).__yt2 = player;
+            ready = true; playerRef.current = player;
             if (pending) { applyMsg(pending); pending = null; }
             if (role === "student") ch.send({ type: "broadcast", event: "ask", payload: {} });
           },
