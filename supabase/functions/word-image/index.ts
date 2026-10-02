@@ -22,7 +22,7 @@ function json(status: number, body: unknown) {
 
 async function fromOpenverse(q: string): Promise<{ url: string; credit: string } | null> {
   const res = await fetch(
-    `https://api.openverse.org/v1/images/?q=${encodeURIComponent(q)}&page_size=1&license_type=all&size=square`,
+    `https://api.openverse.org/v1/images/?q=${encodeURIComponent(q)}&page_size=1&license_type=all&size=medium`,
     { headers: { "User-Agent": "KLAR-Dutch/1.0 (learning app)" } }
   );
   if (!res.ok) return null;
