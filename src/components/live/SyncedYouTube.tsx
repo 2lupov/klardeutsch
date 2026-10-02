@@ -1,4 +1,5 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Volume2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 declare global {
@@ -25,6 +26,8 @@ type Msg = { playing: boolean; time: number; rate: number };
 /** YouTube-плеєр, де викладач керує: play/pause/перемотка/швидкість повторюються в учня. */
 export default function SyncedYouTube({ classId, videoId, role }: { classId: string; videoId: string; role: "teacher" | "student" }) {
   const host = useRef<HTMLDivElement>(null);
+  const playerRef = useRef<any>(null);
+  const [muted, setMuted] = useState(false);
 
   useEffect(() => {
     let player: any = null;
@@ -40,7 +43,16 @@ export default function SyncedYouTube({ classId, videoId, role }: { classId: str
         if (player.getPlaybackRate?.() !== m.rate) player.setPlaybackRate?.(m.rate);
         if (Math.abs((player.getCurrentTime?.() ?? 0) - m.time) > 1.2) player.seekTo(m.time, true);
         const st = player.getPlayerState?.();
-        if (m.playing && st !== 1) player.playVideo();
+        if (m.playing && st !== 1) {
+          player.playVideo();
+          // Браузер може заборонити автозапуск зі звуком — тоді граємо без звуку і просимо учня натиснути «Увімкнути звук».
+          setTimeout(() => {
+            try {
+              const s2 = player.getPlayerState?.();
+              if (s2 !== 1 && s2 !== 3) { player.mute(); setMuted(true); player.playVideo(); }
+            } catch { /* ignore */ }
+          }, 900);
+        }
         if (!m.playing && st !== 2) player.pauseVideo();
       } catch { /* ignore */ }
     };
@@ -75,7 +87,7 @@ export default function SyncedYouTube({ classId, videoId, role }: { classId: str
         playerVars: { rel: 0, playsinline: 1, modestbranding: 1 },
         events: {
           onReady: () => {
-            ready = true; (window as any).__yt = player;
+            ready = true; playerRef.current = player; (window as any).__yt2 = player;
             if (pending) { applyMsg(pending); pending = null; }
             if (role === "student") ch.send({ type: "broadcast", event: "ask", payload: {} });
           },
@@ -104,5 +116,18 @@ export default function SyncedYouTube({ classId, videoId, role }: { classId: str
     };
   }, [classId, videoId, role]);
 
-  return <div ref={host} className="h-full w-full [&>iframe]:h-full [&>iframe]:w-full" />;
+  return (
+    <div className="relative h-full w-full">
+      <div ref={host} className="h-full w-full [&>iframe]:h-full [&>iframe]:w-full" />
+      {muted && (
+        <button
+          type="button"
+          onClick={() => { try { playerRef.current?.unMute(); playerRef.current?.playVideo(); } catch { /* ignore */ } setMuted(false); }}
+          className="absolute left-1/2 top-3 -translate-x-1/2 flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-lg"
+        >
+          <Volume2 className="h-4 w-4" /> Увімкнути звук
+        </button>
+      )}
+    </div>
+  );
 }
