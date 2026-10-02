@@ -8,19 +8,41 @@ import { supabase } from "@/integrations/supabase/client";
  * між викладачем і учнем у реальному часі (обидва бачать одне й те саме).
  */
 const BRIDGE = `<script>(function(){
-var replay=false;
+var replay=false,lastMove=0,ptrs={};
 function path(el){var p=[];while(el&&el.nodeType===1&&el!==document.documentElement){var i=0,s=el;while((s=s.previousElementSibling))i++;p.unshift(i);el=el.parentElement;}return p;}
 function find(p){var el=document.documentElement;for(var i=0;i<p.length;i++){if(!el)return null;el=el.children[p[i]];}return el;}
 function send(m){parent.postMessage({__klar:1,m:m,r:replay},"*");}
-document.addEventListener("click",function(e){send({k:"click",p:path(e.target)});},true);
-document.addEventListener("keydown",function(e){var t=e.target;if(t&&(t.tagName==="INPUT"||t.tagName==="TEXTAREA"))return;send({k:"key",key:e.key,code:e.code,keyCode:e.keyCode});},true);
-document.addEventListener("input",function(e){var t=e.target;if(t&&"value" in t)send({k:"input",p:path(t),v:t.value});},true);
+function rel(e){var t=e.target,r=t&&t.getBoundingClientRect?t.getBoundingClientRect():{left:0,top:0,width:innerWidth,height:innerHeight};return{fx:r.width?(e.clientX-r.left)/r.width:0,fy:r.height?(e.clientY-r.top)/r.height:0,sx:e.clientX-r.left,sy:e.clientY-r.top};}
+function at(el,m){var r=el.getBoundingClientRect();return{clientX:r.left+m.fx*r.width,clientY:r.top+m.fy*r.height};}
+document.addEventListener("click",function(e){if(replay)return;var c=rel(e);send({k:"click",p:path(e.target),fx:c.fx,fy:c.fy});},true);
+document.addEventListener("keydown",function(e){var t=e.target;if(replay||e.repeat||(t&&(t.tagName==="INPUT"||t.tagName==="TEXTAREA")))return;send({k:"key",t:"keydown",key:e.key,code:e.code,keyCode:e.keyCode});},true);
+document.addEventListener("keyup",function(e){var t=e.target;if(replay||(t&&(t.tagName==="INPUT"||t.tagName==="TEXTAREA")))return;send({k:"key",t:"keyup",key:e.key,code:e.code,keyCode:e.keyCode});},true);
+document.addEventListener("input",function(e){var t=e.target;if(!replay&&t&&"value" in t)send({k:"input",p:path(t),v:t.value});},true);
+["pointerdown","pointermove","pointerup","pointercancel"].forEach(function(ty){document.addEventListener(ty,function(e){
+if(replay)return;
+if(ty==="pointermove"){var n=Date.now();if(n-lastMove<33)return;lastMove=n;}
+var tg=ty==="pointerdown"?e.target:(ptrs[e.pointerId]||e.target);
+if(ty==="pointerdown")ptrs[e.pointerId]=e.target;if(ty==="pointerup"||ty==="pointercancel")delete ptrs[e.pointerId];
+var r=tg.getBoundingClientRect();
+send({k:"ptr",t:ty,p:path(tg),fx:r.width?(e.clientX-r.left)/r.width:0,fy:r.height?(e.clientY-r.top)/r.height:0,pt:e.pointerType,b:e.buttons});
+},true);});
+var rcur=document.createElement("div");rcur.style.cssText="position:fixed;z-index:2147483647;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:rgba(250,204,21,.85);box-shadow:0 0 0 3px rgba(250,204,21,.3);pointer-events:none;display:none;transition:left .03s linear,top .03s linear";
+document.addEventListener("DOMContentLoaded",function(){document.body.appendChild(rcur);});
 window.addEventListener("message",function(ev){var m=ev.data&&ev.data.__klarIn;if(!m)return;replay=true;try{
-if(m.k==="click"){var el=find(m.p);if(el){if(typeof el.click==="function")el.click();else el.dispatchEvent(new MouseEvent("click",{bubbles:true,cancelable:true,view:window}));}}
-else if(m.k==="key"){var o={key:m.key,code:m.code,keyCode:m.keyCode,which:m.keyCode,bubbles:true};(document.activeElement||document.body).dispatchEvent(new KeyboardEvent("keydown",o));document.dispatchEvent(new KeyboardEvent("keyup",o));}
+if(m.k==="click"){var el=find(m.p);if(el){if(m.fx!=null){var c=at(el,m);el.dispatchEvent(new MouseEvent("click",{bubbles:true,cancelable:true,view:window,clientX:c.clientX,clientY:c.clientY}));}else if(typeof el.click==="function")el.click();}}
+else if(m.k==="key"){var o={key:m.key,code:m.code,keyCode:m.keyCode,which:m.keyCode,bubbles:true};var ty=m.t||"keydown";(document.activeElement||document.body).dispatchEvent(new KeyboardEvent(ty,o));window.dispatchEvent(new KeyboardEvent(ty,o));if(!m.t){document.dispatchEvent(new KeyboardEvent("keyup",o));}}
 else if(m.k==="input"){var t=find(m.p);if(t){t.value=m.v;t.dispatchEvent(new Event("input",{bubbles:true}));t.dispatchEvent(new Event("change",{bubbles:true}));}}
+else if(m.k==="ptr"){var pe=find(m.p);if(pe){var q=at(pe,m);if(document.body&&!rcur.parentNode)document.body.appendChild(rcur);rcur.style.display="block";rcur.style.left=q.clientX+"px";rcur.style.top=q.clientY+"px";
+pe.dispatchEvent(new PointerEvent(m.t,{bubbles:true,cancelable:true,view:window,clientX:q.clientX,clientY:q.clientY,pointerId:777,pointerType:m.pt||"mouse",isPrimary:true,buttons:m.b||0}));}}
 }finally{setTimeout(function(){replay=false;},0);}});
 })();<\/script>`;
+
+/** Однаковий генератор випадкових чисел у вчителя й учня — щоб ігри (Suchspiel) питали те саме. */
+function seedScript(seed: string) {
+  let h = 2166136261;
+  for (let i = 0; i < seed.length; i++) h = Math.imul(h ^ seed.charCodeAt(i), 16777619);
+  return `<script>(function(){var s=${h >>> 0};Math.random=function(){s|=0;s=s+0x6D2B79F5|0;var t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};})();<\/script>`;
+}
 
 /** Прибирає markdown-обгортки й текстові хвости ШІ навколо HTML/SVG. */
 export function cleanHtml(src: string): string {
