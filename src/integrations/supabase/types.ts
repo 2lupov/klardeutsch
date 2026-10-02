@@ -1140,6 +1140,96 @@ export type Database = {
           },
         ]
       }
+      dutch_module_progress: {
+        Row: {
+          attempts: number
+          best_score: number | null
+          content_json: Json | null
+          id: string
+          module_id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attempts?: number
+          best_score?: number | null
+          content_json?: Json | null
+          id?: string
+          module_id: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attempts?: number
+          best_score?: number | null
+          content_json?: Json | null
+          id?: string
+          module_id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      dutch_vocab: {
+        Row: {
+          article: string | null
+          created_at: string
+          due_at: string
+          ease: number
+          example: string | null
+          example_ru: string | null
+          id: string
+          interval_days: number
+          last_reviewed_at: string | null
+          lemma: string
+          reps: number
+          source: string
+          status: string
+          translation_de: string | null
+          translation_ru: string | null
+          user_id: string
+        }
+        Insert: {
+          article?: string | null
+          created_at?: string
+          due_at?: string
+          ease?: number
+          example?: string | null
+          example_ru?: string | null
+          id?: string
+          interval_days?: number
+          last_reviewed_at?: string | null
+          lemma: string
+          reps?: number
+          source?: string
+          status?: string
+          translation_de?: string | null
+          translation_ru?: string | null
+          user_id: string
+        }
+        Update: {
+          article?: string | null
+          created_at?: string
+          due_at?: string
+          ease?: number
+          example?: string | null
+          example_ru?: string | null
+          id?: string
+          interval_days?: number
+          last_reviewed_at?: string | null
+          lemma?: string
+          reps?: number
+          source?: string
+          status?: string
+          translation_de?: string | null
+          translation_ru?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
           created_at: string
