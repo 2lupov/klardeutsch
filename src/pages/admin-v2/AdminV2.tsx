@@ -181,6 +181,14 @@ export default function AdminV2() {
         </div>
 
         <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-1">
+          <a
+            href="/dutch"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-admin-muted hover:bg-admin-fg/5 hover:text-admin-fg"
+            title="KLAR Dutch"
+          >
+            <span className="w-[18px] text-center shrink-0">🇳🇱</span>
+            {!collapsed && <span className="truncate">KLAR Dutch</span>}
+          </a>
           {NAV.map(({ key, label, icon: Icon }) => {
             const isActive = key === active;
             return (

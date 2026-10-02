@@ -47,7 +47,8 @@ serve(async (req) => {
     const apiFormData = new FormData();
     apiFormData.append("file", audioFile);
     apiFormData.append("model_id", "scribe_v2");
-    apiFormData.append("language_code", "deu"); // German
+    const lang = String(formData.get("language") || "deu");
+    apiFormData.append("language_code", ["deu", "nld"].includes(lang) ? lang : "deu");
 
     const response = await fetch("https://api.elevenlabs.io/v1/speech-to-text", {
       method: "POST",

@@ -31,6 +31,7 @@ import TeachStudents from "./pages/teach/TeachStudents";
 import TeachAttendance from "./pages/teach/TeachAttendance";
 import TeachFinance from "./pages/teach/TeachFinance";
 import Index from "./pages/Index";
+import Dutch from "./pages/Dutch";
 import Auth from "./pages/Auth";
 import AuthCallback from "./pages/AuthCallback";
 import ResetPassword from "./pages/ResetPassword";
@@ -108,6 +109,7 @@ const AppRoutes = () => {
       <Route path="/minicourse/:id" element={<RequireAuth><StudentMiniCourse /></RequireAuth>} />
       {/* Web-only routes — redirect to home in Telegram */}
       <Route path="/admin" element={isTelegram ? <Navigate to="/" replace /> : <AdminV2 />} />
+      <Route path="/dutch" element={<RequireAuth><Dutch /></RequireAuth>} />
       <Route path="/method" element={isTelegram ? <Navigate to="/" replace /> : <Method />} />
       {/* Teacher workspace (school staff only) */}
       <Route path="/teach" element={isTelegram ? <Navigate to="/" replace /> : <RequireTeacher><TeachLayout /></RequireTeacher>}>
