@@ -33,6 +33,15 @@ import { LaserSurface, useLaserReceiver } from "@/components/live/LaserPointer";
 
 
 export default function LiveClass() {
+  const [textZoom, setTextZoom] = useState(() => {
+    const v = typeof window !== "undefined" ? Number(localStorage.getItem("live_text_zoom")) : 1;
+    return v >= 0.7 && v <= 1.4 ? v : 1;
+  });
+  const changeZoom = (d: number) => setTextZoom((z) => {
+    const n = Math.round(Math.min(1.4, Math.max(0.7, z + d)) * 10) / 10;
+    localStorage.setItem("live_text_zoom", String(n));
+    return n;
+  });
   const [navCollapsed, setNavCollapsed] = useState(() => typeof window !== "undefined" && localStorage.getItem("live_nav_collapsed") === "1");
   const { id } = useParams<{ id: string }>();
   const { user, loading } = useAuth();
@@ -316,7 +325,7 @@ export default function LiveClass() {
           </div>
         </header>
 
-        <div style={{ zoom: textZoom } as any} className={section === "board" ? "flex-1 min-h-0 flex flex-col" : ""}>
+        <div style={{ zoom: section === "board" ? 1 : textZoom } as any} className={section === "board" ? "flex-1 min-h-0 flex flex-col" : ""}>
         {section === "board" ? (
           <div className={`flex-1 min-h-0 p-3 flex flex-col gap-3 ${cls.book_page ? "overflow-y-auto" : ""}`}>
             <div className={boardFull
@@ -409,7 +418,7 @@ export default function LiveClass() {
             )}
           </div>
         )}
-
+        </div>
       </main>
 
       <PandaLookupFab label="Словник" />
