@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { GRAMMAR } from "@/lib/dutch";
+import { GRAMMAR, speakWord } from "@/lib/dutch";
 
 export const BRIDGE = [
   ["au → ui / ou", "Haus → huis, Frau → vrouw, kaufen → kopen"],
@@ -9,6 +9,43 @@ export const BRIDGE = [
   ["pf → p", "Apfel → appel, Pfeffer → peper"],
 ];
 export const FALSE = [["slim", "умный (не schlimm)"], ["klaar", "готово"], ["bellen", "звонить"], ["wie", "кто"], ["hoe", "как"], ["durven", "осмелиться"], ["monster", "образец"], ["raar", "странный"], ["eng", "жуткий / страшный"], ["bekomen", "оправиться"]];
+
+function speakDe(text: string) {
+  if (typeof speechSynthesis === "undefined") return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  const v = speechSynthesis.getVoices().find((x) => x.lang.toLowerCase().startsWith("de"));
+  if (v) u.voice = v;
+  u.lang = v?.lang ?? "de-DE";
+  u.rate = 0.9;
+  speechSynthesis.speak(u);
+}
+
+export function SayWord({ w, lang = "nl", bold }: { w: string; lang?: "nl" | "de"; bold?: boolean }) {
+  return (
+    <span role="button" tabIndex={0}
+      onClick={(e) => { e.stopPropagation(); lang === "de" ? speakDe(w) : speakWord(w).catch(() => {}); }}
+      className={`cursor-pointer rounded px-0.5 transition hover:bg-primary/20 active:bg-primary/40 ${bold ? "font-bold" : ""}`}>{w}</span>
+  );
+}
+
+/** "Haus → huis, Frau → vrouw" — немецкое слово звучит по-немецки, голландское по-голландски */
+export function BridgeExamples({ text }: { text: string }) {
+  const pairs = text.split(", ");
+  return <>{pairs.map((p, i) => {
+    const [de, nl] = p.split(" → ");
+    return <span key={i}>{i > 0 && ", "}<SayWord w={de} lang="de" /> → <SayWord w={nl} /></span>;
+  })}</>;
+}
+
+export function FalseFriendCard({ nl, ru }: { nl: string; ru: string }) {
+  return (
+    <button type="button" onClick={() => speakWord(nl).catch(() => {})}
+      className="w-full text-left rounded-lg bg-muted/40 px-3 py-2 transition hover:bg-primary/15 active:bg-primary/30">
+      <b>{nl}</b> — {ru}
+    </button>
+  );
+}
 
 export default function GrammarBridge() {
   const [t, setT] = useState(0);
@@ -27,9 +64,9 @@ export default function GrammarBridge() {
         {t === -1 ? (
           <div className="space-y-6">
             <div><h2 className="text-lg font-semibold mb-2">Звуковые переходы</h2>
-              {BRIDGE.map(([a, b]) => <p key={a} className="py-1"><b className="text-primary">{a}</b> — {b}</p>)}</div>
+              {BRIDGE.map(([a, b]) => <p key={a} className="py-1"><b className="text-primary">{a}</b> — <BridgeExamples text={b} /></p>)}</div>
             <div><h2 className="text-lg font-semibold mb-2">Ложные друзья</h2>
-              <div className="grid sm:grid-cols-2 gap-2">{FALSE.map(([a, b]) => <p key={a} className="rounded-lg bg-muted/40 px-3 py-2"><b>{a}</b> — {b}</p>)}</div></div>
+              <div className="grid sm:grid-cols-2 gap-2">{FALSE.map(([a, b]) => <FalseFriendCard key={a} nl={a} ru={b} />)}</div></div>
           </div>
         ) : (
           <div className="space-y-4">
