@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Lock, GraduationCap, BookMarked, BookOpen, Headphones, MessageCircle, Bookmark, RefreshCw } from "lucide-react";
+import { ArrowLeft, Lock, GraduationCap, BookMarked, BookOpen, Headphones, MessageCircle, Bookmark, RefreshCw, FileCode } from "lucide-react";
+import HtmlDocs from "@/components/dutch/HtmlDocs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import Curriculum from "@/components/dutch/Curriculum";
@@ -29,7 +30,7 @@ const PRACTICE = [
   { key: "listen", label: "Аудирование", icon: Headphones },
   { key: "buddy", label: "Daan", icon: MessageCircle },
 ] as const;
-const REFERENCE = [{ key: "grammar", label: "Справочник", icon: Bookmark }] as const;
+const REFERENCE = [{ key: "grammar", label: "Справочник", icon: Bookmark }, { key: "html", label: "HTML", icon: FileCode }] as const;
 const ALL_TABS = [...PRIMARY, ...PRACTICE, ...REFERENCE] as const;
 type Tab = (typeof ALL_TABS)[number]["key"];
 
@@ -144,6 +145,7 @@ export default function Dutch() {
           {tab === "listen" && <ListeningLab level={level} />}
           {tab === "buddy" && <DutchBuddy level={level} />}
           {tab === "grammar" && <GrammarBridge />}
+          {tab === "html" && <HtmlDocs />}
         </main>
       </div>
     </div>
