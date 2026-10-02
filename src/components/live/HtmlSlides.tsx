@@ -37,6 +37,53 @@ pe.dispatchEvent(new PointerEvent(m.t,{bubbles:true,cancelable:true,view:window,
 }finally{setTimeout(function(){replay=false;},0);}});
 })();<\/script>`;
 
+/** Перехоплює браузерну озвучку презентації — батьківське вікно грає її голосом ElevenLabs (de / nl). */
+const TTS_HOOK = `<script>(function(){try{var S=window.speechSynthesis;if(!S)return;var cur=null;
+function det(u){var l=(u.lang||document.documentElement.lang||"").toLowerCase();return l.indexOf("nl")===0?"nl":"de";}
+S.speak=function(u){cur=u;try{u.onstart&&u.onstart(new Event("start"));}catch(e){}parent.postMessage({__klarTts:{text:String(u.text||""),lang:det(u),rate:u.rate||1}},"*");};
+S.cancel=function(){parent.postMessage({__klarTts:{cancel:1}},"*");};
+window.addEventListener("message",function(ev){if(ev.data&&ev.data.__klarTtsEnd&&cur){var u=cur;cur=null;try{u.onend&&u.onend(new Event("end"));}catch(e){}}});
+}catch(e){}})();<\/script>`;
+
+const VOICE_DE = "aTTiK3YzK3dXETpuDE2h";
+const VOICE_NL = "pFZP5JQG7iQjIQuC4Bku";
+const ttsCache = new Map<string, string>();
+let ttsAudio: HTMLAudioElement | null = null;
+async function playTts(text: string, lang: string, rate: number): Promise<void> {
+  const t = text.trim().slice(0, 800);
+  if (!t) return;
+  const voice = lang === "nl" ? VOICE_NL : VOICE_DE;
+  const speed = Math.min(1.2, Math.max(0.7, rate || 0.9));
+  const key = `${voice}|${speed}|${t}`;
+  let url = ttsCache.get(key);
+  if (!url) {
+    const { data } = await supabase.auth.getSession();
+    const res = await fetch(`https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/elevenlabs-tts`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${data.session?.access_token}`, apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
+      body: JSON.stringify({ text: t, voiceId: voice, speed }),
+    });
+    if (!res.ok) throw new Error("tts");
+    url = URL.createObjectURL(await res.blob());
+    if (ttsCache.size > 200) { const k = ttsCache.keys().next().value; if (k) { URL.revokeObjectURL(ttsCache.get(k)!); ttsCache.delete(k); } }
+    ttsCache.set(key, url);
+  }
+  ttsAudio?.pause();
+  const a = new Audio(url);
+  ttsAudio = a;
+  await new Promise<void>((resolve) => { a.onended = () => resolve(); a.onerror = () => resolve(); a.play().catch(() => resolve()); });
+}
+/** Запасний варіант: системний голос строго потрібної мови (ніколи не російський). */
+function browserTts(text: string, lang: string, rate: number, done: () => void) {
+  try {
+    const S = window.speechSynthesis; const code = lang === "nl" ? "nl" : "de";
+    const v = S.getVoices().find((x) => x.lang.toLowerCase().startsWith(code));
+    if (!v) { done(); return; }
+    const u = new SpeechSynthesisUtterance(text); u.lang = v.lang; u.voice = v; u.rate = rate || 0.9; u.onend = done; u.onerror = done;
+    S.cancel(); S.speak(u);
+  } catch { done(); }
+}
+
 /** Однаковий генератор випадкових чисел у вчителя й учня — щоб ігри (Suchspiel) питали те саме. */
 function seedScript(seed: string) {
   let h = 2166136261;
@@ -72,6 +119,7 @@ export function wrapHtml(src: string, seed?: string): string {
     const sc = seedScript(seed);
     out = /<head[^>]*>/i.test(out) ? out.replace(/<head[^>]*>/i, (m) => m + sc) : sc + out;
   }
+  out = /<head[^>]*>/i.test(out) ? out.replace(/<head[^>]*>/i, (m) => m + TTS_HOOK) : TTS_HOOK + out;
   return out;
 }
 
@@ -124,7 +172,16 @@ export default function HtmlSlides({ html, syncKey, className, progress }: { htm
       frame.current?.contentWindow?.postMessage({ __klarIn: payload }, "*");
     }).subscribe();
     const onMsg = (e: MessageEvent) => {
-      if (e.source !== frame.current?.contentWindow || !e.data?.__klar) return;
+      if (e.source !== frame.current?.contentWindow) return;
+      const tts = e.data?.__klarTts;
+      if (tts) {
+        const done = () => frame.current?.contentWindow?.postMessage({ __klarTtsEnd: 1 }, "*");
+        if (tts.cancel) { ttsAudio?.pause(); return; }
+        if (restoring.current) { done(); return; }
+        playTts(tts.text, tts.lang, tts.rate).then(done).catch(() => browserTts(tts.text, tts.lang, tts.rate, done));
+        return;
+      }
+      if (!e.data?.__klar) return;
       record(e.data.m);
       if (!e.data.r) ch?.send({ type: "broadcast", event: "ev", payload: e.data.m });
     };
