@@ -382,8 +382,8 @@ export default function LiveClass() {
             <LiveNotes classId={cls.id} role="student" className="h-full" />
           </div>
         ) : section === "video" ? (
-          <div className="p-3 h-[calc(100dvh-8rem)] md:h-[calc(100dvh-5.5rem)] overflow-y-auto">
-            <LiveVideo classId={cls.id} role="student" className="min-h-full" />
+          <div className="p-3 h-[calc(100dvh-8rem)] md:h-[calc(100dvh-5.5rem)] overflow-hidden">
+            <LiveVideo classId={cls.id} role="student" className="h-full" />
           </div>
         ) : section === "textbook" ? (
           <div className="p-4">

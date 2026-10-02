@@ -55,10 +55,15 @@ export default function LiveVideo({
       )}
 
       <div className={cn("flex min-h-0 flex-1 flex-col gap-3", !theater && "lg:flex-row")}>
-        <div className={cn("flex min-w-0 shrink-0 flex-col gap-2", !theater && "lg:flex-[7_1_0%]")}>
+        <div className={cn("flex min-h-[200px] min-w-0 flex-1 flex-col gap-2", !theater && "lg:flex-[7_1_0%]")}>
           {state.video_id ? (
-            <div className="mx-auto aspect-video w-full max-h-[calc(100dvh-12rem)] max-w-[calc((100dvh-12rem)*16/9)] overflow-hidden rounded-md border border-border bg-card">
-              <SyncedYouTube key={state.video_id} classId={classId} videoId={state.video_id} role={role} />
+            <div className="grid min-h-0 flex-1 place-items-center" style={{ containerType: "size" } as any}>
+              <div
+                className="overflow-hidden rounded-md border border-border bg-card"
+                style={{ width: "min(100cqw, calc(100cqh * 16 / 9))", aspectRatio: "16 / 9" }}
+              >
+                <SyncedYouTube key={state.video_id} classId={classId} videoId={state.video_id} role={role} />
+              </div>
             </div>
           ) : (
             <div className="grid aspect-video w-full place-items-center rounded-md border border-dashed border-border bg-muted/30 text-center">
