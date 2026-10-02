@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Clapperboard, Link2, NotebookPen } from "lucide-react";
+import { Clapperboard, Columns2, Link2, Maximize2, NotebookPen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import MarkSheet from "@/components/live/MarkSheet";
@@ -23,6 +23,7 @@ export default function LiveVideo({
   const { state, update, remoteTyping, registerEditor } = useLiveVideo(classId);
   const [url, setUrl] = useState(state.video_url);
   const [invalid, setInvalid] = useState(false);
+  const [theater, setTheater] = useState(false);
 
   useEffect(() => setUrl(state.video_url), [state.video_url]);
 
@@ -53,32 +54,41 @@ export default function LiveVideo({
         </div>
       )}
 
-      {state.video_id ? (
-        <div className="aspect-video max-h-[52dvh] w-full shrink-0 overflow-hidden rounded-md border border-border bg-card">
-          <SyncedYouTube key={state.video_id} classId={classId} videoId={state.video_id} role={role} />
-        </div>
-      ) : (
-        <div className="grid aspect-video max-h-[45dvh] w-full shrink-0 place-items-center rounded-md border border-dashed border-border bg-muted/30 text-center">
-          <div className="space-y-2 px-4 text-muted-foreground">
-            <Clapperboard className="mx-auto h-8 w-8" />
-            <p className="text-sm">{role === "teacher" ? "Вставте посилання YouTube вище" : "Викладач ще не відкрив відео"}</p>
+      <div className={cn("flex min-h-0 flex-1 flex-col gap-3", !theater && "lg:flex-row")}>
+        <div className={cn("flex min-w-0 shrink-0 flex-col gap-2", !theater && "lg:flex-[7_1_0%]")}>
+          {state.video_id ? (
+            <div className="mx-auto aspect-video w-full max-h-[calc(100dvh-12rem)] max-w-[calc((100dvh-12rem)*16/9)] overflow-hidden rounded-md border border-border bg-card">
+              <SyncedYouTube key={state.video_id} classId={classId} videoId={state.video_id} role={role} />
+            </div>
+          ) : (
+            <div className="grid aspect-video w-full place-items-center rounded-md border border-dashed border-border bg-muted/30 text-center">
+              <div className="space-y-2 px-4 text-muted-foreground">
+                <Clapperboard className="mx-auto h-8 w-8" />
+                <p className="text-sm">{role === "teacher" ? "Вставте посилання YouTube вище" : "Викладач ще не відкрив відео"}</p>
+              </div>
+            </div>
+          )}
+          <div className="flex justify-end">
+            <Button animated={false} variant="outline" size="sm" onClick={() => setTheater((v) => !v)}>
+              {theater ? <><Columns2 /> Нотатки поруч</> : <><Maximize2 /> Кінотеатр</>}
+            </Button>
           </div>
         </div>
-      )}
 
-      <div className="flex min-h-[220px] flex-1 flex-col gap-2">
-        <div className="flex shrink-0 items-center gap-2 px-1 text-primary">
-          <NotebookPen className="h-4 w-4" />
-          <span className="text-xs font-bold uppercase tracking-widest">Нотатки до відео</span>
-          {remoteTyping && <span className="text-xs text-muted-foreground">{role === "teacher" ? "учень пише…" : "викладач пише…"}</span>}
+        <div className={cn("flex min-h-[220px] min-w-0 flex-1 flex-col gap-2", !theater && "lg:flex-[3_1_0%]")}>
+          <div className="flex shrink-0 items-center gap-2 px-1 text-primary">
+            <NotebookPen className="h-4 w-4" />
+            <span className="text-xs font-bold uppercase tracking-widest">Нотатки до відео</span>
+            {remoteTyping && <span className="text-xs text-muted-foreground">{role === "teacher" ? "учень пише…" : "викладач пише…"}</span>}
+          </div>
+          <MarkSheet
+            className="min-h-0 flex-1"
+            value={state.notes}
+            onChange={(notes) => update({ notes })}
+            register={registerEditor}
+            placeholder="Нові слова, фрази, важливі моменти з відео…"
+          />
         </div>
-        <MarkSheet
-          className="min-h-0 flex-1"
-          value={state.notes}
-          onChange={(notes) => update({ notes })}
-          register={registerEditor}
-          placeholder="Нові слова, фрази, важливі моменти з відео…"
-        />
       </div>
     </div>
   );
