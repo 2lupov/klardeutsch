@@ -37,11 +37,20 @@ serve(async (req) => {
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY not set");
 
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("No auth header");
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "No auth header" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401,
+      });
+    }
 
     const token = authHeader.replace("Bearer ", "");
     const { data: userData, error: userError } = await supabaseAdmin.auth.getUser(token);
-    if (userError) throw new Error(`Auth error: ${userError.message}`);
+    if (userError) {
+      logStep("Auth failed", { message: userError.message });
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401,
+      });
+    }
     const user = userData.user;
     if (!user?.email) throw new Error("No user email");
 

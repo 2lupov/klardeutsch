@@ -45,8 +45,12 @@ export const useSubscription = (): SubscriptionState & { usage: UsageState; chec
       return;
     }
     try {
+      // Берём свежий токен — сохранённый в state мог истечь между проверками.
+      const { data: fresh } = await supabase.auth.getSession();
+      const token = fresh.session?.access_token;
+      if (!token) return;
       const { data, error } = await supabase.functions.invoke("check-subscription", {
-        headers: { Authorization: `Bearer ${session.access_token}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (error) throw error;
       setPlan((data?.plan as SubscriptionPlan) ?? "free");
