@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { GRAMMAR } from "@/lib/dutch";
 
-const BRIDGE = [
+export const BRIDGE = [
   ["au → ui / ou", "Haus → huis, Frau → vrouw, kaufen → kopen"],
   ["ei → ij", "Zeit → tijd, bleiben → blijven, schreiben → schrijven"],
   ["ch → k", "machen → maken, Buch → boek, suchen → zoeken"],
   ["ss / ß / z → t", "Wasser → water, essen → eten, zwei → twee"],
   ["pf → p", "Apfel → appel, Pfeffer → peper"],
 ];
-const FALSE = [["slim", "умный (не schlimm)"], ["klaar", "готово"], ["bellen", "звонить"], ["wie", "кто"], ["hoe", "как"], ["durven", "осмелиться"], ["monster", "образец"], ["raar", "странный"], ["eng", "жуткий / страшный"], ["bekomen", "оправиться"]];
+export const FALSE = [["slim", "умный (не schlimm)"], ["klaar", "готово"], ["bellen", "звонить"], ["wie", "кто"], ["hoe", "как"], ["durven", "осмелиться"], ["monster", "образец"], ["raar", "странный"], ["eng", "жуткий / страшный"], ["bekomen", "оправиться"]];
 
 export default function GrammarBridge() {
   const [t, setT] = useState(0);

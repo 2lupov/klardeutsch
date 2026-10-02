@@ -20,14 +20,15 @@ export const DAYS: { day: number; title: string; topic: string }[] = [
   { day: 14, title: "Мнения обо всём", topic: "высказывать мнение: ik vind, volgens mij, eigenlijk, sowieso, путешествия" },
 ];
 
+// было вперемешку на украинском — привёл к одному языку интерфейса (русский)
 export const SCENARIOS = [
-  "Вільна розмова з другом",
-  "Обговорюємо серіал, який ти щойно подивився",
-  "Плануємо вихідні разом",
-  "Друг розповідає плітки про спільних знайомих",
-  "Голосові повідомлення у WhatsApp",
-  "Сперечаємось, який фільм увімкнути",
-  "Телефонний дзвінок: друг запізнюється",
+  "Свободный разговор с другом",
+  "Обсуждаем сериал, который ты только что посмотрел",
+  "Планируем выходные вместе",
+  "Друг рассказывает сплетни про общих знакомых",
+  "Голосовые сообщения в WhatsApp",
+  "Спорим, какой фильм включить",
+  "Телефонный звонок: друг опаздывает",
 ];
 
 export const GRAMMAR: { title: string; rule: string; items: { q: string; options: string[]; answer: number; why: string }[] }[] = [
@@ -104,8 +105,25 @@ export async function dutchAi<T>(body: Record<string, unknown>): Promise<T> {
 }
 
 const base = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1`;
-const audioCache = new Map<string, string>();
 export const VOICES = { A: "pFZP5JQG7iQjIQuC4Bku", B: "TX3LPaxmHKxFdv7VOQHJ" } as const;
+
+// --- Кэш озвучки с ограничением размера -----------------------------------
+// Раньше Map рос без ограничений и ни один createObjectURL не освобождался —
+// за долгую сессию чтения/аудирования это утечка памяти (blob остаётся в
+// памяти вкладки, пока вкладка не закрыта). Теперь это LRU на 120 записей.
+const AUDIO_CACHE_LIMIT = 120;
+const audioCache = new Map<string, string>();
+function cachePut(key: string, url: string) {
+  if (audioCache.size >= AUDIO_CACHE_LIMIT) {
+    const oldestKey = audioCache.keys().next().value;
+    if (oldestKey) {
+      const oldUrl = audioCache.get(oldestKey);
+      if (oldUrl) URL.revokeObjectURL(oldUrl);
+      audioCache.delete(oldestKey);
+    }
+  }
+  audioCache.set(key, url);
+}
 
 export async function speakUrl(text: string, voiceId: string = VOICES.A, speed = 1): Promise<string> {
   const key = `${voiceId}|${speed}|${text}`;
@@ -123,7 +141,7 @@ export async function speakUrl(text: string, voiceId: string = VOICES.A, speed =
   });
   if (!res.ok) throw new Error("Озвучка недоступна");
   const url = URL.createObjectURL(await res.blob());
-  audioCache.set(key, url);
+  cachePut(key, url);
   return url;
 }
 
@@ -134,6 +152,37 @@ export async function speak(text: string, voiceId?: string, speed = 1) {
   current = new Audio(url);
   await current.play();
   return current;
+}
+
+// --- Бесплатная мгновенная озвучка отдельного слова ------------------------
+// Для клика по слову во время чтения гонять каждое слово через ElevenLabs
+// дорого и медленно (сетевой запрос на каждый клик). Используем встроенный
+// в браузер Web Speech API с голосом nl-*, а на премиальное озвучивание
+// ElevenLabs переходим только если подходящего голоса в системе нет.
+let nlVoice: SpeechSynthesisVoice | null | undefined;
+function getDutchVoice(): SpeechSynthesisVoice | null {
+  if (nlVoice !== undefined) return nlVoice;
+  const voices = typeof speechSynthesis !== "undefined" ? speechSynthesis.getVoices() : [];
+  nlVoice = voices.find((v) => v.lang.toLowerCase().startsWith("nl")) ?? null;
+  return nlVoice;
+}
+if (typeof speechSynthesis !== "undefined") {
+  speechSynthesis.onvoiceschanged = () => { nlVoice = undefined; };
+}
+
+export async function speakWord(text: string, speed = 0.9): Promise<void> {
+  const voice = getDutchVoice();
+  if (voice && typeof speechSynthesis !== "undefined") {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.voice = voice;
+    u.lang = voice.lang;
+    u.rate = speed;
+    speechSynthesis.speak(u);
+    return;
+  }
+  // нет голоса nl в системе (бывает на части мобильных) — падаем на ElevenLabs
+  await speak(text, VOICES.A, speed);
 }
 
 export async function transcribeDutch(blob: Blob): Promise<string> {

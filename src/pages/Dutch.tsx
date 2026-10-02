@@ -3,6 +3,9 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import Curriculum from "@/components/dutch/Curriculum";
+import Reader from "@/components/dutch/Reader";
+import Review from "@/components/dutch/Review";
 import WordSprint from "@/components/dutch/WordSprint";
 import ListeningLab from "@/components/dutch/ListeningLab";
 import DutchBuddy from "@/components/dutch/DutchBuddy";
@@ -10,22 +13,28 @@ import GrammarBridge from "@/components/dutch/GrammarBridge";
 import DutchDictionary from "@/components/dutch/DutchDictionary";
 import type { Level } from "@/lib/dutch";
 
+// "course" — фиксированная программа A0→B2, основной путь (см. src/lib/curriculum.ts).
+// "read" и "review" — свободная практика сверху программы (доп. объём + SRS).
+// Остальное — вспомогательные инструменты.
 const TABS = [
-  { key: "words", label: "📚 Слова" },
-  { key: "dict", label: "🔤 Словарь" },
+  { key: "course", label: "🎓 Курс" },
+  { key: "read", label: "📖 Свободное чтение" },
+  { key: "review", label: "🔁 Повторение" },
   { key: "listen", label: "🎧 Аудирование" },
   { key: "buddy", label: "💬 Daan" },
+  { key: "dict", label: "🔤 Словарь" },
   { key: "grammar", label: "🧩 Грамматика" },
+  { key: "words", label: "📚 Темы (старое)" },
 ] as const;
 type Tab = (typeof TABS)[number]["key"];
 
 export default function Dutch() {
   const { user, loading } = useAuth() as any;
   const [ok, setOk] = useState<boolean | null>(null);
-  const [tab, setTab] = useState<Tab>(() => (localStorage.getItem("klar-dutch-tab") as Tab) || "words");
-  const [level, setLevel] = useState<Level>(() => (localStorage.getItem("klar-dutch-level") as Level) || "A2");
+  const [tab, setTab] = useState<Tab>(() => (localStorage.getItem("klar-dutch-tab") as Tab) || "course");
+  const [level, setLevel] = useState<Level>(() => (localStorage.getItem("klar-dutch-level") as Level) || "A1");
 
-  useEffect(() => { document.title = "KLAR Dutch — нидерландский за 2 недели"; }, []);
+  useEffect(() => { document.title = "KLAR Dutch — от A0 до B2"; }, []);
   useEffect(() => { localStorage.setItem("klar-dutch-tab", tab); }, [tab]);
   useEffect(() => { localStorage.setItem("klar-dutch-level", level); }, [level]);
   useEffect(() => {
@@ -59,6 +68,9 @@ export default function Dutch() {
         </div>
       </header>
       <main className="flex-1 min-h-0 p-4">
+        {tab === "course" && <Curriculum />}
+        {tab === "read" && <Reader level={level} />}
+        {tab === "review" && <Review />}
         {tab === "words" && <WordSprint level={level} />}
         {tab === "dict" && <DutchDictionary />}
         {tab === "listen" && <ListeningLab level={level} />}
