@@ -3,7 +3,7 @@ import { Loader2, Volume2, Check, ArrowRight, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { dutchAi, speakWord } from "@/lib/dutch";
 import { GRAMMAR } from "@/lib/dutch";
-import { BRIDGE, FALSE } from "./GrammarBridge";
+import { BRIDGE, FALSE, BridgeExamples, FalseFriendCard } from "./GrammarBridge";
 import { byId, nextOf, type CurriculumModule } from "@/lib/curriculum";
 import { getOrCreateContent, passModule, recordAttempt, type ModuleContent } from "@/lib/moduleStore";
 import { addIfNew, bulkAddIfNew, type VocabItem } from "@/lib/vocabStore";
@@ -153,9 +153,9 @@ export default function Module({ moduleId, onExit }: { moduleId: string; onExit:
           {mod.grammarSpecial === "sounds" ? (
             <div className="space-y-6">
               <div><h3 className="font-semibold mb-2">Звуковые переходы DE → NL</h3>
-                {BRIDGE.map(([a, b]) => <p key={a} className="py-1"><b className="text-primary">{a}</b> — {b}</p>)}</div>
+                {BRIDGE.map(([a, b]) => <p key={a} className="py-1"><b className="text-primary">{a}</b> — <BridgeExamples text={b} /></p>)}</div>
               <div><h3 className="font-semibold mb-2">Ложные друзья</h3>
-                <div className="grid sm:grid-cols-2 gap-2">{FALSE.map(([a, b]) => <p key={a} className="rounded-lg bg-muted/40 px-3 py-2"><b>{a}</b> — {b}</p>)}</div></div>
+                <div className="grid sm:grid-cols-2 gap-2">{FALSE.map(([a, b]) => <FalseFriendCard key={a} nl={a} ru={b} />)}</div></div>
             </div>
           ) : grammarBlock ? (
             <>
