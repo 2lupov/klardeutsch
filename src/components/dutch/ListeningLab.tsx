@@ -39,7 +39,12 @@ export default function ListeningLab({ level }: { level: Level }) {
     try {
       const l = await dutchAi<Lesson>({ action: "listening", level, topic: t });
       setLesson(l);
-      const u = await Promise.all(l.lines.map((ln) => speakUrl(ln.nl, ln.speaker === "B" ? VOICES.B : VOICES.A, 1)));
+      const u: string[] = new Array(l.lines.length);
+      for (let k = 0; k < l.lines.length; k += 3) {
+        await Promise.all(l.lines.slice(k, k + 3).map(async (ln, j) => {
+          u[k + j] = await speakUrl(ln.nl, ln.speaker === "B" ? VOICES.B : VOICES.A, 1);
+        }));
+      }
       setUrls(u);
     } catch (e) { toast.error((e as Error).message); } finally { setBusy(false); }
   };
