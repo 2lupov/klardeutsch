@@ -33,6 +33,15 @@ import { LaserSurface, useLaserReceiver } from "@/components/live/LaserPointer";
 
 
 export default function LiveClass() {
+  const [textZoom, setTextZoom] = useState(() => {
+    const v = typeof window !== "undefined" ? Number(localStorage.getItem("live_text_zoom")) : 1;
+    return v >= 0.7 && v <= 1.4 ? v : 1;
+  });
+  const changeZoom = (d: number) => setTextZoom((z) => {
+    const n = Math.round(Math.min(1.4, Math.max(0.7, z + d)) * 10) / 10;
+    localStorage.setItem("live_text_zoom", String(n));
+    return n;
+  });
   const [navCollapsed, setNavCollapsed] = useState(() => typeof window !== "undefined" && localStorage.getItem("live_nav_collapsed") === "1");
   const { id } = useParams<{ id: string }>();
   const { user, loading } = useAuth();
@@ -303,6 +312,10 @@ export default function LiveClass() {
                 На весь екран
               </button>
             )}
+            <div className="flex items-center rounded-xl border border-border overflow-hidden" aria-label="Розмір тексту">
+              <button onClick={() => changeZoom(-0.1)} disabled={textZoom <= 0.7} className="px-2.5 py-2 text-xs font-bold text-foreground hover:bg-muted/60 disabled:opacity-40" title="Менший текст">A−</button>
+              <button onClick={() => changeZoom(0.1)} disabled={textZoom >= 1.4} className="px-2.5 py-2 text-sm font-bold text-foreground hover:bg-muted/60 border-l border-border disabled:opacity-40" title="Більший текст">A+</button>
+            </div>
             <button
               onClick={() => navigate("/academy?tab=profile")}
               className="px-3 py-2 rounded-xl border border-border text-xs font-medium text-foreground hover:bg-muted/60"
@@ -312,6 +325,7 @@ export default function LiveClass() {
           </div>
         </header>
 
+        <div style={{ zoom: section === "board" ? 1 : textZoom } as any} className={section === "board" ? "flex-1 min-h-0 flex flex-col" : ""}>
         {section === "board" ? (
           <div className={`flex-1 min-h-0 p-3 flex flex-col gap-3 ${cls.book_page ? "overflow-y-auto" : ""}`}>
             <div className={boardFull
@@ -404,7 +418,7 @@ export default function LiveClass() {
             )}
           </div>
         )}
-
+        </div>
       </main>
 
       <PandaLookupFab label="Словник" />
