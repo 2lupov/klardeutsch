@@ -1140,6 +1140,33 @@ export type Database = {
           },
         ]
       }
+      dutch_html_docs: {
+        Row: {
+          created_at: string
+          html: string
+          id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          html: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          html?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       dutch_module_progress: {
         Row: {
           attempts: number
