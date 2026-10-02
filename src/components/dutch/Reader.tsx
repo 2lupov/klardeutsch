@@ -66,7 +66,7 @@ export default function Reader({ level }: { level: Level }) {
     try {
       const l = await dutchAi<ReadingLesson>({ action: "reading", level, topic: t });
       setLesson(l);
-      await bulkAddIfNew(l.glossary, "reader");
+      await bulkAddIfNew(l.glossary, "reader", "Свободное чтение");
       await refreshVocab();
     } catch (e) {
       toast.error((e as Error).message);
@@ -106,7 +106,7 @@ export default function Reader({ level }: { level: Level }) {
     if (activeClick.current !== key) return; // за это время кликнули по другому слову
 
     try {
-      const saved = await addIfNew(entry, "reader");
+      const saved = await addIfNew(entry, "reader", "Свободное чтение");
       if (saved) setVocabMap((m) => new Map(m).set(key, saved));
       if (activeClick.current === key) setSelected({ surface, entry, item: saved ?? undefined, loading: false });
     } catch {

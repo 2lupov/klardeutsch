@@ -42,7 +42,7 @@ export default function Module({ moduleId, onExit }: { moduleId: string; onExit:
     try {
       const c = await getOrCreateContent(mod!, () => generate(mod!));
       setContent(c);
-      await bulkAddIfNew(c.glossary, "module");
+      await bulkAddIfNew(c.glossary, "module", mod!.level);
       setVocabMap(await getVocabMap());
     } catch (e) {
       toast.error((e as Error).message);
@@ -70,7 +70,7 @@ export default function Module({ moduleId, onExit }: { moduleId: string; onExit:
     const key = norm(surface);
     if (vocabMap.has(key)) return;
     const hit = content?.glossary.find((g) => norm(g.nl) === key);
-    const saved = await addIfNew(hit ?? { nl: surface }, "module").catch(() => null);
+    const saved = await addIfNew(hit ?? { nl: surface }, "module", mod!.level).catch(() => null);
     if (saved) setVocabMap((m) => new Map(m).set(key, saved));
   };
 
