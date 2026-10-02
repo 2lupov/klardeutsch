@@ -30,7 +30,7 @@ var rcur=document.createElement("div");rcur.style.cssText="position:fixed;z-inde
 document.addEventListener("DOMContentLoaded",function(){document.body.appendChild(rcur);});
 window.addEventListener("message",function(ev){var m=ev.data&&ev.data.__klarIn;if(!m)return;replay=true;try{
 if(m.k==="click"){var el=find(m.p);if(el){if(m.fx!=null){var c=at(el,m);el.dispatchEvent(new MouseEvent("click",{bubbles:true,cancelable:true,view:window,clientX:c.clientX,clientY:c.clientY}));}else if(typeof el.click==="function")el.click();}}
-else if(m.k==="key"){var o={key:m.key,code:m.code,keyCode:m.keyCode,which:m.keyCode,bubbles:true};var ty=m.t||"keydown";(document.activeElement||document.body).dispatchEvent(new KeyboardEvent(ty,o));window.dispatchEvent(new KeyboardEvent(ty,o));if(!m.t){document.dispatchEvent(new KeyboardEvent("keyup",o));}}
+else if(m.k==="key"){var o={key:m.key,code:m.code,keyCode:m.keyCode,which:m.keyCode,bubbles:true};var ty=m.t||"keydown";(document.activeElement||document.body).dispatchEvent(new KeyboardEvent(ty,o));if(!m.t){document.dispatchEvent(new KeyboardEvent("keyup",o));}}
 else if(m.k==="input"){var t=find(m.p);if(t){t.value=m.v;t.dispatchEvent(new Event("input",{bubbles:true}));t.dispatchEvent(new Event("change",{bubbles:true}));}}
 else if(m.k==="ptr"){var pe=find(m.p);if(pe){var q=at(pe,m);if(document.body&&!rcur.parentNode)document.body.appendChild(rcur);rcur.style.display="block";rcur.style.left=q.clientX+"px";rcur.style.top=q.clientY+"px";
 pe.dispatchEvent(new PointerEvent(m.t,{bubbles:true,cancelable:true,view:window,clientX:q.clientX,clientY:q.clientY,pointerId:777,pointerType:m.pt||"mouse",isPrimary:true,buttons:m.b||0}));}}
@@ -61,13 +61,18 @@ export function cleanHtml(src: string): string {
 
 const BASE_W = 640;
 
-export function wrapHtml(src: string): string {
+export function wrapHtml(src: string, seed?: string): string {
   const code = cleanHtml(src);
   const isSvg = /^(<\?xml[^>]*>\s*)?<svg[\s>]/i.test(code);
   const base = isSvg
     ? `<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;height:100%;background:#0f172a}body{display:flex;align-items:center;justify-content:center}svg{max-width:100%;max-height:100%;width:100%;height:100%}</style></head><body>${code.replace(/^<\?xml[^>]*>/i, "")}</body></html>`
     : /<html[\s>]/i.test(code) ? code : `<!doctype html><html><head><meta charset="utf-8"></head><body>${code}</body></html>`;
-  return /<\/body>/i.test(base) ? base.replace(/<\/body>/i, `${BRIDGE}</body>`) : base + BRIDGE;
+  let out = /<\/body>/i.test(base) ? base.replace(/<\/body>/i, `${BRIDGE}</body>`) : base + BRIDGE;
+  if (seed) {
+    const sc = seedScript(seed);
+    out = /<head[^>]*>/i.test(out) ? out.replace(/<head[^>]*>/i, (m) => m + sc) : sc + out;
+  }
+  return out;
 }
 
 export default function HtmlSlides({ html, syncKey, className, progress }: { html: string; syncKey?: string; className?: string; progress?: { studentId: string; presentationId: string } }) {
@@ -87,7 +92,7 @@ export default function HtmlSlides({ html, syncKey, className, progress }: { htm
     );
   };
   const record = (m: any) => {
-    if (!progress || restoring.current) return;
+    if (!progress || restoring.current || m.k === "ptr") return;
     const last = log.current[log.current.length - 1];
     if (m.k === "input" && last?.k === "input" && JSON.stringify(last.p) === JSON.stringify(m.p)) log.current[log.current.length - 1] = m;
     else log.current.push(m);
@@ -111,7 +116,7 @@ export default function HtmlSlides({ html, syncKey, className, progress }: { htm
     }
     setTimeout(() => { restoring.current = false; }, 100);
   };
-  const srcDoc = useMemo(() => wrapHtml(html), [html]);
+  const srcDoc = useMemo(() => wrapHtml(html, syncKey), [html, syncKey]);
 
   useEffect(() => {
     const ch = syncKey ? supabase.channel(`live-html:${syncKey}`) : null;
