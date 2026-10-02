@@ -359,13 +359,7 @@ export default function BoardStudentView({
         viewBox={`0 0 ${BOARD_W} ${BOARD_H}`}
         preserveAspectRatio="xMidYMid slice"
         className="w-full h-full touch-none select-none"
-        style={{
-          cursor,
-          backgroundImage: "radial-gradient(hsl(var(--border)) 1px, transparent 1px)",
-          backgroundSize: `${(24 * view.s) / cam.w}px ${(24 * view.s) / cam.w}px`,
-          backgroundPosition: `${view.dx - (cam.x / cam.w) * BOARD_W * view.s}px ${view.dy - (cam.y / cam.w) * BOARD_H * view.s}px`,
-
-        }}
+        style={{ cursor }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={endPointer}
