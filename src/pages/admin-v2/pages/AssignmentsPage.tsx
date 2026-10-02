@@ -9,6 +9,7 @@ import { toast } from "@/hooks/use-toast";
 import StudentBlocks from "@/components/blocks/StudentBlocks";
 import { kitBlocksToLessonBlocks } from "@/lib/lesson-kits";
 import { useAdminLang } from "../LanguageContext";
+import BookPagesSubmissions from "./BookPagesSubmissions";
 
 type AssignmentType = "test" | "homework" | "writing" | "reading" | "grammar" | "audio";
 
@@ -157,6 +158,8 @@ export default function AssignmentsPage() {
           className="w-full pl-10 pr-3 py-2.5 rounded-xl border border-slate-200 text-sm bg-white"
         />
       </div>
+
+      {!loading && <BookPagesSubmissions nameOf={nameOf} query={q} />}
 
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
