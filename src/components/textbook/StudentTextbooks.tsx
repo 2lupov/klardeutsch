@@ -37,7 +37,9 @@ export default function StudentTextbooks() {
   useEffect(() => { load(); }, [user?.id]);
 
   const markDone = async (hwId: string) => {
-    await (supabase as any).from("student_book_pages").update({ homework_status: "done" }).eq("id", hwId);
+    const { error } = await (supabase as any).from("student_book_pages").update({ homework_status: "done" }).eq("id", hwId);
+    if (error) { toast.error("Не вдалося здати сторінку"); return; }
+    supabase.functions.invoke("notify-book-page", { body: { page_id: hwId } }).catch(() => {});
     if (user) await supabase.rpc("award_coins", { p_user_id: user.id, p_amount: 10, p_reason: "Домашка в підручнику" });
     toast.success("Домашку здано!");
     setOpen(null);
