@@ -45,9 +45,9 @@ export default function MarkSheet({
 
   useEffect(() => {
     if (mounted.current) return;
-    if (ref.current && value) {
+    mounted.current = true;
+    if (ref.current && value && ref.current.innerHTML !== value) {
       ref.current.innerHTML = value;
-      mounted.current = true;
     }
   }, [value]);
 
