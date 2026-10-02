@@ -1208,7 +1208,11 @@ export type Database = {
           ease: number
           example: string | null
           example_ru: string | null
+          folder: string
           id: string
+          image_credit: string | null
+          image_query: string | null
+          image_url: string | null
           interval_days: number
           last_reviewed_at: string | null
           lemma: string
@@ -1226,7 +1230,11 @@ export type Database = {
           ease?: number
           example?: string | null
           example_ru?: string | null
+          folder?: string
           id?: string
+          image_credit?: string | null
+          image_query?: string | null
+          image_url?: string | null
           interval_days?: number
           last_reviewed_at?: string | null
           lemma: string
@@ -1244,7 +1252,11 @@ export type Database = {
           ease?: number
           example?: string | null
           example_ru?: string | null
+          folder?: string
           id?: string
+          image_credit?: string | null
+          image_query?: string | null
+          image_url?: string | null
           interval_days?: number
           last_reviewed_at?: string | null
           lemma?: string
