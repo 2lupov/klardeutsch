@@ -187,20 +187,34 @@ export async function reviewCard(item: VocabItem, grade: SrsGrade): Promise<void
   if (error) throw error;
 }
 
+/** Поисковый запрос для картинки: английское слово из ИИ (`image_query`)
+ *  или немецкое существительное с артиклем («der Name» → «Name»).
+ *  Функциональные слова (артикли, частицы, глаголы «heißen», буквы «A [beː]»)
+ *  не получают картинку вовсе — поиск по ним даёт бессвязные фото. */
+function imageQueryFor(item: VocabItem): string | null {
+  const clean = (s: string) => s.replace(/\s*[\[\(].*$/, "").split(";")[0].trim();
+  if (item.image_query) {
+    const en = clean(item.image_query);
+    if (en) return en;
+  }
+  const de = clean(item.translation_de || "");
+  const noun = de.match(/^(?:der|die|das)\s+(.+)$/i);
+  return noun ? noun[1].trim() : null;
+}
+
 /** Картинка к слову — лениво, только когда слово реально показывается
  *  (карточка повторения, строка в словаре), а не для всего глоссария разом.
- *  Результат кэшируется в самой строке, повторный вызов для того же слова
- *  уже не ходит в Pexels. */
+ *  Результат кэшируется в самой строке: image_url NULL = ещё не пробовали,
+ *  "" = пробовали и пусто (не спамим повторными запросами), непустая = есть. */
 export async function fetchWordImage(item: VocabItem): Promise<{ url: string | null; credit: string | null }> {
-  // image_url === null → ещё не пробовали. "" → пробовали, картинки не нашлось
-  // (не повторяем запрос впустую). Непустая строка → уже есть, кэш отдаём как есть.
   if (item.image_url !== null && item.image_url !== undefined) {
     return { url: item.image_url || null, credit: item.image_credit };
   }
-  const query = item.image_query || item.translation_de || item.translation_ru || item.lemma;
+  const query = imageQueryFor(item);
+  if (!query) return { url: null, credit: null }; // запроса-существительного нет — картинку не ищем (en может появиться позже)
   const { data, error } = await supabase.functions.invoke("word-image", { body: { query } });
   if (error || !data?.url) {
-    await supabase.from("dutch_vocab").update({ image_url: "" }).eq("id", item.id); // "" = уже пробовали, пусто — не спамим запросами повторно
+    await supabase.from("dutch_vocab").update({ image_url: "" }).eq("id", item.id);
     return { url: null, credit: null };
   }
   await supabase.from("dutch_vocab").update({ image_url: data.url, image_credit: data.credit ?? null }).eq("id", item.id);
