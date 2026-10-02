@@ -326,7 +326,7 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
       )}
 
       {section === "video" && (
-        <div className="flex-1 min-h-0 flex flex-col gap-2 p-2 overflow-y-auto">
+        <div className="flex-1 min-h-0 flex flex-col gap-2 p-2 overflow-hidden">
           <div className="flex justify-end shrink-0">
             <Button animated={false} size="sm" onClick={() => transfer("video", null)}>
               <Crosshair /> Показати відео учню
@@ -335,7 +335,7 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
           <LiveVideo
             classId={cls.id}
             role="teacher"
-            className="flex-1"
+            className="flex-1 min-h-0"
             onUseLesson={(kit) => transfer("blocks", { type: "blocks", kit_id: kit.id, title: kit.title, level: kit.level, blocks: kit.blocks, sections: kitSections(kit), page_paths: kit.page_paths, presentation_id: kit.presentation_id })}
           />
         </div>
