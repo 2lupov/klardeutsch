@@ -11,6 +11,7 @@ import ListeningLab from "@/components/dutch/ListeningLab";
 import DutchBuddy from "@/components/dutch/DutchBuddy";
 import GrammarBridge from "@/components/dutch/GrammarBridge";
 import DutchDictionary from "@/components/dutch/DutchDictionary";
+import HtmlDocs from "@/components/dutch/HtmlDocs";
 import type { Level } from "@/lib/dutch";
 
 // "course" — фиксированная программа A0→B2, основной путь (см. src/lib/curriculum.ts).
@@ -24,6 +25,7 @@ const TABS = [
   { key: "buddy", label: "💬 Daan" },
   { key: "dict", label: "🔤 Словарь" },
   { key: "grammar", label: "🧩 Грамматика" },
+  { key: "html", label: "🖼️ HTML" },
   { key: "words", label: "📚 Темы (старое)" },
 ] as const;
 type Tab = (typeof TABS)[number]["key"];
@@ -76,6 +78,7 @@ export default function Dutch() {
         {tab === "listen" && <ListeningLab level={level} />}
         {tab === "buddy" && <DutchBuddy level={level} />}
         {tab === "grammar" && <GrammarBridge />}
+        {tab === "html" && <HtmlDocs />}
       </main>
     </div>
   );
