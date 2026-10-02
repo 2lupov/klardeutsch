@@ -7,10 +7,12 @@ import WordSprint from "@/components/dutch/WordSprint";
 import ListeningLab from "@/components/dutch/ListeningLab";
 import DutchBuddy from "@/components/dutch/DutchBuddy";
 import GrammarBridge from "@/components/dutch/GrammarBridge";
+import DutchDictionary from "@/components/dutch/DutchDictionary";
 import type { Level } from "@/lib/dutch";
 
 const TABS = [
   { key: "words", label: "📚 Слова" },
+  { key: "dict", label: "🔤 Словарь" },
   { key: "listen", label: "🎧 Аудирование" },
   { key: "buddy", label: "💬 Daan" },
   { key: "grammar", label: "🧩 Грамматика" },
@@ -58,6 +60,7 @@ export default function Dutch() {
       </header>
       <main className="flex-1 min-h-0 p-4">
         {tab === "words" && <WordSprint level={level} />}
+        {tab === "dict" && <DutchDictionary />}
         {tab === "listen" && <ListeningLab level={level} />}
         {tab === "buddy" && <DutchBuddy level={level} />}
         {tab === "grammar" && <GrammarBridge />}

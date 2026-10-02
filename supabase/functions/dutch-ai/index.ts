@@ -67,6 +67,15 @@ article — тільки для іменників, інакше "". example —
         .filter((m: any) => m && typeof m.content === "string")
         .map((m: any) => ({ role: m.role === "assistant" ? "assistant" : "user", content: m.content.slice(0, 2000) }));
       if (!messages.length) messages = [{ role: "user", content: "(почни розмову першим)" }];
+    } else if (action === "translate") {
+      const query = String(body.query || "").slice(0, 500);
+      if (!query.trim()) return json({ error: "Пустой запрос" }, 400);
+      const direction = body.direction === "ru-nl" ? "ru-nl" : "nl-ru";
+      instructions += `\nТи — розмовний словник нідерландська↔російська. Відповідай ЛИШЕ JSON:
+{"input":"","detected":"nl|ru","entries":[{"nl":"","article":"de|het|","ru":"","de":"","example":"","example_ru":"","note_ru":""}]}
+${direction === "ru-nl" ? "Користувач дав російське слово/фразу — дай 1-3 нідерландські переклади (розмовні варіанти першими)." : "Користувач дав нідерландське слово/фразу — розбери і переклади російською; якщо це фраза чи сленг, поясни цілком."}
+article — тільки для іменників. de — німецька паралель. note_ru — сленг/частки/пастки (коротко) або "". example — коротке живе речення nl.`;
+      messages = [{ role: "user", content: query }];
     } else {
       return json({ error: "Unknown action" }, 400);
     }
