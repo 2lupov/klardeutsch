@@ -2,15 +2,24 @@ import { useEffect, useState } from "react";
 import { Lock, Check, Loader2 } from "lucide-react";
 import { CURRICULUM, type CourseLevel } from "@/lib/curriculum";
 import { getProgressMap, resolveStatus, type ModuleStatus } from "@/lib/moduleStore";
+import { getFolders, type FolderSummary } from "@/lib/vocabStore";
 import Module from "./Module";
 
 const LEVELS: CourseLevel[] = ["A0", "A1", "A2", "B1", "B2"];
 
 export default function Curriculum() {
   const [progress, setProgress] = useState<Map<string, any> | null>(null);
+  const [folders, setFolders] = useState<FolderSummary[]>([]);
   const [openId, setOpenId] = useState<string | null>(null);
 
-  const refresh = async () => setProgress(await getProgressMap());
+  // Словарь уровня = папка dutch_vocab с именем уровня (её заполняют модули
+  // этого уровня по ходу прохождения, см. Module.tsx). Отсюда и "уровни
+  // сохраняют за собой информацию": слова остаются в своей папке насовсем,
+  // даже когда учишь уже следующий уровень.
+  const refresh = async () => {
+    const [p, f] = await Promise.all([getProgressMap(), getFolders()]);
+    setProgress(p); setFolders(f);
+  };
   useEffect(() => { refresh(); }, []);
 
   if (openId) return <Module moduleId={openId} onExit={() => { setOpenId(null); refresh(); }} />;
@@ -32,9 +41,16 @@ export default function Curriculum() {
 
       {LEVELS.map((lvl) => {
         const mods = CURRICULUM.filter((m) => m.level === lvl);
+        const levelPassed = mods.filter((m) => progress.get(m.id)?.status === "passed").length;
+        const vocab = folders.find((f) => f.name === lvl);
         return (
           <div key={lvl}>
-            <h2 className="text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wide">{lvl}</h2>
+            <div className="flex items-baseline justify-between mb-2">
+              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">{lvl}</h2>
+              <p className="text-xs text-muted-foreground">
+                {levelPassed}/{mods.length} модулей{vocab ? ` · ${vocab.known}/${vocab.count} слов выучено` : ""}
+              </p>
+            </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
               {mods.map((m) => {
                 const status: ModuleStatus = resolveStatus(m, progress);
