@@ -6,6 +6,7 @@ import MarkSheet from "@/components/live/MarkSheet";
 import { cn } from "@/lib/utils";
 import { useLiveVideo, youtubeVideoId } from "@/components/live/useLiveVideo";
 import VideoLessonGenerator from "@/components/live/VideoLessonGenerator";
+import SyncedYouTube from "@/components/live/SyncedYouTube";
 import type { LessonKit } from "@/lib/lesson-kits";
 
 export default function LiveVideo({
@@ -54,14 +55,7 @@ export default function LiveVideo({
 
       {state.video_id ? (
         <div className="aspect-video max-h-[52dvh] w-full shrink-0 overflow-hidden rounded-md border border-border bg-card">
-          <iframe
-            key={state.video_id}
-            src={`https://www.youtube-nocookie.com/embed/${state.video_id}?rel=0`}
-            title="Відео уроку"
-            className="h-full w-full"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowFullScreen
-          />
+          <SyncedYouTube key={state.video_id} classId={classId} videoId={state.video_id} role={role} />
         </div>
       ) : (
         <div className="grid aspect-video max-h-[45dvh] w-full shrink-0 place-items-center rounded-md border border-dashed border-border bg-muted/30 text-center">

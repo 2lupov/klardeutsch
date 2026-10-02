@@ -283,13 +283,13 @@ export default function LiveClass() {
       </nav>
       <main className={`flex-1 h-full pb-16 md:pb-0 ${section === "board" ? "overflow-hidden flex flex-col" : "overflow-y-auto"}`}>
         {lastSlide && (
-          <div className={section === "slides" ? "p-2 sm:p-4 h-[calc(100dvh-7rem)] md:h-[calc(100dvh-6rem)]" : "hidden"}>
+          <div className={section === "slides" ? "p-2 sm:p-4 h-[calc(100dvh-4rem)] md:h-[100dvh]" : "hidden"}>
             <LaserSurface point={laser} className="h-full">
               <PresentationView presentationId={lastSlide.presentation_id} page={lastSlide.page} syncKey={cls.id} progressStudentId={user?.id} />
             </LaserSurface>
           </div>
         )}
-        <header className="sticky top-0 z-10 bg-background/90 backdrop-blur border-b border-border px-3 py-2 md:px-5 md:py-4 flex items-center justify-between gap-3">
+        <header className={section === "slides" && lastSlide ? "hidden" : "sticky top-0 z-10 bg-background/90 backdrop-blur border-b border-border px-3 py-2 md:px-5 md:py-4 flex items-center justify-between gap-3"}>
           <div className="min-w-0">
             <p className="text-[10px] md:text-[11px] uppercase tracking-widest text-primary font-bold">Живий урок</p>
             <h1 className="font-display text-base md:text-xl font-bold text-foreground truncate">{cls.title}</h1>
