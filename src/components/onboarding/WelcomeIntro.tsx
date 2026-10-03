@@ -51,15 +51,76 @@ const features = [
 
 const WelcomeIntro = ({ onComplete }: Props) => {
   const [active, setActive] = useState(0);
+  const [nickname, setNickname] = useState("");
+  const [savedNickname, setSavedNickname] = useState<string | null>(null);
+  const [nickError, setNickError] = useState("");
+  const [savingNick, setSavingNick] = useState(false);
   const { lang } = useLanguage();
   const { user } = useAuth() as any;
   const feature = features[active];
   const Icon = feature.icon;
   const isTelegram = feature.icon === Send;
+  const isNickname = feature.icon === AtSign;
   const tgLink = `https://t.me/klar_deutsch_bot${user?.id ? `?start=${user.id}` : ""}`;
   const isLast = active === features.length - 1;
 
-  const advance = () => {
+  useEffect(() => {
+    if (!user?.id) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("nickname, display_name")
+        .eq("user_id", user.id)
+        .single();
+      if (cancelled) return;
+      const current = data?.nickname || data?.display_name || user?.user_metadata?.display_name || "";
+      setNickname(current);
+      setSavedNickname(data?.nickname || null);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
+
+  const advance = async () => {
+    if (isNickname) {
+      const parsed = nicknameSchema.safeParse(nickname);
+      if (!parsed.success) {
+        setNickError(
+          lang === "uk"
+            ? "3–24 символи без пробілів: літери, цифри, _ - ."
+            : "3–24 символа без пробелов: буквы, цифры, _ - ."
+        );
+        return;
+      }
+      const value = parsed.data;
+      if (value !== (savedNickname ?? "").toLowerCase()) {
+        setSavingNick(true);
+        const { error } = await supabase
+          .from("profiles")
+          .update({ nickname: value })
+          .eq("user_id", user.id);
+        setSavingNick(false);
+        if (error) {
+          if (error.code === "23505") {
+            setNickError(
+              lang === "uk"
+                ? "Цей нікнейм уже зайнятий — спробуй інший."
+                : "Этот никнейм уже занят — попробуй другой."
+            );
+          } else {
+            setNickError(
+              lang === "uk"
+                ? "Не вдалося зберегти — спробуй ще раз."
+                : "Не удалось сохранить — попробуй ещё раз."
+            );
+          }
+          return;
+        }
+        setSavedNickname(value);
+      }
+    }
     if (isLast) {
       onComplete();
       return;
