@@ -1,3 +1,4 @@
+import BackButton from "@/components/BackButton";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, Check, Gamepad2, BookOpen, GraduationCap, Sparkles, MessageSquare, Briefcase, Plane } from "lucide-react";

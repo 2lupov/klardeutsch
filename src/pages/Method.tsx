@@ -1,3 +1,4 @@
+import BackButton from "@/components/BackButton";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Brain, Sparkles, Target, Zap, Star, ArrowLeft, Volume2, Loader2, Pause, Play } from "lucide-react";
 import { useNavigate } from "react-router-dom";
