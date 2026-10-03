@@ -213,7 +213,12 @@ const WelcomeIntro = ({ onComplete }: Props) => {
         </div>
       </div>
 
-      <Button onClick={advance} size="lg" className="h-12 w-full rounded-xl text-base">
+      <Button
+        onClick={advance}
+        size="lg"
+        disabled={savingNick}
+        className="h-12 w-full rounded-xl text-base"
+      >
         {isLast
           ? lang === "uk" ? "Почати знайомство" : "Начать знакомство"
           : lang === "uk" ? "Далі" : "Дальше"}
