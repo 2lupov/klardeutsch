@@ -16,6 +16,11 @@ const BodySchema = z.discriminatedUnion("action", [
     nickname: NicknameSchema,
     password: PasswordSchema,
   }),
+  z.object({
+    action: z.literal("request-reset"),
+    nickname: NicknameSchema,
+    origin: z.string().url().max(200).optional(),
+  }),
 ]);
 
 const GENERIC_LOGIN_ERROR = "Неправильний нікнейм або пароль";
@@ -39,7 +44,8 @@ Deno.serve(async (req) => {
       return json({ error: "Перевірте нікнейм, пароль та email" }, 400);
     }
 
-    const { action, nickname, password } = parsed.data;
+    const { action, nickname } = parsed.data;
+    const password = "password" in parsed.data ? parsed.data.password : "";
     const url = Deno.env.get("SUPABASE_URL");
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
