@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Users can insert own course purchases" ON public.course_purchases;
