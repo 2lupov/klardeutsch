@@ -24,3 +24,10 @@ describe("nickname authentication rules", () => {
     expect(optionalEmailSchema.safeParse("not-an-email").success).toBe(false);
   });
 });
+import { getSignupPasswordError } from "@/lib/nickname-auth";
+describe("signup password rules", () => {
+  it("rejects shorter than 8", () => expect(getSignupPasswordError("ab12")).not.toBeNull());
+  it("requires letters and digits", () => expect(getSignupPasswordError("abcdefgh")).not.toBeNull());
+  it("rejects trivial combos", () => expect(getSignupPasswordError("password123")).not.toBeNull());
+  it("accepts a solid password", () => expect(getSignupPasswordError("Klar2026sonne")).toBeNull());
+});
