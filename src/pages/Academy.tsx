@@ -159,7 +159,7 @@ const Academy = () => {
                 key={course.id}
                 course={course}
                 lang={lang}
-                isPurchased={purchasedIds.has(course.id)}
+                isPurchased={true}
               />
             ))}
           </div>
