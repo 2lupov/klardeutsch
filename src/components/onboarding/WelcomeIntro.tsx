@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, BookOpen, GraduationCap, Send, Sparkles } from "lucide-react";
+import { ArrowRight, AtSign, BookOpen, GraduationCap, Send, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { nicknameSchema } from "@/lib/nickname-auth";
 
 interface Props {
   onComplete: () => void;
