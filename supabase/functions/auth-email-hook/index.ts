@@ -36,9 +36,9 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 
 // Configuration
 const SITE_NAME = "klardeutsch"
-const SENDER_DOMAIN = "notify.klardeutsch.org"
-const ROOT_DOMAIN = "klardeutsch.org"
-const FROM_DOMAIN = "klardeutsch.org"
+const SENDER_DOMAIN = "notify.klar.academy"
+const ROOT_DOMAIN = "klar.academy"
+const FROM_DOMAIN = "klar.academy"
 
 // Sample data for preview mode ONLY (not used in actual email sending).
 // URLs are baked in at scaffold time from the project's real data.
