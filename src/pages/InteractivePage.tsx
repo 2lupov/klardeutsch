@@ -21,9 +21,7 @@ export default function InteractivePage() {
   return (
     <div className="h-[100dvh] overflow-y-auto bg-background">
       <header className="sticky top-0 z-10 flex items-center gap-3 px-4 py-3 bg-background/90 backdrop-blur border-b border-border">
-        <button onClick={() => navigate(-1)} className="p-2 rounded-xl hover:bg-muted/60">
-          <ArrowLeft className="w-5 h-5" />
-        </button>
+        <BackButton />
         <div className="min-w-0">
           <h1 className="font-display font-bold text-foreground truncate">{page?.title || "Інтерактивна сторінка"}</h1>
           {page?.level ? <p className="text-xs text-muted-foreground">Niveau {page.level}</p> : null}

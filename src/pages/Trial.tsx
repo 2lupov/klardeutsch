@@ -32,12 +32,7 @@ const Trial = () => {
       <div className="relative max-w-6xl mx-auto px-4 md:px-8 py-6 md:py-10">
         {/* Top bar — airport style */}
         <div className="flex items-center justify-between mb-6 md:mb-10">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-[#0F172A]/60 hover:text-[#EA580C] text-sm font-mono uppercase tracking-widest transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" /> Назад
-          </button>
+          <BackButton />
           <div className="hidden md:flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.3em] text-[#0F172A]/50">
             <span>Gate KLAR</span>
             <span className="w-1 h-1 rounded-full bg-[#EA580C] animate-pulse" />

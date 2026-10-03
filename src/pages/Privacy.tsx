@@ -42,7 +42,8 @@ const Privacy = () => {
 
   return (
     <div className="min-h-[100dvh] overflow-y-auto bg-background text-foreground px-4 py-8 max-w-2xl mx-auto standalone-scroll">
-      <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6">
+      <BackButton className="mb-6" />
+      <button style={{display:"none"}} onClick={() => navigate(-1)} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6">
         <ArrowLeft className="w-4 h-4" /> {c.back}
       </button>
 

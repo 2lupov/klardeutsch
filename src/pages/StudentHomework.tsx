@@ -229,12 +229,7 @@ const StudentHomework = () => {
     <div className="min-h-[100dvh] bg-gradient-to-br from-background via-background to-primary/5 pb-32 lg:pb-12">
       <div className="max-w-4xl mx-auto px-4 lg:px-8 pt-5 lg:pt-10">
         {/* Top bar */}
-        <button
-          onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4"
-        >
-          <ArrowLeft className="w-4 h-4" /> {t("Назад", "Назад")}
-        </button>
+        <BackButton className="mb-4" />
 
         {/* Header card */}
         <motion.div
