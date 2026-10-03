@@ -162,7 +162,16 @@ Deno.serve(async (req) => {
           issuer: "https://oauth.telegram.org",
           audience: clientId,
         });
-        telegramId = Number((payload as any).id ?? payload.sub);
+        console.log("tg oidc claims", Object.keys(payload));
+        const rawId = (payload as any).id ?? (payload as any).telegram_id ?? (payload as any).user_id ?? payload.sub;
+        telegramId = Number(rawId);
+        if (!Number.isFinite(telegramId) || telegramId <= 0) {
+          console.error("tg oidc: non-numeric id", { sub: payload.sub });
+          return new Response(JSON.stringify({ error: "Invalid login widget data" }), {
+            status: 401,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
         const name = String((payload as any).given_name || (payload as any).name || "") || null;
         firstName = name;
         lastName = ((payload as any).family_name as string) || null;
