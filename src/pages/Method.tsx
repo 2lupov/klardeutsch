@@ -1,3 +1,4 @@
+import BackButton from "@/components/BackButton";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Brain, Sparkles, Target, Zap, Star, ArrowLeft, Volume2, Loader2, Pause, Play } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -287,9 +288,7 @@ const Method = () => {
     <div className="min-h-[100dvh] overflow-y-auto bg-background text-foreground standalone-scroll">
       {/* Hero */}
       <section className="relative px-4 pt-12 pb-16 text-center overflow-hidden">
-        <button onClick={() => navigate(-1)} className="absolute top-4 left-4 text-muted-foreground hover:text-foreground transition-colors">
-          <ArrowLeft className="w-5 h-5" />
-        </button>
+        <BackButton className="absolute top-4 left-4" />
 
         <div className="relative z-10 max-w-xl mx-auto">
           <h1 className="text-4xl md:text-5xl font-display font-bold mb-3 flex items-center justify-center gap-3">

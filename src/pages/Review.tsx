@@ -1,3 +1,4 @@
+import BackButton from "@/components/BackButton";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -76,9 +77,7 @@ const Review = () => {
     <div className="min-h-[100dvh] bg-background p-6">
       <div className="max-w-md mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <button onClick={() => navigate(-1)} className="text-muted-foreground">
-            <ArrowLeft className="w-5 h-5" />
-          </button>
+          <BackButton />
           <span className="text-sm text-muted-foreground">
             {current + 1}/{cards.length}
           </span>
