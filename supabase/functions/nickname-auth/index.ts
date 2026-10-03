@@ -84,7 +84,7 @@ Deno.serve(async (req) => {
 
       const { data: signedIn, error: signInError } = await auth.auth.signInWithPassword({ email: authEmail, password });
       if (signInError || !signedIn.session) return json({ error: "Акаунт створено, але не вдалося увійти" }, 500);
-      return json({ access_token: signedIn.session.access_token, refresh_token: signedIn.session.refresh_token });
+      return json({ user_id: created.user.id, access_token: signedIn.session.access_token, refresh_token: signedIn.session.refresh_token });
     }
 
     const { data: attempt } = await admin
