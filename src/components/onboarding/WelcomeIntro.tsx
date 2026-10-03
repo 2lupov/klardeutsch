@@ -1,15 +1,24 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, BookOpen, GraduationCap, Send, Sparkles } from "lucide-react";
+import { ArrowRight, AtSign, BookOpen, GraduationCap, Send, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { nicknameSchema } from "@/lib/nickname-auth";
 
 interface Props {
   onComplete: () => void;
 }
 
 const features = [
+  {
+    icon: AtSign,
+    titleRu: "Твой личный никнейм",
+    titleUk: "Твій особистий нікнейм",
+    textRu: "По никнейму тебя находят другие ученики, по нему возвращается пароль и обращаются в поддержку. Он уникальный — проверим и сохраним твой.",
+    textUk: "За нікнеймом тебе знаходять інші учні, за ним повертається пароль і звертаються до підтримки. Він унікальний — перевіримо й збережемо твій.",
+  },
   {
     icon: GraduationCap,
     titleRu: "Живые занятия",
@@ -42,15 +51,76 @@ const features = [
 
 const WelcomeIntro = ({ onComplete }: Props) => {
   const [active, setActive] = useState(0);
+  const [nickname, setNickname] = useState("");
+  const [savedNickname, setSavedNickname] = useState<string | null>(null);
+  const [nickError, setNickError] = useState("");
+  const [savingNick, setSavingNick] = useState(false);
   const { lang } = useLanguage();
   const { user } = useAuth() as any;
   const feature = features[active];
   const Icon = feature.icon;
   const isTelegram = feature.icon === Send;
+  const isNickname = feature.icon === AtSign;
   const tgLink = `https://t.me/klar_deutsch_bot${user?.id ? `?start=${user.id}` : ""}`;
   const isLast = active === features.length - 1;
 
-  const advance = () => {
+  useEffect(() => {
+    if (!user?.id) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("nickname, display_name")
+        .eq("user_id", user.id)
+        .single();
+      if (cancelled) return;
+      const current = data?.nickname || data?.display_name || user?.user_metadata?.display_name || "";
+      setNickname(current);
+      setSavedNickname(data?.nickname || null);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
+
+  const advance = async () => {
+    if (isNickname) {
+      const parsed = nicknameSchema.safeParse(nickname);
+      if (!parsed.success) {
+        setNickError(
+          lang === "uk"
+            ? "3–24 символи без пробілів: літери, цифри, _ - ."
+            : "3–24 символа без пробелов: буквы, цифры, _ - ."
+        );
+        return;
+      }
+      const value = parsed.data;
+      if (value !== (savedNickname ?? "").toLowerCase()) {
+        setSavingNick(true);
+        const { error } = await supabase
+          .from("profiles")
+          .update({ nickname: value })
+          .eq("user_id", user.id);
+        setSavingNick(false);
+        if (error) {
+          if (error.code === "23505") {
+            setNickError(
+              lang === "uk"
+                ? "Цей нікнейм уже зайнятий — спробуй інший."
+                : "Этот никнейм уже занят — попробуй другой."
+            );
+          } else {
+            setNickError(
+              lang === "uk"
+                ? "Не вдалося зберегти — спробуй ще раз."
+                : "Не удалось сохранить — попробуй ещё раз."
+            );
+          }
+          return;
+        }
+        setSavedNickname(value);
+      }
+    }
     if (isLast) {
       onComplete();
       return;
@@ -95,6 +165,27 @@ const WelcomeIntro = ({ onComplete }: Props) => {
             <p className="max-w-sm text-sm leading-6 text-muted-foreground">
               {lang === "uk" ? feature.textUk : feature.textRu}
             </p>
+            {isNickname && (
+              <div className="mt-4 w-full max-w-xs space-y-2">
+                <div className="flex items-center gap-2 rounded-xl border border-border bg-background/60 px-4 py-3">
+                  <span className="font-display text-lg font-bold text-accent">@</span>
+                  <input
+                    value={nickname}
+                    onChange={(e) => {
+                      setNickname(e.target.value);
+                      setNickError("");
+                    }}
+                    className="w-full bg-transparent text-left font-display text-lg font-bold text-foreground outline-none"
+                    placeholder={lang === "uk" ? "твій_нікнейм" : "твой_никнейм"}
+                    maxLength={24}
+                    autoCapitalize="none"
+                    autoComplete="off"
+                    autoCorrect="off"
+                  />
+                </div>
+                {nickError && <p className="text-xs text-destructive">{nickError}</p>}
+              </div>
+            )}
             {isTelegram && (
               <Button asChild variant="outline" className="mt-4 rounded-xl">
                 <a href={tgLink} target="_blank" rel="noopener noreferrer">
@@ -122,7 +213,12 @@ const WelcomeIntro = ({ onComplete }: Props) => {
         </div>
       </div>
 
-      <Button onClick={advance} size="lg" className="h-12 w-full rounded-xl text-base">
+      <Button
+        onClick={advance}
+        size="lg"
+        disabled={savingNick}
+        className="h-12 w-full rounded-xl text-base"
+      >
         {isLast
           ? lang === "uk" ? "Почати знайомство" : "Начать знакомство"
           : lang === "uk" ? "Далі" : "Дальше"}
