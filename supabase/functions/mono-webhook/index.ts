@@ -126,6 +126,18 @@ Deno.serve(async (req) => {
 
     // idempotent update
     await supabase.from("mono_payments").update(patch).eq("invoice_id", invoiceId);
+
+    // Grant A2 course access after a successful full payment
+    if (status === "success") {
+      const { data: pay } = await supabase.from("mono_payments").select("user_id, reference, amount").eq("invoice_id", invoiceId).maybeSingle();
+      const paid = Number(parsed.finalAmount ?? parsed.amount ?? 0);
+      if (pay?.user_id && String(pay.reference ?? "").startsWith("a2course_") && paid >= 50000) {
+        await supabase.from("course_purchases").upsert(
+          { user_id: pay.user_id, course_id: "a2a2a2a2-0000-4000-8000-000000000a02" },
+          { onConflict: "user_id,course_id", ignoreDuplicates: true },
+        );
+      }
+    }
   }
 
   return new Response(JSON.stringify({ ok: true }), {
