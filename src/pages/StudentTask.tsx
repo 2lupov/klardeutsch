@@ -461,15 +461,10 @@ const uploadFiles = async (list: FileList | null) => {
       </div>
 
       <div className="max-w-4xl mx-auto px-4 lg:px-8 pt-6 space-y-5">
-        <button
+        <BackButton
           onClick={() => { if (preview) { window.close(); navigate(-1); } else navigate("/academy"); }}
-          className="group inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <span className="w-8 h-8 rounded-xl border border-border/70 bg-card/60 backdrop-blur flex items-center justify-center transition-transform group-hover:-translate-x-0.5">
-            <ArrowLeft className="w-4 h-4" />
-          </span>
-          {preview ? t("Закрити перегляд", "Закрыть просмотр") : t("До завдань", "К заданиям")}
-        </button>
+          label={preview ? t("Закрити перегляд", "Закрыть просмотр") : t("До завдань", "К заданиям")}
+        />
 
         {!preview && !submission && !result && savedAt && (
           <div className="text-xs text-muted-foreground flex items-center gap-1.5">

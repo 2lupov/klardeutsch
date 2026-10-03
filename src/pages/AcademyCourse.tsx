@@ -150,13 +150,7 @@ const AcademyCourse = () => {
     <div className="w-full mx-auto animate-slide-up">
       {/* Back */}
       <div className="max-w-6xl mx-auto px-4 pt-4">
-        <button
-          onClick={() => navigate("/academy")}
-          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors group mb-4"
-        >
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-          {lang === "uk" ? "Академія" : "Академия"}
-        </button>
+        <BackButton to="/academy" label={lang === "uk" ? "Академія" : "Академия"} className="mb-4" />
       </div>
 
       <div className={`max-w-6xl mx-auto px-4 pb-8 ${isMobile ? "" : "flex gap-8"}`}>
