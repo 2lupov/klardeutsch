@@ -158,9 +158,9 @@ const AppRoutes = () => {
         <Route path="/tutoring/lesson/:id" element={<RequirePremium><TutoringLesson /></RequirePremium>} />
         <Route path="/tutoring/placement/:id" element={<RequirePremium><PlacementTest /></RequirePremium>} />
         <Route path="/tutoring/homework/:id" element={<RequirePremium><StudentHomework /></RequirePremium>} />
-        <Route path="/academy" element={<RequirePremium><Academy /></RequirePremium>} />
-        <Route path="/academy/:courseId" element={<RequirePremium><AcademyCourse /></RequirePremium>} />
-        <Route path="/academy/:courseId/learn" element={<RequirePremium><AcademyLearn /></RequirePremium>} />
+        <Route path="/academy" element={<RequireAuth><Academy /></RequireAuth>} />
+        <Route path="/academy/:courseId" element={<RequireAuth><AcademyCourse /></RequireAuth>} />
+        <Route path="/academy/:courseId/learn" element={<RequireAuth><AcademyLearn /></RequireAuth>} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>

@@ -20,9 +20,14 @@ const CourseA2 = () => {
     if (!user) return;
     let alive = true;
     const check = async () => {
-      // Курс відкритий для всіх користувачів
-      if (alive) setAccess(true);
-      return true;
+      const [{ data: purchase }, { data: adminRole }, { data: teacherRole }] = await Promise.all([
+        supabase.from("course_purchases").select("id").eq("user_id", user!.id).eq("course_id", A2_COURSE_ID).maybeSingle(),
+        supabase.rpc("has_role", { _user_id: user!.id, _role: "admin" }),
+        supabase.rpc("has_role", { _user_id: user!.id, _role: "teacher" }),
+      ]);
+      const ok = !!purchase || !!adminRole || !!teacherRole;
+      if (alive) setAccess(ok);
+      return ok;
     };
     check();
     // After returning from payment the bank confirmation may take a few seconds
