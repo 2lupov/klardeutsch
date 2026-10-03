@@ -75,7 +75,11 @@ Deno.serve(async (req) => {
         },
       });
       if (createError || !created.user) {
-        const duplicate = createError?.message.toLowerCase().includes("already");
+        const msg = createError?.message.toLowerCase() ?? "";
+        if (msg.includes("weak") || msg.includes("pwned") || (createError as any)?.code === "weak_password") {
+          return json({ error: "Цей пароль занадто простий і відомий зломщикам. Придумай складніший (наприклад, з цифрами й літерами)." }, 400);
+        }
+        const duplicate = msg.includes("already");
         return json({ error: duplicate ? "Цей email або нікнейм уже використовується" : "Не вдалося створити акаунт" }, 400);
       }
 
