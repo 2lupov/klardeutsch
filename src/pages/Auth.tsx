@@ -223,11 +223,21 @@ const Auth = () => {
     setLoading(true);
 
     if (forgotMode) {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });
-      if (error) setError(translateAuthError(error.message));
-      else setMessage(t("resetPasswordSent"));
+      const id = email.trim().toLowerCase();
+      if (id.includes("@")) {
+        const { error } = await supabase.auth.resetPasswordForEmail(id, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (error) setError(translateAuthError(error.message));
+        else setMessage(t("resetPasswordSent"));
+      } else if (!/^[a-z0-9_]{3,24}$/.test(id)) {
+        setError("Введіть нікнейм або email");
+      } else {
+        const { data } = await supabase.functions.invoke("nickname-auth", {
+          body: { action: "request-reset", nickname: id, origin: window.location.origin },
+        });
+        setMessage(data?.message || "Якщо акаунт має прив'язаний Telegram, ми надіслали туди посилання.");
+      }
       setLoading(false);
       return;
     }
@@ -387,14 +397,21 @@ const Auth = () => {
               className="w-full px-4 py-3 rounded-xl bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:border-primary focus:outline-none transition-colors"
             />
           ) : (
-            <input
-              type="email"
-              placeholder={t("email")}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full px-4 py-3 rounded-xl bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:border-primary focus:outline-none transition-colors"
-            />
+            <div className="space-y-2">
+              <input
+                type="text"
+                placeholder="Нікнейм або email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoCapitalize="none"
+                autoCorrect="off"
+                className="w-full px-4 py-3 rounded-xl bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:border-primary focus:outline-none transition-colors"
+              />
+              <p className="text-xs text-muted-foreground">
+                За нікнеймом посилання прийде в Telegram від @klar_deutsch_bot (якщо Telegram прив'язаний). Також можна просто увійти через Telegram.
+              </p>
+            </div>
           )}
           {!isLogin && !forgotMode && (
             <input
