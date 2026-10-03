@@ -6,8 +6,13 @@ describe("nickname authentication rules", () => {
     expect(nicknameSchema.parse("  Klar_User7 ")).toBe("klar_user7");
   });
 
-  it("rejects spaces and non-latin nickname characters", () => {
+  it("rejects spaces in nicknames", () => {
     expect(nicknameSchema.safeParse("моє ім'я").success).toBe(false);
+  });
+
+  it("accepts cyrillic letters, dots and dashes", () => {
+    expect(nicknameSchema.safeParse("Моє-Ім'я.7".replace("'", "")).success).toBe(true);
+    expect(nicknameSchema.safeParse("олena.k").success).toBe(true);
   });
 
   it("allows registration without an email", () => {

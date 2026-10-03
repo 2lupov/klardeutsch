@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { z } from "npm:zod@3.23.8";
 
-const NicknameSchema = z.string().trim().toLowerCase().regex(/^[a-z0-9_]{3,24}$/);
+const NicknameSchema = z.string().trim().toLowerCase().regex(/^[\p{L}\p{N}_.-]{3,24}$/u);
 const PasswordSchema = z.string().min(6).max(200);
 const BodySchema = z.discriminatedUnion("action", [
   z.object({

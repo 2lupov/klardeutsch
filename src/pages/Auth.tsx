@@ -387,11 +387,10 @@ const Auth = () => {
               type="text"
               placeholder={studentMode ? "Нікнейм учня" : "Нікнейм"}
               value={nickname}
-              onChange={(e) => setNickname(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
+              onChange={(e) => setNickname(e.target.value.toLowerCase().replace(/\s/g, ""))}
               required
               minLength={3}
               maxLength={24}
-              pattern="[a-z0-9_]{3,24}"
               autoCapitalize="none"
               autoCorrect="off"
               className="w-full px-4 py-3 rounded-xl bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:border-primary focus:outline-none transition-colors"
