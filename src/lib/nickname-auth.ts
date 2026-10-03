@@ -4,7 +4,7 @@ export const nicknameSchema = z
   .string()
   .trim()
   .toLowerCase()
-  .regex(/^[a-z0-9_]{3,24}$/, "Нікнейм: 3–24 символи, лише латиниця, цифри та _");
+  .regex(/^[\p{L}\p{N}_.-]{3,24}$/u, "Нікнейм: 3–24 символи — літери, цифри та _ - . (без пробілів)");
 
 export const passwordSchema = z.string().min(6, "Пароль має містити щонайменше 6 символів").max(200);
 
