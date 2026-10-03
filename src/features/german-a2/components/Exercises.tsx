@@ -2,6 +2,7 @@ import { useMemo, useState, type KeyboardEvent } from 'react';
 import type { Dialogue, Fix, Gap, GapSelect, MC, Match, Order, Sort, Translate } from '../types';
 import { useLang, useUI, tx } from '../i18n';
 import { Button, CharBar, cn, norm, shuffle } from './ui';
+import { SpeakButton } from './SpeakButton';
 
 interface P<E> { ex: E; onDone: (ok: boolean) => void }
 type GapPart = { text: string } | { gap: number; acc: string[] };
@@ -16,7 +17,10 @@ function Verdict({ ok, answer }: { ok: boolean; answer?: string }) {
   const ui = useUI();
   return (
     <p role="status" className={cn('mt-4 rounded-md border px-3 py-2 text-sm', ok ? OK : BAD)}>
-      {ok ? `✓ ${ui('correct')}` : <>✗ {ui('wrong')} {answer && <strong>{answer}</strong>}</>}
+      <span className="flex items-center gap-2">
+        <span className="flex-1">{ok ? `✓ ${ui('correct')}` : <>✗ {ui('wrong')} {answer && <strong>{answer}</strong>}</>}</span>
+        {answer && answer.trim() && !answer.includes('→') && <SpeakButton text={answer.replace(/ · /g, ', ')} />}
+      </span>
     </p>
   );
 }
@@ -39,6 +43,7 @@ export function MCEx({ ex, onDone }: P<MC>) {
           </button>
         ))}
       </div>
+      {sel !== null && <div className="mt-3 flex justify-end"><SpeakButton text={tx(ex.options[ex.answer]!, 'de')} /></div>}
     </div>
   );
 }
