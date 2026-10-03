@@ -54,14 +54,14 @@ const TelegramLoginButton = () => {
   useEffect(() => {
     if (scriptReady) return;
     const existing = document.querySelector<HTMLScriptElement>(
-      'script[src^="https://telegram.org/js/telegram-widget.js"]',
+      'script[src^="https://oauth.telegram.org/js/telegram-login.js"]',
     );
     if (existing) {
       existing.addEventListener("load", () => setScriptReady(true));
       return;
     }
     const script = document.createElement("script");
-    script.src = "https://telegram.org/js/telegram-widget.js?22";
+    script.src = "https://oauth.telegram.org/js/telegram-login.js?6";
     script.async = true;
     script.onload = () => setScriptReady(true);
     document.body.appendChild(script);
@@ -80,9 +80,9 @@ const TelegramLoginButton = () => {
       return;
     }
     login.auth(
-      { bot_id: TELEGRAM_BOT_ID, request_access: "write" },
-      (tgUser: any) => {
-        if (tgUser) (window as any).onTelegramAuth?.(tgUser);
+      { client_id: Number(TELEGRAM_BOT_ID), scope: ["profile", "write"], lang: "uk" },
+      (result: any) => {
+        if (result?.id_token) (window as any).onTelegramAuth?.(result);
       },
     );
   };
@@ -191,19 +191,7 @@ const Auth = () => {
       setTgWidgetLoading(true);
       setError("");
       try {
-        // Only include fields that Telegram actually sent (non-empty)
-        // Adding empty fields breaks the HMAC signature
-        const widgetData: Record<string, string> = {
-          id: String(tgUser.id),
-          auth_date: String(tgUser.auth_date),
-          hash: tgUser.hash,
-        };
-        if (tgUser.first_name) widgetData.first_name = tgUser.first_name;
-        if (tgUser.last_name) widgetData.last_name = tgUser.last_name;
-        if (tgUser.username) widgetData.username = tgUser.username;
-        if (tgUser.photo_url) widgetData.photo_url = tgUser.photo_url;
-
-        await loginWithTelegramWidget(widgetData);
+        await loginWithTelegramWidget({ id_token: String(tgUser.id_token) });
         setShowFireworks(true);
       } catch (err: any) {
         setError(translateAuthError(err.message));
