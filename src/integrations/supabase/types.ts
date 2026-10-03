@@ -837,6 +837,33 @@ export type Database = {
           },
         ]
       }
+      course_progress: {
+        Row: {
+          course: string
+          created_at: string
+          data: Json
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          course: string
+          created_at?: string
+          data?: Json
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          course?: string
+          created_at?: string
+          data?: Json
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       course_purchases: {
         Row: {
           course_id: string
