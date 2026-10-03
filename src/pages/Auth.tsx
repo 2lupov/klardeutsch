@@ -13,6 +13,7 @@ import Fireworks from "@/components/auth/Fireworks";
 import { Sparkles } from "lucide-react";
 import SimpleCaptcha from "@/components/auth/SimpleCaptcha";
 import { lovable } from "@/integrations/lovable/index";
+import { getPostSignupAction } from "@/lib/registration-flow";
 
 /** Translate common Supabase Auth error messages to Russian */
 function translateAuthError(msg: string): string {
@@ -272,7 +273,7 @@ const Auth = () => {
         // Detect already-registered user (Supabase returns empty identities)
         if (signUpData.user && (!signUpData.user.identities || signUpData.user.identities.length === 0)) {
           setError("Аккаунт с этим email уже существует. Попробуйте войти.");
-        } else if (signUpData.user && signUpData.session) {
+        } else if (signUpData.user && getPostSignupAction(Boolean(signUpData.session)) === "complete-registration") {
           await supabase.from("profiles").update({ display_name: nickname }).eq("user_id", signUpData.user.id);
           if (referralCode.trim() && referralValid) {
             const { data: refApplied } = await supabase.rpc("apply_referral_code", {
