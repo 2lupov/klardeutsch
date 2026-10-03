@@ -1,3 +1,4 @@
+import { SpeakButton } from './SpeakButton';
 import { useState } from 'react';
 import type { CourseModule, VocabGroup } from '../types';
 import { useLang, useUI, tx } from '../i18n';
@@ -147,14 +148,14 @@ export function ListeningSection({ m }: { m: CourseModule }) {
       <div className="space-y-3">
         <H>{tx(l.title, lang)}</H>
         <p className="max-w-prose">{tx(l.instruction, lang)}</p>
-        <AudioSlot url={l.audioUrl} />
+        <AudioSlot url={l.audioUrl} transcript={l.transcript} />
       </div>
       <ExerciseRunner exercises={l.exercises} sectionKey={key(m, 'listening')} onFinish={() => setFinished(true)} />
       <details className="rounded-xl border border-border p-4">
         <summary className="cursor-pointer font-medium">{ui('transcript')}</summary>
         {unlocked ? (
           <div className="mt-3 space-y-2">
-            {l.transcript.map((t, i) => <p key={i}>{t.speaker && <strong>{t.speaker}: </strong>}{t.text}</p>)}
+            {l.transcript.map((t, i) => <p key={i} className="flex items-start gap-2"><span className="flex-1">{t.speaker && <strong>{t.speaker}: </strong>}{t.text}</span><SpeakButton text={t.text} className="h-7 w-7" /></p>)}
           </div>
         ) : (
           <p className="mt-3 text-sm text-muted-foreground">

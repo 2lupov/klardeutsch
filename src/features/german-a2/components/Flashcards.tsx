@@ -2,6 +2,8 @@ import { useState } from 'react';
 import type { VocabItem } from '../types';
 import { useUI } from '../i18n';
 import { Button, cn } from './ui';
+import { SpeakButton } from './SpeakButton';
+import { speak } from '../tts';
 
 export function Flashcards({ items }: { items: VocabItem[] }) {
   const ui = useUI();
@@ -9,7 +11,7 @@ export function Flashcards({ items }: { items: VocabItem[] }) {
   const [flipped, setFlipped] = useState(false);
   const [known, setKnown] = useState<Set<number>>(new Set());
   const item = items[i]!;
-  const go = (d: number) => { setI((i + d + items.length) % items.length); setFlipped(false); };
+  const go = (d: number) => { const n = (i + d + items.length) % items.length; setI(n); setFlipped(false); speak(items[n]!.de); };
   const mark = (k: boolean) => {
     setKnown(s => { const n = new Set(s); if (k) n.add(i); else n.delete(i); return n; });
     go(1);
@@ -23,12 +25,12 @@ export function Flashcards({ items }: { items: VocabItem[] }) {
         className={cn('flex min-h-48 w-full flex-col items-center justify-center gap-2 rounded-xl border border-border p-6 text-center transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring',
           flipped ? 'bg-muted' : 'bg-background', known.has(i) && 'border-emerald-500')}>
         {!flipped ? (
-          <span className="text-3xl font-semibold">{item.de}</span>
+          <span className="flex items-center gap-3"><span className="text-3xl font-semibold">{item.de}</span><SpeakButton text={item.de} /></span>
         ) : (
           <>
             <span className="text-2xl font-semibold">{item.ua}</span>
             {item.extra && <span className="text-base text-muted-foreground">{item.extra}</span>}
-            {item.example && <span className="mt-2 max-w-md text-sm">{item.example}</span>}
+            {item.example && <span className="mt-2 flex max-w-md items-center gap-2 text-sm">{item.example}<SpeakButton text={item.example} className="h-7 w-7" /></span>}
           </>
         )}
       </button>
