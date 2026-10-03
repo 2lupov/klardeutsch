@@ -13,7 +13,7 @@ import Fireworks from "@/components/auth/Fireworks";
 import { Sparkles } from "lucide-react";
 import SimpleCaptcha from "@/components/auth/SimpleCaptcha";
 import { lovable } from "@/integrations/lovable/index";
-import { getPostSignupAction } from "@/lib/registration-flow";
+import { getNicknameAuthError } from "@/lib/nickname-auth";
 
 /** Translate common Supabase Auth error messages to Russian */
 function translateAuthError(msg: string): string {
@@ -161,11 +161,11 @@ const Auth = () => {
       return email.length >= 5 ? 1 : email.length / 5;
     }
     if (isLogin) {
-      const emailPart = Math.min(email.length / 5, 1) * 0.5;
+      const emailPart = Math.min(nickname.length / 3, 1) * 0.5;
       const passPart = Math.min(password.length / 6, 1) * 0.5;
       return emailPart + passPart;
     }
-    const emailPart = Math.min(email.length / 5, 1) * 0.3;
+    const emailPart = email.length > 0 ? Math.min(email.length / 5, 1) * 0.1 : 0.1;
     const nickPart = Math.min(nickname.length / 2, 1) * 0.25;
     const passPart = Math.min(password.length / 6, 1) * 0.35;
     const refPart = referralCode.length > 0 ? 0.1 : 0;
@@ -249,35 +249,49 @@ const Auth = () => {
           setShowFireworks(true);
         }
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) {
-          setError(translateAuthError(error.message));
+        const validationError = getNicknameAuthError({ nickname, password });
+        if (validationError) {
+          setError(validationError);
           setFailedAttempts(prev => prev + 1);
           setCaptchaVerified(false);
-        }
-        else {
-          setShowFireworks(true);
+        } else {
+          const { data, error } = await supabase.functions.invoke("nickname-auth", {
+            body: { action: "login", nickname: nickname.trim().toLowerCase(), password },
+          });
+          if (error || !data?.access_token) {
+            setError(data?.error || "Неправильний нікнейм або пароль");
+            setFailedAttempts(prev => prev + 1);
+            setCaptchaVerified(false);
+          } else {
+            await supabase.auth.setSession({ access_token: data.access_token, refresh_token: data.refresh_token });
+            setShowFireworks(true);
+          }
         }
       }
     } else {
-      const { data: signUpData, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { emailRedirectTo: window.location.origin },
-      });
-      if (error) {
-        setError(translateAuthError(error.message));
+      const validationError = getNicknameAuthError({ nickname, password, email });
+      if (validationError) {
+        setError(validationError);
         setFailedAttempts(prev => prev + 1);
         setCaptchaVerified(false);
       } else {
-        // Detect already-registered user (Supabase returns empty identities)
-        if (signUpData.user && (!signUpData.user.identities || signUpData.user.identities.length === 0)) {
-          setError("Аккаунт с этим email уже существует. Попробуйте войти.");
-        } else if (signUpData.user && getPostSignupAction(Boolean(signUpData.session)) === "complete-registration") {
-          await supabase.from("profiles").update({ display_name: nickname }).eq("user_id", signUpData.user.id);
+        const { data, error } = await supabase.functions.invoke("nickname-auth", {
+          body: {
+            action: "register",
+            nickname: nickname.trim().toLowerCase(),
+            password,
+            email: email.trim().toLowerCase(),
+          },
+        });
+        if (error || !data?.access_token || !data?.user_id) {
+          setError(data?.error || "Не вдалося створити акаунт");
+          setFailedAttempts(prev => prev + 1);
+          setCaptchaVerified(false);
+        } else {
+          await supabase.auth.setSession({ access_token: data.access_token, refresh_token: data.refresh_token });
           if (referralCode.trim() && referralValid) {
             const { data: refApplied } = await supabase.rpc("apply_referral_code", {
-              p_referred_id: signUpData.user.id,
+              p_referred_id: data.user_id,
               p_code: referralCode.trim(),
             });
             if (refApplied) {
@@ -288,8 +302,6 @@ const Auth = () => {
             }
           }
           setShowFireworks(true);
-        } else {
-          setError("Не вдалося автоматично увійти. Спробуйте ще раз.");
         }
       }
     }
@@ -360,15 +372,16 @@ const Auth = () => {
               )}
             </div>
           )}
-          {studentMode && isLogin && !forgotMode ? (
-
+          {!forgotMode ? (
             <input
               type="text"
-              placeholder="Никнейм ученика"
+              placeholder={studentMode ? "Нікнейм учня" : "Нікнейм"}
               value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
+              onChange={(e) => setNickname(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
               required
-              maxLength={32}
+              minLength={3}
+              maxLength={24}
+              pattern="[a-z0-9_]{3,24}"
               autoCapitalize="none"
               autoCorrect="off"
               className="w-full px-4 py-3 rounded-xl bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:border-primary focus:outline-none transition-colors"
@@ -385,12 +398,13 @@ const Auth = () => {
           )}
           {!isLogin && !forgotMode && (
             <input
-              type="text"
-              placeholder={t("nickname") || "Никнейм"}
-              value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
-              required
-              maxLength={20}
+              type="email"
+              placeholder="Email для відновлення (необов’язково)"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              maxLength={255}
+              autoCapitalize="none"
+              autoCorrect="off"
               className="w-full px-4 py-3 rounded-xl bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:border-primary focus:outline-none transition-colors"
             />
           )}
