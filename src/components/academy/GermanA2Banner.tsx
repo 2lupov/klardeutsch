@@ -12,7 +12,7 @@ const GermanA2Banner = () => {
         <GraduationCap className="w-6 h-6 text-primary" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-semibold uppercase tracking-wide text-primary">Інтерактивний курс · A2</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-primary">Інтерактивний курс · A2 · 500 грн</p>
         <p className="font-display font-bold text-foreground">Deutsch A2 — Perfekt</p>
         <p className="text-xs text-muted-foreground">Відео, слова, граматика, читання, аудіювання, письмо й тест</p>
       </div>
