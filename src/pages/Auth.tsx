@@ -13,7 +13,7 @@ import Fireworks from "@/components/auth/Fireworks";
 import { Sparkles } from "lucide-react";
 import SimpleCaptcha from "@/components/auth/SimpleCaptcha";
 import { lovable } from "@/integrations/lovable/index";
-import { getNicknameAuthError } from "@/lib/nickname-auth";
+import { getNicknameAuthError, getSignupPasswordError, PASSWORD_RULES } from "@/lib/nickname-auth";
 
 /** Translate common Supabase Auth error messages to Russian */
 function translateAuthError(msg: string): string {
