@@ -64,7 +64,7 @@ const AcademyCourse = () => {
   const [course, setCourse] = useState<CourseDetail | null>(null);
   const [modules, setModules] = useState<ModuleRow[]>([]);
   const [lessons, setLessons] = useState<LessonRow[]>([]);
-  const [isPurchased, setIsPurchased] = useState(false);
+  const [isPurchased, setIsPurchased] = useState(true);
   const [loading, setLoading] = useState(true);
   const [purchasing, setPurchasing] = useState(false);
 
