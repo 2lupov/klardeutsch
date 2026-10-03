@@ -75,6 +75,7 @@ Deno.serve(async (req) => {
         },
       });
       if (createError || !created.user) {
+        console.error("createUser failed", createError?.code, createError?.message);
         const msg = createError?.message.toLowerCase() ?? "";
         if (msg.includes("weak") || msg.includes("pwned") || (createError as any)?.code === "weak_password") {
           return json({ error: "Цей пароль занадто простий і відомий зломщикам. Придумай складніший (наприклад, з цифрами й літерами)." }, 400);
