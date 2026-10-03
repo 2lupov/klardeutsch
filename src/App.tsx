@@ -32,6 +32,7 @@ import TeachAttendance from "./pages/teach/TeachAttendance";
 import TeachFinance from "./pages/teach/TeachFinance";
 import Index from "./pages/Index";
 import Dutch from "./pages/Dutch";
+import CourseA2 from "./pages/CourseA2";
 import Auth from "./pages/Auth";
 import AuthCallback from "./pages/AuthCallback";
 import ResetPassword from "./pages/ResetPassword";
@@ -147,6 +148,7 @@ const AppRoutes = () => {
         <Route path="/vocabulary" element={<RequireAuth><StudentDictionary /></RequireAuth>} />
 
         <Route path="/interactive/:id" element={<RequireAuth><InteractivePage /></RequireAuth>} />
+        <Route path="/course/a2" element={<RequireAuth><CourseA2 /></RequireAuth>} />
         <Route path="/course/:id" element={<RequireAuth><Course /></RequireAuth>} />
 
         {/* PREMIUM — paid plans */}

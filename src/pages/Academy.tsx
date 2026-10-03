@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useIsManagedStudent } from "@/hooks/useIsManagedStudent";
 import StudentAcademy from "@/pages/StudentAcademy";
+import GermanA2Banner from "@/components/academy/GermanA2Banner";
 
 interface CourseRow {
   id: string;
@@ -106,6 +107,7 @@ const Academy = () => {
       <div className="flex flex-col items-center justify-center min-h-[100dvh] px-6 py-10 text-center">
         <div className="w-full max-w-md">
           <TutoringBanner />
+          <GermanA2Banner />
         </div>
         <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 mt-4">
           <Construction className="w-10 h-10 text-primary" />
@@ -137,6 +139,7 @@ const Academy = () => {
 
       <div className="max-w-6xl mx-auto px-4 pb-8 pt-4">
         <TutoringBanner />
+        <GermanA2Banner />
 
         {loading ? (
           <div className="flex items-center justify-center py-20">
