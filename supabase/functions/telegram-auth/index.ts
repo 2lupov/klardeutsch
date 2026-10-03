@@ -1,4 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createRemoteJWKSet, jwtVerify } from "https://esm.sh/jose@5.9.6";
+
+const TG_JWKS = createRemoteJWKSet(new URL("https://oauth.telegram.org/.well-known/jwks.json"));
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -151,6 +154,26 @@ Deno.serve(async (req) => {
       firstName = user.first_name || null;
       lastName = user.last_name || null;
       username = user.username || null;
+    } else if (loginWidget?.id_token) {
+      // New Telegram Login (OIDC) flow — verify id_token against Telegram JWKS
+      const clientId = botToken.split(":")[0];
+      try {
+        const { payload } = await jwtVerify(String(loginWidget.id_token), TG_JWKS, {
+          issuer: "https://oauth.telegram.org",
+          audience: clientId,
+        });
+        telegramId = Number((payload as any).id ?? payload.sub);
+        const name = String((payload as any).given_name || (payload as any).name || "") || null;
+        firstName = name;
+        lastName = ((payload as any).family_name as string) || null;
+        username = ((payload as any).preferred_username as string) || null;
+      } catch (e) {
+        console.error("id_token verify failed:", e);
+        return new Response(JSON.stringify({ error: "Invalid login widget data" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     } else if (loginWidget) {
       // Telegram Login Widget flow
       const valid = await validateTelegramLoginWidget(loginWidget, botToken);
@@ -186,7 +209,8 @@ Deno.serve(async (req) => {
       .from("profiles")
       .select("user_id")
       .eq("telegram_chat_id", telegramId)
-      .single();
+      .limit(1)
+      .maybeSingle();
 
     let userId: string;
 
@@ -248,7 +272,8 @@ Deno.serve(async (req) => {
 
     // 2. Generate session for this user using admin API
     // We'll use generateLink to create a magic link, then exchange it
-    const fakeEmail = `tg_${telegramId}@telegram.klar.local`;
+    const { data: authUser } = await supabase.auth.admin.getUserById(userId!);
+    const fakeEmail = authUser?.user?.email || `tg_${telegramId}@telegram.klar.local`;
 
     const { data: linkData, error: linkErr } = await supabase.auth.admin.generateLink({
       type: "magiclink",
