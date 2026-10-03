@@ -19,7 +19,12 @@ async function getPubKey(token: string): Promise<string> {
 }
 
 function pemToBinary(pem: string): Uint8Array {
-  const b64 = pem.replace(/-----BEGIN [^-]+-----/, "")
+  // Monobank returns j.key as base64 of the whole PEM text; decode once if needed
+  let text = pem;
+  if (!text.includes("-----BEGIN")) {
+    text = atob(text);
+  }
+  const b64 = text.replace(/-----BEGIN [^-]+-----/, "")
     .replace(/-----END [^-]+-----/, "")
     .replace(/\s+/g, "");
   const bin = atob(b64);
