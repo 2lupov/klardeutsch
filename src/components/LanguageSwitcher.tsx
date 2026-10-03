@@ -7,10 +7,11 @@ const options: { value: Lang; label: string }[] = [
 ];
 
 const LanguageSwitcher = () => {
-  const { lang, setLang, languageLocked } = useLanguage();
+  const { lang, setLang } = useLanguage();
 
-  // If language is locked, don't show switcher
-  if (languageLocked) return null;
+  // Corner RU/UA buttons are hidden everywhere; language is chosen in Profile.
+  const hidden = true;
+  if (hidden) return null;
 
   return (
     <div className="flex gap-1 bg-secondary rounded-lg p-0.5">
