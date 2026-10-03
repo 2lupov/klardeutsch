@@ -63,7 +63,9 @@ Deno.serve(async (req) => {
       if (existing) return json({ error: "Цей нікнейм уже зайнятий" }, 409);
 
       const requestedEmail = parsed.data.email.trim().toLowerCase();
-      const authEmail = requestedEmail || `${nickname}@users.klar.local`;
+      const asciiSafe = /^[a-z0-9._-]+$/i.test(nickname) && !/^[.]|[.]$|\.\./.test(nickname);
+      const localPart = asciiSafe ? nickname.toLowerCase() : `u-${crypto.randomUUID()}`;
+      const authEmail = requestedEmail || `${localPart}@users.klar.local`;
       const { data: created, error: createError } = await admin.auth.admin.createUser({
         email: authEmail,
         password,
@@ -75,7 +77,12 @@ Deno.serve(async (req) => {
         },
       });
       if (createError || !created.user) {
-        const duplicate = createError?.message.toLowerCase().includes("already");
+        console.error("createUser failed", createError?.code, createError?.message);
+        const msg = createError?.message.toLowerCase() ?? "";
+        if (msg.includes("weak") || msg.includes("pwned") || (createError as any)?.code === "weak_password") {
+          return json({ error: "Цей пароль занадто простий і відомий зломщикам. Придумай складніший (наприклад, з цифрами й літерами)." }, 400);
+        }
+        const duplicate = msg.includes("already");
         return json({ error: duplicate ? "Цей email або нікнейм уже використовується" : "Не вдалося створити акаунт" }, 400);
       }
 
