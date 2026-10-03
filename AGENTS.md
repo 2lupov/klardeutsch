@@ -3,3 +3,4 @@
 - Live video uses a dedicated per-class synchronized record for the YouTube source and video notes; this keeps video notes separate from general lesson notes.
 - AI-generated video lessons reuse lesson kits and the existing live block view; this keeps one renderer for previews, live lessons, and the library.
 - Personal Dutch hub (/dutch) is admin-only, keeps progress in localStorage and uses the dutch-ai function; keeps it isolated from student data.
+- New-user onboarding begins with an interactive KLAR introduction and defaults to A1; existing users retain placement testing.

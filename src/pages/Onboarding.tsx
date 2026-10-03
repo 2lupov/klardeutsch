@@ -8,6 +8,7 @@ import PlacementTest from "@/components/onboarding/PlacementTest";
 import GoalSelector from "@/components/onboarding/GoalSelector";
 import DailyGoalPicker from "@/components/onboarding/DailyGoalPicker";
 import FirstLesson from "@/components/onboarding/FirstLesson";
+import WelcomeIntro from "@/components/onboarding/WelcomeIntro";
 
 const Onboarding = () => {
   const [step, setStep] = useState(-1); // -1 = loading/intro
@@ -73,6 +74,8 @@ const Onboarding = () => {
     }
     setStep(1);
   };
+
+  const handleWelcomeComplete = () => handlePlacement("A1");
 
   const handleGoal = (g: string) => {
     setGoal(g);
@@ -166,7 +169,9 @@ const Onboarding = () => {
   }
 
   const steps = [
-    <PlacementTest key="test" onComplete={handlePlacement} />,
+    isExisting
+      ? <PlacementTest key="test" onComplete={handlePlacement} />
+      : <WelcomeIntro key="welcome" onComplete={handleWelcomeComplete} />,
     <GoalSelector key="goal" onComplete={handleGoal} />,
     <DailyGoalPicker key="daily" onComplete={handleDailyGoal} />,
     ...(!isExisting ? [<FirstLesson key="lesson" level={level} onComplete={handleComplete} />] : []),
