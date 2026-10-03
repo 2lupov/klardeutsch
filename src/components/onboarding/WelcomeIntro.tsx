@@ -165,6 +165,27 @@ const WelcomeIntro = ({ onComplete }: Props) => {
             <p className="max-w-sm text-sm leading-6 text-muted-foreground">
               {lang === "uk" ? feature.textUk : feature.textRu}
             </p>
+            {isNickname && (
+              <div className="mt-4 w-full max-w-xs space-y-2">
+                <div className="flex items-center gap-2 rounded-xl border border-border bg-background/60 px-4 py-3">
+                  <span className="font-display text-lg font-bold text-accent">@</span>
+                  <input
+                    value={nickname}
+                    onChange={(e) => {
+                      setNickname(e.target.value);
+                      setNickError("");
+                    }}
+                    className="w-full bg-transparent text-left font-display text-lg font-bold text-foreground outline-none"
+                    placeholder={lang === "uk" ? "твій_нікнейм" : "твой_никнейм"}
+                    maxLength={24}
+                    autoCapitalize="none"
+                    autoComplete="off"
+                    autoCorrect="off"
+                  />
+                </div>
+                {nickError && <p className="text-xs text-destructive">{nickError}</p>}
+              </div>
+            )}
             {isTelegram && (
               <Button asChild variant="outline" className="mt-4 rounded-xl">
                 <a href={tgLink} target="_blank" rel="noopener noreferrer">
