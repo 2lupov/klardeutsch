@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, BookOpen, GraduationCap, Sparkles } from "lucide-react";
+import { ArrowRight, BookOpen, GraduationCap, Send, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Props {
   onComplete: () => void;
@@ -30,13 +31,23 @@ const features = [
     textRu: "Домашние задания, словарь и твой прогресс всегда под рукой.",
     textUk: "Домашні завдання, словник і твій прогрес завжди під рукою.",
   },
+  {
+    icon: Send,
+    titleRu: "Подключи Telegram",
+    titleUk: "Прив'яжи Telegram",
+    textRu: "Так ты сможешь восстановить пароль без почты и получать новости и напоминания о занятиях.",
+    textUk: "Так ти зможеш відновити пароль без пошти й отримувати новини та нагадування про заняття.",
+  },
 ];
 
 const WelcomeIntro = ({ onComplete }: Props) => {
   const [active, setActive] = useState(0);
   const { lang } = useLanguage();
+  const { user } = useAuth() as any;
   const feature = features[active];
   const Icon = feature.icon;
+  const isTelegram = feature.icon === Send;
+  const tgLink = `https://t.me/klar_deutsch_bot${user?.id ? `?start=${user.id}` : ""}`;
   const isLast = active === features.length - 1;
 
   const advance = () => {
@@ -84,6 +95,14 @@ const WelcomeIntro = ({ onComplete }: Props) => {
             <p className="max-w-sm text-sm leading-6 text-muted-foreground">
               {lang === "uk" ? feature.textUk : feature.textRu}
             </p>
+            {isTelegram && (
+              <Button asChild variant="outline" className="mt-4 rounded-xl">
+                <a href={tgLink} target="_blank" rel="noopener noreferrer">
+                  <Send className="h-4 w-4" />
+                  {lang === "uk" ? "Відкрити бота й прив'язати" : "Открыть бота и привязать"}
+                </a>
+              </Button>
+            )}
           </motion.div>
         </AnimatePresence>
 
