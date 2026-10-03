@@ -89,13 +89,15 @@ const WelcomeIntro = ({ onComplete }: Props) => {
 
         <div className="mt-5 flex justify-center gap-2" aria-label={lang === "uk" ? "Можливості KLAR" : "Возможности KLAR"}>
           {features.map((item, index) => (
-            <button
+            <Button
               key={item.titleRu}
               type="button"
+              variant="ghost"
+              animated={false}
               onClick={() => setActive(index)}
               aria-label={`${index + 1} / ${features.length}`}
               aria-current={index === active ? "step" : undefined}
-              className={`h-2 rounded-full transition-all ${index === active ? "w-7 bg-primary" : "w-2 bg-muted"}`}
+              className={`min-w-0 p-0 transition-all hover:bg-primary/80 ${index === active ? "h-2 w-7 bg-primary" : "h-2 w-2 bg-muted"}`}
             />
           ))}
         </div>

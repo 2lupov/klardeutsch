@@ -9,6 +9,7 @@ import GoalSelector from "@/components/onboarding/GoalSelector";
 import DailyGoalPicker from "@/components/onboarding/DailyGoalPicker";
 import FirstLesson from "@/components/onboarding/FirstLesson";
 import WelcomeIntro from "@/components/onboarding/WelcomeIntro";
+import { getInitialOnboardingExperience, NEW_USER_START_LEVEL } from "@/lib/onboarding-flow";
 
 const Onboarding = () => {
   const [step, setStep] = useState(-1); // -1 = loading/intro
@@ -75,7 +76,7 @@ const Onboarding = () => {
     setStep(1);
   };
 
-  const handleWelcomeComplete = () => handlePlacement("A1");
+  const handleWelcomeComplete = () => handlePlacement(NEW_USER_START_LEVEL);
 
   const handleGoal = (g: string) => {
     setGoal(g);
@@ -169,7 +170,7 @@ const Onboarding = () => {
   }
 
   const steps = [
-    isExisting
+    getInitialOnboardingExperience(isExisting) === "placement"
       ? <PlacementTest key="test" onComplete={handlePlacement} />
       : <WelcomeIntro key="welcome" onComplete={handleWelcomeComplete} />,
     <GoalSelector key="goal" onComplete={handleGoal} />,
