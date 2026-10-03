@@ -1,4 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createRemoteJWKSet, jwtVerify } from "https://esm.sh/jose@5.9.6";
+
+const TG_JWKS = createRemoteJWKSet(new URL("https://oauth.telegram.org/.well-known/jwks.json"));
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -206,7 +209,8 @@ Deno.serve(async (req) => {
       .from("profiles")
       .select("user_id")
       .eq("telegram_chat_id", telegramId)
-      .single();
+      .limit(1)
+      .maybeSingle();
 
     let userId: string;
 
@@ -268,7 +272,8 @@ Deno.serve(async (req) => {
 
     // 2. Generate session for this user using admin API
     // We'll use generateLink to create a magic link, then exchange it
-    const fakeEmail = `tg_${telegramId}@telegram.klar.local`;
+    const { data: authUser } = await supabase.auth.admin.getUserById(userId!);
+    const fakeEmail = authUser?.user?.email || `tg_${telegramId}@telegram.klar.local`;
 
     const { data: linkData, error: linkErr } = await supabase.auth.admin.generateLink({
       type: "magiclink",
