@@ -13,7 +13,6 @@ import Fireworks from "@/components/auth/Fireworks";
 import { Sparkles } from "lucide-react";
 import SimpleCaptcha from "@/components/auth/SimpleCaptcha";
 import { lovable } from "@/integrations/lovable/index";
-import { getPostSignupAction } from "@/lib/registration-flow";
 import { getNicknameAuthError } from "@/lib/nickname-auth";
 
 /** Translate common Supabase Auth error messages to Russian */
@@ -373,15 +372,16 @@ const Auth = () => {
               )}
             </div>
           )}
-          {studentMode && isLogin && !forgotMode ? (
-
+          {!forgotMode ? (
             <input
               type="text"
-              placeholder="Никнейм ученика"
+              placeholder={studentMode ? "Нікнейм учня" : "Нікнейм"}
               value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
+              onChange={(e) => setNickname(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
               required
-              maxLength={32}
+              minLength={3}
+              maxLength={24}
+              pattern="[a-z0-9_]{3,24}"
               autoCapitalize="none"
               autoCorrect="off"
               className="w-full px-4 py-3 rounded-xl bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:border-primary focus:outline-none transition-colors"
@@ -398,12 +398,13 @@ const Auth = () => {
           )}
           {!isLogin && !forgotMode && (
             <input
-              type="text"
-              placeholder={t("nickname") || "Никнейм"}
-              value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
-              required
-              maxLength={20}
+              type="email"
+              placeholder="Email для відновлення (необов’язково)"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              maxLength={255}
+              autoCapitalize="none"
+              autoCorrect="off"
               className="w-full px-4 py-3 rounded-xl bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:border-primary focus:outline-none transition-colors"
             />
           )}
