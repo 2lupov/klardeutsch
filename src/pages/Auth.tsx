@@ -279,7 +279,7 @@ const Auth = () => {
         }
       }
     } else {
-      const validationError = getNicknameAuthError({ nickname, password, email });
+      const validationError = getNicknameAuthError({ nickname, password, email }) || getSignupPasswordError(password);
       if (validationError) {
         setError(validationError);
         setFailedAttempts(prev => prev + 1);
@@ -294,7 +294,9 @@ const Auth = () => {
           },
         });
         if (error || !data?.access_token || !data?.user_id) {
-          setError(data?.error || "Не вдалося створити акаунт");
+          let serverMsg: string | undefined = data?.error;
+          try { serverMsg = serverMsg || (await (error as any)?.context?.json())?.error; } catch { /* ignore */ }
+          setError(serverMsg || "Не вдалося створити акаунт");
           setFailedAttempts(prev => prev + 1);
           setCaptchaVerified(false);
         } else {
@@ -455,6 +457,9 @@ const Auth = () => {
               minLength={studentMode && isLogin ? 1 : 6}
               className="w-full px-4 py-3 rounded-xl bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:border-primary focus:outline-none transition-colors"
             />
+          )}
+          {!forgotMode && !isLogin && (
+            <p className="text-xs text-muted-foreground -mt-1 px-1">{PASSWORD_RULES}</p>
           )}
 
           {failedAttempts >= 3 && (
