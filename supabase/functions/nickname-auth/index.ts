@@ -13,7 +13,7 @@ const BodySchema = z.discriminatedUnion("action", [
   }),
   z.object({
     action: z.literal("login"),
-    nickname: NicknameSchema,
+    nickname: z.string().trim().min(3).max(255),
     password: PasswordSchema,
   }),
   z.object({
