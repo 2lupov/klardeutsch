@@ -9,8 +9,10 @@ import {
 } from "@/components/ui/dialog";
 
 import pandaSleeping from "@/assets/mascot/panda-sleeping.png";
-import pandaSleepingVideo from "@/assets/panda-sleeping.mp4.asset.json";
-import pandaSleepingPoster from "@/assets/panda-sleeping-poster.jpg.asset.json";
+import pandaSleepAlpha from "@/assets/panda-sleep-alpha.webm.asset.json";
+import pandaSleepStacked from "@/assets/panda-sleep-stacked.mp4.asset.json";
+import pandaSleepPoster from "@/assets/panda-sleep-poster.png.asset.json";
+import LivePanda from "@/components/LivePanda";
 import pandaStudying from "@/assets/mascot/panda-studying.png";
 import pandaCelebrating from "@/assets/mascot/panda-celebrating.png";
 import pandaWaving from "@/assets/mascot/panda-waving.png";
@@ -52,32 +54,16 @@ const MOTIVATIONS_UK = [
   "Панда — справжній майстер! 🌟",
 ];
 
-const SleepingPandaVideo = () => {
-  const ref = useRef<HTMLVideoElement>(null);
-  useEffect(() => {
-    const v = ref.current;
-    if (!v) return;
-    v.play().catch(() => {
-      const resume = () => v.play().catch(() => {});
-      document.addEventListener("touchstart", resume, { once: true });
-      document.addEventListener("click", resume, { once: true });
-    });
-  }, []);
-  return (
-    <video
-      ref={ref}
-      src={pandaSleepingVideo.url}
-      poster={pandaSleepingPoster.url}
-      autoPlay
-      loop
-      muted
-      playsInline
-      disablePictureInPicture
-      aria-label="Спляча панда KLAR"
-      className="w-full max-w-[240px] rounded-3xl shadow-2xl pointer-events-none select-none"
-    />
-  );
+const SLEEPING_ASSETS = {
+  webm: pandaSleepAlpha.url,
+  stacked: pandaSleepStacked.url,
+  poster: pandaSleepPoster.url,
+  ariaLabel: "Спляча панда KLAR",
 };
+
+const SleepingPandaVideo = () => (
+  <LivePanda assets={SLEEPING_ASSETS} className="w-full max-w-[240px] drop-shadow-2xl" />
+);
 
 function isNightTime(): boolean {
   const hour = new Date().getHours();
