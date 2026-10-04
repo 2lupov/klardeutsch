@@ -17,7 +17,14 @@ const isAppleWebKit = () => {
 const VS = `attribute vec2 p;varying vec2 uv;void main(){uv=vec2((p.x+1.)/2.,(1.-p.y)/2.);gl_Position=vec4(p,0.,1.);}`;
 const FS = `precision mediump float;uniform sampler2D t;varying vec2 uv;void main(){vec3 c=texture2D(t,vec2(uv.x,uv.y*.5)).rgb;float a=texture2D(t,vec2(uv.x,.5+uv.y*.5)).r;gl_FragColor=vec4(c*a,a);}`;
 
-const StackedPanda = ({ className }: { className: string }) => {
+interface PandaAssets {
+  webm: string;
+  stacked: string;
+  poster: string;
+  ariaLabel: string;
+}
+
+const StackedPanda = ({ className, assets }: { className: string; assets: PandaAssets }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [failed, setFailed] = useState(false);
 
@@ -26,7 +33,7 @@ const StackedPanda = ({ className }: { className: string }) => {
     const gl = canvas.getContext("webgl", { premultipliedAlpha: true, alpha: true });
     if (!gl) { setFailed(true); return; }
     const video = document.createElement("video");
-    video.src = stackedAsset.url;
+    video.src = assets.stacked;
     video.muted = true; video.loop = true; video.playsInline = true; video.autoplay = true;
     video.setAttribute("playsinline", ""); video.setAttribute("muted", "");
     video.crossOrigin = "anonymous";
