@@ -13,7 +13,7 @@ const BodySchema = z.discriminatedUnion("action", [
   }),
   z.object({
     action: z.literal("login"),
-    nickname: NicknameSchema,
+    nickname: z.string().trim().min(3).max(255),
     password: PasswordSchema,
   }),
   z.object({
@@ -174,21 +174,26 @@ Deno.serve(async (req) => {
       }, { onConflict: "nickname" });
     };
 
-    const { data: profile } = await admin
-      .from("profiles")
-      .select("user_id")
-      .ilike("nickname", nickname)
-      .maybeSingle();
-    if (!profile) {
-      await recordFailure();
-      return json({ error: GENERIC_LOGIN_ERROR }, 401);
-    }
-
-    const { data: userResult } = await admin.auth.admin.getUserById(profile.user_id);
-    const authEmail = userResult.user?.email;
-    if (!authEmail) {
-      await recordFailure();
-      return json({ error: GENERIC_LOGIN_ERROR }, 401);
+    // Identifier can be a nickname or a real email address.
+    let authEmail: string | undefined;
+    if (nickname.includes("@")) {
+      authEmail = nickname.toLowerCase();
+    } else {
+      const { data: profile } = await admin
+        .from("profiles")
+        .select("user_id")
+        .ilike("nickname", nickname)
+        .maybeSingle();
+      if (!profile) {
+        await recordFailure();
+        return json({ error: GENERIC_LOGIN_ERROR }, 401);
+      }
+      const { data: userResult } = await admin.auth.admin.getUserById(profile.user_id);
+      authEmail = userResult.user?.email;
+      if (!authEmail) {
+        await recordFailure();
+        return json({ error: GENERIC_LOGIN_ERROR }, 401);
+      }
     }
 
     const { data: signedIn, error: signInError } = await auth.auth.signInWithPassword({ email: authEmail, password });
