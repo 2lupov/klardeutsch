@@ -78,7 +78,6 @@ const StackedPanda = ({ className }: { className: string }) => {
       role="img"
       aria-label="Панда KLAR читає книгу"
       className={`pointer-events-none select-none ${className}`}
-      style={{ backgroundImage: `url(${posterAsset.url})`, backgroundSize: "contain", backgroundRepeat: "no-repeat", backgroundPosition: "center" }}
     />
   );
 };
