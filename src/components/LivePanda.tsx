@@ -17,7 +17,14 @@ const isAppleWebKit = () => {
 const VS = `attribute vec2 p;varying vec2 uv;void main(){uv=vec2((p.x+1.)/2.,(1.-p.y)/2.);gl_Position=vec4(p,0.,1.);}`;
 const FS = `precision mediump float;uniform sampler2D t;varying vec2 uv;void main(){vec3 c=texture2D(t,vec2(uv.x,uv.y*.5)).rgb;float a=texture2D(t,vec2(uv.x,.5+uv.y*.5)).r;gl_FragColor=vec4(c*a,a);}`;
 
-const StackedPanda = ({ className }: { className: string }) => {
+interface PandaAssets {
+  webm: string;
+  stacked: string;
+  poster: string;
+  ariaLabel: string;
+}
+
+const StackedPanda = ({ className, assets }: { className: string; assets: PandaAssets }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [failed, setFailed] = useState(false);
 
@@ -26,7 +33,7 @@ const StackedPanda = ({ className }: { className: string }) => {
     const gl = canvas.getContext("webgl", { premultipliedAlpha: true, alpha: true });
     if (!gl) { setFailed(true); return; }
     const video = document.createElement("video");
-    video.src = stackedAsset.url;
+    video.src = assets.stacked;
     video.muted = true; video.loop = true; video.playsInline = true; video.autoplay = true;
     video.setAttribute("playsinline", ""); video.setAttribute("muted", "");
     video.crossOrigin = "anonymous";
@@ -69,20 +76,28 @@ const StackedPanda = ({ className }: { className: string }) => {
     return () => { cancelAnimationFrame(raf); video.pause(); video.removeAttribute("src"); video.load(); };
   }, []);
 
-  if (failed) return <img src={posterAsset.url} alt="Панда KLAR читає книгу" className={className} />;
+  if (failed) return <img src={assets.poster} alt={assets.ariaLabel} className={className} />;
   return (
     <canvas
       ref={canvasRef}
       width={480}
       height={854}
       role="img"
-      aria-label="Панда KLAR читає книгу"
+      aria-label={assets.ariaLabel}
       className={`pointer-events-none select-none ${className}`}
     />
   );
 };
 
-const LivePanda = ({ className = "" }: { className?: string }) => {
+const DEFAULT_ASSETS: PandaAssets = {
+  webm: videoAsset.url,
+  stacked: stackedAsset.url,
+  poster: posterAsset.url,
+  ariaLabel: "Панда KLAR читає книгу",
+};
+
+const LivePanda = ({ className = "", assets }: { className?: string; assets?: PandaAssets }) => {
+  const a = assets || DEFAULT_ASSETS;
   const [mode, setMode] = useState<"img" | "webm" | "stacked">("img");
   useEffect(() => {
     if (isAppleWebKit()) setMode("stacked");
@@ -90,18 +105,18 @@ const LivePanda = ({ className = "" }: { className?: string }) => {
     else setMode("stacked");
   }, []);
 
-  if (mode === "stacked") return <StackedPanda className={className} />;
-  if (mode === "img") return <img src={posterAsset.url} alt="Панда KLAR читає книгу" className={className} />;
+  if (mode === "stacked") return <StackedPanda className={className} assets={a} />;
+  if (mode === "img") return <img src={a.poster} alt={a.ariaLabel} className={className} />;
   return (
     <video
-      src={videoAsset.url}
-      poster={posterAsset.url}
+      src={a.webm}
+      poster={a.poster}
       autoPlay
       loop
       muted
       playsInline
       disablePictureInPicture
-      aria-label="Панда KLAR читає книгу"
+      aria-label={a.ariaLabel}
       className={`pointer-events-none select-none ${className}`}
     />
   );
