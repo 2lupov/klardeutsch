@@ -387,12 +387,12 @@ const Auth = () => {
           {!forgotMode ? (
             <input
               type="text"
-              placeholder={studentMode ? "Нікнейм учня" : "Нікнейм"}
+              placeholder={studentMode ? "Нікнейм учня" : isLogin ? "Нікнейм або email" : "Нікнейм"}
               value={nickname}
               onChange={(e) => setNickname(e.target.value.toLowerCase().replace(/\s/g, ""))}
               required
               minLength={3}
-              maxLength={24}
+              maxLength={isLogin && !studentMode ? 255 : 24}
               autoCapitalize="none"
               autoCorrect="off"
               className="w-full px-4 py-3 rounded-xl bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:border-primary focus:outline-none transition-colors"
