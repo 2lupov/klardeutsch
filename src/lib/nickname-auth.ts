@@ -27,7 +27,11 @@ export const optionalEmailSchema = z.union([
 ]);
 
 export function getNicknameAuthError(input: { nickname: string; password: string; email?: string }) {
-  const nickname = nicknameSchema.safeParse(input.nickname);
+  // Login accepts a real email address too — skip the nickname format check then.
+  const isEmailLogin = input.nickname.includes("@");
+  const nickname = isEmailLogin
+    ? z.string().trim().email("Введіть правильний email").max(255).safeParse(input.nickname)
+    : nicknameSchema.safeParse(input.nickname);
   if (!nickname.success) return nickname.error.issues[0]?.message ?? "Неправильний нікнейм";
   const password = passwordSchema.safeParse(input.password);
   if (!password.success) return password.error.issues[0]?.message ?? "Неправильний пароль";
