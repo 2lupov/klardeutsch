@@ -1,7 +1,17 @@
 import { motion } from "framer-motion";
 import { GraduationCap, Sparkles, Play } from "lucide-react";
 import type { Lang } from "@/i18n/translations";
-import pandaExplorer from "@/assets/panda-director.png";
+import LivePanda from "@/components/LivePanda";
+import pandaAcademyAlpha from "@/assets/panda-academy-alpha.webm.asset.json";
+import pandaAcademyStacked from "@/assets/panda-academy-stacked.mp4.asset.json";
+import pandaAcademyPoster from "@/assets/panda-academy-poster.png.asset.json";
+
+const ACADEMY_PANDA_ASSETS = {
+  webm: pandaAcademyAlpha.url,
+  stacked: pandaAcademyStacked.url,
+  poster: pandaAcademyPoster.url,
+  ariaLabel: "Панда-режисер KLAR",
+};
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import CertificatePreview from "./CertificatePreview";
@@ -96,9 +106,8 @@ const CourseHero = ({ lang }: { lang: Lang }) => (
         className="relative hidden md:flex items-center justify-center"
       >
         <div className="absolute inset-0 bg-accent/25 blur-[80px] rounded-full" />
-        <img
-          src={pandaExplorer}
-          alt=""
+        <LivePanda
+          assets={ACADEMY_PANDA_ASSETS}
           className="relative w-64 lg:w-80 drop-shadow-[0_20px_50px_rgba(245,166,35,0.35)]"
         />
       </motion.div>
