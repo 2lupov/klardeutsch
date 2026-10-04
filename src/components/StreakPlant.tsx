@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dialog";
 
 import pandaSleeping from "@/assets/mascot/panda-sleeping.png";
+import pandaSleepingVideo from "@/assets/panda-sleeping.mp4.asset.json";
 import pandaStudying from "@/assets/mascot/panda-studying.png";
 import pandaCelebrating from "@/assets/mascot/panda-celebrating.png";
 import pandaWaving from "@/assets/mascot/panda-waving.png";
