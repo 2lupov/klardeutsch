@@ -338,16 +338,7 @@ const PandaSceneCard = ({ stage, stageIdx, streak, motivation, progressToNext, i
         transition={{ type: "spring", stiffness: 150, damping: 12, delay: 0.2 }}
       >
         {isNight || stageIdx === 0 ? (
-          <video
-            src={pandaSleepingVideo.url}
-            autoPlay
-            loop
-            muted
-            playsInline
-            disablePictureInPicture
-            aria-label="Спляча панда KLAR"
-            className="w-full max-w-[240px] rounded-3xl shadow-2xl pointer-events-none select-none"
-          />
+          <SleepingPandaVideo />
         ) : (
         <Suspense
           fallback={
