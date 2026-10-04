@@ -259,12 +259,7 @@ const KlarLanding = () => {
             </div>
             <div className="relative mx-auto w-full max-w-[260px]">
               <div className="pointer-events-none absolute inset-6 -z-10 rounded-full bg-accent/15 blur-3xl" />
-              <img
-                src={pandaScholar}
-                alt="Панда-науковець KLAR з книгою"
-                loading="lazy"
-                className="animate-float w-full object-contain drop-shadow-[0_18px_40px_hsl(240_60%_5%/0.55)]"
-              />
+              <LivePanda className="w-full object-contain drop-shadow-[0_18px_40px_hsl(240_60%_5%/0.55)]" />
             </div>
           </div>
         </div>

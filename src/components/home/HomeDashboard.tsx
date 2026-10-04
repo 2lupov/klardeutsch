@@ -114,13 +114,7 @@ const HomeDashboard = ({ displayName, onSelectLevel }: Props) => {
             {/* Mascot */}
             <div className="relative hidden md:flex justify-center items-center">
               <div className="absolute w-72 h-72 bg-primary/15 rounded-full blur-3xl" />
-              <motion.img
-                src={pandaScholar}
-                alt="Panda"
-                className="relative w-64 h-64 object-contain drop-shadow-[0_20px_40px_rgba(109,93,251,0.35)]"
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-              />
+              <LivePanda className="relative h-72 w-auto object-contain drop-shadow-[0_20px_40px_rgba(109,93,251,0.35)]" />
               <motion.div
                 initial={{ rotate: 8 }}
                 animate={{ rotate: [8, 14, 8] }}
