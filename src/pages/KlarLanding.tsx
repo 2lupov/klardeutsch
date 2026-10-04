@@ -8,7 +8,7 @@ import FortuneWheel from "@/components/klar/FortuneWheel";
 import { useReveal, stagger } from "@/components/klar/useReveal";
 import { initMetaPixel } from "@/lib/meta-pixel";
 import pandaCoach from "@/assets/panda-coach.png";
-import pandaScholar from "@/assets/panda-scholar.png";
+import LivePanda from "@/components/LivePanda";
 import pandaGraduate from "@/assets/mascot/panda-graduate.png";
 import pandaWaving from "@/assets/mascot/panda-waving.png";
 import pandaCelebrating from "@/assets/mascot/panda-celebrating.png";
