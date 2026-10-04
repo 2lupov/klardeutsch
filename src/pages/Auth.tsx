@@ -112,7 +112,9 @@ const Auth = () => {
   const [studentMode, setStudentMode] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [nickname, setNickname] = useState("");
+  const [nickname, setNickname] = useState(() => {
+    try { return localStorage.getItem("klar_last_login") ?? ""; } catch { return ""; }
+  });
   const [referralCode, setReferralCode] = useState(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get("ref") ?? "";
@@ -274,6 +276,7 @@ const Auth = () => {
             setCaptchaVerified(false);
           } else {
             await supabase.auth.setSession({ access_token: data.access_token, refresh_token: data.refresh_token });
+            try { localStorage.setItem("klar_last_login", nickname.trim().toLowerCase()); } catch { /* ignore */ }
             setShowFireworks(true);
           }
         }
@@ -387,6 +390,9 @@ const Auth = () => {
           {!forgotMode ? (
             <input
               type="text"
+              name="username"
+              id="username"
+              autoComplete="username"
               placeholder={studentMode ? "Нікнейм учня" : isLogin ? "Нікнейм або email" : "Нікнейм"}
               value={nickname}
               onChange={(e) => setNickname(e.target.value.toLowerCase().replace(/\s/g, ""))}
@@ -450,6 +456,8 @@ const Auth = () => {
           {!forgotMode && (
             <input
               type="password"
+              name="password"
+              autoComplete={isLogin ? "current-password" : "new-password"}
               placeholder={t("password")}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
