@@ -1,4 +1,4 @@
-import { Suspense, lazy, useMemo, useState } from "react";
+import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -10,6 +10,7 @@ import {
 
 import pandaSleeping from "@/assets/mascot/panda-sleeping.png";
 import pandaSleepingVideo from "@/assets/panda-sleeping.mp4.asset.json";
+import pandaSleepingPoster from "@/assets/panda-sleeping-poster.jpg.asset.json";
 import pandaStudying from "@/assets/mascot/panda-studying.png";
 import pandaCelebrating from "@/assets/mascot/panda-celebrating.png";
 import pandaWaving from "@/assets/mascot/panda-waving.png";
