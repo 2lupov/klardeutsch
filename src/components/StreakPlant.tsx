@@ -1,4 +1,4 @@
-import { Suspense, lazy, useMemo, useState } from "react";
+import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -9,6 +9,8 @@ import {
 } from "@/components/ui/dialog";
 
 import pandaSleeping from "@/assets/mascot/panda-sleeping.png";
+import pandaSleepingVideo from "@/assets/panda-sleeping.mp4.asset.json";
+import pandaSleepingPoster from "@/assets/panda-sleeping-poster.jpg.asset.json";
 import pandaStudying from "@/assets/mascot/panda-studying.png";
 import pandaCelebrating from "@/assets/mascot/panda-celebrating.png";
 import pandaWaving from "@/assets/mascot/panda-waving.png";
@@ -49,6 +51,33 @@ const MOTIVATIONS_UK = [
   "Панда-відмінниця! Не кидай!",
   "Панда — справжній майстер! 🌟",
 ];
+
+const SleepingPandaVideo = () => {
+  const ref = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const v = ref.current;
+    if (!v) return;
+    v.play().catch(() => {
+      const resume = () => v.play().catch(() => {});
+      document.addEventListener("touchstart", resume, { once: true });
+      document.addEventListener("click", resume, { once: true });
+    });
+  }, []);
+  return (
+    <video
+      ref={ref}
+      src={pandaSleepingVideo.url}
+      poster={pandaSleepingPoster.url}
+      autoPlay
+      loop
+      muted
+      playsInline
+      disablePictureInPicture
+      aria-label="Спляча панда KLAR"
+      className="w-full max-w-[240px] rounded-3xl shadow-2xl pointer-events-none select-none"
+    />
+  );
+};
 
 function isNightTime(): boolean {
   const hour = new Date().getHours();
@@ -336,6 +365,9 @@ const PandaSceneCard = ({ stage, stageIdx, streak, motivation, progressToNext, i
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: "spring", stiffness: 150, damping: 12, delay: 0.2 }}
       >
+        {isNight || stageIdx === 0 ? (
+          <SleepingPandaVideo />
+        ) : (
         <Suspense
           fallback={
             <motion.img
@@ -350,8 +382,9 @@ const PandaSceneCard = ({ stage, stageIdx, streak, motivation, progressToNext, i
             />
           }
         >
-          <Panda3D isSleeping={isNight || stageIdx === 0} stageImage={stage.img} className="w-full h-[300px]" />
+          <Panda3D isSleeping={false} stageImage={stage.img} className="w-full h-[300px]" />
         </Suspense>
+        )}
       </motion.div>
 
       {/* Bottom info card */}
