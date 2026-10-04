@@ -76,20 +76,28 @@ const StackedPanda = ({ className, assets }: { className: string; assets: PandaA
     return () => { cancelAnimationFrame(raf); video.pause(); video.removeAttribute("src"); video.load(); };
   }, []);
 
-  if (failed) return <img src={posterAsset.url} alt="Панда KLAR читає книгу" className={className} />;
+  if (failed) return <img src={assets.poster} alt={assets.ariaLabel} className={className} />;
   return (
     <canvas
       ref={canvasRef}
       width={480}
       height={854}
       role="img"
-      aria-label="Панда KLAR читає книгу"
+      aria-label={assets.ariaLabel}
       className={`pointer-events-none select-none ${className}`}
     />
   );
 };
 
-const LivePanda = ({ className = "" }: { className?: string }) => {
+const DEFAULT_ASSETS: PandaAssets = {
+  webm: videoAsset.url,
+  stacked: stackedAsset.url,
+  poster: posterAsset.url,
+  ariaLabel: "Панда KLAR читає книгу",
+};
+
+const LivePanda = ({ className = "", assets }: { className?: string; assets?: PandaAssets }) => {
+  const a = assets || DEFAULT_ASSETS;
   const [mode, setMode] = useState<"img" | "webm" | "stacked">("img");
   useEffect(() => {
     if (isAppleWebKit()) setMode("stacked");
@@ -97,18 +105,18 @@ const LivePanda = ({ className = "" }: { className?: string }) => {
     else setMode("stacked");
   }, []);
 
-  if (mode === "stacked") return <StackedPanda className={className} />;
-  if (mode === "img") return <img src={posterAsset.url} alt="Панда KLAR читає книгу" className={className} />;
+  if (mode === "stacked") return <StackedPanda className={className} assets={a} />;
+  if (mode === "img") return <img src={a.poster} alt={a.ariaLabel} className={className} />;
   return (
     <video
-      src={videoAsset.url}
-      poster={posterAsset.url}
+      src={a.webm}
+      poster={a.poster}
       autoPlay
       loop
       muted
       playsInline
       disablePictureInPicture
-      aria-label="Панда KLAR читає книгу"
+      aria-label={a.ariaLabel}
       className={`pointer-events-none select-none ${className}`}
     />
   );
