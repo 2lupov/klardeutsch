@@ -51,6 +51,33 @@ const MOTIVATIONS_UK = [
   "Панда — справжній майстер! 🌟",
 ];
 
+const SleepingPandaVideo = () => {
+  const ref = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const v = ref.current;
+    if (!v) return;
+    v.play().catch(() => {
+      const resume = () => v.play().catch(() => {});
+      document.addEventListener("touchstart", resume, { once: true });
+      document.addEventListener("click", resume, { once: true });
+    });
+  }, []);
+  return (
+    <video
+      ref={ref}
+      src={pandaSleepingVideo.url}
+      poster={pandaSleepingPoster.url}
+      autoPlay
+      loop
+      muted
+      playsInline
+      disablePictureInPicture
+      aria-label="Спляча панда KLAR"
+      className="w-full max-w-[240px] rounded-3xl shadow-2xl pointer-events-none select-none"
+    />
+  );
+};
+
 function isNightTime(): boolean {
   const hour = new Date().getHours();
   return hour >= 20 || hour < 6;
