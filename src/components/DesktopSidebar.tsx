@@ -11,7 +11,6 @@ import { usePlatform } from "@/hooks/usePlatform";
 import KlarLogo from "@/components/KlarLogo";
 import TargetLanguageSwitcher from "@/components/TargetLanguageSwitcher";
 import { useLevelProgress } from "@/hooks/useLevelProgress";
-import { useUnreadDMs } from "@/hooks/useUnreadDMs";
 import { useCoins } from "@/hooks/useCoins";
 import { useXP } from "@/hooks/useXP";
 import { useDailyBonus } from "@/hooks/useDailyBonus";
@@ -31,7 +30,6 @@ const DesktopSidebar = () => {
   const { t, lang } = useLanguage();
   const location = useLocation();
   const { isTelegram } = usePlatform();
-  const unread = useUnreadDMs();
   const { balance } = useCoins();
   const { totalXP } = useXP();
   const { streak } = useDailyBonus();
@@ -74,7 +72,7 @@ const DesktopSidebar = () => {
   ];
 
   const socialLinks: SidebarLink[] = [
-    { to: "/chat", icon: MessageSquare, label: lang === "uk" ? "Чат" : "Чат", badge: unread },
+    { to: "/chat", icon: MessageSquare, label: lang === "uk" ? "Чат" : "Чат" },
     { to: "/challenges", icon: Swords, label: lang === "uk" ? "Дуелі" : "Дуэли" },
   ];
 

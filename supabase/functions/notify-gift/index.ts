@@ -58,19 +58,6 @@ Deno.serve(async (req) => {
     const senderName = sender?.display_name || "Кто-то";
     const receiverLang = receiver?.preferred_lang || "ru";
 
-    // 1. Send in-app DM about the gift
-    const dmContent = gift_emoji + " " + (
-      receiverLang === "uk"
-        ? `${senderName} надіслав тобі подарунок: ${gift_name}!`
-        : `${senderName} отправил тебе подарок: ${gift_name}!`
-    ) + (message ? `\n💬 «${message}»` : "");
-
-    await supabase.from("direct_messages").insert({
-      sender_id: user.id,
-      receiver_id,
-      content: dmContent,
-    });
-
     // 2. Send Telegram notification if available
     let telegramSent = false;
     if (botToken && receiver?.telegram_chat_id) {
