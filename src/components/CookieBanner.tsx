@@ -29,6 +29,7 @@ const CookieBanner = () => {
   };
 
   if (consent) return null;
+  if (typeof window !== "undefined" && window.location.pathname === "/chat") return null;
 
   return (
     <AnimatePresence>
@@ -38,20 +39,18 @@ const CookieBanner = () => {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          className="fixed bottom-4 left-4 right-4 z-[9999] mx-auto max-w-lg rounded-xl border border-border bg-card/95 backdrop-blur-md p-4 shadow-xl"
+          className="fixed bottom-3 left-3 right-3 z-40 mx-auto max-w-lg rounded-2xl border border-border bg-card/95 backdrop-blur-md px-3 py-2 shadow-xl flex items-center gap-2"
         >
-          <p className="text-sm text-muted-foreground mb-3">
-            🍪 Мы используем cookies для улучшения работы сайта. Продолжая использовать сайт, вы соглашаетесь с нашей{" "}
-            <a href="/privacy" className="underline text-primary hover:text-primary/80">
-              политикой конфиденциальности
-            </a>.
+          <p className="text-[11px] leading-snug text-muted-foreground flex-1">
+            🍪 Мы используем cookies.{" "}
+            <a href="/privacy" className="underline text-primary hover:text-primary/80">Подробнее</a>
           </p>
-          <div className="flex gap-2 justify-end">
-            <Button variant="ghost" size="sm" onClick={decline}>
-              Отклонить
+          <div className="flex gap-1 shrink-0">
+            <Button variant="ghost" size="sm" className="h-8 px-2 text-xs" onClick={decline}>
+              Нет
             </Button>
-            <Button size="sm" onClick={accept}>
-              Принять
+            <Button size="sm" className="h-8 px-3 text-xs" onClick={accept}>
+              Ок
             </Button>
           </div>
         </motion.div>

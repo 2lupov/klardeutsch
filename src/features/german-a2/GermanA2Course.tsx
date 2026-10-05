@@ -134,7 +134,7 @@ function ModuleView({ m, section, onSection }: { m: CourseModule; section: Secti
           <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">{m.objectives.map((o, i) => <li key={i}>{tx(o, lang)}</li>)}</ul>
         </details>
       </div>
-      <div role="tablist" className="mb-6 flex gap-1 overflow-x-auto border-b border-border">
+      <div role="tablist" className="mb-6 flex gap-1 overflow-x-auto border-b border-border pr-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [mask-image:linear-gradient(to_right,black_85%,transparent)]">
         {SECTIONS.map(s => (
           <button key={s.id} role="tab" type="button" aria-selected={section === s.id} onClick={() => onSection(s.id)}
             className={cn('-mb-px shrink-0 border-b-2 px-3 py-2 text-sm font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring',

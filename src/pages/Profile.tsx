@@ -1016,15 +1016,21 @@ const Profile = () => {
 };
 
 /* ─── Stat Card ─── */
+const compactNum = (n: number) =>
+  n >= 1_000_000 ? `${(n / 1_000_000).toFixed(n >= 10_000_000 ? 0 : 1).replace(/\.0$/, "")}M`
+  : n >= 10_000 ? `${Math.round(n / 1000)}k`
+  : n >= 1000 ? `${(n / 1000).toFixed(1).replace(/\.0$/, "")}k`
+  : String(n);
+
 const StatCard = ({ icon, value, label, color }: { icon: React.ReactNode; value: number; label: string; color?: string }) => (
   <motion.div
     whileHover={{ scale: 1.04, y: -2 }}
     whileTap={{ scale: 0.97 }}
-    className={`relative overflow-hidden rounded-2xl p-3 flex flex-col items-center gap-1.5 text-center border border-border/50 bg-gradient-to-br ${color || "from-muted/50 to-card"}`}
+    className={`relative overflow-hidden min-w-0 rounded-2xl p-2.5 flex flex-col items-center gap-1.5 text-center border border-border/50 bg-gradient-to-br ${color || "from-muted/50 to-card"}`}
   >
     <div className="text-muted-foreground">{icon}</div>
-    <span className="text-2xl font-display font-bold text-gradient leading-none">{value}</span>
-    <span className="text-[9px] text-muted-foreground leading-tight">{label}</span>
+    <span className="text-xl font-display font-bold text-gradient leading-none truncate max-w-full" title={String(value)}>{compactNum(value)}</span>
+    <span className="text-[9px] text-muted-foreground leading-tight">{label.replace(/\s*🔥\s*$/, "")}</span>
   </motion.div>
 );
 
