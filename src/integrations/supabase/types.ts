@@ -3321,6 +3321,48 @@ export type Database = {
         }
         Relationships: []
       }
+      skill_attempts: {
+        Row: {
+          auto_score: number | null
+          can_do_key: string
+          course_code: string
+          created_at: string
+          exercise_id: string | null
+          id: string
+          lesson_id: string | null
+          new_situation: boolean
+          rubric: Json
+          user_id: string
+          with_support: boolean
+        }
+        Insert: {
+          auto_score?: number | null
+          can_do_key: string
+          course_code: string
+          created_at?: string
+          exercise_id?: string | null
+          id?: string
+          lesson_id?: string | null
+          new_situation?: boolean
+          rubric?: Json
+          user_id: string
+          with_support?: boolean
+        }
+        Update: {
+          auto_score?: number | null
+          can_do_key?: string
+          course_code?: string
+          created_at?: string
+          exercise_id?: string | null
+          id?: string
+          lesson_id?: string | null
+          new_situation?: boolean
+          rubric?: Json
+          user_id?: string
+          with_support?: boolean
+        }
+        Relationships: []
+      }
       srs_cards: {
         Row: {
           created_at: string | null
