@@ -6,3 +6,5 @@
 - New-user onboarding begins with an interactive KLAR introduction and defaults to A1; existing users retain placement testing.
 - Self-service registration and login use a unique nickname as the primary credential; email is optional, and signup auto-confirms without a confirmation-code step.
 - Full A2 course + telc trainer (Deutschraum) lives in `src/features/deutschraum` at `/a2/*`, rendered straight from the imported course/exams JSON; keeps the authored content unmodified and separate from the paid `/course/a2`.
+- Community chat is a single public room (`src/components/chat/CommunityChat.tsx` + `useCommunityMessages`/`useChatUpload`); private messages were removed, so do not reintroduce DM tables or notifications.
+- Synthetic chat activity runs only server-side in the `community-synthetic` function on a schedule, with personas flagged via `profiles.is_synthetic`; this keeps keys off the client and demo users out of real stats.
