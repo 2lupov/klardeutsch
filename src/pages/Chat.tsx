@@ -1,7 +1,7 @@
 import CommunityChat from "@/components/chat/CommunityChat";
 
 const Chat = () => (
-  <div className="h-full w-full overflow-hidden">
+  <div className="h-[100dvh] w-full overflow-hidden">
     <CommunityChat />
   </div>
 );
