@@ -90,11 +90,11 @@ const SRSWidget = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="h-full backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-4 cursor-pointer hover:bg-white/10 transition-all"
+        className="h-full w-full min-w-0 overflow-hidden backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-4 cursor-pointer hover:bg-white/10 transition-all"
         onClick={() => navigate("/assistant")}
       >
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
+        <div className="flex min-w-0 items-center justify-between gap-3">
+          <div className="flex flex-1 items-center gap-3 min-w-0">
             <div className="w-10 h-10 rounded-xl bg-accent/15 flex items-center justify-center shrink-0">
               <Sparkles className="w-5 h-5 text-accent" />
             </div>
@@ -119,7 +119,7 @@ const SRSWidget = () => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="h-full backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-4 cursor-pointer hover:bg-white/10 transition-all flex flex-col gap-3"
+      className="h-full w-full min-w-0 overflow-hidden backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-4 cursor-pointer hover:bg-white/10 transition-all flex flex-col gap-3"
       onClick={() => navigate("/dictionary")}
     >
       <div className="flex items-center justify-between gap-3">

@@ -9,7 +9,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { usePlatform } from "@/hooks/usePlatform";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { BookOpen, Brain, Flame, RotateCcw, TrendingUp, Calendar, LogOut, Camera, Pencil, Check, X, Coins, Trophy, ArrowLeft, ChevronRight, Award, Bell, Send, Unlink2, Users, WifiOff, Trash2, HardDrive, Globe, Lock, ShoppingBag, ExternalLink, Gift, Crown, Settings, Link2, Mail } from "lucide-react";
+import { BookOpen, Brain, Flame, RotateCcw, TrendingUp, Calendar, Camera, Pencil, Check, X, Coins, Trophy, ArrowLeft, ChevronRight, Award, Bell, Send, Unlink2, Users, WifiOff, Trash2, HardDrive, Globe, Lock, ShoppingBag, ExternalLink, Gift, Crown, Settings, Link2, Mail } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useCoins } from "@/hooks/useCoins";
 import Achievements, { type AchievementStats } from "@/components/Achievements";
@@ -47,7 +47,7 @@ interface ProfileData {
 type ProfileScreen = "main" | "achievements" | "activity" | "mistakes" | "leaderboard" | "notifications" | "referrals" | "offline" | "friends" | "accounts";
 
 const Profile = () => {
-  const { user, session, signOut } = useAuth();
+  const { user, session } = useAuth();
   const { t, lang, languageLocked, lockLanguage, unlockLanguage } = useLanguage();
   const { isMobile, isTelegram } = usePlatform();
   const { balance } = useCoins();
@@ -678,15 +678,8 @@ const Profile = () => {
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className={`flex items-center justify-between ${isTelegram ? "mb-2" : "mb-5"}`}
+        className={`flex items-center justify-end ${isTelegram ? "mb-2" : "mb-5"}`}
       >
-        <button
-          onClick={signOut}
-          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <LogOut className="w-3.5 h-3.5" />
-          {t("signOut")}
-        </button>
         <div className="relative">
           <LofiRadio />
         </div>

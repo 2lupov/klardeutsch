@@ -146,11 +146,11 @@ const HomeDashboard = ({ displayName, onSelectLevel }: Props) => {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.15 }}
-          className="grid md:grid-cols-2 gap-4"
+          className="grid w-full min-w-0 grid-cols-1 md:grid-cols-2 gap-4"
         >
-          <div className="rounded-[1.5rem] bg-card/60 border border-white/5 p-4 md:p-5 flex flex-col gap-3">
+          <div className="w-full min-w-0 overflow-hidden rounded-[1.5rem] bg-card/60 border border-white/5 p-4 md:p-5 flex flex-col gap-3">
             <SRSWidget />
-            <div className="grid grid-cols-3 gap-2 mt-auto">
+            <div className="grid w-full min-w-0 grid-cols-3 gap-2 mt-auto">
               {[
                 { icon: BookOpen, label: "Словник", to: "/dictionary" },
                 { icon: Gamepad2, label: "Ігри", to: "/games" },
@@ -159,15 +159,15 @@ const HomeDashboard = ({ displayName, onSelectLevel }: Props) => {
                 <button
                   key={to}
                   onClick={() => navigate(to)}
-                  className="group flex flex-col items-center justify-center gap-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-primary/30 transition p-3"
+                  className="group min-w-0 flex flex-col items-center justify-center gap-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-primary/30 transition px-1 py-3"
                 >
                   <Icon className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
-                  <span className="text-xs font-medium text-foreground/80">{label}</span>
+                  <span className="w-full truncate text-center text-xs font-medium text-foreground/80">{label}</span>
                 </button>
               ))}
             </div>
           </div>
-          <div className="rounded-[1.5rem] bg-card/60 border border-white/5 p-4 md:p-5">
+          <div className="w-full min-w-0 overflow-hidden rounded-[1.5rem] bg-card/60 border border-white/5 p-4 md:p-5">
             <DailyChallenge />
           </div>
         </motion.section>
