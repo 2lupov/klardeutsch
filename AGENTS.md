@@ -8,3 +8,5 @@
 - Full A2 course + telc trainer (Deutschraum) lives in `src/features/deutschraum` at `/a2/*`, rendered straight from the imported course/exams JSON; keeps the authored content unmodified and separate from the paid `/course/a2`.
 - Community chat is a single public room (`src/components/chat/CommunityChat.tsx` + `useCommunityMessages`/`useChatUpload`); private messages were removed, so do not reintroduce DM tables or notifications.
 - Synthetic chat activity runs only server-side in the `community-synthetic` function on a schedule, with personas flagged via `profiles.is_synthetic`; this keeps keys off the client and demo users out of real stats.
+- Academy programme catalog lives in `src/data/catalog.json` (transcribed from the school plan PDF) and per-course content in `src/data/courses/<code>.json`, rendered by `src/features/academy-engine`; keeps content out of components.
+- Skill passport attempts are stored in `skill_attempts` and statuses are derived client-side by `computeStatus`; keeps the section-11 rules in one testable place.
