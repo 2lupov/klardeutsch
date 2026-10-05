@@ -55,6 +55,8 @@ import Course from "./pages/Course";
 import Academy from "./pages/Academy";
 import AcademyCourse from "./pages/AcademyCourse";
 import AcademyLearn from "./pages/AcademyLearn";
+import PassportPage from "./features/academy-engine/PassportPage";
+import CoursePlayer from "./features/academy-engine/CoursePlayer";
 import Onboarding from "./pages/Onboarding";
 import Review from "./pages/Review";
 import Certificate from "./pages/Certificate";
@@ -161,6 +163,8 @@ const AppRoutes = () => {
         <Route path="/tutoring/placement/:id" element={<RequirePremium><PlacementTest /></RequirePremium>} />
         <Route path="/tutoring/homework/:id" element={<RequirePremium><StudentHomework /></RequirePremium>} />
         <Route path="/academy" element={<RequireAuth><Academy /></RequireAuth>} />
+        <Route path="/academy/passport" element={<RequireAuth><PassportPage /></RequireAuth>} />
+        <Route path="/academy/program/:code" element={<RequireAuth><CoursePlayer /></RequireAuth>} />
         <Route path="/academy/:courseId" element={<RequireAuth><AcademyCourse /></RequireAuth>} />
         <Route path="/academy/:courseId/learn" element={<RequireAuth><AcademyLearn /></RequireAuth>} />
       </Route>

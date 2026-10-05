@@ -1,0 +1,109 @@
+{
+  "code": "K-A2.1",
+  "canDo": {
+    "key": "K-A2.1",
+    "de": "Ein einfaches Problem erklären, den Grund nennen, um eine konkrete Handlung bitten.",
+    "uk": "Пояснити просту проблему, назвати причину, попросити конкретну дію.",
+    "ru": "Объяснить простую проблему, назвать причину, попросить конкретное действие."
+  },
+  "lessons": [
+    {
+      "id": "l1",
+      "title": { "de": "Die Heizung ist kaputt", "uk": "Не працює опалення", "ru": "Не работает отопление" },
+      "stages": [
+        {
+          "type": "repetition",
+          "explanation": { "de": "Perfekt: haben oder sein + Partizip II.", "uk": "Perfekt: haben або sein + Partizip II.", "ru": "Perfekt: haben или sein + Partizip II." },
+          "exercises": [
+            { "id": "l1e1", "type": "Lueckentext",
+              "prompt": { "de": "Ergänzen Sie haben oder sein.", "uk": "Вставте haben або sein.", "ru": "Вставьте haben или sein." },
+              "text": "Die Heizung {{1}} gestern kaputtgegangen. Ich {{2}} den Vermieter angerufen.",
+              "gaps": { "1": ["ist"], "2": ["habe"] } }
+          ]
+        },
+        {
+          "type": "input",
+          "exercises": [
+            { "id": "l1e2", "type": "Leseverstehen",
+              "prompt": { "de": "Lesen Sie die Nachricht.", "uk": "Прочитайте повідомлення.", "ru": "Прочитайте сообщение." },
+              "text": "Sehr geehrter Herr Braun,\nseit Montag funktioniert die Heizung in meiner Wohnung nicht. Könnten Sie bitte einen Techniker schicken?\nViele Grüße\nOlena Koval",
+              "questions": [
+                { "question": "Was ist das Problem?", "options": ["Die Heizung", "Das Fenster", "Die Tür"], "correct": [0] },
+                { "question": "Was möchte Olena?", "options": ["Eine neue Wohnung", "Einen Techniker", "Geld zurück"], "correct": [1] }
+              ] }
+          ]
+        },
+        {
+          "type": "practice",
+          "exercises": [
+            { "id": "l1e3", "type": "Zuordnung",
+              "prompt": { "de": "Ordnen Sie zu.", "uk": "Зіставте.", "ru": "Сопоставьте." },
+              "pairs": [
+                { "left": "Die Heizung", "right": "funktioniert nicht." },
+                { "left": "Könnten Sie", "right": "bitte jemanden schicken?" },
+                { "left": "Seit Montag", "right": "ist es kalt." }
+              ] },
+            { "id": "l1e4", "type": "Satzbau",
+              "prompt": { "de": "Bilden Sie einen Satz.", "uk": "Складіть речення.", "ru": "Составьте предложение." },
+              "words": ["Könnten", "Sie", "bitte", "einen", "Techniker", "schicken?"],
+              "validAnswers": ["Könnten Sie bitte einen Techniker schicken", "Könnten Sie einen Techniker bitte schicken"] }
+          ]
+        },
+        {
+          "type": "task",
+          "exercises": [
+            { "id": "l1e5", "type": "VoiceAnswer",
+              "prompt": { "de": "Rufen Sie den Vermieter an: Problem, Grund, Bitte.", "uk": "Зателефонуйте орендодавцю: проблема, причина, прохання.", "ru": "Позвоните арендодателю: проблема, причина, просьба." },
+              "sampleText": { "de": "Guten Tag, hier ist Olena Koval. Die Heizung funktioniert seit Montag nicht. Könnten Sie bitte heute einen Techniker schicken?" } }
+          ]
+        },
+        { "type": "feedback", "explanation": { "de": "Vergleichen Sie Ihre Aufnahme mit dem Muster.", "uk": "Порівняйте свій запис зі зразком.", "ru": "Сравните свою запись с образцом." }, "exercises": [] }
+      ]
+    },
+    {
+      "id": "l2",
+      "title": { "de": "Falsche Lieferung", "uk": "Неправильна доставка", "ru": "Неправильная доставка" },
+      "stages": [
+        {
+          "type": "repetition",
+          "exercises": [
+            { "id": "l2e1", "type": "MultipleChoice",
+              "prompt": { "de": "Welche Form ist höflich?", "uk": "Яка форма ввічлива?", "ru": "Какая форма вежливая?" },
+              "question": "___ Sie mir bitte helfen?", "options": ["Könnten", "Kann", "Musst"], "correct": [0] }
+          ]
+        },
+        {
+          "type": "input",
+          "exercises": [
+            { "id": "l2e2", "type": "Hoerverstehen",
+              "prompt": { "de": "Hören Sie und antworten Sie.", "uk": "Прослухайте й дайте відповідь.", "ru": "Прослушайте и ответьте." },
+              "audioUrl": "",
+              "transcript": "Ich habe einen blauen Pullover bestellt, aber ich habe einen roten bekommen.",
+              "questions": [ { "question": "Welche Farbe hat der Kunde bekommen?", "options": ["Blau", "Rot", "Grün"], "correct": [1] } ] }
+          ]
+        },
+        {
+          "type": "practice",
+          "exercises": [
+            { "id": "l2e3", "type": "Fehlerkorrektur",
+              "prompt": { "de": "Korrigieren Sie den Satz.", "uk": "Виправте речення.", "ru": "Исправьте предложение." },
+              "sentence": "Ich habe den Paket gestern bekommen.",
+              "validAnswers": ["Ich habe das Paket gestern bekommen", "Ich habe gestern das Paket bekommen"] },
+            { "id": "l2e4", "type": "Diktat",
+              "prompt": { "de": "Schreiben Sie, was Sie hören.", "uk": "Запишіть почуте.", "ru": "Запишите услышанное." },
+              "audioUrl": "",
+              "validAnswers": ["Ich möchte den Pullover umtauschen", "Ich moechte den Pullover umtauschen"] }
+          ]
+        },
+        {
+          "type": "task",
+          "exercises": [
+            { "id": "l2e5", "type": "VoiceAnswer", "newSituation": true,
+              "prompt": { "de": "Neue Situation: Der Shop sagt, der Pullover ist ausverkauft. Reagieren Sie und bitten Sie um eine Lösung.", "uk": "Нова ситуація: магазин каже, що светр розпродано. Відреагуйте й попросіть рішення.", "ru": "Новая ситуация: магазин говорит, что свитер распродан. Отреагируйте и попросите решение." } }
+          ]
+        },
+        { "type": "feedback", "explanation": { "de": "Was war schwierig? Hören Sie Ihre Aufnahme noch einmal.", "uk": "Що було складно? Прослухайте свій запис ще раз.", "ru": "Что было сложно? Прослушайте свою запись ещё раз." }, "exercises": [] }
+      ]
+    }
+  ]
+}

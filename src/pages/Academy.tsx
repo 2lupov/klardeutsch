@@ -9,6 +9,7 @@ import CourseHero from "@/components/academy/CourseHero";
 import CourseFilters from "@/components/academy/CourseFilters";
 import CourseCard from "@/components/academy/CourseCard";
 import GermanA2Banner from "@/components/academy/GermanA2Banner";
+import ProgramCatalog from "@/features/academy-engine/ProgramCatalog";
 
 interface CourseRow {
   id: string;
@@ -97,6 +98,8 @@ const Academy = () => {
 
       <div className="mx-auto max-w-6xl px-4 pb-10 pt-6 md:px-6">
         <GermanA2Banner />
+        <ProgramCatalog lang={lang} />
+
 
         <section ref={coursesRef} className="scroll-mt-4">
           <h2 className="mb-4 font-display text-xl font-bold text-foreground">{t.courses}</h2>
