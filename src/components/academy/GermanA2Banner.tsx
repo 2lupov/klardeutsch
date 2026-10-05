@@ -1,39 +1,61 @@
 import { useNavigate } from "react-router-dom";
-import { ChevronRight, GraduationCap } from "lucide-react";
+import { ChevronRight, GraduationCap, Target } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { A2_PRICE_UAH } from "@/features/german-a2/pricing";
+
+const T = {
+  uk: {
+    title: "Deutsch A2",
+    text: "Два способи пройти A2: інтерактивний курс або тренажер до екзамену telc.",
+    course: "Інтерактивний курс Perfekt",
+    courseText: "Відео, слова, граматика, читання, аудіювання, письмо й тест",
+    price: `${A2_PRICE_UAH} грн, доступ назавжди`,
+    telc: "Тренажер telc A2",
+    telcText: "17 модулів, 119 уроків, словник і 3 пробні іспити",
+  },
+  ru: {
+    title: "Deutsch A2",
+    text: "Два способа пройти A2: интерактивный курс или тренажёр к экзамену telc.",
+    course: "Интерактивный курс Perfekt",
+    courseText: "Видео, слова, грамматика, чтение, аудирование, письмо и тест",
+    price: `${A2_PRICE_UAH} грн, доступ навсегда`,
+    telc: "Тренажёр telc A2",
+    telcText: "17 модулей, 119 уроков, словарь и 3 пробных экзамена",
+  },
+} as const;
+
+const Row = ({ icon: Icon, title, text, meta, onClick }: { icon: any; title: string; text: string; meta?: string; onClick: () => void }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className="group flex w-full items-center gap-3 rounded-xl p-3 text-left transition hover:bg-primary/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+  >
+    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
+      <Icon className="h-5 w-5" />
+    </span>
+    <span className="min-w-0 flex-1">
+      <span className="block font-display text-sm font-bold text-foreground">{title}</span>
+      <span className="block text-xs text-muted-foreground">{text}</span>
+      {meta && <span className="mt-0.5 block text-xs font-semibold text-primary">{meta}</span>}
+    </span>
+    <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground transition group-hover:translate-x-0.5" />
+  </button>
+);
 
 const GermanA2Banner = () => {
   const navigate = useNavigate();
+  const { lang } = useLanguage();
+  const t = T[lang === "uk" ? "uk" : "ru"];
+
   return (
-    <>
-    <button
-      onClick={() => navigate("/a2")}
-      className="w-full mb-3 flex items-center gap-4 rounded-2xl border border-primary/30 bg-primary/10 p-4 text-left transition hover:bg-primary/15"
-    >
-      <div className="w-12 h-12 shrink-0 rounded-xl bg-primary/20 flex items-center justify-center">
-        <GraduationCap className="w-6 h-6 text-primary" />
+    <section className="mb-8 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card/60 to-transparent p-4 md:p-5">
+      <h2 className="font-display text-lg font-bold text-foreground">{t.title}</h2>
+      <p className="mt-1 text-sm text-muted-foreground">{t.text}</p>
+      <div className="mt-3 grid gap-1 md:grid-cols-2 md:gap-3">
+        <Row icon={GraduationCap} title={t.course} text={t.courseText} meta={t.price} onClick={() => navigate("/course/a2")} />
+        <Row icon={Target} title={t.telc} text={t.telcText} onClick={() => navigate("/a2")} />
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-xs font-semibold uppercase tracking-wide text-primary">Повний курс A2 · 17 модулів · telc</p>
-        <p className="font-display font-bold text-foreground">Deutsch A2 + тренажер telc</p>
-        <p className="text-xs text-muted-foreground">119 уроків, словник і 3 пробні іспити telc A2</p>
-      </div>
-      <ChevronRight className="w-5 h-5 text-muted-foreground" />
-    </button>
-    <button
-      onClick={() => navigate("/course/a2")}
-      className="w-full mb-5 flex items-center gap-4 rounded-2xl border border-primary/30 bg-primary/10 p-4 text-left transition hover:bg-primary/15"
-    >
-      <div className="w-12 h-12 shrink-0 rounded-xl bg-primary/20 flex items-center justify-center">
-        <GraduationCap className="w-6 h-6 text-primary" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-xs font-semibold uppercase tracking-wide text-primary">Інтерактивний курс · A2 · 500 грн</p>
-        <p className="font-display font-bold text-foreground">Deutsch A2 — Perfekt</p>
-        <p className="text-xs text-muted-foreground">Відео, слова, граматика, читання, аудіювання, письмо й тест</p>
-      </div>
-      <ChevronRight className="w-5 h-5 text-muted-foreground" />
-    </button>
-    </>
+    </section>
   );
 };
 
