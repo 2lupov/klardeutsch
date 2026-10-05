@@ -86,7 +86,7 @@ const DailyChallenge = () => {
 
 
   return (
-    <div className="w-full animate-slide-up">
+    <div className="w-full min-w-0 overflow-hidden animate-slide-up">
       <div className="flex items-center gap-2 mb-3">
         <Sparkles className="w-4 h-4 text-primary" />
         <h2 className="font-display text-sm font-semibold text-foreground">{t("dailyChallenge")}</h2>
@@ -96,17 +96,17 @@ const DailyChallenge = () => {
         {/* Word of the day */}
         {word && (
           <div
-            className="glass-card p-4 cursor-pointer transition-all hover:border-primary/30"
+            className="glass-card w-full min-w-0 overflow-hidden p-4 cursor-pointer transition-all hover:border-primary/30"
             onClick={() => setWordFlipped(!wordFlipped)}
           >
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1.5">{t("wordOfDay")}</p>
-            <div className="flex items-center justify-between">
-              <div>
+            <div className="flex min-w-0 items-center justify-between gap-2">
+              <div className="min-w-0">
                 <div className="flex items-baseline gap-1.5">
                   {word.article && (
                     <span className="text-xs text-primary font-medium">{word.article}</span>
                   )}
-                  <span className="font-display font-bold text-lg text-foreground">
+                    <span className="min-w-0 break-words font-display font-bold text-lg text-foreground">
                     {word.article && word.german.toLowerCase().startsWith(word.article.toLowerCase())
                       ? word.german.slice(word.article.length).trim()
                       : word.german}
@@ -127,9 +127,9 @@ const DailyChallenge = () => {
 
         {/* Mini quiz */}
         {question && !completed && (
-          <div className="glass-card p-4">
+          <div className="glass-card w-full min-w-0 overflow-hidden p-4">
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1.5">{t("miniQuiz")}</p>
-            <p className="text-sm font-display font-semibold text-foreground mb-3">{question.question}</p>
+            <p className="break-words text-sm font-display font-semibold text-foreground mb-3">{question.question}</p>
             <div className="grid grid-cols-2 gap-2">
               {question.options.map((opt, idx) => {
                 const isSelected = selectedAnswer === idx;
@@ -148,7 +148,7 @@ const DailyChallenge = () => {
                 }
 
                 return (
-                  <button key={idx} onClick={() => handleAnswer(idx)} className={btnClass} disabled={selectedAnswer !== null}>
+                  <button key={idx} onClick={() => handleAnswer(idx)} className={`${btnClass} min-w-0`} disabled={selectedAnswer !== null}>
                     <div className="flex items-center gap-2">
                       {showResult && isCorrect && <Check className="w-3.5 h-3.5 text-success shrink-0" />}
                       {showResult && isSelected && !isCorrect && <X className="w-3.5 h-3.5 text-destructive shrink-0" />}
