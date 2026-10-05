@@ -1108,65 +1108,6 @@ export type Database = {
         }
         Relationships: []
       }
-      direct_messages: {
-        Row: {
-          audio_url: string | null
-          content: string
-          created_at: string
-          file_name: string | null
-          file_url: string | null
-          id: string
-          image_url: string | null
-          image_urls: Json | null
-          is_read: boolean
-          receiver_id: string
-          reply_to_content: string | null
-          reply_to_id: string | null
-          reply_to_sender: string | null
-          sender_id: string
-        }
-        Insert: {
-          audio_url?: string | null
-          content: string
-          created_at?: string
-          file_name?: string | null
-          file_url?: string | null
-          id?: string
-          image_url?: string | null
-          image_urls?: Json | null
-          is_read?: boolean
-          receiver_id: string
-          reply_to_content?: string | null
-          reply_to_id?: string | null
-          reply_to_sender?: string | null
-          sender_id: string
-        }
-        Update: {
-          audio_url?: string | null
-          content?: string
-          created_at?: string
-          file_name?: string | null
-          file_url?: string | null
-          id?: string
-          image_url?: string | null
-          image_urls?: Json | null
-          is_read?: boolean
-          receiver_id?: string
-          reply_to_content?: string | null
-          reply_to_id?: string | null
-          reply_to_sender?: string | null
-          sender_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "direct_messages_reply_to_id_fkey"
-            columns: ["reply_to_id"]
-            isOneToOne: false
-            referencedRelation: "direct_messages"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       dutch_html_docs: {
         Row: {
           created_at: string
@@ -2790,6 +2731,7 @@ export type Database = {
           display_name: string | null
           id: string
           is_kid: boolean
+          is_synthetic: boolean
           language_locked: boolean
           last_active: string | null
           last_reminder_sent_at: string | null
@@ -2815,6 +2757,7 @@ export type Database = {
           display_name?: string | null
           id?: string
           is_kid?: boolean
+          is_synthetic?: boolean
           language_locked?: boolean
           last_active?: string | null
           last_reminder_sent_at?: string | null
@@ -2840,6 +2783,7 @@ export type Database = {
           display_name?: string | null
           id?: string
           is_kid?: boolean
+          is_synthetic?: boolean
           language_locked?: boolean
           last_active?: string | null
           last_reminder_sent_at?: string | null
@@ -3874,6 +3818,108 @@ export type Database = {
           id?: string
           metadata?: Json | null
           reason?: string
+        }
+        Relationships: []
+      }
+      synthetic_personas: {
+        Row: {
+          active_hours: number[]
+          activity_level: number
+          avatar_url: string | null
+          average_message_length: number
+          created_at: string
+          display_name: string
+          emoji_frequency: number
+          enabled: boolean
+          interests: string[]
+          language: string
+          last_message_at: string | null
+          personality_notes: string | null
+          typo_frequency: number
+          updated_at: string
+          user_id: string
+          username: string
+          writing_style: string
+        }
+        Insert: {
+          active_hours?: number[]
+          activity_level?: number
+          avatar_url?: string | null
+          average_message_length?: number
+          created_at?: string
+          display_name: string
+          emoji_frequency?: number
+          enabled?: boolean
+          interests?: string[]
+          language?: string
+          last_message_at?: string | null
+          personality_notes?: string | null
+          typo_frequency?: number
+          updated_at?: string
+          user_id: string
+          username: string
+          writing_style: string
+        }
+        Update: {
+          active_hours?: number[]
+          activity_level?: number
+          avatar_url?: string | null
+          average_message_length?: number
+          created_at?: string
+          display_name?: string
+          emoji_frequency?: number
+          enabled?: boolean
+          interests?: string[]
+          language?: string
+          last_message_at?: string | null
+          personality_notes?: string | null
+          typo_frequency?: number
+          updated_at?: string
+          user_id?: string
+          username?: string
+          writing_style?: string
+        }
+        Relationships: []
+      }
+      synthetic_settings: {
+        Row: {
+          active_personas: number
+          activity_level: string
+          enabled: boolean
+          id: number
+          max_delay_minutes: number
+          max_messages_per_hour: number
+          min_delay_minutes: number
+          next_run_at: string | null
+          quiet_hours_end: number
+          quiet_hours_start: number
+          updated_at: string
+        }
+        Insert: {
+          active_personas?: number
+          activity_level?: string
+          enabled?: boolean
+          id?: number
+          max_delay_minutes?: number
+          max_messages_per_hour?: number
+          min_delay_minutes?: number
+          next_run_at?: string | null
+          quiet_hours_end?: number
+          quiet_hours_start?: number
+          updated_at?: string
+        }
+        Update: {
+          active_personas?: number
+          activity_level?: string
+          enabled?: boolean
+          id?: number
+          max_delay_minutes?: number
+          max_messages_per_hour?: number
+          min_delay_minutes?: number
+          next_run_at?: string | null
+          quiet_hours_end?: number
+          quiet_hours_start?: number
+          updated_at?: string
         }
         Relationships: []
       }

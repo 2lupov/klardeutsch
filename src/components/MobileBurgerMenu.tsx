@@ -7,7 +7,6 @@ import {
 import { motion } from "framer-motion";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useUnreadDMs } from "@/hooks/useUnreadDMs";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCoins } from "@/hooks/useCoins";
 import { useXP } from "@/hooks/useXP";
@@ -27,7 +26,6 @@ interface SidebarLink {
 const MobileBurgerMenu = () => {
   const { t, lang } = useLanguage();
   const location = useLocation();
-  const unread = useUnreadDMs();
   const { user, signOut } = useAuth();
   const { balance } = useCoins();
   const { totalXP } = useXP();
@@ -67,7 +65,7 @@ const MobileBurgerMenu = () => {
   ];
 
   const socialLinks: SidebarLink[] = [
-    { to: "/chat", icon: MessageSquare, label: lang === "uk" ? "Чат" : "Чат", badge: unread },
+    { to: "/chat", icon: MessageSquare, label: lang === "uk" ? "Чат" : "Чат" },
     { to: "/challenges", icon: Swords, label: lang === "uk" ? "Дуелі" : "Дуэли" },
   ];
 
