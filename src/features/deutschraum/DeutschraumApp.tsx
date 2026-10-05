@@ -30,7 +30,7 @@ export default function DeutschraumApp() {
   return (
     <div className="h-[100dvh] overflow-y-auto bg-background text-foreground">
       <div className="max-w-4xl mx-auto px-4 py-4 pb-24 space-y-5">
-        <header className="flex items-center justify-between gap-3">
+        <header className="flex items-center justify-between gap-3 pl-12 md:pl-0">
           <Link to={BASE} className="font-display font-bold text-lg flex items-center gap-2"><GraduationCap className="w-5 h-5 text-primary" />{UI.course[lang]}</Link>
           <div className="flex rounded-full border border-border p-0.5">
             {(["uk", "ru", "de"] as L[]).map((l) => (
@@ -110,7 +110,7 @@ function ModulePage(ctx: Ctx) {
         <h1 className="font-display text-2xl font-bold">{m.title.de}</h1>
         {ctx.lang !== "de" && <p className="text-muted-foreground">{m.title[ctx.lang]}</p>}
       </div>
-      <nav className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1">
+      <nav className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 pr-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [mask-image:linear-gradient(to_right,black_85%,transparent)]">
         {SECTIONS.map((s) => (
           <Link key={s} to={`${BASE}/module/${m.id}/${s}`} className={cn("shrink-0 px-3 py-1.5 rounded-full text-sm border flex items-center gap-1",
             s === sec ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground")}>

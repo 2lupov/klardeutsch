@@ -66,7 +66,7 @@ const CourseA2 = () => {
 
   return (
     <div className="h-full overflow-y-auto">
-      <div className="mx-auto max-w-6xl px-4 pt-4">
+      <div className="mx-auto max-w-6xl px-4 pt-4 pl-16 md:pl-4">
         <button onClick={() => navigate("/academy")} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="w-4 h-4" /> Академія
         </button>
