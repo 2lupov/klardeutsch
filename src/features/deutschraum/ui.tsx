@@ -67,7 +67,7 @@ export function QuestionCard({
   const ok = answered && isCorrect(value!, q.answer);
   return (
     <div className="rounded-2xl border border-border bg-card/60 p-4 space-y-3">
-      <p className="font-medium text-foreground"><span className="text-muted-foreground mr-2">{idx + 1}.</span>{q.prompt}</p>
+      <p className="font-medium text-foreground"><span className="text-muted-foreground mr-2">{idx + 1}.</span>{typeof q.prompt === "string" ? q.prompt : ((q.prompt as any)?.[lang] ?? (q.prompt as any)?.de ?? "")}</p>
       {opts ? (
         <div className="flex flex-wrap gap-2">
           {opts.map((o) => {
