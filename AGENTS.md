@@ -5,3 +5,4 @@
 - Personal Dutch hub (/dutch) is admin-only, keeps progress in localStorage and uses the dutch-ai function; keeps it isolated from student data.
 - New-user onboarding begins with an interactive KLAR introduction and defaults to A1; existing users retain placement testing.
 - Self-service registration and login use a unique nickname as the primary credential; email is optional, and signup auto-confirms without a confirmation-code step.
+- Full A2 course + telc trainer (Deutschraum) lives in `src/features/deutschraum` at `/a2/*`, rendered straight from the imported course/exams JSON; keeps the authored content unmodified and separate from the paid `/course/a2`.

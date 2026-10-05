@@ -20,6 +20,8 @@ export function ExamView({ exam, lang, state, update }: { exam: Exam; lang: L; s
   const setA = (k: string, v: string) => update((s) => ({ ...s, exams: { ...s.exams, [ek]: { ...rec, ...s.exams[ek], answers: { ...(s.exams[ek]?.answers ?? {}), [k]: v } } } }));
   const media = getMedia();
   const score = scoreExam(exam, rec.answers);
+  // Without a recording the script is shown, so Hören works as a reading-based practice.
+  const showH = (part: string) => submitted || !media[`e${exam.id}-${part}`];
 
   const Q = (q: Question, k: string, i: number) => (
     <QuestionCard key={k + (submitted ? "s" : "")} q={q} idx={i} lang={lang} seed={exam.id} value={rec.answers[k]} reveal={submitted} onAnswer={(v) => !submitted && setA(k, v)} />
@@ -41,9 +43,9 @@ export function ExamView({ exam, lang, state, update }: { exam: Exam; lang: L; s
           : <span className="text-sm font-semibold text-primary">{score.correct}/{score.total} · {score.percent}%</span>}
       </div>
 
-      <Part title="Hören · Teil 1" audio={`e${exam.id}-h1`}>{exam.notes.map((n, i) => <div key={i} className="space-y-2">{submitted && <Txt t={n.text} />}{Q(n.question, `h1-${i}`, i)}</div>)}</Part>
-      <Part title="Hören · Teil 2" audio={`e${exam.id}-h2`}>{exam.radio.map((n, i) => <div key={i} className="space-y-2">{submitted && <Txt t={n.text} />}{Q(n.question, `h2-${i}`, i)}</div>)}</Part>
-      <Part title="Hören · Teil 3" audio={`e${exam.id}-h3`}>{submitted && <Txt t={exam.dialog.text} />}{exam.dialog.questions.map((q, i) => Q(q, `h3-${i}`, i))}</Part>
+      <Part title="Hören · Teil 1" audio={`e${exam.id}-h1`}>{exam.notes.map((n, i) => <div key={i} className="space-y-2">{showH("h1") && <Txt t={n.text} />}{Q(n.question, `h1-${i}`, i)}</div>)}</Part>
+      <Part title="Hören · Teil 2" audio={`e${exam.id}-h2`}>{exam.radio.map((n, i) => <div key={i} className="space-y-2">{showH("h2") && <Txt t={n.text} />}{Q(n.question, `h2-${i}`, i)}</div>)}</Part>
+      <Part title="Hören · Teil 3" audio={`e${exam.id}-h3`}>{showH("h3") && <Txt t={exam.dialog.text} />}{exam.dialog.questions.map((q, i) => Q(q, `h3-${i}`, i))}</Part>
       <Part title="Lesen · Teil 1"><Txt t={exam.directory.text} />{exam.directory.questions.map((q, i) => Q(q, `l1-${i}`, i))}</Part>
       <Part title="Lesen · Teil 2"><Txt t={exam.article.text} />{exam.article.questions.map((q, i) => Q(q, `l2-${i}`, i))}</Part>
       <Part title="Lesen · Teil 3">
