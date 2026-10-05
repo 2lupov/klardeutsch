@@ -1,0 +1,1775 @@
+[
+  {
+    "id": 1,
+    "notes": [
+      {
+        "text": "Hallo, hier ist die Werkstatt. Ihr Fahrrad ist fertig. Sie können es morgen ab 14 Uhr abholen. Vormittags sind wir nicht da. Die Reparatur kostet 28 Euro.",
+        "question": {
+          "prompt": "Abholung ab ___ Uhr",
+          "answer": "14",
+          "options": null,
+          "explanation": {
+            "ru": "Подтверждение: Hallo, hier ist die Werkstatt. Ihr Fahrrad ist fertig. Sie können es morgen ab 14 Uhr abholen. Vormittags sind wir nicht da. Die Reparatur kostet 28 Euro.",
+            "uk": "Підтвердження: Hallo, hier ist die Werkstatt. Ihr Fahrrad ist fertig. Sie können es morgen ab 14 Uhr abholen. Vormittags sind wir nicht da. Die Reparatur kostet 28 Euro.",
+            "de": "Beleg: Hallo, hier ist die Werkstatt. Ihr Fahrrad ist fertig. Sie können es morgen ab 14 Uhr abholen. Vormittags sind wir nicht da. Die Reparatur kostet 28 Euro."
+          }
+        }
+      },
+      {
+        "text": "Hallo Anna, wir treffen uns heute nicht im Park. Es regnet. Komm bitte direkt in die Bibliothek. Ich warte dort am Eingang.",
+        "question": {
+          "prompt": "Treffpunkt: ___",
+          "answer": "Bibliothek",
+          "options": null,
+          "explanation": {
+            "ru": "Подтверждение: Hallo Anna, wir treffen uns heute nicht im Park. Es regnet. Komm bitte direkt in die Bibliothek. Ich warte dort am Eingang.",
+            "uk": "Підтвердження: Hallo Anna, wir treffen uns heute nicht im Park. Es regnet. Komm bitte direkt in die Bibliothek. Ich warte dort am Eingang.",
+            "de": "Beleg: Hallo Anna, wir treffen uns heute nicht im Park. Es regnet. Komm bitte direkt in die Bibliothek. Ich warte dort am Eingang."
+          }
+        }
+      },
+      {
+        "text": "Guten Tag, Praxis Lind. Ihr neuer Termin ist am Donnerstag um zehn Uhr. Der Mittwochstermin fällt leider aus. Bitte bringen Sie Ihre Karte mit.",
+        "question": {
+          "prompt": "Neuer Termin: ___",
+          "answer": "Donnerstag",
+          "options": null,
+          "explanation": {
+            "ru": "Подтверждение: Guten Tag, Praxis Lind. Ihr neuer Termin ist am Donnerstag um zehn Uhr. Der Mittwochstermin fällt leider aus. Bitte bringen Sie Ihre Karte mit.",
+            "uk": "Підтвердження: Guten Tag, Praxis Lind. Ihr neuer Termin ist am Donnerstag um zehn Uhr. Der Mittwochstermin fällt leider aus. Bitte bringen Sie Ihre Karte mit.",
+            "de": "Beleg: Guten Tag, Praxis Lind. Ihr neuer Termin ist am Donnerstag um zehn Uhr. Der Mittwochstermin fällt leider aus. Bitte bringen Sie Ihre Karte mit."
+          }
+        }
+      },
+      {
+        "text": "Hallo Max, die neue Telefonnummer unseres Büros ist 0381 62 47. Ich wiederhole: 0381 62 47. Die alte Nummer funktioniert nicht mehr.",
+        "question": {
+          "prompt": "Rufnummer ohne Vorwahl 0381: ___",
+          "answer": "6247",
+          "options": null,
+          "explanation": {
+            "ru": "Подтверждение: Hallo Max, die neue Telefonnummer unseres Büros ist 0381 62 47. Ich wiederhole: 0381 62 47. Die alte Nummer funktioniert nicht mehr.",
+            "uk": "Підтвердження: Hallo Max, die neue Telefonnummer unseres Büros ist 0381 62 47. Ich wiederhole: 0381 62 47. Die alte Nummer funktioniert nicht mehr.",
+            "de": "Beleg: Hallo Max, die neue Telefonnummer unseres Büros ist 0381 62 47. Ich wiederhole: 0381 62 47. Die alte Nummer funktioniert nicht mehr."
+          }
+        }
+      },
+      {
+        "text": "Hier ist das Reisebüro. Ihre Fahrkarte nach Hamburg kostet 46 Euro. Die Rückfahrt ist schon inklusive. Sie können die Karte heute abholen.",
+        "question": {
+          "prompt": "Preis insgesamt: ___ Euro",
+          "answer": "46",
+          "options": null,
+          "explanation": {
+            "ru": "Подтверждение: Hier ist das Reisebüro. Ihre Fahrkarte nach Hamburg kostet 46 Euro. Die Rückfahrt ist schon inklusive. Sie können die Karte heute abholen.",
+            "uk": "Підтвердження: Hier ist das Reisebüro. Ihre Fahrkarte nach Hamburg kostet 46 Euro. Die Rückfahrt ist schon inklusive. Sie können die Karte heute abholen.",
+            "de": "Beleg: Hier ist das Reisebüro. Ihre Fahrkarte nach Hamburg kostet 46 Euro. Die Rückfahrt ist schon inklusive. Sie können die Karte heute abholen."
+          }
+        }
+      }
+    ],
+    "radio": [
+      {
+        "text": "Unser Radioprogramm am Sonntag: Um 14 Uhr hören Sie Nachrichten. Um 15 Uhr beginnt eine Sendung für Kinder. Danach spielen wir Musik.",
+        "question": {
+          "prompt": "Was beginnt um 15 Uhr?",
+          "answer": "Eine Kindersendung",
+          "options": [
+            "Eine Kindersendung",
+            "Nachrichten",
+            "Musik"
+          ],
+          "explanation": {
+            "ru": "Подтверждение: Unser Radioprogramm am Sonntag: Um 14 Uhr hören Sie Nachrichten. Um 15 Uhr beginnt eine Sendung für Kinder. Danach spielen wir Musik.",
+            "uk": "Підтвердження: Unser Radioprogramm am Sonntag: Um 14 Uhr hören Sie Nachrichten. Um 15 Uhr beginnt eine Sendung für Kinder. Danach spielen wir Musik.",
+            "de": "Beleg: Unser Radioprogramm am Sonntag: Um 14 Uhr hören Sie Nachrichten. Um 15 Uhr beginnt eine Sendung für Kinder. Danach spielen wir Musik."
+          }
+        }
+      },
+      {
+        "text": "Morgen ist es morgens kühl. Am Nachmittag kommt die Sonne, und es wird 24 Grad warm. Regen gibt es erst am Mittwoch.",
+        "question": {
+          "prompt": "Wie wird es morgen Nachmittag?",
+          "answer": "Sonnig und warm",
+          "options": [
+            "Sonnig und warm",
+            "Regnerisch",
+            "Sehr kalt"
+          ],
+          "explanation": {
+            "ru": "Подтверждение: Morgen ist es morgens kühl. Am Nachmittag kommt die Sonne, und es wird 24 Grad warm. Regen gibt es erst am Mittwoch.",
+            "uk": "Підтвердження: Morgen ist es morgens kühl. Am Nachmittag kommt die Sonne, und es wird 24 Grad warm. Regen gibt es erst am Mittwoch.",
+            "de": "Beleg: Morgen ist es morgens kühl. Am Nachmittag kommt die Sonne, und es wird 24 Grad warm. Regen gibt es erst am Mittwoch."
+          }
+        }
+      },
+      {
+        "text": "Auf der Nordstraße ist ein Hund unterwegs. Fahren Sie dort vorsichtig. Die Polizei sucht den Besitzer.",
+        "question": {
+          "prompt": "Was ist auf der Straße?",
+          "answer": "Ein Hund",
+          "options": [
+            "Ein Hund",
+            "Ein Kind",
+            "Ein Fahrrad"
+          ],
+          "explanation": {
+            "ru": "Подтверждение: Auf der Nordstraße ist ein Hund unterwegs. Fahren Sie dort vorsichtig. Die Polizei sucht den Besitzer.",
+            "uk": "Підтвердження: Auf der Nordstraße ist ein Hund unterwegs. Fahren Sie dort vorsichtig. Die Polizei sucht den Besitzer.",
+            "de": "Beleg: Auf der Nordstraße ist ein Hund unterwegs. Fahren Sie dort vorsichtig. Die Polizei sucht den Besitzer."
+          }
+        }
+      },
+      {
+        "text": "Das Stadtmuseum ist diese Woche nur nachmittags geöffnet. Wegen Bauarbeiten bleiben die Türen vormittags geschlossen.",
+        "question": {
+          "prompt": "Wann ist das Museum offen?",
+          "answer": "Nachmittags",
+          "options": [
+            "Nachmittags",
+            "Vormittags",
+            "Nur nachts"
+          ],
+          "explanation": {
+            "ru": "Подтверждение: Das Stadtmuseum ist diese Woche nur nachmittags geöffnet. Wegen Bauarbeiten bleiben die Türen vormittags geschlossen.",
+            "uk": "Підтвердження: Das Stadtmuseum ist diese Woche nur nachmittags geöffnet. Wegen Bauarbeiten bleiben die Türen vormittags geschlossen.",
+            "de": "Beleg: Das Stadtmuseum ist diese Woche nur nachmittags geöffnet. Wegen Bauarbeiten bleiben die Türen vormittags geschlossen."
+          }
+        }
+      },
+      {
+        "text": "Bei unserem Gewinnspiel können Sie zwei Karten für ein Konzert gewinnen. Rufen Sie bis zwölf Uhr an. Ein Buch gibt es diesmal nicht.",
+        "question": {
+          "prompt": "Was kann man gewinnen?",
+          "answer": "Konzertkarten",
+          "options": [
+            "Konzertkarten",
+            "Ein Buch",
+            "Eine Reise"
+          ],
+          "explanation": {
+            "ru": "Подтверждение: Bei unserem Gewinnspiel können Sie zwei Karten für ein Konzert gewinnen. Rufen Sie bis zwölf Uhr an. Ein Buch gibt es diesmal nicht.",
+            "uk": "Підтвердження: Bei unserem Gewinnspiel können Sie zwei Karten für ein Konzert gewinnen. Rufen Sie bis zwölf Uhr an. Ein Buch gibt es diesmal nicht.",
+            "de": "Beleg: Bei unserem Gewinnspiel können Sie zwei Karten für ein Konzert gewinnen. Rufen Sie bis zwölf Uhr an. Ein Buch gibt es diesmal nicht."
+          }
+        }
+      }
+    ],
+    "dialog": {
+      "text": "Wo sind unsere Freunde? Anna lernt heute in der Bibliothek. Ben trinkt im Café einen Kaffee. Lina holt ihre Schwester am Bahnhof ab. Amir trainiert in der Sporthalle. Max kauft Gemüse im Supermarkt. Im Park ist heute niemand, weil es regnet. Das Kino besuchen wir erst morgen. Die Post ist schon geschlossen.",
+      "options": [
+        "a · Café",
+        "b · Supermarkt",
+        "c · Bibliothek",
+        "d · Park",
+        "e · Bahnhof",
+        "f · Kino",
+        "g · Sporthalle",
+        "h · Post"
+      ],
+      "questions": [
+        {
+          "prompt": "Wo ist Anna?",
+          "answer": "c · Bibliothek",
+          "options": [
+            "a · Café",
+            "b · Supermarkt",
+            "c · Bibliothek",
+            "d · Park",
+            "e · Bahnhof",
+            "f · Kino",
+            "g · Sporthalle",
+            "h · Post"
+          ],
+          "explanation": {
+            "ru": "Подтверждение: Wo sind unsere Freunde? Anna lernt heute in der Bibliothek.",
+            "uk": "Підтвердження: Wo sind unsere Freunde? Anna lernt heute in der Bibliothek.",
+            "de": "Beleg: Wo sind unsere Freunde? Anna lernt heute in der Bibliothek."
+          }
+        },
+        {
+          "prompt": "Wo ist Ben?",
+          "answer": "a · Café",
+          "options": [
+            "a · Café",
+            "b · Supermarkt",
+            "c · Bibliothek",
+            "d · Park",
+            "e · Bahnhof",
+            "f · Kino",
+            "g · Sporthalle",
+            "h · Post"
+          ],
+          "explanation": {
+            "ru": "Подтверждение: Ben trinkt im Café einen Kaffee.",
+            "uk": "Підтвердження: Ben trinkt im Café einen Kaffee.",
+            "de": "Beleg: Ben trinkt im Café einen Kaffee."
+          }
+        },
+        {
+          "prompt": "Wo ist Lina?",
+          "answer": "e · Bahnhof",
+          "options": [
+            "a · Café",
+            "b · Supermarkt",
+            "c · Bibliothek",
+            "d · Park",
+            "e · Bahnhof",
+            "f · Kino",
+            "g · Sporthalle",
+            "h · Post"
+          ],
+          "explanation": {
+            "ru": "Подтверждение: Lina holt ihre Schwester am Bahnhof ab.",
+            "uk": "Підтвердження: Lina holt ihre Schwester am Bahnhof ab.",
+            "de": "Beleg: Lina holt ihre Schwester am Bahnhof ab."
+          }
+        },
+        {
+          "prompt": "Wo ist Amir?",
+          "answer": "g · Sporthalle",
+          "options": [
+            "a · Café",
+            "b · Supermarkt",
+            "c · Bibliothek",
+            "d · Park",
+            "e · Bahnhof",
+            "f · Kino",
+            "g · Sporthalle",
+            "h · Post"
+          ],
+          "explanation": {
+            "ru": "Подтверждение: Amir trainiert in der Sporthalle.",
+            "uk": "Підтвердження: Amir trainiert in der Sporthalle.",
+            "de": "Beleg: Amir trainiert in der Sporthalle."
+          }
+        },
+        {
+          "prompt": "Wo ist Max?",
+          "answer": "b · Supermarkt",
+          "options": [
+            "a · Café",
+            "b · Supermarkt",
+            "c · Bibliothek",
+            "d · Park",
+            "e · Bahnhof",
+            "f · Kino",
+            "g · Sporthalle",
+            "h · Post"
+          ],
+          "explanation": {
+            "ru": "Подтверждение: Max kauft Gemüse im Supermarkt.",
+            "uk": "Підтвердження: Max kauft Gemüse im Supermarkt.",
+            "de": "Beleg: Max kauft Gemüse im Supermarkt."
+          }
+        }
+      ]
+    },
+    "directory": {
+      "text": "Einkaufszentrum Lindenhof\nErdgeschoss: Lebensmittel, Blumen, Apotheke\n1. Stock: Kleidung, Schuhe, Taschen\n2. Stock: Bücher, Schreibwaren, Spielzeug\n3. Stock: Restaurant, Toiletten, Fundbüro",
+      "questions": [
+        {
+          "prompt": "Sie möchten einen Roman kaufen.",
+          "answer": "2. Stock",
+          "options": [
+            "Erdgeschoss",
+            "1. Stock",
+            "2. Stock",
+            "3. Stock"
+          ],
+          "explanation": {
+            "ru": "В справочнике: 2. Stock: Bücher, Schreibwaren, Spielzeug",
+            "uk": "У довіднику: 2. Stock: Bücher, Schreibwaren, Spielzeug",
+            "de": "In der Übersicht: 2. Stock: Bücher, Schreibwaren, Spielzeug"
+          }
+        },
+        {
+          "prompt": "Sie haben Ihren Schlüssel verloren.",
+          "answer": "3. Stock",
+          "options": [
+            "Erdgeschoss",
+            "1. Stock",
+            "2. Stock",
+            "3. Stock"
+          ],
+          "explanation": {
+            "ru": "В справочнике: 3. Stock: Restaurant, Toiletten, Fundbüro",
+            "uk": "У довіднику: 3. Stock: Restaurant, Toiletten, Fundbüro",
+            "de": "In der Übersicht: 3. Stock: Restaurant, Toiletten, Fundbüro"
+          }
+        },
+        {
+          "prompt": "Sie brauchen neue Schuhe.",
+          "answer": "1. Stock",
+          "options": [
+            "Erdgeschoss",
+            "1. Stock",
+            "2. Stock",
+            "3. Stock"
+          ],
+          "explanation": {
+            "ru": "В справочнике: 1. Stock: Kleidung, Schuhe, Taschen",
+            "uk": "У довіднику: 1. Stock: Kleidung, Schuhe, Taschen",
+            "de": "In der Übersicht: 1. Stock: Kleidung, Schuhe, Taschen"
+          }
+        },
+        {
+          "prompt": "Sie möchten Blumen kaufen.",
+          "answer": "Erdgeschoss",
+          "options": [
+            "Erdgeschoss",
+            "1. Stock",
+            "2. Stock",
+            "3. Stock"
+          ],
+          "explanation": {
+            "ru": "В справочнике: Erdgeschoss: Lebensmittel, Blumen, Apotheke",
+            "uk": "У довіднику: Erdgeschoss: Lebensmittel, Blumen, Apotheke",
+            "de": "In der Übersicht: Erdgeschoss: Lebensmittel, Blumen, Apotheke"
+          }
+        },
+        {
+          "prompt": "Sie möchten zu Mittag essen.",
+          "answer": "3. Stock",
+          "options": [
+            "Erdgeschoss",
+            "1. Stock",
+            "2. Stock",
+            "3. Stock"
+          ],
+          "explanation": {
+            "ru": "В справочнике: 3. Stock: Restaurant, Toiletten, Fundbüro",
+            "uk": "У довіднику: 3. Stock: Restaurant, Toiletten, Fundbüro",
+            "de": "In der Übersicht: 3. Stock: Restaurant, Toiletten, Fundbüro"
+          }
+        }
+      ]
+    },
+    "article": {
+      "text": "Lina eröffnet am Samstag ein kleines Café in Leipzig. Früher hat sie in einem Hotel gearbeitet. Ihr Bruder hilft ihr am Wochenende, aber nicht täglich, weil er studiert. Das Café ist von Dienstag bis Sonntag geöffnet. Montags hat Lina frei. Am Eröffnungstag gibt es Kaffee zum halben Preis. Kuchen kostet den normalen Preis. Lina verkauft auch vegetarische Sandwiches. Sie möchte später einen Kochkurs anbieten, aber im Moment gibt es noch keinen Kurs.",
+      "questions": [
+        {
+          "prompt": "Lina eröffnet das Café am Samstag.",
+          "answer": "richtig",
+          "options": [
+            "richtig",
+            "falsch"
+          ],
+          "explanation": {
+            "ru": "Сравни утверждение с фактами текста. Правильный вариант: richtig.",
+            "uk": "Порівняй твердження з фактами тексту. Правильний варіант: richtig.",
+            "de": "Vergleiche die Aussage mit den Fakten im Text. Richtig ist: richtig."
+          }
+        },
+        {
+          "prompt": "Lina hat früher in einer Schule gearbeitet.",
+          "answer": "falsch",
+          "options": [
+            "richtig",
+            "falsch"
+          ],
+          "explanation": {
+            "ru": "Сравни утверждение с фактами текста. Правильный вариант: falsch.",
+            "uk": "Порівняй твердження з фактами тексту. Правильний варіант: falsch.",
+            "de": "Vergleiche die Aussage mit den Fakten im Text. Richtig ist: falsch."
+          }
+        },
+        {
+          "prompt": "Ihr Bruder hilft jeden Tag.",
+          "answer": "falsch",
+          "options": [
+            "richtig",
+            "falsch"
+          ],
+          "explanation": {
+            "ru": "Сравни утверждение с фактами текста. Правильный вариант: falsch.",
+            "uk": "Порівняй твердження з фактами тексту. Правильний варіант: falsch.",
+            "de": "Vergleiche die Aussage mit den Fakten im Text. Richtig ist: falsch."
+          }
+        },
+        {
+          "prompt": "Montags ist das Café geschlossen.",
+          "answer": "richtig",
+          "options": [
+            "richtig",
+            "falsch"
+          ],
+          "explanation": {
+            "ru": "Сравни утверждение с фактами текста. Правильный вариант: richtig.",
+            "uk": "Порівняй твердження з фактами тексту. Правильний варіант: richtig.",
+            "de": "Vergleiche die Aussage mit den Fakten im Text. Richtig ist: richtig."
+          }
+        },
+        {
+          "prompt": "Am Eröffnungstag ist auch Kuchen billiger.",
+          "answer": "falsch",
+          "options": [
+            "richtig",
+            "falsch"
+          ],
+          "explanation": {
+            "ru": "Сравни утверждение с фактами текста. Правильный вариант: falsch.",
+            "uk": "Порівняй твердження з фактами тексту. Правильний варіант: falsch.",
+            "de": "Vergleiche die Aussage mit den Fakten im Text. Richtig ist: falsch."
+          }
+        }
+      ]
+    },
+    "ads": {
+      "items": {
+        "a": "Abendkurs Deutsch A2: Montag und Mittwoch ab 18 Uhr. Für Erwachsene.",
+        "b": "Fahrradwerkstatt: Reparaturen werktags. Keine Vermietung.",
+        "c": "Kochkurs: Vegetarische Gerichte, Samstag 10–13 Uhr.",
+        "d": "Hotel am See: Doppelzimmer mit Frühstück, ruhige Lage.",
+        "e": "Kinder-Schwimmkurs: für Kinder ab sechs Jahren.",
+        "f": "Wohnung: zwei Zimmer, ab Juli, zentral.",
+        "g": "Sprachreise: Deutsch lernen in Hamburg mit Freizeitprogramm.",
+        "h": "Hundebetreuung: tagsüber und im Urlaub."
+      },
+      "questions": [
+        {
+          "prompt": "Sie suchen einen Deutschkurs nach der Arbeit.",
+          "answer": "a",
+          "options": [
+            "a",
+            "b",
+            "c",
+            "d",
+            "e",
+            "f",
+            "g",
+            "h",
+            "x"
+          ],
+          "explanation": {
+            "ru": "Подходящее объявление: Abendkurs Deutsch A2: Montag und Mittwoch ab 18 Uhr. Für Erwachsene.",
+            "uk": "Відповідне оголошення: Abendkurs Deutsch A2: Montag und Mittwoch ab 18 Uhr. Für Erwachsene.",
+            "de": "Passende Anzeige: Abendkurs Deutsch A2: Montag und Mittwoch ab 18 Uhr. Für Erwachsene."
+          }
+        },
+        {
+          "prompt": "Sie möchten vegetarisch kochen lernen.",
+          "answer": "c",
+          "options": [
+            "a",
+            "b",
+            "c",
+            "d",
+            "e",
+            "f",
+            "g",
+            "h",
+            "x"
+          ],
+          "explanation": {
+            "ru": "Подходящее объявление: Kochkurs: Vegetarische Gerichte, Samstag 10–13 Uhr.",
+            "uk": "Відповідне оголошення: Kochkurs: Vegetarische Gerichte, Samstag 10–13 Uhr.",
+            "de": "Passende Anzeige: Kochkurs: Vegetarische Gerichte, Samstag 10–13 Uhr."
+          }
+        },
+        {
+          "prompt": "Sie suchen eine ruhige Unterkunft mit Frühstück.",
+          "answer": "d",
+          "options": [
+            "a",
+            "b",
+            "c",
+            "d",
+            "e",
+            "f",
+            "g",
+            "h",
+            "x"
+          ],
+          "explanation": {
+            "ru": "Подходящее объявление: Hotel am See: Doppelzimmer mit Frühstück, ruhige Lage.",
+            "uk": "Відповідне оголошення: Hotel am See: Doppelzimmer mit Frühstück, ruhige Lage.",
+            "de": "Passende Anzeige: Hotel am See: Doppelzimmer mit Frühstück, ruhige Lage."
+          }
+        },
+        {
+          "prompt": "Ihr Fahrrad ist kaputt.",
+          "answer": "b",
+          "options": [
+            "a",
+            "b",
+            "c",
+            "d",
+            "e",
+            "f",
+            "g",
+            "h",
+            "x"
+          ],
+          "explanation": {
+            "ru": "Подходящее объявление: Fahrradwerkstatt: Reparaturen werktags. Keine Vermietung.",
+            "uk": "Відповідне оголошення: Fahrradwerkstatt: Reparaturen werktags. Keine Vermietung.",
+            "de": "Passende Anzeige: Fahrradwerkstatt: Reparaturen werktags. Keine Vermietung."
+          }
+        },
+        {
+          "prompt": "Sie möchten ein Auto mieten.",
+          "answer": "x",
+          "options": [
+            "a",
+            "b",
+            "c",
+            "d",
+            "e",
+            "f",
+            "g",
+            "h",
+            "x"
+          ],
+          "explanation": {
+            "ru": "Ни одно объявление не предлагает нужную услугу.",
+            "uk": "Жодне оголошення не пропонує потрібної послуги.",
+            "de": "Keine Anzeige bietet die gesuchte Leistung."
+          }
+        }
+      ]
+    },
+    "person": "Anna Wolf wohnt in Bonn. Sie ist am 12.04.1990 geboren. Sie ist verheiratet und arbeitet als Verkäuferin. Ihre Muttersprache ist Deutsch. Sie möchte sich für einen Kochkurs anmelden.",
+    "fields": [
+      {
+        "prompt": "Wohnort",
+        "answer": "Bonn",
+        "options": null,
+        "explanation": {
+          "ru": "Данные из описания человека: Bonn.",
+          "uk": "Дані з опису людини: Bonn.",
+          "de": "Angabe aus der Personenbeschreibung: Bonn."
+        }
+      },
+      {
+        "prompt": "Geburtsdatum",
+        "answer": "12.04.1990",
+        "options": null,
+        "explanation": {
+          "ru": "Данные из описания человека: 12.04.1990.",
+          "uk": "Дані з опису людини: 12.04.1990.",
+          "de": "Angabe aus der Personenbeschreibung: 12.04.1990."
+        }
+      },
+      {
+        "prompt": "Familienstand",
+        "answer": "verheiratet",
+        "options": null,
+        "explanation": {
+          "ru": "Данные из описания человека: verheiratet.",
+          "uk": "Дані з опису людини: verheiratet.",
+          "de": "Angabe aus der Personenbeschreibung: verheiratet."
+        }
+      },
+      {
+        "prompt": "Beruf",
+        "answer": "Verkäuferin",
+        "options": null,
+        "explanation": {
+          "ru": "Данные из описания человека: Verkäuferin.",
+          "uk": "Дані з опису людини: Verkäuferin.",
+          "de": "Angabe aus der Personenbeschreibung: Verkäuferin."
+        }
+      },
+      {
+        "prompt": "Muttersprache",
+        "answer": "Deutsch",
+        "options": null,
+        "explanation": {
+          "ru": "Данные из описания человека: Deutsch.",
+          "uk": "Дані з опису людини: Deutsch.",
+          "de": "Angabe aus der Personenbeschreibung: Deutsch."
+        }
+      }
+    ],
+    "letter": "Ein Freund lädt Sie zu seiner Geburtstagsfeier in einer anderen Stadt ein. Wählen Sie drei von vier Punkten: jemanden mitbringen / Geschenk / Ankunft / Übernachtung. Schreiben Sie zu jedem gewählten Punkt ein bis zwei Sätze, insgesamt circa 40 Wörter. Vergessen Sie Anrede und Gruß nicht.",
+    "model": "Lieber Max, danke für deine Einladung. Kann ich meine Freundin mitbringen? Wir kommen am Samstag gegen 18 Uhr mit dem Zug an. Kennst du ein günstiges Hotel in der Nähe? Ich freue mich auf deine Feier! Liebe Grüße, Anna",
+    "oral": [
+      "Stellen Sie sich vor: Name, Alter, Wohnort, Beruf, Sprachen, Hobby.",
+      "Führen Sie ein Alltagsgespräch zum Thema Reisen: Wie? Wohin? Wann? Mit wem?",
+      "Planen Sie mit Ihrem Partner eine Geburtstagsfeier: Tag, Ort, Essen und Gäste."
+    ]
+  },
+  {
+    "id": 2,
+    "notes": [
+      {
+        "text": "Hallo, hier ist die Sprachschule. Ihr Kurs beginnt morgen in Raum sieben. Raum fünf ist wegen einer Reparatur geschlossen. Bitte kommen Sie fünf Minuten früher.",
+        "question": {
+          "prompt": "Neuer Raum: ___",
+          "answer": "7",
+          "options": null,
+          "explanation": {
+            "ru": "Подтверждение: Hallo, hier ist die Sprachschule. Ihr Kurs beginnt morgen in Raum sieben. Raum fünf ist wegen einer Reparatur geschlossen. Bitte kommen Sie fünf Minuten früher.",
+            "uk": "Підтвердження: Hallo, hier ist die Sprachschule. Ihr Kurs beginnt morgen in Raum sieben. Raum fünf ist wegen einer Reparatur geschlossen. Bitte kommen Sie fünf Minuten früher.",
+            "de": "Beleg: Hallo, hier ist die Sprachschule. Ihr Kurs beginnt morgen in Raum sieben. Raum fünf ist wegen einer Reparatur geschlossen. Bitte kommen Sie fünf Minuten früher."
+          }
+        }
+      },
+      {
+        "text": "Hallo Ben, das Konzert beginnt um halb acht, also um 19:30 Uhr. Treffen wir uns eine halbe Stunde vorher am Eingang?",
+        "question": {
+          "prompt": "Konzertbeginn: ___",
+          "answer": "19:30",
+          "options": null,
+          "explanation": {
+            "ru": "Подтверждение: Hallo Ben, das Konzert beginnt um halb acht, also um 19:30 Uhr. Treffen wir uns eine halbe Stunde vorher am Eingang?",
+            "uk": "Підтвердження: Hallo Ben, das Konzert beginnt um halb acht, also um 19:30 Uhr. Treffen wir uns eine halbe Stunde vorher am Eingang?",
+            "de": "Beleg: Hallo Ben, das Konzert beginnt um halb acht, also um 19:30 Uhr. Treffen wir uns eine halbe Stunde vorher am Eingang?"
+          }
+        }
+      },
+      {
+        "text": "Guten Tag, Ihr Paket ist angekommen. Sie können es bis Freitag abholen. Danach geht es zurück. Bringen Sie bitte Ihren Ausweis mit.",
+        "question": {
+          "prompt": "Abholung bis: ___",
+          "answer": "Freitag",
+          "options": null,
+          "explanation": {
+            "ru": "Подтверждение: Guten Tag, Ihr Paket ist angekommen. Sie können es bis Freitag abholen. Danach geht es zurück. Bringen Sie bitte Ihren Ausweis mit.",
+            "uk": "Підтвердження: Guten Tag, Ihr Paket ist angekommen. Sie können es bis Freitag abholen. Danach geht es zurück. Bringen Sie bitte Ihren Ausweis mit.",
+            "de": "Beleg: Guten Tag, Ihr Paket ist angekommen. Sie können es bis Freitag abholen. Danach geht es zurück. Bringen Sie bitte Ihren Ausweis mit."
+          }
+        }
+      },
+      {
+        "text": "Hier ist der Sportverein. Der Monatsbeitrag beträgt jetzt 32 Euro. Für Kinder bleibt er bei 18 Euro. Ihre Mitgliedschaft ist für Erwachsene.",
+        "question": {
+          "prompt": "Beitrag für Erwachsene: ___ Euro",
+          "answer": "32",
+          "options": null,
+          "explanation": {
+            "ru": "Подтверждение: Hier ist der Sportverein. Der Monatsbeitrag beträgt jetzt 32 Euro. Für Kinder bleibt er bei 18 Euro. Ihre Mitgliedschaft ist für Erwachsene.",
+            "uk": "Підтвердження: Hier ist der Sportverein. Der Monatsbeitrag beträgt jetzt 32 Euro. Für Kinder bleibt er bei 18 Euro. Ihre Mitgliedschaft ist für Erwachsene.",
+            "de": "Beleg: Hier ist der Sportverein. Der Monatsbeitrag beträgt jetzt 32 Euro. Für Kinder bleibt er bei 18 Euro. Ihre Mitgliedschaft ist für Erwachsene."
+          }
+        }
+      },
+      {
+        "text": "Hallo Sara, unser Treffpunkt ist heute vor der Post. Die Bushaltestelle ist zu voll. Ich warte dort um drei Uhr auf dich.",
+        "question": {
+          "prompt": "Treffpunkt vor der: ___",
+          "answer": "Post",
+          "options": null,
+          "explanation": {
+            "ru": "Подтверждение: Hallo Sara, unser Treffpunkt ist heute vor der Post. Die Bushaltestelle ist zu voll. Ich warte dort um drei Uhr auf dich.",
+            "uk": "Підтвердження: Hallo Sara, unser Treffpunkt ist heute vor der Post. Die Bushaltestelle ist zu voll. Ich warte dort um drei Uhr auf dich.",
+            "de": "Beleg: Hallo Sara, unser Treffpunkt ist heute vor der Post. Die Bushaltestelle ist zu voll. Ich warte dort um drei Uhr auf dich."
+          }
+        }
+      }
+    ],
+    "radio": [
+      {
+        "text": "Am Samstag öffnet unser Stadtbad schon um acht Uhr. Sonntags bleibt es wegen Wartungsarbeiten geschlossen.",
+        "question": {
+          "prompt": "Wann ist das Stadtbad geschlossen?",
+          "answer": "Sonntag",
+          "options": [
+            "Sonntag",
+            "Samstag",
+            "Montag"
+          ],
+          "explanation": {
+            "ru": "Подтверждение: Am Samstag öffnet unser Stadtbad schon um acht Uhr. Sonntags bleibt es wegen Wartungsarbeiten geschlossen.",
+            "uk": "Підтвердження: Am Samstag öffnet unser Stadtbad schon um acht Uhr. Sonntags bleibt es wegen Wartungsarbeiten geschlossen.",
+            "de": "Beleg: Am Samstag öffnet unser Stadtbad schon um acht Uhr. Sonntags bleibt es wegen Wartungsarbeiten geschlossen."
+          }
+        }
+      },
+      {
+        "text": "Heute Abend gibt es ein kostenloses Konzert im Park. Bei Regen findet das Konzert in der Sporthalle statt.",
+        "question": {
+          "prompt": "Wo ist das Konzert bei Regen?",
+          "answer": "In der Sporthalle",
+          "options": [
+            "In der Sporthalle",
+            "Im Park",
+            "Im Museum"
+          ],
+          "explanation": {
+            "ru": "Подтверждение: Heute Abend gibt es ein kostenloses Konzert im Park. Bei Regen findet das Konzert in der Sporthalle statt.",
+            "uk": "Підтвердження: Heute Abend gibt es ein kostenloses Konzert im Park. Bei Regen findet das Konzert in der Sporthalle statt.",
+            "de": "Beleg: Heute Abend gibt es ein kostenloses Konzert im Park. Bei Regen findet das Konzert in der Sporthalle statt."
+          }
+        }
+      },
+      {
+        "text": "Auf der Autobahn Richtung Süd gibt es einen Unfall. Richtung Nord ist die Straße frei. Fahren Sie bitte vorsichtig.",
+        "question": {
+          "prompt": "Welche Richtung ist betroffen?",
+          "answer": "Süd",
+          "options": [
+            "Süd",
+            "Nord",
+            "Beide"
+          ],
+          "explanation": {
+            "ru": "Подтверждение: Auf der Autobahn Richtung Süd gibt es einen Unfall. Richtung Nord ist die Straße frei. Fahren Sie bitte vorsichtig.",
+            "uk": "Підтвердження: Auf der Autobahn Richtung Süd gibt es einen Unfall. Richtung Nord ist die Straße frei. Fahren Sie bitte vorsichtig.",
+            "de": "Beleg: Auf der Autobahn Richtung Süd gibt es einen Unfall. Richtung Nord ist die Straße frei. Fahren Sie bitte vorsichtig."
+          }
+        }
+      },
+      {
+        "text": "Unsere nächste Sendung ist ein Gespräch mit einer Ärztin. Sie gibt Tipps zu gesundem Schlaf. Musik hören Sie danach.",
+        "question": {
+          "prompt": "Worum geht es in der nächsten Sendung?",
+          "answer": "Gesunden Schlaf",
+          "options": [
+            "Gesunden Schlaf",
+            "Neue Musik",
+            "Reisen"
+          ],
+          "explanation": {
+            "ru": "Подтверждение: Unsere nächste Sendung ist ein Gespräch mit einer Ärztin. Sie gibt Tipps zu gesundem Schlaf. Musik hören Sie danach.",
+            "uk": "Підтвердження: Unsere nächste Sendung ist ein Gespräch mit einer Ärztin. Sie gibt Tipps zu gesundem Schlaf. Musik hören Sie danach.",
+            "de": "Beleg: Unsere nächste Sendung ist ein Gespräch mit einer Ärztin. Sie gibt Tipps zu gesundem Schlaf. Musik hören Sie danach."
+          }
+        }
+      },
+      {
+        "text": "Der Wochenmarkt zieht diese Woche auf den Schulplatz um. Auf dem Marktplatz gibt es Bauarbeiten.",
+        "question": {
+          "prompt": "Wo ist der Wochenmarkt diese Woche?",
+          "answer": "Auf dem Schulplatz",
+          "options": [
+            "Auf dem Schulplatz",
+            "Am Bahnhof",
+            "Auf dem Marktplatz"
+          ],
+          "explanation": {
+            "ru": "Подтверждение: Der Wochenmarkt zieht diese Woche auf den Schulplatz um. Auf dem Marktplatz gibt es Bauarbeiten.",
+            "uk": "Підтвердження: Der Wochenmarkt zieht diese Woche auf den Schulplatz um. Auf dem Marktplatz gibt es Bauarbeiten.",
+            "de": "Beleg: Der Wochenmarkt zieht diese Woche auf den Schulplatz um. Auf dem Marktplatz gibt es Bauarbeiten."
+          }
+        }
+      }
+    ],
+    "dialog": {
+      "text": "Für die Feier bringt Anna Brot mit. Ben kauft die Getränke, Wasser und Saft. Lina bringt Obst, Äpfel und Bananen. Amir macht einen Salat. Max backt einen Kuchen. Käse, Suppe und Eis müssen wir noch selbst kaufen. Jeder bringt nur eine Sache mit.",
+      "options": [
+        "a · Getränke",
+        "b · Salat",
+        "c · Suppe",
+        "d · Brot",
+        "e · Käse",
+        "f · Obst",
+        "g · Eis",
+        "h · Kuchen"
+      ],
+      "questions": [
+        {
+          "prompt": "Was bringt Anna mit?",
+          "answer": "d · Brot",
+          "options": [
+            "a · Getränke",
+            "b · Salat",
+            "c · Suppe",
+            "d · Brot",
+            "e · Käse",
+            "f · Obst",
+            "g · Eis",
+            "h · Kuchen"
+          ],
+          "explanation": {
+            "ru": "Подтверждение: Für die Feier bringt Anna Brot mit.",
+            "uk": "Підтвердження: Für die Feier bringt Anna Brot mit.",
+            "de": "Beleg: Für die Feier bringt Anna Brot mit."
+          }
+        },
+        {
+          "prompt": "Was bringt Ben mit?",
+          "answer": "a · Getränke",
+          "options": [
+            "a · Getränke",
+            "b · Salat",
+            "c · Suppe",
+            "d · Brot",
+            "e · Käse",
+            "f · Obst",
+            "g · Eis",
+            "h · Kuchen"
+          ],
+          "explanation": {
+            "ru": "Подтверждение: Für die Feier bringt Anna Brot mit.",
+            "uk": "Підтвердження: Für die Feier bringt Anna Brot mit.",
+            "de": "Beleg: Für die Feier bringt Anna Brot mit."
+          }
+        },
+        {
+          "prompt": "Was bringt Lina mit?",
+          "answer": "f · Obst",
+          "options": [
+            "a · Getränke",
+            "b · Salat",
+            "c · Suppe",
+            "d · Brot",
+            "e · Käse",
+            "f · Obst",
+            "g · Eis",
+            "h · Kuchen"
+          ],
+          "explanation": {
+            "ru": "Подтверждение: Für die Feier bringt Anna Brot mit.",
+            "uk": "Підтвердження: Für die Feier bringt Anna Brot mit.",
+            "de": "Beleg: Für die Feier bringt Anna Brot mit."
+          }
+        },
+        {
+          "prompt": "Was bringt Amir mit?",
+          "answer": "b · Salat",
+          "options": [
+            "a · Getränke",
+            "b · Salat",
+            "c · Suppe",
+            "d · Brot",
+            "e · Käse",
+            "f · Obst",
+            "g · Eis",
+            "h · Kuchen"
+          ],
+          "explanation": {
+            "ru": "Подтверждение: Für die Feier bringt Anna Brot mit.",
+            "uk": "Підтвердження: Für die Feier bringt Anna Brot mit.",
+            "de": "Beleg: Für die Feier bringt Anna Brot mit."
+          }
+        },
+        {
+          "prompt": "Was bringt Max mit?",
+          "answer": "h · Kuchen",
+          "options": [
+            "a · Getränke",
+            "b · Salat",
+            "c · Suppe",
+            "d · Brot",
+            "e · Käse",
+            "f · Obst",
+            "g · Eis",
+            "h · Kuchen"
+          ],
+          "explanation": {
+            "ru": "Подтверждение: Für die Feier bringt Anna Brot mit.",
+            "uk": "Підтвердження: Für die Feier bringt Anna Brot mit.",
+            "de": "Beleg: Für die Feier bringt Anna Brot mit."
+          }
+        }
+      ]
+    },
+    "directory": {
+      "text": "Sprachzentrum West\nErdgeschoss: Empfang, Anmeldung, Café\n1. Stock: Computerräume, Beratung\n2. Stock: Bibliothek, Leseraum\n3. Stock: Unterrichtsräume, Lehrerzimmer",
+      "questions": [
+        {
+          "prompt": "Sie möchten sich für einen Kurs anmelden.",
+          "answer": "Erdgeschoss",
+          "options": [
+            "Erdgeschoss",
+            "1. Stock",
+            "2. Stock",
+            "3. Stock"
+          ],
+          "explanation": {
+            "ru": "В справочнике: Erdgeschoss: Empfang, Anmeldung, Café",
+            "uk": "У довіднику: Erdgeschoss: Empfang, Anmeldung, Café",
+            "de": "In der Übersicht: Erdgeschoss: Empfang, Anmeldung, Café"
+          }
+        },
+        {
+          "prompt": "Sie möchten am Computer üben.",
+          "answer": "1. Stock",
+          "options": [
+            "Erdgeschoss",
+            "1. Stock",
+            "2. Stock",
+            "3. Stock"
+          ],
+          "explanation": {
+            "ru": "В справочнике: 1. Stock: Computerräume, Beratung",
+            "uk": "У довіднику: 1. Stock: Computerräume, Beratung",
+            "de": "In der Übersicht: 1. Stock: Computerräume, Beratung"
+          }
+        },
+        {
+          "prompt": "Sie suchen ein Buch.",
+          "answer": "2. Stock",
+          "options": [
+            "Erdgeschoss",
+            "1. Stock",
+            "2. Stock",
+            "3. Stock"
+          ],
+          "explanation": {
+            "ru": "В справочнике: 2. Stock: Bibliothek, Leseraum",
+            "uk": "У довіднику: 2. Stock: Bibliothek, Leseraum",
+            "de": "In der Übersicht: 2. Stock: Bibliothek, Leseraum"
+          }
+        },
+        {
+          "prompt": "Sie haben Unterricht.",
+          "answer": "3. Stock",
+          "options": [
+            "Erdgeschoss",
+            "1. Stock",
+            "2. Stock",
+            "3. Stock"
+          ],
+          "explanation": {
+            "ru": "В справочнике: 3. Stock: Unterrichtsräume, Lehrerzimmer",
+            "uk": "У довіднику: 3. Stock: Unterrichtsräume, Lehrerzimmer",
+            "de": "In der Übersicht: 3. Stock: Unterrichtsräume, Lehrerzimmer"
+          }
+        },
+        {
+          "prompt": "Sie möchten eine Beratung.",
+          "answer": "1. Stock",
+          "options": [
+            "Erdgeschoss",
+            "1. Stock",
+            "2. Stock",
+            "3. Stock"
+          ],
+          "explanation": {
+            "ru": "В справочнике: 1. Stock: Computerräume, Beratung",
+            "uk": "У довіднику: 1. Stock: Computerräume, Beratung",
+            "de": "In der Übersicht: 1. Stock: Computerräume, Beratung"
+          }
+        }
+      ]
+    },
+    "article": {
+      "text": "Amir lebt seit einem Jahr in Köln. Er arbeitet vormittags in einem Supermarkt. Zweimal pro Woche besucht er einen Abendkurs. Früher hat er in Ankara als Koch gearbeitet. In Köln wohnt er allein in einer kleinen Wohnung. Seine Schwester besucht ihn im August für zwei Wochen. Amir möchte nächstes Jahr eine Ausbildung beginnen. Für die Ausbildung braucht er bessere Deutschkenntnisse. Am Wochenende fährt er oft Fahrrad. Ein Auto hat er nicht.",
+      "questions": [
+        {
+          "prompt": "Amir wohnt seit einem Jahr in Köln.",
+          "answer": "richtig",
+          "options": [
+            "richtig",
+            "falsch"
+          ],
+          "explanation": {
+            "ru": "Сравни утверждение с фактами текста. Правильный вариант: richtig.",
+            "uk": "Порівняй твердження з фактами тексту. Правильний варіант: richtig.",
+            "de": "Vergleiche die Aussage mit den Fakten im Text. Richtig ist: richtig."
+          }
+        },
+        {
+          "prompt": "Er arbeitet abends im Supermarkt.",
+          "answer": "falsch",
+          "options": [
+            "richtig",
+            "falsch"
+          ],
+          "explanation": {
+            "ru": "Сравни утверждение с фактами текста. Правильный вариант: falsch.",
+            "uk": "Порівняй твердження з фактами тексту. Правильний варіант: falsch.",
+            "de": "Vergleiche die Aussage mit den Fakten im Text. Richtig ist: falsch."
+          }
+        },
+        {
+          "prompt": "Früher war er Koch.",
+          "answer": "richtig",
+          "options": [
+            "richtig",
+            "falsch"
+          ],
+          "explanation": {
+            "ru": "Сравни утверждение с фактами текста. Правильный вариант: richtig.",
+            "uk": "Порівняй твердження з фактами тексту. Правильний варіант: richtig.",
+            "de": "Vergleiche die Aussage mit den Fakten im Text. Richtig ist: richtig."
+          }
+        },
+        {
+          "prompt": "Seine Schwester wohnt mit ihm.",
+          "answer": "falsch",
+          "options": [
+            "richtig",
+            "falsch"
+          ],
+          "explanation": {
+            "ru": "Сравни утверждение с фактами текста. Правильный вариант: falsch.",
+            "uk": "Порівняй твердження з фактами тексту. Правильний варіант: falsch.",
+            "de": "Vergleiche die Aussage mit den Fakten im Text. Richtig ist: falsch."
+          }
+        },
+        {
+          "prompt": "Er fährt am Wochenende oft Fahrrad.",
+          "answer": "richtig",
+          "options": [
+            "richtig",
+            "falsch"
+          ],
+          "explanation": {
+            "ru": "Сравни утверждение с фактами текста. Правильный вариант: richtig.",
+            "uk": "Порівняй твердження з фактами тексту. Правильний варіант: richtig.",
+            "de": "Vergleiche die Aussage mit den Fakten im Text. Richtig ist: richtig."
+          }
+        }
+      ]
+    },
+    "ads": {
+      "items": {
+        "a": "Job im Café: Arbeitszeit vormittags, Erfahrung nicht nötig.",
+        "b": "Wohnung zu vermieten: vier Zimmer, für Familien.",
+        "c": "Computerkurs für Erwachsene: Freitagabend.",
+        "d": "Sprachberatung: Hilfe bei der Wahl des richtigen Deutschkurses.",
+        "e": "Sport für Senioren: leichte Übungen am Vormittag.",
+        "f": "Stadtführung: Samstag, Treffpunkt am Rathaus.",
+        "g": "Hotelzimmer: nur Einzelzimmer verfügbar.",
+        "h": "Nachhilfe: Mathematik für Schüler."
+      },
+      "questions": [
+        {
+          "prompt": "Sie möchten einen passenden Deutschkurs finden.",
+          "answer": "d",
+          "options": [
+            "a",
+            "b",
+            "c",
+            "d",
+            "e",
+            "f",
+            "g",
+            "h",
+            "x"
+          ],
+          "explanation": {
+            "ru": "Подходящее объявление: Sprachberatung: Hilfe bei der Wahl des richtigen Deutschkurses.",
+            "uk": "Відповідне оголошення: Sprachberatung: Hilfe bei der Wahl des richtigen Deutschkurses.",
+            "de": "Passende Anzeige: Sprachberatung: Hilfe bei der Wahl des richtigen Deutschkurses."
+          }
+        },
+        {
+          "prompt": "Sie suchen Arbeit am Vormittag.",
+          "answer": "a",
+          "options": [
+            "a",
+            "b",
+            "c",
+            "d",
+            "e",
+            "f",
+            "g",
+            "h",
+            "x"
+          ],
+          "explanation": {
+            "ru": "Подходящее объявление: Job im Café: Arbeitszeit vormittags, Erfahrung nicht nötig.",
+            "uk": "Відповідне оголошення: Job im Café: Arbeitszeit vormittags, Erfahrung nicht nötig.",
+            "de": "Passende Anzeige: Job im Café: Arbeitszeit vormittags, Erfahrung nicht nötig."
+          }
+        },
+        {
+          "prompt": "Sie möchten die Stadt kennenlernen.",
+          "answer": "f",
+          "options": [
+            "a",
+            "b",
+            "c",
+            "d",
+            "e",
+            "f",
+            "g",
+            "h",
+            "x"
+          ],
+          "explanation": {
+            "ru": "Подходящее объявление: Stadtführung: Samstag, Treffpunkt am Rathaus.",
+            "uk": "Відповідне оголошення: Stadtführung: Samstag, Treffpunkt am Rathaus.",
+            "de": "Passende Anzeige: Stadtführung: Samstag, Treffpunkt am Rathaus."
+          }
+        },
+        {
+          "prompt": "Sie möchten besser mit dem Computer arbeiten.",
+          "answer": "c",
+          "options": [
+            "a",
+            "b",
+            "c",
+            "d",
+            "e",
+            "f",
+            "g",
+            "h",
+            "x"
+          ],
+          "explanation": {
+            "ru": "Подходящее объявление: Computerkurs für Erwachsene: Freitagabend.",
+            "uk": "Відповідне оголошення: Computerkurs für Erwachsene: Freitagabend.",
+            "de": "Passende Anzeige: Computerkurs für Erwachsene: Freitagabend."
+          }
+        },
+        {
+          "prompt": "Sie suchen einen Kochkurs für Kinder.",
+          "answer": "x",
+          "options": [
+            "a",
+            "b",
+            "c",
+            "d",
+            "e",
+            "f",
+            "g",
+            "h",
+            "x"
+          ],
+          "explanation": {
+            "ru": "Ни одно объявление не предлагает нужную услугу.",
+            "uk": "Жодне оголошення не пропонує потрібної послуги.",
+            "de": "Keine Anzeige bietet die gesuchte Leistung."
+          }
+        }
+      ]
+    },
+    "person": "Amir Kaya wohnt in Köln in der Gartenstraße 8. Er ist am 03.09.1988 in Ankara geboren. Er ist ledig und arbeitet als Verkäufer. Er spricht Türkisch und Englisch. Für die Kursanmeldung fehlen diese fünf Angaben.",
+    "fields": [
+      {
+        "prompt": "Straße und Hausnummer",
+        "answer": "Gartenstraße 8",
+        "options": null,
+        "explanation": {
+          "ru": "Данные из описания человека: Gartenstraße 8.",
+          "uk": "Дані з опису людини: Gartenstraße 8.",
+          "de": "Angabe aus der Personenbeschreibung: Gartenstraße 8."
+        }
+      },
+      {
+        "prompt": "Geburtsdatum",
+        "answer": "03.09.1988",
+        "options": null,
+        "explanation": {
+          "ru": "Данные из описания человека: 03.09.1988.",
+          "uk": "Дані з опису людини: 03.09.1988.",
+          "de": "Angabe aus der Personenbeschreibung: 03.09.1988."
+        }
+      },
+      {
+        "prompt": "Geburtsort",
+        "answer": "Ankara",
+        "options": null,
+        "explanation": {
+          "ru": "Данные из описания человека: Ankara.",
+          "uk": "Дані з опису людини: Ankara.",
+          "de": "Angabe aus der Personenbeschreibung: Ankara."
+        }
+      },
+      {
+        "prompt": "Familienstand",
+        "answer": "ledig",
+        "options": null,
+        "explanation": {
+          "ru": "Данные из описания человека: ledig.",
+          "uk": "Дані з опису людини: ledig.",
+          "de": "Angabe aus der Personenbeschreibung: ledig."
+        }
+      },
+      {
+        "prompt": "Beruf",
+        "answer": "Verkäufer",
+        "options": null,
+        "explanation": {
+          "ru": "Данные из описания человека: Verkäufer.",
+          "uk": "Дані з опису людини: Verkäufer.",
+          "de": "Angabe aus der Personenbeschreibung: Verkäufer."
+        }
+      }
+    ],
+    "letter": "Sie haben einen neuen Deutschkurs begonnen. Schreiben Sie Ihrer Freundin. Wählen Sie drei von vier Punkten: Kurszeiten / Lehrerin / Weg zum Kurs / gemeinsames Lernen. Schreiben Sie circa 40 Wörter mit Anrede und Gruß.",
+    "model": "Liebe Lina, mein neuer Kurs ist montags und mittwochs um 18 Uhr. Die Lehrerin ist freundlich und erklärt alles langsam. Möchtest du am Freitag mit mir lernen? Ich habe ab 17 Uhr Zeit. Wir können zusammen die neuen Wörter wiederholen. Liebe Grüße, Amir",
+    "oral": [
+      "Stellen Sie sich vor und beantworten Sie eine Rückfrage zum Beruf.",
+      "Führen Sie ein Alltagsgespräch zum Thema Lernen: Was? Wann? Wie oft? Warum?",
+      "Planen Sie gemeinsam einen Lerntag: Ort, Zeit, Aufgaben und Pause."
+    ]
+  },
+  {
+    "id": 3,
+    "notes": [
+      {
+        "text": "Hallo, hier ist der Reparaturservice. Unser Techniker kommt am Dienstag zwischen neun und elf Uhr. Am Montag ist leider kein Termin frei.",
+        "question": {
+          "prompt": "Tag des Besuchs: ___",
+          "answer": "Dienstag",
+          "options": null,
+          "explanation": {
+            "ru": "Подтверждение: Hallo, hier ist der Reparaturservice. Unser Techniker kommt am Dienstag zwischen neun und elf Uhr. Am Montag ist leider kein Termin frei.",
+            "uk": "Підтвердження: Hallo, hier ist der Reparaturservice. Unser Techniker kommt am Dienstag zwischen neun und elf Uhr. Am Montag ist leider kein Termin frei.",
+            "de": "Beleg: Hallo, hier ist der Reparaturservice. Unser Techniker kommt am Dienstag zwischen neun und elf Uhr. Am Montag ist leider kein Termin frei."
+          }
+        }
+      },
+      {
+        "text": "Guten Tag, Ihre Jacke ist gereinigt. Die Reinigung kostet zwölf Euro. Sie können sie heute bis 18 Uhr abholen.",
+        "question": {
+          "prompt": "Preis: ___ Euro",
+          "answer": "12",
+          "options": null,
+          "explanation": {
+            "ru": "Подтверждение: Guten Tag, Ihre Jacke ist gereinigt. Die Reinigung kostet zwölf Euro. Sie können sie heute bis 18 Uhr abholen.",
+            "uk": "Підтвердження: Guten Tag, Ihre Jacke ist gereinigt. Die Reinigung kostet zwölf Euro. Sie können sie heute bis 18 Uhr abholen.",
+            "de": "Beleg: Guten Tag, Ihre Jacke ist gereinigt. Die Reinigung kostet zwölf Euro. Sie können sie heute bis 18 Uhr abholen."
+          }
+        }
+      },
+      {
+        "text": "Hallo Anna, bitte bring Wasser zur Wanderung mit. Es gibt unterwegs kein Geschäft. Ich nehme Brot und Obst mit.",
+        "question": {
+          "prompt": "Anna soll mitbringen: ___",
+          "answer": "Wasser",
+          "options": null,
+          "explanation": {
+            "ru": "Подтверждение: Hallo Anna, bitte bring Wasser zur Wanderung mit. Es gibt unterwegs kein Geschäft. Ich nehme Brot und Obst mit.",
+            "uk": "Підтвердження: Hallo Anna, bitte bring Wasser zur Wanderung mit. Es gibt unterwegs kein Geschäft. Ich nehme Brot und Obst mit.",
+            "de": "Beleg: Hallo Anna, bitte bring Wasser zur Wanderung mit. Es gibt unterwegs kein Geschäft. Ich nehme Brot und Obst mit."
+          }
+        }
+      },
+      {
+        "text": "Hier ist das Hotel. Die Zimmer sind ab 15 Uhr frei. Wenn Sie früher kommen, können Sie Ihr Gepäck bei uns lassen.",
+        "question": {
+          "prompt": "Zimmer frei ab: ___ Uhr",
+          "answer": "15",
+          "options": null,
+          "explanation": {
+            "ru": "Подтверждение: Hier ist das Hotel. Die Zimmer sind ab 15 Uhr frei. Wenn Sie früher kommen, können Sie Ihr Gepäck bei uns lassen.",
+            "uk": "Підтвердження: Hier ist das Hotel. Die Zimmer sind ab 15 Uhr frei. Wenn Sie früher kommen, können Sie Ihr Gepäck bei uns lassen.",
+            "de": "Beleg: Hier ist das Hotel. Die Zimmer sind ab 15 Uhr frei. Wenn Sie früher kommen, können Sie Ihr Gepäck bei uns lassen."
+          }
+        }
+      },
+      {
+        "text": "Hallo Max, mein Zug kommt heute von Gleis acht. Nicht von Gleis sechs wie sonst. Warte bitte am Haupteingang.",
+        "question": {
+          "prompt": "Gleis: ___",
+          "answer": "8",
+          "options": null,
+          "explanation": {
+            "ru": "Подтверждение: Hallo Max, mein Zug kommt heute von Gleis acht. Nicht von Gleis sechs wie sonst. Warte bitte am Haupteingang.",
+            "uk": "Підтвердження: Hallo Max, mein Zug kommt heute von Gleis acht. Nicht von Gleis sechs wie sonst. Warte bitte am Haupteingang.",
+            "de": "Beleg: Hallo Max, mein Zug kommt heute von Gleis acht. Nicht von Gleis sechs wie sonst. Warte bitte am Haupteingang."
+          }
+        }
+      }
+    ],
+    "radio": [
+      {
+        "text": "Die Ausstellung ist bis Ende Juni geöffnet. Für Kinder unter zwölf Jahren ist der Eintritt kostenlos. Erwachsene zahlen acht Euro.",
+        "question": {
+          "prompt": "Wer hat kostenlosen Eintritt?",
+          "answer": "Kinder unter zwölf",
+          "options": [
+            "Kinder unter zwölf",
+            "Alle Kinder und Erwachsenen",
+            "Nur Erwachsene"
+          ],
+          "explanation": {
+            "ru": "Подтверждение: Die Ausstellung ist bis Ende Juni geöffnet. Für Kinder unter zwölf Jahren ist der Eintritt kostenlos. Erwachsene zahlen acht Euro.",
+            "uk": "Підтвердження: Die Ausstellung ist bis Ende Juni geöffnet. Für Kinder unter zwölf Jahren ist der Eintritt kostenlos. Erwachsene zahlen acht Euro.",
+            "de": "Beleg: Die Ausstellung ist bis Ende Juni geöffnet. Für Kinder unter zwölf Jahren ist der Eintritt kostenlos. Erwachsene zahlen acht Euro."
+          }
+        }
+      },
+      {
+        "text": "Morgen gibt es am Vormittag starken Regen. Ab 14 Uhr bleibt es trocken, und die Sonne kommt zurück.",
+        "question": {
+          "prompt": "Wann wird es trocken?",
+          "answer": "Ab 14 Uhr",
+          "options": [
+            "Ab 14 Uhr",
+            "Am frühen Morgen",
+            "Erst nachts"
+          ],
+          "explanation": {
+            "ru": "Подтверждение: Morgen gibt es am Vormittag starken Regen. Ab 14 Uhr bleibt es trocken, und die Sonne kommt zurück.",
+            "uk": "Підтвердження: Morgen gibt es am Vormittag starken Regen. Ab 14 Uhr bleibt es trocken, und die Sonne kommt zurück.",
+            "de": "Beleg: Morgen gibt es am Vormittag starken Regen. Ab 14 Uhr bleibt es trocken, und die Sonne kommt zurück."
+          }
+        }
+      },
+      {
+        "text": "Die Buslinie neun fährt heute über die Parkstraße. Die Haltestelle am Rathaus wird nicht bedient.",
+        "question": {
+          "prompt": "Wo hält der Bus heute nicht?",
+          "answer": "Am Rathaus",
+          "options": [
+            "Am Rathaus",
+            "In der Parkstraße",
+            "Am Bahnhof laut Text"
+          ],
+          "explanation": {
+            "ru": "Подтверждение: Die Buslinie neun fährt heute über die Parkstraße. Die Haltestelle am Rathaus wird nicht bedient.",
+            "uk": "Підтвердження: Die Buslinie neun fährt heute über die Parkstraße. Die Haltestelle am Rathaus wird nicht bedient.",
+            "de": "Beleg: Die Buslinie neun fährt heute über die Parkstraße. Die Haltestelle am Rathaus wird nicht bedient."
+          }
+        }
+      },
+      {
+        "text": "Im Stadtpark findet am Sonntag ein Familienfest statt. Es gibt Spiele für Kinder und Musik. Der Eintritt ist kostenlos.",
+        "question": {
+          "prompt": "Was gibt es am Sonntag?",
+          "answer": "Ein Familienfest",
+          "options": [
+            "Ein Familienfest",
+            "Einen Sprachtest",
+            "Einen Flohmarkt"
+          ],
+          "explanation": {
+            "ru": "Подтверждение: Im Stadtpark findet am Sonntag ein Familienfest statt. Es gibt Spiele für Kinder und Musik. Der Eintritt ist kostenlos.",
+            "uk": "Підтвердження: Im Stadtpark findet am Sonntag ein Familienfest statt. Es gibt Spiele für Kinder und Musik. Der Eintritt ist kostenlos.",
+            "de": "Beleg: Im Stadtpark findet am Sonntag ein Familienfest statt. Es gibt Spiele für Kinder und Musik. Der Eintritt ist kostenlos."
+          }
+        }
+      },
+      {
+        "text": "Unsere Bibliothek öffnet ab nächster Woche auch samstags, von zehn bis vierzehn Uhr. Sonntags bleibt sie geschlossen.",
+        "question": {
+          "prompt": "Was ändert sich?",
+          "answer": "Die Bibliothek öffnet samstags.",
+          "options": [
+            "Die Bibliothek öffnet samstags.",
+            "Die Bibliothek öffnet sonntags.",
+            "Die Bibliothek schließt für eine Woche."
+          ],
+          "explanation": {
+            "ru": "Подтверждение: Unsere Bibliothek öffnet ab nächster Woche auch samstags, von zehn bis vierzehn Uhr. Sonntags bleibt sie geschlossen.",
+            "uk": "Підтвердження: Unsere Bibliothek öffnet ab nächster Woche auch samstags, von zehn bis vierzehn Uhr. Sonntags bleibt sie geschlossen.",
+            "de": "Beleg: Unsere Bibliothek öffnet ab nächster Woche auch samstags, von zehn bis vierzehn Uhr. Sonntags bleibt sie geschlossen."
+          }
+        }
+      }
+    ],
+    "dialog": {
+      "text": "Wir besprechen den Arbeitsplan. Anna arbeitet am Montagvormittag. Ben übernimmt den Dienstagnachmittag. Lina kommt am Mittwochvormittag. Amir arbeitet am Donnerstagabend. Max übernimmt den Freitagvormittag. Montagabend, Mittwochabend und Samstagvormittag sind noch frei. Die freien Termine klären wir nächste Woche.",
+      "options": [
+        "a · Mittwochvormittag",
+        "b · Montagvormittag",
+        "c · Montagabend",
+        "d · Freitagvormittag",
+        "e · Dienstagnachmittag",
+        "f · Mittwochabend",
+        "g · Donnerstagabend",
+        "h · Samstagvormittag"
+      ],
+      "questions": [
+        {
+          "prompt": "Wann arbeitet Anna?",
+          "answer": "b · Montagvormittag",
+          "options": [
+            "a · Mittwochvormittag",
+            "b · Montagvormittag",
+            "c · Montagabend",
+            "d · Freitagvormittag",
+            "e · Dienstagnachmittag",
+            "f · Mittwochabend",
+            "g · Donnerstagabend",
+            "h · Samstagvormittag"
+          ],
+          "explanation": {
+            "ru": "Подтверждение: Anna arbeitet am Montagvormittag.",
+            "uk": "Підтвердження: Anna arbeitet am Montagvormittag.",
+            "de": "Beleg: Anna arbeitet am Montagvormittag."
+          }
+        },
+        {
+          "prompt": "Wann arbeitet Ben?",
+          "answer": "e · Dienstagnachmittag",
+          "options": [
+            "a · Mittwochvormittag",
+            "b · Montagvormittag",
+            "c · Montagabend",
+            "d · Freitagvormittag",
+            "e · Dienstagnachmittag",
+            "f · Mittwochabend",
+            "g · Donnerstagabend",
+            "h · Samstagvormittag"
+          ],
+          "explanation": {
+            "ru": "Подтверждение: Ben übernimmt den Dienstagnachmittag.",
+            "uk": "Підтвердження: Ben übernimmt den Dienstagnachmittag.",
+            "de": "Beleg: Ben übernimmt den Dienstagnachmittag."
+          }
+        },
+        {
+          "prompt": "Wann arbeitet Lina?",
+          "answer": "a · Mittwochvormittag",
+          "options": [
+            "a · Mittwochvormittag",
+            "b · Montagvormittag",
+            "c · Montagabend",
+            "d · Freitagvormittag",
+            "e · Dienstagnachmittag",
+            "f · Mittwochabend",
+            "g · Donnerstagabend",
+            "h · Samstagvormittag"
+          ],
+          "explanation": {
+            "ru": "Подтверждение: Lina kommt am Mittwochvormittag.",
+            "uk": "Підтвердження: Lina kommt am Mittwochvormittag.",
+            "de": "Beleg: Lina kommt am Mittwochvormittag."
+          }
+        },
+        {
+          "prompt": "Wann arbeitet Amir?",
+          "answer": "g · Donnerstagabend",
+          "options": [
+            "a · Mittwochvormittag",
+            "b · Montagvormittag",
+            "c · Montagabend",
+            "d · Freitagvormittag",
+            "e · Dienstagnachmittag",
+            "f · Mittwochabend",
+            "g · Donnerstagabend",
+            "h · Samstagvormittag"
+          ],
+          "explanation": {
+            "ru": "Подтверждение: Amir arbeitet am Donnerstagabend.",
+            "uk": "Підтвердження: Amir arbeitet am Donnerstagabend.",
+            "de": "Beleg: Amir arbeitet am Donnerstagabend."
+          }
+        },
+        {
+          "prompt": "Wann arbeitet Max?",
+          "answer": "d · Freitagvormittag",
+          "options": [
+            "a · Mittwochvormittag",
+            "b · Montagvormittag",
+            "c · Montagabend",
+            "d · Freitagvormittag",
+            "e · Dienstagnachmittag",
+            "f · Mittwochabend",
+            "g · Donnerstagabend",
+            "h · Samstagvormittag"
+          ],
+          "explanation": {
+            "ru": "Подтверждение: Max übernimmt den Freitagvormittag.",
+            "uk": "Підтвердження: Max übernimmt den Freitagvormittag.",
+            "de": "Beleg: Max übernimmt den Freitagvormittag."
+          }
+        }
+      ]
+    },
+    "directory": {
+      "text": "Gesundheitszentrum Süd\nErdgeschoss: Apotheke, Information\n1. Stock: Hausarztpraxis, Labor\n2. Stock: Zahnarztpraxis, Augenarztpraxis\n3. Stock: Physiotherapie, Fitnessraum",
+      "questions": [
+        {
+          "prompt": "Sie möchten ein Medikament kaufen.",
+          "answer": "Erdgeschoss",
+          "options": [
+            "Erdgeschoss",
+            "1. Stock",
+            "2. Stock",
+            "3. Stock"
+          ],
+          "explanation": {
+            "ru": "В справочнике: Erdgeschoss: Apotheke, Information",
+            "uk": "У довіднику: Erdgeschoss: Apotheke, Information",
+            "de": "In der Übersicht: Erdgeschoss: Apotheke, Information"
+          }
+        },
+        {
+          "prompt": "Sie haben einen Termin beim Zahnarzt.",
+          "answer": "2. Stock",
+          "options": [
+            "Erdgeschoss",
+            "1. Stock",
+            "2. Stock",
+            "3. Stock"
+          ],
+          "explanation": {
+            "ru": "В справочнике: 2. Stock: Zahnarztpraxis, Augenarztpraxis",
+            "uk": "У довіднику: 2. Stock: Zahnarztpraxis, Augenarztpraxis",
+            "de": "In der Übersicht: 2. Stock: Zahnarztpraxis, Augenarztpraxis"
+          }
+        },
+        {
+          "prompt": "Sie müssen ins Labor.",
+          "answer": "1. Stock",
+          "options": [
+            "Erdgeschoss",
+            "1. Stock",
+            "2. Stock",
+            "3. Stock"
+          ],
+          "explanation": {
+            "ru": "В справочнике: 1. Stock: Hausarztpraxis, Labor",
+            "uk": "У довіднику: 1. Stock: Hausarztpraxis, Labor",
+            "de": "In der Übersicht: 1. Stock: Hausarztpraxis, Labor"
+          }
+        },
+        {
+          "prompt": "Sie suchen die Physiotherapie.",
+          "answer": "3. Stock",
+          "options": [
+            "Erdgeschoss",
+            "1. Stock",
+            "2. Stock",
+            "3. Stock"
+          ],
+          "explanation": {
+            "ru": "В справочнике: 3. Stock: Physiotherapie, Fitnessraum",
+            "uk": "У довіднику: 3. Stock: Physiotherapie, Fitnessraum",
+            "de": "In der Übersicht: 3. Stock: Physiotherapie, Fitnessraum"
+          }
+        },
+        {
+          "prompt": "Sie haben einen Termin beim Augenarzt.",
+          "answer": "2. Stock",
+          "options": [
+            "Erdgeschoss",
+            "1. Stock",
+            "2. Stock",
+            "3. Stock"
+          ],
+          "explanation": {
+            "ru": "В справочнике: 2. Stock: Zahnarztpraxis, Augenarztpraxis",
+            "uk": "У довіднику: 2. Stock: Zahnarztpraxis, Augenarztpraxis",
+            "de": "In der Übersicht: 2. Stock: Zahnarztpraxis, Augenarztpraxis"
+          }
+        }
+      ]
+    },
+    "article": {
+      "text": "Sara ist letzte Woche in eine neue Wohnung gezogen. Die Wohnung ist kleiner als ihre alte, aber heller. Sie liegt nahe am Bahnhof. Früher musste Sara vierzig Minuten zur Arbeit fahren, jetzt braucht sie nur fünfzehn Minuten. Die Miete ist etwas höher. Sara wohnt mit ihrer Tochter zusammen. Ihr Bruder hat beim Umzug geholfen. Das neue Sofa kommt erst nächste Woche. Am Sonntag lädt Sara ihre Nachbarn zum Kaffee ein. Sie möchte die Menschen im Haus kennenlernen.",
+      "questions": [
+        {
+          "prompt": "Sara ist letzte Woche umgezogen.",
+          "answer": "richtig",
+          "options": [
+            "richtig",
+            "falsch"
+          ],
+          "explanation": {
+            "ru": "Сравни утверждение с фактами текста. Правильный вариант: richtig.",
+            "uk": "Порівняй твердження з фактами тексту. Правильний варіант: richtig.",
+            "de": "Vergleiche die Aussage mit den Fakten im Text. Richtig ist: richtig."
+          }
+        },
+        {
+          "prompt": "Die neue Wohnung ist größer.",
+          "answer": "falsch",
+          "options": [
+            "richtig",
+            "falsch"
+          ],
+          "explanation": {
+            "ru": "Сравни утверждение с фактами текста. Правильный вариант: falsch.",
+            "uk": "Порівняй твердження з фактами тексту. Правильний варіант: falsch.",
+            "de": "Vergleiche die Aussage mit den Fakten im Text. Richtig ist: falsch."
+          }
+        },
+        {
+          "prompt": "Sara braucht jetzt weniger Zeit zur Arbeit.",
+          "answer": "richtig",
+          "options": [
+            "richtig",
+            "falsch"
+          ],
+          "explanation": {
+            "ru": "Сравни утверждение с фактами текста. Правильный вариант: richtig.",
+            "uk": "Порівняй твердження з фактами тексту. Правильний варіант: richtig.",
+            "de": "Vergleiche die Aussage mit den Fakten im Text. Richtig ist: richtig."
+          }
+        },
+        {
+          "prompt": "Ihr Bruder wohnt bei ihr.",
+          "answer": "falsch",
+          "options": [
+            "richtig",
+            "falsch"
+          ],
+          "explanation": {
+            "ru": "Сравни утверждение с фактами текста. Правильный вариант: falsch.",
+            "uk": "Порівняй твердження з фактами тексту. Правильний варіант: falsch.",
+            "de": "Vergleiche die Aussage mit den Fakten im Text. Richtig ist: falsch."
+          }
+        },
+        {
+          "prompt": "Am Sonntag lädt sie die Nachbarn ein.",
+          "answer": "richtig",
+          "options": [
+            "richtig",
+            "falsch"
+          ],
+          "explanation": {
+            "ru": "Сравни утверждение с фактами текста. Правильный вариант: richtig.",
+            "uk": "Порівняй твердження з фактами тексту. Правильний варіант: richtig.",
+            "de": "Vergleiche die Aussage mit den Fakten im Text. Richtig ist: richtig."
+          }
+        }
+      ]
+    },
+    "ads": {
+      "items": {
+        "a": "Umzugshilfe: Transporter und zwei Helfer, auch samstags.",
+        "b": "Möbelhaus: Sofas und Tische, Lieferung möglich.",
+        "c": "Fahrradverleih: Tagespreise ab zehn Euro.",
+        "d": "Arztpraxis: Terminvereinbarung 8–11 Uhr.",
+        "e": "Yoga für Erwachsene: Dienstagabend.",
+        "f": "Hundeschule: Training für junge Hunde.",
+        "g": "Reinigung: Kleidung abholen und liefern lassen.",
+        "h": "Schreibkurs: E-Mails auf Deutsch, Niveau A2."
+      },
+      "questions": [
+        {
+          "prompt": "Sie brauchen Hilfe beim Umzug.",
+          "answer": "a",
+          "options": [
+            "a",
+            "b",
+            "c",
+            "d",
+            "e",
+            "f",
+            "g",
+            "h",
+            "x"
+          ],
+          "explanation": {
+            "ru": "Подходящее объявление: Umzugshilfe: Transporter und zwei Helfer, auch samstags.",
+            "uk": "Відповідне оголошення: Umzugshilfe: Transporter und zwei Helfer, auch samstags.",
+            "de": "Passende Anzeige: Umzugshilfe: Transporter und zwei Helfer, auch samstags."
+          }
+        },
+        {
+          "prompt": "Sie möchten ein neues Sofa kaufen.",
+          "answer": "b",
+          "options": [
+            "a",
+            "b",
+            "c",
+            "d",
+            "e",
+            "f",
+            "g",
+            "h",
+            "x"
+          ],
+          "explanation": {
+            "ru": "Подходящее объявление: Möbelhaus: Sofas und Tische, Lieferung möglich.",
+            "uk": "Відповідне оголошення: Möbelhaus: Sofas und Tische, Lieferung möglich.",
+            "de": "Passende Anzeige: Möbelhaus: Sofas und Tische, Lieferung möglich."
+          }
+        },
+        {
+          "prompt": "Sie möchten ein Fahrrad für einen Tag mieten.",
+          "answer": "c",
+          "options": [
+            "a",
+            "b",
+            "c",
+            "d",
+            "e",
+            "f",
+            "g",
+            "h",
+            "x"
+          ],
+          "explanation": {
+            "ru": "Подходящее объявление: Fahrradverleih: Tagespreise ab zehn Euro.",
+            "uk": "Відповідне оголошення: Fahrradverleih: Tagespreise ab zehn Euro.",
+            "de": "Passende Anzeige: Fahrradverleih: Tagespreise ab zehn Euro."
+          }
+        },
+        {
+          "prompt": "Sie möchten E-Mails besser schreiben.",
+          "answer": "h",
+          "options": [
+            "a",
+            "b",
+            "c",
+            "d",
+            "e",
+            "f",
+            "g",
+            "h",
+            "x"
+          ],
+          "explanation": {
+            "ru": "Подходящее объявление: Schreibkurs: E-Mails auf Deutsch, Niveau A2.",
+            "uk": "Відповідне оголошення: Schreibkurs: E-Mails auf Deutsch, Niveau A2.",
+            "de": "Passende Anzeige: Schreibkurs: E-Mails auf Deutsch, Niveau A2."
+          }
+        },
+        {
+          "prompt": "Sie suchen einen Schwimmkurs für Kinder.",
+          "answer": "x",
+          "options": [
+            "a",
+            "b",
+            "c",
+            "d",
+            "e",
+            "f",
+            "g",
+            "h",
+            "x"
+          ],
+          "explanation": {
+            "ru": "Ни одно объявление не предлагает нужную услугу.",
+            "uk": "Жодне оголошення не пропонує потрібної послуги.",
+            "de": "Keine Anzeige bietet die gesuchte Leistung."
+          }
+        }
+      ]
+    },
+    "person": "Sara Klein wohnt in Leipzig. Ihre neue Adresse ist Parkstraße 12. Sie ist am 18.02.1985 geboren und arbeitet als Verkäuferin. Ihre Telefonnummer ist 0151 246810. Sie meldet sich für einen Sportkurs an.",
+    "fields": [
+      {
+        "prompt": "Wohnort",
+        "answer": "Leipzig",
+        "options": null,
+        "explanation": {
+          "ru": "Данные из описания человека: Leipzig.",
+          "uk": "Дані з опису людини: Leipzig.",
+          "de": "Angabe aus der Personenbeschreibung: Leipzig."
+        }
+      },
+      {
+        "prompt": "Straße und Hausnummer",
+        "answer": "Parkstraße 12",
+        "options": null,
+        "explanation": {
+          "ru": "Данные из описания человека: Parkstraße 12.",
+          "uk": "Дані з опису людини: Parkstraße 12.",
+          "de": "Angabe aus der Personenbeschreibung: Parkstraße 12."
+        }
+      },
+      {
+        "prompt": "Geburtsdatum",
+        "answer": "18.02.1985",
+        "options": null,
+        "explanation": {
+          "ru": "Данные из описания человека: 18.02.1985.",
+          "uk": "Дані з опису людини: 18.02.1985.",
+          "de": "Angabe aus der Personenbeschreibung: 18.02.1985."
+        }
+      },
+      {
+        "prompt": "Beruf",
+        "answer": "Verkäuferin",
+        "options": null,
+        "explanation": {
+          "ru": "Данные из описания человека: Verkäuferin.",
+          "uk": "Дані з опису людини: Verkäuferin.",
+          "de": "Angabe aus der Personenbeschreibung: Verkäuferin."
+        }
+      },
+      {
+        "prompt": "Telefonnummer",
+        "answer": "0151246810",
+        "options": null,
+        "explanation": {
+          "ru": "Данные из описания человека: 0151246810.",
+          "uk": "Дані з опису людини: 0151246810.",
+          "de": "Angabe aus der Personenbeschreibung: 0151246810."
+        }
+      }
+    ],
+    "letter": "Sie sind umgezogen und laden einen Freund ein. Wählen Sie drei von vier Punkten: neue Wohnung / Termin / Essen / Wegbeschreibung. Schreiben Sie circa 40 Wörter mit Anrede und Gruß.",
+    "model": "Lieber Ben, ich bin umgezogen. Meine neue Wohnung ist hell und liegt nahe am Bahnhof. Möchtest du am Sonntag um 15 Uhr kommen? Ich mache einen Apfelkuchen und Kaffee. Wir können danach spazieren gehen. Ich freue mich auf dich! Liebe Grüße, Sara",
+    "oral": [
+      "Stellen Sie sich vor und beantworten Sie eine Rückfrage zum Wohnort.",
+      "Führen Sie ein Alltagsgespräch zum Thema Wohnen: Wo? Mit wem? Wie groß? Was gefällt Ihnen?",
+      "Planen Sie einen Umzug: Tag, Transport, Hilfe und Essen danach."
+    ]
+  }
+]
