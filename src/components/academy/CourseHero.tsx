@@ -66,7 +66,7 @@ const CourseHero = ({ lang, onPickCourse, onOpenA2 }: Props) => {
       <div className="pointer-events-none absolute inset-0 opacity-70 [background-image:radial-gradient(hsl(var(--foreground)/0.07)_1px,transparent_1px)] [background-size:22px_22px] [mask-image:linear-gradient(to_bottom,black,transparent_85%)]" />
 
       <div className="relative mx-auto grid max-w-6xl grid-cols-1 items-center gap-6 px-4 py-8 md:grid-cols-[1.3fr_1fr] md:gap-10 md:px-6 md:py-14">
-        <div className="flex flex-col gap-5 text-left">
+        <div className="flex flex-col gap-5 text-left pl-12 md:pl-0">
           <h1 className="font-display text-3xl font-bold leading-[1.08] tracking-tight text-foreground sm:text-4xl lg:text-5xl">
             {t.title}
           </h1>
