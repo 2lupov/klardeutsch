@@ -33,6 +33,7 @@ import TeachFinance from "./pages/teach/TeachFinance";
 import Index from "./pages/Index";
 import Dutch from "./pages/Dutch";
 import CourseA2 from "./pages/CourseA2";
+import DeutschraumApp from "./features/deutschraum/DeutschraumApp";
 import Auth from "./pages/Auth";
 import AuthCallback from "./pages/AuthCallback";
 import ResetPassword from "./pages/ResetPassword";
@@ -149,6 +150,7 @@ const AppRoutes = () => {
 
         <Route path="/interactive/:id" element={<RequireAuth><InteractivePage /></RequireAuth>} />
         <Route path="/course/a2" element={<RequireAuth><CourseA2 /></RequireAuth>} />
+        <Route path="/a2/*" element={<RequireAuth><DeutschraumApp /></RequireAuth>} />
         <Route path="/course/:id" element={<RequireAuth><Course /></RequireAuth>} />
 
         {/* PREMIUM — paid plans */}
