@@ -1,0 +1,1 @@
+CREATE POLICY "Teachers and admins read lesson progress" ON public.course_lesson_progress FOR SELECT TO authenticated USING (public.has_role(auth.uid(),'admin') OR public.has_role(auth.uid(),'teacher'));
