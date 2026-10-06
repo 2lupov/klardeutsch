@@ -2,6 +2,11 @@ import { motion } from "framer-motion";
 import type { Lang } from "@/i18n/translations";
 import certificateSvg from "@/assets/klar-certificate.svg?raw";
 
+const svgMarkup = certificateSvg
+  .replace(/<svg([^>]*?)\swidth="1200"/, "<svg$1")
+  .replace(/<svg([^>]*?)\sheight="850"/, "<svg$1")
+  .replace("<svg", '<svg style="width:100%;height:100%;display:block"');
+
 const CertificatePreview = ({ lang }: { lang: Lang }) => {
   return (
     <motion.div
