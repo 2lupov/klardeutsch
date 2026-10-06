@@ -16,7 +16,7 @@ const CertificatePreview = ({ lang }: { lang: Lang }) => {
       className="relative w-full aspect-[1200/850] rounded-xl overflow-hidden border border-accent/30 shadow-[0_20px_60px_-20px_rgba(245,166,35,0.4)]"
       role="img"
       aria-label={lang === "uk" ? "Приклад сертифіката KLAR Academy" : "Пример сертификата KLAR Academy"}
-      dangerouslySetInnerHTML={{ __html: certificateSvg }}
+      dangerouslySetInnerHTML={{ __html: svgMarkup }}
     />
   );
 };
