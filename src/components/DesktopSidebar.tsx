@@ -202,6 +202,7 @@ const DesktopSidebar = () => {
 
 
             {user ? (
+              <>
               <NavLink
                 to="/profile"
                 className="mx-2 mb-2 p-3 rounded-xl border border-border bg-muted/30 hover:bg-muted/60 transition-colors"
