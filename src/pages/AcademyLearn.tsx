@@ -103,14 +103,18 @@ const AcademyLearn = () => {
   const activeLessonIndex = lessons.findIndex((l) => l.id === activeLessonId);
   const completedIds = new Set(progress.filter((p) => p.status === "completed").map((p) => p.lesson_id));
 
-  const handleComplete = useCallback(async (score?: number) => {
+  const handleComplete = useCallback(async (score?: number, answers?: Record<string, unknown>) => {
     if (!user || !activeLessonId || !courseId) return;
-    await supabase.rpc("complete_course_lesson", {
+    const { error } = await supabase.rpc("complete_course_lesson", {
       p_user_id: user.id,
       p_lesson_id: activeLessonId,
       p_score: score ?? null,
-      p_answers: null,
+      p_answers: (answers ?? null) as any,
     });
+    if (error) {
+      if (answers) throw error;
+      console.error(error);
+    }
     setProgress((prev) => {
       const existing = prev.find((p) => p.lesson_id === activeLessonId);
       if (existing) return prev.map((p) => p.lesson_id === activeLessonId ? { ...p, status: "completed", score: score ?? null } : p);
