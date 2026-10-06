@@ -238,6 +238,16 @@ const DesktopSidebar = () => {
                   </div>
                 </div>
               </NavLink>
+              <button
+                onClick={async () => {
+                  setOpen(false);
+                  await signOut();
+                }}
+                className="group mx-2 mb-2 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-border/60 bg-muted/20 text-muted-foreground hover:text-destructive hover:border-destructive/40 hover:bg-destructive/10 transition-all duration-200 text-sm font-display font-medium"
+              >
+                <LogOut className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                <span>{lang === "uk" ? "Вийти" : "Выйти"}</span>
+              </button>
             ) : (
               <NavLink
                 to="/auth"
