@@ -22,6 +22,11 @@ const T = {
 
 /** Level used for filtering: target sub-level for core, entry level otherwise. */
 const levelOf = (c: (typeof CATALOG)[number]) => (c.targetLevel || c.entryLevel);
+/** Exact CEFR level match: "A1" matches "A1.1" and "B1 / B2 / C1" only if it contains A1. */
+const matchesLevel = (c: (typeof CATALOG)[number], level: string) => {
+  const tokens: string[] = levelOf(c).match(/[ABC][12]/g) ?? [];
+  return tokens.includes(level);
+};
 const hours = (c: (typeof CATALOG)[number]) =>
   c.hoursUE != null ? `${c.hoursUE} UE` : c.hoursMin != null ? `${c.hoursMin}–${c.hoursMax} UE` : c.hoursRaw;
 
@@ -31,7 +36,7 @@ export default function ProgramCatalog({ lang }: { lang: string }) {
   const nav = useNavigate();
   const [block, setBlock] = useState<Block | "all">("all");
   const [level, setLevel] = useState("all");
-  const list = CATALOG.filter((c) => (block === "all" || c.block === block) && (level === "all" || levelOf(c).includes(level)));
+  const list = CATALOG.filter((c) => (block === "all" || c.block === block) && (level === "all" || matchesLevel(c, level)));
 
   const chip = (on: boolean) => `shrink-0 rounded-full border px-3 py-1.5 text-sm transition ${on ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted-foreground hover:border-primary/50"}`;
 

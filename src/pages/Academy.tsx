@@ -85,7 +85,7 @@ const Academy = () => {
   const levels = ["all", "A1", "A2", "B1", "B2", "C1"];
   const allTags = Array.from(new Set(courses.flatMap((c) => c.tags ?? [])));
   const filtered = courses.filter((c) => {
-    if (levelFilter !== "all" && (c.difficulty ?? c.level) !== levelFilter) return false;
+    if (levelFilter !== "all" && c.level !== levelFilter) return false;
     if (tagFilter !== "all" && !(c.tags ?? []).includes(tagFilter)) return false;
     return true;
   });
