@@ -24,7 +24,7 @@ const T = {
 const levelOf = (c: (typeof CATALOG)[number]) => (c.targetLevel || c.entryLevel);
 /** Exact CEFR level match: "A1" matches "A1.1" and "B1 / B2 / C1" only if it contains A1. */
 const matchesLevel = (c: (typeof CATALOG)[number], level: string) => {
-  const tokens = levelOf(c).match(/[ABC][12]/g) ?? [];
+  const tokens: string[] = levelOf(c).match(/[ABC][12]/g) ?? [];
   return tokens.includes(level);
 };
 const hours = (c: (typeof CATALOG)[number]) =>
