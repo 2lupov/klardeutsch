@@ -249,6 +249,7 @@ const DesktopSidebar = () => {
                 <LogOut className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                 <span>{lang === "uk" ? "Вийти" : "Выйти"}</span>
               </button>
+              </>
             ) : (
               <NavLink
                 to="/auth"
