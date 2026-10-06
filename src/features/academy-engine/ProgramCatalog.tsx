@@ -36,7 +36,7 @@ export default function ProgramCatalog({ lang }: { lang: string }) {
   const nav = useNavigate();
   const [block, setBlock] = useState<Block | "all">("all");
   const [level, setLevel] = useState("all");
-  const list = CATALOG.filter((c) => (block === "all" || c.block === block) && (level === "all" || levelOf(c).includes(level)));
+  const list = CATALOG.filter((c) => (block === "all" || c.block === block) && (level === "all" || matchesLevel(c, level)));
 
   const chip = (on: boolean) => `shrink-0 rounded-full border px-3 py-1.5 text-sm transition ${on ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted-foreground hover:border-primary/50"}`;
 
