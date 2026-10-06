@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1200" height="850" viewBox="0 0 1200 850" role="img" aria-labelledby="title desc">
+  <title id="title">KLAR Academy — сертифікат про завершення курсу</title>
+  <desc id="desc">Редагований векторний сертифікат із темно-синім тлом, золотою рамкою та полями для імені, назви курсу, рівня, дати й номера.</desc>
+  <!-- Усі написи є SVG text. Замінюйте вміст елементів за їхніми id.
+       certificate-name: довге ім'я — зменшити font-size із 64 до 48.
+       certificate-course, certificate-level, certificate-date, certificate-id.
+       Потрібні шрифти: Georgia та Arial, із системними fallback.
+       Без растрових зображень, зовнішніх файлів або JavaScript. -->
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#17263E"/>
+      <stop offset="0.52" stop-color="#101C31"/>
+      <stop offset="1" stop-color="#0B1425"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="0.8">
+      <stop stop-color="#AE7E37"/>
+      <stop offset="0.32" stop-color="#F0D6A0"/>
+      <stop offset="0.65" stop-color="#D0A65E"/>
+      <stop offset="1" stop-color="#92652E"/>
+    </linearGradient>
+    <radialGradient id="halo">
+      <stop stop-color="#D8B774" stop-opacity="0.09"/>
+      <stop offset="1" stop-color="#D8B774" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="42" height="42" patternUnits="userSpaceOnUse">
+      <path d="M0 42 42 0" stroke="#B5C8E4" stroke-opacity="0.024" stroke-width="0.8"/>
+    </pattern>
+    <g id="corner" fill="none" stroke="url(#gold)">
+      <path d="M0 88V0H88" stroke-width="3"/>
+      <path d="M10 60V10H60" stroke-width="1" opacity="0.65"/>
+      <path d="M0 16 16 0M0 32 32 0" stroke-width="1" opacity="0.4"/>
+      <path d="M-4 88H4M88-4V4" stroke-width="2"/>
+    </g>
+    <g id="leaf" fill="none" stroke="#D9B879" stroke-width="1.8" stroke-linecap="round">
+      <path d="M0 0C-28-15-42-41-39-74"/>
+      <path d="M-9-7C-25-4-32-11-33-20C-22-21-13-16-9-7Z"/>
+      <path d="M-21-20C-37-19-43-26-43-35C-33-35-24-29-21-20Z"/>
+      <path d="M-30-35C-43-38-49-46-47-55C-37-52-31-45-30-35Z"/>
+      <path d="M-37-53C-46-62-46-71-41-79C-33-72-33-62-37-53Z"/>
+      <path d="M-14-12C-10-24-12-31-19-37C-25-28-23-18-14-12Z"/>
+      <path d="M-28-29C-22-40-24-49-30-54C-37-45-35-35-28-29Z"/>
+    </g>
+  </defs>
+
+  <!-- Тло та тонкий геометричний орнамент -->
+  <rect width="1200" height="850" fill="url(#background)"/>
+  <rect width="1200" height="850" fill="url(#grid)"/>
+  <ellipse cx="600" cy="355" rx="520" ry="340" fill="url(#halo)"/>
+  <g fill="none" stroke="#D9B879" opacity="0.045">
+    <circle cx="1200" cy="0" r="295"/>
+    <circle cx="1200" cy="0" r="330"/>
+    <circle cx="0" cy="850" r="260"/>
+    <circle cx="0" cy="850" r="295"/>
+  </g>
+
+  <!-- Рамка з відкритими, архітектурними кутами -->
+  <rect x="28" y="28" width="1144" height="794" fill="none" stroke="url(#gold)" stroke-width="1.2" opacity="0.7"/>
+  <rect x="47" y="47" width="1106" height="756" fill="none" stroke="#D9B879" stroke-width="0.65" opacity="0.28"/>
+  <use xlink:href="#corner" x="64" y="64"/>
+  <use xlink:href="#corner" transform="translate(1136 64) rotate(90)"/>
+  <use xlink:href="#corner" transform="translate(1136 786) rotate(180)"/>
+  <use xlink:href="#corner" transform="translate(64 786) rotate(270)"/>
+
+  <!-- Бренд: векторна емблема відкритої книги -->
+  <g transform="translate(600 107)" fill="none" stroke="#E0BF82" stroke-width="1.5">
+    <path d="M-20-9C-13-11-7-9 0-5C7-9 13-11 20-9V11C13 9 7 11 0 15C-7 11-13 9-20 11Z"/>
+    <path d="M0-5V15M-15-3C-10-4-6-2-4-1M4-1C6-2 10-4 15-3"/>
+  </g>
+  <g font-family="Arial, Helvetica, sans-serif" text-anchor="middle">
+    <text x="600" y="158" fill="#E9CF9B" font-size="19" letter-spacing="5">KLAR ACADEMY</text>
+    <text x="600" y="188" fill="#8E9EB6" font-size="11" letter-spacing="3">DEUTSCH FÜR DEIN LEBEN</text>
+  </g>
+  <path d="M410 219H568M632 219H790" stroke="url(#gold)" stroke-width="0.8" opacity="0.6"/>
+  <path d="m600 214 5 5-5 5-5-5Z" fill="#D9B879"/>
+
+  <!-- Заголовок та персональні дані -->
+  <text x="600" y="291" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="68" fill="#F4F0E7">Сертифікат</text>
+  <text x="600" y="328" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" letter-spacing="3.4" fill="#D9B879">ПРО ЗАВЕРШЕННЯ КУРСУ</text>
+  <text x="600" y="382" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#A8B4C7">Цим засвідчується, що</text>
+  <text id="certificate-name" x="600" y="456" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="64" fill="#EDD3A0">Ваше ім’я</text>
+  <path d="M295 480H905" stroke="url(#gold)" stroke-width="0.7" opacity="0.4"/>
+  <text x="600" y="521" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#C7D0DE">успішно завершив(-ла) курс німецької мови</text>
+  <text id="certificate-course" x="600" y="555" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#F0EEE9">Німецька для реального життя</text>
+  <g transform="translate(600 587)">
+    <rect x="-66" y="-16" width="132" height="32" rx="16" fill="#D9B879" fill-opacity="0.08" stroke="#D9B879" stroke-opacity="0.35" stroke-width="0.8"/>
+    <text id="certificate-level" x="0" y="5" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" letter-spacing="2" fill="#E2C58F">РІВЕНЬ A1</text>
+  </g>
+
+  <!-- Декоративна нагорода, без імітації підпису або акредитації -->
+  <g transform="translate(600 687)">
+    <circle r="47" fill="#D9B879" fill-opacity="0.035" stroke="url(#gold)" stroke-width="1"/>
+    <circle r="40" fill="none" stroke="#D9B879" stroke-opacity="0.3" stroke-width="0.6" stroke-dasharray="1 4"/>
+    <use xlink:href="#leaf" transform="translate(-7 28) scale(.52)"/>
+    <use xlink:href="#leaf" transform="translate(7 28) scale(-.52 .52)"/>
+    <path d="m-13 8-5 24 18-8 18 8-5-24" fill="none" stroke="#E0BF82" stroke-width="1.6" stroke-linejoin="round"/>
+    <circle cy="-6" r="17" fill="#142039" stroke="#E0BF82" stroke-width="1.6"/>
+    <path d="m0-16 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1Z" fill="#E0BF82"/>
+  </g>
+
+  <!-- Метадані: реальні значення підставляє платформа -->
+  <g font-family="Arial, Helvetica, sans-serif">
+    <path d="M110 716H355M845 716H1090" stroke="#D9B879" stroke-width="0.8" opacity="0.45"/>
+    <text id="certificate-date" x="110" y="696" fill="#E6E8EC" font-size="18">ДД.ММ.РРРР</text>
+    <text x="110" y="740" fill="#8E9EB6" font-size="10" letter-spacing="2">ДАТА ЗАВЕРШЕННЯ</text>
+    <text id="certificate-id" x="1090" y="696" text-anchor="end" fill="#E6E8EC" font-size="18">KLAR-000000</text>
+    <text x="1090" y="740" text-anchor="end" fill="#8E9EB6" font-size="10" letter-spacing="2">НОМЕР СЕРТИФІКАТА</text>
+    <text x="600" y="772" text-anchor="middle" fill="#8998AF" font-size="10" letter-spacing="1">Видано платформою KLAR · Свідоцтво про завершення навчання</text>
+  </g>
+</svg>
