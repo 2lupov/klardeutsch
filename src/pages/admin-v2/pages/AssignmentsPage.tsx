@@ -10,6 +10,7 @@ import StudentBlocks from "@/components/blocks/StudentBlocks";
 import { kitBlocksToLessonBlocks } from "@/lib/lesson-kits";
 import { useAdminLang } from "../LanguageContext";
 import BookPagesSubmissions from "./BookPagesSubmissions";
+import AcademyEssays from "./AcademyEssays";
 
 type AssignmentType = "test" | "homework" | "writing" | "reading" | "grammar" | "audio";
 
@@ -160,6 +161,7 @@ export default function AssignmentsPage() {
       </div>
 
       {!loading && <BookPagesSubmissions nameOf={nameOf} query={q} />}
+      {!loading && <AcademyEssays query={q} />}
 
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
