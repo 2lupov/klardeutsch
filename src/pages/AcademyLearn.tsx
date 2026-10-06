@@ -167,7 +167,7 @@ const AcademyLearn = () => {
       case "ai_tutor":
         return <AITutorLesson key={key} lesson={activeLesson} onComplete={() => handleComplete()} lang={lang} />;
       case "writing":
-        return <WritingTaskLesson key={key} lesson={activeLesson} onComplete={() => handleComplete()} lang={lang} />;
+        return <WritingTaskLesson key={key} lesson={activeLesson} onComplete={(a) => handleComplete(undefined, a)} lang={lang} />;
       case "speaking":
         return <SpeakingChallengeLesson key={key} lesson={activeLesson} onComplete={(s) => handleComplete(s)} lang={lang} />;
       case "exam":
