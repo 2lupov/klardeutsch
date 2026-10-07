@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { toHtml, plain, applyRemoteHtml } from "@/lib/rich-text";
+import { getLessonTopic } from "@/lib/live-class";
 
 export interface WritingTopic {
   title_de?: string;
@@ -161,7 +162,7 @@ export default function LiveWriting({ classId, role, className }: { classId: str
     setGenerating(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-writing-topic", {
-        body: { level, avoid: topic?.title_de ?? "" },
+        body: { level, avoid: topic?.title_de ?? "", theme: getLessonTopic(classId) },
       });
       if (error || data?.error) throw new Error(data?.error || error?.message);
       setTopic(data.topic);

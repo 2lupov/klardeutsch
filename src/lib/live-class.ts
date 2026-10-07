@@ -16,6 +16,7 @@ export type LiveSection =
   | "writing"
   | "video";
 
+/** Нотатки відкриваються острівцем поверх будь-якого розділу, тому окремої вкладки немає. */
 export const LIVE_SECTIONS: { key: LiveSection; label: string; icon: string }[] = [
   { key: "board", label: "Дошка", icon: "✍️" },
   { key: "slides", label: "Презентація", icon: "🖼" },
@@ -25,8 +26,18 @@ export const LIVE_SECTIONS: { key: LiveSection; label: string; icon: string }[] 
   { key: "grammar", label: "Граматика", icon: "🎓" },
   { key: "writing", label: "Письмо", icon: "✉️" },
   { key: "video", label: "Відео", icon: "🎬" },
-  { key: "notes", label: "Нотатки", icon: "📝" },
 ];
+
+/** Спільна тема уроку: введена в Читанні / Граматиці — підтягується в усі розділи. */
+const topicKey = (classId: string) => `klar-live-topic:${classId}`;
+export function getLessonTopic(classId: string): string {
+  try { return localStorage.getItem(topicKey(classId)) || ""; } catch { return ""; }
+}
+export function setLessonTopic(classId: string, topic: string) {
+  const t = topic.trim();
+  if (!t) return;
+  try { localStorage.setItem(topicKey(classId), t); } catch { /* ignore */ }
+}
 
 /** Що саме показано учню в розділі «Презентація» / «Блок-завдання». */
 export type LiveView =
