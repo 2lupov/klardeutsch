@@ -7,7 +7,8 @@ import { disableBiometric, enableBiometric, hasLocalPasskey, isBiometricSupporte
 export function BiometricLoginButton({ onSuccess }: { onSuccess?: () => void }) {
   const [supported, setSupported] = useState(false);
   const [busy, setBusy] = useState(false);
-  useEffect(() => { isBiometricSupported().then(setSupported); }, []);
+  // Only show when Face ID was enabled on THIS device — otherwise iOS offers a QR code for another device.
+  useEffect(() => { isBiometricSupported().then((s) => setSupported(s && hasLocalPasskey())); }, []);
   if (!supported) return null;
 
   const go = async () => {

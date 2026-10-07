@@ -6,6 +6,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { nicknameSchema } from "@/lib/nickname-auth";
+import { BiometricToggle } from "@/components/auth/BiometricButtons";
 
 interface Props {
   onComplete: () => void;
@@ -193,6 +194,11 @@ const WelcomeIntro = ({ onComplete }: Props) => {
                   {lang === "uk" ? "Відкрити бота й прив'язати" : "Открыть бота и привязать"}
                 </a>
               </Button>
+            )}
+            {isTelegram && (
+              <div className="mt-4 w-full max-w-xs text-left">
+                <BiometricToggle />
+              </div>
             )}
           </motion.div>
         </AnimatePresence>
