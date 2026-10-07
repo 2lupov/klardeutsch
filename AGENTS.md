@@ -1,13 +1,1 @@
-- Live classroom uses a dedicated viewport-height workspace inside admin; this prevents nested page scrolling during teaching.
-- Grammar homework uses the dedicated `grammar` assignment type and StudentGrammar workbook; this keeps it separate from reading.
-- Live video uses a dedicated per-class synchronized record for the YouTube source and video notes; this keeps video notes separate from general lesson notes.
-- AI-generated video lessons reuse lesson kits and the existing live block view; this keeps one renderer for previews, live lessons, and the library.
-- Personal Dutch hub (/dutch) is admin-only, keeps progress in localStorage and uses the dutch-ai function; keeps it isolated from student data.
-- New-user onboarding begins with an interactive KLAR introduction and defaults to A1; existing users retain placement testing.
-- Self-service registration and login use a unique nickname as the primary credential; email is optional, and signup auto-confirms without a confirmation-code step.
-- Full A2 course + telc trainer (Deutschraum) lives in `src/features/deutschraum` at `/a2/*`, rendered straight from the imported course/exams JSON; keeps the authored content unmodified and separate from the paid `/course/a2`.
-- Community chat is a single public room (`src/components/chat/CommunityChat.tsx` + `useCommunityMessages`/`useChatUpload`); private messages were removed, so do not reintroduce DM tables or notifications.
-- Synthetic chat activity runs only server-side in the `community-synthetic` function on a schedule, with personas flagged via `profiles.is_synthetic`; this keeps keys off the client and demo users out of real stats.
-- Academy programme catalog lives in `src/data/catalog.json` (transcribed from the school plan PDF) and per-course content in `src/data/courses/<code>.json`, rendered by `src/features/academy-engine`; keeps content out of components.
-- Skill passport attempts are stored in `skill_attempts` and statuses are derived client-side by `computeStatus`; keeps the section-11 rules in one testable place.
-- Biometric login uses WebAuthn passkeys verified server-side in the `passkey-auth` function (credentials in `webauthn_credentials`), which mints a session via a magic-link token; keeps private keys on the device and verification off the client.
+- Personal admin study space "Мій KLAR" lives at `/my` (`src/pages/MyKlar.tsx`) and saves self-study answers through `presentation_progress` keyed by the admin's own user id; reuses the student pipeline instead of a parallel store.
