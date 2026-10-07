@@ -11,3 +11,4 @@
 - Academy programme catalog lives in `src/data/catalog.json` (transcribed from the school plan PDF) and per-course content in `src/data/courses/<code>.json`, rendered by `src/features/academy-engine`; keeps content out of components.
 - Skill passport attempts are stored in `skill_attempts` and statuses are derived client-side by `computeStatus`; keeps the section-11 rules in one testable place.
 - Biometric login uses WebAuthn passkeys verified server-side in the `passkey-auth` function (credentials in `webauthn_credentials`), which mints a session via a magic-link token; keeps private keys on the device and verification off the client.
+- Personal admin study space "Мій KLAR" lives at `/my` (`src/pages/MyKlar.tsx`) and saves self-study answers through `presentation_progress` keyed by the admin's own user id; reuses the student pipeline instead of a parallel store.
