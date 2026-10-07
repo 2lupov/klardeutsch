@@ -38,21 +38,16 @@ export default function LiveGrammar({
   const { lesson, marks, notes, revealed, remote, push, pushLesson, toggleReveal, onRemote } = useLiveGrammar(classId);
   const [level, setLevel] = useState("A2");
   const [count, setCount] = useState(6);
-  const [topic, setTopic] = useState(() => getLessonTopic(classId));
   const [busy, setBusy] = useState(false);
   const [saveOpen, setSaveOpen] = useState(false);
   const [hwOpen, setHwOpen] = useState(false);
 
   const generate = async () => {
-    if (!topic.trim()) { toast.error("Напишіть тему, напр. «Perfekt» або «Dativ»"); return; }
     setBusy(true);
-    setLessonTopic(classId, topic);
     try {
-      const { data, error } = await supabase.functions.invoke("generate-grammar-lesson", {
-        body: { level, topic: topic.trim(), examples: count, student_id: studentId, reading_words: level === "A1" ? 70 : 110 },
-      });
-      if (error || (data as any)?.error) throw new Error((data as any)?.error || error?.message);
-      const l = (data as any).lesson as GrammarLesson;
+      const source = await getReadingSource(classId);
+      if (!source) throw new Error("Спершу створіть текст у «Читанні» — граматика буде саме по ньому");
+      const l = (await generateGrammarFromText({ level, source, count, studentId })) as GrammarLesson;
       pushLesson(l, lessonHtml(l));
     } catch (e: any) {
       toast.error(e?.message || "Не вдалося створити урок");
