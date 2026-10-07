@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { countWords, paragraphsToHtml, plain } from "@/lib/rich-text";
 import { createFolder, createItem, fetchFolders, type MaterialFolder } from "@/lib/materials";
 import { getLessonTopic, setLessonTopic } from "@/lib/live-class";
+import { prefillGrammarAndWriting } from "@/lib/live-prefill";
 import MarkSheet from "@/components/live/MarkSheet";
 import { useLiveReading, type ReadingTopic } from "@/components/live/useLiveReading";
 
@@ -50,6 +51,16 @@ export default function LiveReading({
       if (error || (data as any)?.error) throw new Error((data as any)?.error || error?.message);
       const t = (data as any).topic as ReadingTopic;
       pushTopic(t, paragraphsToHtml(t.text_de || ""));
+      const lessonTheme = theme.trim() || t.title_de || "";
+      if (lessonTheme) {
+        setLessonTopic(classId, lessonTheme);
+        toast.info("Готую Граматику й Письмо на цю тему…");
+        void prefillGrammarAndWriting({ classId, level, theme: lessonTheme, grammarFocus: t.grammar_focus?.[0], studentId })
+          .then((r) => {
+            if (r.grammar && r.writing) toast.success("Граматика й Письмо готові");
+            else toast.warning("Не все вдалося підготувати — згенеруйте вручну у відповідному розділі");
+          });
+      }
     } catch (e: any) {
       toast.error(e?.message || "Не вдалося створити текст");
     } finally {
