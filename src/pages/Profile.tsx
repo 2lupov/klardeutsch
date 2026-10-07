@@ -1002,8 +1002,6 @@ const Profile = () => {
           <Link to="/privacy" className="hover:text-foreground transition-colors">{lang === "uk" ? "Конфіденційність" : "Конфиденциальность"}</Link>
           <span>·</span>
           <Link to="/terms" className="hover:text-foreground transition-colors">{lang === "uk" ? "Оферта" : "Оферта"}</Link>
-          <span>·</span>
-          <Link to="/connect" className="hover:text-foreground transition-colors">{lang === "uk" ? "Підключити AI" : "Подключить AI"}</Link>
         </div>
       )}
     </div>
