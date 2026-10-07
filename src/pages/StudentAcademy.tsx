@@ -7,7 +7,7 @@ import {
   ListChecks, FileText, BookOpen, GraduationCap, ChevronRight,
   Loader2, CheckCircle2, Clock, Layers, Mic, PenLine,
   ClipboardList, Palette, LibraryBig, NotebookTabs, UserRound,
-  NotebookPen, FolderOpen,
+  NotebookPen, FolderOpen, Menu,
 } from "lucide-react";
 import StudentTextbooks from "@/components/textbook/StudentTextbooks";
 import StudentBoard from "@/components/student/StudentBoard";
@@ -20,6 +20,7 @@ import StudentNotes from "@/components/student/StudentNotes";
 import StudentFolders from "@/components/student/StudentFolders";
 import { bgCss } from "@/components/student/academyBackgrounds";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import pandaCelebrating from "@/assets/mascot/panda-celebrating.png";
 import pandaSleeping from "@/assets/mascot/panda-sleeping.png";
 
@@ -79,6 +80,7 @@ const StudentAcademy = () => {
   const [searchParams] = useSearchParams();
   const initialTab = (searchParams.get("tab") || "homework") as Tab;
   const [tab, setTab] = useState<Tab>(initialTab);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [navCollapsed, setNavCollapsed] = useState(() => localStorage.getItem("academy_nav_collapsed") === "1");
   const [liveCls, setLiveCls] = useState<{ id: string; created_at: string } | null>(null);
   const [nowTs, setNowTs] = useState(Date.now());
@@ -430,9 +432,9 @@ const rows = tab === "tests" ? tests : homework;
   const allClear = totalTodo === 0 && hasAnyContent && (tab === "tests" || tab === "homework");
 
   return (
-    <div className="min-h-full bg-background bg-fixed bg-cover flex min-w-0" style={bgCss(bg) ? { backgroundImage: bgCss(bg) } : undefined}>
+    <div className="min-h-full bg-background bg-fixed bg-cover flex min-w-0 pb-[env(safe-area-inset-bottom)]" style={bgCss(bg) ? { backgroundImage: bgCss(bg) } : undefined}>
       {/* Collapsible sidebar */}
-      <aside className={`sticky top-0 h-[100dvh] shrink-0 border-r border-border bg-background/90 backdrop-blur flex flex-col transition-all ${navCollapsed ? "w-14" : "w-14 md:w-52"}`}>
+      <aside className={`hidden md:flex sticky top-0 h-[100dvh] shrink-0 border-r border-border bg-background/90 backdrop-blur flex-col transition-all ${navCollapsed ? "w-14" : "w-52"}`}>
         <div className={`flex items-center gap-2 px-3 py-4 ${navCollapsed ? "justify-center" : ""}`}>
           <span className="font-display font-black text-lg text-foreground">{navCollapsed ? "K" : "KLAR"}</span>
         </div>
@@ -474,6 +476,23 @@ const rows = tab === "tests" ? tests : homework;
       </aside>
 
       <div className="flex-1 min-w-0">
+        <header className="sticky top-0 z-30 border-b border-border bg-background/95 px-3 pt-[env(safe-area-inset-top)] backdrop-blur md:hidden">
+          <div className="flex min-h-16 items-center gap-3 pr-12">
+            <Button animated={false} variant="outline" size="icon" className="h-11 w-11 shrink-0" aria-label="Розділи Академії" onClick={() => setMobileMenuOpen(true)}><Menu /></Button>
+            <div className="min-w-0"><p className="text-[10px] font-bold text-accent">KLAR · Академія</p><h2 className="truncate font-display font-bold">{tabs.find((item) => item.key === tab)?.label}</h2></div>
+          </div>
+          <nav aria-label="Навчання" className="flex gap-1 overflow-x-auto pb-2">
+            {tabs.slice(0, 5).map((item) => <Button key={item.key} animated={false} variant={tab === item.key ? "secondary" : "ghost"} className="h-11 shrink-0 px-3 text-xs" aria-current={tab === item.key ? "page" : undefined} onClick={() => setTab(item.key as Tab)}>{item.label}{item.count > 0 && <span className="text-accent">{item.count}</span>}</Button>)}
+          </nav>
+        </header>
+        <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+          <SheetContent side="bottom" className="max-h-[85dvh] overflow-y-auto rounded-t-lg pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+            <SheetHeader><SheetTitle>Моя Академія</SheetTitle><SheetDescription>Матеріали та навчання</SheetDescription></SheetHeader>
+            <nav className="mt-5 grid grid-cols-2 gap-2" aria-label="Розділи Академії">
+              {tabs.map((item) => <Button key={item.key} animated={false} variant={tab === item.key ? "secondary" : "outline"} className="h-auto min-h-14 justify-start whitespace-normal px-3 text-left" onClick={() => { setTab(item.key as Tab); setMobileMenuOpen(false); }}><item.icon className="shrink-0" /><span className="min-w-0 flex-1">{item.label}</span>{item.count > 0 && <span className="text-accent">{item.count}</span>}</Button>)}
+            </nav>
+          </SheetContent>
+        </Sheet>
       {/* Progress is only relevant while choosing tasks, not while reading or drawing. */}
       {isTaskTab && <div className="border-b border-border bg-background/90">
         <div className="max-w-[1200px] mx-auto px-4 pt-5 pb-3">
@@ -547,7 +566,7 @@ const rows = tab === "tests" ? tests : homework;
                   <p className="font-display font-bold text-sm truncate mt-1">{nextUp.title}</p>
                 </div>
                 <span className="shrink-0 inline-flex items-center gap-1 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold group-hover:bg-primary/90 transition">
-                  Виконати <ChevronRight className="w-4 h-4" />
+                  <span className="hidden sm:inline">Виконати</span><ChevronRight className="w-4 h-4" />
                 </span>
               </button>
             )}
@@ -555,7 +574,7 @@ const rows = tab === "tests" ? tests : homework;
             {tab === "textbook" ? (
               <StudentTextbooks />
             ) : tab === "board" ? (
-               <StudentBoard className="h-[calc(100dvh-6rem)] min-h-[420px]" />
+                 <StudentBoard className="h-[calc(100dvh-10rem)] min-h-[300px] md:h-[calc(100dvh-6rem)]" />
             ) : tab === "writing" ? (
               <StudentWriting />
             ) : tab === "reading" ? (
@@ -615,7 +634,7 @@ const rows = tab === "tests" ? tests : homework;
                         {r.done ? <CheckCircle2 className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-display font-bold text-sm truncate">{r.title}</p>
+                        <p className="font-display font-bold text-sm whitespace-normal break-words leading-relaxed">{r.title}</p>
                         <div className="flex items-center gap-2 flex-wrap mt-1">
                           {r.subtitle && (
                             <span className="text-xs text-muted-foreground truncate max-w-[200px]">{r.subtitle}</span>

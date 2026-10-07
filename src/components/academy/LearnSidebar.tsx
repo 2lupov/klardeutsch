@@ -1,5 +1,6 @@
 import { CheckCircle2, Circle, ChevronRight } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 import type { Lang } from "@/i18n/translations";
 
 const LESSON_TYPE_ICONS: Record<string, string> = {
@@ -91,10 +92,11 @@ const LearnSidebar = ({ modules, lessons, completedIds, activeLessonId, onSelect
                 const isCompleted = completedIds.has(lesson.id);
 
                 return (
-                  <button
+                  <Button animated={false} variant="ghost"
                     key={lesson.id}
                     onClick={() => onSelectLesson(lesson.id)}
-                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left transition-all text-xs ${
+                    aria-current={isActive ? "step" : undefined}
+                    className={`w-full h-auto min-h-14 flex items-center gap-2.5 px-3 py-3 rounded-lg text-left whitespace-normal text-sm ${
                       isActive
                         ? "bg-primary/15 border-l-[3px] border-primary text-foreground"
                         : isCompleted
@@ -115,11 +117,11 @@ const LearnSidebar = ({ modules, lessons, completedIds, activeLessonId, onSelect
                     <span className="text-sm shrink-0">{LESSON_TYPE_ICONS[lesson.lesson_type] || "📄"}</span>
 
                     {/* Title */}
-                    <span className="truncate flex-1">{lesson.title}</span>
+                    <span className="min-w-0 break-words flex-1 leading-relaxed">{lesson.title}</span>
 
                     {/* Duration */}
                     <span className="text-[10px] text-muted-foreground shrink-0">{lesson.estimated_minutes}м</span>
-                  </button>
+                  </Button>
                 );
               })}
             </div>
@@ -134,10 +136,11 @@ const LearnSidebar = ({ modules, lessons, completedIds, activeLessonId, onSelect
             const isActive = lesson.id === activeLessonId;
             const isCompleted = completedIds.has(lesson.id);
             return (
-              <button
+              <Button animated={false} variant="ghost"
                 key={lesson.id}
                 onClick={() => onSelectLesson(lesson.id)}
-                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left transition-all text-xs ${
+                aria-current={isActive ? "step" : undefined}
+                className={`w-full h-auto min-h-14 flex items-center gap-2.5 px-3 py-3 rounded-lg text-left whitespace-normal text-sm ${
                   isActive
                     ? "bg-primary/15 border-l-[3px] border-primary text-foreground"
                     : isCompleted
@@ -153,9 +156,9 @@ const LearnSidebar = ({ modules, lessons, completedIds, activeLessonId, onSelect
                   <Circle className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0" />
                 )}
                 <span className="text-sm shrink-0">{LESSON_TYPE_ICONS[lesson.lesson_type] || "📄"}</span>
-                <span className="truncate flex-1">{lesson.title}</span>
+                <span className="min-w-0 break-words flex-1 leading-relaxed">{lesson.title}</span>
                 <span className="text-[10px] text-muted-foreground shrink-0">{lesson.estimated_minutes}м</span>
-              </button>
+              </Button>
             );
           })}
         </div>

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Maximize2, Minimize2 } from "lucide-react";
+import { Maximize2, Minimize2, ZoomIn, ZoomOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
 /**
@@ -226,6 +227,8 @@ export default function HtmlSlides({ html, syncKey, className, progress }: { htm
   const wrap = useRef<HTMLDivElement>(null);
   const [box, setBox] = useState({ w: 0, h: 0 });
   const [full, setFull] = useState(false);
+  const [readable, setReadable] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   useEffect(() => {
     const el = wrap.current;
     if (!el) return;
@@ -236,33 +239,44 @@ export default function HtmlSlides({ html, syncKey, className, progress }: { htm
     return () => { ro.disconnect(); document.removeEventListener("fullscreenchange", onFs); };
   }, []);
   const toggleFull = () => {
-    if (document.fullscreenElement) document.exitFullscreen?.();
-    else wrap.current?.requestFullscreen?.().catch(() => {});
+    if (expanded) { setExpanded(false); return; }
+    if (document.fullscreenElement) { void document.exitFullscreen?.(); return; }
+    const el = wrap.current;
+    if (!el) return;
+    if (el.requestFullscreen) void el.requestFullscreen().catch(() => setExpanded(true));
+    else setExpanded(true);
   };
   // На вузьких екранах рендеримо як десктоп (640px) і пропорційно зменшуємо.
-  const scale = box.w > 0 && box.w < BASE_W ? box.w / BASE_W : 1;
+  const narrow = box.w > 0 && box.w < BASE_W;
+  const scale = narrow && !readable ? box.w / BASE_W : 1;
 
   return (
-    <div ref={wrap} className={`relative overflow-hidden bg-background ${className ?? "h-full w-full rounded-lg"}`}>
+    <div ref={wrap} className={`${expanded ? "fixed inset-0 z-[100] h-[100dvh] w-screen" : "relative"} overflow-hidden bg-background ${expanded ? "" : className ?? "h-full w-full rounded-lg"}`}>
+      <div className="absolute inset-x-0 top-0 bottom-14 overflow-auto overscroll-contain">
       <iframe
         ref={frame}
         title="Інтерактивна презентація"
         srcDoc={srcDoc}
         onLoad={() => { void restore(); }}
         sandbox="allow-scripts allow-forms allow-modals"
-        className="absolute left-0 top-0 border-0 bg-background"
+        className="block border-0 bg-background"
         style={scale < 1
-          ? { width: BASE_W, height: box.h / scale, transform: `scale(${scale})`, transformOrigin: "0 0" }
-          : { width: "100%", height: "100%" }}
+          ? { width: BASE_W, height: Math.max(0, box.h - 56) / scale, transform: `scale(${scale})`, transformOrigin: "0 0" }
+          : { width: narrow && readable ? BASE_W : "100%", height: "100%" }}
       />
-      <button
+      </div>
+      <div className="absolute inset-x-0 bottom-0 flex h-14 items-center justify-end gap-2 border-t border-border bg-background px-2 pb-[env(safe-area-inset-bottom)]">
+        {narrow && <Button animated={false} variant="outline" className="h-11 mr-auto" onClick={() => setReadable((value) => !value)} aria-pressed={readable}>{readable ? <ZoomOut /> : <ZoomIn />}{readable ? "Вмістити" : "Збільшити"}</Button>}
+      <Button animated={false} variant="ghost" size="icon"
         type="button"
         onClick={toggleFull}
-        aria-label={full ? "Вийти з повного екрана" : "На весь екран"}
-        className="absolute bottom-2 right-2 z-10 rounded-lg border border-border bg-card/80 p-1.5 text-foreground backdrop-blur hover:bg-card"
+        aria-label={full || expanded ? "Вийти з повного екрана" : "На весь екран"}
+        title={full || expanded ? "Вийти з повного екрана" : "На весь екран"}
+        className="h-11 w-11 text-foreground"
       >
-        {full ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-      </button>
+        {full || expanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+      </Button>
+      </div>
     </div>
   );
 }
