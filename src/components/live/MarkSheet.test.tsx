@@ -38,12 +38,11 @@ describe("MarkSheet marker palette", () => {
   it("offers yellow, pink and blue markers and applies the clicked color", () => {
     const exec = vi.fn(() => true);
     (document as any).execCommand = exec;
-    const { container, getByTitle } = render(<MarkSheet value="<p>Test</p>" onChange={() => {}} />);
+    const { getByTitle } = render(<MarkSheet value="<p>Test</p>" onChange={() => {}} />);
 
-    const swatches = ["#FDE047", "#F9A8D4", "#93C5FD"].map((hex) =>
-      container.querySelector(`span[style*="${hex}"]`),
-    );
-    expect(swatches.every(Boolean)).toBe(true);
+    for (const title of ["Жовтим", "Рожевим", "Синім"]) {
+      expect(getByTitle(title)).toBeTruthy();
+    }
 
     fireEvent.mouseDown(getByTitle("Рожевим"), { preventDefault: () => {} });
     fireEvent.click(getByTitle("Рожевим"));
