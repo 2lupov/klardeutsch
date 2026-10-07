@@ -41,6 +41,8 @@ export default function LiveReading({
   const [saveOpen, setSaveOpen] = useState(false);
   const [hwOpen, setHwOpen] = useState(false);
 
+  const [prep, setPrep] = useState<"idle" | "busy" | "ok" | "partial">("idle");
+
   const generate = async () => {
     setBusy(true);
     setLessonTopic(classId, theme);
@@ -51,16 +53,16 @@ export default function LiveReading({
       if (error || (data as any)?.error) throw new Error((data as any)?.error || error?.message);
       const t = (data as any).topic as ReadingTopic;
       pushTopic(t, paragraphsToHtml(t.text_de || ""));
-      const lessonTheme = theme.trim() || t.title_de || "";
-      if (lessonTheme) {
-        setLessonTopic(classId, lessonTheme);
-        toast.info("Готую Граматику й Письмо на цю тему…");
-        void prefillGrammarAndWriting({ classId, level, theme: lessonTheme, grammarFocus: t.grammar_focus?.[0], studentId })
-          .then((r) => {
-            if (r.grammar && r.writing) toast.success("Граматика й Письмо готові");
-            else toast.warning("Не все вдалося підготувати — згенеруйте вручну у відповідному розділі");
-          });
-      }
+      setLessonTopic(classId, theme.trim() || t.title_de || "");
+      setPrep("busy");
+      void prefillGrammarAndWriting({
+        classId, level, studentId,
+        source: { text: t.text_de || "", title: t.title_de || theme, questions: t.questions || [], grammar: t.grammar_focus || [] },
+      }).then((r) => {
+        setPrep(r.grammar && r.writing ? "ok" : "partial");
+        if (r.grammar && r.writing) toast.success("Граматика й Письмо по цьому тексту готові");
+        else toast.warning("Не все вдалося підготувати — натисніть «Створити по тексту» у відповідному розділі");
+      });
     } catch (e: any) {
       toast.error(e?.message || "Не вдалося створити текст");
     } finally {
@@ -70,33 +72,50 @@ export default function LiveReading({
 
   return (
     <div className={cn("grid min-h-0 gap-3 grid-cols-1 xl:grid-cols-[minmax(0,340px)_minmax(0,1fr)]", className)}>
-      {/* Параметри й розбір */}
+      {/* Пульт уроку: тут задається тема й текст для всього заняття */}
       <aside className="min-h-0 space-y-4 overflow-y-auto rounded-2xl border border-border bg-card/80 p-4 shadow-sm backdrop-blur">
         <div className="flex items-center gap-2 text-primary">
           <span className="grid size-8 place-items-center rounded-xl bg-primary/15"><BookOpen className="h-4 w-4" /></span>
-          <span className="text-xs font-bold uppercase tracking-widest">Текст для читання</span>
+          <div className="min-w-0">
+            <p className="text-xs font-bold uppercase tracking-widest">Читання · тема уроку</p>
+            <p className="text-[11px] text-muted-foreground">Звідси будуються Граматика й Письмо</p>
+          </div>
           {topic?.level && <span className="ml-auto rounded-md bg-primary/10 px-2 py-0.5 text-xs font-bold">{topic.level}</span>}
         </div>
 
         {role === "teacher" && (
-          <div className="space-y-2">
-            <div className="grid grid-cols-5 gap-1">
-              {LEVELS.map((l) => (
-                <Button key={l} animated={false} size="sm" variant={l === level ? "default" : "outline"} className="h-8 px-0" onClick={() => setLevel(l)}>{l}</Button>
-              ))}
+          <div className="space-y-3 rounded-2xl border border-primary/30 bg-primary/5 p-3">
+            <Input value={theme} onChange={(e) => setTheme(e.target.value)} placeholder="Тема уроку: Reise, Wohnung, Arbeit…" className="h-10 text-base font-semibold" />
+            <div>
+              <p className="pb-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Рівень</p>
+              <div className="grid grid-cols-5 gap-1">
+                {LEVELS.map((l) => (
+                  <Button key={l} animated={false} size="sm" variant={l === level ? "default" : "outline"} className="h-8 px-0" onClick={() => setLevel(l)}>{l}</Button>
+                ))}
+              </div>
             </div>
-            <div className="grid grid-cols-5 gap-1">
-              {SIZES.map((w) => (
-                <Button key={w} animated={false} size="sm" variant={w === words ? "default" : "outline"} className="h-8 px-0 text-xs" onClick={() => setWords(w)}>{w}</Button>
-              ))}
+            <div>
+              <p className="pb-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Слів у тексті</p>
+              <div className="grid grid-cols-5 gap-1">
+                {SIZES.map((w) => (
+                  <Button key={w} animated={false} size="sm" variant={w === words ? "default" : "outline"} className="h-8 px-0 text-xs" onClick={() => setWords(w)}>{w}</Button>
+                ))}
+              </div>
             </div>
-            <Input value={theme} onChange={(e) => setTheme(e.target.value)} placeholder="Тема (необов'язково)" className="h-8 text-sm" />
-            <Button animated={false} className="w-full" onClick={generate} disabled={busy}>
+            <Button animated={false} className="h-10 w-full" onClick={generate} disabled={busy}>
               {busy ? <Loader2 className="animate-spin" /> : topic ? <Dices /> : <Sparkles />}
-              {busy ? "Створюємо…" : topic ? "Інший текст" : "Створити текст"}
+              {busy ? "Створюємо…" : topic ? "Новий текст і урок" : "Створити урок"}
             </Button>
+            <div className="grid grid-cols-3 gap-1 text-center text-[11px]">
+              {[["Текст", topic ? "ok" : "idle"], ["Граматика", prep], ["Письмо", prep]].map(([k, s]) => (
+                <span key={k} className={cn("rounded-lg border px-1.5 py-1", s === "ok" ? "border-primary/50 bg-primary/10 text-primary" : s === "busy" ? "border-accent/50 text-accent-foreground animate-pulse" : s === "partial" ? "border-destructive/50 text-destructive" : "border-border text-muted-foreground")}>
+                  {s === "ok" ? "✓ " : s === "busy" ? "… " : ""}{k}
+                </span>
+              ))}
+            </div>
           </div>
         )}
+
 
         {topic ? (
           <div className="space-y-3 text-sm">

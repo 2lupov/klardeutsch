@@ -8,12 +8,14 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { paragraphsToHtml, plain } from "@/lib/rich-text";
 import { createFolder, createItem, fetchFolders, type MaterialFolder } from "@/lib/materials";
-import { getLessonTopic, setLessonTopic } from "@/lib/live-class";
+import { generateGrammarFromText, getReadingSource } from "@/lib/live-prefill";
 import MarkSheet from "@/components/live/MarkSheet";
 import { useLiveGrammar, type GrammarLesson } from "@/components/live/useLiveGrammar";
 
 const LEVELS = ["A1", "A2", "B1", "B2", "C1"];
-const COUNTS = [5, 10, 20, 30, 50];
+const COUNTS = [8, 12, 16, 24, 32];
+
+const KIND_LABEL: Record<string, string> = { gap: "Пропуск", choice: "Вибір", order: "Порядок слів", transform: "Перетворення" };
 
 const lessonHtml = (l: GrammarLesson) =>
   `${l.reading?.title_de ? `<p><b>${l.reading.title_de}</b></p>` : ""}${paragraphsToHtml(l.reading?.text_de || "")}`;
@@ -37,22 +39,17 @@ export default function LiveGrammar({
 }) {
   const { lesson, marks, notes, revealed, remote, push, pushLesson, toggleReveal, onRemote } = useLiveGrammar(classId);
   const [level, setLevel] = useState("A2");
-  const [count, setCount] = useState(6);
-  const [topic, setTopic] = useState(() => getLessonTopic(classId));
+  const [count, setCount] = useState(16);
   const [busy, setBusy] = useState(false);
   const [saveOpen, setSaveOpen] = useState(false);
   const [hwOpen, setHwOpen] = useState(false);
 
   const generate = async () => {
-    if (!topic.trim()) { toast.error("Напишіть тему, напр. «Perfekt» або «Dativ»"); return; }
     setBusy(true);
-    setLessonTopic(classId, topic);
     try {
-      const { data, error } = await supabase.functions.invoke("generate-grammar-lesson", {
-        body: { level, topic: topic.trim(), examples: count, student_id: studentId, reading_words: level === "A1" ? 70 : 110 },
-      });
-      if (error || (data as any)?.error) throw new Error((data as any)?.error || error?.message);
-      const l = (data as any).lesson as GrammarLesson;
+      const source = await getReadingSource(classId);
+      if (!source) throw new Error("Спершу створіть текст у «Читанні» — граматика буде саме по ньому");
+      const l = (await generateGrammarFromText({ level, source, count, studentId })) as GrammarLesson;
       pushLesson(l, lessonHtml(l));
     } catch (e: any) {
       toast.error(e?.message || "Не вдалося створити урок");
@@ -79,17 +76,17 @@ export default function LiveGrammar({
                 <Button key={l} animated={false} size="sm" variant={l === level ? "default" : "outline"} className="h-8 px-0" onClick={() => setLevel(l)}>{l}</Button>
               ))}
             </div>
-            <p className="pt-1 text-[10px] font-bold uppercase text-muted-foreground">Приклади і вправи (до 50)</p>
+            <p className="pt-1 text-[10px] font-bold uppercase text-muted-foreground">Скільки завдань</p>
             <div className="grid grid-cols-5 gap-1">
               {COUNTS.map((c) => (
                 <Button key={c} animated={false} size="sm" variant={c === count ? "default" : "outline"} className="h-8 px-0 text-xs" onClick={() => setCount(c)}>{c}</Button>
               ))}
             </div>
             <Input type="number" min={3} max={50} value={count} onChange={(e) => setCount(Math.min(50, Math.max(1, Number(e.target.value) || 1)))} className="h-8 text-sm" aria-label="Кількість вправ" />
-            <Input value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="Тема: Perfekt, Dativ, Nebensatz…" className="h-8 text-sm" />
+            <p className="rounded-lg bg-muted/50 px-2.5 py-2 text-xs text-muted-foreground">📖 Завдання будуються по тексту з «Читання»</p>
             <Button animated={false} className="w-full bg-foreground text-background hover:bg-foreground/90" onClick={generate} disabled={busy}>
               {busy ? <Loader2 className="animate-spin" /> : lesson ? <Dices /> : <Sparkles />}
-              {busy ? "Готуємо урок…" : lesson ? "Ще один урок" : "Створити урок"}
+              {busy ? "Готуємо урок…" : lesson ? "Інші завдання по тексту" : "Створити по тексту"}
             </Button>
           </div>
         )}
@@ -152,7 +149,7 @@ export default function LiveGrammar({
           </div>
         ) : (
           <p className="text-sm text-muted-foreground">
-            {role === "teacher" ? "Оберіть тему, рівень і кількість прикладів." : "Викладач зараз підготує урок граматики."}
+            {role === "teacher" ? "Створіть текст у «Читанні» — граматика з\u2019явиться сама." : "Викладач зараз підготує урок граматики."}
           </p>
         )}
       </aside>
@@ -161,7 +158,7 @@ export default function LiveGrammar({
       <div className="flex min-h-0 flex-col gap-3">
         {!!lesson?.examples?.length && (
           <div className="max-h-[38%] shrink-0 space-y-1.5 overflow-y-auto rounded-2xl border border-border bg-card p-4 shadow-sm">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Приклади і вправи (до 50)</p>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Речення з тексту</p>
             {lesson.examples.map((ex, i) => (
               <div key={i} className="grid grid-cols-[2rem_1fr] gap-2 border-b border-border px-1 py-3 text-sm last:border-0">
                 <span className="grid size-7 place-items-center rounded-full bg-accent/20 text-[11px] font-bold text-foreground">{i + 1}</span>
@@ -197,7 +194,15 @@ export default function LiveGrammar({
               <div key={i} className="space-y-2 border-b border-border py-3 text-sm last:border-0">
                 <div className="flex items-start gap-2">
                   <span className="font-mono text-xs text-muted-foreground">{String(i + 1).padStart(2, "0")}.</span>
-                  <p className="flex-1 font-medium text-foreground">{t.prompt}</p>
+                  <div className="flex-1 space-y-1.5">
+                    {t.kind && <span className="inline-block rounded-md bg-accent/20 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-foreground">{KIND_LABEL[t.kind] ?? t.kind}</span>}
+                    <p className="font-medium text-foreground">{t.prompt}</p>
+                    {!!t.options?.length && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {t.options.map((o, j) => <span key={j} className="rounded-full border border-border bg-muted/40 px-2.5 py-0.5 text-xs text-foreground">{o}</span>)}
+                      </div>
+                    )}
+                  </div>
                   <Button animated={false} size="icon" variant="ghost" className="h-7 w-7 shrink-0" onClick={() => toggleReveal(i)}
                     title={revealed.includes(i) ? "Сховати відповідь" : "Показати відповідь"}>
                     {revealed.includes(i) ? <EyeOff /> : <Eye />}

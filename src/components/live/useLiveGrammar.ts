@@ -4,7 +4,7 @@ import { toHtml } from "@/lib/rich-text";
 
 export interface GrammarRule { title?: string; explanation_uk?: string; table?: string[] }
 export interface GrammarExample { de?: string; uk?: string; focus?: string }
-export interface GrammarTask { prompt?: string; answer?: string; hint_uk?: string }
+export interface GrammarTask { kind?: "gap" | "choice" | "order" | "transform"; options?: string[]; prompt?: string; answer?: string; hint_uk?: string }
 
 export interface GrammarLesson {
   title?: string;
