@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Highlighter, Underline, Bold, Strikethrough, Eraser } from "lucide-react";
+import { Underline, Bold, Strikethrough, Eraser } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HIGHLIGHT_COLORS, SHEET_STYLE, applyRemoteHtml } from "@/lib/rich-text";
 import { cn } from "@/lib/utils";
