@@ -47,7 +47,7 @@ export default function PresentationsPage() {
           { key: "courses", label: courseCount ? `Мінікурси · ${courseCount}` : "Мінікурси", icon: Sparkles },
         ]}
         active={tab}
-        onChange={setTab}
+        onChange={(k) => setTab(k as "slides" | "courses")}
       />
       {tab === "slides" ? <SlidesTab /> : <CoursesTab onCount={setCourseCount} />}
       {/* лічильник мінікурсів підтягуємо у фоні, щоб вкладка не була «порожньою на вигляд» */}
