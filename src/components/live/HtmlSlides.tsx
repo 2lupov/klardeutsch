@@ -179,7 +179,11 @@ export default function HtmlSlides({ html, syncKey, className, progress }: { htm
       const { data } = await (supabase as any).from("presentation_progress").select("log")
         .eq("student_id", progress.studentId).eq("presentation_id", progress.presentationId).maybeSingle();
       rows = (data?.log as any[]) || [];
-      if (!rows.length) { try { rows = JSON.parse(localStorage.getItem(`klar-pres:${pk}`) || "[]"); } catch { rows = []; } }
+      // беремо повніший журнал: локальний міг не встигнути дійти до сервера
+      let local: any[] = [];
+      try { local = JSON.parse(localStorage.getItem(`klar-pres:${pk}`) || "[]"); } catch { local = []; }
+      const fromLocal = local.length > rows.length;
+      if (fromLocal) rows = local;
       log.current = rows;
       for (const m of rows) {
         frame.current?.contentWindow?.postMessage({ __klarIn: m }, "*");
