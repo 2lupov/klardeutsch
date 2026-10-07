@@ -545,18 +545,38 @@ export default function BoardEditor({
 
   /* ─────────── drag & drop (textbook pages / files) ─────────── */
 
+  const isImageFile = (f: File) =>
+    f.type.startsWith("image/") || /\.(png|jpe?g|gif|webp|heic|heif|bmp)$/i.test(f.name);
+
   const onDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     setDropHint(false);
     const at = world(e.clientX, e.clientY);
-    const url =
-      e.dataTransfer.getData("application/x-board-image") ||
-      e.dataTransfer.getData("text/uri-list") ||
-      e.dataTransfer.getData("text/plain");
-    if (url && /^https?:\/\//.test(url.trim())) { placeImage(url.trim(), at); return; }
-    const file = e.dataTransfer.files?.[0];
-    if (file && file.type.startsWith("image/")) await uploadImage(file, at);
+    const own = e.dataTransfer.getData("application/x-board-image");
+    if (own) { placeImage(own, at); return; }
+    // Файли (Telegram, провідник, браузер) мають пріоритет над посиланнями.
+    const files = Array.from(e.dataTransfer.files || []).filter(isImageFile);
+    if (files.length) {
+      for (const [i, f] of files.entries()) await uploadImage(f, i === 0 ? at : undefined);
+      return;
+    }
+    const url = (e.dataTransfer.getData("text/uri-list") || e.dataTransfer.getData("text/plain")).trim().split("\n")[0];
+    if (url && /^https?:\/\//.test(url)) placeImage(url, at);
   };
+
+  // Ctrl/⌘+V: фото, скопійоване з Telegram, одразу на дошку.
+  useEffect(() => {
+    const onPaste = (e: ClipboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+      const files = Array.from(e.clipboardData?.files || []).filter(isImageFile);
+      if (!files.length) return;
+      e.preventDefault();
+      files.forEach((f) => { void uploadImage(f); });
+    };
+    window.addEventListener("paste", onPaste);
+    return () => window.removeEventListener("paste", onPaste);
+  });
 
   /* ─────────── upload ─────────── */
 
