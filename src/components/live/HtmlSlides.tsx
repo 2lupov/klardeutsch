@@ -199,7 +199,7 @@ export default function HtmlSlides({ html, syncKey, className, progress }: { htm
         const done = () => frame.current?.contentWindow?.postMessage({ __klarTtsEnd: 1 }, "*");
         if (tts.cancel) { ttsAudio?.pause(); return; }
         if (restoring.current) { done(); return; }
-        playTts(tts.text, tts.lang, tts.rate).then(done).catch(() => browserTts(tts.text, tts.lang, tts.rate, done));
+        playTts(tts.text, tts.lang, tts.rate).then(done).catch(done);
         return;
       }
       if (!e.data?.__klar) return;
