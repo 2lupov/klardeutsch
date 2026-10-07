@@ -1,4 +1,3 @@
-import { assignPresentationHomework } from "@/lib/presentations";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -169,8 +168,21 @@ export default function LiveClassPage() {
   );
 }
 
-async function ensurePresentationHomework(teacherId: string, studentId: string, presentationId: string) {
-  try { await assignPresentationHomework(teacherId, studentId, presentationId); } catch { /* не інтерактивна */ }
+/** Нотатки «острівцем» поверх будь-якого розділу — без переходу. */
+function NotesIsland({ cls }: { cls: LiveClass }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="fixed bottom-20 right-4 z-50 flex flex-col items-end gap-2">
+      {open && (
+        <div className="w-[min(92vw,380px)] h-[min(60vh,460px)] rounded-2xl border border-border bg-card/95 backdrop-blur-xl shadow-2xl flex flex-col p-2">
+          <LiveNotes classId={cls.id} role="teacher" studentId={cls.student_id} teacherId={cls.teacher_id} className="flex-1" />
+        </div>
+      )}
+      <Button animated={false} onClick={() => setOpen((o) => !o)} className="rounded-full shadow-lg">
+        {open ? "✕ Закрити" : "📝 Нотатки"}
+      </Button>
+    </div>
+  );
 }
 
 /** Розділи, де «Показати учню» — одна дія. Для решти матеріал обирається всередині панелі. */
@@ -220,7 +232,6 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
     try {
       await setLiveView(cls.id, s, view);
       setStudentView({ section: s, view });
-      if (view?.type === "slide") void ensurePresentationHomework(cls.teacher_id, cls.student_id, view.presentation_id);
       if (!silent) toast({ title: "Учня перенесено", description: LIVE_SECTIONS.find((x) => x.key === s)?.label });
     } catch (e: any) {
       toast({ title: "Не вдалося перенести", description: e.message, variant: "destructive" });
@@ -420,6 +431,8 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
           </button>
         ))}
       </nav>
+
+      {section !== "notes" && <NotesIsland cls={cls} />}
 
       {endOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onMouseDown={() => setEndOpen(false)}>
