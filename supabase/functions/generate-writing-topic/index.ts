@@ -24,10 +24,22 @@ Deno.serve(async (req) => {
     const level = LEVELS.includes(body?.level) ? body.level : "A2";
     const avoid = String(body?.avoid ?? "").slice(0, 200);
     const theme = String(body?.theme ?? "").slice(0, 200).trim();
+    const source = String(body?.source_text ?? "").slice(0, 6000).trim();
     const apiKey = Deno.env.get("LOVABLE_API_KEY");
     if (!apiKey) return json({ error: "AI не налаштовано" }, 500);
 
-    const prompt = `Ти — викладач німецької. Придумай ОДНУ ${theme ? "" : "випадкову, "}життєву тему письма (лист, повідомлення, e-mail) для рівня ${level} у стилі іспиту Goethe/telc.
+    const prompt = source
+      ? `Ти — викладач німецької. Учень прочитав текст (рівень ${level}):
+"""
+${source}
+"""
+Склади письмове завдання: учень ПИСЬМОВО відповідає на питання ПО ЦЬОМУ ТЕКСТУ повними реченнями.
+"points" — 5 питань німецькою: 3 на розуміння фактів із тексту (W-Fragen), 1 на причину/зв'язок, 1 на власну думку учня щодо ситуації з тексту.
+Питання — лексикою рівня ${level}.
+Поверни СТРОГО JSON без markdown:
+{"title_de":"Fragen zum Text: <назва тексту>","situation_uk":"1 речення українською: відповідай на питання до тексту повними реченнями","task_de":"Beantworten Sie die Fragen zum Text in ganzen Sätzen.","points":["5 питань німецькою"],"redemittel":["5-6 фраз-опор німецькою, напр. Im Text steht, dass … / Meiner Meinung nach …"],"min_words":число}
+min_words: A1≈30, A2≈50, B1≈80, B2≈120, C1≈160.`
+      : `Ти — викладач німецької. Придумай ОДНУ ${theme ? "" : "випадкову, "}життєву тему письма (лист, повідомлення, e-mail) для рівня ${level} у стилі іспиту Goethe/telc.
 ${theme ? `Тема уроку: "${theme}" — завдання має бути саме про це.` : avoid ? `Не повторюй тему: "${avoid}".` : ""}
 Поверни СТРОГО JSON без markdown:
 {"title_de":"коротка назва німецькою","situation_uk":"ситуація українською, 1-2 речення","task_de":"завдання німецькою так, як в іспиті","points":["3-4 пункти німецькою, про що написати"],"redemittel":["4-6 корисних фраз німецькою"],"min_words":число}
