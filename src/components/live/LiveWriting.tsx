@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { toHtml, plain, applyRemoteHtml, HIGHLIGHT_COLORS } from "@/lib/rich-text";
-import { getLessonTopic } from "@/lib/live-class";
+import { generateWritingFromText, getReadingSource } from "@/lib/live-prefill";
 
 export interface WritingTopic {
   title_de?: string;

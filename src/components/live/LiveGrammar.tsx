@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { paragraphsToHtml, plain } from "@/lib/rich-text";
 import { createFolder, createItem, fetchFolders, type MaterialFolder } from "@/lib/materials";
-import { getLessonTopic, setLessonTopic } from "@/lib/live-class";
+import { generateGrammarFromText, getReadingSource } from "@/lib/live-prefill";
 import MarkSheet from "@/components/live/MarkSheet";
 import { useLiveGrammar, type GrammarLesson } from "@/components/live/useLiveGrammar";
 
