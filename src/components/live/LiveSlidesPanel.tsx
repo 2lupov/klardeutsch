@@ -10,6 +10,7 @@ import {
 import HtmlSlides from "./HtmlSlides";
 import { Code2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Презентація в живому уроці для викладача: одна робоча область на висоту екрана.
@@ -48,19 +49,37 @@ export default function LiveSlidesPanel({
 
   useEffect(() => {
     listPresentationFolders().then(setFolders).catch(() => {});
-    listPresentations()
-      .then((rows) => {
-        setList(rows);
-        let saved: { id?: string; page?: number } = {};
-        try { saved = JSON.parse(localStorage.getItem(`klar-live-pres:${classId}`) || "{}"); } catch { /* ignore */ }
-        const cur = current ? rows.find((p) => p.id === current.presentation_id) : null;
-        const last = saved.id ? rows.find((p) => p.id === saved.id) : null;
-        const pick = cur ?? last ?? rows.find((p) => !p.archived) ?? null;
-        setSelected(pick);
-        if (!cur && last && saved.page) setPage(saved.page);
-      })
-      .catch((e) => toast({ title: "Не вдалося завантажити презентації", description: e.message, variant: "destructive" }));
+    (async () => {
+      const rows = await listPresentations();
+      setList(rows);
+      const read = (k: string) => { try { return JSON.parse(localStorage.getItem(k) || "{}"); } catch { return {}; } };
+      let saved: { id?: string; page?: number } = read(`klar-live-pres:${classId}`);
+      // Новий урок — продовжуємо з того місця, де зупинились з цим учнем
+      if (!saved.id && studentId) saved = read(`klar-live-pres:student:${studentId}`);
+      if (!saved.id && studentId) {
+        const { data } = await supabase.from("live_classes").select("live_view")
+          .eq("teacher_id", teacherId).eq("student_id", studentId)
+          .order("created_at", { ascending: false }).limit(10);
+        const v = (data || []).map((r: any) => r.live_view).find((x: any) => x?.type === "slide");
+        if (v) saved = { id: v.presentation_id, page: v.page };
+      }
+      const cur = current ? rows.find((p) => p.id === current.presentation_id) : null;
+      const last = saved.id ? rows.find((p) => p.id === saved.id) : null;
+      const pick = cur ?? last ?? rows.find((p) => !p.archived) ?? null;
+      setSelected(pick);
+      if (!cur && last && saved.page) setPage(saved.page);
+    })().catch((e) => toast({ title: "Не вдалося завантажити презентації", description: e.message, variant: "destructive" }));
   }, []);
+
+  // запам'ятовуємо презентацію і слайд — після оновлення сторінки чи на наступному уроці відкриється те саме
+  useEffect(() => {
+    if (!selected) return;
+    const v = JSON.stringify({ id: selected.id, page });
+    try {
+      if (classId) localStorage.setItem(`klar-live-pres:${classId}`, v);
+      if (studentId) localStorage.setItem(`klar-live-pres:student:${studentId}`, v);
+    } catch { /* ignore */ }
+  }, [classId, studentId, selected?.id, page]);
 
   useEffect(() => {
     setUrls([]);
@@ -76,12 +95,6 @@ export default function LiveSlidesPanel({
     }
     slideUrls(selected.slide_paths).then(setUrls).catch(() => setUrls([]));
   }, [selected?.id]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // запам'ятовуємо презентацію і слайд — після оновлення сторінки відкриється те саме
-  useEffect(() => {
-    if (!classId || !selected) return;
-    try { localStorage.setItem(`klar-live-pres:${classId}`, JSON.stringify({ id: selected.id, page })); } catch { /* ignore */ }
-  }, [classId, selected?.id, page]);
 
   const interactive = !!selected && isInteractive(selected);
   const selectedHtml = selected ? htmlById[selected.id] : undefined;
