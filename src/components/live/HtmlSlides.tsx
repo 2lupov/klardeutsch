@@ -185,6 +185,7 @@ export default function HtmlSlides({ html, syncKey, className, progress }: { htm
       const fromLocal = local.length > rows.length;
       if (fromLocal) rows = local;
       log.current = rows;
+      if (fromLocal) flush();
       for (const m of rows) {
         frame.current?.contentWindow?.postMessage({ __klarIn: m }, "*");
         await new Promise((r) => setTimeout(r, 15));
