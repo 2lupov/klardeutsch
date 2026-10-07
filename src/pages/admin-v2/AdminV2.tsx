@@ -184,7 +184,7 @@ export default function AdminV2() {
           {!collapsed && (
             <div className="flex flex-col leading-tight">
               <span className="font-semibold text-admin-fg text-sm">KLAR Academy</span>
-              <span className="text-[11px] text-admin-muted">Адмін-панель</span>
+              <span className="text-[11px] text-admin-muted">Панель</span>
             </div>
           )}
         </div>
