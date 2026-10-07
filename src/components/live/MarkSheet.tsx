@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
-import { Highlighter, Underline, Bold, Strikethrough, Eraser } from "lucide-react";
+import { Underline, Bold, Strikethrough, Eraser } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { HIGHLIGHT, SHEET_STYLE, applyRemoteHtml } from "@/lib/rich-text";
+import { HIGHLIGHT_COLORS, SHEET_STYLE, applyRemoteHtml } from "@/lib/rich-text";
 import { cn } from "@/lib/utils";
 
 /**
@@ -63,13 +63,14 @@ export default function MarkSheet({
     <section className={cn("flex min-h-0 flex-col overflow-hidden rounded-2xl border border-border bg-card", className)}>
       {!readOnly && (
         <div className="flex h-10 shrink-0 items-center gap-1 border-b border-border bg-muted/30 px-3">
-          <Button animated={false} size="sm" variant="ghost" className="h-7 gap-1.5 px-2 text-xs"
-            onMouseDown={(e) => e.preventDefault()} onClick={() => format("hiliteColor", HIGHLIGHT)} title="Виділити жовтим">
-            <span className="grid size-5 place-items-center rounded" style={{ background: HIGHLIGHT }}>
-              <Highlighter className="h-3.5 w-3.5 text-slate-900" />
-            </span>
-            Жовтим
-          </Button>
+          <div className="flex items-center gap-0.5 rounded-lg border border-border bg-background/60 p-0.5">
+            {HIGHLIGHT_COLORS.map((c) => (
+              <Button key={c.hex} animated={false} size="icon" variant="ghost" className="h-6 w-6 rounded-md"
+                onMouseDown={(e) => e.preventDefault()} onClick={() => format("hiliteColor", c.hex)} title={c.name}>
+                <span className="size-4 rounded-full ring-1 ring-inset ring-black/10" style={{ background: c.hex }} />
+              </Button>
+            ))}
+          </div>
           {!highlightOnly && (
             <>
               <Button animated={false} size="icon" variant="ghost" className="h-7 w-7" onMouseDown={(e) => e.preventDefault()} onClick={() => format("underline")} title="Підкреслити"><Underline /></Button>

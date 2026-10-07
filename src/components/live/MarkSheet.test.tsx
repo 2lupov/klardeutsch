@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, fireEvent } from "@testing-library/react";
 import { useState } from "react";
 import MarkSheet from "@/components/live/MarkSheet";
@@ -31,5 +31,26 @@ describe("MarkSheet first-keystroke regression", () => {
     const { container } = render(<Harness initial="<p>Servus</p>" />);
     const ed = container.querySelector("[contenteditable]") as HTMLElement;
     expect(ed.innerHTML).toBe("<p>Servus</p>");
+  });
+});
+
+describe("MarkSheet marker palette", () => {
+  it("offers yellow, pink and blue markers and applies the clicked color", () => {
+    const exec = vi.fn(() => true);
+    (document as any).execCommand = exec;
+    const { getByTitle } = render(<MarkSheet value="<p>Test</p>" onChange={() => {}} />);
+
+    for (const title of ["Жовтим", "Рожевим", "Синім"]) {
+      expect(getByTitle(title)).toBeTruthy();
+    }
+
+    fireEvent.mouseDown(getByTitle("Рожевим"), { preventDefault: () => {} });
+    fireEvent.click(getByTitle("Рожевим"));
+    expect(exec).toHaveBeenCalledWith("styleWithCSS", false, "true");
+    expect(exec).toHaveBeenCalledWith("hiliteColor", false, "#F9A8D4");
+
+    fireEvent.click(getByTitle("Синім"));
+    expect(exec).toHaveBeenCalledWith("hiliteColor", false, "#93C5FD");
+    delete (document as any).execCommand;
   });
 });

@@ -2,6 +2,13 @@
 
 export const HIGHLIGHT = "#FDE047";
 
+/** Палітра маркерів для живих аркушів (жовтий, рожевий, синій). */
+export const HIGHLIGHT_COLORS = [
+  { name: "Жовтим", hex: "#FDE047" },
+  { name: "Рожевим", hex: "#F9A8D4" },
+  { name: "Синім", hex: "#93C5FD" },
+] as const;
+
 const ALLOWED_TAGS = new Set(["B", "STRONG", "I", "EM", "U", "S", "STRIKE", "DEL", "BR", "P", "DIV", "SPAN", "MARK", "UL", "OL", "LI", "FONT", "SUB", "SUP", "H1", "H2", "H3", "BLOCKQUOTE"]);
 const DROP_TAGS = new Set(["SCRIPT", "STYLE", "IFRAME", "OBJECT", "EMBED", "LINK", "META", "BASE", "FORM", "INPUT", "BUTTON", "TEXTAREA", "SELECT", "SVG", "MATH", "TEMPLATE", "NOSCRIPT", "AUDIO", "VIDEO", "IMG", "PICTURE", "SOURCE", "TRACK", "CANVAS", "FRAME", "FRAMESET", "APPLET"]);
 const ALLOWED_STYLE_PROPS = new Set(["color", "background", "background-color", "font-weight", "font-style", "text-decoration", "text-decoration-line", "text-decoration-color", "text-decoration-style"]);

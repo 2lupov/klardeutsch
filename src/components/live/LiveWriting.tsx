@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { Loader2, Sparkles, PenLine, Dices, Highlighter, Underline, Bold, Strikethrough, Eraser, FolderDown } from "lucide-react";
+import { Loader2, Sparkles, PenLine, Dices, Underline, Bold, Strikethrough, Eraser, FolderDown } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { fetchFolders, createFolder, createItem, type MaterialFolder } from "@/lib/materials";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { toHtml, plain, applyRemoteHtml } from "@/lib/rich-text";
+import { toHtml, plain, applyRemoteHtml, HIGHLIGHT_COLORS } from "@/lib/rich-text";
 import { getLessonTopic } from "@/lib/live-class";
 
 export interface WritingTopic {
@@ -21,7 +21,6 @@ export interface WritingTopic {
 
 const LEVELS = ["A1", "A2", "B1", "B2", "C1"];
 
-const HIGHLIGHT = "#FDE047";
 
 /**
  * «Письмо» у живому уроці: спільне поле, яке бачать і пишуть обоє в реальному часі.
@@ -281,9 +280,14 @@ export default function LiveWriting({ classId, role, className }: { classId: str
           )}
         </div>
         <div className="h-10 shrink-0 flex items-center gap-1 px-3 border-b border-border bg-muted/30">
-          <Button animated={false} size="sm" variant="ghost" className="h-7 gap-1.5 px-2 text-xs" onMouseDown={(e) => e.preventDefault()} onClick={() => format("hiliteColor", HIGHLIGHT)} title="Виділити жовтим">
-            <span className="grid size-5 place-items-center rounded" style={{ background: HIGHLIGHT }}><Highlighter className="h-3.5 w-3.5 text-foreground" /></span> Жовтим
-          </Button>
+          <div className="flex items-center gap-0.5 rounded-lg border border-border bg-background/60 p-0.5">
+            {HIGHLIGHT_COLORS.map((c) => (
+              <Button key={c.hex} animated={false} size="icon" variant="ghost" className="h-6 w-6 rounded-md"
+                onMouseDown={(e) => e.preventDefault()} onClick={() => format("hiliteColor", c.hex)} title={c.name}>
+                <span className="size-4 rounded-full ring-1 ring-inset ring-black/10" style={{ background: c.hex }} />
+              </Button>
+            ))}
+          </div>
           <Button animated={false} size="icon" variant="ghost" className="h-7 w-7" onMouseDown={(e) => e.preventDefault()} onClick={() => format("underline")} title="Підкреслити"><Underline /></Button>
           <Button animated={false} size="icon" variant="ghost" className="h-7 w-7" onMouseDown={(e) => e.preventDefault()} onClick={() => format("bold")} title="Жирний"><Bold /></Button>
           <Button animated={false} size="icon" variant="ghost" className="h-7 w-7" onMouseDown={(e) => e.preventDefault()} onClick={() => format("strikeThrough")} title="Закреслити помилку"><Strikethrough /></Button>
