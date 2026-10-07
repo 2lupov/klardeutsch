@@ -284,6 +284,8 @@ export async function createHtmlPresentation(
     { owner_id: ownerId, title: t, slide_paths: [], page_count: 1, html },
     { kind: guess.kind, level: guess.level, skill: guess.skill, ...meta },
   );
+  // Озвучку ElevenLabs генеруємо й зберігаємо одразу, у фоні
+  void import("@/components/live/HtmlSlides").then((m) => m.pregenerateTts(html, /nl/i.test(t) ? "nl" : "de")).catch(() => {});
   return normalize(row);
 }
 

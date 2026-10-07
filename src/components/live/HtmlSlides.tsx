@@ -37,35 +37,39 @@ pe.dispatchEvent(new PointerEvent(m.t,{bubbles:true,cancelable:true,view:window,
 }finally{setTimeout(function(){replay=false;},0);}});
 })();<\/script>`;
 
-/** Перехоплює браузерну озвучку презентації — батьківське вікно грає її голосом ElevenLabs (de / nl). */
-const TTS_HOOK = `<script>(function(){try{var S=window.speechSynthesis;if(!S)return;var cur=null;
-function det(u){var l=(u.lang||document.documentElement.lang||"").toLowerCase();return l.indexOf("nl")===0?"nl":"de";}
-S.speak=function(u){cur=u;try{u.onstart&&u.onstart(new Event("start"));}catch(e){}parent.postMessage({__klarTts:{text:String(u.text||""),lang:det(u),rate:u.rate||1}},"*");};
-S.cancel=function(){parent.postMessage({__klarTts:{cancel:1}},"*");};
-window.addEventListener("message",function(ev){if(ev.data&&ev.data.__klarTtsEnd&&cur){var u=cur;cur=null;try{u.onend&&u.onend(new Event("end"));}catch(e){}}});
+/**
+ * Повністю замінює браузерну озвучку презентації: робоголос не вмикається ніколи.
+ * getVoices() повертає «німецький голос KLAR», щоб скрипти не показували «Keine deutsche Stimme»,
+ * а кожен speak() грає батьківське вікно — збереженим MP3 від ElevenLabs (de / nl).
+ */
+const TTS_HOOK = `<script>(function(){try{var cur=null;
+var V=[{lang:"de-DE",name:"KLAR · ElevenLabs",voiceURI:"klar-de",localService:true,default:true},{lang:"nl-NL",name:"KLAR · ElevenLabs NL",voiceURI:"klar-nl",localService:true,default:false}];
+function U(t){this.text=t||"";this.lang="";this.rate=1;this.pitch=1;this.volume=1;this.voice=null;this.onstart=null;this.onend=null;this.onerror=null;this.onboundary=null;}
+U.prototype.addEventListener=function(n,f){this["on"+n]=f;};U.prototype.removeEventListener=function(){};
+function det(u){var l=((u.voice&&u.voice.lang)||u.lang||document.documentElement.lang||"").toLowerCase();return l.indexOf("nl")===0?"nl":"de";}
+var S={speaking:false,pending:false,paused:false,onvoiceschanged:null,getVoices:function(){return V.slice();},
+speak:function(u){cur=u;S.speaking=true;try{u.onstart&&u.onstart(new Event("start"));}catch(e){}parent.postMessage({__klarTts:{text:String(u.text||""),lang:det(u),rate:u.rate||1}},"*");},
+cancel:function(){cur=null;S.speaking=false;parent.postMessage({__klarTts:{cancel:1}},"*");},pause:function(){},resume:function(){},
+addEventListener:function(){},removeEventListener:function(){}};
+try{Object.defineProperty(window,"speechSynthesis",{configurable:true,get:function(){return S;}});}catch(e){window.speechSynthesis=S;}
+window.SpeechSynthesisUtterance=U;
+window.addEventListener("message",function(ev){if(ev.data&&ev.data.__klarTtsEnd&&cur){var u=cur;cur=null;S.speaking=false;try{u.onend&&u.onend(new Event("end"));}catch(e){}}});
 }catch(e){}})();<\/script>`;
 
-const VOICE_DE = "aTTiK3YzK3dXETpuDE2h";
-const VOICE_NL = "pFZP5JQG7iQjIQuC4Bku";
 const ttsCache = new Map<string, string>();
 let ttsAudio: HTMLAudioElement | null = null;
+/** Готовий MP3 зі сховища (генерується ElevenLabs один раз і зберігається назавжди). */
 async function playTts(text: string, lang: string, rate: number): Promise<void> {
   const t = text.trim().slice(0, 800);
   if (!t) return;
-  const voice = lang === "nl" ? VOICE_NL : VOICE_DE;
+  const l = lang === "nl" ? "nl" : "de";
   const speed = Math.min(1.2, Math.max(0.7, rate || 0.9));
-  const key = `${voice}|${speed}|${t}`;
+  const key = `${l}|${speed}|${t}`;
   let url = ttsCache.get(key);
   if (!url) {
-    const { data } = await supabase.auth.getSession();
-    const res = await fetch(`https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/elevenlabs-tts`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${data.session?.access_token}`, apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
-      body: JSON.stringify({ text: t, voiceId: voice, speed }),
-    });
-    if (!res.ok) throw new Error("tts");
-    url = URL.createObjectURL(await res.blob());
-    if (ttsCache.size > 200) { const k = ttsCache.keys().next().value; if (k) { URL.revokeObjectURL(ttsCache.get(k)!); ttsCache.delete(k); } }
+    const { data, error } = await supabase.functions.invoke("presentation-tts", { body: { text: t, lang: l, speed } });
+    if (error || !data?.url) throw new Error("tts");
+    url = data.url as string;
     ttsCache.set(key, url);
   }
   ttsAudio?.pause();
@@ -73,15 +77,25 @@ async function playTts(text: string, lang: string, rate: number): Promise<void> 
   ttsAudio = a;
   await new Promise<void>((resolve) => { a.onended = () => resolve(); a.onerror = () => resolve(); a.play().catch(() => resolve()); });
 }
-/** Запасний варіант: системний голос строго потрібної мови (ніколи не російський). */
-function browserTts(text: string, lang: string, rate: number, done: () => void) {
-  try {
-    const S = window.speechSynthesis; const code = lang === "nl" ? "nl" : "de";
-    const v = S.getVoices().find((x) => x.lang.toLowerCase().startsWith(code));
-    if (!v) { done(); return; }
-    const u = new SpeechSynthesisUtterance(text); u.lang = v.lang; u.voice = v; u.rate = rate || 0.9; u.onend = done; u.onerror = done;
-    S.cancel(); S.speak(u);
-  } catch { done(); }
+
+/** Тексти для озвучки, які видно прямо в коді (data-say, speak('…'), say("…")) — щоб згенерувати їх заздалегідь. */
+export function extractSpeakTexts(html: string): string[] {
+  const set = new Set<string>();
+  const add = (s: string) => { const v = s.replace(/\\(['"])/g, "$1").trim(); if (v.length > 1 && v.length <= 800 && /[a-zäöüß]/i.test(v)) set.add(v); };
+  for (const m of html.matchAll(/data-(?:say|speak|tts|audio)\s*=\s*"([^"]+)"/gi)) add(m[1]);
+  for (const m of html.matchAll(/data-(?:say|speak|tts|audio)\s*=\s*'([^']+)'/gi)) add(m[1]);
+  for (const m of html.matchAll(/\b(?:speak|say|sayText|speakDe|tts)\(\s*'((?:[^'\\\n]|\\.)+)'/g)) add(m[1]);
+  for (const m of html.matchAll(/\b(?:speak|say|sayText|speakDe|tts)\(\s*"((?:[^"\\\n]|\\.)+)"/g)) add(m[1]);
+  return [...set].slice(0, 400);
+}
+
+/** Фоново генерує й зберігає озвучку ElevenLabs для всіх знайдених у презентації фраз. */
+export async function pregenerateTts(html: string, lang: "de" | "nl" = "de") {
+  const texts = extractSpeakTexts(html);
+  for (let i = 0; i < texts.length; i += 20) {
+    await supabase.functions.invoke("presentation-tts", { body: { items: texts.slice(i, i + 20).map((text) => ({ text, lang, speed: 0.9 })) } });
+  }
+  return texts.length;
 }
 
 /** Однаковий генератор випадкових чисел у вчителя й учня — щоб ігри (Suchspiel) питали те саме. */
@@ -185,7 +199,7 @@ export default function HtmlSlides({ html, syncKey, className, progress }: { htm
         const done = () => frame.current?.contentWindow?.postMessage({ __klarTtsEnd: 1 }, "*");
         if (tts.cancel) { ttsAudio?.pause(); return; }
         if (restoring.current) { done(); return; }
-        playTts(tts.text, tts.lang, tts.rate).then(done).catch(() => browserTts(tts.text, tts.lang, tts.rate, done));
+        playTts(tts.text, tts.lang, tts.rate).then(done).catch(done);
         return;
       }
       if (!e.data?.__klar) return;
