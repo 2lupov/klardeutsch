@@ -147,7 +147,14 @@ export default function HtmlSlides({ html, syncKey, className, progress }: { htm
     if (saveT.current) window.clearTimeout(saveT.current);
     saveT.current = window.setTimeout(flush, 800);
   };
-  useEffect(() => () => { if (saveT.current) { window.clearTimeout(saveT.current); flush(); } }, [pk]);
+  useEffect(() => {
+    // Закриття вкладки / згортання застосунку — дозберігаємо одразу, щоб не загубити останню відповідь
+    const now = () => { if (saveT.current) { window.clearTimeout(saveT.current); saveT.current = null; flush(); } };
+    const onVis = () => { if (document.visibilityState === "hidden") now(); };
+    window.addEventListener("pagehide", now);
+    document.addEventListener("visibilitychange", onVis);
+    return () => { window.removeEventListener("pagehide", now); document.removeEventListener("visibilitychange", onVis); now(); };
+  }, [pk]);
   const restore = async () => {
     restoring.current = true;
     if (progress) {

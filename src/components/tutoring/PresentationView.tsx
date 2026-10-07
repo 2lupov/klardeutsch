@@ -24,6 +24,13 @@ export default function PresentationView({
     cache.get(presentationId) ?? null,
   );
   const [error, setError] = useState<string | null>(null);
+  // Відповіді зберігаються завжди: якщо учня не вказано явно — пишемо прогрес поточного користувача.
+  const [me, setMe] = useState<string | null>(null);
+  useEffect(() => {
+    if (progressStudentId) return;
+    supabase.auth.getUser().then(({ data: u }) => setMe(u.user?.id ?? null));
+  }, [progressStudentId]);
+  const progressId = progressStudentId || (compact ? undefined : me ?? undefined);
 
   useEffect(() => {
     let alive = true;
@@ -66,7 +73,7 @@ export default function PresentationView({
   if (data.html)
     return (
       <div className="h-full w-full flex flex-col">
-        <HtmlSlides html={data.html} syncKey={syncKey ? `${syncKey}:${presentationId}` : undefined} className="flex-1 min-h-0 w-full rounded-xl shadow-lg" progress={progressStudentId ? { studentId: progressStudentId, presentationId } : undefined} />
+        <HtmlSlides key={`${presentationId}:${progressId ?? "-"}`} html={data.html} syncKey={syncKey ? `${syncKey}:${presentationId}` : undefined} className="flex-1 min-h-0 w-full rounded-xl shadow-lg" progress={progressId ? { studentId: progressId, presentationId } : undefined} />
       </div>
     );
 
