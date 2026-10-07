@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { countWords, paragraphsToHtml, plain } from "@/lib/rich-text";
 import { createFolder, createItem, fetchFolders, type MaterialFolder } from "@/lib/materials";
+import { getLessonTopic, setLessonTopic } from "@/lib/live-class";
 import MarkSheet from "@/components/live/MarkSheet";
 import { useLiveReading, type ReadingTopic } from "@/components/live/useLiveReading";
 
@@ -34,13 +35,14 @@ export default function LiveReading({
   const { text, notes, topic, remote, push, pushTopic, onRemote } = useLiveReading(classId);
   const [level, setLevel] = useState("A2");
   const [words, setWords] = useState(120);
-  const [theme, setTheme] = useState("");
+  const [theme, setTheme] = useState(() => getLessonTopic(classId));
   const [busy, setBusy] = useState(false);
   const [saveOpen, setSaveOpen] = useState(false);
   const [hwOpen, setHwOpen] = useState(false);
 
   const generate = async () => {
     setBusy(true);
+    setLessonTopic(classId, theme);
     try {
       const { data, error } = await supabase.functions.invoke("generate-reading-text", {
         body: { level, words, theme, avoid: topic?.title_de ?? "" },
@@ -146,21 +148,7 @@ export default function LiveReading({
         }
       />
 
-      {/* Спільні нотатки */}
-      <div className="flex min-h-0 flex-col gap-2">
-        <div className="flex items-center gap-2 px-1 text-primary">
-          <NotebookPen className="h-4 w-4" />
-          <span className="text-xs font-bold uppercase tracking-widest">Нотатки</span>
-          {remote === "notes" && <span className="ml-auto text-xs">пишуть…</span>}
-        </div>
-        <MarkSheet
-          className="min-h-[200px] flex-1"
-          sheetClassName="text-base leading-8"
-          value={notes}
-          onChange={(html) => push("notes", html)}
-          register={(set) => onRemote("notes", set)}
-          placeholder="Правила, переклади, приклади…"
-        />
+      <div className="flex min-h-0 flex-col gap-2 xl:justify-end">
         {role === "teacher" && (
           <div className="flex shrink-0 flex-wrap gap-2">
             <Button animated={false} size="sm" variant="outline" className="flex-1" onClick={() => setSaveOpen(true)} disabled={!plain(text) && !plain(notes)}>

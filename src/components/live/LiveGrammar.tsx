@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { paragraphsToHtml, plain } from "@/lib/rich-text";
 import { createFolder, createItem, fetchFolders, type MaterialFolder } from "@/lib/materials";
+import { getLessonTopic, setLessonTopic } from "@/lib/live-class";
 import MarkSheet from "@/components/live/MarkSheet";
 import { useLiveGrammar, type GrammarLesson } from "@/components/live/useLiveGrammar";
 
@@ -37,7 +38,7 @@ export default function LiveGrammar({
   const { lesson, marks, notes, revealed, remote, push, pushLesson, toggleReveal, onRemote } = useLiveGrammar(classId);
   const [level, setLevel] = useState("A2");
   const [count, setCount] = useState(6);
-  const [topic, setTopic] = useState("");
+  const [topic, setTopic] = useState(() => getLessonTopic(classId));
   const [busy, setBusy] = useState(false);
   const [saveOpen, setSaveOpen] = useState(false);
   const [hwOpen, setHwOpen] = useState(false);
@@ -45,6 +46,7 @@ export default function LiveGrammar({
   const generate = async () => {
     if (!topic.trim()) { toast.error("Напишіть тему, напр. «Perfekt» або «Dativ»"); return; }
     setBusy(true);
+    setLessonTopic(classId, topic);
     try {
       const { data, error } = await supabase.functions.invoke("generate-grammar-lesson", {
         body: { level, topic: topic.trim(), examples: count, student_id: studentId, reading_words: level === "A1" ? 70 : 110 },
@@ -212,21 +214,6 @@ export default function LiveGrammar({
           </div>
         )}
 
-        <div className="flex min-h-0 flex-1 flex-col gap-2">
-          <div className="flex items-center gap-2 px-1 text-primary">
-            <NotebookPen className="h-4 w-4" />
-            <span className="text-xs font-bold uppercase tracking-widest">Нотатки</span>
-            {remote === "notes" && <span className="ml-auto text-xs">пишуть…</span>}
-          </div>
-          <MarkSheet
-            className="min-h-[160px] flex-1 rounded-md"
-            sheetClassName="text-base leading-8"
-            value={notes}
-            onChange={(html) => push("notes", html)}
-            register={(set) => onRemote("notes", set)}
-            placeholder="Правила своїми словами, приклади…"
-          />
-        </div>
 
         {role === "teacher" && (
           <div className="flex shrink-0 flex-wrap gap-2">

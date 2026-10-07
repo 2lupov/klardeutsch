@@ -23,11 +23,12 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const level = LEVELS.includes(body?.level) ? body.level : "A2";
     const avoid = String(body?.avoid ?? "").slice(0, 200);
+    const theme = String(body?.theme ?? "").slice(0, 200).trim();
     const apiKey = Deno.env.get("LOVABLE_API_KEY");
     if (!apiKey) return json({ error: "AI не налаштовано" }, 500);
 
-    const prompt = `Ти — викладач німецької. Придумай ОДНУ випадкову, життєву тему письма (лист, повідомлення, e-mail) для рівня ${level} у стилі іспиту Goethe/telc.
-${avoid ? `Не повторюй тему: "${avoid}".` : ""}
+    const prompt = `Ти — викладач німецької. Придумай ОДНУ ${theme ? "" : "випадкову, "}життєву тему письма (лист, повідомлення, e-mail) для рівня ${level} у стилі іспиту Goethe/telc.
+${theme ? `Тема уроку: "${theme}" — завдання має бути саме про це.` : avoid ? `Не повторюй тему: "${avoid}".` : ""}
 Поверни СТРОГО JSON без markdown:
 {"title_de":"коротка назва німецькою","situation_uk":"ситуація українською, 1-2 речення","task_de":"завдання німецькою так, як в іспиті","points":["3-4 пункти німецькою, про що написати"],"redemittel":["4-6 корисних фраз німецькою"],"min_words":число}
 min_words: A1≈30, A2≈50, B1≈80, B2≈150, C1≈200.`;
