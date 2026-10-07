@@ -344,10 +344,10 @@ const Auth = () => {
     <>
       {showFireworks && <Fireworks onComplete={handleFireworksComplete} originRef={logoRef} />}
       <div
-        className="h-[100dvh] bg-background flex items-center justify-center px-4 overflow-hidden transition-opacity duration-500"
-        style={{ opacity: fadeOut ? 0 : 1 }}
+        className="h-[100dvh] bg-background overflow-y-auto overscroll-contain px-4 py-6 transition-opacity duration-500"
+        style={{ opacity: fadeOut ? 0 : 1, WebkitOverflowScrolling: "touch" }}
       >
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-sm mx-auto min-h-full flex flex-col justify-center pb-10">
         <div className="text-center mb-5 animate-auth-fade-up" style={{ animationDelay: "0.1s" }}>
           <div ref={logoRef} className={`pt-8 ${showFireworks ? "animate-klar-explode" : ""}`}>
             <AuthKlarLogo progress={showFireworks ? 1 : getProgress()} />

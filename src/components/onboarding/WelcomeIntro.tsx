@@ -56,8 +56,14 @@ const WelcomeIntro = ({ onComplete }: Props) => {
   const [savedNickname, setSavedNickname] = useState<string | null>(null);
   const [nickError, setNickError] = useState("");
   const [savingNick, setSavingNick] = useState(false);
-  const { lang } = useLanguage();
+  const { lang, setLang } = useLanguage();
   const { user } = useAuth() as any;
+  const pickLang = (l: "uk" | "ru") => {
+    setLang(l);
+    if (user?.id) {
+      supabase.from("profiles").update({ preferred_lang: l } as any).eq("user_id", user.id).then();
+    }
+  };
   const feature = features[active];
   const Icon = feature.icon;
   const isTelegram = feature.icon === Send;
@@ -198,6 +204,25 @@ const WelcomeIntro = ({ onComplete }: Props) => {
             {isTelegram && (
               <div className="mt-4 w-full max-w-xs text-left">
                 <BiometricToggle />
+              </div>
+            )}
+            {(isNickname || isTelegram) && (
+              <div className="mt-4 w-full max-w-xs">
+                <p className="mb-2 text-xs text-muted-foreground">
+                  {lang === "uk" ? "Мова інтерфейсу" : "Язык интерфейса"}
+                </p>
+                <div className="grid grid-cols-2 gap-2 rounded-xl border border-border bg-secondary p-1">
+                  {(["uk", "ru"] as const).map((l) => (
+                    <button
+                      key={l}
+                      type="button"
+                      onClick={() => pickLang(l)}
+                      className={`rounded-lg px-3 py-2 text-sm font-semibold transition-all ${lang === l ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                    >
+                      {l === "uk" ? "Українська" : "Русский"}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
           </motion.div>

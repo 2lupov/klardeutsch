@@ -10,6 +10,7 @@ import CourseFilters from "@/components/academy/CourseFilters";
 import CourseCard from "@/components/academy/CourseCard";
 import GermanA2Banner from "@/components/academy/GermanA2Banner";
 import ProgramCatalog from "@/features/academy-engine/ProgramCatalog";
+import AcademyTour, { openAcademyTour } from "@/components/academy/AcademyTour";
 
 interface CourseRow {
   id: string;
@@ -94,7 +95,13 @@ const Academy = () => {
 
   return (
     <div className="mx-auto w-full">
+      <AcademyTour lang={lang} />
       <CourseHero lang={lang} onPickCourse={scrollToCourses} onOpenA2={() => navigate("/course/a2")} />
+      <div className="mx-auto max-w-6xl px-4 pt-3 md:px-6">
+        <button type="button" onClick={openAcademyTour} className="text-sm font-semibold text-accent underline underline-offset-4">
+          {lang === "uk" ? "🐼 Екскурсія по Академії" : "🐼 Экскурсия по Академии"}
+        </button>
+      </div>
 
       <div className="mx-auto max-w-6xl px-4 pb-10 pt-6 md:px-6">
         <GermanA2Banner />
