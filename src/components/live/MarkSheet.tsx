@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Highlighter, Underline, Bold, Strikethrough, Eraser } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { HIGHLIGHT, SHEET_STYLE } from "@/lib/rich-text";
+import { HIGHLIGHT, SHEET_STYLE, applyRemoteHtml } from "@/lib/rich-text";
 import { cn } from "@/lib/utils";
 
 /**
@@ -36,11 +36,11 @@ export default function MarkSheet({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const mounted = useRef(false);
+  const lastEdit = useRef(0);
 
   useEffect(() => {
-    register?.((html) => {
-      if (ref.current && ref.current.innerHTML !== html) ref.current.innerHTML = html;
-    });
+    // чужі зміни не перезаписують поле, поки людина друкує; курсор зберігається
+    register?.((html) => { applyRemoteHtml(ref.current, html, lastEdit.current); });
   }, [register]);
 
   useEffect(() => {
@@ -51,7 +51,7 @@ export default function MarkSheet({
     }
   }, [value]);
 
-  const fromEditor = () => onChange(ref.current?.innerHTML ?? "");
+  const fromEditor = () => { lastEdit.current = Date.now(); onChange(ref.current?.innerHTML ?? ""); };
   const format = (cmd: string, v?: string) => {
     ref.current?.focus();
     document.execCommand("styleWithCSS", false, "true");

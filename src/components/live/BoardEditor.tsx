@@ -103,6 +103,7 @@ export default function BoardEditor({
 
 
   const elsRef = useRef(els);
+  const clearedBackup = useRef<BoardEl[] | null>(null);
   const camRef = useRef(cam);
   useEffect(() => { elsRef.current = els; }, [els]);
   useEffect(() => { camRef.current = cam; }, [cam]);
@@ -606,7 +607,8 @@ export default function BoardEditor({
 
   const removeSelected = () => {
     if (!selectedEl) return;
-    commit(els.filter((x) => x.id !== selectedEl.id));
+    // беремо актуальний список з ref: учень міг домалювати штрихи після того, як цей обробник створили
+    commit(elsRef.current.filter((x) => x.id !== selectedEl.id));
     setSelected(null);
     setEditing(null);
   };
@@ -737,10 +739,19 @@ export default function BoardEditor({
 
         <span className="w-px h-6 bg-slate-200 mx-1" />
 
-        <Btn active={false} onClick={() => commit(els.slice(0, -1))} title="Скасувати">
+        <Btn active={false} onClick={() => {
+          // після «Очистити» перша ж «Скасувати» повертає всю дошку
+          if (clearedBackup.current && elsRef.current.length === 0) { commit(clearedBackup.current); clearedBackup.current = null; return; }
+          commit(elsRef.current.slice(0, -1));
+        }} title="Скасувати">
           <Undo2 className="w-4 h-4" />
         </Btn>
-        <Btn active={false} onClick={() => { setSelected(null); setEditing(null); commit([]); }} title="Очистити дошку">
+        <Btn active={false} onClick={() => {
+          if (elsRef.current.length === 0) return;
+          if (!window.confirm("Очистити всю дошку? Зникнуть і записи учня. Одразу після цього можна натиснути «Скасувати».")) return;
+          clearedBackup.current = elsRef.current;
+          setSelected(null); setEditing(null); commit([]);
+        }} title="Очистити дошку">
           <Trash2 className="w-4 h-4" />
         </Btn>
 

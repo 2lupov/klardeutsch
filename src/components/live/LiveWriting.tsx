@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { toHtml, plain, applyRemoteHtml } from "@/lib/rich-text";
 
 export interface WritingTopic {
   title_de?: string;
@@ -19,16 +20,6 @@ export interface WritingTopic {
 
 const LEVELS = ["A1", "A2", "B1", "B2", "C1"];
 
-/** Старі листи — простий текст; перетворюємо на HTML і чистимо небезпечне. */
-function toHtml(v: string) {
-  if (!v) return "";
-  if (!/<[a-z][\s\S]*>|&[a-z]+;|&#\d+;/i.test(v)) return v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/\n/g, "<br>");
-  const doc = new DOMParser().parseFromString(v.replace(/&amp;(nbsp|amp|lt|gt);/g, "&$1;"), "text/html");
-  doc.querySelectorAll("script,style,iframe,object,embed").forEach((n) => n.remove());
-  doc.querySelectorAll("*").forEach((el) => [...el.attributes].forEach((a) => { if (/^on/i.test(a.name) || /javascript:/i.test(a.value)) el.removeAttribute(a.name); }));
-  return doc.body.innerHTML;
-}
-const plain = (html: string) => { const d = document.createElement("div"); d.innerHTML = html.replace(/<br\s*\/?>/gi, "\n").replace(/<\/(div|p)>/gi, "\n"); return (d.textContent || "").trim(); };
 const HIGHLIGHT = "#FDE047";
 
 /**
@@ -46,12 +37,20 @@ export default function LiveWriting({ classId, role, className }: { classId: str
   const saveT = useRef<ReturnType<typeof setTimeout> | null>(null);
   const typingT = useRef<ReturnType<typeof setTimeout> | null>(null);
   const textRef = useRef("");
+  const topicRef = useRef<WritingTopic | null>(null);
   const editorRef = useRef<HTMLDivElement>(null);
   const [saveOpen, setSaveOpen] = useState(false);
-  const setEditor = (html: string) => {
-    const el = editorRef.current;
-    if (el && el.innerHTML !== html) el.innerHTML = html;
-  };
+  const lastEdit = useRef(0);
+  const sendT = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dirty = useRef(false);
+  const retryT = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [saveState, setSaveState] = useState<"saved" | "saving" | "error">("saved");
+  const draftKey = `live-writing:${classId}`;
+  useEffect(() => { topicRef.current = topic; }, [topic]);
+  const setEditor = (html: string) => { applyRemoteHtml(editorRef.current, html, lastEdit.current); };
+  const draftGet = () => { try { const v = localStorage.getItem(draftKey); return v ? (JSON.parse(v) as { html: string }) : null; } catch { return null; } };
+  const draftSet = (html: string) => { try { localStorage.setItem(draftKey, JSON.stringify({ html, ts: Date.now() })); } catch { /* ignore */ } };
+  const draftClear = () => { try { localStorage.removeItem(draftKey); } catch { /* ignore */ } };
 
   useEffect(() => {
     let alive = true;
@@ -66,13 +65,23 @@ export default function LiveWriting({ classId, role, className }: { classId: str
         setTopic(data.topic || null);
         if (data.topic?.level) setLevel(data.topic.level);
       }
+      // Чернетка, яка не встигла піти на сервер (обрив зв'язку, перезавантаження) — повертаємо й дозберігаємо
+      const d = draftGet();
+      if (d && d.html && toHtml(d.html) !== textRef.current) {
+        const h = toHtml(d.html);
+        textRef.current = h; setText(h);
+        if (editorRef.current) editorRef.current.innerHTML = h;
+        dirty.current = true;
+        void flush();
+      }
     })();
 
     const ch = supabase.channel(`live-writing:${classId}`, { config: { broadcast: { self: false } } });
     ch.on("broadcast", { event: "text" }, ({ payload }: any) => {
       if (typeof payload?.text !== "string") return;
       const h = toHtml(payload.text);
-      textRef.current = h; setText(h); setEditor(h);
+      if (!applyRemoteHtml(editorRef.current, h, lastEdit.current)) return; // людина друкує — її текст важливіший
+      textRef.current = h; setText(h);
       setRemoteTyping(true);
       if (typingT.current) clearTimeout(typingT.current);
       typingT.current = setTimeout(() => setRemoteTyping(false), 1500);
@@ -81,7 +90,8 @@ export default function LiveWriting({ classId, role, className }: { classId: str
     ch.on("postgres_changes", { event: "*", schema: "public", table: "live_class_writing", filter: `class_id=eq.${classId}` }, (p: any) => {
       const row = p.new;
       if (!row || row.updated_by === me.current) return;
-      const h = toHtml(row.text || ""); if (h !== textRef.current) { textRef.current = h; setText(h); setEditor(h); }
+      const h = toHtml(row.text || "");
+      if (h !== textRef.current && !dirty.current && applyRemoteHtml(editorRef.current, h, lastEdit.current)) { textRef.current = h; setText(h); }
       setTopic(row.topic || null);
     });
     ch.subscribe();
@@ -91,17 +101,61 @@ export default function LiveWriting({ classId, role, className }: { classId: str
 
   const persist = (patch: { text?: string; topic?: WritingTopic | null }) =>
     (supabase as any).from("live_class_writing").upsert(
-      { class_id: classId, text: textRef.current, topic, ...patch, updated_by: me.current },
+      { class_id: classId, text: textRef.current, topic: topicRef.current, ...patch, updated_by: me.current },
       { onConflict: "class_id" },
     );
 
+  /** Записати на сервер негайно. Помилка не губить текст: лишається в чернетці й повторюється. */
+  const flush = async () => {
+    if (saveT.current) { clearTimeout(saveT.current); saveT.current = null; }
+    if (retryT.current) { clearTimeout(retryT.current); retryT.current = null; }
+    if (!dirty.current) return;
+    setSaveState("saving");
+    const sent = textRef.current;
+    try {
+      const { error } = await persist({ text: sent });
+      if (error) throw error;
+      if (textRef.current === sent) { dirty.current = false; draftClear(); setSaveState("saved"); }
+      else { void flush(); } // за час запису з'явились нові зміни
+    } catch {
+      setSaveState("error");
+      retryT.current = setTimeout(() => { void flush(); }, 3000);
+    }
+  };
+
   const onType = (v: string) => {
+    lastEdit.current = Date.now();
     setText(v);
     textRef.current = v;
-    chan.current?.send({ type: "broadcast", event: "text", payload: { text: v } });
+    dirty.current = true;
+    draftSet(v);
+    setSaveState("saving");
+    // Не засипаємо канал: не частіше ~7 разів на секунду, але завжди з останнім станом
+    if (!sendT.current) {
+      sendT.current = setTimeout(() => {
+        sendT.current = null;
+        chan.current?.send({ type: "broadcast", event: "text", payload: { text: textRef.current } });
+      }, 150);
+    }
     if (saveT.current) clearTimeout(saveT.current);
-    saveT.current = setTimeout(() => { void persist({ text: v }); }, 600);
+    saveT.current = setTimeout(() => { void flush(); }, 700);
   };
+
+  // Не губимо текст, якщо вкладку закрили / згорнули / вийшли з розділу
+  useEffect(() => {
+    const onHide = () => { if (document.visibilityState === "hidden") void flush(); };
+    const onOnline = () => { void flush(); };
+    document.addEventListener("visibilitychange", onHide);
+    window.addEventListener("pagehide", onHide as any);
+    window.addEventListener("online", onOnline);
+    return () => {
+      document.removeEventListener("visibilitychange", onHide);
+      window.removeEventListener("pagehide", onHide as any);
+      window.removeEventListener("online", onOnline);
+      if (sendT.current) clearTimeout(sendT.current);
+      void flush();
+    };
+  }, [classId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const generate = async () => {
     setGenerating(true);
@@ -214,7 +268,10 @@ export default function LiveWriting({ classId, role, className }: { classId: str
           {remoteTyping && (
             <span className="text-xs text-primary">{role === "teacher" ? "учень пише…" : "викладач пише…"}</span>
           )}
-          <span className={cn("ml-auto text-xs font-medium", min && words >= min ? "text-primary" : "text-muted-foreground")}>
+          <span className={cn("ml-auto text-[11px] font-medium", saveState === "error" ? "text-destructive" : "text-muted-foreground")} aria-live="polite">
+            {saveState === "saved" ? "✓ збережено" : saveState === "saving" ? "зберігаємо…" : "⚠ немає зв'язку — текст збережено на пристрої"}
+          </span>
+          <span className={cn("text-xs font-medium", min && words >= min ? "text-primary" : "text-muted-foreground")}>
             {words}{min ? ` / ${min}` : ""} слів
           </span>
           {role === "teacher" && text && (
