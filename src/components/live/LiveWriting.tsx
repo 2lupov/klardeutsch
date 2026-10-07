@@ -199,9 +199,9 @@ export default function LiveWriting({ classId, role, className }: { classId: str
   return (
     <div className={cn("h-full min-h-0 grid gap-3 grid-cols-1 lg:grid-cols-[minmax(0,340px)_minmax(0,1fr)]", className)}>
       {/* Тема */}
-      <aside className="min-h-0 overflow-y-auto rounded-2xl border border-border bg-card p-4 space-y-3">
+      <aside className="min-h-0 overflow-y-auto rounded-2xl border border-border bg-card/80 p-4 space-y-4 shadow-sm backdrop-blur">
         <div className="flex items-center gap-2 text-primary">
-          <PenLine className="h-4 w-4" />
+          <span className="grid size-8 place-items-center rounded-xl bg-primary/15"><PenLine className="h-4 w-4" /></span>
           <span className="text-xs font-bold uppercase tracking-widest">Тема письма</span>
           {topic?.level && <span className="ml-auto rounded-md bg-primary/10 px-2 py-0.5 text-xs font-bold">{topic.level}</span>}
         </div>
@@ -226,7 +226,7 @@ export default function LiveWriting({ classId, role, className }: { classId: str
           <div className="space-y-3 text-sm">
             {topic.title_de && <h3 className="font-display text-lg font-bold text-foreground leading-tight">{topic.title_de}</h3>}
             {topic.situation_uk && <p className="text-muted-foreground">{topic.situation_uk}</p>}
-            {topic.task_de && <p className="rounded-xl bg-muted/50 p-3 font-medium text-foreground">{topic.task_de}</p>}
+            {topic.task_de && <p className="rounded-xl border-l-4 border-primary bg-muted/50 p-3 font-medium text-foreground">{topic.task_de}</p>}
             {!!topic.points?.length && (
               <ul className="space-y-1.5">
                 {topic.points.map((p, i) => (
@@ -245,7 +245,7 @@ export default function LiveWriting({ classId, role, className }: { classId: str
                     <button
                       key={i}
                       onClick={() => insertPhrase(r)}
-                      className="rounded-lg border border-dashed border-border px-2 py-1 text-xs text-foreground hover:bg-muted"
+                      className="rounded-full border border-border bg-muted/40 px-3 py-1 text-xs text-foreground transition hover:border-primary hover:bg-primary/10 active:scale-95"
                     >
                       {r}
                     </button>
@@ -262,7 +262,8 @@ export default function LiveWriting({ classId, role, className }: { classId: str
       </aside>
 
       {/* Спільний аркуш */}
-      <section className="min-h-[320px] flex flex-col rounded-2xl border border-border bg-card overflow-hidden">
+      <section className="relative min-h-[320px] flex flex-col rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
+        {min > 0 && <div className="absolute inset-x-0 top-0 h-1 bg-muted"><div className="h-full bg-primary transition-all duration-500" style={{ width: `${Math.min(100, (words / min) * 100)}%` }} /></div>}
         <div className="h-11 shrink-0 flex items-center gap-3 px-4 border-b border-border">
           <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
           <span className="text-xs font-semibold text-foreground">Спільний аркуш</span>

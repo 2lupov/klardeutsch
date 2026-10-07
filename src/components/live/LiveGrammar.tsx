@@ -64,9 +64,9 @@ export default function LiveGrammar({
   return (
     <div className={cn("grid min-h-0 gap-3 grid-cols-1 xl:grid-cols-[minmax(0,300px)_minmax(0,1fr)_minmax(0,320px)]", className)}>
       {/* Правила й приклади */}
-      <aside className="min-h-0 space-y-4 overflow-y-auto rounded-md border border-border bg-muted/40 p-4">
+      <aside className="min-h-0 space-y-4 overflow-y-auto rounded-2xl border border-border bg-card/80 p-4 shadow-sm backdrop-blur">
         <div className="flex items-center gap-2 text-foreground">
-          <span className="grid size-8 place-items-center rounded-md bg-accent text-accent-foreground"><GraduationCap className="h-4 w-4" /></span>
+          <span className="grid size-8 place-items-center rounded-xl bg-accent text-accent-foreground"><GraduationCap className="h-4 w-4" /></span>
           <span className="text-xs font-bold uppercase">Граматика</span>
           {lesson?.level && <span className="ml-auto rounded-md bg-accent px-2 py-0.5 text-xs font-black text-accent-foreground">{lesson.level}</span>}
         </div>
@@ -103,7 +103,7 @@ export default function LiveGrammar({
               <div className="space-y-2">
                 <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Правила</p>
                 {lesson.rules.map((r, i) => (
-                  <div key={i} className="space-y-1 border-l-4 border-accent bg-card p-3">
+                  <div key={i} className="space-y-1 rounded-xl border-l-4 border-accent bg-muted/40 p-3">
                     {r.title && <p className="font-bold text-foreground">{r.title}</p>}
                     {r.explanation_uk && <p className="text-muted-foreground">{r.explanation_uk}</p>}
                     {!!r.table?.length && (
@@ -143,7 +143,7 @@ export default function LiveGrammar({
                 </div>
                 {lesson.vocab.map((v, i) => (
                   <p key={i} className="text-foreground">
-                    {v.article && <span className="mr-1 text-primary">{v.article}</span>}
+                    {v.article && <span className={cn("mr-1 font-semibold", v.article === "der" ? "text-sky-500" : v.article === "die" ? "text-pink-500" : v.article === "das" ? "text-emerald-500" : "text-primary")}>{v.article}</span>}
                     <b>{v.term}</b> <span className="text-muted-foreground">— {v.translation}</span>
                   </p>
                 ))}
@@ -160,11 +160,11 @@ export default function LiveGrammar({
       {/* Приклади + спільний текст із позначками */}
       <div className="flex min-h-0 flex-col gap-3">
         {!!lesson?.examples?.length && (
-          <div className="max-h-[38%] shrink-0 space-y-1.5 overflow-y-auto rounded-md border border-border bg-card p-4 shadow-sm">
+          <div className="max-h-[38%] shrink-0 space-y-1.5 overflow-y-auto rounded-2xl border border-border bg-card p-4 shadow-sm">
             <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Приклади і вправи (до 50)</p>
             {lesson.examples.map((ex, i) => (
               <div key={i} className="grid grid-cols-[2rem_1fr] gap-2 border-b border-border px-1 py-3 text-sm last:border-0">
-                <span className="font-mono text-xs text-muted-foreground">{String(i + 1).padStart(2, "0")}.</span>
+                <span className="grid size-7 place-items-center rounded-full bg-accent/20 text-[11px] font-bold text-foreground">{i + 1}</span>
                 <div>
                 <p className="text-foreground">{highlightFocus(ex.de || "", ex.focus)}</p>
                 {ex.uk && <p className="text-xs text-muted-foreground">{ex.uk}</p>}
@@ -174,7 +174,7 @@ export default function LiveGrammar({
           </div>
         )}
         <MarkSheet
-          className="min-h-[220px] flex-1 rounded-md"
+          className="min-h-[220px] flex-1 rounded-2xl shadow-sm"
           value={marks}
           onChange={(html) => push("marks", html)}
           register={(set) => onRemote("marks", set)}
@@ -182,7 +182,7 @@ export default function LiveGrammar({
           toolbarExtra={remote === "marks" ? <span className="text-xs text-primary">{role === "teacher" ? "учень працює…" : "викладач працює…"}</span> : null}
         />
         {!!lesson?.reading?.questions?.length && (
-          <ul className="shrink-0 list-disc space-y-0.5 rounded-md border border-border bg-card p-3 pl-7 text-sm text-foreground">
+          <ul className="shrink-0 list-disc space-y-0.5 rounded-2xl border border-border bg-card p-3 pl-7 text-sm text-foreground">
             {lesson.reading.questions.map((q, i) => <li key={i}>{q}</li>)}
           </ul>
         )}
@@ -191,7 +191,7 @@ export default function LiveGrammar({
       {/* Практика + нотатки */}
       <div className="flex min-h-0 flex-col gap-3">
         {!!lesson?.practice?.length && (
-          <div className="max-h-[45%] shrink-0 space-y-2 overflow-y-auto rounded-md border border-border bg-card p-4 shadow-sm">
+          <div className="max-h-[45%] shrink-0 space-y-2 overflow-y-auto rounded-2xl border border-border bg-card p-4 shadow-sm">
             <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Практика</p>
             {lesson.practice.map((t, i) => (
               <div key={i} className="space-y-2 border-b border-border py-3 text-sm last:border-0">
@@ -204,7 +204,7 @@ export default function LiveGrammar({
                   </Button>
                 </div>
                 {revealed.includes(i) && (
-                  <div className="ml-7 border-l-4 border-accent bg-accent/10 px-3 py-2">
+                  <div className="ml-7 rounded-lg border-l-4 border-accent bg-accent/10 px-3 py-2">
                     <p className="font-bold text-foreground">{t.answer}</p>
                     {t.hint_uk && <p className="text-xs text-muted-foreground">{t.hint_uk}</p>}
                   </div>
