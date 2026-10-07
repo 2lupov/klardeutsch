@@ -168,22 +168,6 @@ export default function LiveClassPage() {
   );
 }
 
-/** Нотатки «острівцем» поверх будь-якого розділу — без переходу. */
-function NotesIsland({ cls }: { cls: LiveClass }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="fixed bottom-20 right-4 z-50 flex flex-col items-end gap-2">
-      {open && (
-        <div className="w-[min(92vw,380px)] h-[min(60vh,460px)] rounded-2xl border border-border bg-card/95 backdrop-blur-xl shadow-2xl flex flex-col p-2">
-          <LiveNotes classId={cls.id} role="teacher" studentId={cls.student_id} teacherId={cls.teacher_id} className="flex-1" />
-        </div>
-      )}
-      <Button animated={false} onClick={() => setOpen((o) => !o)} className="rounded-full shadow-lg">
-        {open ? "✕ Закрити" : "📝 Нотатки"}
-      </Button>
-    </div>
-  );
-}
 
 /** Розділи, де «Показати учню» — одна дія. Для решти матеріал обирається всередині панелі. */
 const SIMPLE_SECTIONS: LiveSection[] = ["board", "writing", "reading", "grammar", "notes", "video"];

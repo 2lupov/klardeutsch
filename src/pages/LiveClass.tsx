@@ -15,14 +15,13 @@ import { BoardView } from "@/components/live/BoardRender";
 import LiveWriting from "@/components/live/LiveWriting";
 import LiveReading from "@/components/live/LiveReading";
 import LiveGrammar from "@/components/live/LiveGrammar";
-import LiveNotes from "@/components/live/LiveNotes";
+import NotesIsland from "@/components/live/NotesIsland";
 import LiveVideo from "@/components/live/LiveVideo";
 import TextbookWorkbook from "@/components/textbook/TextbookWorkbook";
 import BoardStudentView from "@/components/live/BoardStudentView";
 import type { BoardCam } from "@/components/live/BoardRender";
 import { signedPageUrl } from "@/lib/books";
 import AddMyWordForm, { addMyWord } from "@/components/dictionary/AddMyWordForm";
-import PandaLookupFab from "@/components/dictionary/PandaLookup";
 import { BookmarkPlus } from "lucide-react";
 import InteractiveScene from "@/components/interactive/InteractiveScene";
 import { fetchInteractivePage, type SceneBlock } from "@/lib/interactivePages";
@@ -457,10 +456,6 @@ export default function LiveClass() {
           <div className="p-3 h-[calc(100dvh-8rem)] md:h-[calc(100dvh-5.5rem)]">
             <LiveGrammar classId={cls.id} role="student" className="h-full" />
           </div>
-        ) : section === "notes" ? (
-          <div className="p-3 h-[calc(100dvh-8rem)] md:h-[calc(100dvh-5.5rem)]">
-            <LiveNotes classId={cls.id} role="student" className="h-full" />
-          </div>
         ) : section === "video" ? (
           <div className="p-3 h-[calc(100dvh-8rem)] md:h-[calc(100dvh-5.5rem)] overflow-hidden">
             <LiveVideo classId={cls.id} role="student" className="h-full" />
@@ -501,7 +496,7 @@ export default function LiveClass() {
         </div>
       </main>
 
-      <PandaLookupFab label="Словник" />
+      <NotesIsland classId={cls.id} role="student" withPanda bottomClass="bottom-20 md:bottom-4" />
     </div>
   );
 }
