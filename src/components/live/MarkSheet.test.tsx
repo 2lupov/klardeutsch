@@ -33,3 +33,24 @@ describe("MarkSheet first-keystroke regression", () => {
     expect(ed.innerHTML).toBe("<p>Servus</p>");
   });
 });
+
+describe("MarkSheet marker palette", () => {
+  it("offers yellow, pink and blue markers and applies the clicked color", () => {
+    const spy = vi.spyOn(document, "execCommand").mockReturnValue(true);
+    const { container, getByTitle } = render(<MarkSheet value="<p>Test</p>" onChange={() => {}} />);
+
+    const swatches = ["#FDE047", "#F9A8D4", "#93C5FD"].map((hex) =>
+      container.querySelector(`span[style*="${hex}"]`),
+    );
+    expect(swatches.every(Boolean)).toBe(true);
+
+    fireEvent.mouseDown(getByTitle("Рожевим"), { preventDefault: () => {} });
+    fireEvent.click(getByTitle("Рожевим"));
+    expect(spy).toHaveBeenCalledWith("styleWithCSS", false, "true");
+    expect(spy).toHaveBeenCalledWith("hiliteColor", false, "#F9A8D4");
+
+    fireEvent.click(getByTitle("Синім"));
+    expect(spy).toHaveBeenCalledWith("hiliteColor", false, "#93C5FD");
+    spy.mockRestore();
+  });
+});
