@@ -71,16 +71,22 @@ export interface LiveItem {
 }
 
 export async function startLiveClass(teacherId: string, studentId: string, title: string) {
-  const { data: existing } = await supabase
-    .from("live_classes")
-    .select("*")
-    .eq("teacher_id", teacherId)
-    .eq("student_id", studentId)
-    .eq("status", "active")
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  if (existing) return existing as unknown as LiveClass;
+  const findActive = async () => {
+    const { data, error } = await supabase
+      .from("live_classes")
+      .select("*")
+      .eq("teacher_id", teacherId)
+      .eq("student_id", studentId)
+      .eq("status", "active")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw error;
+    return data as unknown as LiveClass | null;
+  };
+
+  const existing = await findActive();
+  if (existing) return existing;
 
   // Дошка учня переноситься з попереднього уроку (як у Miro — одне полотно на учня)
   const { data: prev } = await supabase
@@ -97,7 +103,14 @@ export async function startLiveClass(teacherId: string, studentId: string, title
     .insert({ teacher_id: teacherId, student_id: studentId, title, board: ((prev as any)?.board || []) as any })
     .select("*")
     .single();
-  if (error) throw error;
+  if (error) {
+    // 23505: подвійний клік / дві вкладки встигли створити урок — беремо вже створений, а не дубль
+    if ((error as any).code === "23505") {
+      const again = await findActive();
+      if (again) return again;
+    }
+    throw error;
+  }
   return data as unknown as LiveClass;
 }
 

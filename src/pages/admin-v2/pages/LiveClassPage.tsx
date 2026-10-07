@@ -13,7 +13,8 @@ import {
   endLiveClass,
   setLiveView,
 } from "@/lib/live-class";
-import { Play, Square, ChevronLeft, ChevronRight, Loader2, Upload, Crosshair, LogOut, Search } from "lucide-react";
+import { Play, Square, Crosshair, LogOut, Search, Eye, Link2, Link2Off, Timer } from "lucide-react";
+import { useLivePresence } from "@/hooks/useLivePresence";
 import TextbookPanel from "@/components/textbook/TextbookPanel";
 import LiveWriting from "@/components/live/LiveWriting";
 import LiveReading from "@/components/live/LiveReading";
@@ -24,8 +25,6 @@ import LiveSlidesPanel from "@/components/live/LiveSlidesPanel";
 import BoardEditor, { type BoardApi } from "@/components/live/BoardEditor";
 import LiveBookPagePicker from "@/components/books/LiveBookPagePicker";
 import { PandaLookupDialog } from "@/components/dictionary/PandaLookup";
-import { listPresentations, uploadPresentation, listPresentationFolders, type Presentation, type PresentationFolder } from "@/lib/presentations";
-import PresentationView from "@/components/tutoring/PresentationView";
 import { normalizeKit, kitSections, type LessonKit } from "@/lib/lesson-kits";
 import LessonReader from "@/components/blocks/LessonReader";
 import { LaserSurface, useLaserSender, type LaserPoint } from "@/components/live/LaserPointer";
@@ -33,12 +32,19 @@ import { Button } from "@/components/ui/button";
 
 interface StudentRow { user_id: string; display_name: string | null; email: string | null }
 
+const fieldCls = "px-3 py-2 rounded-xl border border-admin-border bg-admin-surface text-sm text-admin-fg focus:outline-none focus:ring-2 focus:ring-admin-accent/40";
+
+function ago(iso: string) {
+  const d = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+  return d <= 0 ? "сьогодні" : d === 1 ? "вчора" : `${d} дн. тому`;
+}
+
 export default function LiveClassPage() {
   const { user } = useAuth();
   const [students, setStudents] = useState<StudentRow[]>([]);
   const [classes, setClasses] = useState<LiveClass[]>([]);
   const [studentId, setStudentId] = useState("");
-  const [title, setTitle] = useState("Живий урок");
+  const [title, setTitle] = useState("");
   const [activeClass, setActiveClass] = useState<LiveClass | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -71,10 +77,16 @@ export default function LiveClassPage() {
     } catch { /* ignore */ }
   }, []);
 
-  const start = async () => {
-    if (!user || !studentId) { toast({ title: "Виберіть учня" }); return; }
+  const nameOf = (id: string) => {
+    const s = students.find((x) => x.user_id === id);
+    return s?.display_name || s?.email || id.slice(0, 8);
+  };
+  const dateLabel = new Date().toLocaleDateString("uk-UA", { day: "numeric", month: "short" });
+
+  const begin = async (sid: string, t?: string) => {
+    if (!user || !sid) { toast({ title: "Виберіть учня" }); return; }
     try {
-      const c = await startLiveClass(user.id, studentId, title.trim() || "Живий урок");
+      const c = await startLiveClass(user.id, sid, (t ?? title).trim() || `${nameOf(sid)} · ${dateLabel}`);
       setActiveClass(c);
       load();
     } catch (e: any) {
@@ -92,55 +104,67 @@ export default function LiveClassPage() {
     );
   }
 
-  return (
-    <div className="h-full overflow-y-auto p-3 md:p-6 space-y-4 md:space-y-6">
-      <Card className="p-5">
-        <SectionHeader title="Запустити живий урок" subtitle="Учень одразу потрапляє в клас — без демонстрації екрана" />
-        <div className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
-          <select
-            value={studentId}
-            onChange={(e) => setStudentId(e.target.value)}
-            className="px-3 py-2 rounded-xl border border-slate-200 text-sm"
-          >
-            <option value="">— Виберіть учня —</option>
-            {students.map((s) => (
-              <option key={s.user_id} value={s.user_id}>
-                {s.display_name || s.email || s.user_id.slice(0, 8)}
-              </option>
-            ))}
-          </select>
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Назва уроку"
-            className="px-3 py-2 rounded-xl border border-slate-200 text-sm"
-          />
-          <button
-            onClick={start}
-            className="px-4 py-2 rounded-xl text-white text-sm font-medium flex items-center gap-2"
-            style={{ background: "#4F46E5" }}
-          >
-            <Play className="w-4 h-4" /> Запустити
-          </button>
-        </div>
-      </Card>
+  const active = classes.filter((c) => c.status === "active");
+  // останні учні (унікальні) — швидкий старт одним натисканням
+  const recent: string[] = [];
+  classes.forEach((c) => { if (!recent.includes(c.student_id)) recent.push(c.student_id); });
+  const lastFor = (sid: string) => classes.find((c) => c.student_id === sid);
 
-      {classes.filter((c) => c.status === "active").length > 0 && (
-        <Card className="p-5">
-          <SectionHeader title="Активні зараз" subtitle="Історія уроків — у картці учня (розділ «Учні»)" />
-          <div className="divide-y divide-slate-100">
-            {classes.filter((c) => c.status === "active").map((c) => (
+  return (
+    <div className="h-full overflow-y-auto p-3 md:p-6 space-y-4 md:space-y-6 max-w-5xl">
+      {active.length > 0 && (
+        <Card className="p-5 border-emerald-500/40">
+          <SectionHeader title="Урок іде зараз" subtitle="Продовжіть там, де зупинились" />
+          <div className="divide-y divide-admin-border">
+            {active.map((c) => (
               <div key={c.id} className="py-3 flex items-center justify-between gap-4">
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-slate-900 truncate">{c.title}</p>
-                  <p className="text-xs text-slate-500">{students.find((s) => s.user_id === c.student_id)?.display_name || "Учень"}</p>
+                  <p className="text-sm font-medium text-admin-fg truncate">{c.title}</p>
+                  <p className="text-xs text-admin-muted">{nameOf(c.student_id)} · розпочато {new Date(c.started_at).toLocaleTimeString("uk-UA", { hour: "2-digit", minute: "2-digit" })}</p>
                 </div>
-                <button onClick={() => setActiveClass(c)} className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 hover:bg-slate-50">Продовжити</button>
+                <Button animated={false} size="sm" onClick={() => setActiveClass(c)}>Продовжити</Button>
               </div>
             ))}
           </div>
         </Card>
       )}
+
+      {recent.length > 0 && (
+        <Card className="p-5">
+          <SectionHeader title="Почати урок" subtitle="Один клік — учень одразу потрапляє в клас, без демонстрації екрана" />
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {recent.slice(0, 6).map((sid) => {
+              const last = lastFor(sid);
+              return (
+                <button key={sid} onClick={() => begin(sid, "")}
+                  className="group flex items-center gap-3 rounded-2xl border border-admin-border bg-admin-surface px-4 py-3 text-left hover:border-admin-primary transition-colors">
+                  <span className="grid size-10 shrink-0 place-items-center rounded-full bg-admin-accent/20 font-semibold text-admin-fg">{nameOf(sid).slice(0, 1).toUpperCase()}</span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-semibold text-admin-fg">{nameOf(sid)}</span>
+                    <span className="block text-xs text-admin-muted">{last ? `останній урок: ${ago(last.started_at)}` : "ще не було уроків"}</span>
+                  </span>
+                  <Play className="size-4 shrink-0 text-admin-muted group-hover:text-admin-primary" />
+                </button>
+              );
+            })}
+          </div>
+        </Card>
+      )}
+
+      <Card className="p-5">
+        <SectionHeader title={recent.length ? "Інший учень або своя назва" : "Запустити живий урок"} subtitle="Назва за замовчуванням — «Ім’я · дата»" />
+        <div className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
+          <select value={studentId} onChange={(e) => setStudentId(e.target.value)} className={fieldCls}>
+            <option value="">— Виберіть учня —</option>
+            {[...students].sort((a, b) => nameOf(a.user_id).localeCompare(nameOf(b.user_id), "uk")).map((s) => (
+              <option key={s.user_id} value={s.user_id}>{nameOf(s.user_id)}</option>
+            ))}
+          </select>
+          <input value={title} onChange={(e) => setTitle(e.target.value)}
+            placeholder={studentId ? `${nameOf(studentId)} · ${dateLabel}` : "Назва уроку (необов’язково)"} className={fieldCls} />
+          <Button animated={false} onClick={() => begin(studentId)} disabled={!studentId}><Play /> Запустити</Button>
+        </div>
+      </Card>
     </div>
   );
 }
@@ -149,11 +173,16 @@ async function ensurePresentationHomework(teacherId: string, studentId: string, 
   try { await assignPresentationHomework(teacherId, studentId, presentationId); } catch { /* не інтерактивна */ }
 }
 
+/** Розділи, де «Показати учню» — одна дія. Для решти матеріал обирається всередині панелі. */
+const SIMPLE_SECTIONS: LiveSection[] = ["board", "writing", "reading", "grammar", "notes", "video"];
+const LESSON_MINUTES = 60;
+
 function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentName: string; onExit: () => void }) {
   const [section, setSection] = useState<LiveSection>(
     LIVE_SECTIONS.some((s) => s.key === cls.current_section) ? cls.current_section : "board",
   );
   const [dictOpen, setDictOpen] = useState(false);
+  const [endOpen, setEndOpen] = useState(false);
   const [ended, setEnded] = useState(cls.status === "ended");
   const [studentView, setStudentView] = useState<{ section: LiveSection; view: LiveView | null }>({
     section: cls.current_section,
@@ -163,45 +192,99 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
   const [laser, setLaser] = useState(false);
   const sendLaser = useLaserSender(cls.id);
   const onLaserMove = (p: LaserPoint) => sendLaser(p);
+  const presence = useLivePresence(cls.id, { id: cls.teacher_id, role: "teacher" }, section);
+
+  // «Слідувати»: переходи викладача між розділами одразу переносять учня
+  const [follow, setFollow] = useState(() => localStorage.getItem("klar-live-follow") !== "0");
+  useEffect(() => { localStorage.setItem("klar-live-follow", follow ? "1" : "0"); }, [follow]);
+
+  // таймер уроку
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => { const t = setInterval(() => setNow(Date.now()), 15000); return () => clearInterval(t); }, []);
+  const mins = Math.max(0, Math.floor((now - new Date(cls.started_at).getTime()) / 60000));
+  const clock = `${Math.floor(mins / 60)}:${String(mins % 60).padStart(2, "0")}`;
+  const overtime = mins >= LESSON_MINUTES;
 
   const finish = async () => {
-    await endLiveClass(cls.id);
-    setEnded(true);
-    toast({ title: "Урок завершено" });
-    onExit();
+    try {
+      await endLiveClass(cls.id);
+      setEnded(true);
+      toast({ title: "Урок завершено", description: `Тривалість ${clock}` });
+      onExit();
+    } catch (e: any) {
+      toast({ title: "Не вдалося завершити", description: e.message, variant: "destructive" });
+    }
   };
 
-  const transfer = async (s: LiveSection, view: LiveView | null) => {
+  const transfer = async (s: LiveSection, view: LiveView | null, silent = false) => {
     try {
       await setLiveView(cls.id, s, view);
       setStudentView({ section: s, view });
       if (view?.type === "slide") void ensurePresentationHomework(cls.teacher_id, cls.student_id, view.presentation_id);
-      toast({ title: "Учня перенесено", description: LIVE_SECTIONS.find((x) => x.key === s)?.label });
+      if (!silent) toast({ title: "Учня перенесено", description: LIVE_SECTIONS.find((x) => x.key === s)?.label });
     } catch (e: any) {
       toast({ title: "Не вдалося перенести", description: e.message, variant: "destructive" });
     }
   };
 
+  const goSection = (key: LiveSection) => {
+    setSection(key);
+    if (follow && SIMPLE_SECTIONS.includes(key) && studentView.section !== key) void transfer(key, null, true);
+  };
+
+  // слайд — 1-based (так само, як у LiveSlidesPanel і PresentationView)
   const whereIsStudent = () => {
     const label = LIVE_SECTIONS.find((s) => s.key === studentView.section)?.label || "Дошка";
-    if (studentView.view?.type === "slide") return `${label} · слайд ${studentView.view.page + 1}`;
+    if (studentView.view?.type === "slide") return `${label} · слайд ${studentView.view.page}`;
     if (studentView.view?.type === "textbook") return `${label} · стор. ${studentView.view.page}`;
     if (studentView.view?.type === "blocks") return `${label} · ${studentView.view.title || "урок"}`;
     return label;
   };
 
+  const simple = SIMPLE_SECTIONS.includes(section);
+  const studentHere = studentView.section === section;
+
   return (
     <div className="h-full min-h-0 flex flex-col bg-admin-bg overflow-hidden pb-14 md:pb-0">
-      <header className="h-12 md:h-14 shrink-0 border-b border-admin-border bg-admin-surface px-2 md:px-3 flex items-center gap-3">
+      <header className="h-14 shrink-0 border-b border-admin-border bg-admin-surface px-2 md:px-3 flex items-center gap-2 md:gap-3">
         <div className="min-w-0 mr-auto">
           <div className="flex items-center gap-2 min-w-0">
-            <span className="size-2 rounded-full bg-emerald-500 shrink-0" />
-            <h2 className="text-sm font-semibold text-admin-fg truncate">{cls.title}</h2>
-            <span className="text-xs text-admin-muted truncate hidden sm:inline">· {studentName}</span>
+            <span
+              className={`size-2.5 rounded-full shrink-0 ${presence.online ? "bg-emerald-500" : "bg-admin-muted/50"}`}
+              title={presence.online ? "Учень в уроці" : "Учня немає в уроці"}
+            />
+            <h2 className="text-sm font-semibold text-admin-fg truncate">{studentName}</h2>
+            <span className="text-xs text-admin-muted truncate hidden sm:inline">· {cls.title}</span>
           </div>
-          <p className="text-[11px] text-admin-muted truncate">Учень бачить: {whereIsStudent()}</p>
+          <p className="text-[11px] text-admin-muted truncate">
+            {presence.online ? "онлайн" : "не в уроці"} · бачить: <span className="text-admin-fg">{whereIsStudent()}</span>
+          </p>
         </div>
+
+        <span
+          className={`hidden sm:inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold tabular-nums ${overtime ? "border-amber-500/60 text-amber-600 dark:text-amber-300" : "border-admin-border text-admin-muted"}`}
+          title={`Урок триває · план ${LESSON_MINUTES} хв`}
+        >
+          <Timer className="size-3.5" /> {clock}
+        </span>
+
+        {simple && (
+          studentHere ? (
+            <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+              ● учень тут
+            </span>
+          ) : (
+            <Button animated={false} size="sm" onClick={() => transfer(section, null)}>
+              <Eye /> <span>Показати учню</span>
+            </Button>
+          )
+        )}
+
         <div className="flex items-center gap-1.5 shrink-0">
+          <Button animated={false} size="sm" variant={follow ? "default" : "outline"} onClick={() => setFollow((f) => !f)}
+            title={follow ? "Учень іде за вами між розділами. Натисніть, щоб готуватися непомітно." : "Ви переходите між розділами непомітно для учня."}>
+            {follow ? <Link2 /> : <Link2Off />} <span className="hidden lg:inline">{follow ? "Слідувати" : "Окремо"}</span>
+          </Button>
           <Button
             animated={false}
             size="sm"
@@ -214,16 +297,11 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
           <Button animated={false} size="sm" variant="outline" onClick={() => setDictOpen(true)} title="Словник">
             <Search /> <span className="hidden lg:inline">Словник</span>
           </Button>
-          <Button animated={false} size="sm" variant="outline" onClick={onExit} title="До списку уроків">
-            <LogOut /> <span className="hidden xl:inline">До списку</span>
+          <Button animated={false} size="sm" variant="outline" onClick={onExit} title="Вийти зі сторінки уроку (урок триває)">
+            <LogOut /> <span className="hidden xl:inline">Вийти</span>
           </Button>
           {!ended && (
-            <Button
-              animated={false}
-              size="sm"
-              variant="destructive"
-              onClick={finish}
-            >
+            <Button animated={false} size="sm" variant="destructive" onClick={() => setEndOpen(true)}>
               <Square /> <span className="hidden md:inline">Завершити</span>
             </Button>
           )}
@@ -237,10 +315,13 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
             size="sm"
             variant={s.key === section ? "default" : "ghost"}
             key={s.key}
-            onClick={() => setSection(s.key)}
-            className="h-8"
+            onClick={() => goSection(s.key)}
+            className="h-8 relative"
           >
             {s.icon} {s.label}
+            {studentView.section === s.key && (
+              <span className="absolute -top-0.5 -right-0.5 size-2.5 rounded-full bg-emerald-500 ring-2 ring-admin-surface" title="Учень зараз тут" />
+            )}
           </Button>
         ))}
       </div>
@@ -251,9 +332,6 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
           <BoardEditor compact className="h-full" classId={cls.id} initial={cls.board || []} apiRef={boardApi} studentId={cls.student_id} />
         </LaserSurface>
         <aside className="hidden xl:flex min-h-0 flex-col gap-2 overflow-y-auto">
-          <Button animated={false} size="sm" onClick={() => transfer("board", null)} className="w-full shrink-0">
-            <Crosshair /> Показати дошку учню
-          </Button>
           <div className="min-h-0 [&>div]:rounded-md [&>div]:p-3">
             <LiveBookPagePicker classId={cls.id} onToBoard={(url) => boardApi.current?.insertImage(url)} />
           </div>
@@ -262,76 +340,46 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
           <div className="w-52 max-w-[55vw] [&>div]:p-1">
             <LiveBookPagePicker classId={cls.id} onToBoard={(url) => boardApi.current?.insertImage(url)} />
           </div>
-          <Button animated={false} size="sm" onClick={() => transfer("board", null)}>
-            <Crosshair /> Учню
-          </Button>
         </div>
       </div>
 
-      {(
-        <LaserSurface active={laser} onMove={onLaserMove} className={section === "slides" ? "flex-1 min-h-0 overflow-hidden p-2" : "hidden"}>
+      <LaserSurface active={laser} onMove={onLaserMove} className={section === "slides" ? "flex-1 min-h-0 overflow-hidden p-2" : "hidden"}>
         <LiveSlidesPanel
+          active={section === "slides"}
           classId={cls.id}
           teacherId={cls.teacher_id}
           studentId={cls.student_id}
           current={studentView.view?.type === "slide" ? studentView.view : null}
           onTransfer={(presentationId, page) => transfer("slides", { type: "slide", presentation_id: presentationId, page })}
         />
-        </LaserSurface>
-      )}
+      </LaserSurface>
 
       {section === "writing" && (
-        <div className="flex-1 min-h-0 flex flex-col gap-2 p-2">
-          <div className="flex justify-end shrink-0">
-            <Button animated={false} size="sm" onClick={() => transfer("writing", null)}>
-              <Crosshair /> Показати письмо учню
-            </Button>
-          </div>
+        <div className="flex-1 min-h-0 flex flex-col p-2">
           <LiveWriting classId={cls.id} role="teacher" className="flex-1" />
         </div>
       )}
 
       {section === "reading" && (
-        <div className="flex-1 min-h-0 flex flex-col gap-2 p-2">
-          <div className="flex justify-end shrink-0">
-            <Button animated={false} size="sm" onClick={() => transfer("reading", null)}>
-              <Crosshair /> Показати читання учню
-            </Button>
-          </div>
+        <div className="flex-1 min-h-0 flex flex-col p-2">
           <LiveReading classId={cls.id} role="teacher" studentId={cls.student_id} teacherId={cls.teacher_id} className="flex-1" />
         </div>
       )}
 
       {section === "grammar" && (
-        <div className="flex-1 min-h-0 flex flex-col gap-2 p-2">
-          <div className="flex justify-end shrink-0">
-            <Button animated={false} size="sm" onClick={() => transfer("grammar", null)}>
-              <Crosshair /> Показати граматику учню
-            </Button>
-          </div>
+        <div className="flex-1 min-h-0 flex flex-col p-2">
           <LiveGrammar classId={cls.id} role="teacher" studentId={cls.student_id} teacherId={cls.teacher_id} className="flex-1" />
         </div>
       )}
 
-
       {section === "notes" && (
-        <div className="flex-1 min-h-0 flex flex-col gap-2 p-2">
-          <div className="flex justify-end shrink-0">
-            <Button animated={false} size="sm" onClick={() => transfer("notes", null)}>
-              <Crosshair /> Показати нотатки учню
-            </Button>
-          </div>
+        <div className="flex-1 min-h-0 flex flex-col p-2">
           <LiveNotes classId={cls.id} role="teacher" studentId={cls.student_id} teacherId={cls.teacher_id} className="flex-1" />
         </div>
       )}
 
       {section === "video" && (
-        <div className="flex-1 min-h-0 flex flex-col gap-2 p-2 overflow-hidden">
-          <div className="flex justify-end shrink-0">
-            <Button animated={false} size="sm" onClick={() => transfer("video", null)}>
-              <Crosshair /> Показати відео учню
-            </Button>
-          </div>
+        <div className="flex-1 min-h-0 flex flex-col p-2 overflow-hidden">
           <LiveVideo
             classId={cls.id}
             role="teacher"
@@ -354,147 +402,42 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
 
       {section === "blocks" && (
         <LaserSurface active={laser} onMove={onLaserMove} className="flex-1 min-h-0 overflow-y-auto p-3">
-        <BlocksPanel
-          onTransfer={(kit) =>
-            transfer("blocks", { type: "blocks", kit_id: kit.id, title: kit.title, level: kit.level, blocks: kit.blocks, sections: kitSections(kit), page_paths: kit.page_paths, presentation_id: kit.presentation_id })
-          }
-        />
+          <BlocksPanel
+            onTransfer={(kit) =>
+              transfer("blocks", { type: "blocks", kit_id: kit.id, title: kit.title, level: kit.level, blocks: kit.blocks, sections: kitSections(kit), page_paths: kit.page_paths, presentation_id: kit.presentation_id })
+            }
+          />
         </LaserSurface>
       )}
 
       <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 h-14 border-t border-admin-border bg-admin-surface flex overflow-x-auto" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
         {LIVE_SECTIONS.map((s) => (
-          <button key={s.key} onClick={() => setSection(s.key)}
-            className={`flex-1 min-w-[60px] flex flex-col items-center justify-center text-[10px] font-medium ${s.key === section ? "text-primary" : "text-admin-muted"}`}>
+          <button key={s.key} onClick={() => goSection(s.key)}
+            className={`relative flex-1 min-w-[60px] flex flex-col items-center justify-center text-[10px] font-medium ${s.key === section ? "text-primary" : "text-admin-muted"}`}>
             <span className="text-base leading-none">{s.icon}</span>
             <span className="truncate max-w-full">{s.label}</span>
+            {studentView.section === s.key && <span className="absolute top-1 right-3 size-2 rounded-full bg-emerald-500" />}
           </button>
         ))}
       </nav>
 
-      <PandaLookupDialog open={dictOpen} onOpenChange={setDictOpen} targetUserId={cls.student_id} />
-    </div>
-  );
-}
-
-/* ───────── Презентація ───────── */
-
-function SlidesPanel({
-  teacherId,
-  current,
-  onTransfer,
-}: {
-  teacherId: string;
-  current: { presentation_id: string; page: number } | null;
-  onTransfer: (presentationId: string, page: number) => void;
-}) {
-  const [list, setList] = useState<Presentation[]>([]);
-  const [folders, setFolders] = useState<PresentationFolder[]>([]);
-  const [folderId, setFolderId] = useState("");
-  const [selected, setSelected] = useState<Presentation | null>(null);
-  const [page, setPage] = useState(current?.page ?? 0);
-  const [busy, setBusy] = useState<string | null>(null);
-
-  const load = async () => {
-    try {
-      const rows = await listPresentations();
-      listPresentationFolders().then(setFolders).catch(() => {});
-      setList(rows);
-      if (current) setSelected(rows.find((p) => p.id === current.presentation_id) ?? null);
-    } catch (e: any) {
-      toast({ title: "Не вдалося завантажити презентації", description: e.message, variant: "destructive" });
-    }
-  };
-
-  useEffect(() => { load(); }, []);
-
-  const upload = async (file: File) => {
-    setBusy("Читаємо PDF…");
-    try {
-      const p = await uploadPresentation({ ownerId: teacherId, file, onProgress: setBusy });
-      setList((prev) => [p, ...prev]);
-      setSelected(p);
-      setPage(0);
-      toast({ title: "Презентацію додано", description: `Слайдів: ${p.page_count}` });
-    } catch (e: any) {
-      toast({ title: "Помилка", description: e.message, variant: "destructive" });
-    } finally {
-      setBusy(null);
-    }
-  };
-
-  const step = (d: number) => {
-    if (!selected) return;
-    const next = Math.min(Math.max(page + d, 0), Math.max(selected.page_count - 1, 0));
-    setPage(next);
-    if (current?.presentation_id === selected.id) onTransfer(selected.id, next);
-  };
-
-  return (
-    <Card className="p-5 space-y-4">
-      <SectionHeader title="Презентація" subtitle="Виберіть, перегляньте — і перенесіть учня" />
-
-      <label className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-indigo-200 bg-indigo-50 text-indigo-700 text-sm font-medium cursor-pointer">
-        {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-        {busy || "Додати PDF"}
-        <input
-          type="file"
-          accept="application/pdf"
-          className="hidden"
-          onChange={(e) => { const f = e.target.files?.[0]; if (f) upload(f); e.currentTarget.value = ""; }}
-        />
-      </label>
-
-      {list.length === 0 ? (
-        <p className="text-sm text-slate-500">Ще немає презентацій — додайте PDF.</p>
-      ) : (
-        <div className="space-y-2">
-        {folders.length > 0 && (
-          <select value={folderId} onChange={(e) => setFolderId(e.target.value)} className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs bg-white">
-            <option value="">Усі папки</option>
-            {folders.map((f) => <option key={f.id} value={f.id}>{f.emoji} {f.name}</option>)}
-          </select>
-        )}
-        <div className="flex flex-wrap gap-2">
-          {list.filter((p) => !p.archived && (!folderId || p.folder_id === folderId || p.id === selected?.id)).map((p) => (
-            <button
-              key={p.id}
-              onClick={() => { setSelected(p); setPage(0); }}
-              className={`px-3 py-1.5 rounded-xl text-xs font-medium border ${
-                selected?.id === p.id ? "border-indigo-300 bg-indigo-50 text-indigo-700" : "border-slate-200 text-slate-600 hover:bg-slate-50"
-              }`}
-            >
-              {p.title} · {p.page_count}
-            </button>
-          ))}
-        </div>
-        </div>
-      )}
-
-      {selected && (
-        <div className="space-y-3">
-          <PresentationView presentationId={selected.id} page={page} />
-          <div className="flex flex-wrap items-center gap-2">
-            <button onClick={() => step(-1)} className="p-2 rounded-xl border border-slate-200 hover:bg-slate-50">
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <span className="text-xs text-slate-500">
-              {page + 1} / {selected.page_count}
-            </span>
-            <button onClick={() => step(1)} className="p-2 rounded-xl border border-slate-200 hover:bg-slate-50">
-              <ChevronRight className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => onTransfer(selected.id, page)}
-              className="px-4 py-2 rounded-xl text-white text-sm font-medium"
-              style={{ background: "#0F172A" }}
-            >
-              Перенести учня сюди
-            </button>
+      {endOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onMouseDown={() => setEndOpen(false)}>
+          <div className="w-full max-w-sm rounded-2xl border border-admin-border bg-admin-card p-5 text-admin-fg shadow-xl" onMouseDown={(e) => e.stopPropagation()}>
+            <h3 className="text-base font-semibold">Завершити урок?</h3>
+            <p className="mt-2 text-sm text-admin-muted">
+              {studentName} {presence.online ? "зараз в уроці й" : ""} буде повернуто до кабінету. Тривалість уроку: {clock}.
+            </p>
+            <div className="mt-5 flex justify-end gap-2">
+              <Button animated={false} size="sm" variant="outline" onClick={() => setEndOpen(false)}>Ще ні</Button>
+              <Button animated={false} size="sm" variant="destructive" onClick={finish}>Завершити</Button>
+            </div>
           </div>
         </div>
       )}
-    </Card>
+
+      <PandaLookupDialog open={dictOpen} onOpenChange={setDictOpen} targetUserId={cls.student_id} />
+    </div>
   );
 }
 
@@ -521,7 +464,7 @@ function BlocksPanel({ onTransfer }: { onTransfer: (kit: LessonKit) => void }) {
     <Card className="p-5 space-y-4">
       <SectionHeader title="Блок-завдання" subtitle="Готові уроки з бібліотеки уроків" />
       {loading ? (
-        <p className="text-sm text-slate-500 animate-pulse">Завантаження…</p>
+        <p className="text-sm text-admin-muted animate-pulse">Завантаження…</p>
       ) : kits.length === 0 ? (
         <EmptyState title="Бібліотека уроків порожня" description="Створіть урок у розділі «Майстерня уроків»." />
       ) : (
@@ -531,7 +474,7 @@ function BlocksPanel({ onTransfer }: { onTransfer: (kit: LessonKit) => void }) {
               key={k.id}
               onClick={() => setSelected(k)}
               className={`px-3 py-1.5 rounded-xl text-xs font-medium border text-left ${
-                selected?.id === k.id ? "border-indigo-300 bg-indigo-50 text-indigo-700" : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                selected?.id === k.id ? "border-admin-primary bg-admin-primary/10 text-admin-fg" : "border-admin-border text-admin-muted hover:bg-admin-fg/5"
               }`}
             >
               {k.title}
@@ -545,13 +488,12 @@ function BlocksPanel({ onTransfer }: { onTransfer: (kit: LessonKit) => void }) {
         <div className="space-y-3">
           <button
             onClick={() => onTransfer(selected)}
-            className="px-4 py-2 rounded-xl text-white text-sm font-medium"
-            style={{ background: "#0F172A" }}
+            className="px-4 py-2 rounded-xl bg-admin-primary text-admin-primary-fg text-sm font-medium"
           >
             Перенести учня сюди
           </button>
-          <div className="rounded-2xl border border-slate-200 p-3">
-            <p className="text-xs text-slate-500 mb-2">Так це бачить учень</p>
+          <div className="rounded-2xl border border-admin-border p-3">
+            <p className="text-xs text-admin-muted mb-2">Так це бачить учень</p>
              <LessonReader title={selected.title} level={selected.level} sections={kitSections(selected)} pagePaths={selected.page_paths} imageBucket={selected.presentation_id ? "presentation-slides" : "tutoring-materials"} showActions={false} />
           </div>
         </div>

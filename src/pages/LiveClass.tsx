@@ -30,19 +30,24 @@ import PresentationView from "@/components/tutoring/PresentationView";
 import LessonReader from "@/components/blocks/LessonReader";
 import { kitSections, normalizeKit } from "@/lib/lesson-kits";
 import { LaserSurface, useLaserReceiver } from "@/components/live/LaserPointer";
+import { useLivePresence } from "@/hooks/useLivePresence";
 
+
+/** localStorage може кидати виняток (приватний режим Safari, Telegram WebView) — урок не повинен через це падати. */
+const lsGet = (k: string): string | null => { try { return localStorage.getItem(k); } catch { return null; } };
+const lsSet = (k: string, v: string) => { try { localStorage.setItem(k, v); } catch { /* ignore */ } };
 
 export default function LiveClass() {
   const [textZoom, setTextZoom] = useState(() => {
-    const v = typeof window !== "undefined" ? Number(localStorage.getItem("live_text_zoom")) : 1;
+    const v = Number(lsGet("live_text_zoom"));
     return v >= 0.7 && v <= 1.4 ? v : 1;
   });
   const changeZoom = (d: number) => setTextZoom((z) => {
     const n = Math.round(Math.min(1.4, Math.max(0.7, z + d)) * 10) / 10;
-    localStorage.setItem("live_text_zoom", String(n));
+    lsSet("live_text_zoom", String(n));
     return n;
   });
-  const [navCollapsed, setNavCollapsed] = useState(() => typeof window !== "undefined" && localStorage.getItem("live_nav_collapsed") === "1");
+  const [navCollapsed, setNavCollapsed] = useState(() => lsGet("live_nav_collapsed") === "1");
   const { id } = useParams<{ id: string }>();
   const { user, loading } = useAuth();
   const navigate = useNavigate();
@@ -53,10 +58,15 @@ export default function LiveClass() {
   const [seen, setSeen] = useState<Record<string, string>>({});
   const [answers, setAnswers] = useState<Record<string, { answer: string; is_correct: boolean | null }>>({});
   const [ready, setReady] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [loadTry, setLoadTry] = useState(0);
+  const [connLost, setConnLost] = useState(false);
   const [boardFull, setBoardFull] = useState(false);
   const [bookPageUrl, setBookPageUrl] = useState<string | null>(null);
   const boardChanRef = useRef<any>(null);
   const laser = useLaserReceiver(id);
+  // викладач бачить, що учень в уроці і в якому розділі
+  useLivePresence(id, user ? { id: user.id, role: "student" } : null, section);
 
   const reportCam = (cam: BoardCam) => {
     boardChanRef.current?.send({ type: "broadcast", event: "studentcam", payload: { cam } });
@@ -109,47 +119,96 @@ export default function LiveClass() {
   useEffect(() => {
     if (!id || !user) return;
     let cancelled = false;
+    setLoadError(false);
     (async () => {
-      const { data } = await supabase.from("live_classes").select("*").eq("id", id).maybeSingle();
-      if (cancelled) return;
-      if (!data || (data as any).status === "ended") { navigate("/academy", { replace: true }); return; }
-      setCls(data as unknown as LiveClassRow);
-      setItems(await fetchLiveItems(id));
-      // Спільна нескінченна дошка учня (та сама, що й в кабінеті)
-      const { data: sb } = await (supabase as any).from("student_boards").select("elements").eq("user_id", user.id).maybeSingle();
-      if (!cancelled && Array.isArray(sb?.elements)) {
-        setCls((prev) => (prev ? ({ ...prev, board: sb.elements } as LiveClassRow) : prev));
+      try {
+        const { data, error } = await supabase.from("live_classes").select("*").eq("id", id).maybeSingle();
+        if (cancelled) return;
+        // Помилка мережі ≠ «уроку немає»: не викидаємо учня з уроку, а пропонуємо повторити
+        if (error) { setLoadError(true); return; }
+        if (!data || (data as any).status === "ended") { navigate("/academy", { replace: true }); return; }
+        setCls(data as unknown as LiveClassRow);
+        setItems(await fetchLiveItems(id));
+        // Спільна нескінченна дошка учня (та сама, що й в кабінеті)
+        const { data: sb } = await (supabase as any).from("student_boards").select("elements").eq("user_id", user.id).maybeSingle();
+        if (!cancelled && Array.isArray(sb?.elements)) {
+          setCls((prev) => (prev ? ({ ...prev, board: sb.elements } as LiveClassRow) : prev));
+        }
+        const { data: seenRows } = await supabase
+          .from("live_class_seen")
+          .select("section, last_seen_at")
+          .eq("class_id", id)
+          .eq("student_id", user.id);
+        const map: Record<string, string> = {};
+        (seenRows || []).forEach((r: any) => { map[r.section] = r.last_seen_at; });
+        const { data: ansRows } = await supabase
+          .from("live_class_answers")
+          .select("item_id, answer, is_correct")
+          .eq("class_id", id)
+          .eq("student_id", user.id);
+        const amap: Record<string, any> = {};
+        (ansRows || []).forEach((r: any) => { amap[r.item_id] = { answer: r.answer, is_correct: r.is_correct }; });
+        if (cancelled) return;
+        setSeen(map);
+        setAnswers(amap);
+        setReady(true);
+      } catch {
+        if (!cancelled) setLoadError(true);
       }
-      const { data: seenRows } = await supabase
-        .from("live_class_seen")
-        .select("section, last_seen_at")
-        .eq("class_id", id)
-        .eq("student_id", user.id);
-      const map: Record<string, string> = {};
-      (seenRows || []).forEach((r: any) => { map[r.section] = r.last_seen_at; });
-      const { data: ansRows } = await supabase
-        .from("live_class_answers")
-        .select("item_id, answer, is_correct")
-        .eq("class_id", id)
-        .eq("student_id", user.id);
-      const amap: Record<string, any> = {};
-      (ansRows || []).forEach((r: any) => { amap[r.item_id] = { answer: r.answer, is_correct: r.is_correct }; });
-      if (cancelled) return;
-      setSeen(map);
-      setAnswers(amap);
-      setReady(true);
     })();
     return () => { cancelled = true; };
-  }, [id, user, navigate]);
+  }, [id, user, navigate, loadTry]);
+
+  // Догрузка пропущеного після обриву зв'язку / сну телефону (realtime не відтворює пропущені події)
+  const resync = useRef<() => void>(() => {});
+  resync.current = async () => {
+    if (!id) return;
+    try {
+      const { data, error } = await supabase.from("live_classes").select("*").eq("id", id).maybeSingle();
+      if (error || !data) return;
+      if ((data as any).status === "ended") {
+        toast.success("Урок завершено");
+        navigate("/academy", { replace: true });
+        return;
+      }
+      // дошку не чіпаємо: вона приходить окремим стрімом і з student_boards
+      const { board: _board, ...rest } = data as any;
+      setCls((prev) => (prev ? ({ ...prev, ...rest } as LiveClassRow) : prev));
+      const fresh = await fetchLiveItems(id);
+      setItems((prev) => {
+        const ids = new Set(fresh.map((f) => f.id));
+        // елементи, що встигли прийти по realtime, але ще не в вибірці, не губимо
+        return [...fresh, ...prev.filter((p) => !ids.has(p.id) && Date.now() - new Date(p.created_at).getTime() < 15000)];
+      });
+    } catch { /* наступна спроба — при наступному поверненні зв'язку */ }
+  };
+
+  // Телефон прокинувся / мережа повернулась — одразу синхронізуємось
+  useEffect(() => {
+    const wake = () => { if (document.visibilityState === "visible") resync.current(); };
+    const online = () => { setConnLost(false); resync.current(); };
+    const offline = () => setConnLost(true);
+    document.addEventListener("visibilitychange", wake);
+    window.addEventListener("online", online);
+    window.addEventListener("offline", offline);
+    if (typeof navigator !== "undefined" && navigator.onLine === false) setConnLost(true);
+    return () => {
+      document.removeEventListener("visibilitychange", wake);
+      window.removeEventListener("online", online);
+      window.removeEventListener("offline", offline);
+    };
+  }, []);
 
   // realtime
   useEffect(() => {
     if (!id) return;
+    let wasLost = false;
     const ch = supabase
       .channel(`live-class:${id}`)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "live_classes", filter: `id=eq.${id}` },
         ({ new: c }: any) => {
-          setCls(c as LiveClassRow);
+          // зливаємо, а не підміняємо: у realtime-події великі «незмінені» колонки (дошка) можуть бути відсутні
+          setCls((prev) => (prev ? ({ ...prev, ...c } as LiveClassRow) : (c as LiveClassRow)));
           if (c?.status === "ended") {
             toast.success("Урок завершено");
             navigate("/academy", { replace: true });
@@ -157,13 +216,21 @@ export default function LiveClass() {
         })
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "live_class_items", filter: `class_id=eq.${id}` },
         ({ new: it }: any) => {
-          setItems((prev) => [...prev, it as LiveItem]);
+          setItems((prev) => (prev.some((p) => p.id === (it as LiveItem).id) ? prev : [...prev, it as LiveItem]));
           const label = LIVE_SECTIONS.find((s) => s.key === (it as LiveItem).section)?.label;
           if (label) toast.info(`Новий матеріал: ${label}`);
         })
       .on("postgres_changes", { event: "DELETE", schema: "public", table: "live_class_items", filter: `class_id=eq.${id}` },
         ({ old: it }: any) => setItems((prev) => prev.filter((p) => p.id !== it.id)))
-      .subscribe();
+      .subscribe((status: string) => {
+        if (status === "SUBSCRIBED") {
+          // перше підключення — дані вже завантажені; повторне (після обриву) — докачуємо пропущене
+          if (wasLost) { wasLost = false; setConnLost(false); resync.current(); }
+        } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
+          wasLost = true;
+          setConnLost(true);
+        }
+      });
 
     // Миттєвий стрім дошки від вчителя
     const boardCh = supabase
@@ -229,8 +296,16 @@ export default function LiveClass() {
 
   if (!cls) {
     return (
-      <div className="min-h-[100dvh] flex items-center justify-center bg-background">
-        <span className="font-display text-muted-foreground animate-pulse">KLAR</span>
+      <div className="min-h-[100dvh] flex flex-col items-center justify-center gap-4 bg-background px-6 text-center">
+        {loadError ? (
+          <>
+            <p className="font-display text-lg font-bold text-foreground">Немає зв'язку з уроком</p>
+            <p className="text-sm text-muted-foreground max-w-xs">Перевірте інтернет — урок нікуди не зник. Натисніть «Повторити», щоб повернутись.</p>
+            <button onClick={() => setLoadTry((n) => n + 1)} className="px-5 py-3 rounded-xl bg-primary text-primary-foreground font-display font-bold">Повторити</button>
+          </>
+        ) : (
+          <span className="font-display text-muted-foreground animate-pulse">KLAR</span>
+        )}
       </div>
     );
   }
@@ -268,7 +343,7 @@ export default function LiveClass() {
           })}
         </nav>
         <button
-          onClick={() => setNavCollapsed((v) => { localStorage.setItem("live_nav_collapsed", v ? "0" : "1"); return !v; })}
+          onClick={() => setNavCollapsed((v) => { lsSet("live_nav_collapsed", v ? "0" : "1"); return !v; })}
           title={navCollapsed ? "Розгорнути" : "Згорнути"}
           className="hidden md:flex m-2 h-9 items-center justify-center rounded-xl text-muted-foreground hover:bg-muted/50 hover:text-foreground text-sm"
         >
@@ -291,6 +366,11 @@ export default function LiveClass() {
         })}
       </nav>
       <main className={`flex-1 h-full pb-16 md:pb-0 ${section === "board" ? "overflow-hidden flex flex-col" : "overflow-y-auto"}`}>
+        {connLost && (
+          <div role="status" className="fixed top-0 inset-x-0 z-[60] bg-amber-500 text-white text-xs font-bold text-center py-1.5 px-3">
+            Немає зв'язку — намагаємось відновити. Ваш текст збережеться, коли зв'язок повернеться.
+          </div>
+        )}
         {lastSlide && (
           <div className={section === "slides" ? "p-2 sm:p-4 h-[calc(100dvh-4rem)] md:h-[100dvh]" : "hidden"}>
             <LaserSurface point={laser} className="h-full">

@@ -168,6 +168,12 @@ export default function StandaloneAssignmentsPage() {
   }, [assignments, q, students, cat]);
 
   const remove = async (id: string) => {
+    // Разом із завданням каскадом зникає здана робота учня, оцінка і запис голосу — просимо підтвердження
+    const sub = subs[id];
+    const warn = sub
+      ? "Учень уже здав це завдання. Буде видалено завдання РАЗОМ зі здачею, оцінкою і записами. Видалити?"
+      : "Видалити завдання?";
+    if (!window.confirm(warn)) return;
     const { error } = await supabase.from("student_assignments").delete().eq("id", id);
     if (error) toast({ title: "Помилка", description: error.message, variant: "destructive" });
     else {

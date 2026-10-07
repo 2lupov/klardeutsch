@@ -45,6 +45,7 @@ const StudentHomework = () => {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const saveTimer = useRef<number | null>(null);
+  const hwIdRef = useRef<string | null>(null);
 
   // Load homework + lesson title
   useEffect(() => {
@@ -84,8 +85,22 @@ const StudentHomework = () => {
         updated_at: data.updated_at,
       };
       setHw(row);
-      setText(row.submission ?? "");
-      setFiles(row.submission_files ?? []);
+      hwIdRef.current = row.id;
+      let startText = row.submission ?? "";
+      let startFiles = row.submission_files ?? [];
+      // Незбережена чернетка з пристрою (обрив зв'язку, перезавантаження) — не губимо
+      try {
+        const raw = localStorage.getItem(`klar-hw-draft:${user.id}:${id}`);
+        const d = raw ? JSON.parse(raw) : null;
+        if (d && typeof d.text === "string" && row.status !== "graded" && d.text !== startText) {
+          startText = d.text;
+          if (Array.isArray(d.files)) startFiles = d.files;
+          pending.current = { text: startText, files: startFiles };
+          saveTimer.current = window.setTimeout(() => { void saveNow(); }, 500);
+        }
+      } catch { /* ignore */ }
+      setText(startText);
+      setFiles(startFiles);
       setLessonTitle(lesson?.title ?? "");
       setLoading(false);
     })();
@@ -116,25 +131,48 @@ const StudentHomework = () => {
     };
   }, [id, hw?.status]);
 
-  // Auto-save draft text (debounced) — pushes to DB so teacher sees it live
+  // Auto-save draft text (debounced) — pushes to DB so teacher sees it live.
+  // Статус тут НЕ чіпаємо: інакше відкладений автосейв після «Здати» повертав роботу в «assigned».
+  const pending = useRef<{ text: string; files: FileMeta[] } | null>(null);
+  const draftKey = user && id ? `klar-hw-draft:${user.id}:${id}` : null;
+  const writeDraft = (v: { text: string; files: FileMeta[] } | null) => {
+    if (!draftKey) return;
+    try { v ? localStorage.setItem(draftKey, JSON.stringify(v)) : localStorage.removeItem(draftKey); } catch { /* ignore */ }
+  };
+
+  const saveNow = async () => {
+    if (saveTimer.current) { window.clearTimeout(saveTimer.current); saveTimer.current = null; }
+    const p = pending.current;
+    if (!p || !hwIdRef.current) return;
+    setSaving(true);
+    const { error } = await supabase
+      .from("tutoring_homework")
+      .update({ submission: p.text, submission_files: p.files as any })
+      .eq("id", hwIdRef.current);
+    setSaving(false);
+    if (error) {
+      // текст лишається в чернетці на пристрої, пробуємо ще раз
+      toast.error(t("Немає зв'язку — текст збережено на пристрої, спробуємо ще раз", "Нет связи — текст сохранён на устройстве, попробуем ещё раз"));
+      saveTimer.current = window.setTimeout(() => { void saveNow(); }, 4000);
+      return;
+    }
+    if (pending.current === p) { pending.current = null; writeDraft(null); }
+  };
+
   const queueAutosave = (nextText: string, nextFiles: FileMeta[]) => {
     if (!hw) return;
+    pending.current = { text: nextText, files: nextFiles };
+    writeDraft(pending.current);
     if (saveTimer.current) window.clearTimeout(saveTimer.current);
-    saveTimer.current = window.setTimeout(async () => {
-      setSaving(true);
-      const { error } = await supabase
-        .from("tutoring_homework")
-        .update({
-          submission: nextText,
-          submission_files: nextFiles as any,
-          // keep status "assigned" while drafting; only "Submit" sets "submitted"
-          status: hw.status === "graded" ? "graded" : hw.status === "submitted" ? "submitted" : "assigned",
-        })
-        .eq("id", hw.id);
-      setSaving(false);
-      if (error) toast.error(t("Помилка автозбереження", "Ошибка автосохранения"));
-    }, 700);
+    saveTimer.current = window.setTimeout(() => { void saveNow(); }, 700);
   };
+
+  // Вийшли зі сторінки / згорнули застосунок — дозберігаємо, що не встигло піти
+  useEffect(() => {
+    const onHide = () => { if (document.visibilityState === "hidden") void saveNow(); };
+    document.addEventListener("visibilitychange", onHide);
+    return () => { document.removeEventListener("visibilitychange", onHide); void saveNow(); };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleTextChange = (v: string) => {
     setText(v);
@@ -183,6 +221,9 @@ const StudentHomework = () => {
       toast.error(t("Додайте текст або файл", "Добавьте текст или файл"));
       return;
     }
+    // відкладений автосейв більше не потрібен: здача містить найновіший текст
+    if (saveTimer.current) { window.clearTimeout(saveTimer.current); saveTimer.current = null; }
+    pending.current = null;
     setSaving(true);
     const { error } = await supabase
       .from("tutoring_homework")
@@ -195,9 +236,12 @@ const StudentHomework = () => {
       .eq("id", hw.id);
     setSaving(false);
     if (error) {
-      toast.error(t("Не вдалося відправити", "Не удалось отправить"));
+      pending.current = { text, files };
+      writeDraft(pending.current);
+      toast.error(t("Не вдалося відправити — текст не втрачено, спробуйте ще раз", "Не удалось отправить — текст не потерян, попробуйте ещё раз"));
       return;
     }
+    writeDraft(null);
     setHw({ ...hw, status: "submitted", submitted_at: new Date().toISOString() });
     toast.success(t("Відправлено викладачу!", "Отправлено преподавателю!"));
   };

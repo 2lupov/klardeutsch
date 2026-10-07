@@ -1,3 +1,5 @@
+import { lazy, Suspense } from "react";
+import RouteErrorBoundary from "@/components/RouteErrorBoundary";
 import StudentPresentationTask from "@/pages/StudentPresentationTask";
 import RuStudentTranslator from "@/components/RuStudentTranslator";
 import { Toaster } from "@/components/ui/toaster";
@@ -26,7 +28,7 @@ import Auth from "./pages/Auth";
 import AuthCallback from "./pages/AuthCallback";
 import ResetPassword from "./pages/ResetPassword";
 import OAuthConsent from "./pages/OAuthConsent";
-import AdminV2 from "./pages/admin-v2/AdminV2";
+const AdminV2 = lazy(() => import("./pages/admin-v2/AdminV2"));
 import Profile from "./pages/Profile";
 import Dictionary from "./pages/Dictionary";
 import Statistics from "./pages/Statistics";
@@ -100,7 +102,11 @@ const AppRoutes = () => {
       <Route path="/book-task/:id" element={<RequireAuth><StudentBookHomework /></RequireAuth>} />
       <Route path="/minicourse/:id" element={<RequireAuth><StudentMiniCourse /></RequireAuth>} />
       {/* Web-only routes — redirect to home in Telegram */}
-      <Route path="/admin" element={isTelegram ? <Navigate to="/" replace /> : <AdminV2 />} />
+      <Route path="/admin" element={isTelegram ? <Navigate to="/" replace /> : (
+        <Suspense fallback={<div className="min-h-[100dvh] grid place-items-center bg-background"><span className="font-display text-muted-foreground animate-pulse">KLAR</span></div>}>
+          <AdminV2 />
+        </Suspense>
+      )} />
       <Route path="/dutch" element={<RequireAuth><Dutch /></RequireAuth>} />
       <Route path="/method" element={isTelegram ? <Navigate to="/" replace /> : <Method />} />
       {/* Teach Space прибрано — викладання йде через адмінку */}
@@ -162,7 +168,9 @@ const App = () => (
           <Sonner />
           <OfflineBanner />
           <BrowserRouter>
-            <AppRoutes />
+            <RouteErrorBoundary>
+              <AppRoutes />
+            </RouteErrorBoundary>
             <ListeningFloatingPlayer />
             <ReportErrorButton />
             <CookieBanner />
