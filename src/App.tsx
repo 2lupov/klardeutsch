@@ -49,7 +49,6 @@ import Method from "./pages/Method";
 import Games from "./pages/Games";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
-import ConnectAgent from "./pages/ConnectAgent";
 import QR from "./pages/QR";
 import LandingUk from "./pages/LandingUk";
 import Course from "./pages/Course";
@@ -132,7 +131,6 @@ const AppRoutes = () => {
       </Route>
       <Route path="/privacy" element={isTelegram ? <Navigate to="/" replace /> : <Privacy />} />
       <Route path="/terms" element={isTelegram ? <Navigate to="/" replace /> : <Terms />} />
-      <Route path="/connect" element={<ConnectAgent />} />
       <Route path="/qr" element={isTelegram ? <Navigate to="/" replace /> : <QR />} />
       <Route path="/uk" element={isTelegram ? <Navigate to="/" replace /> : <LandingUk />} />
       {/* Authenticated routes with responsive layout */}
