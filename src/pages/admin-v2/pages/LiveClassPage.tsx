@@ -64,6 +64,19 @@ export default function LiveClassPage() {
 
   useEffect(() => { if (user) load(); }, [user]);
 
+  // після оновлення сторінки повертаємось у той самий урок
+  useEffect(() => {
+    if (activeClass) { localStorage.setItem("klar-active-live-class", activeClass.id); return; }
+  }, [activeClass?.id]);
+  useEffect(() => {
+    const id = localStorage.getItem("klar-active-live-class");
+    if (!id || sessionStorage.getItem("klar-open-live")) return;
+    supabase.from("live_classes").select("*").eq("id", id).maybeSingle().then(({ data }) => {
+      if (data && (data as any).status === "active") setActiveClass((cur) => cur ?? (data as any));
+      else localStorage.removeItem("klar-active-live-class");
+    });
+  }, []);
+
   // Відкриття уроку з картки учня
   useEffect(() => {
     const raw = sessionStorage.getItem("klar-open-live");
@@ -98,7 +111,7 @@ export default function LiveClassPage() {
       <TeacherConsole
         cls={activeClass}
         studentName={students.find((s) => s.user_id === activeClass.student_id)?.display_name || "Учень"}
-        onExit={() => { setActiveClass(null); load(); }}
+        onExit={() => { localStorage.removeItem("klar-active-live-class"); setActiveClass(null); load(); }}
       />
     );
   }
