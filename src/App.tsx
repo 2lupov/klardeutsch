@@ -18,18 +18,6 @@ import ReportErrorButton from "@/components/ReportErrorButton";
 import CookieBanner from "@/components/CookieBanner";
 import RequireAuth from "@/components/guards/RequireAuth";
 import RequirePremium from "@/components/guards/RequirePremium";
-import RequireTeacher from "@/components/guards/RequireTeacher";
-import TeachLayout from "./pages/teach/TeachLayout";
-import TeachDashboard from "./pages/teach/TeachDashboard";
-import TeachPlaceholder from "./pages/teach/TeachPlaceholder";
-import TeachLibrary from "./pages/teach/TeachLibrary";
-import TeachLessons from "./pages/teach/TeachLessons";
-import TeachLessonBuilder from "./pages/teach/TeachLessonBuilder";
-import TeachGroups from "./pages/teach/TeachGroups";
-import TeachSchedule from "./pages/teach/TeachSchedule";
-import TeachStudents from "./pages/teach/TeachStudents";
-import TeachAttendance from "./pages/teach/TeachAttendance";
-import TeachFinance from "./pages/teach/TeachFinance";
 import Index from "./pages/Index";
 import Dutch from "./pages/Dutch";
 import CourseA2 from "./pages/CourseA2";
@@ -115,20 +103,8 @@ const AppRoutes = () => {
       <Route path="/admin" element={isTelegram ? <Navigate to="/" replace /> : <AdminV2 />} />
       <Route path="/dutch" element={<RequireAuth><Dutch /></RequireAuth>} />
       <Route path="/method" element={isTelegram ? <Navigate to="/" replace /> : <Method />} />
-      {/* Teacher workspace (school staff only) */}
-      <Route path="/teach" element={isTelegram ? <Navigate to="/" replace /> : <RequireTeacher><TeachLayout /></RequireTeacher>}>
-        <Route index element={<TeachDashboard />} />
-        <Route path="schedule" element={<TeachSchedule />} />
-        <Route path="library" element={<TeachLibrary />} />
-        <Route path="lessons" element={<TeachLessons />} />
-        <Route path="lesson/:id/build" element={<TeachLessonBuilder />} />
-        <Route path="class" element={<TeachPlaceholder title="Live-клас" description="Запустіть Presenter Mode з будь-якого уроку в розділі «Уроки»." />} />
-        <Route path="groups" element={<TeachGroups />} />
-        <Route path="students" element={<TeachStudents />} />
-        <Route path="attendance" element={<TeachAttendance />} />
-        <Route path="finance" element={<TeachFinance />} />
-        <Route path="homework" element={<TeachPlaceholder title="Домашні завдання" description="Призначення на групу, автоперевірка, feedback. Розширення tutoring_homework." />} />
-      </Route>
+      {/* Teach Space прибрано — викладання йде через адмінку */}
+      <Route path="/teach/*" element={<Navigate to="/admin" replace />} />
       <Route path="/privacy" element={isTelegram ? <Navigate to="/" replace /> : <Privacy />} />
       <Route path="/terms" element={isTelegram ? <Navigate to="/" replace /> : <Terms />} />
       <Route path="/qr" element={isTelegram ? <Navigate to="/" replace /> : <QR />} />
