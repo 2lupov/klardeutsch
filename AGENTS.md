@@ -1,1 +1,2 @@
 - Personal admin study space "Мій KLAR" lives at `/my` (`src/pages/MyKlar.tsx`) and saves self-study answers through `presentation_progress` keyed by the admin's own user id; reuses the student pipeline instead of a parallel store.
+- Personal admin study space "Мій KLAR" lives at `/my` (`src/pages/MyKlar.tsx`) and saves self-study answers through `presentation_progress` keyed by the admin's own user id; reuses the student pipeline instead of a parallel store.
