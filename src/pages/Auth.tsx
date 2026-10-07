@@ -12,6 +12,7 @@ import AuthKlarLogo from "@/components/auth/AuthKlarLogo";
 import Fireworks from "@/components/auth/Fireworks";
 import { Sparkles } from "lucide-react";
 import SimpleCaptcha from "@/components/auth/SimpleCaptcha";
+import { BiometricLoginButton } from "@/components/auth/BiometricButtons";
 import { lovable } from "@/integrations/lovable/index";
 import { getNicknameAuthError, getSignupPasswordError, PASSWORD_RULES } from "@/lib/nickname-auth";
 
