@@ -222,12 +222,12 @@ export default function AdminV2() {
           ))}
         <div className="pt-3 border-t border-admin-border mt-3">
           <a
-            href="/dutch"
+            href="/my"
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-admin-muted hover:bg-admin-fg/5 hover:text-admin-fg"
-            title="KLAR Dutch"
+            title="Мій KLAR"
           >
-            <span className="w-[18px] text-center shrink-0">🇳🇱</span>
-            {!collapsed && <span className="truncate">KLAR Dutch</span>}
+            <span className="w-[18px] text-center shrink-0">🎓</span>
+            {!collapsed && <span className="truncate">Мій KLAR</span>}
           </a>
         </div>
         </nav>
