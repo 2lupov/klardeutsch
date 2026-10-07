@@ -25,6 +25,7 @@ import GiftShelf from "@/components/gifts/GiftShelf";
 import GiftUnboxing from "@/components/gifts/GiftUnboxing";
 import FriendsList from "@/components/FriendsList";
 import AccountsScreen from "@/components/profile/AccountsScreen";
+import { BiometricToggle } from "@/components/auth/BiometricButtons";
 
 interface ProgressRow {
   level: string;
