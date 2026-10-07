@@ -160,10 +160,9 @@ export default function LiveWriting({ classId, role, className }: { classId: str
   const generate = async () => {
     setGenerating(true);
     try {
-      const { data, error } = await supabase.functions.invoke("generate-writing-topic", {
-        body: { level, avoid: topic?.title_de ?? "", theme: getLessonTopic(classId) },
-      });
-      if (error || data?.error) throw new Error(data?.error || error?.message);
+      const source = await getReadingSource(classId);
+      if (!source) throw new Error("Спершу створіть текст у «Читанні» — питання будуть саме по ньому");
+      const data = { topic: await generateWritingFromText({ level, source }) };
       setTopic(data.topic);
       chan.current?.send({ type: "broadcast", event: "topic", payload: { topic: data.topic } });
       await persist({ topic: data.topic });
@@ -201,7 +200,7 @@ export default function LiveWriting({ classId, role, className }: { classId: str
       <aside className="min-h-0 overflow-y-auto rounded-2xl border border-border bg-card/80 p-4 space-y-4 shadow-sm backdrop-blur">
         <div className="flex items-center gap-2 text-primary">
           <span className="grid size-8 place-items-center rounded-xl bg-primary/15"><PenLine className="h-4 w-4" /></span>
-          <span className="text-xs font-bold uppercase tracking-widest">Тема письма</span>
+          <span className="text-xs font-bold uppercase tracking-widest">Відповіді на питання до тексту</span>
           {topic?.level && <span className="ml-auto rounded-md bg-primary/10 px-2 py-0.5 text-xs font-bold">{topic.level}</span>}
         </div>
 
