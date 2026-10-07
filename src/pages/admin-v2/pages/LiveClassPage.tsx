@@ -24,7 +24,7 @@ import LiveSlidesPanel from "@/components/live/LiveSlidesPanel";
 import BoardEditor, { type BoardApi } from "@/components/live/BoardEditor";
 import LiveBookPagePicker from "@/components/books/LiveBookPagePicker";
 import { PandaLookupDialog } from "@/components/dictionary/PandaLookup";
-import { listPresentations, uploadPresentation, type Presentation } from "@/lib/presentations";
+import { listPresentations, uploadPresentation, listPresentationFolders, type Presentation, type PresentationFolder } from "@/lib/presentations";
 import PresentationView from "@/components/tutoring/PresentationView";
 import { normalizeKit, kitSections, type LessonKit } from "@/lib/lesson-kits";
 import LessonReader from "@/components/blocks/LessonReader";
@@ -389,6 +389,8 @@ function SlidesPanel({
   onTransfer: (presentationId: string, page: number) => void;
 }) {
   const [list, setList] = useState<Presentation[]>([]);
+  const [folders, setFolders] = useState<PresentationFolder[]>([]);
+  const [folderId, setFolderId] = useState("");
   const [selected, setSelected] = useState<Presentation | null>(null);
   const [page, setPage] = useState(current?.page ?? 0);
   const [busy, setBusy] = useState<string | null>(null);
@@ -396,6 +398,7 @@ function SlidesPanel({
   const load = async () => {
     try {
       const rows = await listPresentations();
+      listPresentationFolders().then(setFolders).catch(() => {});
       setList(rows);
       if (current) setSelected(rows.find((p) => p.id === current.presentation_id) ?? null);
     } catch (e: any) {
@@ -445,8 +448,15 @@ function SlidesPanel({
       {list.length === 0 ? (
         <p className="text-sm text-slate-500">Ще немає презентацій — додайте PDF.</p>
       ) : (
+        <div className="space-y-2">
+        {folders.length > 0 && (
+          <select value={folderId} onChange={(e) => setFolderId(e.target.value)} className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs bg-white">
+            <option value="">Усі папки</option>
+            {folders.map((f) => <option key={f.id} value={f.id}>{f.emoji} {f.name}</option>)}
+          </select>
+        )}
         <div className="flex flex-wrap gap-2">
-          {list.map((p) => (
+          {list.filter((p) => !p.archived && (!folderId || p.folder_id === folderId || p.id === selected?.id)).map((p) => (
             <button
               key={p.id}
               onClick={() => { setSelected(p); setPage(0); }}
@@ -457,6 +467,7 @@ function SlidesPanel({
               {p.title} · {p.page_count}
             </button>
           ))}
+        </div>
         </div>
       )}
 

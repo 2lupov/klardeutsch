@@ -2596,6 +2596,33 @@ export type Database = {
           },
         ]
       }
+      presentation_folders: {
+        Row: {
+          created_at: string
+          emoji: string
+          id: string
+          name: string
+          owner_id: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          emoji?: string
+          id?: string
+          name: string
+          owner_id: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          emoji?: string
+          id?: string
+          name?: string
+          owner_id?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
       presentation_progress: {
         Row: {
           created_at: string
@@ -2625,36 +2652,68 @@ export type Database = {
       }
       presentations: {
         Row: {
+          archived: boolean
           created_at: string
+          folder_id: string | null
           html: string | null
           id: string
+          kind: string
+          level: string | null
+          notes: string | null
           owner_id: string
           page_count: number
+          pinned: boolean
+          skill: string | null
           slide_paths: string[]
+          tags: string[]
           title: string
           updated_at: string
         }
         Insert: {
+          archived?: boolean
           created_at?: string
+          folder_id?: string | null
           html?: string | null
           id?: string
+          kind?: string
+          level?: string | null
+          notes?: string | null
           owner_id: string
           page_count?: number
+          pinned?: boolean
+          skill?: string | null
           slide_paths?: string[]
+          tags?: string[]
           title: string
           updated_at?: string
         }
         Update: {
+          archived?: boolean
           created_at?: string
+          folder_id?: string | null
           html?: string | null
           id?: string
+          kind?: string
+          level?: string | null
+          notes?: string | null
           owner_id?: string
           page_count?: number
+          pinned?: boolean
+          skill?: string | null
           slide_paths?: string[]
+          tags?: string[]
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "presentations_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "presentation_folders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       products: {
         Row: {
