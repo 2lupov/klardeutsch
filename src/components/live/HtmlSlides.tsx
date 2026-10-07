@@ -158,16 +158,19 @@ export default function HtmlSlides({ html, syncKey, className, progress }: { htm
     const last = log.current[log.current.length - 1];
     if (m.k === "input" && last?.k === "input" && JSON.stringify(last.p) === JSON.stringify(m.p)) log.current[log.current.length - 1] = m;
     else log.current.push(m);
+    // локально — одразу, щоб навіть раптове закриття нічого не загубило
+    try { localStorage.setItem(`klar-pres:${pk}`, JSON.stringify(log.current.slice(-3000))); } catch { /* ignore */ }
     if (saveT.current) window.clearTimeout(saveT.current);
-    saveT.current = window.setTimeout(flush, 800);
+    saveT.current = window.setTimeout(() => { saveT.current = null; flush(); }, 800);
   };
   useEffect(() => {
-    // Закриття вкладки / згортання застосунку — дозберігаємо одразу, щоб не загубити останню відповідь
+    // Закриття вкладки / оновлення / згортання — дозберігаємо одразу
     const now = () => { if (saveT.current) { window.clearTimeout(saveT.current); saveT.current = null; flush(); } };
     const onVis = () => { if (document.visibilityState === "hidden") now(); };
     window.addEventListener("pagehide", now);
+    window.addEventListener("beforeunload", now);
     document.addEventListener("visibilitychange", onVis);
-    return () => { window.removeEventListener("pagehide", now); document.removeEventListener("visibilitychange", onVis); now(); };
+    return () => { window.removeEventListener("pagehide", now); window.removeEventListener("beforeunload", now); document.removeEventListener("visibilitychange", onVis); now(); };
   }, [pk]);
   const restore = async () => {
     restoring.current = true;
@@ -190,6 +193,8 @@ export default function HtmlSlides({ html, syncKey, className, progress }: { htm
   useEffect(() => {
     const ch = syncKey ? supabase.channel(`live-html:${syncKey}`) : null;
     ch?.on("broadcast", { event: "ev" }, ({ payload }) => {
+      // дії співрозмовника теж пишемо в журнал — після оновлення/виходу відновиться спільний стан
+      record(payload);
       frame.current?.contentWindow?.postMessage({ __klarIn: payload }, "*");
     }).subscribe();
     const onMsg = (e: MessageEvent) => {
