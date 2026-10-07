@@ -96,12 +96,6 @@ export default function LiveSlidesPanel({
     slideUrls(selected.slide_paths).then(setUrls).catch(() => setUrls([]));
   }, [selected?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // запам'ятовуємо презентацію і слайд — після оновлення сторінки відкриється те саме
-  useEffect(() => {
-    if (!classId || !selected) return;
-    try { localStorage.setItem(`klar-live-pres:${classId}`, JSON.stringify({ id: selected.id, page })); } catch { /* ignore */ }
-  }, [classId, selected?.id, page]);
-
   const interactive = !!selected && isInteractive(selected);
   const selectedHtml = selected ? htmlById[selected.id] : undefined;
 
