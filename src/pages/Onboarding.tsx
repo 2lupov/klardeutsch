@@ -181,8 +181,8 @@ const Onboarding = () => {
   const totalSteps = isExisting ? 3 : 4;
 
   return (
-    <div className="min-h-[100dvh] bg-background flex flex-col items-center justify-center p-6">
-      <div className="flex gap-2 mb-8">
+    <div className="h-[100dvh] overflow-y-auto overscroll-contain bg-background flex flex-col items-center p-6 py-8">
+      <div className="flex gap-2 mb-8 mt-auto">
         {Array.from({ length: totalSteps }).map((_, d) => (
           <div
             key={d}
@@ -193,7 +193,7 @@ const Onboarding = () => {
         ))}
       </div>
 
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md mb-auto pb-10">
         <AnimatePresence mode="wait">
           <motion.div
             key={step}
