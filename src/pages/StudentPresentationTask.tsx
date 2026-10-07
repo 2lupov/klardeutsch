@@ -20,8 +20,8 @@ export default function StudentPresentationTask() {
   useEffect(() => {
     const presentationId = task?.payload?.presentation_id;
     if (!presentationId) return;
-    supabase.from("presentations").select("page_count").eq("id", presentationId).maybeSingle()
-      .then(({ data }) => setPageCount(Math.max(1, data?.page_count ?? 1)));
+    supabase.from("presentations").select("page_count, html").eq("id", presentationId).maybeSingle()
+      .then(({ data }) => setPageCount(data?.html ? 1 : Math.max(1, data?.page_count ?? 1)));
   }, [task?.payload?.presentation_id]);
 
   useEffect(() => {
