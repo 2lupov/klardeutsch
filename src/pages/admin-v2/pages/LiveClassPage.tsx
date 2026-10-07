@@ -18,7 +18,7 @@ import TextbookPanel from "@/components/textbook/TextbookPanel";
 import LiveWriting from "@/components/live/LiveWriting";
 import LiveReading from "@/components/live/LiveReading";
 import LiveGrammar from "@/components/live/LiveGrammar";
-import LiveNotes from "@/components/live/LiveNotes";
+import NotesIsland from "@/components/live/NotesIsland";
 import LiveVideo from "@/components/live/LiveVideo";
 import LiveSlidesPanel from "@/components/live/LiveSlidesPanel";
 import BoardEditor, { type BoardApi } from "@/components/live/BoardEditor";
@@ -367,11 +367,6 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
         </div>
       )}
 
-      {section === "notes" && (
-        <div className="flex-1 min-h-0 flex flex-col p-2">
-          <LiveNotes classId={cls.id} role="teacher" studentId={cls.student_id} teacherId={cls.teacher_id} className="flex-1" />
-        </div>
-      )}
 
       {section === "video" && (
         <div className="flex-1 min-h-0 flex flex-col p-2 overflow-hidden">
@@ -416,7 +411,7 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
         ))}
       </nav>
 
-      {section !== "notes" && <NotesIsland cls={cls} />}
+      <NotesIsland classId={cls.id} role="teacher" studentId={cls.student_id} teacherId={cls.teacher_id} bottomClass="bottom-20 md:bottom-4" />
 
       {endOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onMouseDown={() => setEndOpen(false)}>
