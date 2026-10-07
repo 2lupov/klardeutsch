@@ -51,8 +51,13 @@ export default function LiveSlidesPanel({
     listPresentations()
       .then((rows) => {
         setList(rows);
+        let saved: { id?: string; page?: number } = {};
+        try { saved = JSON.parse(localStorage.getItem(`klar-live-pres:${classId}`) || "{}"); } catch { /* ignore */ }
         const cur = current ? rows.find((p) => p.id === current.presentation_id) : null;
-        setSelected(cur ?? rows.find((p) => !p.archived) ?? null);
+        const last = saved.id ? rows.find((p) => p.id === saved.id) : null;
+        const pick = cur ?? last ?? rows.find((p) => !p.archived) ?? null;
+        setSelected(pick);
+        if (!cur && last && saved.page) setPage(saved.page);
       })
       .catch((e) => toast({ title: "Не вдалося завантажити презентації", description: e.message, variant: "destructive" }));
   }, []);
@@ -71,6 +76,12 @@ export default function LiveSlidesPanel({
     }
     slideUrls(selected.slide_paths).then(setUrls).catch(() => setUrls([]));
   }, [selected?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // запам'ятовуємо презентацію і слайд — після оновлення сторінки відкриється те саме
+  useEffect(() => {
+    if (!classId || !selected) return;
+    try { localStorage.setItem(`klar-live-pres:${classId}`, JSON.stringify({ id: selected.id, page })); } catch { /* ignore */ }
+  }, [classId, selected?.id, page]);
 
   const interactive = !!selected && isInteractive(selected);
   const selectedHtml = selected ? htmlById[selected.id] : undefined;
@@ -202,7 +213,7 @@ export default function LiveSlidesPanel({
           <div className="flex-1 min-h-0 p-2">
             {selectedHtml === undefined
               ? <div className="grid h-full place-items-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
-              : <HtmlSlides key={selected.id} html={selectedHtml} syncKey={live && sync && classId ? `${classId}:${selected.id}` : undefined} />}
+              : <HtmlSlides key={selected.id} html={selectedHtml} syncKey={live && sync && classId ? `${classId}:${selected.id}` : undefined} progress={{ studentId: studentId || teacherId, presentationId: selected.id }} />}
           </div>
           <div className="h-12 shrink-0 flex items-center gap-2 border-t border-border bg-card px-3">
             <span className="text-xs font-medium text-muted-foreground">Інтерактивна · кнопки й анімації працюють</span>
