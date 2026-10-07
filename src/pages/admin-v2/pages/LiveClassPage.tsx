@@ -433,6 +433,8 @@ function TeacherConsole({ cls, studentName, onExit }: { cls: LiveClass; studentN
         ))}
       </nav>
 
+      {section !== "notes" && <NotesIsland cls={cls} />}
+
       {endOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onMouseDown={() => setEndOpen(false)}>
           <div className="w-full max-w-sm rounded-2xl border border-admin-border bg-admin-card p-5 text-admin-fg shadow-xl" onMouseDown={(e) => e.stopPropagation()}>
