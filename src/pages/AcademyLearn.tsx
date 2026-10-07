@@ -58,7 +58,7 @@ const AcademyLearn = () => {
   const { courseId } = useParams<{ courseId: string }>();
   const { user } = useAuth();
   const { lang } = useLanguage();
-  const { isMobile } = usePlatform();
+   const { isMobile, viewportHeight } = usePlatform();
   const navigate = useNavigate();
 
   const [courseTitle, setCourseTitle] = useState("");
@@ -171,7 +171,7 @@ const AcademyLearn = () => {
       case "speaking":
         return <SpeakingChallengeLesson key={key} lesson={activeLesson} onComplete={(s) => handleComplete(s)} lang={lang} />;
       case "exam":
-        return <FinalExamLesson key={key} lesson={activeLesson} courseId={courseId!} onComplete={(s) => handleComplete(s)} lang={lang} />;
+        return courseId ? <FinalExamLesson key={key} lesson={activeLesson} courseId={courseId} onComplete={(s) => handleComplete(s)} lang={lang} /> : null;
       case "notebook":
         return <NotebookLesson key={key} lesson={activeLesson} onComplete={() => handleComplete()} lang={lang} />;
       default:
@@ -180,49 +180,54 @@ const AcademyLearn = () => {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col overflow-hidden" style={{ height: viewportHeight }}>
       {/* Header */}
-      <header className="flex items-center gap-3 px-4 h-12 border-b border-border/30 bg-card/50 backdrop-blur-xl shrink-0 z-20">
-        <button onClick={() => navigate(`/academy/${courseId}`)} className="text-muted-foreground hover:text-foreground transition-colors">
+      <header className="flex items-center gap-1 px-2 min-h-16 pt-[env(safe-area-inset-top)] border-b border-border bg-background shrink-0 z-20">
+        <Button animated={false} variant="ghost" size="icon" aria-label={lang === "uk" ? "Назад до курсу" : "Назад к курсу"} onClick={() => navigate(`/academy/${courseId}`)} className="h-11 w-11 shrink-0 text-muted-foreground">
           <ArrowLeft className="w-4 h-4" />
-        </button>
+        </Button>
         <span className="text-sm font-display font-bold text-foreground truncate flex-1">{courseTitle}</span>
         {Array.isArray((activeLesson?.content as any)?.slides) && (activeLesson?.content as any).slides.length > 0 && (
-          <button
+          <Button animated={false} variant="ghost" size="icon"
             onClick={() => setSlidesOpen(true)}
-            className="text-muted-foreground hover:text-primary transition-colors"
+            className="h-11 w-11 shrink-0 text-muted-foreground"
+            aria-label={lang === "uk" ? "Дивитись презентацію" : "Смотреть презентацию"}
             title={lang === "uk" ? "Дивитись презентацію" : "Смотреть презентацию"}
           >
             <Presentation className="w-4.5 h-4.5" />
-          </button>
+          </Button>
         )}
-        <button
+        <Button animated={false} variant="ghost" size="icon"
           onClick={() => setCohortChatOpen(true)}
-          className="text-muted-foreground hover:text-primary transition-colors"
+          className="h-11 w-11 shrink-0 text-muted-foreground"
+          aria-label={lang === "uk" ? "Чат потоку" : "Чат потока"}
           title={lang === "uk" ? "Чат потоку" : "Чат потока"}
         >
           <Users className="w-4.5 h-4.5" />
-        </button>
-        <button
+        </Button>
+        <Button animated={false} variant="ghost" size="icon"
           onClick={() => setTeacherPanelOpen(true)}
-          className="text-muted-foreground hover:text-primary transition-colors relative"
+          className="h-11 w-11 shrink-0 text-muted-foreground"
+          aria-label={lang === "uk" ? "Допомога" : "Помощь"}
           title={lang === "uk" ? "Допомога" : "Помощь"}
         >
           <GraduationCap className="w-4.5 h-4.5" />
-        </button>
-        <button
+        </Button>
+        <Button animated={false} variant="ghost" size="icon"
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="lg:hidden text-muted-foreground hover:text-foreground transition-colors"
+          className="lg:hidden h-11 w-11 shrink-0 text-muted-foreground"
+          aria-label={lang === "uk" ? "Список уроків" : "Список уроков"}
+          aria-expanded={sidebarOpen}
         >
           {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
+        </Button>
       </header>
 
       {/* Body */}
-      <div className="flex flex-1 overflow-hidden relative">
+      <div className="flex flex-1 min-h-0 overflow-hidden relative">
         {/* Main content */}
-        <div className={`flex-1 overflow-y-auto transition-all ${sidebarOpen && !isMobile ? "mr-80" : ""}`}>
-          <div className="max-w-4xl mx-auto px-4 py-6">
+        <div className={`flex-1 min-w-0 overscroll-contain ${isMobile && sidebarOpen ? "overflow-hidden" : "overflow-y-auto"} ${sidebarOpen && !isMobile ? "mr-80" : ""}`}>
+          <div className="max-w-4xl mx-auto px-3 py-4 sm:px-6 sm:py-6 pb-[max(6rem,env(safe-area-inset-bottom))]">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeLessonId}
@@ -242,7 +247,7 @@ const AcademyLearn = () => {
                 size="sm"
                 onClick={goPrev}
                 disabled={activeLessonIndex <= 0}
-                className="text-xs"
+                className="min-h-11 text-xs"
               >
                 ← {lang === "uk" ? "Попередній" : "Попередній"}
               </Button>
@@ -254,7 +259,7 @@ const AcademyLearn = () => {
                 size="sm"
                 onClick={goNext}
                 disabled={activeLessonIndex >= lessons.length - 1}
-                className="text-xs"
+                className="min-h-11 text-xs"
               >
                 {lang === "uk" ? "Наступний" : "Следующий"} →
               </Button>
@@ -267,9 +272,9 @@ const AcademyLearn = () => {
           <div
             className={`${
               isMobile
-                ? "absolute inset-y-0 right-0 w-72 z-30"
+                ? "absolute inset-y-0 right-0 w-[min(90%,24rem)] z-30"
                 : "w-80 shrink-0"
-            } border-l border-border/30 bg-card/50 backdrop-blur-xl overflow-y-auto transition-all ${
+            } border-l border-border bg-background overflow-y-auto overscroll-contain transition-all ${
               !sidebarOpen && !isMobile ? "hidden" : ""
             }`}
             style={!isMobile ? { position: "absolute", right: 0, top: 0, bottom: 0 } : undefined}
