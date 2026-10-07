@@ -69,19 +69,28 @@ const LEGACY_KEYS: Record<string, NavKey> = {
 
 const NAV: { key: NavKey; label: string; icon: any }[] = [
   { key: "dashboard", label: "Головна", icon: LayoutDashboard },
+  { key: "schedule", label: "Графік занять", icon: CalendarClock },
+  { key: "live", label: "Живий клас", icon: Radio },
+  { key: "assignments", label: "Завдання", icon: ClipboardList },
+  { key: "students", label: "Учні", icon: Users },
+  { key: "analytics", label: "Аналітика", icon: BarChart3 },
+  { key: "slides", label: "Презентації", icon: Presentation },
+  { key: "workshop", label: "Майстерня уроків", icon: Wand2 },
   { key: "courses", label: "Курси", icon: BookOpen },
   { key: "books", label: "Підручники", icon: BookMarked },
   { key: "library", label: "Бібліотека книг", icon: Library },
-  { key: "workshop", label: "Майстерня уроків", icon: Wand2 },
-  { key: "slides", label: "Презентації", icon: Presentation },
-  { key: "live", label: "Живий клас", icon: Radio },
-  { key: "assignments", label: "Завдання", icon: ClipboardList },
-  { key: "schedule", label: "Графік занять", icon: CalendarClock },
-  { key: "students", label: "Учні", icon: Users },
   { key: "materials", label: "Банк матеріалів", icon: FolderOpen },
   { key: "content", label: "Контент", icon: Layers },
-  { key: "analytics", label: "Аналітика", icon: BarChart3 },
   { key: "settings", label: "Налаштування", icon: Settings },
+];
+
+/** Меню за логікою викладача: день → учні → матеріали → система. */
+const NAV_GROUPS: { title: string | null; keys: NavKey[] }[] = [
+  { title: null, keys: ["dashboard"] },
+  { title: "Заняття", keys: ["schedule", "live", "assignments"] },
+  { title: "Учні", keys: ["students", "analytics"] },
+  { title: "Матеріали", keys: ["slides", "workshop", "courses", "books", "library", "materials", "content"] },
+  { title: "Система", keys: ["settings"] },
 ];
 
 const ACTIVE_KEY = "klar-admin-section";
@@ -93,7 +102,7 @@ export default function AdminV2() {
   const [active, setActive] = useState<NavKey>(
     () => (localStorage.getItem(ACTIVE_KEY) as NavKey) || "dashboard",
   );
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => typeof window !== "undefined" && window.innerWidth < 768);
   const [dark, setDark] = useState(() => localStorage.getItem("klar-admin-theme") === "dark");
 
   useEffect(() => {
@@ -181,6 +190,37 @@ export default function AdminV2() {
         </div>
 
         <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-1">
+          {NAV_GROUPS.map((g, gi) => (
+            <div key={gi} className={gi > 0 ? "pt-3" : ""}>
+              {g.title && !collapsed && (
+                <div className="px-3 pb-1 text-[10.5px] font-semibold uppercase tracking-wider text-admin-muted/80">{g.title}</div>
+              )}
+              {g.title && collapsed && <div className="mx-3 mb-2 h-px bg-admin-border" />}
+              <div className="space-y-1">
+                {g.keys.map((key) => {
+                  const item = NAV.find((n) => n.key === key)!;
+                  const Icon = item.icon;
+                  const isActive = key === active;
+                  return (
+                    <button
+                      key={key}
+                      onClick={() => go(key)}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                        isActive
+                          ? "bg-admin-primary text-admin-primary-fg shadow-sm"
+                          : "text-admin-muted hover:bg-admin-fg/5 hover:text-admin-fg"
+                      }`}
+                      title={collapsed ? item.label : undefined}
+                    >
+                      <Icon className="w-[18px] h-[18px] shrink-0" />
+                      {!collapsed && <span className="truncate">{item.label}</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        <div className="pt-3 border-t border-admin-border mt-3">
           <a
             href="/dutch"
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-admin-muted hover:bg-admin-fg/5 hover:text-admin-fg"
@@ -189,24 +229,7 @@ export default function AdminV2() {
             <span className="w-[18px] text-center shrink-0">🇳🇱</span>
             {!collapsed && <span className="truncate">KLAR Dutch</span>}
           </a>
-          {NAV.map(({ key, label, icon: Icon }) => {
-            const isActive = key === active;
-            return (
-              <button
-                key={key}
-                onClick={() => go(key)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                  isActive
-                    ? "bg-admin-primary text-admin-primary-fg shadow-sm"
-                    : "text-admin-muted hover:bg-admin-fg/5 hover:text-admin-fg"
-                }`}
-                title={collapsed ? label : undefined}
-              >
-                <Icon className="w-[18px] h-[18px] shrink-0" />
-                {!collapsed && <span className="truncate">{label}</span>}
-              </button>
-            );
-          })}
+        </div>
         </nav>
 
         <div className="p-2 border-t border-admin-border">
