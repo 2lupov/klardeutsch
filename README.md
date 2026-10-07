@@ -1,73 +1,86 @@
-# Welcome to your Lovable project
+# Klar
 
-## Project info
+Для того чтобы нейросеть (например, Claude, GPT-4 или специализированный разработчик на базе ИИ) выдала тебе качественный код или детальный прототип, промпт должен быть на английском языке — это международный стандарт разработки.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+Вот мощный, структурированный промпт для создания твоего приложения KLAR.
 
-## How can I edit this code?
+🚀 Prompt for KLAR: Telegram Mini App Development
+Role: You are an expert Full-stack Developer and UI/UX Designer specializing in Telegram Mini Apps (TMA) and Educational Platforms (EdTech).
 
-There are several ways of editing your application.
+Project Goal: Build a sleek, high-performance Telegram Web App named "KLAR" for learning German. The name "KLAR" stands for clarity, simplicity, and efficiency.
 
-**Use Lovable**
+1. Visual Identity & UX
+Design Philosophy: Minimalist, clean, and professional.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+Color Palette: Deep Navy Blue, Crisp White, and a soft Accent Yellow (modern German aesthetic).
 
-Changes made via Lovable will be committed automatically to this repo.
+User Interface: Use a bottom navigation bar or a simple grid dashboard. It must feel like a native mobile app.
 
-**Use your preferred IDE**
+Feedback: Integrate Telegram Haptic Feedback (vibration) for correct/incorrect answers.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+2. Core Functional Modules (MVP)
+Level Selector: A clean menu to choose between levels: A1, A2, B1, B2.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+Learning Categories: Each level should contain:
 
-Follow these steps:
+Wortschatz (Vocabulary): Flashcard-style learning with progress tracking.
+
+Grammatik (Grammar): Bite-sized theory followed by interactive multiple-choice tests.
+
+Lesen (Reading): Short stories/texts with "fill-in-the-blank" or comprehension questions.
+
+Exercise Engine: Create reusable components for:
+
+Multiple choice questions.
+
+Matching pairs (German-Russian).
+
+Sentence reordering (Drag and drop).
+
+3. Admin & Content Management (The "Edit" Feature)
+CMS Interface: I need a simple, password-protected Admin Panel or a JSON-based structure that allows me to:
+
+Add/Edit/Delete vocabulary lists.
+
+Update grammar rules and test questions.
+
+Upload new texts without rewriting the core code.
+
+4. Technical Stack Requirements
+Frontend: React.js or Vue.js with Vite for speed.
+
+State Management: Securely store user progress (local storage or database integration like Supabase/Firebase).
+
+Telegram Integration: Use @telegram-apps/sdk for seamless integration with the Telegram interface (closing button, back button, theme colors).
+
+5. Task
+Please provide:
+
+The Application Architecture (How to structure the files).
+
+A Basic Boilerplate Code for the Main Screen and one Exercise Module.
+
+A Mock Schema for the JSON database that will hold the lessons.
+
+This project was built with [Lovable](https://lovable.dev).
+
+**Live app**: https://klardeutsch.lovable.app
+
+## Build with Lovable
+
+Continue developing this project in the [Lovable editor](https://lovable.dev/projects/91effce9-96a1-482e-a51a-f7567fdb9bfa).
+
+- **Ship faster**: describe what you want to build and Lovable handles the code.
+- **Stay in sync**: every change made in Lovable is committed straight to this repository.
+- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+
+## Development
+
+Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
+git clone <this-repository-url>
+cd <repository-name>
 npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
