@@ -528,6 +528,8 @@ const Auth = () => {
             </div>
 
 
+            <BiometricLoginButton onSuccess={() => navigate("/")} />
+
             {/* Telegram Login */}
             {tgWidgetLoading ? (
               <p className="text-sm text-center text-muted-foreground animate-pulse">

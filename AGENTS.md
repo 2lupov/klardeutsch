@@ -10,3 +10,4 @@
 - Synthetic chat activity runs only server-side in the `community-synthetic` function on a schedule, with personas flagged via `profiles.is_synthetic`; this keeps keys off the client and demo users out of real stats.
 - Academy programme catalog lives in `src/data/catalog.json` (transcribed from the school plan PDF) and per-course content in `src/data/courses/<code>.json`, rendered by `src/features/academy-engine`; keeps content out of components.
 - Skill passport attempts are stored in `skill_attempts` and statuses are derived client-side by `computeStatus`; keeps the section-11 rules in one testable place.
+- Biometric login uses WebAuthn passkeys verified server-side in the `passkey-auth` function (credentials in `webauthn_credentials`), which mints a session via a magic-link token; keeps private keys on the device and verification off the client.
