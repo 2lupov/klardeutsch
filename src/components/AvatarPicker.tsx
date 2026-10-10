@@ -49,9 +49,9 @@ interface AvatarPickerProps {
 /** Animated "live" avatar tile: rotating aura ring + breathing image. */
 export const LiveAvatarFrame = ({ url, fx, alt }: { url: string; fx: string; alt: string }) => (
   <div className="relative w-full h-full">
-    <div className={`absolute -inset-1 rounded-2xl bg-gradient-conic bg-gradient-to-r ${FX_RING[fx]} animate-[spin_4s_linear_infinite] blur-[2px] opacity-90`} />
+    <div className={`absolute -inset-1 rounded-2xl bg-gradient-to-r ${FX_RING[fx]} animate-[spin_4s_linear_infinite] blur-[2px] opacity-90`} />
     <div className="absolute inset-0 rounded-xl overflow-hidden">
-      <img src={url} alt={alt} loading="lazy" className="w-full h-full object-cover animate-[pulse_3s_ease-in-out_infinite] motion-safe:[animation-name:live-breathe]" />
+      <img src={url} alt={alt} loading="lazy" className="w-full h-full object-cover motion-safe:animate-[live-breathe_3s_ease-in-out_infinite]" />
       <span className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-transparent via-foreground/15 to-transparent motion-safe:animate-[live-shine_2.8s_ease-in-out_infinite]" />
     </div>
   </div>

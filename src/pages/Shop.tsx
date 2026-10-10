@@ -53,7 +53,7 @@ const Shop = () => {
     if (!user) return;
     const load = async () => {
       const [{ data: shopData }, { data: purchaseData }, { data: coursesData }, { data: coursePurchaseData }] = await Promise.all([
-        supabase.from("shop_items").select("*").eq("available", true).order("created_at"),
+        supabase.from("shop_items").select("*").eq("available", true).neq("item_type", "avatar_live").order("created_at"),
         supabase.from("purchases").select("item_id").eq("user_id", user.id),
         supabase.from("courses").select("*").eq("available", true).order("created_at"),
         supabase.from("course_purchases").select("course_id").eq("user_id", user.id),
