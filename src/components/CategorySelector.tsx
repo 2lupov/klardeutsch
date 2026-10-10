@@ -4,6 +4,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import pandaGraduate from "@/assets/mascot/panda-graduate.png";
+import { useAcademyPath } from "@/features/spanish/useAcademyPath";
 
 type Category = "vocabulary" | "grammar" | "reading" | "listening" | "writing";
 
@@ -24,6 +25,7 @@ const CATEGORY_CONFIG: Record<Category, { gradient: string; iconBg: string; acce
 const CategorySelector = ({ level, onSelect, onBack }: CategorySelectorProps) => {
   const { t, lang } = useLanguage();
   const navigate = useNavigate();
+  const academyPath = useAcademyPath();
 
   const categories: { key: Category; label: string; sublabel: string; icon: React.ReactNode; emoji: string }[] = [
     { key: "vocabulary", label: "Wortschatz", sublabel: t("vocabSublabel"), icon: <Languages className="w-5 h-5" />, emoji: "📚" },
@@ -97,7 +99,7 @@ const CategorySelector = ({ level, onSelect, onBack }: CategorySelectorProps) =>
         transition={{ delay: 0.5 }}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
-        onClick={() => navigate("/academy")}
+        onClick={() => navigate(academyPath)}
         className="relative p-4 flex items-center gap-4 rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/8 via-primary/4 to-amber-500/8 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10 transition-all group overflow-hidden"
       >
         <motion.img

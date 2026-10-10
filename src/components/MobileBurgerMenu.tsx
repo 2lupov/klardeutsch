@@ -13,6 +13,7 @@ import { useXP } from "@/hooks/useXP";
 import { useDailyBonus } from "@/hooks/useDailyBonus";
 import { useLevelProgress } from "@/hooks/useLevelProgress";
 import { supabase } from "@/integrations/supabase/client";
+import { useAcademyPath } from "@/features/spanish/useAcademyPath";
 import KlarLogo from "@/components/KlarLogo";
 import TargetLanguageSwitcher from "@/components/TargetLanguageSwitcher";
 
@@ -27,6 +28,7 @@ const MobileBurgerMenu = () => {
   const { t, lang } = useLanguage();
   const location = useLocation();
   const { user, signOut } = useAuth();
+  const academyPath = useAcademyPath();
   const { balance } = useCoins();
   const { totalXP } = useXP();
   const { streak } = useDailyBonus();
@@ -58,7 +60,7 @@ const MobileBurgerMenu = () => {
 
   const learnLinks: SidebarLink[] = [
     { to: "/", icon: Home, label: t("navHome") },
-    { to: "/academy", icon: GraduationCap, label: lang === "uk" ? "Академія" : "Академия" },
+    { to: academyPath, icon: GraduationCap, label: lang === "uk" ? "Академія" : "Академия" },
     { to: "/assistant", icon: Sparkles, label: lang === "uk" ? "Асистент" : "Ассистент" },
     { to: "/dictionary", icon: BookOpen, label: t("navDictionary") },
     { to: "/games", icon: Gamepad2, label: lang === "uk" ? "Ігри" : "Игры" },
