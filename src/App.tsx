@@ -23,6 +23,7 @@ import RequirePremium from "@/components/guards/RequirePremium";
 import Index from "./pages/Index";
 import Dutch from "./pages/Dutch";
 import MyKlar from "./pages/MyKlar";
+import Spanish from "./pages/Spanish";
 import CourseA2 from "./pages/CourseA2";
 import DeutschraumApp from "./features/deutschraum/DeutschraumApp";
 import Auth from "./pages/Auth";
@@ -110,6 +111,7 @@ const AppRoutes = () => {
       )} />
       <Route path="/dutch" element={<RequireAuth><Dutch /></RequireAuth>} />
       <Route path="/my" element={<RequireAuth><MyKlar /></RequireAuth>} />
+      <Route path="/spanish" element={<RequireAuth><Spanish /></RequireAuth>} />
       <Route path="/method" element={isTelegram ? <Navigate to="/" replace /> : <Method />} />
       {/* Teach Space прибрано — викладання йде через адмінку */}
       <Route path="/teach/*" element={<Navigate to="/admin" replace />} />
