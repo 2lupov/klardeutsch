@@ -12,11 +12,13 @@ const resolveAcademyPath = (userId: string) => {
   if (hit) return Promise.resolve(hit);
   let job = pending.get(userId);
   if (!job) {
-    job = supabase
-      .from("profiles")
-      .select("nickname")
-      .eq("user_id", userId)
-      .maybeSingle()
+    job = Promise.resolve(
+      supabase
+        .from("profiles")
+        .select("nickname")
+        .eq("user_id", userId)
+        .maybeSingle(),
+    )
       .then(({ data }) =>
         academyPathFor((data as { nickname?: string | null } | null)?.nickname),
       )
