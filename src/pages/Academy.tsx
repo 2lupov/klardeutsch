@@ -87,7 +87,7 @@ const Academy = () => {
       setLoading(false);
     };
     load();
-  }, [user]);
+  }, [user, navigate]);
 
   // Managed students get the minimal dashboard
   if (studentLoading) return <Spinner />;
