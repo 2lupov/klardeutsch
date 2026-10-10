@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import LevelSelector from "@/components/LevelSelector";
 import SRSWidget from "@/components/SRSWidget";
+import { useAcademyPath } from "@/features/spanish/useAcademyPath";
 import DailyChallenge from "@/components/DailyChallenge";
 import type { Level } from "@/data/lessons";
 
@@ -25,6 +26,7 @@ interface Props {
 const HomeDashboard = ({ displayName, onSelectLevel }: Props) => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const academyPath = useAcademyPath();
   const { totalXP } = useXP();
   const { balance: coins } = useCoins();
   const [streak, setStreak] = useState(0);
@@ -96,7 +98,7 @@ const HomeDashboard = ({ displayName, onSelectLevel }: Props) => {
 
               <div className="flex flex-wrap gap-3 pt-1">
                 <button
-                  onClick={() => navigate("/academy")}
+                  onClick={() => navigate(academyPath)}
                   className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-2xl font-bold text-sm md:text-base shadow-primary-glow flex items-center gap-2 transition-transform active:scale-95"
                 >
                   <Sparkles className="w-4 h-4" />
@@ -154,7 +156,7 @@ const HomeDashboard = ({ displayName, onSelectLevel }: Props) => {
               {[
                 { icon: BookOpen, label: "Словник", to: "/dictionary" },
                 { icon: Gamepad2, label: "Ігри", to: "/games" },
-                { icon: GraduationCap, label: "Академія", to: "/academy" },
+                { icon: GraduationCap, label: "Академія", to: academyPath },
               ].map(({ icon: Icon, label, to }) => (
                 <button
                   key={to}

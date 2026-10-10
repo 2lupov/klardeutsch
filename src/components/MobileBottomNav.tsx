@@ -2,11 +2,13 @@ import { NavLink, useLocation } from "react-router-dom";
 import { Home, BookOpen, Gamepad2, MessageSquare, GraduationCap, Sparkles, LogIn } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAcademyPath } from "@/features/spanish/useAcademyPath";
 
 const MobileBottomNav = () => {
   const { t, lang } = useLanguage();
   const location = useLocation();
   const { user } = useAuth();
+  const academyPath = useAcademyPath();
 
   // Hide bottom nav on chat page to avoid keyboard conflicts
   if (location.pathname === "/chat") return null;
@@ -14,7 +16,7 @@ const MobileBottomNav = () => {
   const items = user
     ? [
         { to: "/", icon: Home, label: t("navHome"), badge: 0 },
-        { to: "/academy", icon: GraduationCap, label: lang === "uk" ? "Академія" : "Академия", badge: 0 },
+        { to: academyPath, icon: GraduationCap, label: lang === "uk" ? "Академія" : "Академия", badge: 0 },
         { to: "/assistant", icon: Sparkles, label: lang === "uk" ? "Асистент" : "Ассистент", badge: 0 },
         { to: "/games", icon: Gamepad2, label: lang === "uk" ? "Ігри" : "Игры", badge: 0 },
         { to: "/chat", icon: MessageSquare, label: "Чат" },

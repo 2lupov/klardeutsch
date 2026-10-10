@@ -16,6 +16,7 @@ import { useXP } from "@/hooks/useXP";
 import { useDailyBonus } from "@/hooks/useDailyBonus";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { useAcademyPath } from "@/features/spanish/useAcademyPath";
 
 interface SidebarLink {
   to: string;
@@ -34,6 +35,7 @@ const DesktopSidebar = () => {
   const { totalXP } = useXP();
   const { streak } = useDailyBonus();
   const { user, signOut } = useAuth();
+  const academyPath = useAcademyPath();
   const [open, setOpen] = useState(false);
   const [profile, setProfile] = useState<{ display_name?: string; avatar_url?: string } | null>(null);
   const [isStaff, setIsStaff] = useState(false);
@@ -65,7 +67,7 @@ const DesktopSidebar = () => {
 
   const learnLinks: SidebarLink[] = [
     { to: "/", icon: Home, label: t("navHome") },
-    { to: "/academy", icon: GraduationCap, label: lang === "uk" ? "Академія" : "Академия" },
+    { to: academyPath, icon: GraduationCap, label: lang === "uk" ? "Академія" : "Академия" },
     { to: "/assistant", icon: Sparkles, label: lang === "uk" ? "Асистент" : "Ассистент" },
     { to: "/dictionary", icon: BookOpen, label: t("navDictionary") },
     { to: "/games", icon: Gamepad2, label: lang === "uk" ? "Ігри" : "Игры" },
