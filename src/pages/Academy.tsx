@@ -11,6 +11,7 @@ import CourseCard from "@/components/academy/CourseCard";
 import GermanA2Banner from "@/components/academy/GermanA2Banner";
 import ProgramCatalog from "@/features/academy-engine/ProgramCatalog";
 import AcademyTour, { openAcademyTour } from "@/components/academy/AcademyTour";
+import { canSeeSpanish } from "@/features/spanish/access";
 
 interface CourseRow {
   id: string;
@@ -68,6 +69,15 @@ const Academy = () => {
       setCourses((data as CourseRow[]) ?? []);
 
       if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("nickname")
+          .eq("id", user.id)
+          .maybeSingle();
+        if (canSeeSpanish(profile?.nickname)) {
+          navigate("/spanish", { replace: true });
+          return;
+        }
         const { data: purchases } = await supabase
           .from("course_purchases")
           .select("course_id")
@@ -77,7 +87,7 @@ const Academy = () => {
       setLoading(false);
     };
     load();
-  }, [user]);
+  }, [user, navigate]);
 
   // Managed students get the minimal dashboard
   if (studentLoading) return <Spinner />;
