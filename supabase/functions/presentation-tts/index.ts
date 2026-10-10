@@ -4,7 +4,7 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
-const VOICES: Record<string, string> = { de: "aTTiK3YzK3dXETpuDE2h", nl: "pFZP5JQG7iQjIQuC4Bku" };
+const VOICES: Record<string, string> = { de: "aTTiK3YzK3dXETpuDE2h", nl: "pFZP5JQG7iQjIQuC4Bku", es: "FGY2WhTYpPnrIDTdsKH5" };
 const json = (b: unknown, status = 200) => new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
 async function sha(s: string) {
@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
     for (const it of list) {
       const text = String(it?.text ?? "").trim().slice(0, 800);
       if (!text) { out.push(null); continue; }
-      const lang = it.lang === "nl" ? "nl" : "de";
+      const lang = it.lang === "nl" ? "nl" : it.lang === "es" ? "es" : "de";
       const speed = Math.round(Math.min(1.2, Math.max(0.7, Number(it.speed) || 0.9)) * 20) / 20;
       const path = `pres/${lang}/${await sha(`${lang}|${speed}|${text}`)}.mp3`;
       const pub = admin.storage.from("tts-audio").getPublicUrl(path).data.publicUrl;
