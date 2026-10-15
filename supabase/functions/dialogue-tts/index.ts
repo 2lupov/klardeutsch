@@ -20,22 +20,25 @@ interface Line {
   text: string;
 }
 
-function parseDialogue(text: string): Line[] | null {
-  const hasDialogue = /^[A-Z]:\s/m.test(text);
-  if (!hasDialogue) return null;
+// Speaker = a single letter ("A:") or a name ("Anna:", "Herr Müller:", "Frau Schmidt:").
+const SPEAKER_RE = /^\s*([A-ZÄÖÜ][\p{L}.\-]*(?:\s[A-ZÄÖÜ][\p{L}.\-]*){0,2})\s*:\s*(.+)$/u;
 
-  // Split by lines and parse each one
-  const rawLines = text.split(/\r?\n/);
+function parseDialogue(text: string): Line[] | null {
   const lines: Line[] = [];
-  
-  for (const raw of rawLines) {
-    const match = raw.match(/^([A-Z]):\s*(.+)$/);
+  for (const raw of text.split(/\r?\n/)) {
+    const match = raw.match(SPEAKER_RE);
     if (match && match[2].trim()) {
-      lines.push({ speaker: match[1], text: match[2].trim() });
+      lines.push({ speaker: match[1].trim(), text: match[2].trim() });
     }
   }
-  
   return lines.length > 0 ? lines : null;
+}
+
+// Quick rules before asking AI: titles clearly mark gender.
+function genderFromTitle(speaker: string): "m" | "f" | null {
+  if (/^(Herr|Mr\.?|Opa|Vater|Papa|Onkel|Sohn|Bruder|Kellner|Arzt)\b/i.test(speaker)) return "m";
+  if (/^(Frau|Mrs\.?|Ms\.?|Oma|Mutter|Mama|Tante|Tochter|Schwester|Kellnerin|Ärztin)\b/i.test(speaker)) return "f";
+  return null;
 }
 
 async function detectGenders(text: string): Promise<Record<string, "m" | "f">> {
